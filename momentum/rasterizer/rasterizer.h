@@ -68,12 +68,6 @@ struct PhongMaterial {
     return !diffuseTextureMap.empty() || !emissiveTextureMap.empty();
   }
 
-  /// Constructor with default Phong material values
-  ///
-  /// @param diffuseColor Base diffuse color (default: white)
-  /// @param specularColor Specular highlight color (default: black)
-  /// @param specularExponent Specular sharpness (default: 10.0)
-  /// @param emissiveColor Self-illumination color (default: black)
   PhongMaterial(
       const Eigen::Vector3f& diffuseColor = Eigen::Vector3f::Ones(),
       const Eigen::Vector3f& specularColor = Eigen::Vector3f::Zero(),
@@ -94,11 +88,6 @@ enum class LightType { Point, Directional, Ambient };
 /// for use in Phong shading calculations.
 struct Light {
   Light() = default;
-  /// Constructor for creating a light with specified properties
-  ///
-  /// @param position Light position in world/eye space
-  /// @param color RGB color intensity of the light
-  /// @param type Type of light (Point, Directional, or Ambient)
   Light(const Eigen::Vector3f& position, const Eigen::Vector3f& color, LightType type)
       : position(position), color(color), type(type) {}
 
@@ -141,57 +130,33 @@ Light createPointLight(
 /// @return Transformed light
 Light transformLight(const Light& light, const Eigen::Affine3f& xf);
 
-/// Pad image width to ensure proper SIMD alignment
-///
-/// @param width Original image width
-/// @return Padded width (multiple of 8 for SIMD support)
+/// Pad image width to ensure SIMD alignment
+/// @param width Original image width in pixels
+/// @return Padded width (multiple of kSimdPacketSize = 8)
+/// @note Required for proper SIMD vectorization in rasterizer operations
 index_t padImageWidthForRasterizer(index_t width);
 
-/// Rasterize a mesh to depth/RGB buffer using Phong lighting model
-///
-/// This function renders a 3D mesh with realistic lighting using the Phong shading model.
-/// It supports texture mapping, multi-pass rendering, and various output buffers for
-/// advanced rendering techniques.
-///
-/// @param positions_world Vertex positions in world space (flat array of floats)
-/// @param normals_world Vertex normals in world space (flat array of floats)
-/// @param triangles Triangle indices into vertex arrays
-/// @param textureCoords Texture coordinates for vertices
-/// @param textureTriangles Array of triangles in texture space. Should have the same size as the
-///        triangles array but contain indices into the textureCoords array. Supports texture
-///        vertices being different from mesh vertices so you can have discontinuities in the
-///        texture map. If textureTriangles is not provided, the regular triangles array will be
-///        used in its place.
-/// @param perVertexDiffuseColor Per-vertex diffuse color modulation
-/// @param camera Camera to render from
-/// @param modelMatrix Additional transform to apply to the model. Unlike the camera extrinsics it
-/// is
-///        allowed to use non-uniform scale and shear.
-/// @param nearClip Near clipping value: triangles closer than this are not rendered.
-/// @param material Phong material to use when rendering.
-/// @param zBuffer Input/output depth buffer. If you want to render multiple objects in a scene, you
-///        can reuse the same depth buffer. Must be padded out to a multiple of 8 for proper SIMD
-///        support (makeRasterizerZBuffer does this automatically).
-/// @param rgbBuffer Input/output RGB buffer. Has the same requirements as the depth buffer.
-/// @param surfaceNormalsBuffer Input/output surface normal buffer. Writes the eye-space surface
-/// normal
-///        as (x,y,z) triplet for each pixel.
-/// @param vertexIndexBuffer Input/output buffer of vertex indices; writes the index of the closest
-///        vertex in the triangle for every rendered pixel (values where the depth buffer is set).
-/// @param triangleIndexBuffer Writes the index of the closest triangle for every rendered pixel.
-/// @param lights_eye Lights in eye coordinates. If not provided, uses a default lighting setup
-///        with a single light colocated with the camera.
-/// @param backfaceCulling Enable back-face culling; speeds up the render but means back-facing
-/// surfaces
-///        will not appear.
-/// @param depthOffset Offset the depth; useful for e.g. rendering the skeleton slightly in front of
-/// the
-///        mesh.
-/// @param imageOffset Offset within the image by (delta_x, delta_y) pixels. Useful for rendering
-///        slightly off to the side of the background or another mesh so you can compare the two
-///        without needing to construct a special camera.
-///
-/// For use with Torch tensors, takes the positions/normals/triangles as a flat array of floats
+/// Rasterize a mesh with Phong lighting and optional texture mapping
+/// @param positions_world Vertex positions in world space (flat: x1,y1,z1,x2,y2,z2,...)
+/// @param normals_world Vertex normals in world space (flat array)
+/// @param triangles Triangle vertex indices (flat: v1,v2,v3,v4,v5,v6,...)
+/// @param textureCoords Texture UV coordinates (flat: u1,v1,u2,v2,...)
+/// @param textureTriangles Texture triangle indices (can differ from mesh triangles for
+/// discontinuities)
+/// @param perVertexDiffuseColor Per-vertex color modulation (empty or 3*numVertices)
+/// @param modelMatrix Model transform (supports non-uniform scale and shear unlike camera
+/// extrinsics)
+/// @param nearClip Near clipping distance (triangles closer are culled)
+/// @param zBuffer Input/output depth buffer (must be SIMD-aligned, use makeRasterizerZBuffer)
+/// @param rgbBuffer Optional RGB output buffer
+/// @param surfaceNormalsBuffer Optional eye-space surface normals output (x,y,z per pixel)
+/// @param vertexIndexBuffer Optional closest vertex index per pixel
+/// @param triangleIndexBuffer Optional triangle index per pixel
+/// @param lights_eye Lights in eye space (default: single light at camera)
+/// @param depthOffset Depth bias for layered rendering
+/// @param imageOffset Pixel offset for comparative rendering
+/// @post All output buffers are updated where depth test passes
+/// @note Multi-pass rendering: reuse zBuffer/rgbBuffer to composite multiple objects
 void rasterizeMesh(
     const Eigen::Ref<const Eigen::VectorXf>& positions_world,
     const Eigen::Ref<const Eigen::VectorXf>& normals_world,
@@ -213,19 +178,12 @@ void rasterizeMesh(
     float depthOffset = 0,
     const Eigen::Vector2f& imageOffset = {0, 0});
 
-/// Rasterize 3D line segments with specified thickness and color
-///
-/// This function projects 3D line segments to image space using camera transformation
-/// and rasterizes them using the actual computed line depth for depth testing.
-/// Lines are not anti-aliased; for smoother rendering consider using supersampling.
-///
-/// @param positions_world 3D line vertex positions in world space (consecutive pairs form line
-/// segments) @param camera Camera for 3D projection @param modelMatrix Additional model
-/// transformation matrix @param nearClip Near clipping distance @param color RGB color for all line
-/// segments @param thickness Line thickness in pixels @param zBuffer **Required** input/output
-/// depth buffer (SIMD-aligned) @param rgbBuffer Optional input/output RGB color buffer @param
-/// depthOffset Depth offset for layered rendering @param imageOffset Pixel offset for comparative
-/// rendering
+/// Rasterize 3D line segments with depth testing
+/// @param positions_world Line endpoints in world space (flat: x1,y1,z1,x2,y2,z2,...)
+/// @param thickness Line thickness in pixels
+/// @param zBuffer **Required** depth buffer (SIMD-aligned)
+/// @note Lines use actual computed depth for depth testing (not screen-space depth)
+/// @note Not anti-aliased; consider supersampling for smoother rendering
 void rasterizeLines(
     std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
@@ -256,25 +214,12 @@ void rasterizeLines(
     float depthOffset = 0,
     const Eigen::Vector2f& imageOffset = {0, 0});
 
-/// Rasterize 3D circles (possibly filled) projected to screen space
-///
-/// This function projects 3D circle centers to image space using camera transformation
-/// and rasterizes them using the actual computed circle depth for depth testing.
-/// Circles can be rendered as outlines only, filled only, or both. Circles are not
-/// anti-aliased; for smoother rendering consider using supersampling.
-///
-/// @param positions_world 3D circle center positions in world space
-/// @param camera Camera for 3D projection
-/// @param modelMatrix Additional model transformation matrix
-/// @param nearClip Near clipping distance
-/// @param lineColor Optional outline color (if not set, no outline is drawn)
-/// @param fillColor Optional fill color (if not set, circles are not filled)
-/// @param lineThickness Outline thickness in pixels
+/// Rasterize 3D circles projected to screen space
+/// @param lineColor Optional outline color (nullopt = no outline)
+/// @param fillColor Optional fill color (nullopt = no fill)
 /// @param radius Circle radius in world units
-/// @param zBuffer **Required** input/output depth buffer (SIMD-aligned)
-/// @param rgbBuffer Optional input/output RGB color buffer
-/// @param depthOffset Depth offset for layered rendering
-/// @param imageOffset Pixel offset for comparative rendering
+/// @note Uses actual circle depth for depth testing
+/// @note Not anti-aliased; consider supersampling
 void rasterizeCircles(
     std::span<const Eigen::Vector3f> positions_world,
     const Camera& camera,
@@ -453,25 +398,12 @@ void rasterizeWireframe(
     float depthOffset = 0,
     const Eigen::Vector2f& imageOffset = {0, 0});
 
-/// Rasterize oriented circular splats with normal-based orientation
-///
-/// A "splat" is an oriented circle centered at the provided position and oriented
-/// orthogonal to the normal. This is particularly useful for rasterizing point clouds
-/// like those constructed from depth maps, providing a surface-like appearance.
-///
-/// @param positions_world 3D splat center positions in world space
-/// @param normals_world 3D normal vectors defining splat orientation
-/// @param camera Camera for 3D projection
-/// @param modelMatrix Additional model transformation matrix
-/// @param nearClip Near clipping distance
-/// @param frontMaterial Phong material for front-facing splats
-/// @param backMaterial Phong material for back-facing splats
+/// Rasterize oriented circular splats (surface-oriented circles)
+/// @param normals_world Normal vectors defining splat orientation (orthogonal to circle plane)
+/// @param frontMaterial Material for front-facing splats
+/// @param backMaterial Material for back-facing splats
 /// @param radius Splat radius in world units
-/// @param zBuffer Input/output depth buffer (SIMD-aligned)
-/// @param rgbBuffer Optional input/output RGB color buffer
-/// @param lights_eye Lights in eye coordinates
-/// @param depthOffset Depth offset for layered rendering
-/// @param imageOffset Pixel offset for comparative rendering
+/// @note Useful for rendering point clouds with surface-like appearance
 void rasterizeSplats(
     std::span<const Eigen::Vector3f> positions_world,
     std::span<const Eigen::Vector3f> normals_world,
@@ -487,17 +419,10 @@ void rasterizeSplats(
     float depthOffset = 0,
     const Eigen::Vector2f& imageOffset = {0, 0});
 
-/// Rasterize 2D line segments directly in image space
-///
-/// This function renders line segments using 2D image coordinates directly, without 3D
-/// projection. When a depth buffer is provided, it fills the buffer with zeros, effectively
-/// placing the lines within the image plane. Useful for UI overlays or 2D graphics.
-/// Lines are not anti-aliased; for smoother rendering consider using supersampling.
-///
-/// @param positions_image 2D line vertex positions in image coordinates (consecutive pairs form
-/// line segments) @param color RGB color for all line segments @param thickness Line thickness in
-/// pixels @param rgbBuffer Input/output RGB color buffer @param zBuffer **Optional** depth buffer
-/// (fills with zeros when provided) @param imageOffset Pixel offset for positioning
+/// Rasterize 2D line segments directly in image space (no 3D projection)
+/// @param positions_image Line endpoints in image coordinates (x1,y1,x2,y2,...)
+/// @param zBuffer Optional depth buffer (fills with zeros when provided)
+/// @note When zBuffer provided, lines are placed at depth=0 (in image plane)
 void rasterizeLines2D(
     std::span<const Eigen::Vector2f> positions_image,
     const Eigen::Vector3f& color,
@@ -520,22 +445,9 @@ void rasterizeLines2D(
     Span2f zBuffer = {},
     const Eigen::Vector2f& imageOffset = {0, 0});
 
-/// Rasterize 2D circles directly in image space
-///
-/// This function renders circles using 2D image coordinates directly, without 3D
-/// projection. When a depth buffer is provided, it fills the buffer with zeros, effectively
-/// placing the circles within the image plane. Circles can be rendered as outlines only,
-/// filled only, or both. Circles are not anti-aliased; for smoother rendering consider
-/// using supersampling.
-///
-/// @param positions_image 2D circle center positions in image coordinates
-/// @param lineColor Optional outline color (if not set, no outline is drawn)
-/// @param fillColor Optional fill color (if not set, circles are not filled)
-/// @param lineThickness Outline thickness in pixels
-/// @param radius Circle radius in pixels
-/// @param rgbBuffer Input/output RGB color buffer
-/// @param zBuffer **Optional** depth buffer (fills with zeros when provided)
-/// @param imageOffset Pixel offset for positioning
+/// Rasterize 2D circles directly in image space (no 3D projection)
+/// @param radius Circle radius in pixels (not world units)
+/// @param zBuffer Optional depth buffer (fills with zeros when provided)
 void rasterizeCircles2D(
     std::span<const Eigen::Vector2f> positions_image,
     const std::optional<Eigen::Vector3f>& lineColor,

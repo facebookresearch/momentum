@@ -30,23 +30,10 @@ enum class VerticalAlignment {
   Bottom,
 };
 
-/// Rasterize text at 3D world positions
-///
-/// Projects 3D positions to image space using the camera and renders text strings at those
-/// locations. Uses an embedded bitmap font for rendering.
-///
-/// @param positionsWorld 3D positions in world coordinates where text should be rendered
+/// Rasterize text at 3D world positions with depth testing
 /// @param texts Text strings to render at each position
-/// @param camera Camera to render from
-/// @param modelMatrix Model transformation matrix
-/// @param nearClip Near clipping distance
-/// @param color RGB color for the text
-/// @param textScale Integer scaling factor for text size (1 = 1 pixel per font pixel)
-/// @param zBuffer Input/output depth buffer (SIMD-aligned)
-/// @param rgbBuffer Optional input/output RGB color buffer
-/// @param imageOffset Pixel offset for positioning
-/// @param horizontalAlignment Horizontal text alignment relative to position
-/// @param verticalAlignment Vertical text alignment relative to position
+/// @param textScale Integer scaling factor (1 = 1 pixel per font pixel)
+/// @note Uses embedded bitmap font for rendering
 void rasterizeText(
     gsl::span<const Eigen::Vector3f> positionsWorld,
     gsl::span<const std::string> texts,
@@ -62,19 +49,9 @@ void rasterizeText(
     HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left,
     VerticalAlignment verticalAlignment = VerticalAlignment::Top);
 
-/// Rasterize text directly in 2D image space
-///
-/// Renders text at 2D image positions without camera projection or depth testing.
-///
-/// @param positionsImage 2D positions in image coordinates where text should be rendered
-/// @param texts Text strings to render at each position
-/// @param color RGB color for the text
-/// @param textScale Integer scaling factor for text size (1 = 1 pixel per font pixel)
-/// @param rgbBuffer Input/output RGB color buffer
+/// Rasterize text at 2D image positions (no camera projection or depth testing)
+/// @param textScale Integer scaling factor (1 = 1 pixel per font pixel)
 /// @param zBuffer Optional depth buffer (fills with zeros when provided)
-/// @param imageOffset Pixel offset for positioning
-/// @param horizontalAlignment Horizontal text alignment relative to position
-/// @param verticalAlignment Vertical text alignment relative to position
 void rasterizeText2D(
     gsl::span<const Eigen::Vector2f> positionsImage,
     gsl::span<const std::string> texts,
