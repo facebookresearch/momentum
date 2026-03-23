@@ -680,6 +680,7 @@ io_sources = [
 
 test_helpers_public_headers = [
     "test/helpers/expect_throw.h",
+    "test/helpers/sanitizer_utils.h",
     "test/helpers/unique_temporary_directory.h",
     "test/helpers/unique_temporary_file.h",
 ]
@@ -792,6 +793,12 @@ rerun_public_headers = [
 rerun_sources = [
     "gui/rerun/logger.cpp",
     "gui/rerun/logging_redirect.cpp",
+]
+
+rerun_test_sources = [
+    "test/gui/rerun/eigen_adapters_test.cpp",
+    "test/gui/rerun/logger_test.cpp",
+    "test/gui/rerun/rerun_compat_test.cpp",
 ]
 
 #==========
