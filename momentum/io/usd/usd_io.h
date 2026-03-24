@@ -8,11 +8,13 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/marker.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/math/types.h>
 
+#include <cstddef>
 #include <span>
 #include <string>
 #include <tuple>
@@ -85,11 +87,19 @@ std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharac
 /// @param[in] fps Frames per second for the animation.
 /// @param[in] motion The motion data (parameter names, poses matrix).
 /// @param[in] offsets The identity parameters (joint names, offset values).
+/// @param[in] markerSequence Optional marker sequence to save.
 void saveUsdCharacterWithMotion(
     const filesystem::path& filename,
     const Character& character,
     float fps = 120.0f,
     const MotionParameters& motion = {},
-    const IdentityParameters& offsets = {});
+    const IdentityParameters& offsets = {},
+    std::span<const std::vector<Marker>> markerSequence = {});
+
+/// Load a marker sequence from a USD file.
+///
+/// @param[in] inputPath The path to the USD file.
+/// @return The loaded MarkerSequence.
+MarkerSequence loadUsdMarkerSequence(const filesystem::path& inputPath);
 
 } // namespace momentum

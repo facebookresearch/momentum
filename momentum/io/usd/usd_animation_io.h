@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/marker.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
@@ -63,5 +64,29 @@ void saveMotionToUsd(
 
 /// Load model-parameter motion from custom attributes on a USD prim.
 std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const UsdPrim& prim);
+
+/// Save marker sequence as animated Xform prims under a Markers scope.
+///
+/// Creates Xform prims for each unique marker with time-sampled translations
+/// and occlusion attributes.
+///
+/// @param[in] stage The USD stage to write to.
+/// @param[in] skelRootPath The path to the SkelRoot prim under which to create the Markers scope.
+/// @param[in] fps Frames per second for the animation.
+/// @param[in] markerSequence The marker data to save (one vector of markers per frame).
+void saveMarkerSequenceToUsd(
+    const UsdStageRefPtr& stage,
+    const SdfPath& skelRootPath,
+    float fps,
+    std::span<const std::vector<Marker>> markerSequence);
+
+/// Load marker sequence from animated Xform prims.
+///
+/// Reads Xform prims under a Markers scope and reconstructs marker data
+/// for each frame from time-sampled translations and occlusion attributes.
+///
+/// @param[in] stage The USD stage to read from.
+/// @return The loaded MarkerSequence containing per-frame marker data and fps.
+MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage);
 
 } // namespace momentum

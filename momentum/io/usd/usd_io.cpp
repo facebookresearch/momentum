@@ -27,6 +27,7 @@
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
 #include <pxr/pxr.h>
+#include <pxr/usd/sdf/layer.h>
 #include <pxr/usd/sdf/valueTypeName.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
@@ -537,7 +538,8 @@ void saveUsdCharacterWithMotion(
     const Character& character,
     float fps,
     const MotionParameters& motion,
-    const IdentityParameters& offsets) {
+    const IdentityParameters& offsets,
+    std::span<const std::vector<Marker>> markerSequence) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
@@ -563,6 +565,10 @@ void saveUsdCharacterWithMotion(
     saveSkeletonStatesToUsd(ctx.stage, ctx.skeleton, character.skeleton, skeletonStates, fps);
   }
 
+  if (!markerSequence.empty()) {
+    saveMarkerSequenceToUsd(ctx.stage, SdfPath("/SkelRoot"), fps, markerSequence);
+  }
+
   finalizeUsdSave(ctx, character);
 }
 
@@ -585,6 +591,16 @@ std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharac
   auto [stage, tempGuard] = openStageFromBuffer(inputSpan);
 
   return loadUsdCharacterWithMotionFromStage(stage);
+}
+
+MarkerSequence loadUsdMarkerSequence(const filesystem::path& inputPath) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::Open(inputPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage: {}", inputPath.string());
+
+  return loadMarkerSequenceFromUsd(stage);
 }
 
 } // namespace momentum
