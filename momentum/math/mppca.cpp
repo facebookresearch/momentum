@@ -30,7 +30,7 @@ void MppcaT<T>::set(
 
   CovarianceMatrix covariance;
 
-  const T half_d_log_2pi = 0.5 * static_cast<T>(d) * std::log(twopi<T>());
+  const T half_d_log_2pi = T(0.5) * static_cast<T>(d) * std::log(twopi<T>());
 
   for (size_t c = 0; c < p; c++) {
     covariance.reset(std::sqrt(sigma2(c)), W[c].transpose());
