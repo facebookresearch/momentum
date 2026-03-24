@@ -11,6 +11,8 @@
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 
+#include <pxr/base/tf/staticTokens.h>
+
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec4f.h>
 #include <pxr/base/vt/array.h>
@@ -22,9 +24,16 @@
 #include <pxr/usd/usdSkel/blendShape.h>
 
 #include <algorithm>
+#include <array>
 #include <string>
 
 PXR_NAMESPACE_USING_DIRECTIVE
+
+TF_DEFINE_PRIVATE_TOKENS(
+    _tokens,
+    (displayColor)(Cd)(color)(vertexColor)(diffuseColor)((
+        momentumConfidence,
+        "momentum:confidence")));
 
 namespace momentum {
 
@@ -56,11 +65,15 @@ std::vector<Vector3b> loadColorsFromMeshPrim(const UsdGeomMesh& meshPrim, size_t
   std::vector<Vector3b> colors;
   UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
 
-  const std::vector<std::string> colorPrimvarNames = {
-      "displayColor", "Cd", "color", "vertexColor", "diffuseColor"};
+  const std::array<TfToken, 5> colorPrimvarNames = {
+      _tokens->displayColor,
+      _tokens->Cd,
+      _tokens->color,
+      _tokens->vertexColor,
+      _tokens->diffuseColor};
 
-  for (const auto& colorName : colorPrimvarNames) {
-    UsdGeomPrimvar colorPrimvar = primvarsAPI.GetPrimvar(TfToken(colorName));
+  for (const auto& colorToken : colorPrimvarNames) {
+    UsdGeomPrimvar colorPrimvar = primvarsAPI.GetPrimvar(colorToken);
     if (!colorPrimvar || !colorPrimvar.HasValue()) {
       continue;
     }
@@ -178,7 +191,7 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
 
     // Load per-vertex confidence from custom primvar
     UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
-    UsdGeomPrimvar confidencePrimvar = primvarsAPI.GetPrimvar(TfToken("momentum:confidence"));
+    UsdGeomPrimvar confidencePrimvar = primvarsAPI.GetPrimvar(_tokens->momentumConfidence);
     if (confidencePrimvar && confidencePrimvar.HasValue()) {
       VtArray<float> confidenceValues;
       if (confidencePrimvar.Get(&confidenceValues)) {
@@ -294,7 +307,7 @@ void saveMeshToUsd(const Mesh& mesh, UsdGeomMesh& meshPrim) {
   if (!mesh.colors.empty()) {
     UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
     auto colorPrimvar = primvarsAPI.CreatePrimvar(
-        TfToken("displayColor"), SdfValueTypeNames->Color3fArray, UsdGeomTokens->vertex);
+        _tokens->displayColor, SdfValueTypeNames->Color3fArray, UsdGeomTokens->vertex);
 
     VtArray<GfVec3f> colors;
     colors.reserve(mesh.colors.size());
@@ -308,7 +321,7 @@ void saveMeshToUsd(const Mesh& mesh, UsdGeomMesh& meshPrim) {
   if (!mesh.confidence.empty()) {
     UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
     auto confidencePrimvar = primvarsAPI.CreatePrimvar(
-        TfToken("momentum:confidence"), SdfValueTypeNames->FloatArray, UsdGeomTokens->vertex);
+        _tokens->momentumConfidence, SdfValueTypeNames->FloatArray, UsdGeomTokens->vertex);
     VtArray<float> confidenceValues(mesh.confidence.begin(), mesh.confidence.end());
     confidencePrimvar.Set(confidenceValues);
   }

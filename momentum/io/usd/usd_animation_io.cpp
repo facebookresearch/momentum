@@ -11,6 +11,8 @@
 #include "momentum/common/log.h"
 #include "momentum/math/utility.h"
 
+#include <pxr/base/tf/staticTokens.h>
+
 #include <pxr/base/gf/half.h>
 #include <pxr/base/gf/quatf.h>
 #include <pxr/base/gf/vec3d.h>
@@ -31,6 +33,19 @@
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
+TF_DEFINE_PRIVATE_TOKENS(
+    _tokens,
+    (Animation)(Markers)((momentumMotionFps, "momentum:motion:fps"))(
+        (momentumMotionParameterNames,
+         "momentum:motion:parameterNames"))((momentumMotionPoses, "momentum:motion:poses"))(
+        (momentumMotionNumFrames,
+         "momentum:motion:numFrames"))((momentumMotionNumParams, "momentum:motion:numParams"))(
+        (momentumMotionJointNames,
+         "momentum:motion:jointNames"))((momentumMotionOffsets, "momentum:motion:offsets"))(
+        (momentumMarkerName,
+         "momentum:marker:name"))((momentumMarkerOccluded, "momentum:marker:occluded"))(
+        (momentumMarkersFps, "momentum:markers:fps")));
+
 namespace momentum {
 
 void saveSkeletonStatesToUsd(
@@ -44,7 +59,7 @@ void saveSkeletonStatesToUsd(
   const auto numJoints = skeleton.joints.size();
 
   // Create animation prim
-  auto animPath = skelPrim.GetPath().AppendChild(TfToken("Animation"));
+  auto animPath = skelPrim.GetPath().AppendChild(_tokens->Animation);
   auto animPrim = UsdSkelAnimation::Define(stage, animPath);
 
   // Set joint order to match skeleton
@@ -208,11 +223,11 @@ void saveMotionToUsd(
     return;
   }
 
-  prim.CreateAttribute(TfToken("momentum:motion:fps"), SdfValueTypeNames->Float).Set(fps);
+  prim.CreateAttribute(_tokens->momentumMotionFps, SdfValueTypeNames->Float).Set(fps);
 
   // Save parameter names as string array
   VtArray<std::string> paramNamesArray(paramNames.begin(), paramNames.end());
-  prim.CreateAttribute(TfToken("momentum:motion:parameterNames"), SdfValueTypeNames->StringArray)
+  prim.CreateAttribute(_tokens->momentumMotionParameterNames, SdfValueTypeNames->StringArray)
       .Set(paramNamesArray);
 
   // Save poses matrix as flat float array (column-major: numParams * numFrames)
@@ -224,24 +239,23 @@ void saveMotionToUsd(
       posesArray[f * numParams + p] = poses(p, f);
     }
   }
-  prim.CreateAttribute(TfToken("momentum:motion:poses"), SdfValueTypeNames->FloatArray)
-      .Set(posesArray);
-  prim.CreateAttribute(TfToken("momentum:motion:numFrames"), SdfValueTypeNames->Int)
+  prim.CreateAttribute(_tokens->momentumMotionPoses, SdfValueTypeNames->FloatArray).Set(posesArray);
+  prim.CreateAttribute(_tokens->momentumMotionNumFrames, SdfValueTypeNames->Int)
       .Set(static_cast<int>(numFrames));
-  prim.CreateAttribute(TfToken("momentum:motion:numParams"), SdfValueTypeNames->Int)
+  prim.CreateAttribute(_tokens->momentumMotionNumParams, SdfValueTypeNames->Int)
       .Set(static_cast<int>(numParams));
 
   // Save identity offsets
   if (!jointNames.empty() && offsetValues.size() > 0) {
     VtArray<std::string> jointNamesArray(jointNames.begin(), jointNames.end());
-    prim.CreateAttribute(TfToken("momentum:motion:jointNames"), SdfValueTypeNames->StringArray)
+    prim.CreateAttribute(_tokens->momentumMotionJointNames, SdfValueTypeNames->StringArray)
         .Set(jointNamesArray);
 
     VtArray<float> offsetsArray(offsetValues.size());
     for (Eigen::Index i = 0; i < offsetValues.size(); ++i) {
       offsetsArray[i] = offsetValues[i];
     }
-    prim.CreateAttribute(TfToken("momentum:motion:offsets"), SdfValueTypeNames->FloatArray)
+    prim.CreateAttribute(_tokens->momentumMotionOffsets, SdfValueTypeNames->FloatArray)
         .Set(offsetsArray);
   }
 }
@@ -251,7 +265,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const 
   IdentityParameters identity;
   float fps = 120.0f;
 
-  auto fpsAttr = prim.GetAttribute(TfToken("momentum:motion:fps"));
+  auto fpsAttr = prim.GetAttribute(_tokens->momentumMotionFps);
   if (!fpsAttr) {
     return {motion, identity, fps};
   }
@@ -259,8 +273,8 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const 
 
   int numFrames = 0;
   int numParams = 0;
-  prim.GetAttribute(TfToken("momentum:motion:numFrames")).Get(&numFrames);
-  prim.GetAttribute(TfToken("momentum:motion:numParams")).Get(&numParams);
+  prim.GetAttribute(_tokens->momentumMotionNumFrames).Get(&numFrames);
+  prim.GetAttribute(_tokens->momentumMotionNumParams).Get(&numParams);
 
   if (numFrames <= 0 || numParams <= 0) {
     return {motion, identity, fps};
@@ -268,7 +282,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const 
 
   // Load parameter names
   VtArray<std::string> paramNamesArray;
-  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:parameterNames")); attr) {
+  if (auto attr = prim.GetAttribute(_tokens->momentumMotionParameterNames); attr) {
     attr.Get(&paramNamesArray);
   }
   auto& [paramNames, poses] = motion;
@@ -276,7 +290,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const 
 
   // Load poses matrix
   VtArray<float> posesArray;
-  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:poses")); attr) {
+  if (auto attr = prim.GetAttribute(_tokens->momentumMotionPoses); attr) {
     attr.Get(&posesArray);
   }
 
@@ -300,13 +314,13 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromUsd(const 
   auto& [jointNames, offsetValues] = identity;
 
   VtArray<std::string> jointNamesArray;
-  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:jointNames")); attr) {
+  if (auto attr = prim.GetAttribute(_tokens->momentumMotionJointNames); attr) {
     attr.Get(&jointNamesArray);
   }
   jointNames.assign(jointNamesArray.begin(), jointNamesArray.end());
 
   VtArray<float> offsetsArray;
-  if (auto attr = prim.GetAttribute(TfToken("momentum:motion:offsets")); attr) {
+  if (auto attr = prim.GetAttribute(_tokens->momentumMotionOffsets); attr) {
     attr.Get(&offsetsArray);
     Eigen::VectorXf offsetVec(offsetsArray.size());
     for (size_t i = 0; i < offsetsArray.size(); ++i) {
@@ -354,12 +368,12 @@ void saveMarkerSequenceToUsd(
   }
 
   // Create Markers scope
-  auto markersPath = skelRootPath.AppendChild(TfToken("Markers"));
+  auto markersPath = skelRootPath.AppendChild(_tokens->Markers);
   UsdGeomScope::Define(stage, markersPath);
 
   // Store fps as attribute on the Markers scope
   auto markersPrim = stage->GetPrimAtPath(markersPath);
-  markersPrim.CreateAttribute(TfToken("momentum:markers:fps"), SdfValueTypeNames->Float).Set(fps);
+  markersPrim.CreateAttribute(_tokens->momentumMarkersFps, SdfValueTypeNames->Float).Set(fps);
 
   // Track sanitized names to detect collisions
   std::unordered_set<std::string> usedSafeNames;
@@ -386,14 +400,14 @@ void saveMarkerSequenceToUsd(
 
     // Store original name as attribute
     xformPrim.GetPrim()
-        .CreateAttribute(TfToken("momentum:marker:name"), SdfValueTypeNames->String)
+        .CreateAttribute(_tokens->momentumMarkerName, SdfValueTypeNames->String)
         .Set(name);
 
     auto xformAPI = UsdGeomXformCommonAPI(xformPrim);
 
     // Create the occluded attribute once per marker, then reuse inside the loop
     auto occludedAttr = xformPrim.GetPrim().CreateAttribute(
-        TfToken("momentum:marker:occluded"), SdfValueTypeNames->Bool);
+        _tokens->momentumMarkerOccluded, SdfValueTypeNames->Bool);
 
     // Write time-sampled translations and occlusion
     for (size_t frame = 0; frame < markerSequence.size(); ++frame) {
@@ -430,7 +444,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
   // Find the Markers scope
   UsdPrim markersScopePrim;
   for (const auto& prim : stage->Traverse()) {
-    if (prim.GetName() == TfToken("Markers") && prim.IsA<UsdGeomScope>()) {
+    if (prim.GetName() == _tokens->Markers && prim.IsA<UsdGeomScope>()) {
       markersScopePrim = prim;
       break;
     }
@@ -441,7 +455,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
   }
 
   // Read fps
-  auto fpsAttr = markersScopePrim.GetAttribute(TfToken("momentum:markers:fps"));
+  auto fpsAttr = markersScopePrim.GetAttribute(_tokens->momentumMarkersFps);
   if (fpsAttr) {
     fpsAttr.Get(&result.fps);
   }
@@ -460,7 +474,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
     }
 
     std::string markerName;
-    auto nameAttr = child.GetAttribute(TfToken("momentum:marker:name"));
+    auto nameAttr = child.GetAttribute(_tokens->momentumMarkerName);
     if (nameAttr) {
       nameAttr.Get(&markerName);
     } else {
@@ -477,7 +491,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
   // Determine frame count from actual time samples on marker data
   std::vector<double> timeSamples;
   auto firstOccludedAttr =
-      markerPrims[0].xform.GetPrim().GetAttribute(TfToken("momentum:marker:occluded"));
+      markerPrims[0].xform.GetPrim().GetAttribute(_tokens->momentumMarkerOccluded);
   if (firstOccludedAttr) {
     firstOccludedAttr.GetTimeSamples(&timeSamples);
   }
@@ -502,7 +516,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
     cachedMarkers.push_back(
         {name,
          UsdGeomXformCommonAPI(xform),
-         xform.GetPrim().GetAttribute(TfToken("momentum:marker:occluded"))});
+         xform.GetPrim().GetAttribute(_tokens->momentumMarkerOccluded)});
   }
 
   for (int frame = 0; frame < numFrames; ++frame) {

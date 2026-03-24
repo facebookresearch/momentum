@@ -27,6 +27,7 @@
 
 #include <pxr/base/tf/diagnosticMgr.h>
 #include <pxr/base/tf/errorMark.h>
+#include <pxr/base/tf/staticTokens.h>
 #include <pxr/pxr.h>
 #include <pxr/usd/sdf/layer.h>
 #include <pxr/usd/sdf/valueTypeName.h>
@@ -72,6 +73,14 @@
 
 // Import USD namespace
 PXR_NAMESPACE_USING_DIRECTIVE
+
+TF_DEFINE_PRIVATE_TOKENS(
+    _tokens,
+    ((momentumCharacterName,
+      "momentum:characterName"))((momentumParameterTransform, "momentum:parameterTransform"))(
+        (momentumParameterLimits,
+         "momentum:parameterLimits"))((momentumParameterSets, "momentum:parameterSets"))(
+        (momentumPoseConstraints, "momentum:poseConstraints")));
 
 namespace momentum {
 
@@ -181,7 +190,7 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
   // Save character name
   if (!character.name.empty()) {
     auto nameAttr =
-        skelRootPrim.CreateAttribute(TfToken("momentum:characterName"), SdfValueTypeNames->String);
+        skelRootPrim.CreateAttribute(_tokens->momentumCharacterName, SdfValueTypeNames->String);
     nameAttr.Set(std::string(character.name));
   }
 
@@ -190,7 +199,7 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
     nlohmann::json ptJson;
     parameterTransformToJson(character, ptJson);
     auto ptAttr = skelRootPrim.CreateAttribute(
-        TfToken("momentum:parameterTransform"), SdfValueTypeNames->String);
+        _tokens->momentumParameterTransform, SdfValueTypeNames->String);
     ptAttr.Set(ptJson.dump());
   }
 
@@ -198,8 +207,8 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
   if (!character.parameterLimits.empty()) {
     nlohmann::json limJson;
     parameterLimitsToJson(character, limJson);
-    auto limAttr = skelRootPrim.CreateAttribute(
-        TfToken("momentum:parameterLimits"), SdfValueTypeNames->String);
+    auto limAttr =
+        skelRootPrim.CreateAttribute(_tokens->momentumParameterLimits, SdfValueTypeNames->String);
     limAttr.Set(limJson.dump());
   }
 
@@ -208,7 +217,7 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
     nlohmann::json setsJson;
     parameterSetsToJson(character, setsJson);
     auto setsAttr =
-        skelRootPrim.CreateAttribute(TfToken("momentum:parameterSets"), SdfValueTypeNames->String);
+        skelRootPrim.CreateAttribute(_tokens->momentumParameterSets, SdfValueTypeNames->String);
     setsAttr.Set(setsJson.dump());
   }
 
@@ -216,15 +225,15 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
   if (!character.parameterTransform.poseConstraints.empty()) {
     nlohmann::json pcJson;
     poseConstraintsToJson(character, pcJson);
-    auto pcAttr = skelRootPrim.CreateAttribute(
-        TfToken("momentum:poseConstraints"), SdfValueTypeNames->String);
+    auto pcAttr =
+        skelRootPrim.CreateAttribute(_tokens->momentumPoseConstraints, SdfValueTypeNames->String);
     pcAttr.Set(pcJson.dump());
   }
 }
 
 void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   // Load character name
-  auto nameAttr = skelRootPrim.GetAttribute(TfToken("momentum:characterName"));
+  auto nameAttr = skelRootPrim.GetAttribute(_tokens->momentumCharacterName);
   if (nameAttr) {
     std::string name;
     if (nameAttr.Get(&name)) {
@@ -233,7 +242,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   }
 
   // Load parameter transform from JSON
-  auto ptAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterTransform"));
+  auto ptAttr = skelRootPrim.GetAttribute(_tokens->momentumParameterTransform);
   if (ptAttr) {
     std::string ptStr;
     if (ptAttr.Get(&ptStr)) {
@@ -247,7 +256,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   }
 
   // Load parameter limits from JSON
-  auto limAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterLimits"));
+  auto limAttr = skelRootPrim.GetAttribute(_tokens->momentumParameterLimits);
   if (limAttr) {
     std::string limStr;
     if (limAttr.Get(&limStr)) {
@@ -261,7 +270,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   }
 
   // Load parameter sets from JSON
-  auto setsAttr = skelRootPrim.GetAttribute(TfToken("momentum:parameterSets"));
+  auto setsAttr = skelRootPrim.GetAttribute(_tokens->momentumParameterSets);
   if (setsAttr) {
     std::string setsStr;
     if (setsAttr.Get(&setsStr)) {
@@ -275,7 +284,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   }
 
   // Load pose constraints from JSON
-  auto pcAttr = skelRootPrim.GetAttribute(TfToken("momentum:poseConstraints"));
+  auto pcAttr = skelRootPrim.GetAttribute(_tokens->momentumPoseConstraints);
   if (pcAttr) {
     std::string pcStr;
     if (pcAttr.Get(&pcStr)) {
