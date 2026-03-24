@@ -433,7 +433,7 @@ SkinWeights CharacterT<T>::remapSkinWeights(
   for (int v = 0; v < result.index.rows(); v++) {
     // remap the parent bones according to the map
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
-      result.index(v, i) = gsl::narrow<uint32_t>(jointMap[result.index(v, i)]);
+      result.index(v, i) = static_cast<uint32_t>(jointMap[result.index(v, i)]);
     }
 
     // join together all weights with the same parent
@@ -548,7 +548,7 @@ SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
   for (auto& sl : result) {
     // remap the joint indices according to the map
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
-      sl.parents(i) = gsl::narrow<uint32_t>(jointMap[sl.parents(i)]);
+      sl.parents(i) = static_cast<uint32_t>(jointMap[sl.parents(i)]);
     }
 
     // join together all weights with the same joint

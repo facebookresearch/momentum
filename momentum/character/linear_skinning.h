@@ -11,9 +11,9 @@
 #include <momentum/character/skinned_locator.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
+#include <momentum/math/span_compat.h>
 #include <momentum/math/types.h>
 
-#include <span>
 #include <vector>
 
 namespace momentum {
@@ -251,7 +251,7 @@ Affine3f getInverseSSDTransformation(
 std::vector<Vector3f> applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    std::span<const Vector3f> points,
+    momentum::span<const Vector3f> points,
     const SkeletonState& state);
 
 /// Applies inverse SSD to points, storing results in a mesh
@@ -267,7 +267,7 @@ std::vector<Vector3f> applyInverseSSD(
 void applyInverseSSD(
     const TransformationList& inverseBindPose,
     const SkinWeights& skin,
-    std::span<const Vector3f> points,
+    momentum::span<const Vector3f> points,
     const SkeletonState& state,
     Mesh& mesh);
 

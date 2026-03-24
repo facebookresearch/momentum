@@ -331,7 +331,7 @@ Skeleton transformSkeleton(const Skeleton& skeleton, const Eigen::Affine3f& xfor
   const Eigen::Vector3f singularValues = xform.linear().jacobiSvd().singularValues();
   for (Eigen::Index i = 0; i < 3; ++i) {
     MT_CHECK(
-        singularValues(i) > 0.99 && singularValues(i) < 1.01,
+        singularValues(i) > 0.99f && singularValues(i) < 1.01f,
         "Transform should not include scale or shear.");
   }
 
@@ -359,7 +359,7 @@ BlendShape_const_p transformBlendShape(
   const Eigen::Vector3f singularValues = xform.linear().jacobiSvd().singularValues();
   for (Eigen::Index i = 0; i < 3; ++i) {
     MT_CHECK(
-        singularValues(i) > 0.99 && singularValues(i) < 1.01,
+        singularValues(i) > 0.99f && singularValues(i) < 1.01f,
         "Transform should not include scale or shear.");
   }
 
@@ -598,7 +598,7 @@ Character replaceSkeletonHierarchy(
       tgtCharacter.blendShape};
 }
 
-Character removeJoints(const Character& character, std::span<const size_t> jointsToRemove) {
+Character removeJoints(const Character& character, momentum::span<const size_t> jointsToRemove) {
   std::vector<bool> toRemove(character.skeleton.joints.size(), false);
   for (const auto& j : jointsToRemove) {
     MT_THROW_IF(j >= character.skeleton.joints.size(), "Invalid joint found in removeJoints.");

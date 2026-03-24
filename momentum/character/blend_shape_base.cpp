@@ -36,7 +36,7 @@ void BlendShapeBase::applyDeltas(
 BlendShapeBase::BlendShapeBase(
     const size_t modelSize,
     const size_t numShapes,
-    std::span<const std::string> shapeNames)
+    momentum::span<const std::string> shapeNames)
     : shapeVectors_(MatrixXf::Zero(modelSize * 3, numShapes)) {
   shapeNames_.assign(shapeNames.begin(), shapeNames.end());
   if (shapeNames_.size() != numShapes) {
@@ -52,7 +52,7 @@ BlendShapeBase::BlendShapeBase(
 
 void BlendShapeBase::setShapeVectors(
     const MatrixXf& shapeVectors,
-    std::span<const std::string> shapeNames) {
+    momentum::span<const std::string> shapeNames) {
   shapeVectors_ = shapeVectors;
 
   if (shapeNames.size() == static_cast<size_t>(shapeVectors_.cols())) {
@@ -70,11 +70,11 @@ void BlendShapeBase::setShapeVectors(
 
 void BlendShapeBase::setShapeVector(
     const size_t index,
-    std::span<const Vector3f> shape,
+    momentum::span<const Vector3f> shape,
     std::string_view name) {
   MT_CHECK(modelSize() == shape.size(), "{} is not {}", modelSize(), shape.size());
   MT_CHECK(
-      gsl::narrow<Eigen::Index>(shape.size()) * 3 == shapeVectors_.rows(),
+      static_cast<Eigen::Index>(shape.size()) * 3 == shapeVectors_.rows(),
       "{} is not {}",
       shape.size() * 3,
       shapeVectors_.rows());

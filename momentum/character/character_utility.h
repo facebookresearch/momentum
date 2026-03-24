@@ -62,7 +62,7 @@ namespace momentum {
 /// specified joints.
 [[nodiscard]] Character removeJoints(
     const Character& character,
-    std::span<const size_t> jointsToRemove);
+    momentum::span<const size_t> jointsToRemove);
 
 /// Maps the input ModelParameter motion to a target character by matching model parameter names.
 /// Mismatched names will be discarded (source) or set to zero (target).

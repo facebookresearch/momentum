@@ -182,7 +182,7 @@ void testTransformCharacter(const Character& character) {
   scaleTransform.linear() = 2.0f * Eigen::Matrix3f::Identity();
   MOMENTUM_EXPECT_DEATH(
       static_cast<void>(transformCharacter(character, scaleTransform)),
-      "singularValues\\(i\\) > 0.99 && singularValues\\(i\\) < 1.01");
+      "singularValues\\(i\\) > 0.99f && singularValues\\(i\\) < 1.01f");
 }
 
 // Test transformCharacter function
