@@ -73,7 +73,8 @@ ParameterTransformT<T> ParameterTransformT<T>::empty(size_t nJointParameters) {
 }
 
 template <typename T>
-ParameterTransformT<T> ParameterTransformT<T>::identity(std::span<const std::string> jointNames) {
+ParameterTransformT<T> ParameterTransformT<T>::identity(
+    momentum::span<const std::string> jointNames) {
   ParameterTransformT<T> result;
   const size_t nJoints = jointNames.size();
   const size_t nJointParameters = nJoints * kParametersPerJoint;
@@ -401,12 +402,11 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
       auto paramNew = oldParamToNewParam[paramOld];
       for (int k = 0; k < 3; ++k) {
         if (oldParamToNewParam[paramOld + k] != paramNew + k) {
-          throw std::runtime_error(
-              fmt::format(
-                  "When mapping skinned locator parameters, must retain all 3 parameters for each locator. Locator {} is missing parameter {} ({}).",
-                  iSkinnedLocator,
-                  paramOld + k,
-                  paramTransformOld.name[paramOld + k]));
+          MT_THROW(
+              "When mapping skinned locator parameters, must retain all 3 parameters for each locator. Locator {} is missing parameter {} ({}).",
+              iSkinnedLocator,
+              paramOld + k,
+              paramTransformOld.name[paramOld + k]);
         }
       }
 

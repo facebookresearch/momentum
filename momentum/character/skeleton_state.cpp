@@ -94,7 +94,7 @@ void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv
 
   // ensure that all variables are valid
   MT_CHECK(
-      jointParameters.size() == gsl::narrow<Eigen::Index>(numJoints * kParametersPerJoint),
+      jointParameters.size() == static_cast<Eigen::Index>(numJoints * kParametersPerJoint),
       "Unexpected joint parameter size. Expected '{}' (# of joints '{}' X kParametersPerJoint '{}') but got '{}'.",
       numJoints * kParametersPerJoint,
       numJoints,
@@ -161,14 +161,14 @@ StateSimilarity SkeletonStateT<T>::compare(
   for (size_t i = 0; i < state1.jointState.size(); i++) {
     result.positionError[i] =
         (state1.jointState[i].translation() - state2.jointState[i].translation()).norm();
-    const double dot = std::min(
+    const T dot = std::min(
         std::max(
             state1.jointState[i].rotation().normalized().dot(
                 state2.jointState[i].rotation().normalized()),
             T(-1.0)),
         T(1.0));
-    const double sgn = dot < 0.0 ? -1.0 : 1.0;
-    result.orientationError[i] = gsl::narrow_cast<float>(2.0 * std::acos(sgn * dot));
+    const T sgn = dot < T(0) ? T(-1) : T(1);
+    result.orientationError[i] = gsl::narrow_cast<float>(T(2) * std::acos(sgn * dot));
   }
 
   // derive RMSE/max values
@@ -374,7 +374,7 @@ JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
     const VectorX<bool>& activeJointParams) {
   MT_CHECK(
       activeJointParams.size() ==
-          gsl::narrow<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
+          static_cast<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
       "activeJointParams size {} does not match expected size {} (skeleton joints: {})",
       activeJointParams.size(),
       skeleton.joints.size() * kParametersPerJoint,
@@ -407,7 +407,7 @@ JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
     const VectorX<bool>& activeJointParams) {
   MT_CHECK(
       activeJointParams.size() ==
-          gsl::narrow<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
+          static_cast<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
       "activeJointParams size {} does not match expected size {} (skeleton joints: {})",
       activeJointParams.size(),
       skeleton.joints.size() * kParametersPerJoint,
