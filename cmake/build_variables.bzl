@@ -603,6 +603,10 @@ io_usd_test_sources = [
     "test/io/io_usd_test.cpp",
 ]
 
+io_usd_gltf_roundtrip_test_sources = [
+    "test/io/io_usd_gltf_roundtrip_test.cpp",
+]
+
 io_urdf_public_headers = [
     "io/urdf/urdf_io.h",
 ]

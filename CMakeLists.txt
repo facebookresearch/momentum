@@ -947,6 +947,18 @@ if(MOMENTUM_BUILD_TESTING)
       ENV
         "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
     )
+
+    mt_test(
+      NAME io_usd_gltf_roundtrip_test
+      SOURCES_VARS io_usd_gltf_roundtrip_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        character_test_helpers_gtest
+        io_gltf
+        io_test_helper
+        io_usd
+        Python3::Python
+    )
   endif()
 
   mt_test(

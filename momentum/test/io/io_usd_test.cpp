@@ -147,6 +147,21 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip) {
     EXPECT_TRUE(loaded.translationOffset.isApprox(original.translationOffset, 1e-4f))
         << "translationOffset mismatch at joint " << i << " (" << original.name << ")";
   }
+
+  // Verify mesh confidence survives roundtrip
+  ASSERT_EQ(loadedCharacter.mesh->confidence.size(), testCharacter.mesh->confidence.size());
+  for (size_t i = 0; i < testCharacter.mesh->confidence.size(); ++i) {
+    EXPECT_NEAR(loadedCharacter.mesh->confidence[i], testCharacter.mesh->confidence[i], 1e-5f)
+        << "Confidence mismatch at vertex " << i;
+  }
+
+  // Verify inverseBindPose is populated
+  ASSERT_EQ(loadedCharacter.inverseBindPose.size(), testCharacter.inverseBindPose.size());
+  for (size_t i = 0; i < testCharacter.inverseBindPose.size(); ++i) {
+    EXPECT_TRUE(
+        loadedCharacter.inverseBindPose[i].isApprox(testCharacter.inverseBindPose[i], 1e-4f))
+        << "InverseBindPose mismatch at joint " << i;
+  }
 }
 
 TEST_F(UsdIoTest, SaveAndLoadRoundTrip_JointTopology) {
