@@ -10,6 +10,8 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
 
+#include <pxr/base/tf/staticTokens.h>
+
 #include <pxr/base/gf/matrix4d.h>
 #include <pxr/base/gf/quatf.h>
 #include <pxr/base/gf/vec2f.h>
@@ -24,6 +26,18 @@
 #include <pxr/usd/usdSkel/skeletonQuery.h>
 
 PXR_NAMESPACE_USING_DIRECTIVE
+
+TF_DEFINE_PRIVATE_TOKENS(
+    _tokens,
+    (Collision)(Locators)((momentumType, "momentum:type"))((momentumParent, "momentum:parent"))(
+        (momentumLength, "momentum:length"))((momentumRadius, "momentum:radius"))(
+        (momentumTranslation, "momentum:translation"))((momentumRotation, "momentum:rotation"))(
+        (momentumName, "momentum:name"))((momentumOffset, "momentum:offset"))(
+        (momentumWeight, "momentum:weight"))((momentumLocked, "momentum:locked"))(
+        (momentumLimitOrigin,
+         "momentum:limitOrigin"))((momentumLimitWeight, "momentum:limitWeight"))(
+        (momentumAttachedToSkin,
+         "momentum:attachedToSkin"))((momentumSkinOffset, "momentum:skinOffset")));
 
 namespace momentum {
 
@@ -206,7 +220,7 @@ void saveCollisionGeometryToUsd(
     return;
   }
 
-  auto collisionScope = UsdGeomScope::Define(stage, skelRootPath.AppendChild(TfToken("Collision")));
+  auto collisionScope = UsdGeomScope::Define(stage, skelRootPath.AppendChild(_tokens->Collision));
 
   for (size_t i = 0; i < collision.size(); ++i) {
     const auto& capsule = collision[i];
@@ -218,19 +232,19 @@ void saveCollisionGeometryToUsd(
     auto primPath = collisionScope.GetPath().AppendChild(TfToken(primName));
     auto prim = stage->DefinePrim(primPath);
 
-    prim.CreateAttribute(TfToken("momentum:type"), SdfValueTypeNames->String)
+    prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String)
         .Set(std::string("collision_capsule"));
-    prim.CreateAttribute(TfToken("momentum:parent"), SdfValueTypeNames->String).Set(jointName);
-    prim.CreateAttribute(TfToken("momentum:length"), SdfValueTypeNames->Float).Set(capsule.length);
-    prim.CreateAttribute(TfToken("momentum:radius"), SdfValueTypeNames->Float2)
+    prim.CreateAttribute(_tokens->momentumParent, SdfValueTypeNames->String).Set(jointName);
+    prim.CreateAttribute(_tokens->momentumLength, SdfValueTypeNames->Float).Set(capsule.length);
+    prim.CreateAttribute(_tokens->momentumRadius, SdfValueTypeNames->Float2)
         .Set(GfVec2f(capsule.radius.x(), capsule.radius.y()));
 
     const auto& t = capsule.transformation.translation;
-    prim.CreateAttribute(TfToken("momentum:translation"), SdfValueTypeNames->Float3)
+    prim.CreateAttribute(_tokens->momentumTranslation, SdfValueTypeNames->Float3)
         .Set(GfVec3f(t.x(), t.y(), t.z()));
 
     const auto& q = capsule.transformation.rotation;
-    prim.CreateAttribute(TfToken("momentum:rotation"), SdfValueTypeNames->Quatf)
+    prim.CreateAttribute(_tokens->momentumRotation, SdfValueTypeNames->Quatf)
         .Set(GfQuatf(q.w(), q.x(), q.y(), q.z()));
   }
 }
@@ -241,7 +255,7 @@ CollisionGeometry loadCollisionGeometryFromUsd(
   CollisionGeometry result;
 
   for (const auto& prim : stage->Traverse()) {
-    auto typeAttr = prim.GetAttribute(TfToken("momentum:type"));
+    auto typeAttr = prim.GetAttribute(_tokens->momentumType);
     if (!typeAttr) {
       continue;
     }
@@ -254,30 +268,30 @@ CollisionGeometry loadCollisionGeometryFromUsd(
     TaperedCapsule capsule;
 
     std::string parentName;
-    if (auto attr = prim.GetAttribute(TfToken("momentum:parent")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumParent); attr) {
       attr.Get(&parentName);
       capsule.parent = skeleton.getJointIdByName(parentName);
     }
 
-    if (auto attr = prim.GetAttribute(TfToken("momentum:length")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumLength); attr) {
       attr.Get(&capsule.length);
     }
 
     GfVec2f radius(0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:radius")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumRadius); attr) {
       attr.Get(&radius);
       capsule.radius = Eigen::Vector2f(radius[0], radius[1]);
     }
 
     GfVec3f translation(0.0f, 0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:translation")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumTranslation); attr) {
       attr.Get(&translation);
       capsule.transformation.translation =
           Eigen::Vector3f(translation[0], translation[1], translation[2]);
     }
 
     GfQuatf rotation(1.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:rotation")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumRotation); attr) {
       attr.Get(&rotation);
       capsule.transformation.rotation = Eigen::Quaternionf(
           rotation.GetReal(),
@@ -301,7 +315,7 @@ void saveLocatorsToUsd(
     return;
   }
 
-  auto locatorScope = UsdGeomScope::Define(stage, skelRootPath.AppendChild(TfToken("Locators")));
+  auto locatorScope = UsdGeomScope::Define(stage, skelRootPath.AppendChild(_tokens->Locators));
 
   for (size_t i = 0; i < locators.size(); ++i) {
     const auto& loc = locators[i];
@@ -311,31 +325,31 @@ void saveLocatorsToUsd(
     auto primPath = locatorScope.GetPath().AppendChild(TfToken(primName));
     auto prim = stage->DefinePrim(primPath);
 
-    prim.CreateAttribute(TfToken("momentum:type"), SdfValueTypeNames->String)
+    prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String)
         .Set(std::string("locator"));
-    prim.CreateAttribute(TfToken("momentum:name"), SdfValueTypeNames->String).Set(loc.name);
+    prim.CreateAttribute(_tokens->momentumName, SdfValueTypeNames->String).Set(loc.name);
 
     const std::string parentName =
         (loc.parent < skeleton.joints.size()) ? skeleton.joints[loc.parent].name : "";
-    prim.CreateAttribute(TfToken("momentum:parent"), SdfValueTypeNames->String).Set(parentName);
+    prim.CreateAttribute(_tokens->momentumParent, SdfValueTypeNames->String).Set(parentName);
 
-    prim.CreateAttribute(TfToken("momentum:offset"), SdfValueTypeNames->Float3)
+    prim.CreateAttribute(_tokens->momentumOffset, SdfValueTypeNames->Float3)
         .Set(GfVec3f(loc.offset.x(), loc.offset.y(), loc.offset.z()));
 
-    prim.CreateAttribute(TfToken("momentum:weight"), SdfValueTypeNames->Float).Set(loc.weight);
+    prim.CreateAttribute(_tokens->momentumWeight, SdfValueTypeNames->Float).Set(loc.weight);
 
-    prim.CreateAttribute(TfToken("momentum:locked"), SdfValueTypeNames->Int3)
+    prim.CreateAttribute(_tokens->momentumLocked, SdfValueTypeNames->Int3)
         .Set(GfVec3i(loc.locked.x(), loc.locked.y(), loc.locked.z()));
 
-    prim.CreateAttribute(TfToken("momentum:limitOrigin"), SdfValueTypeNames->Float3)
+    prim.CreateAttribute(_tokens->momentumLimitOrigin, SdfValueTypeNames->Float3)
         .Set(GfVec3f(loc.limitOrigin.x(), loc.limitOrigin.y(), loc.limitOrigin.z()));
 
-    prim.CreateAttribute(TfToken("momentum:limitWeight"), SdfValueTypeNames->Float3)
+    prim.CreateAttribute(_tokens->momentumLimitWeight, SdfValueTypeNames->Float3)
         .Set(GfVec3f(loc.limitWeight.x(), loc.limitWeight.y(), loc.limitWeight.z()));
 
     if (loc.attachedToSkin) {
-      prim.CreateAttribute(TfToken("momentum:attachedToSkin"), SdfValueTypeNames->Bool).Set(true);
-      prim.CreateAttribute(TfToken("momentum:skinOffset"), SdfValueTypeNames->Float)
+      prim.CreateAttribute(_tokens->momentumAttachedToSkin, SdfValueTypeNames->Bool).Set(true);
+      prim.CreateAttribute(_tokens->momentumSkinOffset, SdfValueTypeNames->Float)
           .Set(loc.skinOffset);
     }
   }
@@ -345,7 +359,7 @@ LocatorList loadLocatorsFromUsd(const UsdStageRefPtr& stage, const Skeleton& ske
   LocatorList result;
 
   for (const auto& prim : stage->Traverse()) {
-    auto typeAttr = prim.GetAttribute(TfToken("momentum:type"));
+    auto typeAttr = prim.GetAttribute(_tokens->momentumType);
     if (!typeAttr) {
       continue;
     }
@@ -356,14 +370,14 @@ LocatorList loadLocatorsFromUsd(const UsdStageRefPtr& stage, const Skeleton& ske
     }
 
     Locator loc;
-    if (auto attr = prim.GetAttribute(TfToken("momentum:name")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumName); attr) {
       attr.Get(&loc.name);
     } else {
       loc.name = prim.GetName().GetString();
     }
 
     std::string parentName;
-    if (auto attr = prim.GetAttribute(TfToken("momentum:parent")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumParent); attr) {
       attr.Get(&parentName);
       if (!parentName.empty()) {
         loc.parent = skeleton.getJointIdByName(parentName);
@@ -371,38 +385,38 @@ LocatorList loadLocatorsFromUsd(const UsdStageRefPtr& stage, const Skeleton& ske
     }
 
     GfVec3f offset(0.0f, 0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:offset")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumOffset); attr) {
       attr.Get(&offset);
       loc.offset = Eigen::Vector3f(offset[0], offset[1], offset[2]);
     }
 
-    if (auto attr = prim.GetAttribute(TfToken("momentum:weight")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumWeight); attr) {
       attr.Get(&loc.weight);
     }
 
     GfVec3i locked(0, 0, 0);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:locked")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumLocked); attr) {
       attr.Get(&locked);
       loc.locked = Eigen::Vector3i(locked[0], locked[1], locked[2]);
     }
 
     GfVec3f limitOrigin(0.0f, 0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:limitOrigin")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumLimitOrigin); attr) {
       attr.Get(&limitOrigin);
       loc.limitOrigin = Eigen::Vector3f(limitOrigin[0], limitOrigin[1], limitOrigin[2]);
     }
 
     GfVec3f limitWeight(0.0f, 0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(TfToken("momentum:limitWeight")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumLimitWeight); attr) {
       attr.Get(&limitWeight);
       loc.limitWeight = Eigen::Vector3f(limitWeight[0], limitWeight[1], limitWeight[2]);
     }
 
-    if (auto attr = prim.GetAttribute(TfToken("momentum:attachedToSkin")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumAttachedToSkin); attr) {
       attr.Get(&loc.attachedToSkin);
     }
 
-    if (auto attr = prim.GetAttribute(TfToken("momentum:skinOffset")); attr) {
+    if (auto attr = prim.GetAttribute(_tokens->momentumSkinOffset); attr) {
       attr.Get(&loc.skinOffset);
     }
 
