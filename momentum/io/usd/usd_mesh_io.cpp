@@ -9,6 +9,7 @@
 
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec4f.h>
@@ -174,6 +175,24 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
     mesh.colors = loadColorsFromMeshPrim(meshPrim, mesh.vertices.size());
     mesh.normals = loadNormalsFromMeshPrim(meshPrim, mesh.vertices.size());
     mesh.faces = loadFacesFromMeshPrim(meshPrim, mesh.vertices.size());
+
+    // Load per-vertex confidence from custom primvar
+    UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
+    UsdGeomPrimvar confidencePrimvar = primvarsAPI.GetPrimvar(TfToken("momentum:confidence"));
+    if (confidencePrimvar && confidencePrimvar.HasValue()) {
+      VtArray<float> confidenceValues;
+      if (confidencePrimvar.Get(&confidenceValues)) {
+        if (confidenceValues.size() == mesh.vertices.size()) {
+          mesh.confidence.assign(confidenceValues.begin(), confidenceValues.end());
+        } else {
+          MT_LOGW(
+              "Confidence primvar size ({}) != vertex count ({}), skipping",
+              confidenceValues.size(),
+              mesh.vertices.size());
+        }
+      }
+    }
+
     break; // Use first mesh found
   }
 
@@ -283,6 +302,15 @@ void saveMeshToUsd(const Mesh& mesh, UsdGeomMesh& meshPrim) {
       colors.push_back(GfVec3f(color.x() / 255.0f, color.y() / 255.0f, color.z() / 255.0f));
     }
     colorPrimvar.Set(colors);
+  }
+
+  // Write per-vertex confidence
+  if (!mesh.confidence.empty()) {
+    UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
+    auto confidencePrimvar = primvarsAPI.CreatePrimvar(
+        TfToken("momentum:confidence"), SdfValueTypeNames->FloatArray, UsdGeomTokens->vertex);
+    VtArray<float> confidenceValues(mesh.confidence.begin(), mesh.confidence.end());
+    confidencePrimvar.Set(confidenceValues);
   }
 }
 
