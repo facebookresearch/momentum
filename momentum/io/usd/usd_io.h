@@ -12,6 +12,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/file_save_options.h>
 #include <momentum/math/types.h>
 
 #include <cstddef>
@@ -52,7 +53,11 @@ loadUsdCharacterWithSkeletonStates(std::span<const std::byte> inputSpan);
 ///
 /// @param[in] filename The path to save the USD file.
 /// @param[in] character The Character object to save.
-void saveUsd(const filesystem::path& filename, const Character& character);
+/// @param[in] options Optional file save options for controlling output.
+void saveUsd(
+    const filesystem::path& filename,
+    const Character& character,
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Save a character with skeleton state animation to a USD file.
 ///
@@ -60,11 +65,13 @@ void saveUsd(const filesystem::path& filename, const Character& character);
 /// @param[in] character The Character object to save.
 /// @param[in] fps Frames per second for the animation.
 /// @param[in] skeletonStates The skeleton states to save (one per frame).
+/// @param[in] options Optional file save options for controlling output.
 void saveUsdCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps,
-    std::span<const SkeletonState> skeletonStates);
+    std::span<const SkeletonState> skeletonStates,
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Load a USD character with model-parameter motion from a local file path.
 ///
@@ -88,13 +95,15 @@ std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharac
 /// @param[in] motion The motion data (parameter names, poses matrix).
 /// @param[in] offsets The identity parameters (joint names, offset values).
 /// @param[in] markerSequence Optional marker sequence to save.
+/// @param[in] options Optional file save options for controlling output.
 void saveUsdCharacterWithMotion(
     const filesystem::path& filename,
     const Character& character,
     float fps = 120.0f,
     const MotionParameters& motion = {},
     const IdentityParameters& offsets = {},
-    std::span<const std::vector<Marker>> markerSequence = {});
+    std::span<const std::vector<Marker>> markerSequence = {},
+    const FileSaveOptions& options = FileSaveOptions());
 
 /// Load a marker sequence from a USD file.
 ///
