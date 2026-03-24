@@ -525,6 +525,7 @@ if(MOMENTUM_BUILD_IO_USD)
     PUBLIC_LINK_LIBRARIES
       character
       io_common
+      io_file_save_options
       io_json_utils
       io_skeleton
     PRIVATE_LINK_LIBRARIES
