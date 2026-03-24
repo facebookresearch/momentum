@@ -11,6 +11,7 @@
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry.h"
 #include "momentum/character/locator.h"
+#include "momentum/character/marker.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/mesh.h"
@@ -631,5 +632,53 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_ModelParameterMotion) {
   for (Eigen::Index i = 0; i < offsetValues.size(); ++i) {
     EXPECT_NEAR(loadedOffsetValues[i], offsetValues[i], 1e-5f)
         << "Identity offset mismatch at index " << i;
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MarkerSequence) {
+  const float fps = 60.0f;
+  const int numFrames = 5;
+  const int numMarkers = 3;
+
+  // Create marker sequence
+  std::vector<std::vector<Marker>> markerSequence(numFrames);
+  for (int f = 0; f < numFrames; ++f) {
+    markerSequence[f].resize(numMarkers);
+    for (int m = 0; m < numMarkers; ++m) {
+      markerSequence[f][m].name = "Marker_" + std::to_string(m);
+      markerSequence[f][m].pos = Vector3d(
+          static_cast<double>(f) * 0.1 + m,
+          static_cast<double>(f) * 0.2 + m * 2,
+          static_cast<double>(f) * 0.3 + m * 3);
+      // Make some markers occluded in some frames
+      markerSequence[f][m].occluded = (f + m) % 3 == 0;
+    }
+  }
+
+  auto tempFile = temporaryFile("momentum_usd_markers", ".usda");
+  saveUsdCharacterWithMotion(tempFile.path(), testCharacter, fps, {}, {}, markerSequence);
+
+  auto loadedMarkers = loadUsdMarkerSequence(tempFile.path());
+
+  ASSERT_EQ(loadedMarkers.frames.size(), static_cast<size_t>(numFrames));
+  EXPECT_FLOAT_EQ(loadedMarkers.fps, fps);
+
+  for (int f = 0; f < numFrames; ++f) {
+    ASSERT_EQ(loadedMarkers.frames[f].size(), static_cast<size_t>(numMarkers));
+    for (int m = 0; m < numMarkers; ++m) {
+      const auto& orig = markerSequence[f][m];
+      const auto& loaded = loadedMarkers.frames[f][m];
+
+      EXPECT_EQ(loaded.name, orig.name)
+          << "Marker name mismatch at frame " << f << ", marker " << m;
+      EXPECT_NEAR(loaded.pos.x(), orig.pos.x(), 1e-6)
+          << "Marker pos.x mismatch at frame " << f << ", marker " << m;
+      EXPECT_NEAR(loaded.pos.y(), orig.pos.y(), 1e-6)
+          << "Marker pos.y mismatch at frame " << f << ", marker " << m;
+      EXPECT_NEAR(loaded.pos.z(), orig.pos.z(), 1e-6)
+          << "Marker pos.z mismatch at frame " << f << ", marker " << m;
+      EXPECT_EQ(loaded.occluded, orig.occluded)
+          << "Marker occlusion mismatch at frame " << f << ", marker " << m;
+    }
   }
 }
