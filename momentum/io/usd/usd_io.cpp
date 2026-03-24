@@ -58,13 +58,13 @@
 #include <UsdPluginInit.h>
 #endif
 
-#include <cstdio>
-#include <cstdlib>
+#include <atomic>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <thread>
 #include <vector>
 
@@ -103,6 +103,11 @@ class ResolverWarningsSuppressor : public TfDiagnosticMgr::Delegate {
 };
 
 std::mutex g_usdInitMutex;
+// Serializes all USD operations. USD has internal global state (SdfLayer registry,
+// ArResolver, TfDiagnosticMgr) that may not be fully thread-safe for concurrent
+// stage open/close. This mutex provides a simple correctness guarantee at the
+// cost of preventing concurrent USD I/O. If concurrent USD I/O is needed, this
+// should be revisited and thoroughly tested with independent stages.
 std::mutex g_usdOperationMutex;
 bool g_usdInitialized = false;
 std::unique_ptr<ResolverWarningsSuppressor> g_suppressor;
@@ -233,7 +238,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
       try {
         auto ptJson = nlohmann::json::parse(ptStr);
         character.parameterTransform = parameterTransformFromJson(character, ptJson);
-      } catch (const nlohmann::json::parse_error& e) {
+      } catch (const nlohmann::json::exception& e) {
         MT_LOGW("Failed to parse momentum:parameterTransform: {}", e.what());
       }
     }
@@ -247,7 +252,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
       try {
         auto limJson = nlohmann::json::parse(limStr);
         character.parameterLimits = parameterLimitsFromJson(character, limJson);
-      } catch (const nlohmann::json::parse_error& e) {
+      } catch (const nlohmann::json::exception& e) {
         MT_LOGW("Failed to parse momentum:parameterLimits: {}", e.what());
       }
     }
@@ -261,7 +266,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
       try {
         auto setsJson = nlohmann::json::parse(setsStr);
         character.parameterTransform.parameterSets = parameterSetsFromJson(character, setsJson);
-      } catch (const nlohmann::json::parse_error& e) {
+      } catch (const nlohmann::json::exception& e) {
         MT_LOGW("Failed to parse momentum:parameterSets: {}", e.what());
       }
     }
@@ -275,7 +280,7 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
       try {
         auto pcJson = nlohmann::json::parse(pcStr);
         character.parameterTransform.poseConstraints = poseConstraintsFromJson(character, pcJson);
-      } catch (const nlohmann::json::parse_error& e) {
+      } catch (const nlohmann::json::exception& e) {
         MT_LOGW("Failed to parse momentum:poseConstraints: {}", e.what());
       }
     }
@@ -349,14 +354,43 @@ struct TempFileGuard {
   filesystem::path path;
   explicit TempFileGuard(filesystem::path p) : path(std::move(p)) {}
   ~TempFileGuard() {
-    std::error_code ec;
-    filesystem::remove(path, ec);
+    if (!path.empty()) {
+      std::error_code ec;
+      filesystem::remove(path, ec);
+    }
   }
   TempFileGuard(const TempFileGuard&) = delete;
   TempFileGuard& operator=(const TempFileGuard&) = delete;
-  TempFileGuard(TempFileGuard&&) = delete;
+  TempFileGuard(TempFileGuard&& other) noexcept : path(std::move(other.path)) {
+    other.path.clear();
+  }
   TempFileGuard& operator=(TempFileGuard&&) = delete;
 };
+
+/// Write a byte buffer to a temporary file and open it as a USD stage.
+/// The returned TempFileGuard must be kept alive while the stage is in use.
+std::pair<UsdStageRefPtr, TempFileGuard> openStageFromBuffer(std::span<const std::byte> inputSpan) {
+  static std::atomic<uint64_t> tempFileCounter{0};
+  auto tempDir = filesystem::temp_directory_path();
+  auto tempPath = tempDir /
+      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
+       "_" + std::to_string(std::time(nullptr)) + "_" +
+       std::to_string(tempFileCounter.fetch_add(1, std::memory_order_relaxed)) + ".usd");
+
+  TempFileGuard tempGuard(tempPath);
+
+  {
+    std::ofstream tempFile(tempPath, std::ios::binary);
+    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
+    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
+    MT_THROW_IF(!tempFile.good(), "Failed to write to temporary file: {}", tempPath.string());
+  }
+
+  auto stage = UsdStage::Open(tempPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
+
+  return {stage, std::move(tempGuard)};
+}
 
 std::tuple<Character, MotionParameters, IdentityParameters, float>
 loadUsdCharacterWithMotionFromStage(const UsdStageRefPtr& stage) {
@@ -376,46 +410,17 @@ loadUsdCharacterWithMotionFromStage(const UsdStageRefPtr& stage) {
   return {std::move(character), std::move(motion), std::move(identity), fps};
 }
 
-} // namespace
+struct UsdSaveContext {
+  UsdStageRefPtr stage;
+  UsdSkelRoot skelRoot;
+  UsdSkelSkeleton skeleton;
+  UsdGeomMesh mesh;
+};
 
-Character loadUsdCharacter(const filesystem::path& inputPath) {
-  initializeUsdWithSuppressedWarnings();
-  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
-
-  auto stage = UsdStage::Open(inputPath.string());
-  MT_THROW_IF(!stage, "Failed to open USD stage: {}", inputPath.string());
-
-  return loadUsdCharacterFromStage(stage);
-}
-
-Character loadUsdCharacter(std::span<const std::byte> inputSpan) {
-  initializeUsdWithSuppressedWarnings();
-  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
-
-  // Create a unique temporary file name using thread ID and timestamp
-  auto tempDir = filesystem::temp_directory_path();
-  auto tempPath = tempDir /
-      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
-       "_" + std::to_string(std::time(nullptr)) + ".usd");
-
-  TempFileGuard tempGuard(tempPath);
-
-  {
-    std::ofstream tempFile(tempPath, std::ios::binary);
-    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
-    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
-  } // File closed automatically
-
-  auto stage = UsdStage::Open(tempPath.string());
-  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
-
-  return loadUsdCharacterFromStage(stage); // tempGuard destructor will clean up the file
-}
-
-void saveUsd(const filesystem::path& filename, const Character& character) {
-  initializeUsdWithSuppressedWarnings();
-  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
-
+// Creates a USD stage with SkelRoot, Skeleton, and Mesh prims, and saves
+// the common character components (skeleton, mesh, skin weights, blend shapes,
+// collision geometry, locators).
+UsdSaveContext createUsdSaveContext(const filesystem::path& filename, const Character& character) {
   auto stage = UsdStage::CreateNew(filename.string());
   MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
 
@@ -447,9 +452,40 @@ void saveUsd(const filesystem::path& filename, const Character& character) {
     saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
   }
 
-  saveMomentumMetadata(character, skelRoot.GetPrim());
+  return {stage, skelRoot, skeleton, mesh};
+}
 
-  stage->GetRootLayer()->Save();
+void finalizeUsdSave(const UsdSaveContext& ctx, const Character& character) {
+  saveMomentumMetadata(character, ctx.skelRoot.GetPrim());
+  ctx.stage->GetRootLayer()->Save();
+}
+
+} // namespace
+
+Character loadUsdCharacter(const filesystem::path& inputPath) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto stage = UsdStage::Open(inputPath.string());
+  MT_THROW_IF(!stage, "Failed to open USD stage: {}", inputPath.string());
+
+  return loadUsdCharacterFromStage(stage);
+}
+
+Character loadUsdCharacter(std::span<const std::byte> inputSpan) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto [stage, tempGuard] = openStageFromBuffer(inputSpan);
+  return loadUsdCharacterFromStage(stage);
+}
+
+void saveUsd(const filesystem::path& filename, const Character& character) {
+  initializeUsdWithSuppressedWarnings();
+  std::lock_guard<std::mutex> lock(g_usdOperationMutex);
+
+  auto ctx = createUsdSaveContext(filename, character);
+  finalizeUsdSave(ctx, character);
 }
 
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
@@ -471,21 +507,7 @@ loadUsdCharacterWithSkeletonStates(std::span<const std::byte> inputSpan) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto tempDir = filesystem::temp_directory_path();
-  auto tempPath = tempDir /
-      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
-       "_" + std::to_string(std::time(nullptr)) + ".usd");
-
-  TempFileGuard tempGuard(tempPath);
-
-  {
-    std::ofstream tempFile(tempPath, std::ios::binary);
-    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
-    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
-  }
-
-  auto stage = UsdStage::Open(tempPath.string());
-  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
+  auto [stage, tempGuard] = openStageFromBuffer(inputSpan);
 
   auto character = loadUsdCharacterFromStage(stage);
   auto [states, frameTimes] = loadSkeletonStatesFromUsd(stage, character.skeleton);
@@ -501,44 +523,13 @@ void saveUsdCharacter(
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto stage = UsdStage::CreateNew(filename.string());
-  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
-
-  auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
-  auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
-
-  saveSkeletonToUsd(character.skeleton, skeleton);
-
-  auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
-
-  if (character.mesh) {
-    saveMeshToUsd(*character.mesh, mesh);
-  }
-
-  if (character.skinWeights) {
-    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
-  }
-
-  if (character.blendShape) {
-    saveBlendShapesToUsd(*character.blendShape, mesh);
-  }
+  auto ctx = createUsdSaveContext(filename, character);
 
   if (!skeletonStates.empty()) {
-    saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
+    saveSkeletonStatesToUsd(ctx.stage, ctx.skeleton, character.skeleton, skeletonStates, fps);
   }
 
-  if (character.collision) {
-    saveCollisionGeometryToUsd(
-        *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
-  }
-
-  if (!character.locators.empty()) {
-    saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
-  }
-
-  saveMomentumMetadata(character, skelRoot.GetPrim());
-
-  stage->GetRootLayer()->Save();
+  finalizeUsdSave(ctx, character);
 }
 
 void saveUsdCharacterWithMotion(
@@ -550,41 +541,12 @@ void saveUsdCharacterWithMotion(
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto stage = UsdStage::CreateNew(filename.string());
-  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
-
-  auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
-  auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
-
-  saveSkeletonToUsd(character.skeleton, skeleton);
-
-  auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
-
-  if (character.mesh) {
-    saveMeshToUsd(*character.mesh, mesh);
-  }
-
-  if (character.skinWeights) {
-    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
-  }
-
-  if (character.blendShape) {
-    saveBlendShapesToUsd(*character.blendShape, mesh);
-  }
-
-  if (character.collision) {
-    saveCollisionGeometryToUsd(
-        *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
-  }
-
-  if (!character.locators.empty()) {
-    saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
-  }
+  auto ctx = createUsdSaveContext(filename, character);
 
   // Save motion data as custom attributes
   const auto& [paramNames, poses] = motion;
   if (!paramNames.empty() && poses.cols() > 0) {
-    saveMotionToUsd(skelRoot.GetPrim(), fps, motion, offsets);
+    saveMotionToUsd(ctx.skelRoot.GetPrim(), fps, motion, offsets);
 
     // Also bake as skeleton states for interop with standard USD viewers
     const auto numFrames = poses.cols();
@@ -598,12 +560,10 @@ void saveUsdCharacterWithMotion(
       skeletonStates.emplace_back(jointParams, character.skeleton, false);
     }
 
-    saveSkeletonStatesToUsd(stage, skeleton, character.skeleton, skeletonStates, fps);
+    saveSkeletonStatesToUsd(ctx.stage, ctx.skeleton, character.skeleton, skeletonStates, fps);
   }
 
-  saveMomentumMetadata(character, skelRoot.GetPrim());
-
-  stage->GetRootLayer()->Save();
+  finalizeUsdSave(ctx, character);
 }
 
 std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharacterWithMotion(
@@ -622,21 +582,7 @@ std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharac
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto tempDir = filesystem::temp_directory_path();
-  auto tempPath = tempDir /
-      ("momentum_usd_" + std::to_string(std::hash<std::thread::id>{}(std::this_thread::get_id())) +
-       "_" + std::to_string(std::time(nullptr)) + ".usd");
-
-  TempFileGuard tempGuard(tempPath);
-
-  {
-    std::ofstream tempFile(tempPath, std::ios::binary);
-    MT_THROW_IF(!tempFile.is_open(), "Failed to create temporary file: {}", tempPath.string());
-    tempFile.write(reinterpret_cast<const char*>(inputSpan.data()), inputSpan.size());
-  }
-
-  auto stage = UsdStage::Open(tempPath.string());
-  MT_THROW_IF(!stage, "Failed to open USD stage from buffer");
+  auto [stage, tempGuard] = openStageFromBuffer(inputSpan);
 
   return loadUsdCharacterWithMotionFromStage(stage);
 }
