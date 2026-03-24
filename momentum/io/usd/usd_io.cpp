@@ -17,6 +17,7 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/file_save_options.h"
 #include "momentum/io/usd/usd_animation_io.h"
 #include "momentum/io/usd/usd_mesh_io.h"
 #include "momentum/io/usd/usd_skeleton_io.h"
@@ -418,45 +419,56 @@ struct UsdSaveContext {
   UsdStageRefPtr stage;
   UsdSkelRoot skelRoot;
   UsdSkelSkeleton skeleton;
-  UsdGeomMesh mesh;
 };
 
-// Creates a USD stage with SkelRoot, Skeleton, and Mesh prims, and saves
+// Populates a USD stage with SkelRoot, Skeleton, and Mesh prims, and saves
 // the common character components (skeleton, mesh, skin weights, blend shapes,
-// collision geometry, locators).
-UsdSaveContext createUsdSaveContext(const filesystem::path& filename, const Character& character) {
-  auto stage = UsdStage::CreateNew(filename.string());
-  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
-
+// collision geometry, locators) according to the provided options.
+UsdSaveContext createUsdSaveContextFromStage(
+    const UsdStageRefPtr& stage,
+    const Character& character,
+    const FileSaveOptions& options) {
   auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
   auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
 
   saveSkeletonToUsd(character.skeleton, skeleton);
 
-  auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
+  if (options.mesh) {
+    auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
 
-  if (character.mesh) {
-    saveMeshToUsd(*character.mesh, mesh);
+    if (character.mesh) {
+      saveMeshToUsd(*character.mesh, mesh);
+    }
+
+    if (character.skinWeights) {
+      saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
+    }
+
+    if (options.blendShapes && character.blendShape) {
+      saveBlendShapesToUsd(*character.blendShape, mesh);
+    }
   }
 
-  if (character.skinWeights) {
-    saveSkinWeightsToUsd(*character.skinWeights, mesh, skeleton);
-  }
-
-  if (character.blendShape) {
-    saveBlendShapesToUsd(*character.blendShape, mesh);
-  }
-
-  if (character.collision) {
+  if (options.collisions && character.collision) {
     saveCollisionGeometryToUsd(
         *character.collision, character.skeleton, stage, SdfPath("/SkelRoot"));
   }
 
-  if (!character.locators.empty()) {
+  if (options.locators && !character.locators.empty()) {
     saveLocatorsToUsd(character.locators, character.skeleton, stage, SdfPath("/SkelRoot"));
   }
 
-  return {stage, skelRoot, skeleton, mesh};
+  return {stage, skelRoot, skeleton};
+}
+
+// Creates a new USD stage from a file path and populates it with common character components.
+UsdSaveContext createUsdSaveContext(
+    const filesystem::path& filename,
+    const Character& character,
+    const FileSaveOptions& options) {
+  auto stage = UsdStage::CreateNew(filename.string());
+  MT_THROW_IF(!stage, "Failed to create USD stage: {}", filename.string());
+  return createUsdSaveContextFromStage(stage, character, options);
 }
 
 void finalizeUsdSave(const UsdSaveContext& ctx, const Character& character) {
@@ -484,11 +496,14 @@ Character loadUsdCharacter(std::span<const std::byte> inputSpan) {
   return loadUsdCharacterFromStage(stage);
 }
 
-void saveUsd(const filesystem::path& filename, const Character& character) {
+void saveUsd(
+    const filesystem::path& filename,
+    const Character& character,
+    const FileSaveOptions& options) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto ctx = createUsdSaveContext(filename, character);
+  auto ctx = createUsdSaveContext(filename, character, options);
   finalizeUsdSave(ctx, character);
 }
 
@@ -523,11 +538,12 @@ void saveUsdCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps,
-    std::span<const SkeletonState> skeletonStates) {
+    std::span<const SkeletonState> skeletonStates,
+    const FileSaveOptions& options) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto ctx = createUsdSaveContext(filename, character);
+  auto ctx = createUsdSaveContext(filename, character, options);
 
   if (!skeletonStates.empty()) {
     saveSkeletonStatesToUsd(ctx.stage, ctx.skeleton, character.skeleton, skeletonStates, fps);
@@ -542,24 +558,22 @@ void saveUsdCharacterWithMotion(
     float fps,
     const MotionParameters& motion,
     const IdentityParameters& offsets,
-    std::span<const std::vector<Marker>> markerSequence) {
+    std::span<const std::vector<Marker>> markerSequence,
+    const FileSaveOptions& options) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
 
-  auto ctx = createUsdSaveContext(filename, character);
+  auto ctx = createUsdSaveContext(filename, character, options);
 
-  // Save motion data as custom attributes
   const auto& [paramNames, poses] = motion;
   if (!paramNames.empty() && poses.cols() > 0) {
     saveMotionToUsd(ctx.skelRoot.GetPrim(), fps, motion, offsets);
 
-    // Also bake as skeleton states for interop with standard USD viewers
     const auto numFrames = poses.cols();
     std::vector<SkeletonState> skeletonStates;
     skeletonStates.reserve(numFrames);
 
     for (Eigen::Index f = 0; f < numFrames; ++f) {
-      // Apply the model parameters through the parameter transform
       JointParameters jointParams =
           character.parameterTransform.apply(ModelParameters(poses.col(f)));
       skeletonStates.emplace_back(jointParams, character.skeleton, false);
