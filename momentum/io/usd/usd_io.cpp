@@ -331,6 +331,9 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
     character.parameterTransform.activeJointParams = VectorX<bool>::Constant(numJointParams, true);
   }
 
+  character.resetJointMap();
+  character.initInverseBindPose();
+
   // Load collision geometry and locators
   auto collision = loadCollisionGeometryFromUsd(stage, character.skeleton);
   if (!collision.empty()) {
