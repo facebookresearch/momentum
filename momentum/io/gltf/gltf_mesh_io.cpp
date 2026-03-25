@@ -439,7 +439,7 @@ SkinWeights_u bindMeshToJoint(const Mesh_u& mesh, size_t jointId) {
   skinWeights->index.bottomRows(kNumVertices).setZero();
   skinWeights->weight.bottomRows(kNumVertices).setZero();
   for (auto vertId = 0; vertId < kNumVertices; vertId++) {
-    skinWeights->index(vertId, 0) = jointId;
+    skinWeights->index(vertId, 0) = static_cast<uint32_t>(jointId);
     skinWeights->weight(vertId, 0) = 1.0f;
   }
 

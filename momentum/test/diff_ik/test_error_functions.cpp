@@ -462,7 +462,7 @@ TEST(ErrorFunction, PosePriorErrorFunction) {
   std::mt19937 rng;
 
   // Input dimensionality:
-  const int d = paramNames.size();
+  const size_t d = paramNames.size();
 
   // Number of mixtures:
   const int p = 2;
