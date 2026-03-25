@@ -124,16 +124,16 @@ CollisionGeometry createDefaultCollisionGeometry(size_t numJoints) {
   result.transform.resize(numJointParameters, static_cast<int>(result.name.size()));
 
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 0, 0, 1.0f)); // root_tx
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 1, 1, 1.0f)); // root_ty
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 2, 2, 1.0f)); // root_tz
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 3, 3, 1.0f)); // root_rx
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 4, 4, 1.0f)); // root_ry
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 5, 5, 1.0f)); // root_rz
-  triplets.push_back(Eigen::Triplet<float>(0 * kParametersPerJoint + 6, 6, 1.0f)); // root_sc
-  triplets.push_back(Eigen::Triplet<float>(1 * kParametersPerJoint + 3, 7, 1.0f)); // joint1_rx
-  triplets.push_back(Eigen::Triplet<float>(1 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
-  triplets.push_back(Eigen::Triplet<float>(2 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
+  triplets.emplace_back(0 * kParametersPerJoint + 0, 0, 1.0f); // root_tx
+  triplets.emplace_back(0 * kParametersPerJoint + 1, 1, 1.0f); // root_ty
+  triplets.emplace_back(0 * kParametersPerJoint + 2, 2, 1.0f); // root_tz
+  triplets.emplace_back(0 * kParametersPerJoint + 3, 3, 1.0f); // root_rx
+  triplets.emplace_back(0 * kParametersPerJoint + 4, 4, 1.0f); // root_ry
+  triplets.emplace_back(0 * kParametersPerJoint + 5, 5, 1.0f); // root_rz
+  triplets.emplace_back(0 * kParametersPerJoint + 6, 6, 1.0f); // root_sc
+  triplets.emplace_back(1 * kParametersPerJoint + 3, 7, 1.0f); // joint1_rx
+  triplets.emplace_back(1 * kParametersPerJoint + 5, 8, 0.5f); // shared_rz
+  triplets.emplace_back(2 * kParametersPerJoint + 5, 8, 0.5f); // shared_rz
   for (size_t iJoint = 2; iJoint < numJoints; ++iJoint) {
     triplets.emplace_back(
         static_cast<int>(iJoint * kParametersPerJoint + 3),
