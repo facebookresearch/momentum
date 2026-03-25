@@ -33,7 +33,7 @@ TEST(StringTest, TrimString) {
   EXPECT_EQ(trim(s4), "hello");
 
   // Test with empty string
-  std::string s5 = "";
+  std::string s5;
   EXPECT_EQ(trim(s5), "");
 
   // Test with only whitespace
@@ -157,7 +157,7 @@ TEST(StringTest, TokenizeString) {
   EXPECT_EQ(tokens[2], "test");
 
   // Test with empty string
-  std::string s5 = "";
+  std::string s5;
   tokens = tokenize(s5);
   EXPECT_TRUE(tokens.empty());
 
@@ -279,7 +279,7 @@ TEST(StringTest, EdgeCases) {
   EXPECT_EQ(tokens[0], "hello world");
 
   // Test tokenize with empty delimiter string
-  std::string delim2 = "";
+  std::string delim2;
   tokens = tokenize(s3, delim2);
   ASSERT_EQ(tokens.size(), 1);
   EXPECT_EQ(tokens[0], "hello world");
