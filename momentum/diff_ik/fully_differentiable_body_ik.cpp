@@ -191,7 +191,7 @@ std::vector<ErrorFunctionDerivativesT<T>> d_modelParams_d_inputs(
 
   const auto& errorFunctions = solverFunction.getErrorFunctions();
   for (size_t iErr = 0; iErr < errorFunctions.size(); ++iErr) {
-    const auto errf = errorFunctions[iErr];
+    const auto& errf = errorFunctions[iErr];
     Eigen::VectorX<T> dGrad_dWeight =
         Eigen::VectorX<T>::Zero(parameterTransform.numAllModelParameters());
     errf->getGradient(modelParameters, skelState, meshState, dGrad_dWeight);
