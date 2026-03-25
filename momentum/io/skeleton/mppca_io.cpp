@@ -78,7 +78,6 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
   } catch (std::exception& e) {
     MT_THROW("Error loading Mppca model: {}", e.what());
   }
-  return result;
 }
 
 void saveMppca(const Mppca& mppca, const std::string& name) {
