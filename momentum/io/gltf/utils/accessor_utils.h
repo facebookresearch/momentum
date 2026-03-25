@@ -165,12 +165,12 @@ int32_t createAccessorBuffer(
     for (size_t e = 0; e < data.size(); e++) {
       std::memcpy(&buffer.data[bufferDataStart + alignedElementSize * e], &data[e], elementSize);
     }
-    buffer.byteLength = buffer.data.size();
+    buffer.byteLength = static_cast<uint32_t>(buffer.data.size());
   } else {
     // no alignment needed or already aligned, just copy data in
     buffer.data.resize(bufferDataStart + dataSize);
     std::memcpy(&buffer.data[bufferDataStart], data.data(), dataSize);
-    buffer.byteLength = buffer.data.size();
+    buffer.byteLength = static_cast<uint32_t>(buffer.data.size());
   }
 
   // create bufferview
@@ -178,11 +178,11 @@ int32_t createAccessorBuffer(
   model.bufferViews.emplace_back();
   auto& bufferView = model.bufferViews.back();
 
-  bufferView.buffer = bufferIdx;
-  bufferView.byteLength = dataSize;
-  bufferView.byteOffset = bufferDataStart;
+  bufferView.buffer = static_cast<int32_t>(bufferIdx);
+  bufferView.byteLength = static_cast<uint32_t>(dataSize);
+  bufferView.byteOffset = static_cast<uint32_t>(bufferDataStart);
   if (align && elementSize % 4 != 0) {
-    bufferView.byteStride = alignedElementSize;
+    bufferView.byteStride = static_cast<uint32_t>(alignedElementSize);
   } else {
     bufferView.byteStride = 0;
   }
@@ -194,12 +194,12 @@ int32_t createAccessorBuffer(
 
   // set component type and accessor size depending on the type
   setAccessorType<T>(accessor);
-  accessor.bufferView = bufferViewIdx;
+  accessor.bufferView = static_cast<int32_t>(bufferViewIdx);
   accessor.byteOffset = 0;
-  accessor.count = data.size();
+  accessor.count = static_cast<uint32_t>(data.size());
   accessor.normalized = normalized;
 
-  return accessorIdx;
+  return static_cast<int32_t>(accessorIdx);
 }
 
 template <>
@@ -273,7 +273,7 @@ int32_t createSampler(
       data.size() == timestamps.size(), "data: {}, timestmaps: {}", data.size(), timestamps.size());
 
   // create new sampler
-  const int32_t index = anim.samplers.size();
+  const auto index = static_cast<int32_t>(anim.samplers.size());
   anim.samplers.emplace_back();
   auto& sampler = anim.samplers.back();
   sampler.interpolation = fx::gltf::Animation::Sampler::Type::Step;
@@ -291,7 +291,7 @@ int32_t createSampler(
     std::span<T> data,
     const int32_t timestampAccessor) {
   // create new sampler
-  const int32_t index = anim.samplers.size();
+  const auto index = static_cast<int32_t>(anim.samplers.size());
   anim.samplers.emplace_back();
   auto& sampler = anim.samplers.back();
   sampler.interpolation = fx::gltf::Animation::Sampler::Type::Step;
