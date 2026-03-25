@@ -54,15 +54,15 @@ class FbxMemoryStream : public FbxStream {
 
  private:
   std::span<const std::byte> buffer_;
-  long length_;
+  long length_{0};
 #if FBX_VERSION_GE(2020, 3, 2)
   mutable FbxInt64 position_{0};
 #else
-  mutable long position_;
+  mutable long position_{0};
 #endif
-  EState state_;
-  int readerId_;
-  mutable int errorCode_;
+  EState state_{eEmpty};
+  int readerId_{0};
+  mutable int errorCode_{0};
 };
 
 } // namespace momentum
