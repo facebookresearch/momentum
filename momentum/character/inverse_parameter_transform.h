@@ -8,6 +8,7 @@
 #pragma once
 
 #include <momentum/character/fwd.h>
+#include <momentum/character/parameter_transform.h>
 #include <momentum/character/types.h>
 #include <momentum/math/types.h>
 
@@ -54,5 +55,21 @@ struct InverseParameterTransformT {
 
 using InverseParameterTransform = InverseParameterTransformT<float>;
 using InverseParameterTransformd = InverseParameterTransformT<double>;
+
+/// Apply model parameter scale conversion to motion data.
+///
+/// Extracts scaling parameters from the parameter transform, converts joint-level identity
+/// parameters (bone scales) to model-level parameters using InverseParameterTransform, and bakes
+/// the scale values into each frame of the motion matrix.
+///
+/// @param[in] parameterTransform The character's parameter transform.
+/// @param[in,out] motion The motion matrix (numModelParams x numFrames, column-major). Scale
+///   parameters are added to each frame in-place.
+/// @param[in] jointIdentity Joint-level identity parameters (bone scales).
+/// @return Model-level identity parameters with scale values.
+[[nodiscard]] ModelParameters applyModelParameterScales(
+    const ParameterTransform& parameterTransform,
+    MatrixXf& motion,
+    const JointParameters& jointIdentity);
 
 } // namespace momentum

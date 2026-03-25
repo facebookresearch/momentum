@@ -10,6 +10,7 @@
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry.h"
+#include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
@@ -617,6 +618,37 @@ std::tuple<Character, MotionParameters, IdentityParameters, float> loadUsdCharac
   auto [stage, tempGuard] = openStageFromBuffer(inputSpan);
 
   return loadUsdCharacterWithMotionFromStage(stage);
+}
+
+namespace {
+
+std::tuple<Character, MatrixXf, ModelParameters, float> applyModelParameterScalesToUsdMotion(
+    std::tuple<Character, MotionParameters, IdentityParameters, float>&& loaded) {
+  auto& [character, motionParams, identityParams, fps] = loaded;
+  auto& motion = std::get<1>(motionParams);
+  const auto& jointIdentity = std::get<1>(identityParams);
+
+  MT_THROW_IF(
+      motion.rows() != character.parameterTransform.numAllModelParameters(),
+      "Mismatch between character and motion; character has {} model parameters while motion has {}.",
+      character.parameterTransform.numAllModelParameters(),
+      motion.rows());
+
+  auto modelIdentity =
+      applyModelParameterScales(character.parameterTransform, motion, jointIdentity);
+  return {std::move(character), std::move(motion), std::move(modelIdentity), fps};
+}
+
+} // namespace
+
+std::tuple<Character, MatrixXf, ModelParameters, float>
+loadUsdCharacterWithMotionModelParameterScales(const filesystem::path& inputPath) {
+  return applyModelParameterScalesToUsdMotion(loadUsdCharacterWithMotion(inputPath));
+}
+
+std::tuple<Character, MatrixXf, ModelParameters, float>
+loadUsdCharacterWithMotionModelParameterScales(std::span<const std::byte> inputSpan) {
+  return applyModelParameterScalesToUsdMotion(loadUsdCharacterWithMotion(inputSpan));
 }
 
 MarkerSequence loadUsdMarkerSequence(const filesystem::path& inputPath) {

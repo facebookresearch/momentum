@@ -12,6 +12,7 @@
 #include "momentum/character/collision_geometry.h"
 #include "momentum/character/locator.h"
 #include "momentum/character/marker.h"
+#include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/mesh.h"
@@ -696,4 +697,119 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MarkerSequence) {
           << "Marker occlusion mismatch at frame " << f << ", marker " << m;
     }
   }
+}
+
+namespace {
+
+// Saves a USD file with motion that has scales stripped out and joint identity preserved,
+// returning the expected motion (with scales) and model identity for verification.
+struct ModelParameterScalesTestData {
+  Character character;
+  Eigen::MatrixXf motionWithScales;
+  ModelParameters modelIdentity;
+  TemporaryFile tempFile;
+  float fps;
+};
+
+ModelParameterScalesTestData createModelParameterScalesTestFile(
+    const std::string& prefix,
+    float fps) {
+  Character c = createTestCharacter();
+  const int numFrames = 5;
+  Eigen::MatrixXf motionWithScales =
+      MatrixXf::Random(c.parameterTransform.numAllModelParameters(), numFrames);
+
+  ModelParameters modelIdentity =
+      ModelParameters::Zero(c.parameterTransform.numAllModelParameters());
+  const auto& scalingParams = c.parameterTransform.getScalingParameters();
+  for (size_t i = 0; i < c.parameterTransform.numAllModelParameters(); i++) {
+    if (scalingParams.test(i)) {
+      modelIdentity[i] = 0.5f + (i % 100) * 0.01f;
+    }
+  }
+
+  // Make scale parameters constant across all frames
+  for (Eigen::Index iFrame = 0; iFrame < motionWithScales.cols(); iFrame++) {
+    for (size_t iParam = 0; iParam < c.parameterTransform.numAllModelParameters(); iParam++) {
+      if (scalingParams.test(iParam)) {
+        motionWithScales(iParam, iFrame) = modelIdentity[iParam];
+      }
+    }
+  }
+
+  // Strip scales from motion for saving
+  Eigen::MatrixXf motionWithoutScales = motionWithScales;
+  for (Eigen::Index iFrame = 0; iFrame < motionWithoutScales.cols(); iFrame++) {
+    for (size_t iParam = 0; iParam < c.parameterTransform.numAllModelParameters(); iParam++) {
+      if (scalingParams.test(iParam)) {
+        motionWithoutScales(iParam, iFrame) -= modelIdentity[iParam];
+      }
+    }
+  }
+
+  JointParameters jointIdentity = c.parameterTransform.apply(modelIdentity);
+
+  TemporaryFile tempFile = temporaryFile(prefix, ".usda");
+  saveUsdCharacterWithMotion(
+      tempFile.path(),
+      c,
+      fps,
+      std::make_tuple(c.parameterTransform.name, motionWithoutScales),
+      std::make_tuple(c.skeleton.getJointNames(), jointIdentity));
+
+  return {
+      std::move(c),
+      std::move(motionWithScales),
+      std::move(modelIdentity),
+      std::move(tempFile),
+      fps};
+}
+
+void verifyModelParameterScalesResult(
+    const ModelParameterScalesTestData& expected,
+    const MatrixXf& loadedMotion,
+    const ModelParameters& loadedModelIdentity,
+    float loadedFps) {
+  EXPECT_EQ(loadedFps, expected.fps);
+
+  EXPECT_EQ(loadedModelIdentity.size(), expected.modelIdentity.size());
+  for (size_t i = 0; i < loadedModelIdentity.size(); i++) {
+    EXPECT_NEAR(loadedModelIdentity[i], expected.modelIdentity[i], 1e-5f)
+        << "Model identity mismatch at index " << i;
+  }
+
+  for (Eigen::Index iFrame = 0; iFrame < expected.motionWithScales.cols(); iFrame++) {
+    for (size_t iParam = 0; iParam < expected.character.parameterTransform.numAllModelParameters();
+         iParam++) {
+      EXPECT_NEAR(loadedMotion(iParam, iFrame), expected.motionWithScales(iParam, iFrame), 1e-5f)
+          << "Motion mismatch at param " << iParam << ", frame " << iFrame;
+    }
+  }
+}
+
+} // namespace
+
+TEST(UsdIOTest, ModelParameterScalesRoundTrip) {
+  auto testData = createModelParameterScalesTestFile("usd_model_param_scales", 30.0f);
+
+  auto [loadedChar, loadedMotion, loadedModelIdentity, loadedFps] =
+      loadUsdCharacterWithMotionModelParameterScales(testData.tempFile.path());
+
+  verifyModelParameterScalesResult(testData, loadedMotion, loadedModelIdentity, loadedFps);
+}
+
+TEST(UsdIOTest, ModelParameterScalesFromBuffer) {
+  auto testData = createModelParameterScalesTestFile("usd_model_param_scales_buf", 15.0f);
+
+  std::ifstream file(testData.tempFile.path(), std::ios::binary | std::ios::ate);
+  ASSERT_TRUE(file.is_open());
+  const auto size = file.tellg();
+  file.seekg(0, std::ios::beg);
+  std::vector<std::byte> buffer(size);
+  ASSERT_TRUE(file.read(reinterpret_cast<char*>(buffer.data()), size));
+
+  auto [loadedChar, loadedMotion, loadedModelIdentity, loadedFps] =
+      loadUsdCharacterWithMotionModelParameterScales(std::span<const std::byte>(buffer));
+
+  verifyModelParameterScalesResult(testData, loadedMotion, loadedModelIdentity, loadedFps);
 }

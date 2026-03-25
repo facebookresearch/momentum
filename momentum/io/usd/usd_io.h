@@ -105,6 +105,28 @@ void saveUsdCharacterWithMotion(
     std::span<const std::vector<Marker>> markerSequence = {},
     const FileSaveOptions& options = FileSaveOptions());
 
+/// Load a USD character with motion and apply scale parameters to the motion.
+///
+/// This function loads both the character and motion data from a USD file, applying the
+/// character's scale parameters directly to the motion as model parameters. This approach is
+/// preferred over the deprecated method of storing scales in an offset vector in the parameter
+/// transform. The scale parameters from the identity vector are integrated into the motion data
+/// for each frame.
+///
+/// @param[in] inputPath The path to the USD character file.
+/// @return A tuple containing the loaded Character object, the motion represented in model
+/// parameters with scales applied, the identity parameters as model parameters, and the fps.
+std::tuple<Character, MatrixXf, ModelParameters, float>
+loadUsdCharacterWithMotionModelParameterScales(const filesystem::path& inputPath);
+
+/// Load a USD character with motion and apply scale parameters to the motion.
+///
+/// @param[in] inputSpan The buffer containing the USD character data.
+/// @return A tuple containing the loaded Character object, the motion represented in model
+/// parameters with scales applied, the identity parameters as model parameters, and the fps.
+std::tuple<Character, MatrixXf, ModelParameters, float>
+loadUsdCharacterWithMotionModelParameterScales(std::span<const std::byte> inputSpan);
+
 /// Load a marker sequence from a USD file.
 ///
 /// @param[in] inputPath The path to the USD file.
