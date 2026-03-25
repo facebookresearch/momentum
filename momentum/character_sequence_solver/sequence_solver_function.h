@@ -36,6 +36,10 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
       const ParameterSet& universal,
       size_t nFrames);
   ~SequenceSolverFunctionT() override;
+  SequenceSolverFunctionT(const SequenceSolverFunctionT&) = delete;
+  SequenceSolverFunctionT& operator=(const SequenceSolverFunctionT&) = delete;
+  SequenceSolverFunctionT(SequenceSolverFunctionT&&) = delete;
+  SequenceSolverFunctionT& operator=(SequenceSolverFunctionT&&) = delete;
 
   double getError(const Eigen::VectorX<T>& parameters) final;
 
