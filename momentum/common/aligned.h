@@ -14,6 +14,43 @@
 
 namespace momentum {
 
+// Detect platforms with std::aligned_alloc (C11/C++17).
+// We explicitly check for known platforms rather than assuming availability,
+// so that unknown/embedded platforms safely fall back to malloc.
+#if !defined(MOMENTUM_HAS_ALIGNED_ALLOC)
+#if defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 16))
+// glibc 2.16+ has aligned_alloc
+#define MOMENTUM_HAS_ALIGNED_ALLOC 1
+#elif defined(__APPLE__)
+// macOS 10.15+, iOS 13+, and other modern Apple platforms have aligned_alloc
+#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500) ||   \
+    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000) || \
+    (defined(__TV_OS_VERSION_MIN_REQUIRED) && __TV_OS_VERSION_MIN_REQUIRED >= 130000) ||         \
+    (defined(__WATCH_OS_VERSION_MIN_REQUIRED) && __WATCH_OS_VERSION_MIN_REQUIRED >= 60000)
+#define MOMENTUM_HAS_ALIGNED_ALLOC 1
+#endif
+#elif defined(__ANDROID__) && defined(__ANDROID_API__) && __ANDROID_API__ >= 28
+// Android API 28+ has aligned_alloc
+#define MOMENTUM_HAS_ALIGNED_ALLOC 1
+#elif defined(__EMSCRIPTEN__)
+// Emscripten (WebAssembly) has aligned_alloc
+#define MOMENTUM_HAS_ALIGNED_ALLOC 1
+#endif
+#endif
+
+#if !defined(MOMENTUM_HAS_ALIGNED_ALLOC)
+#define MOMENTUM_HAS_ALIGNED_ALLOC 0
+#endif
+
+// Detect platforms with posix_memalign.
+#if !defined(MOMENTUM_HAS_POSIX_MEMALIGN)
+#if (defined(__unix__) || defined(__APPLE__) || defined(__ANDROID__)) && !defined(_WIN32)
+#define MOMENTUM_HAS_POSIX_MEMALIGN 1
+#else
+#define MOMENTUM_HAS_POSIX_MEMALIGN 0
+#endif
+#endif
+
 #if defined(_WIN32)
 
 [[nodiscard]] inline void* aligned_malloc(size_t size, size_t align) {
@@ -24,8 +61,17 @@ inline void aligned_free(void* ptr) {
   return _aligned_free(ptr);
 }
 
-#elif (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED < 130000) || \
-    (defined(__ANDROID_API__) && __ANDROID_API__ < 28)
+#elif MOMENTUM_HAS_ALIGNED_ALLOC
+
+[[nodiscard]] inline void* aligned_malloc(size_t size, size_t align) {
+  return std::aligned_alloc(align, size);
+}
+
+inline void aligned_free(void* ptr) {
+  return std::free(ptr);
+}
+
+#elif MOMENTUM_HAS_POSIX_MEMALIGN
 
 [[nodiscard]] inline void* aligned_malloc(size_t size, size_t align) {
   void* result = nullptr;
@@ -39,8 +85,11 @@ inline void aligned_free(void* ptr) {
 
 #else
 
-[[nodiscard]] inline void* aligned_malloc(size_t size, size_t align) {
-  return std::aligned_alloc(align, size);
+// Fallback for platforms without aligned allocation support (e.g., embedded systems).
+// Uses standard malloc which may not honor alignment requirements,
+// but Eigen and other users will still work (just potentially slower).
+[[nodiscard]] inline void* aligned_malloc(size_t size, size_t /*align*/) {
+  return std::malloc(size);
 }
 
 inline void aligned_free(void* ptr) {

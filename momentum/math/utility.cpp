@@ -23,7 +23,7 @@ constexpr T eulerTol() {
   // Tolerance used to determine when sin(tol) can be considered approximately zero for the given
   // floating-point type (float or double). These values have been chosen based on a balance between
   // the precision of the floating-point type and numerical stability.
-  return Eps<T>(1e-6f, 1e-12);
+  return Eps<T>(T(1e-6), T(1e-12));
 }
 
 } // namespace
@@ -39,7 +39,7 @@ Quaternion<T> quaternionExpMap(const Vector3<T>& v) {
 
   // For numerical stability, use Taylor series for small angles
   // Threshold is sqrt(epsilon): ~3.5e-4 for float, ~1.5e-8 for double
-  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+  constexpr T kSmallAngleThreshold = Eps<T>(T(3.5e-4), T(1.5e-8));
 
   if (theta < kSmallAngleThreshold) {
     // Taylor series expansion of exp map near zero:
@@ -83,7 +83,7 @@ Vector3<T> quaternionLogMap(const Quaternion<T>& q) {
 
   // For numerical stability, use Taylor series for small angles
   // Threshold is sqrt(epsilon): ~3.5e-4 for float, ~1.5e-8 for double
-  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+  constexpr T kSmallAngleThreshold = Eps<T>(T(3.5e-4), T(1.5e-8));
 
   if (vecNorm < kSmallAngleThreshold) {
     // Quaternion is close to identity or -identity
@@ -134,7 +134,7 @@ Eigen::Matrix<T, 3, 4> quaternionLogMapDerivative(const Quaternion<T>& q) {
   const T vecNorm = vec.norm();
 
   // For numerical stability, use Taylor series for small angles
-  constexpr T kSmallAngleThreshold = Eps<T>(3.5e-4f, 1.5e-8);
+  constexpr T kSmallAngleThreshold = Eps<T>(T(3.5e-4), T(1.5e-8));
 
   Eigen::Matrix<T, 3, 4> jacobian;
 
@@ -231,7 +231,7 @@ Vector3<T> rotationMatrixToEulerXYZ(const Matrix3<T>& m, EulerConvention convent
       // So cos(y) == 0 which leads to m(0, 0), m(0, 1), m(0, 1), and m(0, 2) becoming
       // zero. So we use other non-zero elements in the rotation matrix
       res.x() = 0; // any angle can be OK, but we choose zero
-      res.y() = -pi<T>() * 0.5; // choose in [-pi, pi]
+      res.y() = -pi<T>() * T(0.5); // choose in [-pi, pi]
       res.z() = std::atan2(m(1, 0), m(1, 1)); // -res.x() - atan2(...) but we use res.x() == 0
     }
   } else {
@@ -239,7 +239,7 @@ Vector3<T> rotationMatrixToEulerXYZ(const Matrix3<T>& m, EulerConvention convent
     // So cos(y) == 0 which leads to m(0, 0), m(0, 1), m(0, 1), and m(0, 2) becoming
     // zero. So we use other non-zero elements in the rotation matrix
     res.x() = 0; // any angle can be OK, but we choose zero
-    res.y() = pi<T>() * 0.5; // choose in [-pi, pi]
+    res.y() = pi<T>() * T(0.5); // choose in [-pi, pi]
     res.z() = std::atan2(m(1, 0), m(1, 1)); // res.x() - atan2(...) but we use res.x() == 0
   }
   return res;
@@ -272,7 +272,7 @@ Vector3<T> rotationMatrixToEulerZYX(const Matrix3<T>& m, EulerConvention convent
       // So cos(y) == 0 which leads to m(0, 0), m(1, 0), m(2, 1), and m(2, 2) becoming
       // zero. So we use other non-zero elements in the rotation matrix
       res.x() = 0; // any angle can be OK, but we choose zero
-      res.y() = pi<T>() * 0.5; // choose in [-pi, pi]
+      res.y() = pi<T>() * T(0.5); // choose in [-pi, pi]
       res.z() = std::atan2(m(0, 1), m(0, 2)); // res.x() - atan2(...) but we use res.x() == 0
     }
   } else {
@@ -280,7 +280,7 @@ Vector3<T> rotationMatrixToEulerZYX(const Matrix3<T>& m, EulerConvention convent
     // So cos(y) == 0 which leads to m(0, 0), m(1, 0), m(2, 1), and m(2, 2) becoming
     // zero. So we use other non-zero elements in the rotation matrix
     res.x() = 0; // any angle can be OK, but we choose zero
-    res.y() = -pi<T>() * 0.5; // choose in [-pi, pi]
+    res.y() = -pi<T>() * T(0.5); // choose in [-pi, pi]
     res.z() = std::atan2(-m(0, 1), -m(0, 2)); // -res.x() - atan2(...) but we use res.x() == 0
     // Note that this is not identical to std::atan2(m(0, 1), m(0, 2))
   }
@@ -412,7 +412,7 @@ Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::spa
 
 template <typename T>
 MatrixX<T> pseudoInverse(const MatrixX<T>& mat) {
-  constexpr T pinvtoler = Eps<T>(1e-6f, 1e-60); // choose your tolerance wisely!
+  constexpr T pinvtoler = Eps<T>(T(1e-6), T(1e-60)); // choose your tolerance wisely!
   const auto svd = mat.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
   VectorX<T> singularValues_inv = svd.singularValues();
   for (int j = 0; j < singularValues_inv.size(); ++j) {
@@ -455,9 +455,9 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   T tD = D;
 
   // check if lines are nearly parallel
-  if (D < 1e-7f) {
-    sN = 0.0f;
-    sD = 1.0f;
+  if (D < T(1e-7)) {
+    sN = T(0);
+    sD = T(1);
     tN = e;
     tD = c;
 
@@ -474,9 +474,9 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
       return std::make_tuple(false, std::numeric_limits<T>::max(), Eigen::Vector2<T>::Zero());
     }
 
-    if (sN < 0.0) {
+    if (sN < T(0)) {
       // sc < 0 => the s=0 edge is visible
-      sN = 0.0;
+      sN = T(0);
       tN = e;
       tD = c;
     } else if (sN > sD) {
@@ -488,11 +488,11 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   }
 
   // tc < 0 => the t=0 edge is visible
-  if (tN < 0.0) {
-    tN = 0.0;
+  if (tN < T(0)) {
+    tN = T(0);
     // recompute sc for this edge
-    if (-d < 0.0) {
-      sN = 0.0;
+    if (-d < T(0)) {
+      sN = T(0);
     } else if (-d > a) {
       sN = sD;
     } else {
@@ -503,8 +503,8 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
     // tc > 1  => the t=1 edge is visible
     tN = tD;
     // recompute sc for this edge
-    if ((-d + b) < 0.0) {
-      sN = 0;
+    if ((-d + b) < T(0)) {
+      sN = T(0);
     } else if ((-d + b) > a) {
       sN = sD;
     } else {
@@ -515,8 +515,8 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
 
   // finally do the division to get sc and tc
   // Check for small denominators to avoid division by zero or very small numbers
-  res[0] = (std::abs(sN) < 1e-7f || std::abs(sD) < 1e-7f) ? 0.0f : sN / sD;
-  res[1] = (std::abs(tN) < 1e-7f || std::abs(tD) < 1e-7f) ? 0.0f : tN / tD;
+  res[0] = (std::abs(sN) < T(1e-7) || std::abs(sD) < T(1e-7)) ? T(0) : sN / sD;
+  res[1] = (std::abs(tN) < T(1e-7) || std::abs(tD) < T(1e-7)) ? T(0) : tN / tD;
 
   // get the difference of the two closest points
   const auto dP = w + (d1 * res[0]) - (d2 * res[1]);
