@@ -211,6 +211,7 @@ void createAnimationCurves(
     const size_t jointIndex = i * kParametersPerJoint;
     const size_t index = i * 9;
     skeletonNodes[i]->LclTranslation.GetCurveNode(true);
+    // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
     if (skipActiveJointParamCheck || aj[jointIndex + 0]) {
       animCurves[index + 0] = skeletonNodes[i]->LclTranslation.GetCurve(
           animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
@@ -254,6 +255,7 @@ void createAnimationCurves(
           skeletonNodes[i]->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
       animCurvesIndex.push_back(index + 8);
     }
+    // NOLINTEND(facebook-hte-LocalUncheckedArrayBounds)
   }
 
   // calculate the actual motion and set the keyframes
@@ -268,6 +270,7 @@ void createAnimationCurves(
       continue;
     }
 
+    // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
     animCurves[ai]->KeyModifyBegin();
     for (size_t f = 0; f < jointValues.cols(); f++) {
       // set keyframe time
@@ -294,6 +297,7 @@ void createAnimationCurves(
     }
     animCurves[ai]->KeyModifyEnd();
   }
+  // NOLINTEND(facebook-hte-LocalUncheckedArrayBounds)
 }
 
 // Get or create the animation stack and base layer for the scene.
