@@ -65,12 +65,14 @@ void saveUsd(
 /// @param[in] character The Character object to save.
 /// @param[in] fps Frames per second for the animation.
 /// @param[in] skeletonStates The skeleton states to save (one per frame).
+/// @param[in] markerSequence Optional marker sequence to save.
 /// @param[in] options Optional file save options for controlling output.
 void saveUsdCharacter(
     const filesystem::path& filename,
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
+    std::span<const std::vector<Marker>> markerSequence = {},
     const FileSaveOptions& options = FileSaveOptions());
 
 /// Load a USD character with model-parameter motion from a local file path.

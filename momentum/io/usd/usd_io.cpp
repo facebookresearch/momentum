@@ -549,6 +549,7 @@ void saveUsdCharacter(
     const Character& character,
     float fps,
     std::span<const SkeletonState> skeletonStates,
+    std::span<const std::vector<Marker>> markerSequence,
     const FileSaveOptions& options) {
   initializeUsdWithSuppressedWarnings();
   std::lock_guard<std::mutex> lock(g_usdOperationMutex);
@@ -557,6 +558,10 @@ void saveUsdCharacter(
 
   if (!skeletonStates.empty()) {
     saveSkeletonStatesToUsd(ctx.stage, ctx.skeleton, character.skeleton, skeletonStates, fps);
+  }
+
+  if (!markerSequence.empty()) {
+    saveMarkerSequenceToUsd(ctx.stage, SdfPath("/SkelRoot"), fps, markerSequence);
   }
 
   finalizeUsdSave(ctx, character);
