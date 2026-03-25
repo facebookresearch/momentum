@@ -133,6 +133,7 @@ size_t UnionErrorFunctionT<T>::getJacobianSize() const {
 template <typename T>
 std::vector<std::string> UnionErrorFunctionT<T>::inputs() const {
   std::vector<std::string> result;
+  result.reserve(inputs_.size());
   for (const auto& i : inputs_) {
     result.push_back(i.first);
   }
