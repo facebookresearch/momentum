@@ -489,7 +489,7 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
 
       // go over all data and enter into the output array
       for (size_t i = 0; i < positions.size(); i++) {
-        const size_t index = static_cast<size_t>(std::lround(timestamps[i] * fps));
+        const auto index = static_cast<size_t>(std::lround(timestamps[i] * fps));
         result.frames[index].emplace_back();
         auto& marker = result.frames[index].back();
 
