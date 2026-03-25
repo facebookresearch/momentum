@@ -273,22 +273,16 @@ TYPED_TEST_SUITE(TransformPoseTest, Types);
   paramTransform.transform.resize(numJointParameters, static_cast<int>(paramTransform.name.size()));
 
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.push_back(
-      Eigen::Triplet<float>(worldJoint * kParametersPerJoint + 0, 0, 1.0f)); // root_tx
-  triplets.push_back(
-      Eigen::Triplet<float>(rootJoint * kParametersPerJoint + 1, 1, 1.0f)); // root_ty
-  triplets.push_back(
-      Eigen::Triplet<float>(rootJoint * kParametersPerJoint + 2, 2, 1.0f)); // root_tz
-  triplets.push_back(
-      Eigen::Triplet<float>(rootJoint * kParametersPerJoint + 3, 3, 1.0f)); // root_rx
-  triplets.push_back(
-      Eigen::Triplet<float>(worldJoint * kParametersPerJoint + 4, 4, 1.0f)); // root_ry
-  triplets.push_back(
-      Eigen::Triplet<float>(rootJoint * kParametersPerJoint + 5, 5, 1.0f)); // root_rz
-  triplets.push_back(
-      Eigen::Triplet<float>(worldJoint * kParametersPerJoint + 6, 6, 1.0f)); // scale_global
-  triplets.push_back(
-      Eigen::Triplet<float>(childJoint * kParametersPerJoint + 3, 7, 1.0f)); // joint1_rx
+  triplets.emplace_back(static_cast<int>(worldJoint * kParametersPerJoint + 0), 0, 1.0f); // root_tx
+  triplets.emplace_back(static_cast<int>(rootJoint * kParametersPerJoint + 1), 1, 1.0f); // root_ty
+  triplets.emplace_back(static_cast<int>(rootJoint * kParametersPerJoint + 2), 2, 1.0f); // root_tz
+  triplets.emplace_back(static_cast<int>(rootJoint * kParametersPerJoint + 3), 3, 1.0f); // root_rx
+  triplets.emplace_back(static_cast<int>(worldJoint * kParametersPerJoint + 4), 4, 1.0f); // root_ry
+  triplets.emplace_back(static_cast<int>(rootJoint * kParametersPerJoint + 5), 5, 1.0f); // root_rz
+  triplets.emplace_back(
+      static_cast<int>(worldJoint * kParametersPerJoint + 6), 6, 1.0f); // scale_global
+  triplets.emplace_back(
+      static_cast<int>(childJoint * kParametersPerJoint + 3), 7, 1.0f); // joint1_rx
 
   paramTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
   paramTransform.activeJointParams = paramTransform.computeActiveJointParams();

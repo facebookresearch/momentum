@@ -817,7 +817,7 @@ void assignSkinWeights(
     for (int iPr = 0; iPr < curBoneWeights.size() && iPr < kMaxSkinJoints; ++iPr) {
       // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       const auto [boneIdx, weight] = curBoneWeights[iPr];
-      skinWeights->index(vertexOffset + iVertex, iPr) = boneIdx;
+      skinWeights->index(vertexOffset + iVertex, iPr) = static_cast<uint32_t>(boneIdx);
       skinWeights->weight(vertexOffset + iVertex, iPr) = weight / weightSum;
     }
   }
@@ -916,7 +916,7 @@ void parseSkinnedModel(
 double getMaxSeconds(const std::vector<const ofbx::AnimationCurveNode*>& curves) {
   ofbx::i64 fbxTime = 0;
   for (const ofbx::AnimationCurveNode* node : curves) {
-    for (size_t iChannel = 0; iChannel < 3; ++iChannel) {
+    for (int iChannel = 0; iChannel < 3; ++iChannel) {
       const ofbx::AnimationCurve* channel = node->getCurve(iChannel);
       if (channel == nullptr) {
         continue;
