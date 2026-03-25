@@ -54,7 +54,7 @@ void SequenceSolverFunctionT<T>::setEnabledParameters(const ParameterSet& parame
 
   // give data to helper functions
   for (size_t f = 0; f < getNumFrames(); f++) {
-    for (auto solvable : perFrameErrorFunctions_[f]) {
+    for (const auto& solvable : perFrameErrorFunctions_[f]) {
       solvable->setActiveJoints(activeJointParams_);
     }
   }

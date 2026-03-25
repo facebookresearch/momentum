@@ -87,7 +87,7 @@ void TrustRegionQRT<T>::doIteration() {
 
   // Compute the QR factorization of the Jacobian:
   double error_orig = 0.0;
-  for (auto errorFunction : sf->getErrorFunctions()) {
+  for (const auto& errorFunction : sf->getErrorFunctions()) {
     if (errorFunction->getWeight() <= 0) {
       continue;
     }
