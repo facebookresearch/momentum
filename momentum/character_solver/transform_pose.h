@@ -46,6 +46,11 @@ class PoseTransformSolverT {
   explicit PoseTransformSolverT(const Character& character);
   ~PoseTransformSolverT();
 
+  PoseTransformSolverT(const PoseTransformSolverT&) = delete;
+  PoseTransformSolverT& operator=(const PoseTransformSolverT&) = delete;
+  PoseTransformSolverT(PoseTransformSolverT&&) noexcept = default;
+  PoseTransformSolverT& operator=(PoseTransformSolverT&&) noexcept = default;
+
   /// Applies a rigid transform to the given model parameters.
   /// @param[in,out] modelParameters The model parameters to be transformed.
   /// @param[in] transform The transform to apply.

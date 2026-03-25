@@ -25,6 +25,11 @@ struct SimdPositionConstraints final {
 
   ~SimdPositionConstraints();
 
+  SimdPositionConstraints(const SimdPositionConstraints&) = delete;
+  SimdPositionConstraints& operator=(const SimdPositionConstraints&) = delete;
+  SimdPositionConstraints(SimdPositionConstraints&&) = delete;
+  SimdPositionConstraints& operator=(SimdPositionConstraints&&) = delete;
+
   void clearConstraints();
 
   void addConstraint(

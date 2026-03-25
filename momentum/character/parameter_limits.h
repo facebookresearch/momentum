@@ -91,7 +91,7 @@ struct LimitHalfPlane {
 union LimitData {
   LimitMinMax minMax;
   LimitMinMaxJoint minMaxJoint;
-  LimitLinear linear;
+  LimitLinear linear{};
   LimitLinearJoint linearJoint;
   LimitEllipsoid ellipsoid;
   LimitHalfPlane halfPlane;
@@ -104,6 +104,17 @@ union LimitData {
   LimitData(const LimitData& rhs);
 
   LimitData& operator=(const LimitData& rhs);
+
+  ~LimitData() = default;
+
+  LimitData(LimitData&& rhs) noexcept {
+    std::memcpy(rawData.data(), rhs.rawData.data(), rawData.size());
+  }
+
+  LimitData& operator=(LimitData&& rhs) noexcept {
+    std::memcpy(rawData.data(), rhs.rawData.data(), rawData.size());
+    return *this;
+  }
 
   /// Compares raw memory
   bool operator==(const LimitData& limitData) const;
