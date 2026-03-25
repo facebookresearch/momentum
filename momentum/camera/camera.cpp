@@ -13,6 +13,7 @@
 #include <drjit/fwd.h>
 #include <drjit/matrix.h>
 
+#include <array>
 #include <cfloat>
 #include <cmath>
 
@@ -1274,11 +1275,11 @@ void OpenCVFisheyeIntrinsicsModelT<T>::setMaxRSquared(T rsqr) {
 template <typename T>
 void OpenCVFisheyeIntrinsicsModelT<T>::computeMaxValidAngleFromImageBounds() {
   // Find the farthest image corner from the principal point
-  const T corners[4][2] = {
-      {T(0), T(0)},
-      {T(this->imageWidth()), T(0)},
-      {T(0), T(this->imageHeight())},
-      {T(this->imageWidth()), T(this->imageHeight())}};
+  const std::array<std::array<T, 2>, 4> corners = {
+      {{T(0), T(0)},
+       {T(this->imageWidth()), T(0)},
+       {T(0), T(this->imageHeight())},
+       {T(this->imageWidth()), T(this->imageHeight())}}};
 
   T maxDistSqr = T(0);
   for (const auto& corner : corners) {
