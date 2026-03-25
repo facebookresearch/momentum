@@ -306,7 +306,7 @@ void addSkinWeights(
         // Try fallback with short indices.
         auto jointIndicesShort = copyAccessorBuffer<Vector4b>(model, jointAttribute->second);
         for (const auto& value : jointIndicesShort) {
-          jointIndices.push_back(value.cast<uint16_t>());
+          jointIndices.emplace_back(value.cast<uint16_t>());
         }
       }
     }
