@@ -350,7 +350,7 @@ ParameterTransform parseParameterTransform(
         line);
 
     // enable the attribute in the skeleton if we have a parameter controlling it
-    pt.activeJointParams[jointIndex * kParametersPerJoint + attributeIndex] = 1;
+    pt.activeJointParams[jointIndex * kParametersPerJoint + attributeIndex] = true;
 
     // split the parameter names
     parseParameter(triplets, pt, pTokens, skeleton, jointIndex, attributeIndex, line);
