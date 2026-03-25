@@ -9,6 +9,7 @@
 
 #include "momentum/character/parameter_transform.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 
 namespace momentum {
 
@@ -43,5 +44,57 @@ CharacterParametersT<T> InverseParameterTransformT<T>::apply(
 
 template struct InverseParameterTransformT<float>;
 template struct InverseParameterTransformT<double>;
+
+ModelParameters applyModelParameterScales(
+    const ParameterTransform& parameterTransform,
+    MatrixXf& motion,
+    const JointParameters& jointIdentity) {
+  const auto scalingParams = parameterTransform.getScalingParameters();
+
+  // Check if motion already contains non-zero scale parameters
+  bool hasScaleParametersInMotion = false;
+  for (Eigen::Index iFrame = 0; iFrame < motion.cols() && !hasScaleParametersInMotion; ++iFrame) {
+    for (Eigen::Index iParam = 0; iParam < parameterTransform.numAllModelParameters(); ++iParam) {
+      if (scalingParams.test(iParam) && motion(iParam, iFrame) != 0) {
+        hasScaleParametersInMotion = true;
+        break;
+      }
+    }
+  }
+
+  // Convert joint identity parameters to model identity parameters
+  ModelParameters modelIdentity = ModelParameters::Zero(parameterTransform.numAllModelParameters());
+  if (jointIdentity.size() > 0 && !jointIdentity.v.isZero()) {
+    if (hasScaleParametersInMotion) {
+      MT_LOGW("Motion already contains scale parameters, not adding joint identity parameters.");
+    }
+    const auto scalingTransform = parameterTransform.simplify(scalingParams);
+    const ModelParameters scaleParametersSubset =
+        InverseParameterTransform(scalingTransform).apply(jointIdentity).pose;
+
+    MT_CHECK(
+        static_cast<Eigen::Index>(parameterTransform.name.size()) ==
+            parameterTransform.numAllModelParameters(),
+        "Parameter name count ({}) does not match model parameter count ({})",
+        parameterTransform.name.size(),
+        parameterTransform.numAllModelParameters());
+    for (Eigen::Index iParam = 0; iParam < parameterTransform.numAllModelParameters(); iParam++) {
+      if (scalingParams.test(iParam)) {
+        auto subsetParamIdx =
+            scalingTransform.getParameterIdByName(parameterTransform.name[iParam]);
+        modelIdentity[iParam] = scaleParametersSubset(subsetParamIdx);
+
+        // Add the identity parameters into the motion:
+        if (!hasScaleParametersInMotion) {
+          for (Eigen::Index jFrame = 0; jFrame < motion.cols(); ++jFrame) {
+            motion(iParam, jFrame) += scaleParametersSubset(subsetParamIdx);
+          }
+        }
+      }
+    }
+  }
+
+  return modelIdentity;
+}
 
 } // namespace momentum
