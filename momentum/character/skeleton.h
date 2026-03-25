@@ -42,6 +42,9 @@ struct SkeletonT {
   /// Move assignment operator
   SkeletonT& operator=(SkeletonT&& other) noexcept = default;
 
+  /// Destructor
+  ~SkeletonT() = default;
+
   /// Returns the index of a joint with the given name, or kInvalidIndex if not found.
   [[nodiscard]] size_t getJointIdByName(std::string_view name) const;
 
