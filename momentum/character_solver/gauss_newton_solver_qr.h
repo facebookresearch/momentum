@@ -29,6 +29,10 @@ class GaussNewtonSolverQRT : public SolverT<T> {
  public:
   GaussNewtonSolverQRT(const SolverOptions& options, SolverFunctionT<T>* solver);
   ~GaussNewtonSolverQRT() override;
+  GaussNewtonSolverQRT(const GaussNewtonSolverQRT&) = delete;
+  GaussNewtonSolverQRT& operator=(const GaussNewtonSolverQRT&) = delete;
+  GaussNewtonSolverQRT(GaussNewtonSolverQRT&&) noexcept = default;
+  GaussNewtonSolverQRT& operator=(GaussNewtonSolverQRT&&) noexcept = default;
 
   [[nodiscard]] std::string_view getName() const override;
 

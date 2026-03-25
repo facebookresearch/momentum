@@ -22,6 +22,13 @@ class FullyDifferentiableMotionErrorFunctionT : public FullyDifferentiableSkelet
  public:
   FullyDifferentiableMotionErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
   ~FullyDifferentiableMotionErrorFunctionT() override;
+  FullyDifferentiableMotionErrorFunctionT(const FullyDifferentiableMotionErrorFunctionT&) = default;
+  FullyDifferentiableMotionErrorFunctionT& operator=(
+      const FullyDifferentiableMotionErrorFunctionT&) = default;
+  FullyDifferentiableMotionErrorFunctionT(FullyDifferentiableMotionErrorFunctionT&&) noexcept =
+      default;
+  FullyDifferentiableMotionErrorFunctionT& operator=(
+      FullyDifferentiableMotionErrorFunctionT&&) noexcept = default;
 
   [[nodiscard]] std::vector<std::string> inputs() const final;
   [[nodiscard]] Eigen::Index getInputSize(const std::string& name) const final;

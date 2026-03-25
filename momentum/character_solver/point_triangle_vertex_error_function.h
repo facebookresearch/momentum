@@ -48,6 +48,11 @@ class PointTriangleVertexErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Character& character,
       VertexConstraintType type = VertexConstraintType::Position);
   ~PointTriangleVertexErrorFunctionT() override;
+  PointTriangleVertexErrorFunctionT(const PointTriangleVertexErrorFunctionT&) = default;
+  PointTriangleVertexErrorFunctionT& operator=(const PointTriangleVertexErrorFunctionT&) = default;
+  PointTriangleVertexErrorFunctionT(PointTriangleVertexErrorFunctionT&&) noexcept = default;
+  PointTriangleVertexErrorFunctionT& operator=(PointTriangleVertexErrorFunctionT&&) noexcept =
+      default;
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& modelParameters,
