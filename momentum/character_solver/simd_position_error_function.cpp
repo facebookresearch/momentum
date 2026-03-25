@@ -142,7 +142,7 @@ double SimdPositionErrorFunction::getError(
       const FloatP dist = dot(diff, diff);
 
       // Calculate error as squared distance: err = constraintWeight * dist
-      const FloatP constraintWeight =
+      const auto constraintWeight =
           drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
       error += constraintWeight * dist;
     }
@@ -198,7 +198,7 @@ double SimdPositionErrorFunction::getGradient(
           const FloatP dist = dot(diff, diff);
 
           // Calculate error as squared distance: err = constraintWeight * dist
-          const FloatP constraintWeight =
+          const auto constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
           jointError += constraintWeight * dist;
 
@@ -350,7 +350,7 @@ double SimdPositionErrorFunction::getJacobian(
           const FloatP dist = dot(diff, diff);
 
           // Calculate error as squared distance: err = constraintWeight * dist
-          const FloatP constraintWeight =
+          const auto constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
           jointError += constraintWeight * dist;
 
@@ -979,7 +979,7 @@ double SimdPositionErrorFunctionAVX::getJacobian(
             }
             if (activeJointParams_[paramIndex + 6]) {
               // calculate jacobian with respect to joint: jac = (posd * LN2) * wgt;
-              const float l = ln2<float>();
+              const auto l = ln2<float>();
 
               const __m256 jacx = _mm256_mul_ps(_mm256_mul_ps(posdx, wgt), _mm256_broadcast_ss(&l));
               const __m256 jacy = _mm256_mul_ps(_mm256_mul_ps(posdy, wgt), _mm256_broadcast_ss(&l));
