@@ -26,6 +26,15 @@ TEST(Momentum_Mesh_Intersection, TriangleIntersection) {
        {1.0, 1.5, 0.5}}, // vertices
       {}, // normals
       {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}}, // faces
+      {}, // lines
+      {}, // colors
+      {}, // confidence
+      {}, // texcoords
+      {}, // texcoord_faces
+      {}, // texcoord_lines
+      {}, // polyFaces
+      {}, // polyFaceSizes
+      {}, // polyTexcoordFaces
   };
 
   std::vector<Vector3<float>> faceNormals(mesh.faces.size());
@@ -56,6 +65,15 @@ TEST(Momentum_Mesh_Intersection, MeshSelfIntersection) {
        {1.0, 1.5, 0.5}}, // vertices
       {}, // normals
       {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}}, // faces
+      {}, // lines
+      {}, // colors
+      {}, // confidence
+      {}, // texcoords
+      {}, // texcoord_faces
+      {}, // texcoord_lines
+      {}, // polyFaces
+      {}, // polyFaceSizes
+      {}, // polyTexcoordFaces
   };
 
   std::vector<std::pair<int32_t, int32_t>> intersections = intersectMeshBruteForce(mesh);
@@ -85,6 +103,15 @@ TEST(Momentum_Mesh_Intersection, MeshSelfIntersectionRandom) {
       vertices,
       {}, // normals
       faces, // faces
+      {}, // lines
+      {}, // colors
+      {}, // confidence
+      {}, // texcoords
+      {}, // texcoord_faces
+      {}, // texcoord_lines
+      {}, // polyFaces
+      {}, // polyFaceSizes
+      {}, // polyTexcoordFaces
   };
 
   // check that both brute force and optimized version return the same result
