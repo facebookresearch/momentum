@@ -26,6 +26,14 @@ class FullyDifferentiablePosePriorErrorFunctionT
       const ParameterTransform& pt,
       std::vector<std::string> names);
   ~FullyDifferentiablePosePriorErrorFunctionT() override;
+  FullyDifferentiablePosePriorErrorFunctionT(const FullyDifferentiablePosePriorErrorFunctionT&) =
+      default;
+  FullyDifferentiablePosePriorErrorFunctionT(
+      FullyDifferentiablePosePriorErrorFunctionT&&) noexcept = default;
+  FullyDifferentiablePosePriorErrorFunctionT& operator=(
+      const FullyDifferentiablePosePriorErrorFunctionT&) = default;
+  FullyDifferentiablePosePriorErrorFunctionT& operator=(
+      FullyDifferentiablePosePriorErrorFunctionT&&) noexcept = default;
 
   void setPosePrior(
       const VectorX<T>& pi,
