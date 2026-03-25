@@ -248,7 +248,7 @@ std::vector<Vector2i> CollisionErrorFunctionT<T>::getCollisionPairs() const {
     Vector2<T> cp;
     T overlap;
     if (checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
-      collidingPairs.emplace_back(pair.indexA, pair.indexB);
+      collidingPairs.emplace_back(static_cast<int>(pair.indexA), static_cast<int>(pair.indexB));
     }
   }
   return collidingPairs;
