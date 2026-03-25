@@ -114,7 +114,7 @@ Eigen::MatrixXd randomMatrix(
 
   std::vector<double> singularValues;
   for (Eigen::Index i = 0; i < nSVD; ++i) {
-    singularValues.push_back(exp((double)i / (double)nSVD * log(conditionNumber)));
+    singularValues.emplace_back(exp((double)i / (double)nSVD * log(conditionNumber)));
   }
   std::shuffle(singularValues.begin(), singularValues.end(), rng);
 
@@ -176,11 +176,11 @@ TEST(OnlineQR, MatrixWithZeros) {
 
   OnlineHouseholderQR<float> qr(dim);
   for (int i = 0; i < 5; ++i) {
-    A_i.push_back(makeRandomMatrix<float>(i + 3, dim, rng));
+    A_i.emplace_back(makeRandomMatrix<float>(i + 3, dim, rng));
     for (int j = 0; j < i && j < dim; ++j) {
       A_i.back().col(j).setZero();
     }
-    b_i.push_back(makeRandomMatrix<float>(i + 3, 1, rng));
+    b_i.emplace_back(makeRandomMatrix<float>(i + 3, 1, rng));
     qr.add(A_i.back(), b_i.back());
   }
 
@@ -252,8 +252,8 @@ TEST(OnlineQR, LargeMatrix) {
     std::uniform_int_distribution<Eigen::Index> unif(minConstraints, maxConstraints);
     const auto nConsCur = unif(rng);
     const Eigen::Index rowEnd = std::min(curRow + nConsCur, nRows);
-    A_mat.push_back(A_combined.middleRows(curRow, rowEnd - curRow));
-    b_vec.push_back(b_combined.middleRows(curRow, rowEnd - curRow));
+    A_mat.emplace_back(A_combined.middleRows(curRow, rowEnd - curRow));
+    b_vec.emplace_back(b_combined.middleRows(curRow, rowEnd - curRow));
 
     curRow = rowEnd;
   }
@@ -261,10 +261,10 @@ TEST(OnlineQR, LargeMatrix) {
   std::vector<Eigen::MatrixXf> A_mat_f;
   std::vector<Eigen::VectorXf> b_vec_f;
   for (const auto& a : A_mat) {
-    A_mat_f.push_back(a.cast<float>());
+    A_mat_f.emplace_back(a.cast<float>());
   }
   for (const auto& b : b_vec) {
-    b_vec_f.push_back(b.cast<float>());
+    b_vec_f.emplace_back(b.cast<float>());
   }
 
   const auto nMat = A_mat.size();
@@ -677,9 +677,9 @@ TEST(OnlineBlockQR, RandomMatrix) {
       const auto nCols = nColsDist(rng);
       const auto nRows = nCols + nRowsDist(rng);
 
-      A_ii.push_back(makeRandomMatrix<float>(nRows, nCols, rng));
-      A_in.push_back(makeRandomMatrix<float>(nRows, nCols_common, rng));
-      b_i.push_back(makeRandomMatrix<float>(nRows, 1, rng));
+      A_ii.emplace_back(makeRandomMatrix<float>(nRows, nCols, rng));
+      A_in.emplace_back(makeRandomMatrix<float>(nRows, nCols_common, rng));
+      b_i.emplace_back(makeRandomMatrix<float>(nRows, 1, rng));
 
       validateBlockwiseSolver<float>(A_ii, A_in, b_i, nCols_common, rng);
     }

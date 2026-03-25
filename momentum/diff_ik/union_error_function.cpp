@@ -36,9 +36,9 @@ UnionErrorFunctionT<T>::UnionErrorFunctionT(
     std::vector<std::string> names;
     for (const auto& e : diffErrorFunctions_) {
       if (e) {
-        names.push_back(e->name());
+        names.emplace_back(e->name());
       } else {
-        names.push_back("Unknown");
+        names.emplace_back("Unknown");
       }
     }
 
