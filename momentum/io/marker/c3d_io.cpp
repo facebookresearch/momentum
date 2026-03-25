@@ -138,7 +138,7 @@ loadC3d(const std::string& filename, UpVector up, std::span<const std::string> v
 
     // Go through the labels to find all the subjects and their markers.
     // A Subject is a collection of points that should be grouped together to represent an object.
-    std::unordered_map<std::string, std::vector<int>> subjectNameMap;
+    std::unordered_map<std::string, std::vector<size_t>> subjectNameMap;
     subjectNameMap.reserve(kPointsPerFrame);
     for (size_t iLabel = 0; iLabel < kPointsPerFrame; ++iLabel) {
       const std::string& name = pointLabels[iLabel];

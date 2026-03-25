@@ -135,9 +135,10 @@ CollisionGeometry createDefaultCollisionGeometry(size_t numJoints) {
   triplets.push_back(Eigen::Triplet<float>(1 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
   triplets.push_back(Eigen::Triplet<float>(2 * kParametersPerJoint + 5, 8, 0.5f)); // shared_rz
   for (size_t iJoint = 2; iJoint < numJoints; ++iJoint) {
-    triplets.push_back(
-        Eigen::Triplet<float>(
-            iJoint * kParametersPerJoint + 3, rxStart + iJoint - 2, 1.0f)); // joint1_rx
+    triplets.emplace_back(
+        static_cast<int>(iJoint * kParametersPerJoint + 3),
+        static_cast<int>(rxStart + iJoint - 2),
+        1.0f); // joint1_rx
   }
 
   result.transform.setFromTriplets(triplets.begin(), triplets.end());
@@ -276,7 +277,7 @@ std::shared_ptr<const MppcaT<T>> createDefaultPosePrior() {
   std::vector<std::string> paramNames = {"joint1_rx", "shared_rz", "joint2_rx"};
 
   // Input dimensionality:
-  const int d = paramNames.size();
+  const int d = static_cast<int>(paramNames.size());
 
   // Number of mixtures:
   const int p = 2;
