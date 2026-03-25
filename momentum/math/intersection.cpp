@@ -106,7 +106,8 @@ std::vector<std::pair<int32_t, int32_t>> intersectMeshBruteForce(const MeshT<T>&
   // calculate all face intersections brute force
   for (size_t iFace0 = 0; iFace0 < mesh.faces.size(); iFace0++) {
     for (size_t iFace1 = iFace0 + 1; iFace1 < mesh.faces.size(); iFace1++) {
-      if (intersectFace(mesh, faceNormals, iFace0, iFace1)) {
+      if (intersectFace(
+              mesh, faceNormals, static_cast<int32_t>(iFace0), static_cast<int32_t>(iFace1))) {
         intersectingFaces.emplace_back(static_cast<int32_t>(iFace0), static_cast<int32_t>(iFace1));
       }
     }
@@ -134,7 +135,7 @@ std::vector<std::pair<int32_t, int32_t>> intersectMesh(const MeshT<T>& mesh) {
     auto& aabb = aabbs[iFace];
     aabb.aabb.min() = v0;
     aabb.aabb.max() = v0;
-    aabb.id = iFace;
+    aabb.id = static_cast<axel::Index>(iFace);
     aabb.extend(v1);
     aabb.extend(v2);
   }
@@ -142,7 +143,8 @@ std::vector<std::pair<int32_t, int32_t>> intersectMesh(const MeshT<T>& mesh) {
 
   // calculate all face intersections
   bvh.traverseOverlappingPairs([&](size_t iFace0, size_t iFace1) {
-    if (intersectFace(mesh, faceNormals, iFace0, iFace1)) {
+    if (intersectFace(
+            mesh, faceNormals, static_cast<int32_t>(iFace0), static_cast<int32_t>(iFace1))) {
       intersectingFaces.emplace_back(static_cast<int32_t>(iFace0), static_cast<int32_t>(iFace1));
     }
     return true;
