@@ -43,7 +43,7 @@ void SolverT<T>::setEnabledParameters(const ParameterSet& parameterSet) {
   newParameterPattern_ = true;
 
   solverFunction_->setEnabledParameters(parameterSet);
-  actualParameters_ = solverFunction_->getActualParameters();
+  actualParameters_ = gsl::narrow<int>(solverFunction_->getActualParameters());
 }
 
 template <typename T>

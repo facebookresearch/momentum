@@ -398,7 +398,7 @@ void logBvh(
   std::vector<axel::BoundingBoxf> aabbs(n);
   for (size_t i = 0; i < n; ++i) {
     auto& aabb = aabbs[i];
-    aabb.id = i;
+    aabb.id = static_cast<axel::Index>(i);
     updateAabb(
         aabb, collisionState.origin[i], collisionState.direction[i], collisionState.radius[i]);
   }
