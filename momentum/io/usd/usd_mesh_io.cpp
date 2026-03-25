@@ -238,7 +238,7 @@ SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertic
         bindingAPI.GetJointWeightsAttr().Get(&jointWeights)) {
       if (!jointIndices.empty() && !jointWeights.empty() &&
           jointIndices.size() == jointWeights.size()) {
-        const int influencesPerVertex = jointIndices.size() / numVertices;
+        const int influencesPerVertex = static_cast<int>(jointIndices.size() / numVertices);
 
         if (influencesPerVertex > 0 && jointIndices.size() == numVertices * influencesPerVertex) {
           for (size_t v = 0; v < numVertices; ++v) {
@@ -246,7 +246,7 @@ SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertic
             for (int i = 0;
                  i < influencesPerVertex && validInfluences < static_cast<int>(kMaxSkinJoints);
                  ++i) {
-              size_t idx = v * influencesPerVertex + i;
+              const size_t idx = v * influencesPerVertex + i;
               int jointIndex = jointIndices[idx];
               float weight = jointWeights[idx];
 
@@ -342,7 +342,7 @@ void saveSkinWeightsToUsd(
   VtArray<float> jointWeights;
 
   const int maxInfluences = 4;
-  const int numVertices = skinWeights.index.rows();
+  const int numVertices = static_cast<int>(skinWeights.index.rows());
   const int numJointsPerVertex =
       std::min(maxInfluences, static_cast<int>(skinWeights.index.cols()));
 
