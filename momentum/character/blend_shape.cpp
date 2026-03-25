@@ -26,7 +26,7 @@ void BlendShape::computeShape(
     const BlendWeightsT<T>& coefficients,
     std::vector<Eigen::Vector3<T>>& output) const {
   MT_CHECK(
-      gsl::narrow<Eigen::Index>(baseShape_.size()) * 3 == shapeVectors_.rows(),
+      static_cast<Eigen::Index>(baseShape_.size()) * 3 == shapeVectors_.rows(),
       "{} is not {}",
       baseShape_.size() * 3,
       shapeVectors_.rows());
@@ -39,11 +39,11 @@ void BlendShape::computeShape(
 }
 
 VectorXf BlendShape::estimateCoefficients(
-    std::span<const Vector3f> vertices,
+    momentum::span<const Vector3f> vertices,
     const float regularization,
     const VectorXf& weights) const {
   MT_CHECK(
-      gsl::narrow<Eigen::Index>(baseShape_.size()) * 3 == shapeVectors_.rows(),
+      static_cast<Eigen::Index>(baseShape_.size()) * 3 == shapeVectors_.rows(),
       "{} is not {}",
       baseShape_.size() * 3,
       shapeVectors_.rows());
@@ -54,7 +54,7 @@ VectorXf BlendShape::estimateCoefficients(
   const Map<const VectorXf> vertexVec(&vertices[0][0], vertices.size() * 3);
 
   // if we're not using weights, use default pipeline
-  if (weights.size() != gsl::narrow<Eigen::Index>(vertices.size())) {
+  if (weights.size() != static_cast<Eigen::Index>(vertices.size())) {
     // check if factorization is valid
     if (!factorizationValid_) {
       factorization_.compute(shapeVectors_, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -89,16 +89,16 @@ VectorXf BlendShape::estimateCoefficients(
 }
 
 BlendShape::BlendShape(
-    std::span<const Vector3f> baseShape,
+    momentum::span<const Vector3f> baseShape,
     const size_t numShapes,
-    std::span<const std::string> shapeNames)
+    momentum::span<const std::string> shapeNames)
     : BlendShapeBase(baseShape.size(), numShapes, shapeNames),
       baseShape_(baseShape.begin(), baseShape.end()),
       factorizationValid_(false) {}
 
 void BlendShape::setShapeVector(
     const size_t index,
-    std::span<const Vector3f> shape,
+    momentum::span<const Vector3f> shape,
     std::string_view name) {
   BlendShapeBase::setShapeVector(index, shape, name);
 

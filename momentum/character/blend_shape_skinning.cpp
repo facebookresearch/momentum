@@ -75,12 +75,12 @@ void skinWithBlendShapes(
       state.jointState.size(),
       inverseBindPose.size());
   MT_CHECK(
-      skin.index.rows() == gsl::narrow<int>(character.mesh->vertices.size()),
+      skin.index.rows() == static_cast<int>(character.mesh->vertices.size()),
       "{} is not {}",
       skin.index.rows(),
       character.mesh->vertices.size());
   MT_CHECK(
-      skin.weight.rows() == gsl::narrow<int>(character.mesh->vertices.size()),
+      skin.weight.rows() == static_cast<int>(character.mesh->vertices.size()),
       "{} is not {}",
       skin.weight.rows(),
       character.mesh->vertices.size());
@@ -125,8 +125,8 @@ void skinWithBlendShapes(
           Eigen::Vector3<T> p_skinned = Eigen::Vector3<T>::Zero();
           for (uint32_t k = 0; k < kMaxSkinJoints; ++k) {
             const auto bIndex = skinWeights.index(iVert, k);
-            const T bWeight = skinWeights.weight(iVert, k);
-            if (bWeight == 0) {
+            const T bWeight = static_cast<T>(skinWeights.weight(iVert, k));
+            if (bWeight == T(0)) {
               break;
             }
             p_skinned +=

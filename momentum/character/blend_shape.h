@@ -25,11 +25,11 @@ struct BlendShape : public BlendShapeBase {
   /// @param shapeNames Names of the blend shapes (will be automatically generated if empty or not
   /// the right size)
   BlendShape(
-      std::span<const Vector3f> baseShape,
+      momentum::span<const Vector3f> baseShape,
       size_t numShapes,
-      std::span<const std::string> shapeNames = {});
+      momentum::span<const std::string> shapeNames = {});
 
-  void setBaseShape(std::span<const Vector3f> baseShape) {
+  void setBaseShape(momentum::span<const Vector3f> baseShape) {
     baseShape_.assign(baseShape.begin(), baseShape.end());
   }
 
@@ -72,7 +72,7 @@ struct BlendShape : public BlendShapeBase {
   /// @param weights Optional per-vertex importance weights
   /// @return Estimated blend shape coefficients
   [[nodiscard]] VectorXf estimateCoefficients(
-      std::span<const Vector3f> vertices,
+      momentum::span<const Vector3f> vertices,
       float regularization = 1.0f,
       const VectorXf& weights = VectorXf()) const;
 
@@ -80,8 +80,10 @@ struct BlendShape : public BlendShapeBase {
   ///
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
-  void
-  setShapeVector(size_t index, std::span<const Vector3f> shapeVector, std::string_view name = "");
+  void setShapeVector(
+      size_t index,
+      momentum::span<const Vector3f> shapeVector,
+      std::string_view name = "");
 
   /// Compares all components of two blend shapes
   ///
