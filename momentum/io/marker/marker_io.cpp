@@ -80,7 +80,7 @@ int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences) {
   // We will go through the sequence to find the max number of visible markers. This is quite slow
   // but more robust.
   const size_t numActors = markerSequences.size();
-  std::vector<int> maxMarkers(numActors, 0);
+  std::vector<size_t> maxMarkers(numActors, 0);
   // count markers for each actor
   for (size_t iActor = 0; iActor < numActors; ++iActor) {
     maxMarkers.at(iActor) = markerCount(markerSequences[iActor].frames);
@@ -108,7 +108,7 @@ int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences) {
   }
 
   if (maxCount > 0) {
-    return actorID;
+    return static_cast<int>(actorID);
   } else {
     return -1;
   }

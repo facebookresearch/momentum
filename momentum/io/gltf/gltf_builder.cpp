@@ -264,7 +264,7 @@ void addMorphWeightsToModel(
       animation,
       std::span<const float>(weights.data(), numWeights * numFrames),
       timestampIdx);
-  channel.target.node = meshIndex;
+  channel.target.node = static_cast<int32_t>(meshIndex);
   channel.target.path = "weights";
 }
 
@@ -353,7 +353,7 @@ void addActorAnimationToModel(
     const auto nodeIndex = model.nodes.size();
     model.nodes.emplace_back();
     auto& node = model.nodes.back();
-    scene.nodes.push_back(nodeIndex);
+    scene.nodes.push_back(static_cast<uint32_t>(nodeIndex));
     node.name = markerNames[j];
     node.translation = {0.0f, 0.0f, 0.0f};
     node.extensionsAndExtras["extensions"]["FB_momentum"]["type"] = "marker";
@@ -361,7 +361,7 @@ void addActorAnimationToModel(
       case GltfBuilder::MarkerMesh::UnitCube: {
         auto newMeshIdx = addMeshToModel(model, kUnitCubeRed, true);
         if (newMeshIdx < model.meshes.size()) {
-          node.mesh = newMeshIdx;
+          node.mesh = static_cast<int32_t>(newMeshIdx);
         }
         break;
       }
@@ -382,7 +382,7 @@ void addActorAnimationToModel(
     tchannel.sampler =
         // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
         createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
-    tchannel.target.node = nodeIndex;
+    tchannel.target.node = static_cast<int32_t>(nodeIndex);
     tchannel.target.path = "translation";
   }
 }
@@ -403,7 +403,7 @@ size_t addMeshToModel(
         "Root node index {} exceeds model.nodes size {}",
         rootNodeIdx,
         model.nodes.size());
-    model.nodes[rootNodeIdx].children.push_back(nodeIdx);
+    model.nodes[rootNodeIdx].children.push_back(static_cast<int32_t>(nodeIdx));
 
     // create model mesh
     const auto& mesh = *character.mesh;
@@ -412,7 +412,7 @@ size_t addMeshToModel(
       // Mesh not valid, skip
       return kInvalidIndex;
     }
-    node.mesh = newMeshIdx;
+    node.mesh = static_cast<int32_t>(newMeshIdx);
     auto& m = model.meshes[node.mesh];
     MT_CHECK(m.primitives.size() == 1);
     auto& prim = m.primitives.back();
@@ -423,12 +423,12 @@ size_t addMeshToModel(
 
     // add skin node
     for (const auto& ji : jointToNodeMap) {
-      sk.joints.push_back(ji);
+      sk.joints.push_back(static_cast<uint32_t>(ji));
     }
     sk.skeleton = sk.joints[0];
 
     node.name = "mesh";
-    node.skin = model.skins.size() - 1;
+    node.skin = static_cast<int32_t>(model.skins.size() - 1);
 
     // add inverse bind matrix
     std::vector<Matrix4f> ibm;
@@ -554,7 +554,7 @@ void addSkeletonStatesToModel(
       auto& tchannel = animation.channels.back();
       tchannel.sampler =
           createSampler<const Vector3f>(model, animation, translation[j], timestampIdx);
-      tchannel.target.node = jointToNodeMap[j];
+      tchannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       tchannel.target.path = "translation";
     }
 
@@ -562,7 +562,7 @@ void addSkeletonStatesToModel(
       animation.channels.emplace_back();
       auto& rchannel = animation.channels.back();
       rchannel.sampler = createSampler<const Vector4f>(model, animation, rotation[j], timestampIdx);
-      rchannel.target.node = jointToNodeMap[j];
+      rchannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       rchannel.target.path = "rotation";
     }
 
@@ -570,7 +570,7 @@ void addSkeletonStatesToModel(
       animation.channels.emplace_back();
       auto& schannel = animation.channels.back();
       schannel.sampler = createSampler<const Vector3f>(model, animation, scale[j], timestampIdx);
-      schannel.target.node = jointToNodeMap[j];
+      schannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       schannel.target.path = "scale";
     }
   }
@@ -681,10 +681,10 @@ std::vector<size_t> addSkeletonToModel(
     auto& node = model.nodes[nodeIndex];
     if (i == 0) {
       if (modelRootNodeIndex != kInvalidIndex && modelRootNodeIndex < model.nodes.size()) {
-        model.nodes[modelRootNodeIndex].children.push_back(nodeIndex);
+        model.nodes[modelRootNodeIndex].children.push_back(static_cast<int32_t>(nodeIndex));
       } else {
         auto& scene = getDefaultScene(model);
-        scene.nodes.push_back(nodeIndex);
+        scene.nodes.push_back(static_cast<uint32_t>(nodeIndex));
       }
     }
 
@@ -700,7 +700,8 @@ std::vector<size_t> addSkeletonToModel(
 
     // add node as child to parent joint
     if (joint.parent != kInvalidIndex) {
-      model.nodes.at(jointToNodeMap.at(joint.parent)).children.push_back(nodeIndex);
+      model.nodes.at(jointToNodeMap.at(joint.parent))
+          .children.push_back(static_cast<int32_t>(nodeIndex));
     }
 
     // add node to map
@@ -728,7 +729,8 @@ void addCollisionsToModel(
       auto& node = model.nodes.back();
 
       // add node as child to parent joint
-      model.nodes.at(jointToNodeMap.at(col.parent)).children.push_back(nodeIndex);
+      model.nodes.at(jointToNodeMap.at(col.parent))
+          .children.push_back(static_cast<int32_t>(nodeIndex));
 
       // add values for the tapered capsule
       node.name = character.skeleton.joints.at(col.parent).name + "_col";
@@ -763,7 +765,7 @@ void addLocatorsToModel(
     auto& node = model.nodes.back();
 
     // add node as child to parent joint
-    model.nodes[jointToNodeMap[loc.parent]].children.push_back(nodeIndex);
+    model.nodes[jointToNodeMap[loc.parent]].children.push_back(static_cast<int32_t>(nodeIndex));
 
     // add values for the tapered capsule
     node.name = loc.name;
@@ -788,7 +790,7 @@ void addLocatorsToModel(
 
     auto newMeshIdx = addMeshToModel(model, kUnitCubeGreen, true);
     if (newMeshIdx < model.meshes.size()) {
-      node.mesh = newMeshIdx;
+      node.mesh = static_cast<int32_t>(newMeshIdx);
     }
   }
 }
@@ -896,7 +898,7 @@ void GltfBuilder::addCharacter(
   const auto translation = fromMomentumVec3f(positionOffset);
   node.translation = {translation[0], translation[1], translation[2]};
   node.rotation = fromMomentumQuaternionf(rotationOffset);
-  scene.nodes.push_back(rootNodeIdx);
+  scene.nodes.push_back(static_cast<uint32_t>(rootNodeIdx));
   auto& characterData = impl_->characterData[character.name];
   characterData.rootIndex = rootNodeIdx;
 
@@ -948,10 +950,10 @@ void GltfBuilder::addMesh(const Mesh& mesh, const std::string& name, bool addCol
   auto& node = model.nodes.back();
   node.name = name;
   node.translation = {0.0f, 0.0f, 0.0f};
-  node.mesh = meshIdx;
+  node.mesh = static_cast<int32_t>(meshIdx);
 
   auto& scene = getDefaultScene(model);
-  scene.nodes.push_back(nodeIndex);
+  scene.nodes.push_back(static_cast<uint32_t>(nodeIndex));
 }
 
 size_t GltfBuilder::getNumCharacters() {
