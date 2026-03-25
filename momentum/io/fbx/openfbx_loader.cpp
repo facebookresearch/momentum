@@ -815,6 +815,7 @@ void assignSkinWeights(
         weightSum <= 0, "Empty weight sum found for vertex {} in mesh {}", iVertex, meshName);
 
     for (int iPr = 0; iPr < curBoneWeights.size() && iPr < kMaxSkinJoints; ++iPr) {
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       const auto [boneIdx, weight] = curBoneWeights[iPr];
       skinWeights->index(vertexOffset + iVertex, iPr) = boneIdx;
       skinWeights->weight(vertexOffset + iVertex, iPr) = weight / weightSum;
