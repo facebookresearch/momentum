@@ -11,6 +11,7 @@
 
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/rasterizer.h>
+#include <momentum/simd/simd.h>
 
 #include <ATen/ATen.h>
 #include <fmt/format.h>
@@ -199,7 +200,7 @@ validateRasterizerBuffers(
             paddedWidth,
             zBufferHeight,
             zBufferWidth,
-            momentum::rasterizer::kSimdPacketSize));
+            momentum::kSimdPacketSize));
   }
 
   return {zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer};

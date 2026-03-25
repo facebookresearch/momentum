@@ -26,10 +26,6 @@ using momentum::OpenCVIntrinsicsModeld;
 using momentum::PinholeIntrinsicsModel;
 using momentum::PinholeIntrinsicsModeld;
 
-// Re-export SIMD constants for use in rasterizer
-using momentum::kSimdAlignment;
-using momentum::kSimdPacketSize;
-
 using momentum::ByteP;
 using momentum::DoubleP;
 using momentum::FloatP;
