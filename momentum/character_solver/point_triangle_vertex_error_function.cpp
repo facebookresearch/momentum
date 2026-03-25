@@ -703,7 +703,7 @@ double PointTriangleVertexErrorFunctionT<T>::getJacobian(
           jacobian.block(3 * iCons, 0, 3, modelParameters.size()),
           residual.middleRows(3 * iCons, 3));
     }
-    usedRows = 3 * constraints_.size();
+    usedRows = static_cast<int>(3 * constraints_.size());
   } else {
     MT_PROFILE_EVENT("VertexErrorFunction - normal jacobians");
     T sourceNormalWeight;
@@ -722,7 +722,7 @@ double PointTriangleVertexErrorFunctionT<T>::getJacobian(
           residual(iCons));
     }
 
-    usedRows = constraints_.size();
+    usedRows = static_cast<int>(constraints_.size());
   }
 
   return error;

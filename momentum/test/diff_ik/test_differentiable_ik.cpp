@@ -130,7 +130,7 @@ TEST(DifferentiableIK, Basic) {
   solver.solve(parameters_opt.v);
 
   const Eigen::VectorX<T> testVec =
-      randomVec(rng, parameterTransform.numAllModelParameters()).cast<T>();
+      randomVec(rng, static_cast<int>(parameterTransform.numAllModelParameters())).cast<T>();
 
   const std::vector<ErrorFunctionDerivativesT<T>> ikDerivatives = d_modelParams_d_inputs<T>(
       skeleton, parameterTransform, activeParams, parameters_opt, solverFunction, testVec);
