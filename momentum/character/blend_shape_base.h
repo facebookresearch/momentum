@@ -19,6 +19,10 @@ namespace momentum {
 struct BlendShapeBase {
  public:
   BlendShapeBase() = default;
+  BlendShapeBase(const BlendShapeBase&) = default;
+  BlendShapeBase& operator=(const BlendShapeBase&) = default;
+  BlendShapeBase(BlendShapeBase&&) = default;
+  BlendShapeBase& operator=(BlendShapeBase&&) = default;
 
   /// @param modelSize Number of vertices in the model
   /// @param numShapes Number of blend shapes
