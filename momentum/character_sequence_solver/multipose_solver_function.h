@@ -25,6 +25,10 @@ class MultiposeSolverFunctionT : public SolverFunctionT<T> {
       std::span<const int> universal,
       size_t frames);
   ~MultiposeSolverFunctionT() override;
+  MultiposeSolverFunctionT(const MultiposeSolverFunctionT&) = default;
+  MultiposeSolverFunctionT& operator=(const MultiposeSolverFunctionT&) = default;
+  MultiposeSolverFunctionT(MultiposeSolverFunctionT&&) noexcept = default;
+  MultiposeSolverFunctionT& operator=(MultiposeSolverFunctionT&&) noexcept = default;
 
   double getError(const Eigen::VectorX<T>& parameters) final;
 

@@ -28,6 +28,10 @@ class FbxMemoryStream : public FbxStream {
  public:
   FbxMemoryStream(std::span<const std::byte> buffer, int pReaderId);
   ~FbxMemoryStream() override;
+  FbxMemoryStream(const FbxMemoryStream&) = default;
+  FbxMemoryStream& operator=(const FbxMemoryStream&) = default;
+  FbxMemoryStream(FbxMemoryStream&&) = default;
+  FbxMemoryStream& operator=(FbxMemoryStream&&) = default;
   EState GetState() override;
   bool Open(void* pStreamData) override;
   bool Close() override;
