@@ -374,7 +374,7 @@ std::vector<Vector3f> applyInverseSSD(
   std::vector<Vector3f> res(points.size());
 
   TransformationList transformations(state.jointState.size());
-  for (size_t i = 0; i < state.jointState.size(); i++) {
+  for (size_t i = 0; i < transformations.size(); i++) {
     transformations[i] = state.jointState[i].transform * inverseBindPose[i];
   }
 
