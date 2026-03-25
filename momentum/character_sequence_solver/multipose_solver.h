@@ -32,6 +32,11 @@ class MultiposeSolverT : public SolverT<T> {
   MultiposeSolverT(const SolverOptions& options, MultiposeSolverFunctionT<T>* function);
   ~MultiposeSolverT() override;
 
+  MultiposeSolverT(const MultiposeSolverT&) = delete;
+  MultiposeSolverT& operator=(const MultiposeSolverT&) = delete;
+  MultiposeSolverT(MultiposeSolverT&&) noexcept = default;
+  MultiposeSolverT& operator=(MultiposeSolverT&&) noexcept = default;
+
   [[nodiscard]] std::string_view getName() const override;
 
   void setOptions(const SolverOptions& options) final;
