@@ -875,6 +875,10 @@ GltfBuilder::GltfBuilder() {
 
 GltfBuilder::~GltfBuilder() = default;
 
+GltfBuilder::GltfBuilder(GltfBuilder&&) noexcept = default;
+
+GltfBuilder& GltfBuilder::operator=(GltfBuilder&&) noexcept = default;
+
 void GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
