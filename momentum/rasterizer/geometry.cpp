@@ -361,10 +361,10 @@ Mesh makeCapsule(
       const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
       const int jPolarNext = (jPolar + 1);
 
-      int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
-      int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
-      int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
-      int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
+      int idx1 = static_cast<int>(vertexOffset + jPolar * numCircleSubdivisions + iAzimuth);
+      int idx2 = static_cast<int>(vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext);
+      int idx3 = static_cast<int>(vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext);
+      int idx4 = static_cast<int>(vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth);
 
       if (jPolar != 0) {
         result.faces.emplace_back(idx1, idx2, idx3);
@@ -397,10 +397,10 @@ Mesh makeCapsule(
       const int iAzimuthNext = (iAzimuth + 1) % numCircleSubdivisions;
       const int jPolarNext = jPolar + 1;
 
-      int idx1 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuth;
-      int idx2 = vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext;
-      int idx3 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext;
-      int idx4 = vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth;
+      int idx1 = static_cast<int>(vertexOffset + jPolar * numCircleSubdivisions + iAzimuth);
+      int idx2 = static_cast<int>(vertexOffset + jPolar * numCircleSubdivisions + iAzimuthNext);
+      int idx3 = static_cast<int>(vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuthNext);
+      int idx4 = static_cast<int>(vertexOffset + jPolarNext * numCircleSubdivisions + iAzimuth);
 
       if (jPolar != 0) {
         result.faces.emplace_back(idx3, idx2, idx1);
@@ -1104,11 +1104,15 @@ makeCameraFrustumLines(const Camera& camera, float distance, size_t nSamples) {
     }
     for (uint32_t j = 0; j <= nSamples; ++j) {
       lineLoop.push_back(windowToEyeWithLength(
-          curOffset + cur_w - 1, curOffset + (nSamples - j) * (cur_h - 1) / nSamples, distance));
+          curOffset + cur_w - 1,
+          static_cast<uint32_t>(curOffset + (nSamples - j) * (cur_h - 1) / nSamples),
+          distance));
     }
     for (uint32_t j = 0; j <= nSamples; ++j) {
       lineLoop.push_back(windowToEyeWithLength(
-          curOffset + (nSamples - j) * (cur_w - 1) / nSamples, curOffset, distance));
+          static_cast<uint32_t>(curOffset + (nSamples - j) * (cur_w - 1) / nSamples),
+          curOffset,
+          distance));
     }
 
     for (size_t i = 0; i < lineLoop.size(); ++i) {
