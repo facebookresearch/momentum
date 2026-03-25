@@ -266,7 +266,9 @@ ParameterTransformT<T> mapParameterTransformJoints(
 
       triplets.push_back(
           Eigen::Triplet<float>(
-              mappedJoint * kParametersPerJoint + jOffset, static_cast<int>(it.col()), it.value()));
+              static_cast<int>(mappedJoint * kParametersPerJoint + jOffset),
+              static_cast<int>(it.col()),
+              it.value()));
 
       // enable joint channels
       mappedTransform.activeJointParams[mappedJoint * kParametersPerJoint + jOffset] = true;
@@ -364,7 +366,7 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
     if (paramOld >= 0) {
       auto paramNew = oldParamToNewParam[paramOld];
       if (paramNew != kInvalidIndex) {
-        paramTransformNew.blendShapeParameters(iBlendShape) = paramNew;
+        paramTransformNew.blendShapeParameters(iBlendShape) = static_cast<int>(paramNew);
       }
     }
   }
@@ -378,7 +380,7 @@ std::tuple<ParameterTransformT<T>, ParameterLimits> subsetParameterTransform(
     if (paramOld >= 0) {
       auto paramNew = oldParamToNewParam[paramOld];
       if (paramNew != kInvalidIndex) {
-        paramTransformNew.faceExpressionParameters(iBlendShape) = paramNew;
+        paramTransformNew.faceExpressionParameters(iBlendShape) = static_cast<int>(paramNew);
       }
     }
   }
