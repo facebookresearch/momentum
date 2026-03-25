@@ -40,6 +40,10 @@ class GltfBuilder final {
 
   void operator=(GltfBuilder const&) = delete;
 
+  GltfBuilder(GltfBuilder&&) noexcept;
+
+  GltfBuilder& operator=(GltfBuilder&&) noexcept;
+
   /// Specify how marker mesh is represented in the glb file
   enum class MarkerMesh : uint8_t { None, UnitCube };
 

@@ -22,6 +22,13 @@ class FullyDifferentiableStateErrorFunctionT : public FullyDifferentiableSkeleto
  public:
   FullyDifferentiableStateErrorFunctionT(const Skeleton& skel, const ParameterTransform& pt);
   ~FullyDifferentiableStateErrorFunctionT() override;
+  FullyDifferentiableStateErrorFunctionT(const FullyDifferentiableStateErrorFunctionT&) = default;
+  FullyDifferentiableStateErrorFunctionT& operator=(const FullyDifferentiableStateErrorFunctionT&) =
+      default;
+  FullyDifferentiableStateErrorFunctionT(FullyDifferentiableStateErrorFunctionT&&) noexcept =
+      default;
+  FullyDifferentiableStateErrorFunctionT& operator=(
+      FullyDifferentiableStateErrorFunctionT&&) noexcept = default;
 
   [[nodiscard]] std::vector<std::string> inputs() const final;
   [[nodiscard]] Eigen::Index getInputSize(const std::string& name) const final;
