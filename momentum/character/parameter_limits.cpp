@@ -48,7 +48,7 @@ JointParameters applyPassiveJointParameterLimits(
     const auto& data = limit.data.minMaxJoint;
     const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
     MT_CHECK(
-        parameterIndex <= gsl::narrow<size_t>(jointParams.size()),
+        parameterIndex <= static_cast<size_t>(jointParams.size()),
         "{} vs {}",
         parameterIndex,
         jointParams.size());

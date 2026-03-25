@@ -9,9 +9,8 @@
 
 #include <momentum/character/parameter_limits.h>
 #include <momentum/character/types.h>
+#include <momentum/math/span_compat.h>
 #include <momentum/math/utility.h>
-
-#include <span>
 
 #include <string>
 #include <unordered_map>
@@ -79,7 +78,8 @@ struct ParameterTransformT {
 
   /// Return a ParameterTransform object where the model parameters are identical to the joint
   /// parameters.
-  [[nodiscard]] static ParameterTransformT<T> identity(std::span<const std::string> jointNames);
+  [[nodiscard]] static ParameterTransformT<T> identity(
+      momentum::span<const std::string> jointNames);
 
   /// Compute activeJointParams based on the transform and the input ParameterSet.
   [[nodiscard]] VectorX<bool> computeActiveJointParams(const ParameterSet& ps = allParams()) const;
