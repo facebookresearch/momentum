@@ -433,7 +433,7 @@ template <typename T>
 Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> assembleBlockMatrix(
     const std::vector<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>& A_diag,
     const std::vector<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>& A_common,
-    const int n_common) {
+    const Eigen::Index n_common) {
   typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> MatrixType;
   MT_CHECK(A_diag.size() == A_common.size());
 

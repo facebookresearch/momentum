@@ -128,7 +128,7 @@ Eigen::VectorX<T> FullyDifferentiableProjectionErrorFunctionT<T>::d_gradient_d_i
       const auto dotProd = constraintGradient_dot<JetType>(
           modelParams,
           state,
-          this->constraints_[iCons].parent,
+          static_cast<int>(this->constraints_[iCons].parent),
           this->constraints_[iCons].offset.template cast<JetType>(),
           JetType(this->constraints_[iCons].weight, 0),
           this->constraints_[iCons].projection.template cast<JetType>(),
@@ -145,7 +145,7 @@ Eigen::VectorX<T> FullyDifferentiableProjectionErrorFunctionT<T>::d_gradient_d_i
       const auto dotProd = constraintGradient_dot<JetType>(
           modelParams,
           state,
-          this->constraints_[iCons].parent,
+          static_cast<int>(this->constraints_[iCons].parent),
           momentum::buildJetVec<T, 3>(this->constraints_[iCons].offset),
           JetType(this->constraints_[iCons].weight),
           this->constraints_[iCons].projection.template cast<JetType>(),
@@ -161,7 +161,7 @@ Eigen::VectorX<T> FullyDifferentiableProjectionErrorFunctionT<T>::d_gradient_d_i
       const auto dotProd = constraintGradient_dot<JetType>(
           modelParams,
           state,
-          this->constraints_[iCons].parent,
+          static_cast<int>(this->constraints_[iCons].parent),
           this->constraints_[iCons].offset.template cast<JetType>(),
           JetType(this->constraints_[iCons].weight),
           this->constraints_[iCons].projection.template cast<JetType>(),
@@ -177,7 +177,7 @@ Eigen::VectorX<T> FullyDifferentiableProjectionErrorFunctionT<T>::d_gradient_d_i
       const auto dotProd = constraintGradient_dot<JetType>(
           modelParams,
           state,
-          this->constraints_[iCons].parent,
+          static_cast<int>(this->constraints_[iCons].parent),
           this->constraints_[iCons].offset.template cast<JetType>(),
           JetType(this->constraints_[iCons].weight),
           momentum::buildJetMat<T, 3, 4>(this->constraints_[iCons].projection),

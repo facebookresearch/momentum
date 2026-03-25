@@ -619,7 +619,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
           jacobian.block(3 * i, 0, 3, modelParameters.size()),
           residual.middleRows(3 * i, 3));
     }
-    usedRows = 3 * constraints_.size();
+    usedRows = static_cast<int>(3 * constraints_.size());
   } else {
     MT_CHECK(constraintType_ == VertexConstraintType::Plane);
     for (size_t i = 0; i < constraints_.size(); ++i) {
@@ -639,7 +639,7 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::getJacobian(
           residualValue);
       residual(i) = residualValue;
     }
-    usedRows = constraints_.size();
+    usedRows = static_cast<int>(constraints_.size());
   }
 
   return error;
