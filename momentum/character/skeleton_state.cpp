@@ -330,7 +330,7 @@ localTransformToJointParametersRespectingConstraints(
 
   // Determine which rotation axes are active
 
-  std::array<size_t, 3> activeAxes{};
+  std::array<int, 3> activeAxes{};
   size_t numActiveAxes = 0;
   for (int k = 0; k < 3; ++k) {
     if (activeJointParams[paramOffset + 3 + k]) {
