@@ -158,7 +158,7 @@ bool equalsCaseInsensitive(const ofbx::DataView& data, const char* rhs) {
   const char* c2 = (const char*)data.begin;
   while (*c && c2 != (const char*)data.end) {
     if (tolower(*c) != tolower(*c2)) {
-      return 0;
+      return false;
     }
     ++c;
     ++c2;
