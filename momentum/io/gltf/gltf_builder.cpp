@@ -365,7 +365,7 @@ void addActorAnimationToModel(
         }
         break;
       }
-      default:
+      case GltfBuilder::MarkerMesh::None:
         break;
     }
 
