@@ -225,6 +225,7 @@ std::vector<size_t> addMappedParameters(
 
     // Invalid joint index, so any model parameters are invalid too:
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       validParamsOrig[it.col()] = true;
     }
   }
@@ -235,6 +236,7 @@ std::vector<size_t> addMappedParameters(
       paramTransformResult.name.begin(), paramTransformResult.name.end());
   for (Eigen::Index iParamOld = 0; iParamOld < paramTransformOrig.numAllModelParameters();
        ++iParamOld) {
+    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
     if (!validParamsOrig[iParamOld]) {
       continue;
     }
@@ -244,6 +246,7 @@ std::vector<size_t> addMappedParameters(
         "Duplicate parameter {} found while merging parameter transforms.",
         paramTransformOrig.name[iParamOld]);
 
+    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
     origParamToNewParam[iParamOld] = paramTransformResult.name.size();
     paramTransformResult.name.push_back(paramTransformOrig.name[iParamOld]);
   }
@@ -262,6 +265,7 @@ std::vector<size_t> addMappedParameters(
 
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
       const auto iOldParam = it.col();
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       const auto iNewParam = origParamToNewParam[iOldParam];
 
       if (iNewParam != SIZE_MAX) {
@@ -281,6 +285,7 @@ std::vector<size_t> addMappedParameters(
         continue;
       }
 
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       const auto iNewParam = origParamToNewParam[iOrigParam];
       if (iNewParam != kInvalidIndex) {
         paramTransformResult.parameterSets[paramSetOrig.first].set(iNewParam);
@@ -572,6 +577,7 @@ Character replaceSkeletonHierarchy(
       while (tgtParent != kInvalidIndex) {
         const auto itr = combinedSkeletonJointMapping.find(tgtSkeleton.joints[tgtParent].name);
         if (itr != combinedSkeletonJointMapping.end()) {
+          // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
           tgtToCombinedWithParents[iTgtJoint] = itr->second;
           break;
         }
@@ -614,6 +620,7 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
 
     size_t parent = iJoint;
     while (parent != kInvalidIndex) {
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       if (toRemove[parent]) {
         shouldRemove = true;
         break;
@@ -651,11 +658,12 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
       size_t srcParent = iSrcJoint;
       // Anything skinned to a deleted joint should get skinned to its parent instead:
       while (srcParent != kInvalidIndex) {
+        // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
         srcToResultJointsWithParents[iSrcJoint] = srcToResultJoints[srcParent];
         if (srcToResultJointsWithParents[iSrcJoint] != kInvalidIndex) {
           break;
         }
-        srcParent = srcSkeleton.joints.at(srcParent).parent;
+        srcParent = srcSkeleton.joints[srcParent].parent;
       }
     }
 
@@ -797,6 +805,7 @@ std::pair<std::vector<size_t>, std::vector<size_t>> createIndexMapping(
   std::vector<size_t> reverseMapping(activeElements.size(), kInvalidIndex);
   for (size_t i = 0; i < activeElements.size(); ++i) {
     if (activeElements[i]) {
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       reverseMapping[i] = forwardMapping.size();
       forwardMapping.push_back(i);
     }
@@ -933,6 +942,7 @@ std::vector<bool> verticesToFaces(
         face[1] < static_cast<int>(activeVertices.size()) && face[2] >= 0 &&
         face[2] < static_cast<int>(activeVertices.size()) && activeVertices[face[0]] &&
         activeVertices[face[1]] && activeVertices[face[2]]) {
+      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       activeFaces[faceIdx] = true;
     }
   }
@@ -990,6 +1000,7 @@ std::vector<bool> verticesToPolys(
         break;
       }
     }
+    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
     activePolys[polyIdx] = allActive;
     offset += polySize;
   }
