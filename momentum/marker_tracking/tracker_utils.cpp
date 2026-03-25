@@ -307,7 +307,9 @@ momentum::Character locatorsToSkinnedLocators(
 
     // Set the locator's parent to the closest face.
     std::tie(skinnedLocator.parents, skinnedLocator.skinWeights) = averageTriangleSkinWeights(
-        sourceCharacter, closestPointResult.triangleIdx, closestPointResult.baryCoords);
+        sourceCharacter,
+        gsl::narrow_cast<int>(closestPointResult.triangleIdx),
+        closestPointResult.baryCoords);
     skinnedLocators.push_back(skinnedLocator);
   }
 
@@ -582,7 +584,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     }
 
     momentum::SkinnedLocatorTriangleConstraintT<float> constr;
-    constr.locatorIndex = i;
+    constr.locatorIndex = gsl::narrow_cast<int>(i);
     constr.tgtTriangleIndices = mesh.faces[closestPointResult.triangleIdx];
     constr.tgtTriangleBaryCoords = closestPointResult.baryCoords;
     constr.depth = targetDepth;
