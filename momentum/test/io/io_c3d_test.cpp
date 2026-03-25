@@ -77,7 +77,7 @@ void checkAllTheSame(
     EXPECT_NO_THROW(newSequences = loadC3d(filesystem::absolute(path).string()))
         << "load c3d from " << path.string();
 
-    if (firstSequences.size() == 0) {
+    if (firstSequences.empty()) {
       firstSequences = newSequences;
     } else {
       ASSERT_EQ(firstSequences.size(), newSequences.size());
