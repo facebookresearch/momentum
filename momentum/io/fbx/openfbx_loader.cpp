@@ -228,6 +228,7 @@ std::string resolveStringProperty(const ofbx::Object& object, const char* name) 
   const ofbx::IElementProperty* x = getElementProperty(element, 4);
   MT_THROW_IF(x == nullptr, "Unable to find property {} in {}", name, object.name);
   if (x->getType() == ofbx::IElementProperty::STRING) {
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char result[65536];
     x->getValue().toString(result);
     return {result};
