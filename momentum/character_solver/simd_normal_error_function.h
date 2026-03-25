@@ -22,6 +22,10 @@ struct SimdNormalConstraints {
  public:
   explicit SimdNormalConstraints(const Skeleton* skel);
   ~SimdNormalConstraints();
+  SimdNormalConstraints(const SimdNormalConstraints&) = delete;
+  SimdNormalConstraints& operator=(const SimdNormalConstraints&) = delete;
+  SimdNormalConstraints(SimdNormalConstraints&&) = delete;
+  SimdNormalConstraints& operator=(SimdNormalConstraints&&) = delete;
 
   void clearConstraints();
 

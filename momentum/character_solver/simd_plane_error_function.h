@@ -25,6 +25,11 @@ struct SimdPlaneConstraints final {
 
   ~SimdPlaneConstraints();
 
+  SimdPlaneConstraints(const SimdPlaneConstraints&) = delete;
+  SimdPlaneConstraints& operator=(const SimdPlaneConstraints&) = delete;
+  SimdPlaneConstraints(SimdPlaneConstraints&&) = delete;
+  SimdPlaneConstraints& operator=(SimdPlaneConstraints&&) = delete;
+
   void clearConstraints();
 
   void addConstraint(

@@ -28,6 +28,11 @@ struct spanstreambuf : std::streambuf {
   /// Destructor.
   ~spanstreambuf() override;
 
+  spanstreambuf(const spanstreambuf&) = delete;
+  spanstreambuf& operator=(const spanstreambuf&) = delete;
+  spanstreambuf(spanstreambuf&&) = delete;
+  spanstreambuf& operator=(spanstreambuf&&) = delete;
+
  protected:
   /// Write a sequence of characters to the output buffer.
   ///
@@ -46,6 +51,11 @@ struct ispanstream : std::istream {
 
   /// Destructor.
   ~ispanstream() override;
+
+  ispanstream(const ispanstream&) = delete;
+  ispanstream& operator=(const ispanstream&) = delete;
+  ispanstream(ispanstream&&) = delete;
+  ispanstream& operator=(ispanstream&&) = delete;
 
  private:
   /// Internal spanstreambuf instance.
