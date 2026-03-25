@@ -524,7 +524,7 @@ void addSkeletonStatesToModel(
 
       float localScale = skeletonStates[i].jointState[j].localScale();
       scale[j][i] = Vector3f::Ones() * localScale;
-      if (fabs(localScale - 1.0f) > 1e-5f) {
+      if (std::fabs(localScale - 1.0f) > 1e-5f) {
         useChannel[j][2] = true;
         foundAnyChannel = true;
       }
