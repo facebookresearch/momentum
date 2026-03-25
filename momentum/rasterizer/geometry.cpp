@@ -387,8 +387,8 @@ Mesh makeCapsule(
       result.vertices[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] =
           Eigen::Vector3f(length, 0, 0) + endRadius * pos;
       result.normals[vertexOffset + iPolar * numCircleSubdivisions + iAzimuth] = pos.normalized();
-      result.vertices.push_back(Eigen::Vector3f(length, 0, 0) + endRadius * pos);
-      result.normals.push_back(pos.normalized());
+      result.vertices.emplace_back(Eigen::Vector3f(length, 0, 0) + endRadius * pos);
+      result.normals.emplace_back(pos.normalized());
     }
   }
 
@@ -498,8 +498,8 @@ Mesh makeArrowhead(
 
     result.vertices.emplace_back(translation, innerRadius * cosTheta, innerRadius * sinTheta);
     result.vertices.emplace_back(translation, outerRadius * cosTheta, outerRadius * sinTheta);
-    result.normals.push_back(-Eigen::Vector3f::UnitX());
-    result.normals.push_back(-Eigen::Vector3f::UnitX());
+    result.normals.emplace_back(-Eigen::Vector3f::UnitX());
+    result.normals.emplace_back(-Eigen::Vector3f::UnitX());
   }
 
   for (int iCircle = 0; iCircle < numCircleSubdivisions; ++iCircle) {
