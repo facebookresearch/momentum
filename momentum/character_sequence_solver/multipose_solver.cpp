@@ -53,8 +53,7 @@ template <typename T>
 void MultiposeSolverT<T>::doIteration() {
   MT_PROFILE_FUNCTION();
 
-  MultiposeSolverFunctionT<T>* fn =
-      dynamic_cast<MultiposeSolverFunctionT<T>*>(this->solverFunction_);
+  auto* fn = dynamic_cast<MultiposeSolverFunctionT<T>*>(this->solverFunction_);
 
   const std::vector<Eigen::Index> genericParameters(
       fn->genericParameters_.begin(), fn->genericParameters_.end());

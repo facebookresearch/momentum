@@ -88,8 +88,8 @@ void saveMppca(const Mppca& mppca, const std::string& name) {
   }
 
   // write dimensions
-  const uint64_t od = gsl::narrow<uint64_t>(mppca.d);
-  const uint64_t op = gsl::narrow<uint64_t>(mppca.p);
+  const auto od = gsl::narrow<uint64_t>(mppca.d);
+  const auto op = gsl::narrow<uint64_t>(mppca.p);
   data.write((char*)&od, sizeof(od));
   data.write((char*)&op, sizeof(op));
 
