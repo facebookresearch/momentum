@@ -68,6 +68,10 @@ void GaussNewtonSolverQRT<T>::doIteration() {
 
   const auto nSubsetParams = static_cast<int>(enabledParameters.size());
 
+  if (enabledParameters.empty()) {
+    return;
+  }
+
   // momentum solves the problem (J^T*J + lambda*I) x = J^T*r;
   // the QR solver wants the square root of that lambda.
   qrSolver_.reset(nSubsetParams, std::sqrt(regularization_));

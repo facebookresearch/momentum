@@ -46,7 +46,9 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   }
   MT_CHECK(idxDense.size() % 3 == 0, "{} % 3 = {}", idxDense.size(), idxDense.size() % 3);
   std::vector<Vector3i> idx(idxDense.size() / 3);
-  std::copy_n(idxDense.data(), idxDense.size(), &idx[0][0]);
+  if (!idx.empty()) {
+    std::copy_n(idxDense.data(), idxDense.size(), &idx[0][0]);
+  }
 
   // load vertex position buffer
   auto pos = copyAccessorBuffer<Vector3f>(model, primitive.attributes.at("POSITION"));
@@ -395,10 +397,11 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
 
   if (!skinnedNodes.empty()) {
     for (auto nodeId : skinnedNodes) {
-      // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
+      // NOLINTBEGIN(facebook-hte-ParameterUncheckedArrayBounds)
       const auto& node = model.nodes[nodeId];
       const auto& mesh = model.meshes[node.mesh];
       const auto& skin = model.skins[node.skin];
+      // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
         const auto kNumVertices = addMesh(model, primitive, resultMesh);
         addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, skinWeights);
@@ -412,9 +415,10 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
     }
   } else if (!unskinnedNodes.empty()) {
     for (auto nodeId : unskinnedNodes) {
-      // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
+      // NOLINTBEGIN(facebook-hte-ParameterUncheckedArrayBounds)
       const auto& node = model.nodes[nodeId];
       const auto& mesh = model.meshes[node.mesh];
+      // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
         addMesh(model, primitive, resultMesh);
         addBlendShapes(model, primitive, blendShape);
