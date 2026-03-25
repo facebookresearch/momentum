@@ -380,6 +380,7 @@ void addActorAnimationToModel(
     animation.channels.emplace_back();
     auto& tchannel = animation.channels.back();
     tchannel.sampler =
+        // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
         createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
     tchannel.target.node = nodeIndex;
     tchannel.target.path = "translation";
@@ -454,6 +455,7 @@ size_t addMeshToModel(
             skin.index(i, b * 4 + 1),
             skin.index(i, b * 4 + 2),
             skin.index(i, b * 4 + 3));
+        // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
         weights[i] = Vector4f(
             skin.weight(i, b * 4 + 0),
             skin.weight(i, b * 4 + 1),
