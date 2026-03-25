@@ -77,7 +77,7 @@ void TrustRegionQRT<T>::doIteration() {
     }
   }
 
-  const Eigen::Index nSubsetParams = gsl::narrow_cast<Eigen::Index>(enabledParameters.size());
+  const auto nSubsetParams = gsl::narrow_cast<Eigen::Index>(enabledParameters.size());
 
   // Add a tiny lambda just to make sure we don't divide by zero when back-substituting into R,
   // this isn't intended to regularize the problem at all (searching for the actual lambda parameter

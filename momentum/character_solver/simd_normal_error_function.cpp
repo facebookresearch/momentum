@@ -641,7 +641,7 @@ double SimdNormalErrorFunctionAVX::getJacobian(
             if (activeJointParams_[paramIndex + 6]) {
               // calculate jacobian with respect to joint :
               // jac = normal.dot(posd) * wgt * LN2;
-              constexpr double kLn2d = ln2<double>();
+              constexpr auto kLn2d = ln2<double>();
               const __m256 jac = _mm256_mul_ps(
                   _mm256_mul_ps(
                       _mm256_fmadd_ps(
