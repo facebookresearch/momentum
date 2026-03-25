@@ -1281,9 +1281,9 @@ void OpenCVFisheyeIntrinsicsModelT<T>::computeMaxValidAngleFromImageBounds() {
       {T(this->imageWidth()), T(this->imageHeight())}};
 
   T maxDistSqr = T(0);
-  for (int i = 0; i < 4; ++i) {
-    const T dx = corners[i][0] - cx_;
-    const T dy = corners[i][1] - cy_;
+  for (const auto& corner : corners) {
+    const T dx = corner[0] - cx_;
+    const T dy = corner[1] - cy_;
     const T distSqr = dx * dx + dy * dy;
     maxDistSqr = std::max(maxDistSqr, distSqr);
   }

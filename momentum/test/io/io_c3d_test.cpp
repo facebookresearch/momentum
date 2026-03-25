@@ -82,8 +82,7 @@ void checkAllTheSame(
     } else {
       ASSERT_EQ(firstSequences.size(), newSequences.size());
 
-      for (auto actorId = 0; actorId < firstSequences.size(); actorId++) {
-        const auto& firstSequence = firstSequences[actorId];
+      for (const auto& firstSequence : firstSequences) {
         const auto& sequenceName = firstSequence.name;
         auto newSequenceIter = std::find_if(
             newSequences.begin(),
