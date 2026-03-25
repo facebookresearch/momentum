@@ -36,6 +36,7 @@ template <typename T2, typename T>
 std::vector<ModelParametersT<T2>> castModelParameters(
     const std::vector<ModelParametersT<T>>& params) {
   std::vector<ModelParametersT<T2>> result;
+  result.reserve(params.size());
   for (const auto& p : params) {
     result.push_back(p.template cast<T2>());
   }
