@@ -26,6 +26,11 @@ class SkeletonSolverFunctionT : public SolverFunctionT<T> {
       std::span<const std::shared_ptr<SkeletonErrorFunctionT<T>>> errorFunctions = {});
   ~SkeletonSolverFunctionT() override;
 
+  SkeletonSolverFunctionT(const SkeletonSolverFunctionT&) = delete;
+  SkeletonSolverFunctionT& operator=(const SkeletonSolverFunctionT&) = delete;
+  SkeletonSolverFunctionT(SkeletonSolverFunctionT&&) = delete;
+  SkeletonSolverFunctionT& operator=(SkeletonSolverFunctionT&&) = delete;
+
   double getError(const Eigen::VectorX<T>& parameters) final;
 
   double getGradient(const Eigen::VectorX<T>& parameters, Eigen::VectorX<T>& gradient) final;
