@@ -49,9 +49,9 @@ TEST(SimdTest, Utilities) {
   // pX1 = {1, 2, ..., kSimdPacketSize}
   // pY1 = {2, 3, ..., kSimdPacketSize + 1}
   // pZ1 = {3, 4, ..., kSimdPacketSize + 2}
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pX1;
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pY1;
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pZ1;
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pX1{};
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pY1{};
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pZ1{};
   for (auto i = 0u; i < kSimdPacketSize; ++i) {
     pX1[i] = i;
     pY1[i] = i + 1;
@@ -61,9 +61,9 @@ TEST(SimdTest, Utilities) {
   // pX2 = {1, 2, ..., kSimdPacketSize + 3}
   // pY2 = {2, 3, ..., kSimdPacketSize + 4}
   // pZ2 = {3, 4, ..., kSimdPacketSize + 5}
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pX2;
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pY2;
-  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pZ2;
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pX2{};
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pY2{};
+  alignas(kSimdAlignment) std::array<float, kSimdPacketSize> pZ2{};
   for (auto i = 0u; i < kSimdPacketSize; ++i) {
     pX2[i] = i + 3;
     pY2[i] = i + 4;
