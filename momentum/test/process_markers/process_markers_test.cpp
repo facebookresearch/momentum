@@ -286,8 +286,7 @@ TEST(ProcessMarkersTest, ProcessMarkers_IdentityPoseMarkers_LocatorsAtCorrectPos
     const JointParameters frameJointParams = character.parameterTransform.apply(frameParams);
     const SkeletonState frameSkelState(frameJointParams, character.skeleton);
 
-    for (size_t i = 0; i < character.locators.size(); ++i) {
-      const auto& locator = character.locators[i];
+    for (const auto& locator : character.locators) {
       const Eigen::Vector3f expectedPos = computeLocatorWorldPosition(locator, identitySkelState);
       const Eigen::Vector3f actualPos = computeLocatorWorldPosition(locator, frameSkelState);
 
@@ -353,8 +352,7 @@ TEST(ProcessMarkersTest, ProcessMarkers_LinearlyMovingMarkers_LocatorsFollowMoti
         (frame == 0) ? 1e-3f : kMaxAverageErrorFraction * displacementMagnitude;
 
     float totalError = 0.0f;
-    for (size_t i = 0; i < character.locators.size(); ++i) {
-      const auto& locator = character.locators[i];
+    for (const auto& locator : character.locators) {
       const Eigen::Vector3f basePos = computeLocatorWorldPosition(locator, identitySkelState);
       const Eigen::Vector3f expectedPos = basePos + frameOffset;
       const Eigen::Vector3f actualPos = computeLocatorWorldPosition(locator, frameSkelState);
