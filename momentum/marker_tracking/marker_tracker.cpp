@@ -1491,7 +1491,7 @@ std::pair<float, float> getLocatorError(
   double error = 0.0;
   double maxError = 0.0;
   size_t frameNum = 0.0;
-  std::string markerName = "";
+  std::string markerName;
   for (size_t iFrame = 0; iFrame < numFrames; ++iFrame) {
     const auto jointParams = pt.apply(motion.col(iFrame));
     state.set(jointParams, character.skeleton, false);
