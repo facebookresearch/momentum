@@ -252,10 +252,10 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
       auto parentIter = std::find(skin.joints.begin(), skin.joints.end(), parentId);
       if (parentIter == skin.joints.end()) {
         bool foundSibling = false;
-        for (auto i = 0; i < roots.size(); i++) {
-          auto commonAncestor = findClosestCommonAncestor(jointId, roots[i], parentMap);
+        for (auto& root : roots) {
+          auto commonAncestor = findClosestCommonAncestor(jointId, root, parentMap);
           if (commonAncestor != kInvalidNodeId) {
-            roots[i] = commonAncestor;
+            root = commonAncestor;
             foundSibling = true;
             break;
           }
