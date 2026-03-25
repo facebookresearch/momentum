@@ -406,7 +406,7 @@ TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyBasic) {
 
   // Ensure parameter names don't conflict by renaming source parameters
   for (auto& name : sourceCharacter.parameterTransform.name) {
-    name = "source_" + name;
+    name.insert(0, "source_");
   }
 
   // Get the names of joints to use for replacement
@@ -727,7 +727,7 @@ TEST_F(CharacterUtilityTest, ParentMappingInReplaceSkeletonHierarchy) {
 
   // Ensure parameter names don't conflict
   for (auto& name : sourceCharacter.parameterTransform.name) {
-    name = "source_" + name;
+    name.insert(0, "source_");
   }
 
   // Get the names of joints to use for replacement
@@ -786,7 +786,7 @@ TEST_F(CharacterUtilityTest, ParameterSetsAndRemainingCodePaths) {
 
   // Ensure parameter names don't conflict
   for (auto& name : sourceCharacter.parameterTransform.name) {
-    name = "source_" + name;
+    name.insert(0, "source_");
   }
 
   // Add parameter sets to source character
