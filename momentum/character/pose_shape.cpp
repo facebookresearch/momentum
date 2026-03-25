@@ -37,6 +37,9 @@ std::vector<Vector3f> PoseShape::compute(const SkeletonState& state) const {
 
   // use the coefficients to calculate the new base shape
   std::vector<Vector3f> output(baseShape.size() / 3);
+  if (output.empty()) {
+    return output;
+  }
   Map<VectorXf> outputVec(&output[0][0], output.size() * 3);
 
   outputVec = baseShape + shapeVectors * coefficients;
