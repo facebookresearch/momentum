@@ -684,7 +684,6 @@ io_sources = [
 
 test_helpers_public_headers = [
     "test/helpers/expect_throw.h",
-    "test/helpers/sanitizer_utils.h",
     "test/helpers/unique_temporary_directory.h",
     "test/helpers/unique_temporary_file.h",
 ]

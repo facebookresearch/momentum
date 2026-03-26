@@ -6,7 +6,6 @@
  */
 
 #include <momentum/gui/rerun/rerun_compat.h>
-#include <momentum/test/helpers/sanitizer_utils.h>
 
 #include <gtest/gtest.h>
 #include <rerun.hpp>
@@ -16,12 +15,6 @@ using namespace momentum;
 class RerunCompatTest : public testing::Test {
  protected:
   void SetUp() override {
-    // The rerun Rust FFI layer crashes under sanitizer builds due to a
-    // null-pointer precondition in slice::from_raw_parts_mut inside
-    // rr_recording_stream_log_impl. Skip all tests under sanitizers.
-    if (isSanitizerBuild()) {
-      GTEST_SKIP() << "Rerun SDK crashes under sanitizer builds (Rust FFI issue)";
-    }
     rec_ = std::make_unique<rerun::RecordingStream>("rerun_compat_test");
   }
 
@@ -33,29 +26,35 @@ TEST_F(RerunCompatTest, MakeScalar) {
   auto scalarDouble = makeScalar(2.0);
   auto scalarInt = makeScalar(42);
 
-  // Verify the scalar component batch was populated
-  EXPECT_TRUE(scalarFloat.scalars.has_value());
-  EXPECT_TRUE(scalarDouble.scalars.has_value());
-  EXPECT_TRUE(scalarInt.scalars.has_value());
+  ASSERT_TRUE(scalarFloat.scalars.has_value());
+  ASSERT_TRUE(scalarDouble.scalars.has_value());
+  ASSERT_TRUE(scalarInt.scalars.has_value());
+  EXPECT_EQ(scalarFloat.scalars->length(), 1);
+  EXPECT_EQ(scalarDouble.scalars->length(), 1);
+  EXPECT_EQ(scalarInt.scalars->length(), 1);
 
-  // Log to verify they are valid rerun archetypes (accepted by the stream)
+  EXPECT_TRUE(hasComponentData(scalarFloat));
   rec_->log("test/scalar_float", scalarFloat);
   rec_->log("test/scalar_double", scalarDouble);
   rec_->log("test/scalar_int", scalarInt);
 }
 
-TEST_F(RerunCompatTest, MakeSeriesLine) {
+TEST_F(RerunCompatTest, MakeSeriesLineEmpty) {
   auto seriesLine = makeSeriesLine();
-  // Default-constructed SeriesLines has no optional fields set
   EXPECT_FALSE(seriesLine.names.has_value());
   EXPECT_FALSE(seriesLine.colors.has_value());
-  rec_->log_static("test/series", seriesLine);
+  EXPECT_FALSE(hasComponentData(seriesLine));
+
+  // safeLogStatic must not crash with an empty archetype
+  EXPECT_NO_THROW(safeLogStatic(*rec_, "test/series", seriesLine));
 }
 
 TEST_F(RerunCompatTest, MakeSeriesLineWithName) {
   auto seriesLine = makeSeriesLineWithName("test_param");
-  // Verify the name was set on the archetype
-  EXPECT_TRUE(seriesLine.names.has_value());
+  ASSERT_TRUE(seriesLine.names.has_value());
+  EXPECT_EQ(seriesLine.names->length(), 1);
+  EXPECT_TRUE(hasComponentData(seriesLine));
+
   rec_->log_static("test/named_series", seriesLine);
 }
 
@@ -64,12 +63,23 @@ TEST_F(RerunCompatTest, SetTimeSeconds) {
   rec_->log("test/after_time", makeScalar(1.0f));
 }
 
-TEST_F(RerunCompatTest, MakeTransform3D) {
+TEST_F(RerunCompatTest, MakeTransform3DEmpty) {
   auto transform = makeTransform3D();
-  // Default-constructed Transform3D has no translation or rotation set
   EXPECT_FALSE(transform.translation.has_value());
   EXPECT_FALSE(transform.rotation_axis_angle.has_value());
-  rec_->log("test/transform", transform);
+  EXPECT_FALSE(hasComponentData(transform));
+
+  // safeLog must not crash with an empty archetype
+  EXPECT_NO_THROW(safeLog(*rec_, "test/transform", transform));
+}
+
+TEST_F(RerunCompatTest, MakeTransform3DWithTranslation) {
+  auto transform = makeTransform3D(rerun::components::Translation3D(1.0f, 2.0f, 3.0f));
+  ASSERT_TRUE(transform.translation.has_value());
+  EXPECT_EQ(transform.translation->length(), 1);
+  EXPECT_TRUE(hasComponentData(transform));
+
+  rec_->log("test/transform_translated", transform);
 }
 
 TEST_F(RerunCompatTest, LogAxes3D) {

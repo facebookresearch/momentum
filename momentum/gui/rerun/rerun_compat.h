@@ -136,4 +136,42 @@ inline rerun::Collection<rerun::ComponentColumn> makeScalarColumns(std::vector<d
 #endif
 }
 
+/// Check whether an archetype has any component data to log.
+///
+/// The rerun Rust FFI panics when logging archetypes with zero component
+/// batches (null pointer in slice::from_raw_parts_mut).  This helper
+/// serializes the archetype and returns false when the result is empty,
+/// allowing callers to skip the log call.
+template <typename T>
+inline bool hasComponentData(const T& archetype) {
+  const auto result = rerun::AsComponents<T>().as_batches(archetype);
+  return result.is_ok() && !result.value.empty();
+}
+
+/// Safe wrapper for RecordingStream::log that skips empty archetypes.
+///
+/// Serializes the archetype exactly once and forwards the batches via
+/// try_log_serialized_batches, so there is no overhead compared to a
+/// raw rec.log() call.
+template <typename T>
+inline void
+safeLog(const rerun::RecordingStream& rec, std::string_view entityPath, const T& archetype) {
+  auto result = rerun::AsComponents<T>().as_batches(archetype);
+  if (result.is_err() || result.value.empty()) {
+    return;
+  }
+  rec.try_log_serialized_batches(entityPath, false, std::move(result.value).to_vector()).handle();
+}
+
+/// Safe wrapper for RecordingStream::log_static that skips empty archetypes.
+template <typename T>
+inline void
+safeLogStatic(const rerun::RecordingStream& rec, std::string_view entityPath, const T& archetype) {
+  auto result = rerun::AsComponents<T>().as_batches(archetype);
+  if (result.is_err() || result.value.empty()) {
+    return;
+  }
+  rec.try_log_serialized_batches(entityPath, true, std::move(result.value).to_vector()).handle();
+}
+
 } // namespace momentum

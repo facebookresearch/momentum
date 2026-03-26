@@ -12,7 +12,6 @@
 #include <momentum/gui/rerun/logging_redirect.h>
 #include <momentum/gui/rerun/rerun_compat.h>
 #include <momentum/test/character/character_helpers.h>
-#include <momentum/test/helpers/sanitizer_utils.h>
 
 #include <gtest/gtest.h>
 #include <rerun.hpp>
@@ -28,12 +27,6 @@ using namespace momentum;
 class RerunLoggerTest : public testing::Test {
  protected:
   void SetUp() override {
-    // The rerun Rust FFI layer crashes under sanitizer builds due to a
-    // null-pointer precondition in slice::from_raw_parts_mut inside
-    // rr_recording_stream_log_impl. Skip all tests under sanitizers.
-    if (isSanitizerBuild()) {
-      GTEST_SKIP() << "Rerun SDK crashes under sanitizer builds (Rust FFI issue)";
-    }
     rec_ = std::make_unique<rerun::RecordingStream>("logger_test");
     character_ = createTestCharacter(5);
     characterState_ = CharacterState(character_);
