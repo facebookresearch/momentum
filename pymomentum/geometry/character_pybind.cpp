@@ -96,7 +96,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - load_model_definition_from_bytes(model_bytes)
   //
   // [static methods for io]
-  // - load_gltf_from_bytes(gltf_btyes)
+  // - load_gltf_from_bytes(gltf_bytes)
   // - to_gltf(character, fps, motion, offsets)
   // - load_fbx(fbxFilename, modelFilename, locatorsFilename)
   // - load_fbx_from_bytes(fbx_bytes, permissive)
@@ -104,14 +104,33 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - load_fbx_with_motion_from_bytes(fbx_bytes, permissive, strip_namespaces)
   // - load_gltf(path)
   // - load_gltf_with_motion(gltfFilename)
+  // - load_gltf_with_motion_from_bytes(gltf_bytes)
+  // - load_gltf_with_motion_model_parameter_scales(path)
+  // - load_gltf_with_motion_model_parameter_scales_from_bytes(gltf_bytes)
+  // - load_gltf_with_skel_states(path)
+  // - load_gltf_with_skel_states_from_bytes(gltf_bytes)
   // - load_urdf(urdf_filename)
   // - load_urdf_from_bytes(urdf_bytes)
   // - save_gltf(path, character, fps, motion, offsets, markers, options)
   // - save_gltf_from_skel_states(path, character, fps, skel_states,
-  // joint_params, markers, options)
+  //   markers, options)
   // - save_fbx(path, character, fps, motion, offsets, coord_system_info, markers, fbx_namespace)
   // - save_fbx_with_joint_params(path, character, fps, joint_params, coord_system_info,
-  // markers, fbx_namespace)
+  //   markers, fbx_namespace)
+  //
+  // [static methods for USD io] (only available when MOMENTUM_WITH_USD is defined)
+  // - is_usd_available()
+  // - load_usd(path)
+  // - load_usd_from_bytes(usd_bytes)
+  // - load_usd_with_motion(path)
+  // - load_usd_with_motion_from_bytes(usd_bytes)
+  // - load_usd_with_motion_model_parameter_scales(path)
+  // - load_usd_with_motion_model_parameter_scales_from_bytes(usd_bytes)
+  // - load_usd_with_skel_states(path)
+  // - load_usd_with_skel_states_from_bytes(usd_bytes)
+  // - load_usd_marker_sequence(path)
+  // - save_usd(path, character, fps, motion, offsets, markers, options)
+  // - save_usd_from_skel_states(path, character, fps, skel_states, markers, options)
   // =====================================================
   characterClass
       .def(
@@ -836,6 +855,106 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
 :return: A :class:`Character` object containing the loaded skeleton, mesh, and skin weights.
       )",
           py::arg("usd_bytes"))
+      // loadUSDCharacterWithMotion(path)
+      .def_static(
+          "load_usd_with_motion",
+          &loadUSDCharacterWithMotion,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load both character (skeleton/mesh) and motion data from a USD file in a single call.
+
+The motion is stored as model parameters per frame and identity as joint parameters (bone offsets/scales).
+
+:param usd_filename: Path to the USD file.
+:return: A tuple (character, motion, identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (n_frames, n_params), identity is a numpy array of joint parameters,
+         and fps is the frames per second.
+      )",
+          py::arg("usd_filename"))
+      // loadUSDCharacterWithMotionFromBytes(bytes)
+      .def_static(
+          "load_usd_with_motion_from_bytes",
+          &loadUSDCharacterWithMotionFromBytes,
+          // No py::call_guard<py::gil_scoped_release>() here because the
+          // function accesses pybind11::bytes which requires the GIL.
+          R"(Load both character and motion data from USD bytes.
+
+This is the byte array version of :meth:`load_usd_with_motion`.
+
+:param usd_bytes: Bytes array containing the USD data.
+:return: A tuple (character, motion, identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (n_frames, n_params), identity is a numpy array of joint parameters,
+         and fps is the frames per second.
+      )",
+          py::arg("usd_bytes"))
+      // loadUSDCharacterWithMotionModelParameterScales(path)
+      .def_static(
+          "load_usd_with_motion_model_parameter_scales",
+          &loadUSDCharacterWithMotionModelParameterScales,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load both character and motion data from a USD file, with model parameter scales.
+
+This function differs from :meth:`load_usd_with_motion` by returning identity parameters
+as model parameters (n_params,) instead of joint parameters (n_joints * 7,).
+Additionally, the motion has the identity parameters added back to the scale parameters.
+
+Use this function when you need the character structure, animation, and identity parameters
+all expressed in model parameter space.
+
+:param usd_filename: Path to the USD file.
+:return: A tuple (character, motion, model_identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (n_frames, n_params) with identity added to scale parameters,
+         model_identity is the identity/scale parameters as a numpy array of shape (n_params,),
+         and fps is the frames per second.
+      )",
+          py::arg("usd_filename"))
+      // loadUSDCharacterWithMotionModelParameterScalesFromBytes(bytes)
+      .def_static(
+          "load_usd_with_motion_model_parameter_scales_from_bytes",
+          &loadUSDCharacterWithMotionModelParameterScalesFromBytes,
+          // No py::call_guard<py::gil_scoped_release>() here because the
+          // function accesses pybind11::bytes which requires the GIL.
+          R"(Load both character and motion data from USD bytes, with model parameter scales.
+
+This is the byte array version of :meth:`load_usd_with_motion_model_parameter_scales`.
+
+:param usd_bytes: Bytes array containing the USD data.
+:return: A tuple (character, motion, model_identity, fps), where character is the loaded :class:`Character` object,
+         motion is a numpy array of shape (n_frames, n_params) with identity added to scale parameters,
+         model_identity is the identity/scale parameters as a numpy array of shape (n_params,),
+         and fps is the frames per second.
+      )",
+          py::arg("usd_bytes"))
+      // loadUSDCharacterWithSkelStates(path)
+      // Note: No py::call_guard<py::gil_scoped_release>() here because
+      // loadUSDCharacterWithSkelStates manages the GIL internally (releases
+      // it around the C++ loading call, then re-acquires for tensor creation).
+      .def_static(
+          "load_usd_with_skel_states",
+          &loadUSDCharacterWithSkelStates,
+          R"(Load a character and skeleton state motion sequence from a USD file.
+
+Unlike :meth:`load_usd_with_motion`, this function reads raw joint transforms and does not
+require a valid parameter transform. Use this for USD files authored by any application.
+
+:param usd_filename: Path to the USD file.
+:return: A tuple (character, skel_states, timestamps), where skel_states is a numpy array
+         of shape (n_frames, n_joints, 8) and timestamps is a list of frame times in seconds.
+      )",
+          py::arg("usd_filename"))
+      // loadUSDCharacterWithSkelStatesFromBytes(bytes)
+      // Note: No py::call_guard — same as above, GIL is managed internally.
+      .def_static(
+          "load_usd_with_skel_states_from_bytes",
+          &loadUSDCharacterWithSkelStatesFromBytes,
+          R"(Load a character and skeleton state motion sequence from USD bytes.
+
+This is the byte array version of :meth:`load_usd_with_skel_states`.
+
+:param usd_bytes: Bytes array containing the USD data.
+:return: A tuple (character, skel_states, timestamps), where skel_states is a numpy array
+         of shape (n_frames, n_joints, 8) and timestamps is a list of frame times in seconds.
+      )",
+          py::arg("usd_bytes"))
       // saveUSDCharacterToFile(path, character, fps, motion, offsets, markers, options)
       .def_static(
           "save_usd",
@@ -858,6 +977,37 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
           py::arg("offsets") = std::nullopt,
           py::arg("markers") = std::nullopt,
           py::arg("options") = std::nullopt)
+      // saveUSDCharacterToFileFromSkelStates(path, character, fps, skel_states, markers, options)
+      .def_static(
+          "save_usd_from_skel_states",
+          &saveUSDCharacterToFileFromSkelStates,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character with skeleton state animation to a USD file.
+
+:param path: Path to save the USD file.
+:param character: The :class:`Character` object to save.
+:param fps: Frequency in frames per second.
+:param skel_states: Skeleton states as a numpy array of shape (n_frames, n_joints, 8).
+:param markers: Additional marker data (currently unused for USD skeleton state saves).
+:param options: :class:`FileSaveOptions` for controlling output (mesh, locators, collisions, etc.)
+      )",
+          py::arg("path"),
+          py::arg("character"),
+          py::arg("fps"),
+          py::arg("skel_states"),
+          py::arg("markers") = std::optional<const std::vector<std::vector<momentum::Marker>>>{},
+          py::arg("options") = std::optional<momentum::FileSaveOptions>{})
+      // loadUSDMarkerSequence(path)
+      .def_static(
+          "load_usd_marker_sequence",
+          &loadUSDMarkerSequence,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a marker sequence from a USD file.
+
+:param usd_filename: Path to the USD file.
+:return: A :class:`MarkerSequence` containing the loaded marker data.
+      )",
+          py::arg("usd_filename"))
 #endif // MOMENTUM_WITH_USD
       // saveGLTFCharacterToFile(filename, character)
       .def_static(
