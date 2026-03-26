@@ -55,14 +55,14 @@ void applyHouseholderTransformationBlock(
     ColumnIndexedMatrix<MatrixType> Y_2m,
     Eigen::Index colStart,
     Eigen::Index colEnd) {
-  const auto nCols = Y_2m.cols();
+  [[maybe_unused]] const auto nCols = Y_2m.cols();
   MT_CHECK(v_2m.rows() == Y_2m.rows());
   MT_CHECK(colStart <= colEnd);
   MT_CHECK(colEnd <= nCols);
   MT_CHECK(colEnd <= nCols);
   MT_CHECK(Y_1.cols() == nCols);
 
-  const auto colIndices = Y_2m.columnIndices();
+  [[maybe_unused]] const auto colIndices = Y_2m.columnIndices();
   MT_CHECK(colIndices.empty() || colIndices.size() >= colEnd);
   auto jCol = colStart;
 
