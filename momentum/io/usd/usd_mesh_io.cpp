@@ -363,8 +363,11 @@ void saveSkinWeightsToUsd(
     }
   }
 
-  bindingAPI.GetJointIndicesAttr().Set(jointIndices);
-  bindingAPI.GetJointWeightsAttr().Set(jointWeights);
+  // Create primvars with correct elementSize and "vertex" interpolation.
+  // Without elementSize, UsdSkel viewers can't determine how many influences
+  // per vertex exist and the skinning silently fails.
+  bindingAPI.CreateJointIndicesPrimvar(false, maxInfluences).Set(jointIndices);
+  bindingAPI.CreateJointWeightsPrimvar(false, maxInfluences).Set(jointWeights);
 }
 
 void saveBlendShapesToUsd(const BlendShape& blendShape, UsdGeomMesh& meshPrim) {
