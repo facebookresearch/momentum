@@ -84,6 +84,8 @@ std::string leafName(const std::string& path) {
   return path.substr(pos + 1);
 }
 
+} // namespace
+
 // Build hierarchical joint paths from flat names and parent indices.
 // E.g., joint 0 "root" (no parent) -> "root"
 //       joint 1 "spine" (parent 0) -> "root/spine"
@@ -99,8 +101,6 @@ std::vector<std::string> buildHierarchicalPaths(const Skeleton& skeleton) {
   }
   return paths;
 }
-
-} // namespace
 
 Skeleton loadSkeletonFromUsd(const UsdStageRefPtr& stage) {
   Skeleton skeleton;

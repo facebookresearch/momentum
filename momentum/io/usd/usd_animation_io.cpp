@@ -7,6 +7,8 @@
 
 #include "momentum/io/usd/usd_animation_io.h"
 
+#include "momentum/io/usd/usd_skeleton_io.h"
+
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
 #include "momentum/math/utility.h"
@@ -62,11 +64,13 @@ void saveSkeletonStatesToUsd(
   auto animPath = skelPrim.GetPath().AppendChild(_tokens->Animation);
   auto animPrim = UsdSkelAnimation::Define(stage, animPath);
 
-  // Set joint order to match skeleton
+  // Set joint order to match skeleton (must use hierarchical paths to match
+  // the Skeleton prim's joints attribute, otherwise UsdSkel won't bind)
+  const auto paths = buildHierarchicalPaths(skeleton);
   VtArray<TfToken> jointTokens;
   jointTokens.reserve(numJoints);
-  for (const auto& joint : skeleton.joints) {
-    jointTokens.push_back(TfToken(joint.name));
+  for (const auto& path : paths) {
+    jointTokens.push_back(TfToken(path));
   }
   animPrim.GetJointsAttr().Set(jointTokens);
 

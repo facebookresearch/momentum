@@ -26,6 +26,8 @@
 #include <pxr/base/vt/array.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
+#include <pxr/usd/usdGeom/mesh.h>
+#include <pxr/usd/usdGeom/tokens.h>
 #include <pxr/usd/usdSkel/animation.h>
 #include <pxr/usd/usdSkel/bindingAPI.h>
 #include <pxr/usd/usdSkel/skeleton.h>
@@ -59,6 +61,41 @@ class UsdIoTest : public ::testing::Test {
   void SetUp() override {
     // Create a simple test character
     testCharacter = createTestCharacter();
+  }
+
+  // Verify that the Animation prim's joints tokens match the Skeleton prim's.
+  // UsdSkel viewers (e.g. usdview) match by name, so a mismatch causes the
+  // animation to be silently ignored (rest pose only).
+  static void verifyAnimationJointTokensMatchSkeleton(const filesystem::path& usdPath) {
+    auto stage = UsdStage::Open(usdPath.string());
+    ASSERT_TRUE(stage);
+
+    UsdSkelSkeleton skelPrim;
+    UsdSkelAnimation animPrim;
+    for (const auto& prim : stage->Traverse()) {
+      if (prim.IsA<UsdSkelSkeleton>()) {
+        skelPrim = UsdSkelSkeleton(prim);
+      }
+      if (prim.IsA<UsdSkelAnimation>()) {
+        animPrim = UsdSkelAnimation(prim);
+      }
+    }
+    ASSERT_TRUE(skelPrim);
+    ASSERT_TRUE(animPrim);
+
+    VtArray<TfToken> skelJoints;
+    skelPrim.GetJointsAttr().Get(&skelJoints);
+
+    VtArray<TfToken> animJoints;
+    animPrim.GetJointsAttr().Get(&animJoints);
+
+    ASSERT_EQ(animJoints.size(), skelJoints.size());
+    for (size_t i = 0; i < skelJoints.size(); ++i) {
+      EXPECT_EQ(animJoints[i], skelJoints[i])
+          << "Animation joint token mismatch at index " << i << ": animation has '"
+          << animJoints[i].GetString() << "' but skeleton has '" << skelJoints[i].GetString()
+          << "'";
+    }
   }
 
   Character testCharacter;
@@ -185,6 +222,29 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkinWeights) {
   auto tempFile = temporaryFile("momentum_usd_skinweights", ".usda");
 
   saveUsd(tempFile.path(), testCharacter);
+
+  // Verify primvar attributes are UsdSkel-compliant (elementSize + vertex interpolation)
+  {
+    auto stage = UsdStage::Open(tempFile.path().string());
+    ASSERT_TRUE(stage);
+    for (const auto& prim : stage->Traverse()) {
+      if (!prim.IsA<UsdGeomMesh>()) {
+        continue;
+      }
+      UsdSkelBindingAPI bindingAPI(prim);
+      auto indicesPrimvar = bindingAPI.GetJointIndicesPrimvar();
+      auto weightsPrimvar = bindingAPI.GetJointWeightsPrimvar();
+      ASSERT_TRUE(indicesPrimvar);
+      ASSERT_TRUE(weightsPrimvar);
+      EXPECT_EQ(indicesPrimvar.GetElementSize(), 4)
+          << "jointIndices elementSize must be set for UsdSkel viewers";
+      EXPECT_EQ(weightsPrimvar.GetElementSize(), 4)
+          << "jointWeights elementSize must be set for UsdSkel viewers";
+      EXPECT_EQ(indicesPrimvar.GetInterpolation(), UsdGeomTokens->vertex);
+      EXPECT_EQ(weightsPrimvar.GetInterpolation(), UsdGeomTokens->vertex);
+      break;
+    }
+  }
 
   const auto loadedCharacter = loadUsdCharacter(tempFile.path());
 
@@ -864,6 +924,44 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_BlendShapesWithSpecialCharNames) {
     EXPECT_EQ(loadedNames[i], specialShapeNames[i])
         << "Blend shape name round-trip failed at index " << i;
   }
+}
+
+TEST_F(UsdIoTest, AnimationJointTokensMatchSkeleton_SkeletonStates) {
+  const auto& skeleton = testCharacter.skeleton;
+  const auto numJoints = skeleton.joints.size();
+  const float fps = 30.0f;
+
+  std::vector<SkeletonState> states;
+  for (int frame = 0; frame < 3; ++frame) {
+    JointParameters params = JointParameters::Zero(numJoints * kParametersPerJoint);
+    params[0] = static_cast<float>(frame) * 0.1f;
+    states.emplace_back(params, skeleton, false);
+  }
+
+  auto tempFile = temporaryFile("momentum_usd_anim_joints_skel", ".usda");
+  saveUsdCharacter(tempFile.path(), testCharacter, fps, states);
+
+  verifyAnimationJointTokensMatchSkeleton(tempFile.path());
+}
+
+TEST_F(UsdIoTest, AnimationJointTokensMatchSkeleton_ModelParameterMotion) {
+  const auto numModelParams = testCharacter.parameterTransform.numAllModelParameters();
+  const int numFrames = 3;
+  const float fps = 30.0f;
+
+  MatrixXf poses(numModelParams, numFrames);
+  for (int f = 0; f < numFrames; ++f) {
+    for (Eigen::Index p = 0; p < numModelParams; ++p) {
+      poses(p, f) = static_cast<float>(p) * 0.01f + static_cast<float>(f) * 0.1f;
+    }
+  }
+
+  MotionParameters motion = {testCharacter.parameterTransform.name, poses};
+
+  auto tempFile = temporaryFile("momentum_usd_anim_joints_motion", ".usda");
+  saveUsdCharacterWithMotion(tempFile.path(), testCharacter, fps, motion);
+
+  verifyAnimationJointTokensMatchSkeleton(tempFile.path());
 }
 
 TEST(UsdIOTest, ModelParameterScalesRoundTrip) {
