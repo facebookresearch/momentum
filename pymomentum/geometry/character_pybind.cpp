@@ -836,7 +836,7 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
 :return: A :class:`Character` object containing the loaded skeleton, mesh, and skin weights.
       )",
           py::arg("usd_bytes"))
-      // saveUSDCharacterToFile(path, character)
+      // saveUSDCharacterToFile(path, character, fps, motion, offsets, markers, options)
       .def_static(
           "save_usd",
           &saveUSDCharacterToFile,
@@ -845,9 +845,19 @@ Supports .usd, .usda, .usdc, and .usdz file formats.
 
 :param path: Path to save the USD file.
 :param character: The :class:`Character` object to save.
+:param fps: Frequency in frames per second.
+:param motion: Pose data as a tuple of (parameter_names, poses_array) where poses_array has shape (n_frames, n_params).
+:param offsets: Identity/offset data as a tuple of (joint_names, offsets_array).
+:param markers: Additional marker (3D positions) data as a list of lists of :class:`Marker`.
+:param options: :class:`FileSaveOptions` for controlling output (mesh, locators, collisions, etc.)
       )",
           py::arg("path"),
-          py::arg("character"))
+          py::arg("character"),
+          py::arg("fps") = 120.f,
+          py::arg("motion") = std::nullopt,
+          py::arg("offsets") = std::nullopt,
+          py::arg("markers") = std::nullopt,
+          py::arg("options") = std::nullopt)
 #endif // MOMENTUM_WITH_USD
       // saveGLTFCharacterToFile(filename, character)
       .def_static(

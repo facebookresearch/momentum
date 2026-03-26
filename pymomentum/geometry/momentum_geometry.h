@@ -68,7 +68,6 @@ momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes)
 #ifdef MOMENTUM_WITH_USD
 momentum::Character loadUSDCharacterFromFile(const std::string& usdPath);
 momentum::Character loadUSDCharacterFromBytes(const pybind11::bytes& usdBytes);
-void saveUSDCharacterToFile(const std::string& path, const momentum::Character& character);
 #endif // MOMENTUM_WITH_USD
 
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path);

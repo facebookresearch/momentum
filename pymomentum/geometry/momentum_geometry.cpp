@@ -223,9 +223,6 @@ momentum::Character loadUSDCharacterFromBytes(const pybind11::bytes& usdBytes) {
   return momentum::loadUsdCharacter(toSpan<std::byte>(usdBytes));
 }
 
-void saveUSDCharacterToFile(const std::string& path, const momentum::Character& character) {
-  momentum::saveUsd(path, character);
-}
 #endif // MOMENTUM_WITH_USD
 
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path) {
