@@ -439,12 +439,15 @@ UsdSaveContext createUsdSaveContextFromStage(
     const Character& character,
     const FileSaveOptions& options) {
   auto skelRoot = UsdSkelRoot::Define(stage, SdfPath("/SkelRoot"));
+  MT_THROW_IF(!skelRoot.GetPrim().IsValid(), "Failed to define SkelRoot prim on USD stage");
   auto skeleton = UsdSkelSkeleton::Define(stage, SdfPath("/SkelRoot/Skeleton"));
+  MT_THROW_IF(!skeleton.GetPrim().IsValid(), "Failed to define Skeleton prim on USD stage");
 
   saveSkeletonToUsd(character.skeleton, skeleton);
 
   if (options.mesh) {
     auto mesh = UsdGeomMesh::Define(stage, SdfPath("/SkelRoot/Mesh"));
+    MT_THROW_IF(!mesh.GetPrim().IsValid(), "Failed to define Mesh prim on USD stage");
 
     if (character.mesh) {
       saveMeshToUsd(*character.mesh, mesh);

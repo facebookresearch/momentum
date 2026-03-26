@@ -9,6 +9,7 @@
 
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
+#include "momentum/io/usd/usd_utils.h"
 
 #include <pxr/base/tf/staticTokens.h>
 
@@ -24,6 +25,8 @@
 #include <pxr/usd/usdGeom/xform.h>
 #include <pxr/usd/usdSkel/cache.h>
 #include <pxr/usd/usdSkel/skeletonQuery.h>
+
+#include <cctype>
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -227,10 +230,15 @@ void saveCollisionGeometryToUsd(
     const std::string jointName = (capsule.parent < skeleton.joints.size())
         ? skeleton.joints[capsule.parent].name
         : "unknown";
-    const std::string primName = jointName + "_col_" + std::to_string(i);
+    const std::string primName = sanitizePrimName(jointName + "_col_" + std::to_string(i));
 
     auto primPath = collisionScope.GetPath().AppendChild(TfToken(primName));
     auto prim = stage->DefinePrim(primPath);
+    MT_THROW_IF(
+        !prim.IsValid(),
+        "Failed to create collision prim '{}' (from joint '{}')",
+        primName,
+        jointName);
 
     prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String)
         .Set(std::string("collision_capsule"));
@@ -320,13 +328,19 @@ void saveLocatorsToUsd(
   for (size_t i = 0; i < locators.size(); ++i) {
     const auto& loc = locators[i];
     const std::string baseName = loc.name.empty() ? "locator" : loc.name;
-    const std::string primName = baseName + "_" + std::to_string(i);
+    const std::string primName = sanitizePrimName(baseName + "_" + std::to_string(i));
 
     auto primPath = locatorScope.GetPath().AppendChild(TfToken(primName));
     auto prim = stage->DefinePrim(primPath);
+    MT_THROW_IF(
+        !prim.IsValid(),
+        "Failed to create locator prim '{}' (from locator '{}')",
+        primName,
+        loc.name);
 
     prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String)
         .Set(std::string("locator"));
+    // Store the original unsanitized name for round-trip fidelity
     prim.CreateAttribute(_tokens->momentumName, SdfValueTypeNames->String).Set(loc.name);
 
     const std::string parentName =
