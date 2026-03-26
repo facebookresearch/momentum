@@ -4,6 +4,7 @@ var structmomentum_1_1SkeletonT =
     [ "SkeletonT", "structmomentum_1_1SkeletonT.html#a6eb641fcf2e704fed84c1cc6a3aa953a", null ],
     [ "SkeletonT", "structmomentum_1_1SkeletonT.html#a7024721e7558c599b9a7e521b06cb0dd", null ],
     [ "SkeletonT", "structmomentum_1_1SkeletonT.html#a940a2388ea16e945d063ae9ff9ef39b2", null ],
+    [ "~SkeletonT", "structmomentum_1_1SkeletonT.html#acf728551b04847554c032be06f7e4499", null ],
     [ "cast", "structmomentum_1_1SkeletonT.html#a303902379f4a32c423a6853806309e5d", null ],
     [ "commonAncestor", "structmomentum_1_1SkeletonT.html#a40a202cffa13ff0fc09ea8481c834d4a", null ],
     [ "getChildrenJoints", "structmomentum_1_1SkeletonT.html#aa5ce27fce9e8c2b8ea06534008613c7b", null ],

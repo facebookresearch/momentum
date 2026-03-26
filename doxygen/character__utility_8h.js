@@ -10,7 +10,7 @@ var character__utility_8h =
     [ "reduceMeshByPolys", "character__utility_8h.html#a9e77179b6166d815db4472f71ee776ec", null ],
     [ "reduceMeshByVertices", "character__utility_8h.html#a0fe1fae874679ce8563b86ae80ebc59a", null ],
     [ "reduceMeshByVertices", "character__utility_8h.html#a97ea66048949b59732cd20091e7af8dd", null ],
-    [ "removeJoints", "character__utility_8h.html#a5f3d53441b155364e67eb4d00d4afb2a", null ],
+    [ "removeJoints", "character__utility_8h.html#a2520884dcdc9ec8ceb533d9b4f87a560", null ],
     [ "replaceSkeletonHierarchy", "character__utility_8h.html#a1df42ce0cf53d225639ab19b226ed6fb", null ],
     [ "scaleCharacter", "character__utility_8h.html#a6669a678d5cebfaffdcac3cc4924067d", null ],
     [ "transformCharacter", "character__utility_8h.html#af9f3c6e1508dc52e560a036181b7e2ce", null ],

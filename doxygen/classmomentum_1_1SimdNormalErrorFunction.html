@@ -197,7 +197,7 @@ Static Protected Attributes</h2></td></tr>
 <p>This function should primarily be used when dealing with a large number of constraints. For smaller numbers of constraints, consider using the generic NormalErrorFunction.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Due to the multi-threaded evaluation of the error/gradient, the functions are non-deterministic, which may cause numerical inconsistencies. As a result, slightly different results may occur on multiple calls with the same data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00071">71</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00075">75</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a890d51079e79c13bc3f93c9c31c29ec3" name="a890d51079e79c13bc3f93c9c31c29ec3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a890d51079e79c13bc3f93c9c31c29ec3">&#9670;&#160;</a></span>SimdNormalErrorFunction() <span class="overload">[1/2]</span></h2>
@@ -247,7 +247,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8cpp_source.html#l00107">107</a> of file <a class="el" href="simd__normal__error__function_8cpp_source.html">simd_normal_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00122">constraints_</a>.</p>
+<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00126">constraints_</a>.</p>
 
 </div>
 </div>
@@ -338,7 +338,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8cpp_source.html#l00118">118</a> of file <a class="el" href="simd__normal__error__function_8cpp_source.html">simd_normal_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00058">momentum::SimdNormalConstraints::constraintCount</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00122">constraints_</a>, <a class="el" href="simd_8h_source.html#l00125">momentum::dot()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00039">momentum::SimdNormalConstraints::kMaxConstraints</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00117">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00048">momentum::SimdNormalConstraints::normalX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00049">momentum::SimdNormalConstraints::normalY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00050">momentum::SimdNormalConstraints::normalZ</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00059">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00044">momentum::SimdNormalConstraints::offsetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00045">momentum::SimdNormalConstraints::offsetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00046">momentum::SimdNormalConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00189">momentum::operator*()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00051">momentum::SimdNormalConstraints::targetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00052">momentum::SimdNormalConstraints::targetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00053">momentum::SimdNormalConstraints::targetZ</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__normal__error__function_8h_source.html#l00055">momentum::SimdNormalConstraints::weights</a>.</p>
+<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00062">momentum::SimdNormalConstraints::constraintCount</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00126">constraints_</a>, <a class="el" href="simd_8h_source.html#l00153">momentum::dot()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00043">momentum::SimdNormalConstraints::kMaxConstraints</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00121">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00052">momentum::SimdNormalConstraints::normalX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00053">momentum::SimdNormalConstraints::normalY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00054">momentum::SimdNormalConstraints::normalZ</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00063">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00048">momentum::SimdNormalConstraints::offsetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00049">momentum::SimdNormalConstraints::offsetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00050">momentum::SimdNormalConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00225">momentum::operator*()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00055">momentum::SimdNormalConstraints::targetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00056">momentum::SimdNormalConstraints::targetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00057">momentum::SimdNormalConstraints::targetZ</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__normal__error__function_8h_source.html#l00059">momentum::SimdNormalConstraints::weights</a>.</p>
 
 </div>
 </div>
@@ -390,7 +390,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">166</a> of file <a class="el" href="simd__normal__error__function_8cpp_source.html">simd_normal_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00146">momentum::SkeletonErrorFunctionT&lt; T &gt;::activeJointParams_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00058">momentum::SimdNormalConstraints::constraintCount</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00122">constraints_</a>, <a class="el" href="simd_8h_source.html#l00230">momentum::cross()</a>, <a class="el" href="simd_8h_source.html#l00125">momentum::dot()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00221">jointIndex</a>, <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00039">momentum::SimdNormalConstraints::kMaxConstraints</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00117">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>, <a class="el" href="constants_8h_source.html#l00031">momentum::ln2()</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00048">momentum::SimdNormalConstraints::normalX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00049">momentum::SimdNormalConstraints::normalY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00050">momentum::SimdNormalConstraints::normalZ</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00059">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00044">momentum::SimdNormalConstraints::offsetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00045">momentum::SimdNormalConstraints::offsetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00046">momentum::SimdNormalConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00189">momentum::operator*()</a>, <a class="el" href="simd_8h_source.html#l00169">momentum::operator-()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00144">momentum::SkeletonErrorFunctionT&lt; T &gt;::parameterTransform_</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00143">momentum::SkeletonErrorFunctionT&lt; T &gt;::skeleton_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00051">momentum::SimdNormalConstraints::targetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00052">momentum::SimdNormalConstraints::targetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00053">momentum::SimdNormalConstraints::targetZ</a>, <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00055">momentum::SimdNormalConstraints::weights</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
+<p class="reference">References <a class="el" href="skeleton__error__function_8h_source.html#l00146">momentum::SkeletonErrorFunctionT&lt; T &gt;::activeJointParams_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00062">momentum::SimdNormalConstraints::constraintCount</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00126">constraints_</a>, <a class="el" href="simd_8h_source.html#l00271">momentum::cross()</a>, <a class="el" href="simd_8h_source.html#l00153">momentum::dot()</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00221">jointIndex</a>, <a class="el" href="skeleton_8h_source.html#l00024">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00043">momentum::SimdNormalConstraints::kMaxConstraints</a>, <a class="el" href="character_2types_8h_source.html#l00025">momentum::kParametersPerJoint</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00121">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>, <a class="el" href="constants_8h_source.html#l00031">momentum::ln2()</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00052">momentum::SimdNormalConstraints::normalX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00053">momentum::SimdNormalConstraints::normalY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00054">momentum::SimdNormalConstraints::normalZ</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00063">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00048">momentum::SimdNormalConstraints::offsetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00049">momentum::SimdNormalConstraints::offsetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00050">momentum::SimdNormalConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00225">momentum::operator*()</a>, <a class="el" href="simd_8h_source.html#l00201">momentum::operator-()</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00144">momentum::SkeletonErrorFunctionT&lt; T &gt;::parameterTransform_</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00143">momentum::SkeletonErrorFunctionT&lt; T &gt;::skeleton_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00055">momentum::SimdNormalConstraints::targetX</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00056">momentum::SimdNormalConstraints::targetY</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00057">momentum::SimdNormalConstraints::targetZ</a>, <a class="el" href="parameter__transform_8h_source.html#l00045">momentum::ParameterTransformT&lt; T &gt;::transform</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00059">momentum::SimdNormalConstraints::weights</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
@@ -454,7 +454,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">288</a> of file <a class="el" href="simd__normal__error__function_8cpp_source.html">simd_normal_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00122">constraints_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00119">jacobianOffset_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00124">maxThreads_</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00059">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00144">momentum::SkeletonErrorFunctionT&lt; T &gt;::parameterTransform_</a>, and <a class="el" href="parameter__transform_8h_source.html#l00046">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00126">constraints_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00123">jacobianOffset_</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00128">maxThreads_</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00063">momentum::SimdNormalConstraints::numJoints</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00144">momentum::SkeletonErrorFunctionT&lt; T &gt;::parameterTransform_</a>, and <a class="el" href="parameter__transform_8h_source.html#l00045">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -485,7 +485,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8cpp_source.html#l00410">410</a> of file <a class="el" href="simd__normal__error__function_8cpp_source.html">simd_normal_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>.</p>
+<p class="reference">References <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>.</p>
 
 </div>
 </div>
@@ -513,9 +513,9 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00111">111</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00115">115</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00122">constraints_</a>.</p>
+<p class="reference">References <a class="el" href="simd__normal__error__function_8h_source.html#l00126">constraints_</a>.</p>
 
 </div>
 </div>
@@ -540,9 +540,9 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00122">122</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00126">126</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00118">getError()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">getGradient()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">getJacobian()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00111">setConstraints()</a>, and <a class="el" href="simd__normal__error__function_8cpp_source.html#l00107">SimdNormalErrorFunction()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00118">getError()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">getGradient()</a>, <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">getJacobian()</a>, <a class="el" href="simd__normal__error__function_8h_source.html#l00115">setConstraints()</a>, and <a class="el" href="simd__normal__error__function_8cpp_source.html#l00107">SimdNormalErrorFunction()</a>.</p>
 
 </div>
 </div>
@@ -566,7 +566,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00119">119</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00123">123</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">getJacobian()</a>.</p>
 
@@ -592,7 +592,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00117">117</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00121">121</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00118">getError()</a>, and <a class="el" href="simd__normal__error__function_8cpp_source.html#l00166">getGradient()</a>.</p>
 
@@ -618,7 +618,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00124">124</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__normal__error__function_8h_source.html#l00128">128</a> of file <a class="el" href="simd__normal__error__function_8h_source.html">simd_normal_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__normal__error__function_8cpp_source.html#l00288">getJacobian()</a>.</p>
 
@@ -634,7 +634,7 @@ Static Protected Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdNormalErrorFunction.html">SimdNormalErrorFunction</a></li>
-    <li class="footer">Generated on Thu Mar 19 2026 20:26:03 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 14:20:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

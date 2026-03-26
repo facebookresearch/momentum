@@ -2,7 +2,10 @@ var unionmomentum_1_1LimitData =
 [
     [ "LimitData", "unionmomentum_1_1LimitData.html#aa8dab6552b4e179e66250b1b33f42cf6", null ],
     [ "LimitData", "unionmomentum_1_1LimitData.html#a44ccb11fe33f792b292013f8eef6cf8d", null ],
+    [ "~LimitData", "unionmomentum_1_1LimitData.html#afdcce7f1d2f33d97dacbfc424696c2d3", null ],
+    [ "LimitData", "unionmomentum_1_1LimitData.html#a2138c5056276479b91f147e1484b472f", null ],
     [ "operator=", "unionmomentum_1_1LimitData.html#a86a02893f746fd1fe8425d2c49052f3b", null ],
+    [ "operator=", "unionmomentum_1_1LimitData.html#a1a44e05bfaad09b060e482f5239bb3bd", null ],
     [ "operator==", "unionmomentum_1_1LimitData.html#a041c30632c0ed50916ed16ed5444134d", null ],
     [ "ellipsoid", "unionmomentum_1_1LimitData.html#a88638de21db282837c815eae146af676", null ],
     [ "halfPlane", "unionmomentum_1_1LimitData.html#a4d475fa1af8ba015b66beac18b3d65f8", null ],

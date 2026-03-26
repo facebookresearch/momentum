@@ -203,7 +203,7 @@ Static Protected Attributes</h2></td></tr>
 <p>This class is best used when dealing with a large number of constraints. For fewer constraints, consider using the generic PositionErrorFunction instead.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Due to the multi-threaded evaluation of the error/gradient, the functions are non-deterministic, which may cause numerical inconsistencies. As a result, slightly different results may be produced on multiple calls with the same data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00068">68</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00073">73</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a883d24e46f2cb064fdb8beb799dbd0cf" name="a883d24e46f2cb064fdb8beb799dbd0cf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a883d24e46f2cb064fdb8beb799dbd0cf">&#9670;&#160;</a></span>SimdPositionErrorFunction() <span class="overload">[1/2]</span></h2>
@@ -253,7 +253,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__position__error__function_8cpp_source.html#l00091">91</a> of file <a class="el" href="simd__position__error__function_8cpp_source.html">simd_position_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00120">constraints_</a>.</p>
+<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00125">constraints_</a>.</p>
 
 </div>
 </div>
@@ -344,7 +344,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__position__error__function_8cpp_source.html#l00106">106</a> of file <a class="el" href="simd__position__error__function_8cpp_source.html">simd_position_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00056">momentum::SimdPositionConstraints::constraintCount</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00120">constraints_</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00225">diff</a>, <a class="el" href="simd_8h_source.html#l00125">momentum::dot()</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00040">momentum::SimdPositionConstraints::kMaxConstraints</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00115">kPositionWeight</a>, <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00057">momentum::SimdPositionConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00045">momentum::SimdPositionConstraints::offsetX</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00046">momentum::SimdPositionConstraints::offsetY</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00047">momentum::SimdPositionConstraints::offsetZ</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00049">momentum::SimdPositionConstraints::targetX</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00050">momentum::SimdPositionConstraints::targetY</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00051">momentum::SimdPositionConstraints::targetZ</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__position__error__function_8h_source.html#l00053">momentum::SimdPositionConstraints::weights</a>.</p>
+<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00061">momentum::SimdPositionConstraints::constraintCount</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00125">constraints_</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00225">diff</a>, <a class="el" href="simd_8h_source.html#l00153">momentum::dot()</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00045">momentum::SimdPositionConstraints::kMaxConstraints</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00120">kPositionWeight</a>, <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00062">momentum::SimdPositionConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00050">momentum::SimdPositionConstraints::offsetX</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00051">momentum::SimdPositionConstraints::offsetY</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00052">momentum::SimdPositionConstraints::offsetZ</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00054">momentum::SimdPositionConstraints::targetX</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00055">momentum::SimdPositionConstraints::targetY</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00056">momentum::SimdPositionConstraints::targetZ</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__position__error__function_8h_source.html#l00058">momentum::SimdPositionConstraints::weights</a>.</p>
 
 </div>
 </div>
@@ -396,7 +396,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__position__error__function_8cpp_source.html#l00155">155</a> of file <a class="el" href="simd__position__error__function_8cpp_source.html">simd_position_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00120">constraints_</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00122">maxThreads_</a>, and <a class="el" href="simd__position__error__function_8h_source.html#l00057">momentum::SimdPositionConstraints::numJoints</a>.</p>
+<p class="reference">References <a class="el" href="simd__position__error__function_8h_source.html#l00125">constraints_</a>, <a class="el" href="simd__position__error__function_8h_source.html#l00127">maxThreads_</a>, and <a class="el" href="simd__position__error__function_8h_source.html#l00062">momentum::SimdPositionConstraints::numJoints</a>.</p>
 
 </div>
 </div>
@@ -491,7 +491,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__position__error__function_8cpp_source.html#l00474">474</a> of file <a class="el" href="simd__position__error__function_8cpp_source.html">simd_position_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>.</p>
+<p class="reference">References <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>.</p>
 
 </div>
 </div>
@@ -536,7 +536,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00120">120</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00125">125</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__position__error__function_8cpp_source.html#l00106">getError()</a>, <a class="el" href="simd__position__error__function_8cpp_source.html#l00155">getGradient()</a>, and <a class="el" href="simd__position__error__function_8cpp_source.html#l00091">SimdPositionErrorFunction()</a>.</p>
 
@@ -562,7 +562,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00117">117</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00122">122</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -588,7 +588,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>The dimensionality of each constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00071">71</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00076">76</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -612,7 +612,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00115">115</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00120">120</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__position__error__function_8cpp_source.html#l00106">getError()</a>.</p>
 
@@ -638,7 +638,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00122">122</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__position__error__function_8h_source.html#l00127">127</a> of file <a class="el" href="simd__position__error__function_8h_source.html">simd_position_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__position__error__function_8cpp_source.html#l00155">getGradient()</a>.</p>
 
@@ -654,7 +654,7 @@ Static Protected Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdPositionErrorFunction.html">SimdPositionErrorFunction</a></li>
-    <li class="footer">Generated on Thu Mar 19 2026 20:26:03 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 14:20:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

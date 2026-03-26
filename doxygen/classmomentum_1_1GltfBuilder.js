@@ -8,6 +8,7 @@ var classmomentum_1_1GltfBuilder =
     [ "GltfBuilder", "classmomentum_1_1GltfBuilder.html#a58d255c191d5fe57ab24f7ee3a3660ba", null ],
     [ "~GltfBuilder", "classmomentum_1_1GltfBuilder.html#abe615b24d16387b985dd83eeee349068", null ],
     [ "GltfBuilder", "classmomentum_1_1GltfBuilder.html#a3fc0cb937315b207977e24e69fb22584", null ],
+    [ "GltfBuilder", "classmomentum_1_1GltfBuilder.html#a3adf89dc03662784873640bb96f37fd7", null ],
     [ "addCharacter", "classmomentum_1_1GltfBuilder.html#a98ddd6c2f36cecca4acd076e57a82c01", null ],
     [ "addMarkerSequence", "classmomentum_1_1GltfBuilder.html#a620a154d7f8d24c5ea434ea52b49d853", null ],
     [ "addMesh", "classmomentum_1_1GltfBuilder.html#a9cc5d8454d3344d9246d782e0144d4f1", null ],
@@ -21,6 +22,7 @@ var classmomentum_1_1GltfBuilder =
     [ "getNumCharacters", "classmomentum_1_1GltfBuilder.html#a706f934964523a73fed4bcb3c0bb011c", null ],
     [ "getNumJoints", "classmomentum_1_1GltfBuilder.html#ac5498c318efd947f6d04bfa973ac7621", null ],
     [ "getNumMotions", "classmomentum_1_1GltfBuilder.html#aa96968c613753ff337fd8f885d84ba0a", null ],
+    [ "operator=", "classmomentum_1_1GltfBuilder.html#abf58358483e824cd7651e039238e954e", null ],
     [ "operator=", "classmomentum_1_1GltfBuilder.html#a496cb8ec4670226b3bae420ba4f27941", null ],
     [ "save", "classmomentum_1_1GltfBuilder.html#aa5082bfd08cf270262f97a89293269cc", null ],
     [ "setFps", "classmomentum_1_1GltfBuilder.html#aff999cc3c299174f14ecb6eb3c11b0c5", null ]

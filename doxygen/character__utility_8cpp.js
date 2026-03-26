@@ -26,7 +26,7 @@ var character__utility_8cpp =
     [ "reduceMeshByVertices< double >", "character__utility_8cpp.html#a0d495729d035f0bcbd9d4ceae3743c8a", null ],
     [ "reduceMeshByVertices< float >", "character__utility_8cpp.html#ae05e37c76bd3393a575f520b7a0e32fd", null ],
     [ "reduceMeshByVertices< float >", "character__utility_8cpp.html#aec48235caf245a8870e6eead9a1a67ba", null ],
-    [ "removeJoints", "character__utility_8cpp.html#a5f3d53441b155364e67eb4d00d4afb2a", null ],
+    [ "removeJoints", "character__utility_8cpp.html#a2520884dcdc9ec8ceb533d9b4f87a560", null ],
     [ "replaceSkeletonHierarchy", "character__utility_8cpp.html#a1df42ce0cf53d225639ab19b226ed6fb", null ],
     [ "scaleCharacter", "character__utility_8cpp.html#a6669a678d5cebfaffdcac3cc4924067d", null ],
     [ "transformCharacter", "character__utility_8cpp.html#af9f3c6e1508dc52e560a036181b7e2ce", null ],

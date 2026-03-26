@@ -2,9 +2,13 @@ var structmomentum_1_1SimdNormalConstraints =
 [
     [ "SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html#a4d27e7da075212889318f48167c0302c", null ],
     [ "~SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html#ac58407836a588d4d6067713b19d7f596", null ],
+    [ "SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html#aa61710249607a96265e7cd1fb1990427", null ],
+    [ "SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html#a313123d40da93438ccf84842dd050457", null ],
     [ "addConstraint", "structmomentum_1_1SimdNormalConstraints.html#a3735b87748d1a00a8c3edb6996ed2246", null ],
     [ "clearConstraints", "structmomentum_1_1SimdNormalConstraints.html#a25a21a0bc7b451e3b659d323f5e13454", null ],
     [ "getNumConstraints", "structmomentum_1_1SimdNormalConstraints.html#a814d253e4cb9afac536c205a99b7fa4f", null ],
+    [ "operator=", "structmomentum_1_1SimdNormalConstraints.html#ab350d63b0727008786a14c3104d72704", null ],
+    [ "operator=", "structmomentum_1_1SimdNormalConstraints.html#a3cb8ed755ef2a495a8b5769460dbaf8c", null ],
     [ "constraintCount", "structmomentum_1_1SimdNormalConstraints.html#a4b3c92043b62ac4d6e5d5c06e53378d4", null ],
     [ "data", "structmomentum_1_1SimdNormalConstraints.html#a8d27107c02117b6b20d6a9d3d9aad0a2", null ],
     [ "normalX", "structmomentum_1_1SimdNormalConstraints.html#adb7690b0a5a08de1a02a28bd67c5479b", null ],

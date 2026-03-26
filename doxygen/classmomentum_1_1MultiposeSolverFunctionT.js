@@ -2,6 +2,8 @@ var classmomentum_1_1MultiposeSolverFunctionT =
 [
     [ "MultiposeSolverFunctionT", "classmomentum_1_1MultiposeSolverFunctionT.html#afd4fb096f9bf666e494bee4922a98b63", null ],
     [ "~MultiposeSolverFunctionT", "classmomentum_1_1MultiposeSolverFunctionT.html#a60c408ea1f72c6c88b308d3d29104915", null ],
+    [ "MultiposeSolverFunctionT", "classmomentum_1_1MultiposeSolverFunctionT.html#a00f426b4ebac8fc29e30cbb5eb3050f7", null ],
+    [ "MultiposeSolverFunctionT", "classmomentum_1_1MultiposeSolverFunctionT.html#a59f7d8184ddcfeaf5f8cc6b1981d803a", null ],
     [ "addErrorFunction", "classmomentum_1_1MultiposeSolverFunctionT.html#a5a682b6d4f91ac3df9ff8356218992a0", null ],
     [ "computeJacobianBlock", "classmomentum_1_1MultiposeSolverFunctionT.html#a0ad94c8e45d222994a7ab871791954d8", null ],
     [ "finalizeJacobianComputation", "classmomentum_1_1MultiposeSolverFunctionT.html#a664640ce8105f079e9b45d3a1d7f2f5d", null ],
@@ -16,6 +18,8 @@ var classmomentum_1_1MultiposeSolverFunctionT =
     [ "getUniversalParameters", "classmomentum_1_1MultiposeSolverFunctionT.html#a0f45580a603820c23e564d453f23f32d", null ],
     [ "getUniversalParameterSet", "classmomentum_1_1MultiposeSolverFunctionT.html#a5bbd28c1f6919b761aaa8aedf337c7d2", null ],
     [ "initializeJacobianComputation", "classmomentum_1_1MultiposeSolverFunctionT.html#a2130a8dd58bad6f88c4204918b189f66", null ],
+    [ "operator=", "classmomentum_1_1MultiposeSolverFunctionT.html#a43c7c9dfc0d08056e7a8b89a67567142", null ],
+    [ "operator=", "classmomentum_1_1MultiposeSolverFunctionT.html#a8eabe062b14bf7271bc5acdb4737c1a3", null ],
     [ "setEnabledParameters", "classmomentum_1_1MultiposeSolverFunctionT.html#a91e52676b24b51b0667b830332b9f307", null ],
     [ "setFrameParameters", "classmomentum_1_1MultiposeSolverFunctionT.html#a9b6136b216c3df72f99338b18b265207", null ],
     [ "setJoinedParameterVector", "classmomentum_1_1MultiposeSolverFunctionT.html#ab5282aad4ff1e26506f0d01657793382", null ],

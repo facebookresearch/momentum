@@ -182,12 +182,12 @@ $(document).ready(function(){initNavTree('blend__shape__skinning_8cpp_source.htm
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.jointState.size(),</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      inverseBindPose.size());</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.index.rows() == gsl::narrow&lt;int&gt;(character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size()),</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.index.rows() == <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size()),</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>      <span class="stringliteral">&quot;{} is not {}&quot;</span>,</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.index.rows(),</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>      character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size());</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.weight.rows() == gsl::narrow&lt;int&gt;(character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size()),</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.weight.rows() == <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size()),</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      <span class="stringliteral">&quot;{} is not {}&quot;</span>,</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.weight.rows(),</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>      character.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">mesh</a>-&gt;vertices.size());</div>
@@ -232,8 +232,8 @@ $(document).ready(function(){initNavTree('blend__shape__skinning_8cpp_source.htm
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>          Eigen::Vector3&lt;T&gt; p_skinned = Eigen::Vector3&lt;T&gt;::Zero();</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>          for (uint32_t k = 0; k &lt; kMaxSkinJoints; ++k) {</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>            const auto bIndex = skinWeights.index(iVert, k);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>            const T bWeight = skinWeights.weight(iVert, k);</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            if (bWeight == 0) {</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>            const T bWeight = static_cast&lt;T&gt;(skinWeights.weight(iVert, k));</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            if (bWeight == T(0)) {</div>
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>              break;</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>            }</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            p_skinned +=</div>
@@ -317,7 +317,7 @@ $(document).ready(function(){initNavTree('blend__shape__skinning_8cpp_source.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="blend__shape__skinning_8cpp.html">blend_shape_skinning.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 19 2026 20:26:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 14:20:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

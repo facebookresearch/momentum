@@ -196,7 +196,7 @@ Static Protected Attributes</h2></td></tr>
 <p>This function is recommended for use only when dealing with a large number of constraints. For a smaller number of constraints, consider using the generic PlaneErrorFunction.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Due to the multi-threaded evaluation of the error/gradient, the functions are non-deterministic. This might lead to numerical inconsistencies, resulting in slightly different outcomes on multiple calls with the same data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00070">70</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00075">75</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0d08b57a879a2f36d6f6e12f4cc00b12" name="a0d08b57a879a2f36d6f6e12f4cc00b12"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0d08b57a879a2f36d6f6e12f4cc00b12">&#9670;&#160;</a></span>SimdPlaneErrorFunction() <span class="overload">[1/2]</span></h2>
@@ -246,7 +246,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8cpp_source.html#l00094">94</a> of file <a class="el" href="simd__plane__error__function_8cpp_source.html">simd_plane_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00119">constraints_</a>.</p>
+<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00124">constraints_</a>.</p>
 
 </div>
 </div>
@@ -337,7 +337,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8cpp_source.html#l00107">107</a> of file <a class="el" href="simd__plane__error__function_8cpp_source.html">simd_plane_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00058">momentum::SimdPlaneConstraints::constraintCount</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00119">constraints_</a>, <a class="el" href="simd_8h_source.html#l00125">momentum::dot()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00041">momentum::SimdPlaneConstraints::kMaxConstraints</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00114">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00050">momentum::SimdPlaneConstraints::normalX</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00051">momentum::SimdPlaneConstraints::normalY</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00052">momentum::SimdPlaneConstraints::normalZ</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00059">momentum::SimdPlaneConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00046">momentum::SimdPlaneConstraints::offsetX</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00047">momentum::SimdPlaneConstraints::offsetY</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00048">momentum::SimdPlaneConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00189">momentum::operator*()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00053">momentum::SimdPlaneConstraints::targets</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__plane__error__function_8h_source.html#l00055">momentum::SimdPlaneConstraints::weights</a>.</p>
+<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00063">momentum::SimdPlaneConstraints::constraintCount</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00124">constraints_</a>, <a class="el" href="simd_8h_source.html#l00153">momentum::dot()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00046">momentum::SimdPlaneConstraints::kMaxConstraints</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00119">kPlaneWeight</a>, <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>, <a class="el" href="checks_8h_source.html#l00023">MT_CHECK</a>, <a class="el" href="random-inl_8h_source.html#l00374">momentum::normal()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00055">momentum::SimdPlaneConstraints::normalX</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00056">momentum::SimdPlaneConstraints::normalY</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00057">momentum::SimdPlaneConstraints::normalZ</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00064">momentum::SimdPlaneConstraints::numJoints</a>, <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00051">momentum::SimdPlaneConstraints::offsetX</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00052">momentum::SimdPlaneConstraints::offsetY</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00053">momentum::SimdPlaneConstraints::offsetZ</a>, <a class="el" href="simd_8h_source.html#l00225">momentum::operator*()</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00058">momentum::SimdPlaneConstraints::targets</a>, <a class="el" href="skeleton__error__function_8h_source.html#l00145">momentum::SkeletonErrorFunctionT&lt; T &gt;::weight_</a>, and <a class="el" href="simd__plane__error__function_8h_source.html#l00060">momentum::SimdPlaneConstraints::weights</a>.</p>
 
 </div>
 </div>
@@ -389,7 +389,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8cpp_source.html#l00156">156</a> of file <a class="el" href="simd__plane__error__function_8cpp_source.html">simd_plane_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00119">constraints_</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00121">maxThreads_</a>, and <a class="el" href="simd__plane__error__function_8h_source.html#l00059">momentum::SimdPlaneConstraints::numJoints</a>.</p>
+<p class="reference">References <a class="el" href="simd__plane__error__function_8h_source.html#l00124">constraints_</a>, <a class="el" href="simd__plane__error__function_8h_source.html#l00126">maxThreads_</a>, and <a class="el" href="simd__plane__error__function_8h_source.html#l00064">momentum::SimdPlaneConstraints::numJoints</a>.</p>
 
 </div>
 </div>
@@ -484,7 +484,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8cpp_source.html#l00431">431</a> of file <a class="el" href="simd__plane__error__function_8cpp_source.html">simd_plane_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="simd_8h_source.html#l00035">momentum::kSimdPacketSize</a>.</p>
+<p class="reference">References <a class="el" href="simd_8h_source.html#l00048">momentum::kSimdPacketSize</a>.</p>
 
 </div>
 </div>
@@ -529,7 +529,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00119">119</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00124">124</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__plane__error__function_8cpp_source.html#l00107">getError()</a>, <a class="el" href="simd__plane__error__function_8cpp_source.html#l00156">getGradient()</a>, and <a class="el" href="simd__plane__error__function_8cpp_source.html#l00094">SimdPlaneErrorFunction()</a>.</p>
 
@@ -555,7 +555,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00116">116</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00121">121</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -579,7 +579,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00114">114</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00119">119</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__plane__error__function_8cpp_source.html#l00107">getError()</a>.</p>
 
@@ -605,7 +605,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00121">121</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simd__plane__error__function_8h_source.html#l00126">126</a> of file <a class="el" href="simd__plane__error__function_8h_source.html">simd_plane_error_function.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="simd__plane__error__function_8cpp_source.html#l00156">getGradient()</a>.</p>
 
@@ -621,7 +621,7 @@ Static Protected Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SimdPlaneErrorFunction.html">SimdPlaneErrorFunction</a></li>
-    <li class="footer">Generated on Thu Mar 19 2026 20:26:03 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 14:20:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

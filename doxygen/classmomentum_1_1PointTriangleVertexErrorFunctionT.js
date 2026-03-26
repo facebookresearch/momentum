@@ -2,6 +2,8 @@ var classmomentum_1_1PointTriangleVertexErrorFunctionT =
 [
     [ "PointTriangleVertexErrorFunctionT", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a0582719024befd1e3aadce14af7421eb", null ],
     [ "~PointTriangleVertexErrorFunctionT", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#acdd69ab1a638334b60e930d6b4c68906", null ],
+    [ "PointTriangleVertexErrorFunctionT", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a8b38f0061389f93c541df18515d092ff", null ],
+    [ "PointTriangleVertexErrorFunctionT", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a727d6299bf3d70c4dc31e28c5e147f7f", null ],
     [ "addConstraint", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#afc7f0fc27461c91c25505ef44a9c1be1", null ],
     [ "clearConstraints", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a3d660dfce61e52d4d37f9a8b049f493e", null ],
     [ "getCharacter", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a34d57e54ef3457161df0fb5aa7ab4e66", null ],
@@ -11,5 +13,7 @@ var classmomentum_1_1PointTriangleVertexErrorFunctionT =
     [ "getJacobian", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a63eae82aee5105ef51bcacc809b57506", null ],
     [ "getJacobianSize", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a1d984f4b5c655ec51d2a956ed9f9ba0c", null ],
     [ "getNumVertices", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a1a2a1763c9e2406c1a75cb821b48c6b6", null ],
-    [ "needsMesh", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a2a5c74fdaa6b70ee01a7c201277c5ed1", null ]
+    [ "needsMesh", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a2a5c74fdaa6b70ee01a7c201277c5ed1", null ],
+    [ "operator=", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a6620c90d2288303bd67b24ccd1bdf933", null ],
+    [ "operator=", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html#a7a4ef1df0149e3caea3c65fa97c916d4", null ]
 ];

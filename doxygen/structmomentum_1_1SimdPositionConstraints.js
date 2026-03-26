@@ -2,9 +2,13 @@ var structmomentum_1_1SimdPositionConstraints =
 [
     [ "SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html#a6ae87f20c24575913c91cf3e7a770c46", null ],
     [ "~SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html#a39e0f612aebe067e02ecc7354fc67539", null ],
+    [ "SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html#adf233dd889e089838052dc4c110c0fea", null ],
+    [ "SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html#a409bee25825daa1ee929378859cb0d51", null ],
     [ "addConstraint", "structmomentum_1_1SimdPositionConstraints.html#a9faa8546a8742bbc5fa759db8e9d098a", null ],
     [ "clearConstraints", "structmomentum_1_1SimdPositionConstraints.html#a9f50da44f3d3672f8fdbc0a1d5c73170", null ],
     [ "getNumConstraints", "structmomentum_1_1SimdPositionConstraints.html#a1f97453de3541be7b2b55774fd0bc2da", null ],
+    [ "operator=", "structmomentum_1_1SimdPositionConstraints.html#a58683880c01baab7a545d344bc2a596a", null ],
+    [ "operator=", "structmomentum_1_1SimdPositionConstraints.html#a9ce4cc7a88a48fe22d284e386f3436b1", null ],
     [ "constraintCount", "structmomentum_1_1SimdPositionConstraints.html#a5639d078dd19329041a31bb85b689680", null ],
     [ "data", "structmomentum_1_1SimdPositionConstraints.html#ad6c22a1bae07a503572ae00121529680", null ],
     [ "numJoints", "structmomentum_1_1SimdPositionConstraints.html#a5ec51c2945e4a684141925effada9b0c", null ],

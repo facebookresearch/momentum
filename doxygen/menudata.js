@@ -220,6 +220,7 @@ var menudata={children:[
 {text:"t",url:"globals.html#index_t"},
 {text:"v",url:"globals.html#index_v"},
 {text:"w",url:"globals.html#index_w"}]},
+{text:"Functions",url:"globals_func.html"},
 {text:"Variables",url:"globals_vars.html",children:[
 {text:"a",url:"globals_vars.html#index_a"},
 {text:"b",url:"globals_vars.html#index_b"},
