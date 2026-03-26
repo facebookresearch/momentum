@@ -10,6 +10,7 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
+#include "momentum/io/usd/usd_utils.h"
 
 #include <pxr/base/tf/staticTokens.h>
 
@@ -26,6 +27,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <unordered_set>
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -33,7 +35,7 @@ TF_DEFINE_PRIVATE_TOKENS(
     _tokens,
     (displayColor)(Cd)(color)(vertexColor)(diffuseColor)((
         momentumConfidence,
-        "momentum:confidence")));
+        "momentum:confidence"))((momentumBlendShapeName, "momentum:blendShapeName")));
 
 namespace momentum {
 
@@ -386,14 +388,37 @@ void saveBlendShapesToUsd(const BlendShape& blendShape, UsdGeomMesh& meshPrim) {
   VtArray<GfVec3f> offsets;
   offsets.reserve(numVertices);
 
+  // Track sanitized names to detect collisions from different original names
+  std::unordered_set<std::string> usedSafeNames;
+  usedSafeNames.reserve(numShapes);
+
   for (Eigen::Index s = 0; s < numShapes; ++s) {
-    const std::string name =
+    const std::string originalName =
         (s < static_cast<Eigen::Index>(shapeNames.size()) && !shapeNames[s].empty())
         ? shapeNames[s]
         : "shape_" + std::to_string(s);
 
-    auto shapePath = meshPath.AppendChild(TfToken(name));
+    std::string safeName = sanitizePrimName(originalName);
+
+    // Disambiguate if sanitized name collides with an existing one
+    std::string baseName = safeName;
+    int suffix = 1;
+    while (!usedSafeNames.insert(safeName).second) {
+      safeName = baseName + "_" + std::to_string(suffix++);
+    }
+
+    auto shapePath = meshPath.AppendChild(TfToken(safeName));
     auto shapePrim = UsdSkelBlendShape::Define(stage, shapePath);
+    MT_THROW_IF(
+        !shapePrim.GetPrim().IsValid(),
+        "Failed to create blend shape prim '{}' (from '{}')",
+        safeName,
+        originalName);
+
+    // Store the original unsanitized name for round-trip fidelity
+    shapePrim.GetPrim()
+        .CreateAttribute(_tokens->momentumBlendShapeName, SdfValueTypeNames->String)
+        .Set(originalName);
 
     // Extract per-vertex offsets from the shape vector column
     offsets.clear();
@@ -404,7 +429,7 @@ void saveBlendShapesToUsd(const BlendShape& blendShape, UsdGeomMesh& meshPrim) {
     shapePrim.GetOffsetsAttr().Set(offsets);
 
     blendShapePaths.push_back(shapePath);
-    blendShapeTokens.push_back(TfToken(name));
+    blendShapeTokens.push_back(TfToken(safeName));
   }
 
   // Bind blend shapes to the mesh
@@ -442,11 +467,18 @@ std::shared_ptr<BlendShape> loadBlendShapesFromUsd(
 
     VtArray<GfVec3f> offsets;
     for (Eigen::Index s = 0; s < numShapes; ++s) {
-      shapeNames.push_back(blendShapePaths[s].GetName());
-
+      // Prefer the stored original name over the sanitized prim name
       auto shapePrim = UsdSkelBlendShape::Get(stage, blendShapePaths[s]);
       if (!shapePrim) {
+        shapeNames.push_back(blendShapePaths[s].GetName());
         continue;
+      }
+      std::string shapeName;
+      if (auto nameAttr = shapePrim.GetPrim().GetAttribute(_tokens->momentumBlendShapeName);
+          nameAttr && nameAttr.Get(&shapeName)) {
+        shapeNames.push_back(std::move(shapeName));
+      } else {
+        shapeNames.push_back(blendShapePaths[s].GetName());
       }
 
       offsets.clear();
