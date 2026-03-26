@@ -91,6 +91,7 @@ $(document).ready(function(){initNavTree('character__utility_8h.html',''); initR
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">character_utility.h File Reference</div></div>
@@ -100,6 +101,12 @@ $(document).ready(function(){initNavTree('character__utility_8h.html',''); initR
 </div>
 <p><a href="character__utility_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1RigidTransformNodeResult.html">momentum::RigidTransformNodeResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of addRigidTransformNode containing the new character and indices of the added bone and parameters.  <a href="structmomentum_1_1RigidTransformNodeResult.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
@@ -165,6 +172,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ac9cf6698aeae33c79a5f40a66490a932"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ac9cf6698aeae33c79a5f40a66490a932">momentum::reduceMeshByPolys</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">activePolys</a>)</td></tr>
 <tr class="memdesc:ac9cf6698aeae33c79a5f40a66490a932"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces the mesh to only include the specified polygons and associated vertices.  <br /></td></tr>
 <tr class="separator:ac9cf6698aeae33c79a5f40a66490a932"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa58d6826eb690263c466a37faf0309fa" id="r_aa58d6826eb690263c466a37faf0309fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1RigidTransformNodeResult.html">RigidTransformNodeResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aa58d6826eb690263c466a37faf0309fa">momentum::addRigidTransformNode</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Vector3f &amp;translationOffset=Eigen::Vector3f::Zero(), <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Quaternionf &amp;preRotation=Eigen::Quaternionf::Identity())</td></tr>
+<tr class="memdesc:aa58d6826eb690263c466a37faf0309fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a new root-level bone with 6 rigid DOF parameters (tx/ty/tz/rx/ry/rz) to a character.  <br /></td></tr>
+<tr class="separator:aa58d6826eb690263c466a37faf0309fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -172,7 +182,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="character__utility_8h.html">character_utility.h</a></li>
-    <li class="footer">Generated on Thu Mar 26 2026 14:20:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 22:26:48 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

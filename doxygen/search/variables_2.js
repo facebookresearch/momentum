@@ -8,5 +8,5 @@ var searchData=
   ['blendshapeparameters_5',['blendShapeParameters',['../structmomentum_1_1ParameterTransformT.html#abcfd51bd3f35465c71d5d816056e973c',1,'momentum::ParameterTransformT']]],
   ['blendshapes_6',['blendShapes',['../structmomentum_1_1FileSaveOptions.html#ad89edb3c862d0446891a80850f26adae',1,'momentum::FileSaveOptions']]],
   ['blocksize_7',['blockSize',['../state__sequence__error__function_8cpp.html#aa219775c20ca1c090756a777840c0c58',1,'state_sequence_error_function.cpp']]],
-  ['boneindex_8',['boneIndex',['../structmomentum_1_1BoneCollisionPairT.html#a9c19aca5ff2aaaeaa5e37fafbf6327b3',1,'momentum::BoneCollisionPairT']]]
+  ['boneindex_8',['boneindex',['../structmomentum_1_1RigidTransformNodeResult.html#a7e42e54dff7fa6b12ad59224778b309b',1,'momentum::RigidTransformNodeResult::boneIndex'],['../structmomentum_1_1BoneCollisionPairT.html#a9c19aca5ff2aaaeaa5e37fafbf6327b3',1,'momentum::BoneCollisionPairT::boneIndex']]]
 ];

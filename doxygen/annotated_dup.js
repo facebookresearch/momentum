@@ -140,6 +140,7 @@ var annotated_dup =
       [ "Random", "classmomentum_1_1Random.html", "classmomentum_1_1Random" ],
       [ "RefineConfig", "structmomentum_1_1RefineConfig.html", "structmomentum_1_1RefineConfig" ],
       [ "ResizeableMatrix", "classmomentum_1_1ResizeableMatrix.html", "classmomentum_1_1ResizeableMatrix" ],
+      [ "RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", "structmomentum_1_1RigidTransformNodeResult" ],
       [ "SDFColliderT", "structmomentum_1_1SDFColliderT.html", "structmomentum_1_1SDFColliderT" ],
       [ "SDFCollisionErrorFunctionT", "classmomentum_1_1SDFCollisionErrorFunctionT.html", "classmomentum_1_1SDFCollisionErrorFunctionT" ],
       [ "SequenceErrorFunctionT", "classmomentum_1_1SequenceErrorFunctionT.html", "classmomentum_1_1SequenceErrorFunctionT" ],

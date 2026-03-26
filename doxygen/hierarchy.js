@@ -131,6 +131,7 @@ var hierarchy =
     [ "momentum::Random< Generator_ >", "classmomentum_1_1Random.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
+    [ "momentum::RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", null ],
     [ "momentum::SDFColliderT< S >", "structmomentum_1_1SDFColliderT.html", null ],
     [ "momentum::SDFColliderT< float >", "structmomentum_1_1SDFColliderT.html", null ],
     [ "momentum::io_detail::SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", null ],

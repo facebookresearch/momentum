@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('usd__mesh__io_8cpp.html',''); initResi
 <code>#include &quot;<a class="el" href="checks_8h_source.html">momentum/common/checks.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="exception_8h_source.html">momentum/common/exception.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="log_8h_source.html">momentum/common/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="usd__utils_8h_source.html">momentum/io/usd/usd_utils.h</a>&quot;</code><br />
 <code>#include &lt;pxr/base/tf/staticTokens.h&gt;</code><br />
 <code>#include &lt;pxr/base/gf/vec3f.h&gt;</code><br />
 <code>#include &lt;pxr/base/gf/vec4f.h&gt;</code><br />
@@ -113,6 +114,7 @@ $(document).ready(function(){initNavTree('usd__mesh__io_8cpp.html',''); initResi
 <code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
 </div>
 <p><a href="usd__mesh__io_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -123,8 +125,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab969353b6b912a7e8690d73b5779872a" id="r_ab969353b6b912a7e8690d73b5779872a"><td class="memItemLeft" align="right" valign="top">PXR_NAMESPACE_USING_DIRECTIVE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="usd__mesh__io_8cpp.html#ab969353b6b912a7e8690d73b5779872a">TF_DEFINE_PRIVATE_TOKENS</a> (_tokens,(displayColor)(Cd)(color)(vertexColor)(diffuseColor)((momentumConfidence, &quot;momentum:confidence&quot;)))</td></tr>
-<tr class="separator:ab969353b6b912a7e8690d73b5779872a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28117768114462577fcbcbd9cc88340a" id="r_a28117768114462577fcbcbd9cc88340a"><td class="memItemLeft" align="right" valign="top">PXR_NAMESPACE_USING_DIRECTIVE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="usd__mesh__io_8cpp.html#a28117768114462577fcbcbd9cc88340a">TF_DEFINE_PRIVATE_TOKENS</a> (_tokens,(displayColor)(Cd)(color)(vertexColor)(diffuseColor)((momentumConfidence, &quot;momentum:confidence&quot;))((momentumBlendShapeName, &quot;momentum:blendShapeName&quot;)))</td></tr>
+<tr class="separator:a28117768114462577fcbcbd9cc88340a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aece520d7cfa7d27d15d1faef7f41abbc" id="r_aece520d7cfa7d27d15d1faef7f41abbc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aece520d7cfa7d27d15d1faef7f41abbc">momentum::loadMeshFromUsd</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">UsdStageRefPtr</a> &amp;<a class="el" href="usd__io_8cpp.html#adda1e17a3fc07d51ebc0178ab7d44715">stage</a>)</td></tr>
 <tr class="memdesc:aece520d7cfa7d27d15d1faef7f41abbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a mesh from a USD stage.  <br /></td></tr>
 <tr class="separator:aece520d7cfa7d27d15d1faef7f41abbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,8 +147,8 @@ Functions</h2></td></tr>
 <tr class="separator:a1fff0171f3613116ca8a43e453a68d2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ab969353b6b912a7e8690d73b5779872a" name="ab969353b6b912a7e8690d73b5779872a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab969353b6b912a7e8690d73b5779872a">&#9670;&#160;</a></span>TF_DEFINE_PRIVATE_TOKENS()</h2>
+<a id="a28117768114462577fcbcbd9cc88340a" name="a28117768114462577fcbcbd9cc88340a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28117768114462577fcbcbd9cc88340a">&#9670;&#160;</a></span>TF_DEFINE_PRIVATE_TOKENS()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -160,7 +162,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">(displayColor)(Cd)(color)(vertexColor)(diffuseColor)((momentumConfidence, &quot;momentum:confidence&quot;))&#160;</td>
+          <td class="paramtype">(displayColor)(Cd)(color)(vertexColor)(diffuseColor)((momentumConfidence, &quot;momentum:confidence&quot;))((momentumBlendShapeName, &quot;momentum:blendShapeName&quot;))&#160;</td>
           <td class="paramname">&#160;</td>
         </tr>
         <tr>
@@ -179,7 +181,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_b80d2ac3e54057ed5222b59115afcc36.html">usd</a></li><li class="navelem"><a class="el" href="usd__mesh__io_8cpp.html">usd_mesh_io.cpp</a></li>
-    <li class="footer">Generated on Thu Mar 26 2026 14:20:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Mar 26 2026 22:26:48 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -6,5 +6,5 @@ var usd__mesh__io_8cpp =
     [ "saveBlendShapesToUsd", "usd__mesh__io_8cpp.html#a5513db955ed6b508aa57f2649a0fe145", null ],
     [ "saveMeshToUsd", "usd__mesh__io_8cpp.html#a0938cb12878a5c7dc4043caa6c45f0c2", null ],
     [ "saveSkinWeightsToUsd", "usd__mesh__io_8cpp.html#ad7a3c3bb0dbcc7ef470dcfe3931a2d4a", null ],
-    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__mesh__io_8cpp.html#ab969353b6b912a7e8690d73b5779872a", null ]
+    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__mesh__io_8cpp.html#a28117768114462577fcbcbd9cc88340a", null ]
 ];

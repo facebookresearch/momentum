@@ -1,5 +1,6 @@
 var usd__skeleton__io_8cpp =
 [
+    [ "buildHierarchicalPaths", "usd__skeleton__io_8cpp.html#ad96b4e878b9cdb81598acfaa62ab466b", null ],
     [ "loadCollisionGeometryFromUsd", "usd__skeleton__io_8cpp.html#ad5b43db743e71bc102006e0769d01ba2", null ],
     [ "loadLocatorsFromUsd", "usd__skeleton__io_8cpp.html#a80293c70475b8f81c774b8150ded0e85", null ],
     [ "loadSkeletonFromUsd", "usd__skeleton__io_8cpp.html#a044690b5e50fffac8b8308257512d985", null ],

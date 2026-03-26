@@ -1,5 +1,7 @@
 var character__utility_8h =
 [
+    [ "momentum::RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", "structmomentum_1_1RigidTransformNodeResult" ],
+    [ "addRigidTransformNode", "character__utility_8h.html#aa58d6826eb690263c466a37faf0309fa", null ],
     [ "facesToVertices", "character__utility_8h.html#a501351229cd80a0ac3bd2f7faf66b619", null ],
     [ "mapIdentityToCharacter", "character__utility_8h.html#a282dcf02eeccbffc2a557df4aa81c7d0", null ],
     [ "mapMotionToCharacter", "character__utility_8h.html#a5a4ce41d8becb7fb5f392eda3d99b7cb", null ],

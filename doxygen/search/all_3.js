@@ -66,7 +66,7 @@ var searchData=
   ['changevector_63',['changevector',['../namespacemomentum.html#a2d29b43c1a7b7f64b019950549a36ebc',1,'momentum::changeVector(const Vector3&lt; double &gt; &amp;, const CoordinateSystem &amp;, const CoordinateSystem &amp;)'],['../namespacemomentum.html#a34d709b085844970241ab755f0d8b811',1,'momentum::changeVector(const Vector3&lt; float &gt; &amp;, const CoordinateSystem &amp;, const CoordinateSystem &amp;)'],['../namespacemomentum.html#ad591a2d53b2655ad138744ea586bb810',1,'momentum::changeVector(const Vector3&lt; T &gt; &amp;v, const CoordinateSystem &amp;from, const CoordinateSystem &amp;to)']]],
   ['channeloffset_64',['channelOffset',['../bvh__io_8cpp.html#a00fc3384f3ea395b6dd00b38cc3cf9ee',1,'bvh_io.cpp']]],
   ['channels_65',['channels',['../bvh__io_8cpp.html#a879079d116d26b4dc5737637fe13b432',1,'bvh_io.cpp']]],
-  ['character_66',['Character',['../namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e',1,'momentum']]],
+  ['character_66',['character',['../namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e',1,'momentum::Character'],['../structmomentum_1_1RigidTransformNodeResult.html#ad4f7ee0ad8fce6df61ec42d19d51b6ae',1,'momentum::RigidTransformNodeResult::character']]],
   ['character_2ecpp_67',['character.cpp',['../character_8cpp.html',1,'']]],
   ['character_2eh_68',['character.h',['../character_8h.html',1,'']]],
   ['character_5f_69',['character_',['../classmomentum_1_1VertexErrorFunctionT.html#a972ac603ac2c87711f8b2425192f6f72',1,'momentum::VertexErrorFunctionT']]],
