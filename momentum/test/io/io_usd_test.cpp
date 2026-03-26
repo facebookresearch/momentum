@@ -789,6 +789,83 @@ void verifyModelParameterScalesResult(
 
 } // namespace
 
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_LocatorsWithSpecialCharNames) {
+  // Locator names with characters invalid for USD SDF prim names (dots, dashes,
+  // colons, spaces) must be sanitized when building prim paths.  The original
+  // names are preserved via the momentum:name attribute for round-trip.
+  testCharacter.locators.clear();
+  const std::vector<std::string> specialNames = {
+      "nose.tip", "left-eye", "brow:inner.L", "chin tip"};
+  for (size_t i = 0; i < specialNames.size(); ++i) {
+    Locator loc;
+    loc.name = specialNames[i];
+    loc.parent = i % testCharacter.skeleton.joints.size();
+    loc.offset = Eigen::Vector3f(static_cast<float>(i), 0.0f, 0.0f);
+    testCharacter.locators.push_back(loc);
+  }
+
+  auto tempFile = temporaryFile("momentum_usd_special_locators", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_EQ(loadedCharacter.locators.size(), specialNames.size());
+  for (size_t i = 0; i < specialNames.size(); ++i) {
+    EXPECT_EQ(loadedCharacter.locators[i].name, specialNames[i])
+        << "Locator name round-trip failed at index " << i;
+    EXPECT_EQ(loadedCharacter.locators[i].parent, testCharacter.locators[i].parent);
+  }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionWithSpecialCharJointNames) {
+  // Joint names with SDF-invalid characters must be sanitized when used to
+  // build collision prim names.
+  testCharacter.skeleton.joints[0].name = "root.bone";
+  testCharacter.skeleton.joints[1].name = "spine-1";
+  testCharacter.skeleton.joints[2].name = "neck:twist";
+
+  auto tempFile = temporaryFile("momentum_usd_special_collision", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.collision);
+  ASSERT_TRUE(testCharacter.collision);
+  EXPECT_EQ(loadedCharacter.collision->size(), testCharacter.collision->size());
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_BlendShapesWithSpecialCharNames) {
+  // Blend shape names with SDF-invalid characters must be sanitized.
+  // The original names are preserved via the momentum:blendShapeName attribute.
+  auto character = withTestBlendShapes(testCharacter);
+  ASSERT_TRUE(character.blendShape);
+
+  // Create a mutable copy with special character names
+  const std::vector<std::string> specialShapeNames = {
+      "jawOpen", "brow.inner_L", "cheek-puff", "mouth:funnel", "lip upper"};
+  auto mutableBlendShape = std::make_shared<BlendShape>(*character.blendShape);
+  for (size_t i = 0; i < specialShapeNames.size(); ++i) {
+    mutableBlendShape->setShapeName(i, specialShapeNames[i]);
+  }
+  character.blendShape = mutableBlendShape;
+
+  auto tempFile = temporaryFile("momentum_usd_special_blendshapes", ".usda");
+  saveUsd(tempFile.path(), character);
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  ASSERT_TRUE(loadedCharacter.blendShape);
+  EXPECT_EQ(loadedCharacter.blendShape->shapeSize(), character.blendShape->shapeSize());
+
+  // Verify original names round-trip correctly
+  const auto& loadedNames = loadedCharacter.blendShape->getShapeNames();
+  ASSERT_EQ(loadedNames.size(), specialShapeNames.size());
+  for (size_t i = 0; i < specialShapeNames.size(); ++i) {
+    EXPECT_EQ(loadedNames[i], specialShapeNames[i])
+        << "Blend shape name round-trip failed at index " << i;
+  }
+}
+
 TEST(UsdIOTest, ModelParameterScalesRoundTrip) {
   auto testData = createModelParameterScalesTestFile("usd_model_param_scales", 30.0f);
 
