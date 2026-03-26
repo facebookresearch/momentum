@@ -22,7 +22,6 @@
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
 
-#include <iostream>
 #include <memory>
 #include <numeric>
 
