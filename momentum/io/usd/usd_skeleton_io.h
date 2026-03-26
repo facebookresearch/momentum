@@ -18,6 +18,12 @@ PXR_NAMESPACE_USING_DIRECTIVE
 
 namespace momentum {
 
+/// Build hierarchical joint paths from flat names and parent indices.
+/// E.g., joint 0 "root" (no parent) -> "root"
+///       joint 1 "spine" (parent 0) -> "root/spine"
+///       joint 2 "chest" (parent 1) -> "root/spine/chest"
+std::vector<std::string> buildHierarchicalPaths(const Skeleton& skeleton);
+
 /// Load a skeleton from a USD stage.
 Skeleton loadSkeletonFromUsd(const UsdStageRefPtr& stage);
 
