@@ -62,7 +62,7 @@ void logMesh(
     rerunMesh = std::move(rerunMesh).with_vertex_normals(mesh.normals);
   }
 
-  rec.log(streamName, rerunMesh);
+  safeLog(rec, streamName, rerunMesh);
 }
 
 void logJoints(
@@ -87,7 +87,8 @@ void logJoints(
            toStdArray3f(jointStates[iJoint].transform.translation)});
       labels.push_back(names[iJoint]);
     }
-    rec.log(
+    safeLog(
+        rec,
         streamName + "/" + names[iJoint],
         rerun::Transform3D()
             .with_mat3x3(
@@ -99,7 +100,8 @@ void logJoints(
 #endif
     );
   }
-  rec.log(
+  safeLog(
+      rec,
       streamName,
       rerun::LineStrips3D(lines).with_radii(0.2f).with_colors(kGrey).with_labels(labels));
 }
@@ -123,7 +125,8 @@ void logMarkers(
   }
 
   // TODO: make radius and color configurable
-  rec.log(
+  safeLog(
+      rec,
       streamName,
       rerun::Points3D(points3d).with_radii(0.5f).with_colors(kPurple).with_labels(labels));
 }
@@ -153,14 +156,18 @@ void logLocators(
     if (locators.at(i).name.find("Floor_") != std::string::npos) {
       color = kGreen;
     } else {
-      float intensity = 255.0 * locators[i].weight * 0.6;
-      color = rerun::Color(int8_t(intensity), int8_t(intensity), int8_t(intensity * 0.5));
+      float intensity = 255.0f * locators[i].weight * 0.6f;
+      color = rerun::Color(
+          static_cast<uint8_t>(intensity),
+          static_cast<uint8_t>(intensity),
+          static_cast<uint8_t>(intensity * 0.5f));
     }
     colors.push_back(color);
   }
 
   // TODO: make radius and color configurable
-  rec.log(
+  safeLog(
+      rec,
       streamName,
       rerun::Points3D(points3d).with_radii(0.5f).with_colors(colors).with_labels(labels));
 }
@@ -209,7 +216,8 @@ void logMarkerLocatorCorrespondence(
       }
     }
 
-    rec.log(
+    safeLog(
+        rec,
         streamName,
         rerun::LineStrips3D(lines).with_labels(labels).with_colors(colors).with_radii(radius));
   }
@@ -226,9 +234,9 @@ void logModelParams(
 
   for (size_t iParam = 0; iParam < nParams; ++iParam) {
     if (names[iParam].find("root") != std::string::npos) {
-      rec.log(fmt::format("{}/{}", worldPrefix, names[iParam]), makeScalar(params[iParam]));
+      safeLog(rec, fmt::format("{}/{}", worldPrefix, names[iParam]), makeScalar(params[iParam]));
     } else {
-      rec.log(fmt::format("{}/{}", posePrefix, names[iParam]), makeScalar(params[iParam]));
+      safeLog(rec, fmt::format("{}/{}", posePrefix, names[iParam]), makeScalar(params[iParam]));
     }
   }
 }
@@ -247,9 +255,9 @@ void logJointParams(
       const size_t paramIdx = iJoint * kParametersPerJoint + jParam;
       if (names[iJoint].find("world") != std::string::npos ||
           names[iJoint].find("root") != std::string::npos) {
-        rec.log(fmt::format("{}/{}", worldPrefix, channelName), makeScalar(params[paramIdx]));
+        safeLog(rec, fmt::format("{}/{}", worldPrefix, channelName), makeScalar(params[paramIdx]));
       } else {
-        rec.log(fmt::format("{}/{}", posePrefix, channelName), makeScalar(params[paramIdx]));
+        safeLog(rec, fmt::format("{}/{}", posePrefix, channelName), makeScalar(params[paramIdx]));
       }
     }
   }
@@ -262,9 +270,9 @@ void logModelParamNames(
     std::span<const std::string> names) {
   for (const auto& name : names) {
     if (name.find("root") != std::string::npos) {
-      rec.log_static(fmt::format("{}/{}", worldPrefix, name), makeSeriesLineWithName(name));
+      safeLogStatic(rec, fmt::format("{}/{}", worldPrefix, name), makeSeriesLineWithName(name));
     } else {
-      rec.log_static(fmt::format("{}/{}", posePrefix, name), makeSeriesLineWithName(name));
+      safeLogStatic(rec, fmt::format("{}/{}", posePrefix, name), makeSeriesLineWithName(name));
     }
   }
 }
@@ -278,11 +286,15 @@ void logJointParamNames(
     for (const auto& jointParameterName : kJointParameterNames) {
       const std::string channelName = name + "_" + jointParameterName;
       if (name.find("world") != std::string::npos || name.find("root") != std::string::npos) {
-        rec.log_static(
-            fmt::format("{}/{}", worldPrefix, channelName), makeSeriesLineWithName(channelName));
+        safeLogStatic(
+            rec,
+            fmt::format("{}/{}", worldPrefix, channelName),
+            makeSeriesLineWithName(channelName));
       } else {
-        rec.log_static(
-            fmt::format("{}/{}", posePrefix, channelName), makeSeriesLineWithName(channelName));
+        safeLogStatic(
+            rec,
+            fmt::format("{}/{}", posePrefix, channelName),
+            makeSeriesLineWithName(channelName));
       }
     }
   }
@@ -420,7 +432,8 @@ void logBvh(
 
   // TODO: make radius configurable
   // TODO: use different colors by the depth of BVH nodes
-  rec.log(
+  safeLog(
+      rec,
       streamName,
       rerun::Boxes3D::from_centers_and_half_sizes(centers, halfSizes)
           .with_radii(0.1f)
@@ -458,7 +471,8 @@ void logCollisionGeometry(
   }
 
   // TODO: make radius and color configurable
-  rec.log(
+  safeLog(
+      rec,
       streamName,
       rerun::Capsules3D::from_lengths_and_radii(lengths, radii)
           .with_translations(translations)

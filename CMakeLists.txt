@@ -992,7 +992,6 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       rerun
       rerun_eigen_adapters
-      test_helpers
   )
 endif()
 
