@@ -697,6 +697,79 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
       character.blendShape};
 }
 
+RigidTransformNodeResult addRigidTransformNode(
+    const Character& character,
+    const std::string& name,
+    const Eigen::Vector3f& translationOffset,
+    const Eigen::Quaternionf& preRotation) {
+  // 1. Add a new joint to the skeleton
+  const size_t boneIndex = character.skeleton.joints.size();
+  JointList newJoints = character.skeleton.joints;
+  Joint newJoint;
+  newJoint.name = name;
+  newJoint.parent = kInvalidIndex;
+  newJoint.translationOffset = translationOffset;
+  newJoint.preRotation = preRotation;
+  newJoints.push_back(newJoint);
+  Skeleton newSkeleton(std::move(newJoints));
+
+  // 2. Extend the ParameterTransform with 6 new model parameters
+  ParameterTransform newParamTransform = character.parameterTransform;
+
+  const size_t numJoints = boneIndex + 1;
+  const size_t newNumJointParams = numJoints * kParametersPerJoint;
+  const size_t oldNumJointParams = boneIndex * kParametersPerJoint;
+
+  // Resize offsets
+  VectorXf newOffsets = VectorXf::Zero(newNumJointParams);
+  newOffsets.head(oldNumJointParams) = newParamTransform.offsets;
+  newParamTransform.offsets = std::move(newOffsets);
+
+  // Record the parameter start index and append 6 new parameter names
+  const size_t parameterStartIndex = newParamTransform.name.size();
+  newParamTransform.name.push_back(name + "_tx");
+  newParamTransform.name.push_back(name + "_ty");
+  newParamTransform.name.push_back(name + "_tz");
+  newParamTransform.name.push_back(name + "_rx");
+  newParamTransform.name.push_back(name + "_ry");
+  newParamTransform.name.push_back(name + "_rz");
+
+  // Rebuild the sparse transform matrix: keep existing triplets and add 6 new ones
+  std::vector<Eigen::Triplet<float>> triplets = toTriplets(newParamTransform.transform);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + TX, parameterStartIndex + 0, 1.0f);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + TY, parameterStartIndex + 1, 1.0f);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + TZ, parameterStartIndex + 2, 1.0f);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + RX, parameterStartIndex + 3, 1.0f);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + RY, parameterStartIndex + 4, 1.0f);
+  triplets.emplace_back(boneIndex * kParametersPerJoint + RZ, parameterStartIndex + 5, 1.0f);
+
+  newParamTransform.transform.resize(newNumJointParams, newParamTransform.name.size());
+  newParamTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
+
+  // Recompute activeJointParams
+  newParamTransform.activeJointParams = newParamTransform.computeActiveJointParams();
+
+  // 3. Construct and return the new Character
+  // Pass empty inverseBindPose so the Character constructor calls initInverseBindPose()
+  Character newCharacter(
+      newSkeleton,
+      newParamTransform,
+      character.parameterLimits,
+      character.locators,
+      character.mesh.get(),
+      character.skinWeights.get(),
+      character.collision.get(),
+      character.poseShapes.get(),
+      character.blendShape,
+      character.faceExpressionBlendShape,
+      character.name,
+      TransformationList{},
+      character.skinnedLocators,
+      character.metadata);
+
+  return {std::move(newCharacter), boneIndex, parameterStartIndex};
+}
+
 MatrixXf mapMotionToCharacter(
     const MotionParameters& inputMotion,
     const Character& targetCharacter) {
