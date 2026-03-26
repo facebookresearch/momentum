@@ -224,6 +224,28 @@ TEST_F(CharacterUtilityTest, RemoveJoints) {
   // Note: Joint 3 might be removed if it's a child of joint 2
   // The implementation of removeJoints also removes child joints
 
+  // Verify activeJointParams is correctly mapped for surviving joints
+  {
+    const auto& srcAj = this->character.parameterTransform.activeJointParams;
+    const auto& resultAj = resultCharacter.parameterTransform.activeJointParams;
+    EXPECT_EQ(resultAj.size(), resultCharacter.skeleton.joints.size() * kParametersPerJoint);
+    // For each joint in the result, its active flags should match the source
+    for (size_t iResult = 0; iResult < resultCharacter.skeleton.joints.size(); ++iResult) {
+      const auto& name = resultCharacter.skeleton.joints[iResult].name;
+      const auto iSrc = this->character.skeleton.getJointIdByName(name);
+      ASSERT_NE(iSrc, kInvalidIndex);
+      for (size_t offset = 0; offset < kParametersPerJoint; ++offset) {
+        EXPECT_EQ(
+            resultAj[iResult * kParametersPerJoint + offset],
+            srcAj[iSrc * kParametersPerJoint + offset])
+            << "activeJointParams mismatch for joint " << name << " offset " << offset;
+      }
+    }
+    // Also verify consistency with computeActiveJointParams()
+    const auto recomputed = resultCharacter.parameterTransform.computeActiveJointParams();
+    EXPECT_EQ(resultAj, recomputed);
+  }
+
   // Test with invalid joint index (should throw an exception)
   std::vector<size_t> invalidJoints = {this->character.skeleton.joints.size() + 1};
   EXPECT_THROW(

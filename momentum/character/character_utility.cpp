@@ -649,6 +649,8 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
   const std::vector<size_t> srcToResultParameters =
       addMappedParameters(character.parameterTransform, srcToResultJoints, resultParamTransform);
 
+  resultParamTransform.activeJointParams = resultParamTransform.computeActiveJointParams();
+
   std::unique_ptr<SkinWeights> resultSkinWeights;
   {
     // Mapping for every joint in the target skeleton to a joint in the combined skeleton.
