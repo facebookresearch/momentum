@@ -232,6 +232,15 @@ void saveFBXCharacterToFileWithSkelStates(
       options);
 }
 
+namespace {
+
+bool hasUsdExtension(const std::string& path) {
+  const auto ext = filesystem::path(path).extension().string();
+  return ext == ".usd" || ext == ".usda" || ext == ".usdc" || ext == ".usdz";
+}
+
+} // namespace
+
 void saveCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
@@ -239,6 +248,26 @@ void saveCharacterToFile(
     const std::optional<const Eigen::MatrixXf>& motion,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const momentum::FileSaveOptions& options) {
+#ifdef MOMENTUM_WITH_USD
+  if (hasUsdExtension(path)) {
+    momentum::MotionParameters motionParams;
+    if (motion.has_value()) {
+      std::get<0>(motionParams) = character.parameterTransform.name;
+      std::get<1>(motionParams) = motion.value().transpose();
+    }
+    const std::vector<std::vector<momentum::Marker>> emptyMarkers;
+    momentum::saveUsdCharacterWithMotion(
+        path,
+        character,
+        fps,
+        motionParams,
+        momentum::IdentityParameters{},
+        markers.has_value() ? std::span<const std::vector<momentum::Marker>>(markers.value())
+                            : std::span<const std::vector<momentum::Marker>>(emptyMarkers),
+        options);
+    return;
+  }
+#endif
   momentum::saveCharacter(
       path,
       character,
@@ -254,6 +283,18 @@ void saveCharacterToFileWithSkelStates(
     const float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
+#ifdef MOMENTUM_WITH_USD
+  if (hasUsdExtension(path)) {
+    momentum::saveUsdCharacter(
+        path,
+        character,
+        fps,
+        arrayToSkeletonStates(skelStates, character),
+        markers.has_value() ? std::span<const std::vector<momentum::Marker>>(*markers)
+                            : std::span<const std::vector<momentum::Marker>>{});
+    return;
+  }
+#endif
   momentum::saveCharacter(
       path,
       character,
