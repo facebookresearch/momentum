@@ -357,6 +357,8 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     character_solver
     simd
+  PRIVATE_LINK_LIBRARIES
+    Dispenso::dispenso
 )
 
 mt_library(
