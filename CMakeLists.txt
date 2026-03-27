@@ -461,10 +461,11 @@ mt_library(
     io_fbx_private_headers
   SOURCES_VARS
     io_fbx_sources
-  PRIVATE_LINK_LIBRARIES
-    io_common
+  PUBLIC_LINK_LIBRARIES
     io_file_save_options
     io_skeleton
+  PRIVATE_LINK_LIBRARIES
+    io_common
     ${io_fbx_private_link_libraries}
     OpenFBX
 )
@@ -617,9 +618,8 @@ mt_library(
   SOURCES_VARS
     marker_tracker_sources
   PUBLIC_LINK_LIBRARIES
-    character_solver
-  PRIVATE_LINK_LIBRARIES
     character_sequence_solver
+    character_solver
 )
 
 mt_library(
