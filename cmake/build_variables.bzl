@@ -54,14 +54,17 @@ simd_test_sources = [
 camera_public_headers = [
     "camera/camera.h",
     "camera/fwd.h",
+    "camera/projection_utils.h",
 ]
 
 camera_sources = [
     "camera/camera.cpp",
+    "camera/projection_utils.cpp",
 ]
 
 camera_test_sources = [
     "test/camera/test_camera.cpp",
+    "test/camera/test_projection_utils.cpp",
 ]
 
 fmt_eigen_public_headers = [

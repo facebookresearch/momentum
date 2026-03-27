@@ -31,6 +31,9 @@ struct ProjectionConstraintT {
 /// Error function that projects 3D skeleton points through a bone-parented camera
 /// using an IntrinsicsModelT<T> and penalizes reprojection error in pixel space.
 ///
+/// If camera parameters are fixed and off-screen robustness is needed, consider using
+/// ProjectionErrorFunctionT with matrices from `<momentum/camera/projection_utils.h>` instead.
+///
 /// The camera is rigidly attached to a skeleton joint (cameraParent) with a fixed
 /// offset (cameraOffset). If cameraParent is kInvalidIndex, the camera is static
 /// in world space (cameraOffset is used directly as eyeFromWorld).
