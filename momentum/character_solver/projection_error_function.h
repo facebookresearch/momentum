@@ -11,6 +11,27 @@
 
 namespace momentum {
 
+/// @name Choosing a projection error function
+///
+/// Momentum provides two projection error functions:
+///
+/// - **ProjectionErrorFunctionT** (this file): Uses a precomputed 3x4 projection matrix per
+///   constraint. The distortion model is linearized around the target pixel, but the perspective
+///   divide remains exact. This makes it robust for off-screen points (behind the camera or far
+///   outside the image bounds) and efficient when camera parameters are fixed.
+///
+/// - **CameraProjectionErrorFunctionT** (camera_projection_error_function.h): Uses a CameraT
+///   directly with full nonlinear projection. Use this when you need to optimize camera intrinsics
+///   or extrinsics as part of the solve.
+///
+/// To construct projection matrices from a CameraT, use the utility functions in
+/// `<momentum/camera/projection_utils.h>`:
+/// - `projectionMatrixPixels(camera, targetPixel)` — residual in pixel units
+/// - `projectionMatrixRadians(camera, targetPixel)` — residual in radians (tangent-of-angle)
+///
+/// When using these utilities, set `ProjectionConstraintDataT::target` to `(0, 0)` because the
+/// target pixel is already baked into the projection matrix.
+
 template <typename T>
 struct ProjectionConstraintDataT {
   // Project a 3d point (after skinning) to (rxz, ryz, z) where
