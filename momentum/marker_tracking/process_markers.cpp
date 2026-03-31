@@ -63,6 +63,13 @@ void calibrateMarkers(
       maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
   const std::span<const std::vector<momentum::Marker>> inputData(
       markerData.data() + firstFrame, lastFrame - firstFrame);
+  MT_THROW_IF(
+      inputData.size() < 2,
+      "Calibration requires at least 2 frames, got {} (from {} total with firstFrame={}, maxFrames={}).",
+      inputData.size(),
+      markerData.size(),
+      firstFrame,
+      maxFrames);
 
   const auto leftGloveSlice =
       validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
@@ -112,6 +119,11 @@ Eigen::MatrixXf processMarkers(
       maxFrames > 0 ? std::min(firstFrame + maxFrames, markerData.size()) : markerData.size();
   const std::span<const std::vector<momentum::Marker>> inputData(
       markerData.data() + firstFrame, lastFrame - firstFrame);
+  MT_THROW_IF(
+      inputData.empty(),
+      "Input marker data is empty (firstFrame={}, maxFrames={}).",
+      firstFrame,
+      maxFrames);
 
   const auto leftGloveSlice =
       validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
