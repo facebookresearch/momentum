@@ -121,7 +121,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
             return fmt::format(
-                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={}, target_height_cm={})",
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={}, target_height_cm={}, mesh_constraint_weight={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -135,7 +135,8 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.enforceFloorInFirstFrame),
                 self.firstFramePoseConstraintSet,
                 boolToString(self.calibShape),
-                self.targetHeightCm);
+                self.targetHeightCm,
+                self.meshConstraintWeight);
           })
       .def(
           py::init<
@@ -152,6 +153,7 @@ PYBIND11_MODULE(marker_tracking, m) {
               bool,
               std::string,
               bool,
+              float,
               float>(),
           R"(Create a CalibrationConfig with specified parameters.
 
@@ -167,6 +169,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param enforce_floor_in_first_frame: Force floor contact in first frame
           :param first_frame_pose_constraint_set: Name of pose constraint set to use in first frame
           :param target_height_cm: Target height for character in cm.  Defaults to 0 (unspecified).
+          :param mesh_constraint_weight: Weight multiplier for mesh surface constraints during calibration.
           )",
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
@@ -181,7 +184,8 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("enforce_floor_in_first_frame") = false,
           py::arg("first_frame_pose_constraint_set") = "",
           py::arg("calib_shape") = false,
-          py::arg("target_height_cm") = 0.0)
+          py::arg("target_height_cm") = 0.0,
+          py::arg("mesh_constraint_weight") = 1.0f)
       .def_readwrite(
           "calib_frames",
           &momentum::CalibrationConfig::calibFrames,
@@ -215,7 +219,11 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "target_height_cm",
           &momentum::CalibrationConfig::targetHeightCm,
-          "Target height for the character in cm (0 means no target height specified)");
+          "Target height for the character in cm (0 means no target height specified)")
+      .def_readwrite(
+          "mesh_constraint_weight",
+          &momentum::CalibrationConfig::meshConstraintWeight,
+          "Weight multiplier for mesh surface constraints during calibration");
 
   auto trackingConfig = py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
       m, "TrackingConfig", "Config for the tracking optimization step");
@@ -315,7 +323,11 @@ to construct a meaningful set, e.g. to exclude finger DOFs::
     active &= ~pt.parameter_sets.get("fingers", np.zeros_like(active))
     tracking_config.active_params = active
 
-Set to None (default) to use the solver's default parameter set.)");
+Set to None (default) to use the solver's default parameter set.)")
+      .def_readwrite(
+          "mesh_constraint_weight",
+          &momentum::TrackingConfig::meshConstraintWeight,
+          "Weight multiplier for mesh surface constraints");
 
   auto refineConfig = py::class_<momentum::RefineConfig, momentum::TrackingConfig>(
       m, "RefineConfig", "Config for refining a tracked motion.");

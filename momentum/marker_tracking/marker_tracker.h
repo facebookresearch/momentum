@@ -50,6 +50,9 @@ struct CalibrationConfig : public BaseConfig {
   bool calibShape = false;
   /// Target height in cm for the character, if set to 0, no height constraint is applied
   float targetHeightCm = 0.0f;
+  /// Multiplier for the mesh surface constraint weight on skinned locators during shape
+  /// calibration. Higher values pull markers more tightly to the mesh surface. Default 1.0.
+  float meshConstraintWeight = 1.0f;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -69,6 +72,9 @@ struct TrackingConfig : public BaseConfig {
   /// parameters). Use the character's ParameterTransform to construct a meaningful set, e.g. to
   /// exclude finger DOFs from the solve.
   std::optional<ParameterSet> activeParams;
+  /// Multiplier for the mesh surface constraint weight on skinned locators. Higher values pull
+  /// skinned locators closer to the mesh surface during the solve. Default 1.0.
+  float meshConstraintWeight = 1.0f;
 };
 
 /// Configuration for refining an already tracked motion, eg. add smoothing and/or collision
@@ -190,7 +196,8 @@ Eigen::MatrixXf trackPosesForFrames(
     bool isContinuous = false,
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
-    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt,
+    const std::string& progressLabel = "Tracking per-frame");
 
 /// Calibrate body proportions and locator offsets of a character from input marker data.
 ///

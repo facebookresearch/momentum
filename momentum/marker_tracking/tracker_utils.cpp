@@ -547,7 +547,7 @@ std::vector<CandidateTriangle> findCandidateTrianglesDfs(
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
-    float targetDepth,
+    float cutoffWeight,
     float maxSearchDistanceCm,
     float maxNormalAngleDeg) {
   if (!character.mesh || !character.skinWeights) {
@@ -580,8 +580,12 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
         character.skeleton,
         p_world,
         locator.parents[0],
-        targetDepth);
+        cutoffWeight);
     if (!closestPointResult.valid) {
+      MT_LOGW(
+          "Skinned locator '{}': no valid mesh triangle found (parent={})",
+          locator.name,
+          locator.parents[0]);
       continue;
     }
 
@@ -589,7 +593,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     constr.locatorIndex = gsl::narrow_cast<int>(i);
     constr.tgtTriangleIndices = mesh.faces[closestPointResult.triangleIdx];
     constr.tgtTriangleBaryCoords = closestPointResult.baryCoords;
-    constr.depth = targetDepth + locator.skinOffset;
+    constr.depth = locator.skinOffset;
 
     // Populate candidate triangles if sliding is enabled
     if (maxSearchDistanceCm > 0.0f) {
@@ -907,6 +911,26 @@ std::vector<std::vector<Marker>> extractMarkersFromMotion(
       const Vector3d pos = (states.at(loc.parent).transform * loc.offset).cast<double>();
       markers.emplace_back(Marker{loc.name, pos, false});
     }
+  }
+
+  return result;
+}
+
+std::vector<std::pair<std::string, float>> computeSkinnedLocatorMeshDistances(
+    const Character& character) {
+  std::vector<std::pair<std::string, float>> result;
+  if (!character.mesh || !character.skinWeights || character.skinnedLocators.empty()) {
+    return result;
+  }
+
+  const Mesh& mesh = *character.mesh;
+  const SkinWeights& skin = *character.skinWeights;
+  result.reserve(character.skinnedLocators.size());
+
+  for (const auto& locator : character.skinnedLocators) {
+    const auto closest = closestPointOnMeshMatchingParent(
+        mesh, skin, character.skeleton, locator.position, locator.parents[0]);
+    result.emplace_back(locator.name, closest.valid ? closest.distance : -1.0f);
   }
 
   return result;
