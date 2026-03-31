@@ -169,6 +169,10 @@ void registerLocatorBindings(
           "weight",
           &mm::SkinnedLocator::weight,
           "Influence weight of this locator when used in constraints.")
+      .def_readonly(
+          "skin_offset",
+          &mm::SkinnedLocator::skinOffset,
+          "Offset from the skin surface in cm, accounts for marker thickness.")
       .def("__repr__", [](const mm::SkinnedLocator& l) {
         return fmt::format(
             "SkinnedLocator(name={}, position=[{}, {}, {}], weight={})",

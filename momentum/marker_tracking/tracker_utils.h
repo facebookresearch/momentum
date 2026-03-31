@@ -41,11 +41,15 @@ momentum::Character createLocatorCharacter(
 /// @param minSkinWeight Minimum skin weight threshold for considering a mesh triangle as belonging
 /// to the same bone as the locator.
 /// @param verbose If true, print diagnostic messages about locators that could not be converted.
+/// @param markerDiameter Marker diameter in centimeters. When positive, the skinned locator
+/// position is offset toward the mesh surface by half this value to account for the physical marker
+/// sitting on top of the skin.
 momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
     float maxDistance = 3.0f,
     float minSkinWeight = 0.03f,
-    bool verbose = false);
+    bool verbose = false,
+    float markerDiameter = 0.0f);
 
 /// Convert skinned locators to regular locators by selecting the bone with the highest skin weight.
 /// This is useful when exporting to file formats that don't support skinned locators (e.g., Maya).
