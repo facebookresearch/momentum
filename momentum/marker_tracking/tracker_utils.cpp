@@ -239,7 +239,8 @@ momentum::Character locatorsToSkinnedLocators(
     const momentum::Character& sourceCharacter,
     float maxDistance,
     float minSkinWeight,
-    bool verbose) {
+    bool verbose,
+    float markerDiameter) {
   if (!sourceCharacter.mesh || !sourceCharacter.skinWeights) {
     MT_LOGI_IF(
         verbose,
@@ -303,6 +304,7 @@ momentum::Character locatorsToSkinnedLocators(
     skinnedLocator.name = locator.name;
     skinnedLocator.position = p_world;
     skinnedLocator.weight = locator.weight;
+    skinnedLocator.skinOffset = locator.skinOffset + markerDiameter * 0.5f;
     MT_LOGT("Converting locator {} to skinned locator", locator.name);
 
     // Set the locator's parent to the closest face.
@@ -587,7 +589,7 @@ std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLoc
     constr.locatorIndex = gsl::narrow_cast<int>(i);
     constr.tgtTriangleIndices = mesh.faces[closestPointResult.triangleIdx];
     constr.tgtTriangleBaryCoords = closestPointResult.baryCoords;
-    constr.depth = targetDepth;
+    constr.depth = targetDepth + locator.skinOffset;
 
     // Populate candidate triangles if sliding is enabled
     if (maxSearchDistanceCm > 0.0f) {

@@ -784,11 +784,15 @@ influenced by multiple joints through skin weights.
     belonging to the same bone as the locator (default: 0.03)
 :param verbose: If True, print diagnostic messages about locators that could not be
     converted (default: False)
+:param marker_diameter: Marker diameter in centimeters. When positive, the skinned locator
+    position is offset toward the mesh surface by half this value to account for the physical
+    marker sitting on top of the skin (default: 0.0)
 :return: New character with converted skinned locators and remaining regular locators)",
       py::arg("character"),
       py::arg("max_distance") = 3.0f,
       py::arg("min_skin_weight") = 0.03f,
-      py::arg("verbose") = false);
+      py::arg("verbose") = false,
+      py::arg("marker_diameter") = 0.0f);
 
   m.def(
       "convert_skinned_locators_to_locators",
