@@ -1,10 +1,11 @@
 var tracker__utils_8h =
 [
     [ "buildTriangleAdjacency", "tracker__utils_8h.html#a710cca2a3e8ff5130375f03d9f8b9887", null ],
+    [ "computeSkinnedLocatorMeshDistances", "tracker__utils_8h.html#a735e67bbdfd8a8005fe352a224680679", null ],
     [ "createConstraintData", "tracker__utils_8h.html#a0dbeea2379779d383cd6200d6ca61066", null ],
     [ "createLocatorCharacter", "tracker__utils_8h.html#a8672dec18fb662d392c5f2f6f749cf04", null ],
     [ "createSkinnedConstraintData", "tracker__utils_8h.html#a998aa3659b01fb63c2b53489108f6c7f", null ],
-    [ "createSkinnedLocatorMeshConstraints", "tracker__utils_8h.html#a286ad5ba1fc634fbe4d2a3c71eaf01d9", null ],
+    [ "createSkinnedLocatorMeshConstraints", "tracker__utils_8h.html#a9385ae77e7c6ba37fe01db39ba4ea6d7", null ],
     [ "extractBlendShapeFromParams", "tracker__utils_8h.html#a4591df41bc5c72d11bab59b07ddf5284", null ],
     [ "extractIdAndLocatorsFromParams", "tracker__utils_8h.html#a571c151c67aa408a90ae54b4996e284b", null ],
     [ "extractLocatorsFromCharacter", "tracker__utils_8h.html#a1f635ed7abd17811b7970615e0dc6cf8", null ],
@@ -13,7 +14,7 @@ var tracker__utils_8h =
     [ "fillIdentity", "tracker__utils_8h.html#a73e44695fb092ba7863259c1affa8283", null ],
     [ "findCandidateTrianglesDfs", "tracker__utils_8h.html#a4120ea89a36ddb1941fef94ad42ea12c", null ],
     [ "jointIdentityToModelIdentity", "tracker__utils_8h.html#a9ea114b0a31b9c28d6780db87accc6cc", null ],
-    [ "locatorsToSkinnedLocators", "tracker__utils_8h.html#a4fc4d4d23fe9cbeb703b299f86dcd750", null ],
+    [ "locatorsToSkinnedLocators", "tracker__utils_8h.html#a5fb0e580b61b7165849bdf2abc22dc96", null ],
     [ "removeIdentity", "tracker__utils_8h.html#a8babd568c031639522dc41c963d46f0a", null ],
     [ "skinnedLocatorsToLocators", "tracker__utils_8h.html#aa409a1b3be8e585566733519d1dad5a0", null ]
 ];

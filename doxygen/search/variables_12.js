@@ -14,7 +14,7 @@ var searchData=
   ['skelroot_11',['skelRoot',['../usd__io_8cpp.html#afe13af4ee4e142de7656acf0e3ede287',1,'usd_io.cpp']]],
   ['skinnedlocatorparameters_12',['skinnedLocatorParameters',['../structmomentum_1_1ParameterTransformT.html#af322708ca9a33593ea5875a1456e28c0',1,'momentum::ParameterTransformT']]],
   ['skinnedlocators_13',['skinnedLocators',['../structmomentum_1_1CharacterT.html#af8c6b4511f80fbc306eac794d3f57157',1,'momentum::CharacterT']]],
-  ['skinoffset_14',['skinOffset',['../structmomentum_1_1Locator.html#a8da4470ceec71e6a4b24a9407fe5c775',1,'momentum::Locator']]],
+  ['skinoffset_14',['skinoffset',['../structmomentum_1_1SkinnedLocator.html#acea81f8925dbdf4ddd076cec67c728b1',1,'momentum::SkinnedLocator::skinOffset'],['../structmomentum_1_1Locator.html#a8da4470ceec71e6a4b24a9407fe5c775',1,'momentum::Locator::skinOffset']]],
   ['skinweights_15',['skinweights',['../structmomentum_1_1SkinnedLocator.html#a797ccdb6cdaf1b7bd8fab6ecb070ca32',1,'momentum::SkinnedLocator::skinWeights'],['../structmomentum_1_1CharacterT.html#a729d4cf7474cfcf21a280816ba6b2f88',1,'momentum::CharacterT::skinWeights']]],
   ['smoothing_16',['smoothing',['../structmomentum_1_1TrackingConfig.html#aa8c2177d85f4b37039e69f9436e442e2',1,'momentum::TrackingConfig']]],
   ['smoothingweights_17',['smoothingWeights',['../structmomentum_1_1TrackingConfig.html#ac41e892cf77448f4611ddc0a895cd811',1,'momentum::TrackingConfig']]],

@@ -141,6 +141,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ac8378945cca0789b3ea1fd904eedc861 inherit pub_attribs_structmomentum_1_1TrackingConfig" id="r_ac8378945cca0789b3ea1fd904eedc861"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TrackingConfig.html#ac8378945cca0789b3ea1fd904eedc861">activeParams</a></td></tr>
 <tr class="memdesc:ac8378945cca0789b3ea1fd904eedc861 inherit pub_attribs_structmomentum_1_1TrackingConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional mask to restrict which parameters are optimized during tracking.  <br /></td></tr>
 <tr class="separator:ac8378945cca0789b3ea1fd904eedc861 inherit pub_attribs_structmomentum_1_1TrackingConfig"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfb58e16db74d521c1d7e7f2e644eb8f inherit pub_attribs_structmomentum_1_1TrackingConfig" id="r_adfb58e16db74d521c1d7e7f2e644eb8f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1TrackingConfig.html#adfb58e16db74d521c1d7e7f2e644eb8f">meshConstraintWeight</a> = 1.0f</td></tr>
+<tr class="memdesc:adfb58e16db74d521c1d7e7f2e644eb8f inherit pub_attribs_structmomentum_1_1TrackingConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplier for the mesh surface constraint weight on skinned locators.  <br /></td></tr>
+<tr class="separator:adfb58e16db74d521c1d7e7f2e644eb8f inherit pub_attribs_structmomentum_1_1TrackingConfig"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structmomentum_1_1BaseConfig"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structmomentum_1_1BaseConfig')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structmomentum_1_1BaseConfig.html">momentum::BaseConfig</a></td></tr>
 <tr class="memitem:a68fc30982e603214cb49277909bcacc4 inherit pub_attribs_structmomentum_1_1BaseConfig" id="r_a68fc30982e603214cb49277909bcacc4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BaseConfig.html#a68fc30982e603214cb49277909bcacc4">minVisPercent</a> = 0.<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
 <tr class="memdesc:a68fc30982e603214cb49277909bcacc4 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum percentage of visible markers in a frame to consider for tracking.  <br /></td></tr>
@@ -162,7 +165,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>Configuration for refining an already tracked motion, eg. </p>
 <p>add smoothing and/or collision handling; improve residuals with extra dofs etc. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00076">76</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00082">82</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a2556017544547cdf04af11cfce1dd7a4" name="a2556017544547cdf04af11cfce1dd7a4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2556017544547cdf04af11cfce1dd7a4">&#9670;&#160;</a></span>calibId</h2>
@@ -178,7 +181,7 @@ Public Attributes</h2></td></tr>
 
 <p>Calibrate identity parameters when refining the motion. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00081">81</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00087">87</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -196,7 +199,7 @@ Public Attributes</h2></td></tr>
 
 <p>Calibrate locators when refining the motion. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00083">83</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00089">89</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -214,7 +217,7 @@ Public Attributes</h2></td></tr>
 
 <p>Minimize changes to calibration parameters when in calibration mode, by regularizing towards the input value with this regularizer weight. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00079">79</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00085">85</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -227,7 +230,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1RefineConfig.html">RefineConfig</a></li>
-    <li class="footer">Generated on Thu Mar 26 2026 22:26:49 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Apr 1 2026 15:34:57 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
