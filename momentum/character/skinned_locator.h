@@ -42,12 +42,17 @@ struct SkinnedLocator {
   /// Influence weight of this locator when used in constraints
   float weight = 1.0f;
 
+  /// Offset from the skin surface in centimeters, used when solving for body shape.
+  /// Accounts for physical marker thickness (e.g. half the marker diameter).
+  float skinOffset = 0.0f;
+
   /// Creates a locator with the specified properties
   ///
   /// @param name Identifier for the locator
   /// @param parents Indices of the parent joints
   /// @param weights Skinning weights for the parent joints
   /// @param weight Influence weight in constraints
+  /// @param skinOffset Offset from the skin surface in centimeters
   SkinnedLocator(
       const std::string& name = "uninitialized",
       const Eigen::Matrix<uint32_t, kMaxSkinJoints, 1>& parents =
@@ -55,12 +60,14 @@ struct SkinnedLocator {
       const Eigen::Matrix<float, kMaxSkinJoints, 1>& skinWeights =
           Eigen::Matrix<float, kMaxSkinJoints, 1>::Zero(),
       const Vector3f& position = Vector3f::Zero(),
-      const float weight = 1.0f)
+      const float weight = 1.0f,
+      const float skinOffset = 0.0f)
       : name(name),
         parents(parents),
         skinWeights(skinWeights),
         position(position),
-        weight(weight) {}
+        weight(weight),
+        skinOffset(skinOffset) {}
 
   /// Compares two locators for equality, using approximate comparison for floating-point values
   ///
@@ -70,7 +77,7 @@ struct SkinnedLocator {
     return (
         (name == locator.name) && (parents == locator.parents) &&
         skinWeights.isApprox(locator.skinWeights) && position.isApprox(locator.position) &&
-        isApprox(weight, locator.weight));
+        isApprox(weight, locator.weight) && isApprox(skinOffset, locator.skinOffset));
   }
 };
 
