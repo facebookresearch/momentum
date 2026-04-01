@@ -62,7 +62,7 @@ momentum::Character skinnedLocatorsToLocators(const momentum::Character& sourceC
 
 std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> createSkinnedLocatorMeshConstraints(
     const momentum::Character& character,
-    float targetDepth = 1.0f,
+    float cutoffWeight = 0.05f,
     float maxSearchDistanceCm = 3.0f,
     float maxNormalAngleDeg = 30.0f);
 
@@ -141,5 +141,10 @@ void removeIdentity(
 std::vector<std::vector<momentum::Marker>> extractMarkersFromMotion(
     const momentum::Character& character,
     const Eigen::MatrixXf& motion);
+
+/// Compute the distance from each skinned locator to the closest point on the mesh surface.
+/// Returns a vector of (name, distance_cm) pairs for each skinned locator.
+std::vector<std::pair<std::string, float>> computeSkinnedLocatorMeshDistances(
+    const momentum::Character& character);
 
 } // namespace momentum

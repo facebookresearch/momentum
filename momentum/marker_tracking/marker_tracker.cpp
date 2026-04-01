@@ -295,7 +295,8 @@ void addSequenceFrameConstraints(
     auto skinnedTriangleConstrFunc =
         std::make_shared<SkinnedLocatorTriangleErrorFunctionT<float>>(character);
     skinnedTriangleConstrFunc->setConstraints(skinnedLocatorMeshContraints);
-    skinnedTriangleConstrFunc->setWeight(solvedFrames * posConstrWeight);
+    skinnedTriangleConstrFunc->setWeight(
+        solvedFrames * posConstrWeight * config.meshConstraintWeight);
     solverFunc.addErrorFunction(solverFrame, skinnedTriangleConstrFunc);
   }
 
@@ -438,8 +439,12 @@ Eigen::MatrixXf trackSequence(
   }
 
   std::vector<momentum::SkinnedLocatorTriangleConstraintT<float>> skinnedLocatorMeshContraints;
-  if ((globalParams & pt.getBlendShapeParameters()).any() && !character.skinnedLocators.empty()) {
-    skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character, 1.0f);
+  if (!character.skinnedLocators.empty() && character.mesh) {
+    skinnedLocatorMeshContraints = createSkinnedLocatorMeshConstraints(character);
+    MT_LOGI(
+        "Created {} mesh constraints for {} skinned locators",
+        skinnedLocatorMeshContraints.size(),
+        character.skinnedLocators.size());
   }
 
   // set up the solver function
@@ -715,7 +720,8 @@ Eigen::MatrixXf trackPosesForFrames(
     bool isContinuous,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    const std::string& progressLabel) {
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input data is empty.");
   MT_CHECK(
@@ -842,7 +848,7 @@ Eigen::MatrixXf trackPosesForFrames(
   MatrixXf outMotion = initialMotion;
   Eigen::Index outputIndex = 0;
   { // scope the ProgressBar so it returns
-    ProgressBar progress("Tracking per-frame", sortedFrames.size());
+    ProgressBar progress(progressLabel, sortedFrames.size());
     for (const auto iFrame : sortedFrames) {
       // For continuous tracking, keep the solved dof from previous frame (temporal coherence)
       // For non-continuous tracking, always start from initial motion (independent solving)
@@ -969,6 +975,20 @@ float computeCharacterHeight(const Character& character, const ModelParameters& 
   return height;
 }
 
+// Log per-locator mesh distances with skin offsets for debugging calibration.
+void logSkinnedLocatorMeshDistances(const Character& character, const std::string& label) {
+  if (character.skinnedLocators.empty() || !character.mesh) {
+    return;
+  }
+  const auto distances = computeSkinnedLocatorMeshDistances(character);
+  MT_LOGI("{} skinned locator mesh distances:", label);
+  for (size_t i = 0; i < distances.size(); ++i) {
+    const auto& [name, dist] = distances[i];
+    const float skinOff = character.skinnedLocators[i].skinOffset;
+    MT_LOGI("  {}: {:.4f} cm (skinOffset: {:.2f} cm)", name, dist, skinOff);
+  }
+}
+
 } // namespace
 
 Character addSkinnedLocatorParametersToTransform(Character character) {
@@ -1064,7 +1084,8 @@ void calibrateModel(
       0.0,
       1.0f,
       {},
-      std::nullopt};
+      std::nullopt,
+      config.meshConstraintWeight};
 
   // only keep one motion; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -1088,7 +1109,11 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           firstFrame,
-          false); // Not continuous for calibration keyframes
+          false, // Not continuous for calibration keyframes
+          {},
+          {},
+          std::nullopt,
+          "Calibrating first frame");
       motion.topRows(transform.numAllModelParameters()) = trackSequence(
           markerData,
           character,
@@ -1198,11 +1223,14 @@ void calibrateModel(
     // below.
     std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
-    if (config.calibShape && solvingCharacter.blendShape && character.mesh) {
+    if (config.calibShape && solvingCharacter.blendShape) {
       auto blendShapeParams =
           extractBlendWeights(solvingCharacter.parameterTransform, ModelParameters(motion.col(0)));
       MT_LOGI("Solved for blend shape coeffs: {}", blendShapeParams.v.transpose());
-      *character.mesh = extractBlendShapeFromParams(motion.col(0), solvingCharacter);
+      // NOTE: We intentionally do NOT bake the mesh here.  The caller
+      // (Python) is responsible for calling bake_blend_shape() which
+      // both updates the mesh and strips the blend shape parameters
+      // from the parameter transform.
     }
 
     // The sequence solve above could get stuck with euler singularity but per-frame solve could get
@@ -1215,7 +1243,11 @@ void calibrateModel(
           motion.topRows(transform.numAllModelParameters()),
           trackingConfig,
           frameIndices,
-          false); // Not continuous for calibration keyframes
+          false, // Not continuous for calibration keyframes
+          {},
+          {},
+          std::nullopt,
+          "Calibrating per-frame");
     } else {
       const VectorXf initPose = motion.col(0).head(transform.numAllModelParameters());
       motion.topRows(transform.numAllModelParameters()) =
@@ -1270,6 +1302,9 @@ void calibrateModel(
   // TODO: A hack to return the solved first frame as initialization for tracking later.
   identity.v = motion.col(0).head(transform.numAllModelParameters());
 
+  // Log final per-locator mesh distances
+  logSkinnedLocatorMeshDistances(character, "Final");
+
   // Log the calibrated character height
   const float height = computeCharacterHeight(character, identity);
   MT_LOGI("Calibrated character height: {:.4f} cm", height);
@@ -1316,7 +1351,8 @@ void calibrateLocators(
       0.0,
       1.0f,
       {},
-      std::nullopt};
+      std::nullopt,
+      config.meshConstraintWeight};
 
   // only keep one motion for both character and solvingCharacter; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -1366,7 +1402,11 @@ void calibrateLocators(
         motion.topRows(transform.numAllModelParameters()),
         trackingConfig,
         frameIndices,
-        false); // Not continuous for calibration keyframes
+        false, // Not continuous for calibration keyframes
+        {},
+        {},
+        std::nullopt,
+        "Calibrating locators per-frame");
 
     // Solve for both markers and poses.
     // TODO: add a small regularization to prevent too large a change
