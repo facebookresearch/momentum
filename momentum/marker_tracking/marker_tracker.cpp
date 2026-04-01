@@ -39,6 +39,24 @@ using namespace momentum;
 
 namespace momentum {
 
+namespace {
+
+/// Compute a frame stride for sampling numFrames down to ~targetFrames.
+/// Always returns at least 1 to avoid division-by-zero or infinite loops.
+/// When greedyMax > 0, the stride is also capped to greedyMax.
+size_t computeSampleStride(size_t numFrames, size_t targetFrames, size_t greedyMax = 0) {
+  if (targetFrames == 0 || numFrames == 0) {
+    return 1;
+  }
+  size_t stride = (numFrames - 1) / targetFrames;
+  if (greedyMax > 0) {
+    stride = std::min(stride, greedyMax);
+  }
+  return std::max(size_t(1), stride);
+}
+
+} // namespace
+
 /// Sample representative frames from motion data to maximize parameter variance.
 ///
 /// Uses a greedy algorithm to select frames that are maximally different from each other
@@ -62,6 +80,7 @@ std::vector<size_t> sampleFrames(
     const size_t numSamples) {
   // sample frames so that we get the most variance from the initial input
   const auto numFrames = static_cast<size_t>(initialMotion.cols());
+  MT_CHECK(frameStride > 0, "frameStride must be > 0.");
   size_t solvedFrames = (numFrames - 1) / frameStride + 1;
 
   std::vector<size_t> frameIndices;
@@ -205,6 +224,8 @@ Eigen::MatrixXf trackSequence(
     const std::optional<GloveConfig>& gloveConfig) {
   // sanity checks
   const size_t numFrames = markerData.size();
+  MT_CHECK(numFrames > 0, "Input marker data is empty.");
+  MT_CHECK(frameStride > 0, "frameStride must be > 0.");
   std::vector<size_t> frames;
   for (size_t fi = 0; fi < numFrames; fi += frameStride) {
     frames.emplace_back(fi);
@@ -390,10 +411,10 @@ Eigen::MatrixXf trackSequence(
     const std::optional<GloveConfig>& gloveConfig) {
   // sanity checks
   const size_t numFrames = markerData.size();
-  MT_CHECK(numFrames > 0, "Input data is empty.");
+  MT_CHECK(numFrames > 0, "Input marker data is empty.");
   MT_CHECK(
       initialMotion.cols() >= numFrames,
-      "Number of frames in data {} doesn't match that of input motion {}",
+      "Number of frames in data {} exceeds input motion columns {}",
       numFrames,
       initialMotion.cols());
   MT_CHECK(
@@ -628,7 +649,8 @@ Eigen::MatrixXf trackPosesPerframe(
     std::span<const GloveFrameData> rightGloveData,
     const std::optional<GloveConfig>& gloveConfig) {
   const size_t numFrames = markerData.size();
-  MT_CHECK(numFrames > 0, "Input data is empty.");
+  MT_CHECK(numFrames > 0, "Input marker data is empty.");
+  MT_CHECK(frameStride > 0, "frameStride must be > 0.");
 
   // Generate frame indices from stride
   std::vector<size_t> frameIndices;
@@ -723,7 +745,12 @@ Eigen::MatrixXf trackPosesForFrames(
     const std::optional<GloveConfig>& gloveConfig,
     const std::string& progressLabel) {
   const size_t numFrames = markerData.size();
-  MT_CHECK(numFrames > 0, "Input data is empty.");
+  MT_CHECK(numFrames > 0, "Input marker data is empty.");
+  MT_CHECK(
+      initialMotion.cols() >= numFrames,
+      "Number of frames in data {} exceeds input motion columns {}",
+      numFrames,
+      initialMotion.cols());
   MT_CHECK(
       initialMotion.rows() == character.parameterTransform.numAllModelParameters(),
       "Input motion parameters {} do not match character model parameters {}",
@@ -1015,26 +1042,34 @@ void calibrateModel(
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
     const std::optional<GloveConfig>& gloveConfig) {
-  MT_CHECK(
-      identity.v.size() == character.parameterTransform.numAllModelParameters(),
+  const size_t numFrames = markerData.size();
+  MT_THROW_IF(numFrames < 2, "Calibration requires at least 2 frames, got {}.", numFrames);
+  MT_THROW_IF(
+      identity.v.size() != character.parameterTransform.numAllModelParameters(),
       "Input identity parameters {} do not match character parameters {}",
       identity.v.size(),
       character.parameterTransform.numAllModelParameters());
-  MT_CHECK(
-      leftGloveData.empty() || leftGloveData.size() == markerData.size(),
+  MT_THROW_IF(
+      !leftGloveData.empty() && leftGloveData.size() != numFrames,
       "Left glove data has {} frames but marker data has {} frames",
       leftGloveData.size(),
-      markerData.size());
-  MT_CHECK(
-      rightGloveData.empty() || rightGloveData.size() == markerData.size(),
+      numFrames);
+  MT_THROW_IF(
+      !rightGloveData.empty() && rightGloveData.size() != numFrames,
       "Right glove data has {} frames but marker data has {} frames",
       rightGloveData.size(),
-      markerData.size());
+      numFrames);
 
-  const size_t numFrames = markerData.size();
+  MT_THROW_IF(config.calibFrames == 0, "calibFrames must be > 0.");
+  if (numFrames < config.calibFrames) {
+    MT_LOGW(
+        "Only {} frames available for calibration (requested {}); using all frames.",
+        numFrames,
+        config.calibFrames);
+  }
+
   // uniformly sample frames for calibration
-  size_t frameStride = (numFrames - 1) / config.calibFrames;
-  frameStride = std::max(size_t(1), frameStride);
+  const size_t frameStride = computeSampleStride(numFrames, config.calibFrames);
 
   // create a solving character with markers as bones
   Character solvingCharacter = character;
@@ -1130,7 +1165,8 @@ void calibrateModel(
 
       // track sequence with selected stride. we need to sample at least config.calibFrames frames
       // so make sure we have a stride that allows that
-      size_t sampleStride = std::min(numFrames / config.calibFrames, config.greedySampling);
+      const size_t sampleStride =
+          computeSampleStride(numFrames, config.calibFrames, config.greedySampling);
 
       motion.topRows(transform.numAllModelParameters()) =
           trackPosesPerframe(markerData, character, identity, trackingConfig, sampleStride);
@@ -1326,13 +1362,21 @@ void calibrateLocators(
     const CalibrationConfig& config,
     const ModelParameters& identity,
     Character& character) {
-  MT_CHECK(
-      identity.v.size() == character.parameterTransform.numAllModelParameters(),
+  const size_t numFrames = markerData.size();
+  MT_THROW_IF(numFrames < 2, "Calibration requires at least 2 frames, got {}.", numFrames);
+  MT_THROW_IF(
+      identity.v.size() != character.parameterTransform.numAllModelParameters(),
       "Input identity parameters {} do not match character parameters {}",
       identity.v.size(),
       character.parameterTransform.numAllModelParameters());
 
-  const size_t numFrames = markerData.size();
+  MT_THROW_IF(config.calibFrames == 0, "calibFrames must be > 0.");
+  if (numFrames < config.calibFrames) {
+    MT_LOGW(
+        "Only {} frames available for calibration (requested {}); using all frames.",
+        numFrames,
+        config.calibFrames);
+  }
 
   // create a solving character with locators as bones
   Character solvingCharacter = createLocatorCharacter(character, "locator_");
@@ -1365,7 +1409,8 @@ void calibrateLocators(
   if (config.greedySampling > 0) {
     // track sequence with selected stride. we need to sample at least config.calibFrames frames
     // so make sure we have a stride that allows that
-    size_t sampleStride = std::min(numFrames / config.calibFrames, config.greedySampling);
+    const size_t sampleStride =
+        computeSampleStride(numFrames, config.calibFrames, config.greedySampling);
     motion.topRows(transform.numAllModelParameters()) =
         trackPosesPerframe(markerData, character, identity, trackingConfig, sampleStride);
 
@@ -1380,8 +1425,7 @@ void calibrateLocators(
         config.calibFrames);
   } else {
     // uniformly sample frames for calibration
-    size_t frameStride = (numFrames - 1) / config.calibFrames;
-    frameStride = std::max(size_t(1), frameStride);
+    const size_t frameStride = computeSampleStride(numFrames, config.calibFrames);
     for (size_t fi = 0; fi < numFrames; fi += frameStride) {
       frameIndices.emplace_back(fi);
     }
@@ -1442,8 +1486,9 @@ MatrixXf refineMotion(
     const MatrixXf& motion,
     const RefineConfig& config,
     momentum::Character& character) {
-  MT_CHECK(
-      markerData.size() == motion.cols(),
+  MT_THROW_IF(markerData.empty(), "Input marker data is empty.");
+  MT_THROW_IF(
+      markerData.size() != motion.cols(),
       "markers and motion frames mismatch: {} != {}",
       markerData.size(),
       motion.cols());
@@ -1504,7 +1549,12 @@ std::pair<float, float> getLocatorError(
     const MatrixXf& motion,
     momentum::Character& character) {
   const size_t numFrames = markerData.size();
-  MT_CHECK(numFrames > 0, "Input data is empty.");
+  MT_CHECK(numFrames > 0, "Input marker data is empty.");
+  MT_CHECK(
+      motion.cols() >= numFrames,
+      "Motion has {} columns but marker data has {} frames",
+      motion.cols(),
+      numFrames);
   MT_CHECK(
       motion.rows() == character.parameterTransform.numAllModelParameters(),
       "Input motion parameters {} do not match character model parameters {}",
