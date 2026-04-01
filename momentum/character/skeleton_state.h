@@ -24,16 +24,16 @@ struct StateSimilarity {
   VectorXf orientationError;
 
   /// Root mean square of position errors across all joints
-  float positionRMSE;
+  float positionRMSE{0.0f};
 
   /// Root mean square of orientation errors across all joints
-  float orientationRMSE;
+  float orientationRMSE{0.0f};
 
   /// Maximum position error across all joints
-  float positionMax;
+  float positionMax{0.0f};
 
   /// Maximum orientation error across all joints
-  float orientationMax;
+  float orientationMax{0.0f};
 };
 
 /// Represents the complete state of a skeleton

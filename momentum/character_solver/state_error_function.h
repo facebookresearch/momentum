@@ -105,8 +105,8 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
   Eigen::VectorX<T> targetPositionWeights_;
   Eigen::VectorX<T> targetRotationWeights_;
 
-  T posWgt_;
-  T rotWgt_;
+  T posWgt_{1};
+  T rotWgt_{1};
 
   const RotationErrorType rotationErrorType_;
 
