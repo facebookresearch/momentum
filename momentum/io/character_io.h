@@ -64,8 +64,9 @@ enum class CharacterFormat : uint8_t {
 
 /// High level function to save a character with motion and markers to any supported format.
 ///
-/// The format is determined by the file extension (.fbx, .glb, .gltf).
-/// This is a unified interface that automatically selects between FBX and GLTF based on extension.
+/// The format is determined by the file extension (.fbx, .glb, .gltf, .usd, .usda, .usdc).
+/// This is a unified interface that automatically selects between FBX, GLTF, and USD based on
+/// extension.
 /// @param[in] filename The path where the character file will be saved.
 /// @param[in] character The Character object to save.
 /// @param[in] fps Frame rate for the animation (default: 120.0f).
@@ -84,8 +85,9 @@ void saveCharacter(
 /// High level function to save a character with motion in skeleton states and markers to any
 /// supported format.
 ///
-/// The format is determined by the file extension (.fbx, .glb, .gltf).
-/// This is a unified interface that automatically selects between FBX and GLTF based on extension.
+/// The format is determined by the file extension (.fbx, .glb, .gltf, .usd, .usda, .usdc).
+/// This is a unified interface that automatically selects between FBX, GLTF, and USD based on
+/// extension.
 /// @param[in] filename The path where the character file will be saved.
 /// @param[in] character The Character object to save.
 /// @param[in] fps Frame rate for the animation.

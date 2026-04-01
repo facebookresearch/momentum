@@ -155,7 +155,7 @@ void saveCharacter(
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
       format == CharacterFormat::Unknown,
-      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf",
+      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf, .usd, .usda, .usdc",
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
@@ -171,9 +171,23 @@ void saveCharacter(
     // Save as FBX
     saveFbx(
         filename, character, motion, VectorXf(), static_cast<double>(fps), markerSequence, options);
+  } else if (format == CharacterFormat::Usd) {
+#ifdef MOMENTUM_IO_WITH_USD
+    saveUsdCharacterWithMotion(
+        filename,
+        character,
+        fps,
+        {character.parameterTransform.name, motion},
+        {},
+        markerSequence,
+        options);
+#else
+    MT_THROW("USD format is not supported in this build");
+#endif
   } else {
     MT_THROW(
-        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
+        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf, .usd, .usda, .usdc",
+        filename.string());
   }
 }
 
@@ -188,7 +202,7 @@ void saveCharacter(
   const auto format = parseCharacterFormat(filename);
   MT_THROW_IF(
       format == CharacterFormat::Unknown,
-      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf",
+      "Unknown character format for path: {}. Supported formats: .fbx, .glb, .gltf, .usd, .usda, .usdc",
       filename.string());
 
   if (format == CharacterFormat::Gltf) {
@@ -197,9 +211,16 @@ void saveCharacter(
     // Save as FBX
     saveFbxWithSkeletonStates(
         filename, character, skeletonStates, static_cast<double>(fps), markerSequence, options);
+  } else if (format == CharacterFormat::Usd) {
+#ifdef MOMENTUM_IO_WITH_USD
+    saveUsdCharacter(filename, character, fps, skeletonStates, markerSequence, options);
+#else
+    MT_THROW("USD format is not supported in this build");
+#endif
   } else {
     MT_THROW(
-        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf", filename.string());
+        "{} is not a supported format. Supported formats: .fbx, .glb, .gltf, .usd, .usda, .usdc",
+        filename.string());
   }
 }
 
