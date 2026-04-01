@@ -135,8 +135,8 @@ momentum::Camera makeOutsideInCameraForBody(
   }();
 
   std::vector<momentum::TransformT<double>> spineLocalToWorldTransforms;
-  for (size_t i = 0; i < skelStates.size(); ++i) {
-    const auto& jointState = skelStates[i].jointState.at(spineJoint);
+  for (const auto& skelState : skelStates) {
+    const auto& jointState = skelState.jointState.at(spineJoint);
     spineLocalToWorldTransforms.emplace_back(
         jointState.translation().cast<double>(), jointState.rotation().cast<double>());
   }
