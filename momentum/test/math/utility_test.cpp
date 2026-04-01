@@ -27,7 +27,7 @@ TYPED_TEST(UtilityTest, IsNanNoOpt) {
 
   const T nanValue = std::numeric_limits<T>::quiet_NaN();
   const T infValue = std::numeric_limits<T>::infinity();
-  const T normalValue = static_cast<T>(42.0);
+  const auto normalValue = static_cast<T>(42.0);
 
 #ifndef MOMENTUM_TEST_FAST_MATH
   EXPECT_TRUE(std::isnan(nanValue));
