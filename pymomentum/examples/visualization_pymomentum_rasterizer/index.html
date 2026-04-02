@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQKPMTK7XB"></script>
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-NQKPMTK7XB",{})</script><link rel="stylesheet" href="/momentum/assets/css/styles.be52daac.css">
-<script src="/momentum/assets/js/runtime~main.cd93cd86.js" defer="defer"></script>
-<script src="/momentum/assets/js/main.a1b13006.js" defer="defer"></script>
+<script src="/momentum/assets/js/runtime~main.e445da9d.js" defer="defer"></script>
+<script src="/momentum/assets/js/main.26effd80.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -48,7 +48,7 @@
 <p>The first thing you need is a camera. Pymomentum&#x27;s rasterizer uses the <code>pymomentum.camera.Camera</code> class. You can construct one in a few ways:</p>
 <ol>
 <li class="">You can construct a camera with an intrinsics model and optional extrinsics matrix.</li>
-<li class="">If you have a pymomentum body model, you can use <code>pymomentum.renderer.build_cameras_for_body()</code> to create a camera that looks at the body and frames it in view.</li>
+<li class="">If you have a pymomentum body model, you can use <code>pymomentum.renderer.create_camera_for_body()</code> to create a camera that looks at the body and frames it in view.</li>
 <li class="">You can construct a default camera and set the extrinsics matrix explicitly, using e.g. <code>camera.look_at()</code>.</li>
 <li class="">You can use <code>camera.frame()</code> to frame a set of 3d points in view (this can be handy for ensuring that an entire animation stays in frame).</li>
 </ol>
