@@ -777,6 +777,43 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("subdivisions") = 1);
 
   m.def(
+      "rasterize_grid",
+      &rasterizeGrid,
+      R"(Rasterize a grid of lines in the x-z plane (with y up).
+
+This is similar to :meth:`rasterize_checkerboard`, but renders only the grid lines rather than
+filled triangles, which is useful when you want to see through the floor (e.g. in overlay views).
+
+See detailed notes under :meth:`rasterize_mesh`, above.
+
+:param camera: Camera to render from.
+:param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
+:param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
+:param thickness: Thickness of the grid lines in pixels.  Defaults to 1.0.
+:param color: Color to use for the grid lines.  Defaults to white.
+:param model_matrix: Matrix to use to transform the grid from the origin.
+:param near_clip: Clip any geometry closer than this depth.  Defaults to 0.1.
+:param depth_offset: Offset the depth values.  Nonzero values can be used to render something slightly in front of
+    something else and avoid depth fighting.  Defaults to 0.
+:param image_offset: Offset by (x, y) pixels in image space.  Can be used to render e.g. two characters next to each
+    other for comparison without needing to create a special camera.
+:param width: Width of the grid in x/z.  Defaults to 50.0.
+:param num_lines: Number of cells in each axis (the grid will have ``num_lines + 1`` lines in each direction).  Defaults to 10.
+)",
+      py::arg("camera"),
+      py::arg("z_buffer"),
+      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::kw_only(),
+      py::arg("thickness") = 1.0f,
+      py::arg("color") = std::optional<Eigen::Vector3f>{},
+      py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
+      py::arg("near_clip") = 0.1f,
+      py::arg("depth_offset") = 0.0f,
+      py::arg("image_offset") = std::optional<Eigen::Vector2f>{},
+      py::arg("width") = 50.0f,
+      py::arg("num_lines") = 10);
+
+  m.def(
       "rasterize_lines",
       &rasterizeLines,
       R"(Rasterize lines to the provided RGB and z buffers.

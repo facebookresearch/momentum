@@ -79,6 +79,20 @@ void rasterizeCameraFrustum(
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
+/// Rasterize a grid of lines in the x-z plane (with y up).
+void rasterizeGrid(
+    const momentum::Camera& camera,
+    at::Tensor zBuffer,
+    std::optional<at::Tensor> rgbBuffer,
+    float thickness,
+    const std::optional<Eigen::Vector3f>& color,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset,
+    float width,
+    int numLines);
+
 // 2D rasterization functions that operate directly in image space
 // without camera projection or z-buffer
 

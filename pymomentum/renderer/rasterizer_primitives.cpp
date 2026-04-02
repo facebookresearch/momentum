@@ -310,6 +310,72 @@ void rasterizeCameraFrustum(
       imageOffset.value_or(Eigen::Vector2f::Zero()));
 }
 
+void rasterizeGrid(
+    const momentum::rasterizer::Camera& camera,
+    at::Tensor zBuffer,
+    std::optional<at::Tensor> rgbBuffer,
+    float thickness,
+    const std::optional<Eigen::Vector3f>& color,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset,
+    float width,
+    int numLines) {
+  drjit::scoped_flush_denormals flushDenorm(true);
+  pybind11::gil_scoped_release release;
+
+  if (nearClip <= 0) {
+    throw std::runtime_error("near_clip should be positive.");
+  }
+
+  if (width <= 0) {
+    throw std::runtime_error("width should be positive.");
+  }
+
+  if (numLines <= 0) {
+    throw std::runtime_error("num_lines should be positive.");
+  }
+
+  TensorChecker checker("rasterize_grid");
+
+  std::tie(zBuffer, rgbBuffer, std::ignore, std::ignore, std::ignore) =
+      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, {}, {}, {});
+
+  // Generate grid line segments in the XZ plane (y=0).
+  // numLines cells per axis => numLines+1 lines in each direction.
+  const int linesPerAxis = numLines + 1;
+  const float halfWidth = width / 2.0f;
+  const float step = width / static_cast<float>(numLines);
+
+  std::vector<Eigen::Vector3f> gridLines;
+  gridLines.reserve(linesPerAxis * 4);
+
+  for (int i = 0; i < linesPerAxis; ++i) {
+    const float t = -halfWidth + static_cast<float>(i) * step;
+
+    // Line parallel to X axis (varying Z)
+    gridLines.emplace_back(-halfWidth, 0.0f, t);
+    gridLines.emplace_back(halfWidth, 0.0f, t);
+
+    // Line parallel to Z axis (varying X)
+    gridLines.emplace_back(t, 0.0f, -halfWidth);
+    gridLines.emplace_back(t, 0.0f, halfWidth);
+  }
+
+  momentum::rasterizer::rasterizeLines(
+      gridLines,
+      camera,
+      modelMatrix.value_or(Eigen::Matrix4f::Identity()),
+      nearClip,
+      color.value_or(Eigen::Vector3f::Ones()),
+      thickness,
+      make_mdspan<float, 2>(zBuffer),
+      make_mdspan<float, 3>(rgbBuffer),
+      depthOffset,
+      imageOffset.value_or(Eigen::Vector2f::Zero()));
+}
+
 void rasterizeLines2D(
     at::Tensor positions,
     at::Tensor rgbBuffer,
