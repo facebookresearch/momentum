@@ -72,7 +72,7 @@ class VectorAccessor {
   void set(std::span<const py::ssize_t> batchIndices, const StrongType<T>& value);
 
  private:
-  T* data_;
+  T* data_{nullptr};
   py::ssize_t vectorSize_{};
   std::vector<py::ssize_t> strides_;
   size_t leadingNDim_{};
@@ -147,7 +147,7 @@ class JointParametersAccessor {
       const momentum::JointParametersT<T>& jointParams);
 
  private:
-  T* data_;
+  T* data_{nullptr};
   py::ssize_t nJoints_{};
   const JointParamsShape shape_;
   std::vector<py::ssize_t> strides_;
@@ -199,7 +199,7 @@ class SkeletonStateAccessor {
       const momentum::TransformListT<T>& transforms);
 
  private:
-  T* data_;
+  T* data_{nullptr};
   py::ssize_t nJoints_{};
   std::vector<py::ssize_t> strides_;
   size_t leadingNDim_{};

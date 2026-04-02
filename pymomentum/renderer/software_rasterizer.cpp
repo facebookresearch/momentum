@@ -510,10 +510,10 @@ struct SkeletonRenderingAssets {
   std::vector<Eigen::Vector3f> jointLines;
   std::vector<Eigen::Vector3f> jointCircles;
   momentum::rasterizer::Mesh sphereMesh;
-  float lineThickness;
-  float circleRadius;
-  Eigen::Vector3f lineColor;
-  Eigen::Vector3f circleColor;
+  float lineThickness{1.0f};
+  float circleRadius{3.0f};
+  Eigen::Vector3f lineColor{Eigen::Vector3f(1.0f, 0.0f, 0.0f)};
+  Eigen::Vector3f circleColor{Eigen::Vector3f(1.0f, 0.0f, 0.0f)};
 };
 
 SkeletonRenderingAssets initSkeletonAssets(
