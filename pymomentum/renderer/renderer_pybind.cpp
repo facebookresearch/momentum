@@ -24,6 +24,7 @@
 #include <Eigen/Core>
 
 #include <optional>
+#include <utility>
 
 namespace py = pybind11;
 
@@ -223,14 +224,42 @@ PYBIND11_MODULE(renderer, m) {
 
   m.def(
       "build_cameras_for_body",
-      &buildCamerasForBody,
+      [](const momentum::Character& character,
+         at::Tensor jointParameters,
+         int imageHeight,
+         int imageWidth,
+         float focalLength_mm,
+         bool horizontal,
+         float cameraAngle) {
+        if (PyErr_WarnEx(
+                PyExc_DeprecationWarning,
+                "build_cameras_for_body() is deprecated, use create_camera_for_body() instead. "
+                "The new function takes skeleton_states (numpy.ndarray) instead of joint_parameters "
+                "(torch.Tensor) and returns a single Camera instead of a list.",
+                1) == -1) {
+          throw py::error_already_set();
+        }
+        return buildCamerasForBody(
+            character,
+            std::move(jointParameters),
+            imageHeight,
+            imageWidth,
+            focalLength_mm,
+            horizontal,
+            cameraAngle);
+      },
       R"(Build a batched vector of cameras that roughly face the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.
 
+.. deprecated::
+    Use :func:`create_camera_for_body` instead.  The new function takes ``skeleton_states``
+    (``numpy.ndarray``) instead of ``joint_parameters`` (``torch.Tensor``) and returns a single
+    :class:`~pymomentum.camera.Camera` instead of a list.
+
 :param character: Character to use.
-:param jointParameters: torch.Tensor of size (nBatch x [nFrames] x nJointParameters) or size (nJointParameters); can be computed from the modelParameters using :math:`ParameterTransform.apply`.
-:param imageHeight: Height of the target image.
-:param imageWidth: Width of the target image.
-:param focalLength_mm: 35mm-equivalent focal length; e.g. focalLength=50 corresponds to a "normal" lens.
+:param joint_parameters: torch.Tensor of size (nBatch x [nFrames] x nJointParameters) or size (nJointParameters); can be computed from the modelParameters using :math:`ParameterTransform.apply`.
+:param image_height: Height of the target image.
+:param image_width: Width of the target image.
+:param focal_length_mm: 35mm-equivalent focal length; e.g. focalLength=50 corresponds to a "normal" lens.
 :param horizontal: whether the cameras are placed horizontally, assuming the Y axis is the world up direction.
 :param camera_angle: what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.
 :return: List of cameras, one for each element of the batch.)",
