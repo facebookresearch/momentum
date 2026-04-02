@@ -288,3 +288,7 @@ geometry_test_utils_sources = [
 camera_sources = [
     "camera/camera_pybind.cpp",
 ]
+
+io_usd_sources = [
+    "geometry/io_usd_pybind.cpp",
+]
