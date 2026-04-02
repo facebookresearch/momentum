@@ -40,7 +40,7 @@ Pymomentum rasterizer is a fully-featured rasterizer.
 The first thing you need is a camera. Pymomentum's rasterizer uses the `pymomentum.camera.Camera` class. You can construct one in a few ways:
 
 1. You can construct a camera with an intrinsics model and optional extrinsics matrix.
-2. If you have a pymomentum body model, you can use `pymomentum.renderer.build_cameras_for_body()` to create a camera that looks at the body and frames it in view.
+2. If you have a pymomentum body model, you can use `pymomentum.renderer.create_camera_for_body()` to create a camera that looks at the body and frames it in view.
 3. You can construct a default camera and set the extrinsics matrix explicitly, using e.g. `camera.look_at()`.
 4. You can use `camera.frame()` to frame a set of 3d points in view (this can be handy for ensuring that an entire animation stays in frame).
 
