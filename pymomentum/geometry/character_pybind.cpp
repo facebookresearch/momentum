@@ -25,6 +25,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pymomentum/python_utility/eigen_quaternion.h>
 #include <Eigen/Core>
 #include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 
@@ -1256,14 +1257,46 @@ parameters rather than joints.  Does not modify the parameter transform.  This i
           },
           "Maps a list of parameter indices to a list of joints driven by those parameters.",
           py::arg("active_parameters"))
-      .def("__repr__", [](const mm::Character& c) {
-        return fmt::format(
-            "Character(name='{}', joints={}, parameters={}, has_mesh={})",
-            c.name,
-            c.skeleton.joints.size(),
-            c.parameterTransform.numAllModelParameters(),
-            c.mesh ? "True" : "False");
-      });
+      .def(
+          "__repr__",
+          [](const mm::Character& c) {
+            return fmt::format(
+                "Character(name='{}', joints={}, parameters={}, has_mesh={})",
+                c.name,
+                c.skeleton.joints.size(),
+                c.parameterTransform.numAllModelParameters(),
+                c.mesh ? "True" : "False");
+          })
+      .def_static(
+          "add_rigid_transform_node",
+          [](const mm::Character& character,
+             const std::string& name,
+             const std::optional<Eigen::Vector3f>& translationOffset,
+             const std::optional<Eigen::Quaternionf>& preRotation) -> py::tuple {
+            auto result = mm::addRigidTransformNode(
+                character,
+                name,
+                translationOffset.value_or(Eigen::Vector3f::Zero()),
+                preRotation.value_or(Eigen::Quaternionf::Identity()));
+            return py::make_tuple(
+                std::move(result.character), result.boneIndex, result.parameterStartIndex);
+          },
+          R"(Add a new root-level bone with 6 rigid DOF parameters (tx/ty/tz/rx/ry/rz) to a character.
+
+The new joint is parented at the root level and gets 6 new model parameters
+that map directly to the joint's translation and rotation. This is useful for
+attaching camera or other rigid transform nodes to an existing character without
+modifying the original skeleton hierarchy.
+
+:param character: The :class:`Character` to add the rigid transform node to.
+:param name: Name for the new joint (also used as prefix for parameter names).
+:param translation_offset: Translation offset for the new joint. Defaults to zero.
+:param pre_rotation: Pre-rotation quaternion [x, y, z, w] for the new joint. Defaults to identity.
+:return: A tuple of (new_character, bone_index, parameter_start_index).)",
+          py::arg("character"),
+          py::arg("name"),
+          py::arg("translation_offset") = py::none(),
+          py::arg("pre_rotation") = py::none());
 }
 
 } // namespace pymomentum
