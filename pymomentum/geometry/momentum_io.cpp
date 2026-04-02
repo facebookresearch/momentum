@@ -21,6 +21,8 @@
 #include <momentum/io/usd/usd_io.h>
 #endif
 
+namespace py = pybind11;
+
 namespace pymomentum {
 
 momentum::Character loadGLTFCharacterFromFile(const std::string& path) {

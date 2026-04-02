@@ -143,7 +143,7 @@ std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>
     MT_THROW_IF(
         errorFunctionMap[typeIndex] != -1,
         "solveBodyIKProblem(): active_error_functions have duplicate types")
-    errorFunctionMap[typeIndex] = iErr;
+    errorFunctionMap[typeIndex] = static_cast<int>(iErr);
   }
 
   // All characters are guaranteed to have the same skeleton sizes so it's safe
