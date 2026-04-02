@@ -218,14 +218,14 @@ enum class StateType { Prev, Next };
 /// Parameters needed for per-state gradient computation.
 template <typename T>
 struct GradientComputationParams {
-  size_t jointIndex;
+  size_t jointIndex{kInvalidIndex};
   const TransformT<T>& targetTransform;
   const Eigen::Quaternion<T>& prevRot;
   const Eigen::Quaternion<T>& nextRot;
   const Eigen::Vector3<T>& diff;
-  T pwgt;
-  T rwgt;
-  RotationErrorType rotationErrorType;
+  T pwgt{0};
+  T rwgt{0};
+  RotationErrorType rotationErrorType{RotationErrorType::RotationMatrixDifference};
   const Eigen::Matrix3<T>& rotDiff;
   const Eigen::Matrix<T, 3, 4>& dLogDq;
 };
@@ -338,15 +338,15 @@ void computeStateGradient(
 /// Parameters needed for per-state Jacobian computation.
 template <typename T>
 struct JacobianComputationParams {
-  size_t jointIndex;
+  size_t jointIndex{kInvalidIndex};
   const TransformT<T>& targetTransform;
   const Eigen::Quaternion<T>& prevRot;
   const Eigen::Quaternion<T>& nextRot;
-  T wgt;
-  T awgt;
-  size_t rotationResidualSize;
-  size_t blockSize;
-  RotationErrorType rotationErrorType;
+  T wgt{0};
+  T awgt{0};
+  size_t rotationResidualSize{0};
+  size_t blockSize{0};
+  RotationErrorType rotationErrorType{RotationErrorType::RotationMatrixDifference};
   const Eigen::Matrix<T, 3, 4>& dLogDq;
 };
 
