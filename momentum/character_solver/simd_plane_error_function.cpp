@@ -79,7 +79,7 @@ void SimdPlaneConstraints::addConstraint(
 }
 
 VectorXi SimdPlaneConstraints::getNumConstraints() const {
-  VectorXi res = VectorXi(numJoints);
+  auto res = VectorXi(numJoints);
   for (int jointIndex = 0; jointIndex < numJoints; ++jointIndex) {
     res[jointIndex] = constraintCount[jointIndex];
   }
@@ -452,16 +452,16 @@ void SimdPlaneErrorFunction::setConstraints(const SimdPlaneConstraints* cstrs) {
 
 inline double __vectorcall sum8(const __m256 x) {
   // extract the higher and lower 4 floats
-  const __m128 high = _mm256_extractf128_ps(x, 1);
-  const __m128 low = _mm256_castps256_ps128(x);
+  const auto high = _mm256_extractf128_ps(x, 1);
+  const auto low = _mm256_castps256_ps128(x);
   // convert them to 256 bit doubles and add them up
-  const __m256d val = _mm256_add_pd(_mm256_cvtps_pd(high), _mm256_cvtps_pd(low));
+  const auto val = _mm256_add_pd(_mm256_cvtps_pd(high), _mm256_cvtps_pd(low));
   // sum the 4 doubles up and return the result
-  const __m128d valupper = _mm256_extractf128_pd(val, 1);
-  const __m128d vallower = _mm256_castpd256_pd128(val);
+  const auto valupper = _mm256_extractf128_pd(val, 1);
+  const auto vallower = _mm256_castpd256_pd128(val);
   _mm256_zeroupper();
-  const __m128d valval = _mm_add_pd(valupper, vallower);
-  const __m128d res = _mm_add_pd(_mm_permute_pd(valval, 1), valval);
+  const auto valval = _mm_add_pd(valupper, vallower);
+  const auto res = _mm_add_pd(_mm_permute_pd(valval, 1), valval);
   return _mm_cvtsd_f64(res);
 }
 
