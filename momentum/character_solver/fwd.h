@@ -564,6 +564,25 @@ using FixedAxisDiffErrorFunctiond_const_u = ::std::unique_ptr<const FixedAxisDif
 using FixedAxisDiffErrorFunctiond_const_w = ::std::weak_ptr<const FixedAxisDiffErrorFunctiond>;
 
 template <typename T>
+class FloorErrorFunctionT;
+using FloorErrorFunction = FloorErrorFunctionT<float>;
+using FloorErrorFunctiond = FloorErrorFunctionT<double>;
+
+using FloorErrorFunction_p = ::std::shared_ptr<FloorErrorFunction>;
+using FloorErrorFunction_u = ::std::unique_ptr<FloorErrorFunction>;
+using FloorErrorFunction_w = ::std::weak_ptr<FloorErrorFunction>;
+using FloorErrorFunction_const_p = ::std::shared_ptr<const FloorErrorFunction>;
+using FloorErrorFunction_const_u = ::std::unique_ptr<const FloorErrorFunction>;
+using FloorErrorFunction_const_w = ::std::weak_ptr<const FloorErrorFunction>;
+
+using FloorErrorFunctiond_p = ::std::shared_ptr<FloorErrorFunctiond>;
+using FloorErrorFunctiond_u = ::std::unique_ptr<FloorErrorFunctiond>;
+using FloorErrorFunctiond_w = ::std::weak_ptr<FloorErrorFunctiond>;
+using FloorErrorFunctiond_const_p = ::std::shared_ptr<const FloorErrorFunctiond>;
+using FloorErrorFunctiond_const_u = ::std::unique_ptr<const FloorErrorFunctiond>;
+using FloorErrorFunctiond_const_w = ::std::weak_ptr<const FloorErrorFunctiond>;
+
+template <typename T>
 class GaussNewtonSolverQRT;
 using GaussNewtonSolverQR = GaussNewtonSolverQRT<float>;
 using GaussNewtonSolverQRd = GaussNewtonSolverQRT<double>;

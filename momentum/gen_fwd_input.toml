@@ -84,6 +84,7 @@ template_classes = [
     "FixedAxisAngleErrorFunction",
     "FixedAxisCosErrorFunction",
     "FixedAxisDiffErrorFunction",
+    "FloorErrorFunction",
     "GaussNewtonSolverQR",
     "HeightErrorFunction",
     "JointToJointDistanceErrorFunction",

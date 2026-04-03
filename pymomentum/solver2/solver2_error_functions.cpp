@@ -11,6 +11,7 @@
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_solver/collision_error_function.h>
+#include <momentum/character_solver/floor_error_function.h>
 #include <momentum/character_solver/height_error_function.h>
 #include <momentum/character_solver/joint_to_joint_distance_error_function.h>
 #include <momentum/character_solver/joint_to_joint_position_error_function.h>
@@ -39,6 +40,93 @@ namespace py = pybind11;
 namespace mm = momentum;
 
 namespace pymomentum {
+
+namespace {
+
+void addFloorErrorFunction(py::module_& m) {
+  py::class_<
+      mm::FloorErrorFunction,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::FloorErrorFunction>>(
+      m,
+      "FloorErrorFunction",
+      R"(Error function that constrains the minimum vertex height to a target value.
+
+Given a set of candidate vertex indices (e.g. foot vertices), this error
+function finds the k lowest vertices along a specified "up" direction and
+penalizes the difference between their average projection and a target
+height. This is useful for ground contact constraints where feet should
+touch the floor (target_height = 0) while allowing individual feet to
+lift off the ground.
+
+Unlike HeightErrorFunction, this function:
+
+- Uses the solver's posed mesh, so it responds to all model parameters
+  including pose.
+- Only constrains the minimum projection (not the height = max - min).
+- Operates on a specified subset of vertices rather than all vertices.)")
+      .def(
+          "__repr__",
+          [](const mm::FloorErrorFunction& self) {
+            return fmt::format(
+                "FloorErrorFunction(weight={}, target_height={:.3f})",
+                self.getWeight(),
+                self.getTargetHeight());
+          })
+      .def(
+          py::init<>([](const mm::Character& character,
+                        const std::vector<size_t>& vertexIndices,
+                        float targetHeight,
+                        const std::optional<Eigen::Vector3f>& upDirection,
+                        size_t k,
+                        float weight) {
+            validateWeight(weight, "weight");
+            if (vertexIndices.empty()) {
+              throw std::invalid_argument("vertex_indices must not be empty");
+            }
+            auto result = std::make_shared<mm::FloorErrorFunction>(
+                character,
+                vertexIndices,
+                targetHeight,
+                upDirection.value_or(Eigen::Vector3f::UnitY()),
+                k);
+            result->setWeight(weight);
+            return result;
+          }),
+          R"(Initialize a FloorErrorFunction.
+
+:param character: The character (must have a mesh).
+:param vertex_indices: Indices of candidate vertices to consider (e.g. foot vertices).
+:param target_height: Target height for the minimum vertices (default: 0).
+:param up_direction: Direction to measure height along (defaults to Y-axis [0, 1, 0]).
+:param k: Number of lowest vertices to average (default: 5).
+:param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::arg("vertex_indices"),
+          py::kw_only(),
+          py::arg("target_height") = 0.0f,
+          py::arg("up_direction") = std::nullopt,
+          py::arg("k") = 5,
+          py::arg("weight") = 1.0f)
+      .def_property(
+          "target_height",
+          &mm::FloorErrorFunction::getTargetHeight,
+          &mm::FloorErrorFunction::setTargetHeight,
+          "The target height for the minimum vertices.")
+      .def_property(
+          "up_direction",
+          &mm::FloorErrorFunction::getUpDirection,
+          &mm::FloorErrorFunction::setUpDirection,
+          "The up direction for height measurement.")
+      .def_property(
+          "vertex_indices",
+          &mm::FloorErrorFunction::getVertexIndices,
+          &mm::FloorErrorFunction::setVertexIndices,
+          "The candidate vertex indices.");
+}
+
+} // namespace
 
 void addErrorFunctions(py::module_& m) {
   py::class_<
@@ -124,6 +212,8 @@ only (not pose parameters). This allows constraining height independent of pose.
           &mm::HeightErrorFunction::getUpDirection,
           &mm::HeightErrorFunction::setUpDirection,
           "The up direction for height measurement.");
+
+  addFloorErrorFunction(m);
 
   py::class_<
       mm::ModelParametersErrorFunction,
