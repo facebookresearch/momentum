@@ -166,7 +166,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8cpp_s
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character,</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#af0e46fb9bdc1cabaca7f59df6d624de9">SDFCollisionGeometry</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sdfColliders</a>,</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">const</span> std::vector&lt;int&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a>,</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">const</span> std::vector&lt;T&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a>,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">const</span> std::vector&lt;T&gt;&amp; vertexWeights,</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordtype">bool</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filterRestPoseIntersections</a>,</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint8_t</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxCollisionsPerVertex</a>)</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    : <a class="code hl_class" href="classmomentum_1_1SkeletonErrorFunctionT.html">SkeletonErrorFunctionT</a>&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;(character.<a class="code hl_variable" href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a>, character.<a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>),</div>
@@ -181,7 +181,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8cpp_s
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(maxCollisionsPerVertex_ &lt;= 255, <span class="stringliteral">&quot;maxCollisionsPerVertex must be &lt;= 255&quot;</span>);</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="comment">// Organize vertices by bone for efficient processing</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  organizeVerticesByBone(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a>);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  organizeVerticesByBone(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a>, vertexWeights);</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="comment">// Initialize bone-collider pairs and test rest pose intersections</span></div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  initializeBoneCollisionPairs(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filterRestPoseIntersections</a>);</div>
@@ -214,17 +214,17 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8cpp_s
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  }</div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="comment">// Determine weights</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  std::vector&lt;T&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  std::vector&lt;T&gt; vertexWeights;</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  <span class="keywordflow">if</span> (weights.empty()) {</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// Use uniform weights</span></div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a>.assign(vertices.size(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1));</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    vertexWeights.assign(vertices.size(), <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1));</div>
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        weights.size() == vertices.size(),</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        <span class="stringliteral">&quot;Weight count ({}) must match vertex count ({})&quot;</span>,</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        weights.size(),</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        vertices.size());</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a> = weights;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    vertexWeights = weights;</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  }</div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="comment">// Create vertex info with primary bone indices</span></div>
@@ -242,7 +242,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8cpp_s
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> = 0; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> &lt; vertices.size(); ++<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>) {</div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> vertexIndex = vertices[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>];</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vertexWeights</a>[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>];</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight = vertexWeights[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>];</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">primaryBone</a> = skinWeights.index(vertexIndex, 0);</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">primaryBone</a> &lt; character_.skeleton.joints.size());</div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
@@ -1157,7 +1157,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8cpp_s
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="sdf__collision__error__function_8cpp.html">sdf_collision_error_function.cpp</a></li>
-    <li class="footer">Generated on Thu Apr 2 2026 17:02:34 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat Apr 4 2026 06:11:56 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -48,6 +48,7 @@ var annotated_dup =
       [ "FixedAxisCosErrorFunctionT", "classmomentum_1_1FixedAxisCosErrorFunctionT.html", "classmomentum_1_1FixedAxisCosErrorFunctionT" ],
       [ "FixedAxisDataT", "structmomentum_1_1FixedAxisDataT.html", "structmomentum_1_1FixedAxisDataT" ],
       [ "FixedAxisDiffErrorFunctionT", "classmomentum_1_1FixedAxisDiffErrorFunctionT.html", "classmomentum_1_1FixedAxisDiffErrorFunctionT" ],
+      [ "FloorErrorFunctionT", "classmomentum_1_1FloorErrorFunctionT.html", "classmomentum_1_1FloorErrorFunctionT" ],
       [ "FullyDifferentiableDistanceErrorFunctionT", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT" ],
       [ "FullyDifferentiableMotionErrorFunctionT", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT" ],
       [ "FullyDifferentiableOrientationErrorFunctionT", "classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT.html", "classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT" ],

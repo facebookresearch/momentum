@@ -194,6 +194,7 @@ var hierarchy =
       [ "momentum::DistanceErrorFunctionT< T >", "classmomentum_1_1DistanceErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableDistanceErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::FloorErrorFunctionT< T >", "classmomentum_1_1FloorErrorFunctionT.html", null ],
       [ "momentum::FullyDifferentiableOrientationErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableOrientationErrorFunctionT.html", null ],
       [ "momentum::FullyDifferentiablePositionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiablePositionErrorFunctionT.html", null ],
       [ "momentum::HeightErrorFunctionT< T >", "classmomentum_1_1HeightErrorFunctionT.html", null ],

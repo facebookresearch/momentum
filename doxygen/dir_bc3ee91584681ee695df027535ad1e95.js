@@ -19,6 +19,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "error_function_utils.h", "error__function__utils_8h.html", "error__function__utils_8h" ],
     [ "fixed_axis_error_function.cpp", "fixed__axis__error__function_8cpp.html", null ],
     [ "fixed_axis_error_function.h", "fixed__axis__error__function_8h.html", "fixed__axis__error__function_8h" ],
+    [ "floor_error_function.cpp", "floor__error__function_8cpp.html", null ],
+    [ "floor_error_function.h", "floor__error__function_8h.html", "floor__error__function_8h" ],
     [ "fwd.h", "character__solver_2fwd_8h.html", "character__solver_2fwd_8h" ],
     [ "gauss_newton_solver_qr.cpp", "gauss__newton__solver__qr_8cpp.html", null ],
     [ "gauss_newton_solver_qr.h", "gauss__newton__solver__qr_8h.html", "gauss__newton__solver__qr_8h" ],
