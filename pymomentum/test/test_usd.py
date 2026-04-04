@@ -12,6 +12,7 @@ from typing import Optional
 import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
+import pymomentum.io_usd as pym_io_usd
 import pymomentum.skel_state as pym_skel_state
 import torch
 
@@ -29,7 +30,7 @@ def load_tests(
     Works with uses_legacy_listing = True (static listing handles
     this correctly by finding 0 tests when load_tests returns empty).
     """
-    if not pym_geometry.is_usd_available():
+    if not pym_io_usd.is_usd_available():
         return unittest.TestSuite()
     return standard_tests
 
@@ -43,7 +44,7 @@ class TestUsd(unittest.TestCase):
         (OpenUSD is >4GB). This test only runs when USD is available;
         otherwise load_tests() returns an empty suite.
         """
-        result = pym_geometry.is_usd_available()
+        result = pym_io_usd.is_usd_available()
         self.assertIsInstance(result, bool)
         # When this test runs, USD should be available
         self.assertTrue(result)
@@ -54,12 +55,12 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = os.path.join(temp_dir, "character.usda")
-            pym_geometry.Character.save_usd(temp_path, char)
+            pym_io_usd.save_character(temp_path, char)
 
             self.assertTrue(os.path.exists(temp_path))
             self.assertGreater(os.path.getsize(temp_path), 0)
 
-            loaded_char = pym_geometry.Character.load_usd(temp_path)
+            loaded_char = pym_io_usd.load_character(temp_path)
 
             self.assertEqual(
                 len(loaded_char.skeleton.joints),
@@ -88,10 +89,10 @@ class TestUsd(unittest.TestCase):
             # Save with mesh disabled
             path_no_mesh = os.path.join(temp_dir, "no_mesh.usda")
             options = pym_geometry.FileSaveOptions(mesh=False)
-            pym_geometry.Character.save_usd(path_no_mesh, char, options=options)
+            pym_io_usd.save_character(path_no_mesh, char, options=options)
 
             self.assertTrue(os.path.exists(path_no_mesh))
-            loaded = pym_geometry.Character.load_usd(path_no_mesh)
+            loaded = pym_io_usd.load_character(path_no_mesh)
             self.assertEqual(
                 len(loaded.skeleton.joints),
                 len(char.skeleton.joints),
@@ -99,7 +100,7 @@ class TestUsd(unittest.TestCase):
 
             # Save with default options (mesh enabled)
             path_with_mesh = os.path.join(temp_dir, "with_mesh.usda")
-            pym_geometry.Character.save_usd(path_with_mesh, char)
+            pym_io_usd.save_character(path_with_mesh, char)
 
             self.assertTrue(os.path.exists(path_with_mesh))
             # File with mesh should be larger than without
@@ -114,12 +115,12 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = os.path.join(temp_dir, "character.usda")
-            pym_geometry.Character.save_usd(temp_path, char)
+            pym_io_usd.save_character(temp_path, char)
 
             with open(temp_path, "rb") as f:
                 usd_bytes = f.read()
 
-            loaded_char = pym_geometry.Character.load_usd_from_bytes(usd_bytes)
+            loaded_char = pym_io_usd.load_character_from_bytes(usd_bytes)
 
             self.assertGreater(len(loaded_char.skeleton.joints), 0)
             self.assertEqual(
@@ -141,7 +142,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "character_motion.usda")
-            pym_geometry.Character.save_usd(
+            pym_io_usd.save_character(
                 path=path,
                 character=ref,
                 fps=120,
@@ -149,7 +150,7 @@ class TestUsd(unittest.TestCase):
                 offsets=(ref.skeleton.joint_names, offsets),
             )
 
-            char, ps, offs, fps = pym_geometry.Character.load_usd_with_motion(path)
+            char, ps, offs, fps = pym_io_usd.load_character_with_motion(path)
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
             self.assertTrue(np.allclose(poses, ps, atol=1e-5))
@@ -174,7 +175,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "character_markers.usda")
-            pym_geometry.Character.save_usd(
+            pym_io_usd.save_character(
                 path=path,
                 character=ref,
                 fps=120,
@@ -183,7 +184,7 @@ class TestUsd(unittest.TestCase):
                 markers=marker_list,
             )
 
-            char, ps, offs, fps = pym_geometry.Character.load_usd_with_motion(path)
+            char, ps, offs, fps = pym_io_usd.load_character_with_motion(path)
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
             self.assertTrue(np.allclose(poses, ps, atol=1e-5))
@@ -192,7 +193,7 @@ class TestUsd(unittest.TestCase):
             # Verify markers were preserved.
             # USD deduplicates markers by name, so the 3 identical "m" markers
             # collapse to 1 per frame.
-            marker_seq = pym_geometry.Character.load_usd_marker_sequence(path)
+            marker_seq = pym_io_usd.load_marker_sequence(path)
             self.assertEqual(len(marker_seq.frames), frames)
             for frame_markers in marker_seq.frames:
                 self.assertEqual(len(frame_markers), 1)
@@ -212,7 +213,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "character_motion.usda")
-            pym_geometry.Character.save_usd(
+            pym_io_usd.save_character(
                 path=path,
                 character=ref,
                 fps=60,
@@ -222,8 +223,8 @@ class TestUsd(unittest.TestCase):
             with open(path, "rb") as f:
                 usd_bytes = f.read()
 
-            char, ps, offs, fps = (
-                pym_geometry.Character.load_usd_with_motion_from_bytes(usd_bytes)
+            char, ps, offs, fps = pym_io_usd.load_character_with_motion_from_bytes(
+                usd_bytes
             )
 
             self.assertEqual(char.skeleton.joint_names, ref.skeleton.joint_names)
@@ -243,7 +244,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "character_skel.usda")
-            pym_geometry.Character.save_usd_from_skel_states(
+            pym_io_usd.save_character_from_skel_states(
                 path=path,
                 character=ref,
                 fps=120,
@@ -251,7 +252,7 @@ class TestUsd(unittest.TestCase):
             )
 
             char, skel_states_read, timestamps = (
-                pym_geometry.Character.load_usd_with_skel_states(path)
+                pym_io_usd.load_character_with_skel_states(path)
             )
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
@@ -277,7 +278,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "character_skel.usda")
-            pym_geometry.Character.save_usd_from_skel_states(
+            pym_io_usd.save_character_from_skel_states(
                 path=path,
                 character=ref,
                 fps=60,
@@ -288,7 +289,7 @@ class TestUsd(unittest.TestCase):
                 usd_bytes = f.read()
 
             char, skel_states_read, timestamps = (
-                pym_geometry.Character.load_usd_with_skel_states_from_bytes(usd_bytes)
+                pym_io_usd.load_character_with_skel_states_from_bytes(usd_bytes)
             )
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
@@ -304,8 +305,8 @@ class TestUsd(unittest.TestCase):
         """Test loading motion with model parameter scales.
 
         Verifies that:
-        1. We can load motion using load_usd_with_motion_model_parameter_scales
-        2. Results are consistent with load_usd_with_skel_states
+        1. We can load motion using load_character_with_motion_model_parameter_scales
+        2. Results are consistent with load_character_with_skel_states
         3. The function returns model parameter scales (not joint parameters)
         """
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -324,7 +325,7 @@ class TestUsd(unittest.TestCase):
                     motion[:, i] = motion[0, i]
 
             path_test = os.path.join(temp_dir, "motion_test.usda")
-            pym_geometry.Character.save_usd(
+            pym_io_usd.save_character(
                 path=path_test,
                 character=character,
                 fps=fps,
@@ -333,18 +334,14 @@ class TestUsd(unittest.TestCase):
 
             # Load with model parameter scales
             char1, motion1, identity1, fps1 = (
-                pym_geometry.Character.load_usd_with_motion_model_parameter_scales(
-                    path_test
-                )
+                pym_io_usd.load_character_with_motion_model_parameter_scales(path_test)
             )
 
             # Load with regular motion for comparison
-            char2, motion2, _, fps2 = pym_geometry.Character.load_usd_with_motion(
-                path_test
-            )
+            char2, motion2, _, fps2 = pym_io_usd.load_character_with_motion(path_test)
 
             # Load with skel states for comparison
-            char3, skel_states, _ = pym_geometry.Character.load_usd_with_skel_states(
+            char3, skel_states, _ = pym_io_usd.load_character_with_skel_states(
                 path_test
             )
 
@@ -369,8 +366,8 @@ class TestUsd(unittest.TestCase):
             )
 
             # Compare with skeleton states.
-            # Use atol/rtol=1e-3 because load_usd_with_skel_states reconstructs
-            # joint params from USD TRS (quaternion→Euler + log2 scale round-trip),
+            # Use atol/rtol=1e-3 because load_character_with_skel_states reconstructs
+            # joint params from USD TRS (quaternion->Euler + log2 scale round-trip),
             # introducing small numerical differences vs the model-parameter path.
             for i in range(n_frames):
                 skel_state_from_motion = torch.from_numpy(
@@ -411,7 +408,7 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "markers.usda")
-            pym_geometry.Character.save_usd(
+            pym_io_usd.save_character(
                 path=path,
                 character=ref,
                 fps=24,
@@ -419,7 +416,7 @@ class TestUsd(unittest.TestCase):
                 markers=markers_per_frame,
             )
 
-            marker_seq = pym_geometry.Character.load_usd_marker_sequence(path)
+            marker_seq = pym_io_usd.load_marker_sequence(path)
             self.assertIsNotNone(marker_seq)
             self.assertEqual(len(marker_seq.frames), frames)
             for frame_idx, frame_markers in enumerate(marker_seq.frames):
@@ -439,8 +436,8 @@ class TestUsd(unittest.TestCase):
                         err_msg=f"Marker {i} position mismatch at frame {frame_idx}",
                     )
 
-    def test_unified_save_usd(self) -> None:
-        """Test unified save function with USD extension."""
+    def test_save_load_usd_character(self) -> None:
+        """Test save_character and load_character round-trip."""
         character = pym_test_utils.create_test_character()
         np.random.seed(42)
         model_params = np.random.rand(
@@ -448,19 +445,19 @@ class TestUsd(unittest.TestCase):
         ).astype(np.float32)
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = os.path.join(temp_dir, "test_unified.usda")
-            pym_geometry.Character.save(
+            path = os.path.join(temp_dir, "test_save_load.usda")
+            pym_io_usd.save_character(
                 path=path,
                 character=character,
                 fps=60,
-                motion=model_params,
+                motion=(character.parameter_transform.names, model_params),
             )
             # Verify file was created
             self.assertTrue(os.path.exists(path))
             self.assertGreater(os.path.getsize(path), 0)
 
             # Verify we can load it back
-            loaded_char = pym_geometry.Character.load_usd(path)
+            loaded_char = pym_io_usd.load_character(path)
             self.assertEqual(loaded_char.skeleton.size, character.skeleton.size)
 
     def test_save_usd_character_with_special_char_locators(self) -> None:
@@ -483,12 +480,12 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "special_locators.usda")
-            pym_geometry.Character.save_usd(path, char)
+            pym_io_usd.save_character(path, char)
 
             self.assertTrue(os.path.exists(path))
             self.assertGreater(os.path.getsize(path), 0)
 
-            loaded = pym_geometry.Character.load_usd(path)
+            loaded = pym_io_usd.load_character(path)
             self.assertEqual(len(loaded.locators), len(special_locators))
 
             # Verify original names are preserved via the momentum:name attribute
@@ -505,10 +502,10 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "blendshapes.usda")
-            pym_geometry.Character.save_usd(path, char)
+            pym_io_usd.save_character(path, char)
 
             self.assertTrue(os.path.exists(path))
-            loaded = pym_geometry.Character.load_usd(path)
+            loaded = pym_io_usd.load_character(path)
             self.assertIsNotNone(loaded.blend_shape)
 
     def test_save_usd_with_collision_geometry(self) -> None:
@@ -520,17 +517,17 @@ class TestUsd(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             path = os.path.join(temp_dir, "collision.usda")
-            pym_geometry.Character.save_usd(path, char)
+            pym_io_usd.save_character(path, char)
 
             self.assertTrue(os.path.exists(path))
-            loaded = pym_geometry.Character.load_usd(path)
+            loaded = pym_io_usd.load_character(path)
             self.assertEqual(
                 len(loaded.collision_geometry),
                 len(char.collision_geometry),
             )
 
-    def test_unified_save_usd_with_skel_states(self) -> None:
-        """Test unified save_with_skel_states with USD extension."""
+    def test_save_load_usd_character_with_skel_states_roundtrip(self) -> None:
+        """Test save_character_from_skel_states and load_character_with_skel_states."""
         ref = pym_test_utils.create_test_character()
         frames = 3
         np.random.seed(0)
@@ -542,8 +539,8 @@ class TestUsd(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = os.path.join(temp_dir, "test_unified_skel.usda")
-            pym_geometry.Character.save_with_skel_states(
+            path = os.path.join(temp_dir, "test_skel_roundtrip.usda")
+            pym_io_usd.save_character_from_skel_states(
                 path=path,
                 character=ref,
                 fps=60,
@@ -551,9 +548,7 @@ class TestUsd(unittest.TestCase):
             )
             self.assertTrue(os.path.exists(path))
 
-            char, skel_states_read, _ = (
-                pym_geometry.Character.load_usd_with_skel_states(path)
-            )
+            char, skel_states_read, _ = pym_io_usd.load_character_with_skel_states(path)
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
             self.assertEqual(skel_states_read.shape, skeleton_states.shape)
 

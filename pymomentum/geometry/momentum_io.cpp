@@ -269,6 +269,11 @@ void saveCharacterToFile(
         options);
     return;
   }
+#else
+  MT_THROW_IF(
+      hasUsdExtension(path),
+      "USD file format requires pymomentum.io_usd. "
+      "Import pymomentum.io_usd and use its save functions directly.");
 #endif
   momentum::saveCharacter(
       path,
@@ -296,6 +301,11 @@ void saveCharacterToFileWithSkelStates(
                             : std::span<const std::vector<momentum::Marker>>{});
     return;
   }
+#else
+  MT_THROW_IF(
+      hasUsdExtension(path),
+      "USD file format requires pymomentum.io_usd. "
+      "Import pymomentum.io_usd and use its save functions directly.");
 #endif
   momentum::saveCharacter(
       path,

@@ -14,31 +14,19 @@ logic for pytest (used in GitHub CI).
 
 # pyre-strict
 
-import pytest
+import os
 
+# Exclude test files whose dependencies are not available.
+# collect_ignore runs before pytest imports the test modules, preventing
+# ImportError during collection (e.g. when pymomentum.io_usd is not built).
+collect_ignore: list[str] = []
 
-def pytest_collection_modifyitems(
-    config: pytest.Config,  # noqa: ARG001 - required by pytest hook signature
-    items: list[pytest.Item],
-) -> None:
-    """
-    Skip tests at collection time when their dependencies are unavailable.
+try:
+    import pymomentum.io_usd as _io_usd  # noqa: F401
 
-    This is the pytest equivalent of load_tests() returning an empty TestSuite.
-    It prevents tests from running (and failing) when required dependencies
-    are not available in the build environment.
-    """
-    # Check USD availability once at collection time
-    try:
-        import pymomentum.geometry as pym_geometry
+    usd_available = True
+except ImportError:
+    usd_available = False
 
-        usd_available = pym_geometry.is_usd_available()
-    except (ImportError, AttributeError):
-        usd_available = False
-
-    skip_usd = pytest.mark.skip(reason="USD support not available in this build")
-
-    for item in items:
-        # Skip USD tests when USD is not available
-        if "test_usd" in item.nodeid and not usd_available:
-            item.add_marker(skip_usd)
+if not usd_available:
+    collect_ignore.append(os.path.join(os.path.dirname(__file__), "test_usd.py"))

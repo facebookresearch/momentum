@@ -201,7 +201,6 @@ mt_python_binding(
     io_shape
     io_skeleton
     io_urdf
-    $<$<BOOL:${MOMENTUM_BUILD_IO_USD}>:io_usd>
     python_utility
     tensor_momentum
     tensor_utility
@@ -211,8 +210,21 @@ mt_python_binding(
     ${torch_python}
   COMPILE_OPTIONS
     ${TORCH_CXX_FLAGS}
-    $<$<BOOL:${MOMENTUM_BUILD_IO_USD}>:-DMOMENTUM_WITH_USD>
 )
+
+if(MOMENTUM_BUILD_IO_USD)
+  mt_python_binding(
+    NAME io_usd
+    PYMOMENTUM_SOURCES_VARS io_usd_sources
+    LINK_LIBRARIES
+      character
+      io_file_save_options
+      io_usd
+      skeleton
+    COMPILE_OPTIONS
+      -DMOMENTUM_WITH_USD
+  )
+endif()
 
 mt_python_binding(
   NAME geometry_test_utils
