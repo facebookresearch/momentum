@@ -57,6 +57,21 @@ void jacobian_jointParams_to_modelParams(
   }
 }
 
+/// Overload accepting MatrixBase for Eigen expression types (e.g. row blocks).
+template <typename T, typename Derived>
+void jacobian_jointParams_to_modelParams(
+    const T& jacobian_jointParams,
+    const Eigen::Index iJointParam,
+    const ParameterTransform& parameterTransform,
+    Eigen::MatrixBase<Derived>& jacobian) {
+  for (auto index = parameterTransform.transform.outerIndexPtr()[iJointParam];
+       index < parameterTransform.transform.outerIndexPtr()[iJointParam + 1];
+       ++index) {
+    jacobian(0, parameterTransform.transform.innerIndexPtr()[index]) +=
+        jacobian_jointParams * parameterTransform.transform.valuePtr()[index];
+  }
+}
+
 template <typename T>
 void jacobian_jointParams_to_modelParams(
     const T& jacobian_jointParams,

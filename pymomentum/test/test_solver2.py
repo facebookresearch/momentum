@@ -2647,6 +2647,81 @@ class TestSolver(unittest.TestCase):
             f"Solved height {actual_height_2} does not match second target height {target_height_2}",
         )
 
+    def test_floor_error_solver_convergence(self) -> None:
+        """Test FloorErrorFunction pulls the character to the floor."""
+
+        # Create test character with mesh
+        character = pym_test_utils.create_test_character(num_joints=4)
+
+        n_params = character.parameter_transform.size
+
+        # The test mesh has vertices along the Y axis. At rest pose, the
+        # lowest vertices are at y=0. We'll translate the character up via
+        # root_ty, then verify the floor constraint pulls it back to y=0.
+        up_direction = np.array([0.0, 1.0, 0.0])
+
+        # Use all vertex indices as candidates
+        mesh_vertices_rest = character.skin_points(
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, np.zeros(n_params, dtype=np.float32)
+            )
+        )
+        n_verts = mesh_vertices_rest.shape[0]
+        vertex_indices = list(range(n_verts))
+
+        # Create floor error: target min height = 0
+        floor_error = pym_solver2.FloorErrorFunction(
+            character,
+            vertex_indices,
+            target_height=0.0,
+            up_direction=up_direction,
+            k=3,
+            weight=1.0,
+        )
+
+        # Also add a model parameters error to anchor most parameters
+        model_params_error = pym_solver2.ModelParametersErrorFunction(
+            character,
+            weight=0.01,
+        )
+
+        solver_function = pym_solver2.SkeletonSolverFunction(
+            character, [floor_error, model_params_error]
+        )
+
+        # Start with the character translated up by 2 units
+        model_params_init = np.zeros(n_params, dtype=np.float32)
+        model_params_init[1] = 2.0  # root_ty
+
+        solver_options = pym_solver2.GaussNewtonSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.min_iterations = 5
+        solver_options.regularization = 1e-7
+        solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
+
+        model_params_final = solver.solve(model_params_init)
+
+        # Compute min vertex height after solving
+        skel_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
+        )
+        mesh_vertices = character.skin_points(skel_state)
+        projections = mesh_vertices @ up_direction
+        min_height = projections.min()
+
+        # The min vertex height should be close to 0 (the target)
+        self.assertTrue(
+            np.isclose(min_height, 0.0, atol=0.1),
+            f"Min vertex height {min_height} should be close to 0.0 after solving",
+        )
+
+        # Verify that the solver reduced the error significantly
+        self.assertLess(
+            solver.per_iteration_errors[-1],
+            solver.per_iteration_errors[0],
+            "Solver should reduce error",
+        )
+
     def test_velocity_magnitude_sequence_error_function(self) -> None:
         """Test VelocityMagnitudeSequenceErrorFunction to ensure joint velocity magnitudes match targets."""
 
