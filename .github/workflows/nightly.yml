@@ -88,6 +88,8 @@ jobs:
     name: nightly-cpp-win
     runs-on: windows-latest
     env:
+      # Static libs to avoid DLL resolution failures on Windows CI runners
+      BUILD_SHARED_LIBS: "OFF"
       CMAKE_C_COMPILER_LAUNCHER: sccache
       CMAKE_CXX_COMPILER_LAUNCHER: sccache
       SCCACHE_GHA_ENABLED: "true"
@@ -163,7 +165,7 @@ jobs:
         run: ccache -s
 
   pymomentum-ubuntu:
-    name: nightly-py-${{ matrix.pixi_env }}-ubuntu
+    name: nightly-py-${{ matrix.pixi_env }}-ubuntu${{ contains(matrix.pixi_env, 'cuda') && '-build-only' || '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -202,10 +204,17 @@ jobs:
           cache: true
 
       - name: Build and test PyMomentum
+        if: ${{ !contains(matrix.pixi_env, 'cuda') }}
         run: |
           pixi run -e ${{ matrix.pixi_env }} test_py
 
+      - name: Build PyMomentum (CUDA, build-only)
+        if: ${{ contains(matrix.pixi_env, 'cuda') }}
+        run: |
+          pixi run -e ${{ matrix.pixi_env }} build_py
+
       - name: Build Python API Doc
+        if: ${{ !contains(matrix.pixi_env, 'cuda') }}
         run: |
           MOMENTUM_BUILD_WITH_FBXSDK=ON \
             pixi run -e ${{ matrix.pixi_env }} doc_py
