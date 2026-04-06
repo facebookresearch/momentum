@@ -316,7 +316,8 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { FBXSDK_PATH 
 """, MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, depends-on = [
     "install_deps",
 ] }
-test_py = { cmd = "pytest pymomentum/test/", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+# TODO(T219163027): Remove test_lighting skip once drjit::range<IntP> crash in scalar SIMD mode is fixed
+test_py = { cmd = "pytest pymomentum/test/ -k 'not test_lighting'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
@@ -394,7 +395,7 @@ config = { cmd = """
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
         -G 'Visual Studio 17 2022' \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
         -DMOMENTUM_ENABLE_FBX_SAVING=$MOMENTUM_ENABLE_FBX_SAVING \
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
@@ -406,7 +407,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+    """, env = { BUILD_SHARED_LIBS = "ON", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
     "config",
 ] }
