@@ -456,30 +456,35 @@ The resulting arrays are as follows:
   //    name
   //    pos
   //    occluded
+  //    confidence
   markerClass.def(py::init())
       .def(
-          py::init<const std::string&, const Eigen::Vector3d&, const bool>(),
+          py::init<const std::string&, const Eigen::Vector3d&, const bool, const float>(),
           R"(Create a marker with the specified properties.
 
           :param name: The name of the marker
           :param pos: The 3D position of the marker
           :param occluded: Whether the marker is occluded with no position info
+          :param confidence: How much to trust this observation, in [0, 1]
           )",
-          py::arg("name"),
-          py::arg("pos"),
-          py::arg("occluded"))
+          py::arg("name") = "Undefined",
+          py::arg("pos") = Eigen::Vector3d::Zero(),
+          py::arg("occluded") = false,
+          py::arg("confidence") = 1.0)
       .def_readwrite("name", &mm::Marker::name, "Name of the marker")
       .def_readwrite("pos", &mm::Marker::pos, "Marker 3d position")
       .def_readwrite(
           "occluded", &mm::Marker::occluded, "True if the marker is occluded with no position info")
+      .def_readwrite("confidence", &mm::Marker::confidence, "How trusted is this marker")
       .def("__repr__", [](const mm::Marker& m) {
         return fmt::format(
-            "Marker(name='{}', pos=[{} {} {}], occluded={})",
+            "Marker(name='{}', pos=[{} {} {}], occluded={}, confidence={})",
             m.name,
             m.pos.x(),
             m.pos.y(),
             m.pos.z(),
-            m.occluded ? "True" : "False");
+            m.occluded ? "True" : "False",
+            m.confidence);
       });
 
   // Class MarkerSequence, defining the properties:
