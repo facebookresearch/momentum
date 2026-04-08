@@ -450,6 +450,8 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
       }
 
       // go over all data and enter into the output array
+      const auto& confArray =
+          extension.count("confidence") != 0 ? extension["confidence"] : nlohmann::json();
       for (size_t i = 0; i < positions.size(); i++) {
         const auto index = static_cast<size_t>(std::lround(timestamps[i] * fps));
         result.frames[index].emplace_back();
@@ -458,6 +460,9 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
         marker.name = node.name;
         marker.occluded = false;
         marker.pos = positions[i].cast<double>();
+        if (confArray.is_array() && i < confArray.size()) {
+          marker.confidence = confArray[i].get<float>();
+        }
       }
     }
   }
