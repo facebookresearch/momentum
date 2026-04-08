@@ -46,7 +46,8 @@ TF_DEFINE_PRIVATE_TOKENS(
          "momentum:motion:jointNames"))((momentumMotionOffsets, "momentum:motion:offsets"))(
         (momentumMarkerName,
          "momentum:marker:name"))((momentumMarkerOccluded, "momentum:marker:occluded"))(
-        (momentumMarkersFps, "momentum:markers:fps")));
+        (momentumMarkerConfidence,
+         "momentum:marker:confidence"))((momentumMarkersFps, "momentum:markers:fps")));
 
 namespace momentum {
 
@@ -409,11 +410,13 @@ void saveMarkerSequenceToUsd(
 
     auto xformAPI = UsdGeomXformCommonAPI(xformPrim);
 
-    // Create the occluded attribute once per marker, then reuse inside the loop
+    // Create per-marker attributes once, then reuse inside the loop
     auto occludedAttr = xformPrim.GetPrim().CreateAttribute(
         _tokens->momentumMarkerOccluded, SdfValueTypeNames->Bool);
+    auto confidenceAttr = xformPrim.GetPrim().CreateAttribute(
+        _tokens->momentumMarkerConfidence, SdfValueTypeNames->Float);
 
-    // Write time-sampled translations and occlusion
+    // Write time-sampled translations, occlusion, and confidence
     for (size_t frame = 0; frame < markerSequence.size(); ++frame) {
       const auto timeCode = UsdTimeCode(static_cast<double>(frame));
 
@@ -423,10 +426,12 @@ void saveMarkerSequenceToUsd(
         const auto& marker = markerSequence[frame][it->second];
         xformAPI.SetTranslate(GfVec3d(marker.pos.x(), marker.pos.y(), marker.pos.z()), timeCode);
         occludedAttr.Set(marker.occluded, timeCode);
+        confidenceAttr.Set(marker.confidence, timeCode);
       } else {
-        // Marker not present in this frame — mark as occluded at origin
+        // Marker not present in this frame — mark as occluded at origin with zero confidence
         xformAPI.SetTranslate(GfVec3d(0.0, 0.0, 0.0), timeCode);
         occludedAttr.Set(true, timeCode);
+        confidenceAttr.Set(0.0f, timeCode);
       }
     }
   }
@@ -513,6 +518,7 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
     std::string name;
     UsdGeomXformCommonAPI xformAPI;
     UsdAttribute occludedAttr;
+    UsdAttribute confidenceAttr;
   };
   std::vector<CachedMarkerInfo> cachedMarkers;
   cachedMarkers.reserve(markerPrims.size());
@@ -520,7 +526,8 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
     cachedMarkers.push_back(
         {name,
          UsdGeomXformCommonAPI(xform),
-         xform.GetPrim().GetAttribute(_tokens->momentumMarkerOccluded)});
+         xform.GetPrim().GetAttribute(_tokens->momentumMarkerOccluded),
+         xform.GetPrim().GetAttribute(_tokens->momentumMarkerConfidence)});
   }
 
   for (int frame = 0; frame < numFrames; ++frame) {
@@ -548,6 +555,13 @@ MarkerSequence loadMarkerSequenceFromUsd(const UsdStageRefPtr& stage) {
         bool occluded = true;
         cached.occludedAttr.Get(&occluded, timeCode);
         marker.occluded = occluded;
+      }
+
+      // Read confidence (default 1.0 for backward compatibility)
+      if (cached.confidenceAttr) {
+        float confidence = 1.0f;
+        cached.confidenceAttr.Get(&confidence, timeCode);
+        marker.confidence = confidence;
       }
 
       frameMarkers.push_back(std::move(marker));

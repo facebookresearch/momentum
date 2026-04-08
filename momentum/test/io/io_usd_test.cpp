@@ -728,6 +728,8 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MarkerSequence) {
           static_cast<double>(f) * 0.3 + m * 3);
       // Make some markers occluded in some frames
       markerSequence[f][m].occluded = (f + m) % 3 == 0;
+      // Vary confidence across markers and frames
+      markerSequence[f][m].confidence = 0.5f + 0.1f * static_cast<float>(m);
     }
   }
 
@@ -755,6 +757,8 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MarkerSequence) {
           << "Marker pos.z mismatch at frame " << f << ", marker " << m;
       EXPECT_EQ(loaded.occluded, orig.occluded)
           << "Marker occlusion mismatch at frame " << f << ", marker " << m;
+      EXPECT_FLOAT_EQ(loaded.confidence, orig.confidence)
+          << "Marker confidence mismatch at frame " << f << ", marker " << m;
     }
   }
 }
