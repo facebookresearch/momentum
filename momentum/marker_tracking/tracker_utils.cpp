@@ -96,7 +96,7 @@ std::vector<std::vector<SkinnedLocatorConstraint>> createSkinnedConstraintData(
       SkinnedLocatorConstraint skinnedConstraint;
       skinnedConstraint.locatorIndex = gsl::narrow_cast<int>(locatorIdx);
       skinnedConstraint.targetPosition = jMarker.pos.cast<float>();
-      skinnedConstraint.weight = locators[locatorIdx].weight;
+      skinnedConstraint.weight = locators[locatorIdx].weight * jMarker.confidence;
       results.at(iFrame).push_back(skinnedConstraint);
     }
   }
