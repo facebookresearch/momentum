@@ -102,11 +102,11 @@ var NAVTREEINDEX =
 "structmomentum_1_1CameraIntrinsicsMapping.html#a47604d7fde314b6554d432c95bb649d7",
 "structmomentum_1_1ErrorFunctionDerivativesT.html",
 "structmomentum_1_1JointToJointDistanceConstraintT.html#a5b31a8fa113dc71724deefd35968c027",
-"structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1",
-"structmomentum_1_1RigidTransformNodeResult.html",
-"structmomentum_1_1SkinnedLocator.html#a94cba762940a13d9c48dcc43cc581620",
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#ac65feeb44b9f66b2189597946e7f6def",
-"usd__mesh__io_8cpp.html#ad7a3c3bb0dbcc7ef470dcfe3931a2d4a"
+"structmomentum_1_1MppcaT.html#a9366b82bc8711904c17dce6dcbd8f4a7",
+"structmomentum_1_1RefineConfig.html#a5e819dc131e4662059b46b14b94b975d",
+"structmomentum_1_1SkinnedLocator.html#a797ccdb6cdaf1b7bd8fab6ecb070ca32",
+"structmomentum_1_1VertexVertexDistanceConstraintT.html#ab5791b8d05cea1960c8d5a455c7479e5",
+"usd__mesh__io_8cpp.html#a5513db955ed6b508aa57f2649a0fe145"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

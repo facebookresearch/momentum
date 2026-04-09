@@ -328,6 +328,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Marker"><code class="docutils literal notranslate"><span class="pre">Marker</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.__init__"><code class="docutils literal notranslate"><span class="pre">Marker.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.confidence"><code class="docutils literal notranslate"><span class="pre">Marker.confidence</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.name"><code class="docutils literal notranslate"><span class="pre">Marker.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.occluded"><code class="docutils literal notranslate"><span class="pre">Marker.occluded</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Marker.pos"><code class="docutils literal notranslate"><span class="pre">Marker.pos</span></code></a></li>
@@ -2707,7 +2708,7 @@ Output shape: […, numModelParams]</p>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
 <li><p>__init__(self: pymomentum.geometry.Marker) -&gt; None</p></li>
-<li><p>__init__(self: pymomentum.geometry.Marker, name: str, pos: numpy.ndarray[numpy.float64[3, 1]], occluded: bool) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.geometry.Marker, name: str = ‘Undefined’, pos: numpy.ndarray[numpy.float64[3, 1]] = array([0., 0., 0.]), occluded: bool = False, confidence: float = 1.0) -&gt; None</p></li>
 </ol>
 <p>Create a marker with the specified properties.</p>
 <blockquote>
@@ -2721,8 +2722,17 @@ Output shape: […, numModelParams]</p>
 <dt class="field-odd">param occluded<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Whether the marker is occluded with no position info</p>
 </dd>
+<dt class="field-even">param confidence<span class="colon">:</span></dt>
+<dd class="field-even"><p>How much to trust this observation, in [0, 1]</p>
+</dd>
 </dl>
 </div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.Marker.confidence">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">confidence</span></span><a class="headerlink" href="#pymomentum.geometry.Marker.confidence" title="Link to this definition"></a></dt>
+<dd><p>How trusted is this marker</p>
 </dd></dl>
 
 <dl class="py property">
