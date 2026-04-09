@@ -1097,6 +1097,18 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
+  if(MOMENTUM_BUILD_IO_USD)
+    mt_executable(
+      NAME usd_viewer
+      SOURCES_VARS usd_viewer_sources
+      LINK_LIBRARIES
+        io_usd
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
+  endif()
+
 endif()
 
 #===============================================================================
