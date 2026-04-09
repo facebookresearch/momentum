@@ -13,9 +13,9 @@ jobs:
   pixi-update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.5
         with:
           run-install: false
       - name: Update lockfiles
@@ -23,7 +23,7 @@ jobs:
           pixi global install pixi-diff-to-markdown
           pixi update --json --no-install | pixi-diff-to-markdown >> diff.md
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           token: ${{ secrets.BYPASS_TOKEN }}
           commit-message: Update pixi lockfile

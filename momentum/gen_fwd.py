@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 import tomlkit
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 # Define the template for the header file
@@ -74,7 +74,10 @@ def main():
             data = tomlkit.parse(file.read())
 
         # Setup Jinja2 environment
-        env = Environment(loader=FileSystemLoader("."))
+        env = Environment(
+            loader=FileSystemLoader("."),
+            autoescape=select_autoescape(default_for_string=False),
+        )
         template = env.from_string(header_template)
 
         # Iterate over each fwd in the TOML data
