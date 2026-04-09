@@ -138,46 +138,4 @@ std::vector<momentum::SkeletonState> arrayToSkeletonStates(
 
 bool isFbxsdkAvailable();
 
-bool isUsdAvailable();
-
-#ifdef MOMENTUM_WITH_USD
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadUSDCharacterWithMotion(
-    const std::string& path);
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionFromBytes(const pybind11::bytes& bytes);
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionModelParameterScales(const std::string& path);
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionModelParameterScalesFromBytes(const pybind11::bytes& bytes);
-
-std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
-loadUSDCharacterWithSkelStates(const std::string& path);
-
-std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
-loadUSDCharacterWithSkelStatesFromBytes(const pybind11::bytes& bytes);
-
-void saveUSDCharacterToFile(
-    const std::string& path,
-    const momentum::Character& character,
-    float fps = 120.f,
-    const std::optional<const momentum::MotionParameters>& motion = std::nullopt,
-    const std::optional<const std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets =
-        std::nullopt,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers = std::nullopt,
-    const std::optional<const momentum::FileSaveOptions>& options = std::nullopt);
-
-void saveUSDCharacterToFileFromSkelStates(
-    const std::string& path,
-    const momentum::Character& character,
-    float fps,
-    const pybind11::array_t<float>& skelStates,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FileSaveOptions>& options);
-
-momentum::MarkerSequence loadUSDMarkerSequence(const std::string& path);
-#endif // MOMENTUM_WITH_USD
-
 } // namespace pymomentum

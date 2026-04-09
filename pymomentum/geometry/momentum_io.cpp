@@ -17,9 +17,6 @@
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
-#ifdef MOMENTUM_WITH_USD
-#include <momentum/io/usd/usd_io.h>
-#endif
 
 namespace py = pybind11;
 
@@ -250,31 +247,10 @@ void saveCharacterToFile(
     const std::optional<const Eigen::MatrixXf>& motion,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
     const momentum::FileSaveOptions& options) {
-#ifdef MOMENTUM_WITH_USD
-  if (hasUsdExtension(path)) {
-    momentum::MotionParameters motionParams;
-    if (motion.has_value()) {
-      std::get<0>(motionParams) = character.parameterTransform.name;
-      std::get<1>(motionParams) = motion.value().transpose();
-    }
-    const std::vector<std::vector<momentum::Marker>> emptyMarkers;
-    momentum::saveUsdCharacterWithMotion(
-        path,
-        character,
-        fps,
-        motionParams,
-        momentum::IdentityParameters{},
-        markers.has_value() ? std::span<const std::vector<momentum::Marker>>(markers.value())
-                            : std::span<const std::vector<momentum::Marker>>(emptyMarkers),
-        options);
-    return;
-  }
-#else
   MT_THROW_IF(
       hasUsdExtension(path),
       "USD file format requires pymomentum.io_usd. "
       "Import pymomentum.io_usd and use its save functions directly.");
-#endif
   momentum::saveCharacter(
       path,
       character,
@@ -290,23 +266,10 @@ void saveCharacterToFileWithSkelStates(
     const float fps,
     const pybind11::array_t<float>& skelStates,
     const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers) {
-#ifdef MOMENTUM_WITH_USD
-  if (hasUsdExtension(path)) {
-    momentum::saveUsdCharacter(
-        path,
-        character,
-        fps,
-        arrayToSkeletonStates(skelStates, character),
-        markers.has_value() ? std::span<const std::vector<momentum::Marker>>(*markers)
-                            : std::span<const std::vector<momentum::Marker>>{});
-    return;
-  }
-#else
   MT_THROW_IF(
       hasUsdExtension(path),
       "USD file format requires pymomentum.io_usd. "
       "Import pymomentum.io_usd and use its save functions directly.");
-#endif
   momentum::saveCharacter(
       path,
       character,
@@ -461,169 +424,5 @@ bool isFbxsdkAvailable() {
   return false;
 #endif
 }
-
-bool isUsdAvailable() {
-#ifdef MOMENTUM_WITH_USD
-  return true;
-#else
-  return false;
-#endif
-}
-
-#ifdef MOMENTUM_WITH_USD
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadUSDCharacterWithMotion(
-    const std::string& path) {
-  auto [character, motionParams, identityParams, fps] = momentum::loadUsdCharacterWithMotion(path);
-  const auto& motion = std::get<1>(motionParams);
-  const auto& identity = std::get<1>(identityParams);
-  return {std::move(character), motion.transpose(), identity.v, fps};
-}
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionFromBytes(const pybind11::bytes& bytes) {
-  pybind11::buffer_info info(pybind11::buffer(bytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
-  auto [character, motionParams, identityParams, fps] =
-      momentum::loadUsdCharacterWithMotion(std::span<const std::byte>(data, length));
-  const auto& motion = std::get<1>(motionParams);
-  const auto& identity = std::get<1>(identityParams);
-  return {std::move(character), motion.transpose(), identity.v, fps};
-}
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionModelParameterScales(const std::string& path) {
-  auto [character, motion, modelIdentity, fps] =
-      momentum::loadUsdCharacterWithMotionModelParameterScales(path);
-  return {std::move(character), motion.transpose(), modelIdentity.v, fps};
-}
-
-std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
-loadUSDCharacterWithMotionModelParameterScalesFromBytes(const pybind11::bytes& bytes) {
-  pybind11::buffer_info info(pybind11::buffer(bytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
-  auto [character, motion, modelIdentity, fps] =
-      momentum::loadUsdCharacterWithMotionModelParameterScales(
-          std::span<const std::byte>(data, length));
-  return {std::move(character), motion.transpose(), modelIdentity.v, fps};
-}
-
-std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
-loadUSDCharacterWithSkelStates(const std::string& path) {
-  momentum::Character character;
-  std::vector<momentum::SkeletonState> states;
-  std::vector<float> timestamps;
-  {
-    pybind11::gil_scoped_release release;
-    std::tie(character, states, timestamps) = momentum::loadUsdCharacterWithSkeletonStates(path);
-  }
-
-  auto tensor = skelStatesToTensor(states, character);
-  return std::make_tuple(std::move(character), std::move(tensor), std::move(timestamps));
-}
-
-std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
-loadUSDCharacterWithSkelStatesFromBytes(const pybind11::bytes& bytes) {
-  pybind11::buffer_info info(pybind11::buffer(bytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
-  momentum::Character character;
-  std::vector<momentum::SkeletonState> states;
-  std::vector<float> timestamps;
-
-  {
-    pybind11::gil_scoped_release release;
-    std::tie(character, states, timestamps) =
-        momentum::loadUsdCharacterWithSkeletonStates(std::span<const std::byte>(data, length));
-  }
-
-  auto tensor = skelStatesToTensor(states, character);
-  return std::make_tuple(std::move(character), std::move(tensor), std::move(timestamps));
-}
-
-void saveUSDCharacterToFile(
-    const std::string& path,
-    const momentum::Character& character,
-    const float fps,
-    const std::optional<const momentum::MotionParameters>& motion,
-    const std::optional<const std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FileSaveOptions>& options) {
-  if (motion.has_value()) {
-    const auto& [parameters, poses] = motion.value();
-    MT_THROW_IF(
-        poses.cols() != parameters.size(),
-        "Expected motion parameters to be n_frames x {}, but got {} x {}",
-        parameters.size(),
-        poses.rows(),
-        poses.cols());
-  }
-
-  momentum::IdentityParameters identityParams;
-  if (offsets.has_value()) {
-    const auto& [names, params] = offsets.value();
-    identityParams = {names, params};
-  }
-
-  static const std::vector<std::vector<momentum::Marker>> kEmptyMarkers;
-  const auto& markersRef = markers.has_value() ? *markers : kEmptyMarkers;
-  auto transposedMotion = motion.has_value() ? transpose(*motion) : momentum::MotionParameters{};
-
-  momentum::saveUsdCharacterWithMotion(
-      path,
-      character,
-      fps,
-      transposedMotion,
-      identityParams,
-      markersRef,
-      options.value_or(momentum::FileSaveOptions{}));
-}
-
-void saveUSDCharacterToFileFromSkelStates(
-    const std::string& path,
-    const momentum::Character& character,
-    const float fps,
-    const pybind11::array_t<float>& skelStates,
-    const std::optional<const std::vector<std::vector<momentum::Marker>>>& markers,
-    const std::optional<const momentum::FileSaveOptions>& options) {
-  const auto numFrames = skelStates.shape(0);
-
-  MT_THROW_IF(
-      markers.has_value() && markers->size() != numFrames,
-      "The number of frames of the skeleton states array {} does not coincide with the number of frames of the markers {}",
-      numFrames,
-      markers->size());
-
-  std::vector<momentum::SkeletonState> skeletonStates =
-      arrayToSkeletonStates(skelStates, character);
-
-  static const std::vector<std::vector<momentum::Marker>> kEmptyMarkers;
-  const auto& markersRef = markers.has_value() ? *markers : kEmptyMarkers;
-
-  momentum::saveUsdCharacter(
-      path,
-      character,
-      fps,
-      skeletonStates,
-      markersRef,
-      options.value_or(momentum::FileSaveOptions{}));
-}
-
-momentum::MarkerSequence loadUSDMarkerSequence(const std::string& path) {
-  return momentum::loadUsdMarkerSequence(path);
-}
-
-#endif // MOMENTUM_WITH_USD
 
 } // namespace pymomentum
