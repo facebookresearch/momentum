@@ -1059,6 +1059,16 @@ if(MOMENTUM_BUILD_EXAMPLES)
   )
 
   mt_executable(
+    NAME bvh_viewer
+    SOURCES_VARS bvh_viewer_sources
+    LINK_LIBRARIES
+      io_bvh
+      rerun
+      CLI11::CLI11
+      rerun_sdk
+  )
+
+  mt_executable(
     NAME animate_shapes
     SOURCES_VARS animate_shapes_sources
     LINK_LIBRARIES

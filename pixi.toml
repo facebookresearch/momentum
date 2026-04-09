@@ -140,6 +140,9 @@ glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/glb_viewer", depe
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/urdf_viewer", depends-on = [
     "build",
 ], description = "Run URDF file viewer" }
+bvh_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/bvh_viewer", depends-on = [
+    "build",
+], description = "Run BVH file viewer" }
 usd_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/usd_viewer", depends-on = [
     "build",
 ], description = "Run USD file viewer" }
@@ -442,6 +445,9 @@ glb_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/glb_viewer.exe", 
     "build",
 ] }
 urdf_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/urdf_viewer.exe", depends-on = [
+    "build",
+] }
+bvh_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/bvh_viewer.exe", depends-on = [
     "build",
 ] }
 usd_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/usd_viewer.exe", depends-on = [
