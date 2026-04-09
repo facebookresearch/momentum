@@ -199,7 +199,7 @@ $(document).ready(function(){initNavTree('tracker__utils_8cpp_source.html',''); 
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      <a class="code hl_typedef" href="namespacemomentum.html#a9721f0650161578214bf0ff9eef3eac4">SkinnedLocatorConstraint</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>;</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>.locatorIndex = gsl::narrow_cast&lt;int&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorIdx</a>);</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>.targetPosition = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jMarker</a>.pos.cast&lt;<span class="keywordtype">float</span>&gt;();</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>.weight = locators[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorIdx</a>].weight;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>.weight = locators[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">locatorIdx</a>].weight * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jMarker</a>.confidence;</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">results</a>.at(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iFrame</a>).push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skinnedConstraint</a>);</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    }</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  }</div>
@@ -1190,7 +1190,7 @@ $(document).ready(function(){initNavTree('tracker__utils_8cpp_source.html',''); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_da9a4e26ab0cde1b62bca67c124a4985.html">marker_tracking</a></li><li class="navelem"><a class="el" href="tracker__utils_8cpp.html">tracker_utils.cpp</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 03:12:38 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Apr 9 2026 10:01:27 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

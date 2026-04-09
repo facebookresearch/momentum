@@ -91,6 +91,24 @@ buck run @arvr/mode/win/opt c3d_viewer -- --input <my_file.c3d>
 
 * [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/c3d_viewer)
 
+## BVH Viewer
+
+To run the BVH viewer, use the following command:
+
+<OssOnly>
+```
+pixi run bvh_viewer --input <my_file.bvh>
+```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt bvh_viewer -- --input <my_file.bvh>
+```
+</FbInternalOnly>
+
+* [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/bvh_viewer)
+
 ## URDF Viewer
 
 To run the URDF viewer, use the following command:
@@ -112,3 +130,21 @@ buck run @arvr/mode/win/opt urdf_viewer -- --input <my_file.urdf>
 For example, you can download an Atlas robot from this [link](https://github.com/Daniella1/urdf_files_dataset/blob/main/urdf_files/matlab/Atlas/urdf/atlas.urdf), which may look like:
 
 ![urdf_viewer](/img/urdf_viewer.png)
+
+## USD Viewer
+
+To run the USD viewer, use the following command:
+
+<OssOnly>
+```
+pixi run usd_viewer --input <my_file.usd>
+```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt usd_viewer -- --input <my_file.usd>
+```
+</FbInternalOnly>
+
+* [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/usd_viewer)

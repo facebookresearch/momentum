@@ -6,5 +6,5 @@ var usd__animation__io_8cpp =
     [ "saveMarkerSequenceToUsd", "usd__animation__io_8cpp.html#aa987bbd4e1686a71aeb44f9df7d1f3f8", null ],
     [ "saveMotionToUsd", "usd__animation__io_8cpp.html#aa5607fd1c8dea99c577770bbc88002de", null ],
     [ "saveSkeletonStatesToUsd", "usd__animation__io_8cpp.html#a64627cc2dd8daa7f9518c2c590f405f1", null ],
-    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__animation__io_8cpp.html#a884e952d3dd8053a544503b238ad9856", null ]
+    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__animation__io_8cpp.html#aa77d015bc3ca7d17bd0ac9c0db897d1d", null ]
 ];
