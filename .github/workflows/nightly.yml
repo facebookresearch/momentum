@@ -69,3 +69,20 @@ jobs:
       - name: Build and test PyMomentum
         run: |
           pixi run -e py313 test_py
+
+  pymomentum-ubuntu-arm64:
+    name: nightly-py-py312-ubuntu-arm64
+    runs-on: 2-core-ubuntu-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
+        with:
+          environments: py312
+          cache: true
+
+      - name: Build and test PyMomentum
+        run: |
+          pixi run -e py312 test_py
