@@ -347,7 +347,8 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { CMAKE_ARGS =
     -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
-    -DBUILD_SHARED_LIBS=OFF
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_CXX_FLAGS=-fsigned-char
 """, MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO(T219163027): Skip TestRendering entirely on Linux — drjit segfaults in scalar SIMD mode
 test_py = { cmd = "pytest pymomentum/test/ -k 'not TestRendering'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
