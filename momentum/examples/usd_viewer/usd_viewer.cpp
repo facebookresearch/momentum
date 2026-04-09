@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 
     try {
       rec.set_time_sequence("frame_index", 0);
-      momentum::setTimeSeconds(rec, "log_time", 0.0f);
+      momentum::setTimeSeconds(rec, "time", 0.0f);
 
       if (character.mesh && !character.mesh->vertices.empty()) {
         if (character.mesh->normals.empty()) {

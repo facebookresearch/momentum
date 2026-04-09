@@ -319,7 +319,7 @@ void logModelParamsColumns(
       rerun::Collection<int64_t>::borrow(frameIndices.data(), frameIndices.size()),
       rerun::SortingStatus::Sorted);
   auto timeColumn = makeDurationSecondsTimeColumn(
-      "log_time",
+      "time",
       rerun::Collection<double>::borrow(times.data(), times.size()),
       rerun::SortingStatus::Sorted);
   const std::vector<rerun::TimeColumn> timeColumns = {
@@ -363,7 +363,7 @@ void logJointParamsColumns(
       rerun::Collection<int64_t>::borrow(frameIndices.data(), frameIndices.size()),
       rerun::SortingStatus::Sorted);
   auto timeColumn = makeDurationSecondsTimeColumn(
-      "log_time",
+      "time",
       rerun::Collection<double>::borrow(times.data(), times.size()),
       rerun::SortingStatus::Sorted);
   const std::vector<rerun::TimeColumn> timeColumns = {
