@@ -62,50 +62,29 @@ jobs:
           pixi run cmake --build momentum/examples/hello_world/build
 
   pymomentum:
-    if: false # Temporarily disabled to reduce CI cost
-    name: py-${{ matrix.pixi_env }}-ubuntu
+    name: py-py312-ubuntu
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - pixi_env: "py312"
-          - pixi_env: "py312-cuda129"
-            cuda_version: "12.9.0"
-    env:
-      FULL_CUDA_VERSION: ${{ matrix.cuda_version }}
     steps:
-      - name: Maximize build space
-        if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
-        with:
-          root-reserve-mb: 32768
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Setup CUDA
-        if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: ./.github/actions/setup-cuda
-        with:
-          cuda-version: ${{ matrix.cuda_version }}
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
-          environments: ${{ matrix.pixi_env }}
+          environments: py312
           cache: true
 
       - name: Build and test PyMomentum
         run: |
-          pixi run -e ${{ matrix.pixi_env }} test_py
+          pixi run -e py312 test_py
 
       - name: Build Python API Doc
         run: |
-          MOMENTUM_BUILD_WITH_FBXSDK=ON \
-            pixi run -e ${{ matrix.pixi_env }} doc_py
+          pixi run -e py312 doc_py
+
+      - name: Upload Python API Doc
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        with:
+          name: python-api-doc
+          path: build/python_api_doc
+          retention-days: 7
