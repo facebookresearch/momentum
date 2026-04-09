@@ -1,0 +1,77 @@
+name: Weekly CI (GPU)
+
+on:
+  schedule:
+    - cron: '0 5 * * SUN' # Runs at 05:00 UTC every Sunday
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  pymomentum-ubuntu-gpu:
+    name: weekly-py-py312-cuda129-ubuntu-gpu
+    runs-on: 4-core-ubuntu-gpu-t4
+    env:
+      FULL_CUDA_VERSION: "12.9.0"
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
+        with:
+          root-reserve-mb: 32768
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup CUDA
+        uses: ./.github/actions/setup-cuda
+        with:
+          cuda-version: "12.9.0"
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
+        with:
+          environments: py312-cuda129
+          cache: true
+
+      - name: Build and test PyMomentum (GPU)
+        run: |
+          pixi run -e py312-cuda129 test_py
+
+  pymomentum-windows-gpu:
+    name: weekly-py-py312-cuda129-win-gpu
+    runs-on: 4-core-windows-gpu-t4
+    env:
+      FULL_CUDA_VERSION: "12.9.0"
+      CMAKE_C_COMPILER_LAUNCHER: sccache
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+
+      - name: Setup CUDA
+        uses: ./.github/actions/setup-cuda
+        with:
+          cuda-version: "12.9.0"
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
+        with:
+          environments: py312-cuda129
+          cache: true
+
+      - name: Build and test PyMomentum (GPU)
+        run: |
+          pixi run -e py312-cuda129 test_py
+
+      - name: Print sccache stats
+        run: sccache --show-stats

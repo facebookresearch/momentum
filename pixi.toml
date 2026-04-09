@@ -1,7 +1,7 @@
 [workspace]
 name = "momentum"
 channels = ["conda-forge"]
-platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 version = "0.1.0"
 description = "A library providing foundational algorithms for human kinematic motion and numerical optimization solvers to apply human motion in various applications"
 license = "MIT"
@@ -27,10 +27,7 @@ setuptools = ">=80.9.0,<81"
 setuptools-scm = ">=8.0.0,<9"
 sphinx = ">=7.0.0,<9"
 sphinx-rtd-theme = ">=3.0.2,<4"
-tracy-profiler-gui = ">=0.11.1,<0.13"
-twine = ">=6.1.0,<7"
 jinja2 = ">=3.1.0,<4"
-cibuildwheel = ">=2.22.0,<3"
 
 # runtime dependencies
 blas = ">=2.135,<3"
@@ -244,6 +241,9 @@ sysroot_linux-64 = ">=2.28,<3"
 patchelf = ">=0.17.2,<0.18"
 auditwheel = ">=6.4.2,<7"
 podman = ">=5.0.0,<6"
+tracy-profiler-gui = ">=0.11.1,<0.13"  # not available on linux-aarch64
+cibuildwheel = ">=2.22.0,<3"  # not available on linux-aarch64
+twine = ">=6.1.0,<7"  # not available on linux-aarch64
 
 [target.linux-64.tasks]
 # Linux variant-aware wheel build uses cibuildwheel to produce manylinux_2_28 wheels
@@ -333,11 +333,35 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
     "doc_py",
 ] }
 
+#===============
+# linux-aarch64
+#===============
+
+[target.linux-aarch64.dependencies]
+sysroot_linux-aarch64 = ">=2.28,<3"
+
+[target.linux-aarch64.tasks]
+build_py = { cmd = "pip install . -v --no-build-isolation", env = { CMAKE_ARGS = """
+    -DMOMENTUM_ENABLE_FBX_SAVING=OFF \
+    -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
+    -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
+    -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
+    -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+    -DBUILD_SHARED_LIBS=OFF
+""", MOMENTUM_ENABLE_SIMD = "ON" } }
+# TODO(T219163027): Skip TestRendering entirely on Linux — drjit segfaults in scalar SIMD mode
+test_py = { cmd = "pytest pymomentum/test/ -k 'not TestRendering'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+    "build_py",
+] }
+
 #============
 # osx-64
 #============
 
 [target.osx.dependencies]
+tracy-profiler-gui = ">=0.11.1,<0.13"
+cibuildwheel = ">=2.22.0,<3"
+twine = ">=6.1.0,<7"
 
 [target.osx.tasks]
 build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
@@ -393,6 +417,9 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 
 [target.win-64.dependencies]
 delvewheel = ">=1.8.7,<2"
+tracy-profiler-gui = ">=0.11.1,<0.13"
+cibuildwheel = ">=2.22.0,<3"
+twine = ">=6.1.0,<7"
 
 [target.win-64.tasks]
 config = { cmd = """
@@ -515,7 +542,7 @@ dependencies = { python = "3.13.*" }
 #==============
 
 [feature.rerun-latest]
-platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 
 [feature.rerun-latest.dependencies]
 rerun-sdk = ">=0.29.0"
@@ -570,10 +597,8 @@ platforms = ["linux-64", "win-64"]
 system-requirements = { cuda = "12" }
 dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*", python = "3.12.*", pytorch-gpu = ">=2.8.0,<3" }
 
-[feature.py313-cuda129]
-platforms = ["linux-64", "win-64"]
-system-requirements = { cuda = "12" }
-dependencies = { cuda-toolkit = ">=12.9.0,<13", nvtx-c = ">=3.1.1", cuda-version = "12.9.*", python = "3.13.*", pytorch-gpu = ">=2.8.0,<3" }
+# NOTE: py313-cuda129 feature removed — pytorch-gpu does not yet support Python 3.13 on conda-forge.
+# Re-add when pytorch-gpu >=2.x has py313 builds available.
 
 #==============
 # Feature: GPU Wheel Build (no CUDA required on host)
@@ -639,7 +664,6 @@ py313 = ["py313", "rerun-latest"]
 # GPU development environments (requires CUDA on host)
 # Use these for testing GPU features locally
 py312-cuda129 = ["py312-cuda129", "rerun-latest"]
-py313-cuda129 = ["py313-cuda129", "rerun-latest"]
 gpu = ["py312-cuda129", "rerun-latest"]
 
 # GPU wheel build environments (no CUDA required on host)
