@@ -179,6 +179,7 @@ template_classes = [
 [[fwd]]
 subdirectory = "marker_tracking"
 structs = [
+    "GapFillConfig",
     "GloveConfig",
     "GloveOffset",
     "GloveSensorObservation",

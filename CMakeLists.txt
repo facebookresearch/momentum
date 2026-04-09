@@ -988,6 +988,14 @@ if(MOMENTUM_BUILD_TESTING)
   )
 
   mt_test(
+    NAME marker_gap_fill_test
+    SOURCES_VARS marker_gap_fill_test_sources
+    LINK_LIBRARIES
+      character_test_helpers
+      marker_tracker
+  )
+
+  mt_test(
     NAME rerun_test
     SOURCES_VARS rerun_test_sources
     LINK_LIBRARIES
