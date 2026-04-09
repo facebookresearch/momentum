@@ -30,9 +30,6 @@
 #include <momentum/io/skeleton/mppca_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/urdf/urdf_io.h>
-#ifdef MOMENTUM_WITH_USD
-#include <momentum/io/usd/usd_io.h>
-#endif
 #include <momentum/math/constants.h>
 #include <momentum/math/mesh.h>
 
@@ -213,17 +210,6 @@ momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath) {
 momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes) {
   return momentum::loadUrdfCharacter<float>(toSpan<std::byte>(urdfBytes));
 }
-
-#ifdef MOMENTUM_WITH_USD
-momentum::Character loadUSDCharacterFromFile(const std::string& usdPath) {
-  return momentum::loadUsdCharacter(usdPath);
-}
-
-momentum::Character loadUSDCharacterFromBytes(const pybind11::bytes& usdBytes) {
-  return momentum::loadUsdCharacter(toSpan<std::byte>(usdBytes));
-}
-
-#endif // MOMENTUM_WITH_USD
 
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path) {
   return momentum::loadMppca(path);

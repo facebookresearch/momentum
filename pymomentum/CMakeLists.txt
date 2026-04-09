@@ -221,8 +221,6 @@ if(MOMENTUM_BUILD_IO_USD)
       io_file_save_options
       io_usd
       skeleton
-    COMPILE_OPTIONS
-      -DMOMENTUM_WITH_USD
   )
 endif()
 

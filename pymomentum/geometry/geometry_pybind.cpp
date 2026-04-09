@@ -1313,14 +1313,6 @@ Supports arbitrary leading dimensions and both float32/float64 dtypes.
       &isFbxsdkAvailable,
       R"(When FBXSDK is available, you can save fbx files as output.)");
 
-  // isUsdAvailable()
-  m.def(
-      "is_usd_available",
-      &isUsdAvailable,
-      R"(Check if USD file format support is available.
-
-When USD is available, you can load and save USD files (.usd, .usda, .usdc, .usdz).)");
-
   registerMeshBindings(meshClass);
   registerJointBindings(jointClass);
   registerSkeletonBindings(skeletonClass);
