@@ -5,6 +5,9 @@ on:
     - cron: '0 3 * * *' # Runs at 03:00 UTC daily
   workflow_dispatch: # Allow manual trigger
 
+permissions:
+  contents: read
+
 jobs:
   # ---- C++ Momentum ----
 
@@ -16,10 +19,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: ${{ github.workflow }}-macos-latest-momentum
 
@@ -30,7 +33,7 @@ jobs:
           sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
           cache: true
 
@@ -58,10 +61,10 @@ jobs:
       MOMENTUM_ENABLE_SIMD: "ON"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
           cache: true
 
@@ -95,13 +98,13 @@ jobs:
       SCCACHE_GHA_ENABLED: "true"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
+        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
           cache: true
 
@@ -133,10 +136,10 @@ jobs:
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: ${{ github.workflow }}-macos-latest-pymomentum
 
@@ -147,7 +150,7 @@ jobs:
           sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.5
         with:
           cache: true
 
@@ -179,7 +182,7 @@ jobs:
     steps:
       - name: Maximize build space
         if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: easimon/maximize-build-space@master
+        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
         with:
           root-reserve-mb: 32768
           remove-dotnet: true
@@ -189,7 +192,7 @@ jobs:
           remove-docker-images: true
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup CUDA
         if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
@@ -198,7 +201,7 @@ jobs:
           cuda-version: ${{ matrix.cuda_version }}
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
           environments: ${{ matrix.pixi_env }}
           cache: true
@@ -234,10 +237,10 @@ jobs:
       SCCACHE_GHA_ENABLED: "true"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
+        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Setup CUDA
         if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
@@ -246,7 +249,7 @@ jobs:
           cuda-version: ${{ matrix.cuda_version }}
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.5
         with:
           cache: true
 

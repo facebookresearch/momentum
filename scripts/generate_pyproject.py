@@ -15,7 +15,7 @@ For Python 3.14+, add new arguments following the pattern:
 import argparse
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 def main():
@@ -72,7 +72,10 @@ def main():
     template_dir = Path(__file__).parent.parent
     output_dir = Path(args.output_dir)
     env = Environment(
-        loader=FileSystemLoader(template_dir), trim_blocks=True, lstrip_blocks=True
+        loader=FileSystemLoader(template_dir),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        autoescape=select_autoescape(),
     )
     template = env.get_template("pyproject-pypi.toml.j2")
 

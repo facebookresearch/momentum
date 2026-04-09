@@ -14,7 +14,7 @@ runs:
       # For wheel builds, we only need CONDA_OVERRIDE_CUDA (PyTorch includes CUDA runtime)
       if: runner.os == 'Windows'
       # Using N-Storm fork until https://github.com/Jimver/cuda-toolkit/issues/395 is resolved
-      uses: N-Storm/cuda-toolkit@v0.2.28
+      uses: N-Storm/cuda-toolkit@10a119c2ee0aa39506c39e7ce3068787870edbc2 # v0.2.28
       with:
         cuda: ${{ inputs.cuda-version }}
 
