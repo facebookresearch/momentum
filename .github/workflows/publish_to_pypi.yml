@@ -147,7 +147,7 @@ jobs:
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.3
+        uses: prefix-dev/setup-pixi@v0.9.5
         with:
           pixi-version: latest
           cache: true
@@ -243,7 +243,7 @@ jobs:
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.3
+        uses: prefix-dev/setup-pixi@v0.9.5
         with:
           pixi-version: latest
           cache: true
@@ -478,7 +478,7 @@ jobs:
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.3
+        uses: prefix-dev/setup-pixi@v0.9.5
         with:
           pixi-version: latest
           cache: true
