@@ -22,8 +22,6 @@ concurrency:
 
 jobs:
   momentum:
-    # Disabled: C++ testing moved to Ubuntu (cheaper).
-    if: false
     name: cpp-${{ matrix.mode == '' && 'opt' || 'dev' }}-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -74,6 +72,8 @@ jobs:
         run: ccache -s
 
   pymomentum:
+    # Disabled: Python testing moved to Ubuntu (cheaper). macOS Python coverage in nightly.
+    if: false
     name: py-${{ matrix.os == 'macos-latest-large' && 'mac-x86_64' || 'mac-arm64' }}
     runs-on: ${{ matrix.os }}
     strategy:

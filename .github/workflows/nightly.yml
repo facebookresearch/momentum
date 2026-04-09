@@ -9,124 +9,9 @@ permissions:
   contents: read
 
 jobs:
-  # ---- C++ Momentum ----
-
-  momentum-macos:
-    name: nightly-cpp-mac-arm64
-    runs-on: macos-latest
-    env:
-      CMAKE_C_COMPILER_LAUNCHER: ccache
-      CMAKE_CXX_COMPILER_LAUNCHER: ccache
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
-        with:
-          key: ${{ github.workflow }}-macos-latest-momentum
-
-      - name: Install FBX SDK
-        run: |
-          curl -O https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_clang_mac.pkg.tgz
-          tar -xvf fbx202037_fbxsdk_clang_mac.pkg.tgz
-          sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
-
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
-        with:
-          cache: true
-
-      - name: Build and test Momentum
-        run: |
-          MOMENTUM_BUILD_WITH_FBXSDK=ON \
-            pixi run test
-
-      - name: Install Momentum and Build hello_world
-        run: |
-          pixi run install
-          pixi run cmake \
-            -S momentum/examples/hello_world \
-            -B momentum/examples/hello_world/build \
-            -DCMAKE_BUILD_TYPE=Release
-          pixi run cmake --build momentum/examples/hello_world/build
-
-      - name: Print ccache stats
-        run: ccache -s
-
-  momentum-ubuntu:
-    name: nightly-cpp-simd-ubuntu
-    runs-on: ubuntu-latest
-    env:
-      MOMENTUM_ENABLE_SIMD: "ON"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
-        with:
-          cache: true
-
-      - name: Check code formatting
-        run: |
-          pixi run lint-check
-
-      - name: Build and test Momentum
-        run: |
-          MOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
-            pixi run test
-
-      - name: Install Momentum and Build hello_world
-        run: |
-          MOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
-            pixi run install
-          pixi run cmake \
-            -S momentum/examples/hello_world \
-            -B momentum/examples/hello_world/build \
-            -DCMAKE_BUILD_TYPE=Release
-          pixi run cmake --build momentum/examples/hello_world/build
-
-  momentum-windows:
-    name: nightly-cpp-win
-    runs-on: windows-latest
-    env:
-      # Static libs to avoid DLL resolution failures on Windows CI runners
-      BUILD_SHARED_LIBS: "OFF"
-      CMAKE_C_COMPILER_LAUNCHER: sccache
-      CMAKE_CXX_COMPILER_LAUNCHER: sccache
-      SCCACHE_GHA_ENABLED: "true"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up sccache
-        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
-
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
-        with:
-          cache: true
-
-      - name: Build and test Momentum
-        run: |
-          pixi run test
-
-      - name: Install Momentum and Build hello_world
-        run: |
-          pixi run install
-          pixi run cmake `
-            -S momentum/examples/hello_world `
-            -B momentum/examples/hello_world/build
-          pixi run cmake `
-            --build momentum/examples/hello_world/build `
-            --config Release `
-            --parallel
-
-      - name: Print sccache stats
-        run: sccache --show-stats
-
   # ---- PyMomentum ----
+  # C++ Momentum jobs removed — covered per-push by ci_ubuntu (pymomentum superset)
+  # and ci_macos (C++ only). Windows C++ covered per-push by ci_windows (pymomentum superset).
 
   pymomentum-macos:
     name: nightly-py-mac-arm64
@@ -168,94 +53,19 @@ jobs:
         run: ccache -s
 
   pymomentum-ubuntu:
-    name: nightly-py-${{ matrix.pixi_env }}-ubuntu${{ contains(matrix.pixi_env, 'cuda') && '-build-only' || '' }}
+    # py312 covered per-push by ci_ubuntu; CUDA build-only moved to weekly GPU jobs
+    name: nightly-py-py313-ubuntu
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - pixi_env: "py312"
-          - pixi_env: "py312-cuda129"
-            cuda_version: "12.9.0"
-    env:
-      FULL_CUDA_VERSION: ${{ matrix.cuda_version }}
     steps:
-      - name: Maximize build space
-        if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
-        with:
-          root-reserve-mb: 32768
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Setup CUDA
-        if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: ./.github/actions/setup-cuda
-        with:
-          cuda-version: ${{ matrix.cuda_version }}
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
-          environments: ${{ matrix.pixi_env }}
-          cache: true
-
-      - name: Build and test PyMomentum
-        if: ${{ !contains(matrix.pixi_env, 'cuda') }}
-        run: |
-          pixi run -e ${{ matrix.pixi_env }} test_py
-
-      - name: Build PyMomentum (CUDA, build-only)
-        if: ${{ contains(matrix.pixi_env, 'cuda') }}
-        run: |
-          pixi run -e ${{ matrix.pixi_env }} build_py
-
-      - name: Build Python API Doc
-        if: ${{ !contains(matrix.pixi_env, 'cuda') }}
-        run: |
-          MOMENTUM_BUILD_WITH_FBXSDK=ON \
-            pixi run -e ${{ matrix.pixi_env }} doc_py
-
-  pymomentum-windows:
-    name: nightly-py-${{ matrix.pixi_env }}-win
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - pixi_env: "py312"
-    env:
-      FULL_CUDA_VERSION: ${{ matrix.cuda_version }}
-      CMAKE_C_COMPILER_LAUNCHER: sccache
-      CMAKE_CXX_COMPILER_LAUNCHER: sccache
-      SCCACHE_GHA_ENABLED: "true"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up sccache
-        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
-
-      - name: Setup CUDA
-        if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
-        uses: ./.github/actions/setup-cuda
-        with:
-          cuda-version: ${{ matrix.cuda_version }}
-
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@82d477f15f3a381dbcc8adc1206ce643fe110fb7 # v0.9.5
-        with:
+          environments: py313
           cache: true
 
       - name: Build and test PyMomentum
         run: |
-          pixi run -e ${{ matrix.pixi_env }} test_py
-
-      - name: Print sccache stats
-        run: sccache --show-stats
+          pixi run -e py313 test_py
