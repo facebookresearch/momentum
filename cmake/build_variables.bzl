@@ -858,6 +858,10 @@ usd_viewer_sources = [
     "examples/usd_viewer/usd_viewer.cpp",
 ]
 
+bvh_viewer_sources = [
+    "examples/bvh_viewer/bvh_viewer.cpp",
+]
+
 c3d_viewer_sources = [
     "examples/c3d_viewer/c3d_viewer.cpp",
 ]

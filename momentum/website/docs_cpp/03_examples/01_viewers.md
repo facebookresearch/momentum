@@ -91,6 +91,24 @@ buck run @arvr/mode/win/opt c3d_viewer -- --input <my_file.c3d>
 
 * [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/c3d_viewer)
 
+## BVH Viewer
+
+To run the BVH viewer, use the following command:
+
+<OssOnly>
+```
+pixi run bvh_viewer --input <my_file.bvh>
+```
+</OssOnly>
+
+<FbInternalOnly>
+```
+buck run @arvr/mode/win/opt bvh_viewer -- --input <my_file.bvh>
+```
+</FbInternalOnly>
+
+* [Source Code](https://github.com/facebookresearch/momentum/tree/main/momentum/examples/bvh_viewer)
+
 ## URDF Viewer
 
 To run the URDF viewer, use the following command:
