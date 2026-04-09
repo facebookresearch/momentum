@@ -27,28 +27,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 0) Clean up disk
-    - name: Maximize build space
-      uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
-      with:
-        root-reserve-mb: 32768
-        remove-dotnet: true
-        remove-android: true
-        remove-haskell: true
-        remove-codeql: true
-        remove-docker-images: true
-
-    # 1) Check out the repository
+    # 0) Check out the repository
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      with:
+        fetch-depth: 2
+
+    # 1) Detect if pymomentum source changed
+    - name: Check for pymomentum changes
+      id: check_pymomentum
+      run: |
+        if git diff --name-only HEAD~1 HEAD | grep -q '^pymomentum/'; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
 
     # 2) Build Docusaurus site with C++ docs (using Doxygen)
     - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
       with:
           node-version: 20
-          # Disable yarn cache since we clear ~/.cache later in disk cleanup step
-          # cache: yarn
-          # cache-dependency-path: ./momentum/website/yarn.lock
 
     - name: Install Doxygen
       run: sudo apt-get install doxygen
@@ -59,9 +57,10 @@ jobs:
         yarn install --frozen-lockfile
         yarn run build
 
+    # 3) Build Python API docs (only when pymomentum source changed)
     - name: Free up disk space before pixi
+      if: steps.check_pymomentum.outputs.changed == 'true'
       run: |
-        # Remove unnecessary large packages to free disk space
         sudo rm -rf /usr/share/dotnet || true
         sudo rm -rf /opt/ghc || true
         sudo rm -rf /usr/local/share/boost || true
@@ -69,27 +68,25 @@ jobs:
         sudo rm -rf /usr/local/lib/android || true
         sudo rm -rf /usr/local/.ghcup || true
         sudo rm -rf /opt/hostedtoolcache || true
-        # Clear apt cache
         sudo apt-get clean || true
-        # Clear GitHub runner caches and logs
-        sudo rm -rf /home/runner/actions-runner/cached/_diag/*.log || true
         sudo rm -rf /home/runner/.cache/* || true
         df -h
 
-    # 3) Build Python API docs
     - name: Set up pixi
+      if: steps.check_pymomentum.outputs.changed == 'true'
       uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
       with:
         cache: false
         environments: default
 
     - name: Build Python API Documentation
+      if: steps.check_pymomentum.outputs.changed == 'true'
       run: |
-        MOMENTUM_BUILD_WITH_FBXSDK=ON \
-          pixi run doc_py
+        pixi run doc_py
 
-    # 4) Copy Python API Documentation to Docusaurus
+    # 4) Copy Python API Documentation to Docusaurus (if built)
     - name: Copy Python API Documentation
+      if: steps.check_pymomentum.outputs.changed == 'true'
       run: |
         cp -R build/python_api_doc momentum/website/build/python_api_doc
 

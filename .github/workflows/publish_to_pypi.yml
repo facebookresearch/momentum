@@ -4,21 +4,14 @@
 name: PyPI Wheels
 
 on:
-  # Build wheels on every push to test the build process
+  # Build wheels on pushes to main and version tags
   push:
     branches:
-      - "**"
+      - main
     paths-ignore:
       - "**/website/**"
     tags:
       - 'v*'
-
-  # Build on pull requests
-  pull_request:
-    branches:
-      - "**"
-    paths-ignore:
-      - "**/website/**"
 
   # Allow manual trigger for testing builds or publishing
   workflow_dispatch:
