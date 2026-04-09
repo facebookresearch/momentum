@@ -10,6 +10,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
 #include <momentum/marker_tracking/glove_utils.h>
+#include <momentum/marker_tracking/marker_gap_fill.h>
 
 namespace momentum {
 
@@ -75,6 +76,10 @@ struct TrackingConfig : public BaseConfig {
   /// Multiplier for the mesh surface constraint weight on skinned locators. Higher values pull
   /// skinned locators closer to the mesh surface during the solve. Default 1.0.
   float meshConstraintWeight = 1.0f;
+  /// Configuration for pre-processing marker gaps before constraint creation.
+  /// Fills temporary gaps via cubic Hermite interpolation and blends off permanent
+  /// dropouts via linear velocity extrapolation with cosine weight ramp.
+  GapFillConfig gapFillConfig;
 };
 
 /// Configuration for refining an already tracked motion, eg. add smoothing and/or collision

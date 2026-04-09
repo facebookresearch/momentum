@@ -30,6 +30,7 @@
 #include "momentum/common/log.h"
 #include "momentum/common/progress_bar.h"
 #include "momentum/marker_tracking/glove_utils.h"
+#include "momentum/marker_tracking/marker_gap_fill.h"
 #include "momentum/marker_tracking/tracker_utils.h"
 #include "momentum/math/fmt_eigen.h"
 #include "momentum/math/mesh.h"
@@ -434,7 +435,6 @@ Eigen::MatrixXf trackSequence(
       numFrames);
 
   const ParameterTransform& pt = character.parameterTransform;
-  const size_t numMarkers = markerData[0].size();
 
   // universal parameters include "scaling" and "locators" (if exists); pose parameters need to
   // exclude "locators". universalParams is to indicate to the solver which parameters are "global"
@@ -504,7 +504,7 @@ Eigen::MatrixXf trackSequence(
   for (size_t solverFrame = 0; solverFrame < solvedFrames; ++solverFrame) {
     const size_t& iFrame = sortedFrames[solverFrame];
     if ((constrData.at(iFrame).size() + skinnedConstData.at(iFrame).size()) >
-        numMarkers * config.minVisPercent) {
+        markerData[iFrame].size() * config.minVisPercent) {
       addSequenceFrameConstraints(
           solverFunc,
           solverFrame,
@@ -768,7 +768,6 @@ Eigen::MatrixXf trackPosesForFrames(
       numFrames);
 
   const ParameterTransform& pt = character.parameterTransform;
-  const size_t numMarkers = markerData[0].size();
 
   std::vector<size_t> sortedFrames = frameIndices;
   std::sort(sortedFrames.begin(), sortedFrames.end());
@@ -829,9 +828,15 @@ Eigen::MatrixXf trackPosesForFrames(
   halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight);
   solverFunc.addErrorFunction(halfPlaneConstrFunc);
 
-  // marker constraint data
-  auto constrData = createConstraintData(markerData, character.locators);
-  auto skinnedConstrData = createSkinnedConstraintData(markerData, character.skinnedLocators);
+  // Pre-process marker gaps (interpolate temporary gaps, blend off permanent dropouts).
+  // Creates a mutable copy since the input span is const.
+  auto processedMarkerData = std::vector<std::vector<Marker>>(markerData.begin(), markerData.end());
+  preprocessMarkerGaps(processedMarkerData, config.gapFillConfig);
+
+  // marker constraint data (uses gap-filled markers)
+  auto constrData = createConstraintData(processedMarkerData, character.locators);
+  auto skinnedConstrData =
+      createSkinnedConstraintData(processedMarkerData, character.skinnedLocators);
 
   // smoothness constraint only for the joints and exclude global dofs because the global transform
   // needs to be accurate (may not matter in practice?)
@@ -886,7 +891,7 @@ Eigen::MatrixXf trackPosesForFrames(
       // For continuous tracking, dof is preserved from previous iteration (or initial value)
 
       if ((constrData.at(iFrame).size() + skinnedConstrData.at(iFrame).size()) >
-          numMarkers * config.minVisPercent) {
+          processedMarkerData[iFrame].size() * config.minVisPercent) {
         // add positional constraints
         posConstrFunc->clearConstraints(); // clear constraint data from the previous frame
         posConstrFunc->setConstraints(constrData.at(iFrame));
@@ -1120,7 +1125,8 @@ void calibrateModel(
       1.0f,
       {},
       std::nullopt,
-      config.meshConstraintWeight};
+      config.meshConstraintWeight,
+      {}};
 
   // only keep one motion; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -1396,7 +1402,8 @@ void calibrateLocators(
       1.0f,
       {},
       std::nullopt,
-      config.meshConstraintWeight};
+      config.meshConstraintWeight,
+      {}};
 
   // only keep one motion for both character and solvingCharacter; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the

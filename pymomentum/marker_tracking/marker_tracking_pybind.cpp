@@ -7,6 +7,7 @@
 
 #include <momentum/character/marker.h>
 #include <momentum/marker_tracking/glove_utils.h>
+#include <momentum/marker_tracking/marker_gap_fill.h>
 #include <momentum/marker_tracking/marker_tracker.h>
 #include <momentum/marker_tracking/process_markers.h>
 #include <momentum/marker_tracking/tracker_utils.h>
@@ -225,6 +226,54 @@ PYBIND11_MODULE(marker_tracking, m) {
           &momentum::CalibrationConfig::meshConstraintWeight,
           "Weight multiplier for mesh surface constraints during calibration");
 
+  auto gapFillConfig = py::class_<momentum::GapFillConfig>(
+      m, "GapFillConfig", "Config for marker gap filling and dropout blending");
+
+  gapFillConfig.def(py::init<>())
+      .def(
+          "__repr__",
+          [](const momentum::GapFillConfig& self) {
+            return fmt::format(
+                "GapFillConfig(enabled={}, max_gap_frames={}, max_gap_frames_stationary={}, "
+                "max_gap_displacement={}, min_visible_frames={}, "
+                "blend_off_frames={}, velocity_window_frames={})",
+                self.enabled,
+                self.maxGapFrames,
+                self.maxGapFramesStationary,
+                self.maxGapDisplacement,
+                self.minVisibleFrames,
+                self.blendOffFrames,
+                self.velocityWindowFrames);
+          })
+      .def_readwrite(
+          "enabled",
+          &momentum::GapFillConfig::enabled,
+          "Master switch; when False (default), gap filling is skipped entirely")
+      .def_readwrite(
+          "max_gap_frames",
+          &momentum::GapFillConfig::maxGapFrames,
+          "Max gap length (frames) to interpolate; longer gaps treated as permanent")
+      .def_readwrite(
+          "max_gap_frames_stationary",
+          &momentum::GapFillConfig::maxGapFramesStationary,
+          "Extended max gap (frames) for near-stationary markers; blends to max_gap_frames as displacement approaches max_gap_displacement")
+      .def_readwrite(
+          "max_gap_displacement",
+          &momentum::GapFillConfig::maxGapDisplacement,
+          "Displacement threshold (cm) above which standard max_gap_frames applies")
+      .def_readwrite(
+          "min_visible_frames",
+          &momentum::GapFillConfig::minVisibleFrames,
+          "Minimum visible segment length (frames); shorter segments between gaps are suppressed")
+      .def_readwrite(
+          "blend_off_frames",
+          &momentum::GapFillConfig::blendOffFrames,
+          "Frames over which to blend off permanent dropouts (cosine ramp)")
+      .def_readwrite(
+          "velocity_window_frames",
+          &momentum::GapFillConfig::velocityWindowFrames,
+          "Visible frames used for velocity estimation in extrapolation");
+
   auto trackingConfig = py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
       m, "TrackingConfig", "Config for the tracking optimization step");
 
@@ -327,7 +376,11 @@ Set to None (default) to use the solver's default parameter set.)")
       .def_readwrite(
           "mesh_constraint_weight",
           &momentum::TrackingConfig::meshConstraintWeight,
-          "Weight multiplier for mesh surface constraints");
+          "Weight multiplier for mesh surface constraints")
+      .def_readwrite(
+          "gap_fill_config",
+          &momentum::TrackingConfig::gapFillConfig,
+          "Config for marker gap filling and dropout blending");
 
   auto refineConfig = py::class_<momentum::RefineConfig, momentum::TrackingConfig>(
       m, "RefineConfig", "Config for refining a tracked motion.");
