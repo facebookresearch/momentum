@@ -245,7 +245,7 @@ int run(const Options& options) {
 
   for (size_t iFrame = firstFrame; iFrame < lastFrame; iFrame += options.stride) {
     rec.set_time_sequence("frame_index", iFrame);
-    momentum::setTimeSeconds(rec, "log_time", (float)iFrame / fps);
+    momentum::setTimeSeconds(rec, "time", (float)iFrame / fps);
 
     if (iFrame < nFrames) {
       charParams.pose = motion.col(iFrame);

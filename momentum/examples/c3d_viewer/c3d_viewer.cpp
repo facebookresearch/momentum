@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 
       for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
         rec.set_time_sequence("frame_index", iFrame);
-        momentum::setTimeSeconds(rec, "log_time", (float)iFrame / actor.fps);
+        momentum::setTimeSeconds(rec, "time", (float)iFrame / actor.fps);
         logMarkers(rec, "world/" + streamName, actor.frames.at(iFrame));
 
         if (options->plot) {
