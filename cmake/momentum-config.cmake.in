@@ -29,7 +29,7 @@ find_dependency(spdlog CONFIG)
 find_dependency(urdfdom CONFIG)
 
 if(@MOMENTUM_BUILD_RENDERER@)
-  find_dependency(Kokkos CONFIG) # For mdspan headers (vendored in Kokkos)
+  find_dependency(mdspan CONFIG)
 endif()
 
 if(@MOMENTUM_ENABLE_PROFILING@)

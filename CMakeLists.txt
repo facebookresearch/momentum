@@ -133,7 +133,17 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
 
 if(MOMENTUM_BUILD_RENDERER)
-  find_package(Kokkos CONFIG REQUIRED) # For mdspan headers (vendored in Kokkos)
+  # Use standalone mdspan (header-only) instead of full Kokkos.
+  # Full Kokkos with CUDA sets CMAKE_CXX_COMPILER to nvcc_wrapper globally,
+  # which breaks pybind11 compilation. We only need mdspan headers.
+  include(FetchContent)
+  FetchContent_Declare(mdspan
+    URL https://github.com/kokkos/mdspan/archive/refs/heads/stable.tar.gz
+  )
+  set(MDSPAN_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+  set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
+  set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(mdspan)
 endif()
 
 if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
@@ -664,7 +674,7 @@ if(MOMENTUM_BUILD_RENDERER)
       common
       drjit
       Eigen3::Eigen
-      Kokkos::kokkos # For mdspan headers (vendored in Kokkos)
+      mdspan::mdspan
       Microsoft.GSL::GSL
   )
 endif()
