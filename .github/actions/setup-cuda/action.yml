@@ -20,15 +20,20 @@ runs:
 
     - name: Check CUDA Version (Windows only)
       if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        nvcc --version
+      shell: cmd
+      run: nvcc --version
 
-    - name: Set Conda environment variables
+    - name: Set Conda environment variables (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
         CUDA_MAJOR=$(echo ${{ inputs.cuda-version }} | cut -d'.' -f1)
         echo "CONDA_OVERRIDE_CUDA=$CUDA_MAJOR" >> $GITHUB_ENV
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          echo "Skipping CUDA installation on Ubuntu (using mock CUDA $CUDA_MAJOR for pixi)"
-        fi
+        echo "Skipping CUDA installation on Ubuntu (using mock CUDA $CUDA_MAJOR for pixi)"
+
+    - name: Set Conda environment variables (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        for /f "tokens=1 delims=." %%a in ("${{ inputs.cuda-version }}") do set CUDA_MAJOR=%%a
+        echo CONDA_OVERRIDE_CUDA=%CUDA_MAJOR%>> %GITHUB_ENV%
