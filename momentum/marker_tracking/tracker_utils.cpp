@@ -434,10 +434,14 @@ std::vector<std::vector<size_t>> buildTriangleAdjacency(const Mesh& mesh) {
     // For each pair of triangles sharing this edge, mark them as adjacent
     for (size_t i = 0; i < triangles.size(); ++i) {
       for (size_t j = i + 1; j < triangles.size(); ++j) {
-        // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
+        MT_THROW_IF(
+            triangles[i] >= adjacency.size() || triangles[j] >= adjacency.size(),
+            "Triangle index out of bounds: {} or {} >= {}",
+            triangles[i],
+            triangles[j],
+            adjacency.size());
         adjacency[triangles[i]].push_back(triangles[j]);
         adjacency[triangles[j]].push_back(triangles[i]);
-        // NOLINTEND(facebook-hte-LocalUncheckedArrayBounds)
       }
     }
   }

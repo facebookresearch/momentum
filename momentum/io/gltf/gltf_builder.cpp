@@ -74,10 +74,17 @@ void setBufferView(
     fx::gltf::Document& model,
     const uint32_t accessorId,
     fx::gltf::BufferView::TargetType targetType) {
-  MT_CHECK(accessorId < model.accessors.size());
+  MT_CHECK(
+      accessorId < model.accessors.size(),
+      "accessorId: {}, size: {}",
+      accessorId,
+      model.accessors.size());
   const auto accessor = model.accessors[accessorId];
-  MT_CHECK(accessor.bufferView < model.bufferViews.size());
-  // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
+  MT_CHECK(
+      accessor.bufferView < model.bufferViews.size(),
+      "bufferView: {}, size: {}",
+      accessor.bufferView,
+      model.bufferViews.size());
   auto& view = model.bufferViews[accessor.bufferView];
   view.target = targetType;
 };
@@ -397,8 +404,12 @@ void addActorAnimationToModel(
     // translation
     animation.channels.emplace_back();
     auto& tchannel = animation.channels.back();
+    MT_THROW_IF(
+        j >= markerPositions.size(),
+        "Marker position index {} exceeds markerPositions size {}",
+        j,
+        markerPositions.size());
     tchannel.sampler =
-        // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
         createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
     tchannel.target.node = nodeIndex;
     tchannel.target.path = "translation";
@@ -480,7 +491,8 @@ size_t addMeshToModel(
             skin.index(i, b * 4 + 1),
             skin.index(i, b * 4 + 2),
             skin.index(i, b * 4 + 3));
-        // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+        MT_THROW_IF(
+            i >= weights.size(), "Weight index {} exceeds weights size {}", i, weights.size());
         weights[i] = Vector4f(
             skin.weight(i, b * 4 + 0),
             skin.weight(i, b * 4 + 1),

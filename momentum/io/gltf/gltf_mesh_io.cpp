@@ -397,11 +397,21 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
 
   if (!skinnedNodes.empty()) {
     for (auto nodeId : skinnedNodes) {
-      // NOLINTBEGIN(facebook-hte-ParameterUncheckedArrayBounds)
+      MT_CHECK(
+          nodeId < model.nodes.size(), "nodeId: {}, nodes size: {}", nodeId, model.nodes.size());
       const auto& node = model.nodes[nodeId];
+      MT_CHECK(
+          node.mesh >= 0 && static_cast<size_t>(node.mesh) < model.meshes.size(),
+          "mesh: {}, meshes size: {}",
+          node.mesh,
+          model.meshes.size());
       const auto& mesh = model.meshes[node.mesh];
+      MT_CHECK(
+          node.skin >= 0 && static_cast<size_t>(node.skin) < model.skins.size(),
+          "skin: {}, skins size: {}",
+          node.skin,
+          model.skins.size());
       const auto& skin = model.skins[node.skin];
-      // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
         const auto kNumVertices = addMesh(model, primitive, resultMesh);
         addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, skinWeights);
@@ -415,10 +425,15 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
     }
   } else if (!unskinnedNodes.empty()) {
     for (auto nodeId : unskinnedNodes) {
-      // NOLINTBEGIN(facebook-hte-ParameterUncheckedArrayBounds)
+      MT_CHECK(
+          nodeId < model.nodes.size(), "nodeId: {}, nodes size: {}", nodeId, model.nodes.size());
       const auto& node = model.nodes[nodeId];
+      MT_CHECK(
+          node.mesh >= 0 && static_cast<size_t>(node.mesh) < model.meshes.size(),
+          "mesh: {}, meshes size: {}",
+          node.mesh,
+          model.meshes.size());
       const auto& mesh = model.meshes[node.mesh];
-      // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
         addMesh(model, primitive, resultMesh);
         addBlendShapes(model, primitive, blendShape);

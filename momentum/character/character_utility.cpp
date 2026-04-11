@@ -225,7 +225,11 @@ std::vector<size_t> addMappedParameters(
 
     // Invalid joint index, so any model parameters are invalid too:
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          static_cast<size_t>(it.col()) >= validParamsOrig.size(),
+          "Column index {} exceeds validParamsOrig size {}",
+          it.col(),
+          validParamsOrig.size());
       validParamsOrig[it.col()] = true;
     }
   }
@@ -236,7 +240,11 @@ std::vector<size_t> addMappedParameters(
       paramTransformResult.name.begin(), paramTransformResult.name.end());
   for (Eigen::Index iParamOld = 0; iParamOld < paramTransformOrig.numAllModelParameters();
        ++iParamOld) {
-    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+    MT_THROW_IF(
+        static_cast<size_t>(iParamOld) >= validParamsOrig.size(),
+        "Parameter index {} exceeds validParamsOrig size {}",
+        iParamOld,
+        validParamsOrig.size());
     if (!validParamsOrig[iParamOld]) {
       continue;
     }
@@ -246,7 +254,11 @@ std::vector<size_t> addMappedParameters(
         "Duplicate parameter {} found while merging parameter transforms.",
         paramTransformOrig.name[iParamOld]);
 
-    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+    MT_THROW_IF(
+        static_cast<size_t>(iParamOld) >= origParamToNewParam.size(),
+        "Parameter index {} exceeds origParamToNewParam size {}",
+        iParamOld,
+        origParamToNewParam.size());
     origParamToNewParam[iParamOld] = paramTransformResult.name.size();
     paramTransformResult.name.push_back(paramTransformOrig.name[iParamOld]);
   }
@@ -265,7 +277,11 @@ std::vector<size_t> addMappedParameters(
 
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
       const auto iOldParam = it.col();
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          static_cast<size_t>(iOldParam) >= origParamToNewParam.size(),
+          "Old parameter index {} exceeds origParamToNewParam size {}",
+          iOldParam,
+          origParamToNewParam.size());
       const auto iNewParam = origParamToNewParam[iOldParam];
 
       if (iNewParam != SIZE_MAX) {
@@ -285,7 +301,11 @@ std::vector<size_t> addMappedParameters(
         continue;
       }
 
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          static_cast<size_t>(iOrigParam) >= origParamToNewParam.size(),
+          "Original parameter index {} exceeds origParamToNewParam size {}",
+          iOrigParam,
+          origParamToNewParam.size());
       const auto iNewParam = origParamToNewParam[iOrigParam];
       if (iNewParam != kInvalidIndex) {
         paramTransformResult.parameterSets[paramSetOrig.first].set(iNewParam);
@@ -577,7 +597,11 @@ Character replaceSkeletonHierarchy(
       while (tgtParent != kInvalidIndex) {
         const auto itr = combinedSkeletonJointMapping.find(tgtSkeleton.joints[tgtParent].name);
         if (itr != combinedSkeletonJointMapping.end()) {
-          // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+          MT_THROW_IF(
+              iTgtJoint >= tgtToCombinedWithParents.size(),
+              "Target joint index {} exceeds tgtToCombinedWithParents size {}",
+              iTgtJoint,
+              tgtToCombinedWithParents.size());
           tgtToCombinedWithParents[iTgtJoint] = itr->second;
           break;
         }
@@ -620,7 +644,11 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
 
     size_t parent = iJoint;
     while (parent != kInvalidIndex) {
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          parent >= toRemove.size(),
+          "Parent index {} exceeds toRemove size {}",
+          parent,
+          toRemove.size());
       if (toRemove[parent]) {
         shouldRemove = true;
         break;
@@ -660,7 +688,11 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
       size_t srcParent = iSrcJoint;
       // Anything skinned to a deleted joint should get skinned to its parent instead:
       while (srcParent != kInvalidIndex) {
-        // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+        MT_THROW_IF(
+            iSrcJoint >= srcToResultJointsWithParents.size(),
+            "Source joint index {} exceeds srcToResultJointsWithParents size {}",
+            iSrcJoint,
+            srcToResultJointsWithParents.size());
         srcToResultJointsWithParents[iSrcJoint] = srcToResultJoints[srcParent];
         if (srcToResultJointsWithParents[iSrcJoint] != kInvalidIndex) {
           break;
@@ -880,7 +912,11 @@ std::pair<std::vector<size_t>, std::vector<size_t>> createIndexMapping(
   std::vector<size_t> reverseMapping(activeElements.size(), kInvalidIndex);
   for (size_t i = 0; i < activeElements.size(); ++i) {
     if (activeElements[i]) {
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          i >= reverseMapping.size(),
+          "Index {} exceeds reverseMapping size {}",
+          i,
+          reverseMapping.size());
       reverseMapping[i] = forwardMapping.size();
       forwardMapping.push_back(i);
     }
@@ -1017,7 +1053,11 @@ std::vector<bool> verticesToFaces(
         face[1] < static_cast<int>(activeVertices.size()) && face[2] >= 0 &&
         face[2] < static_cast<int>(activeVertices.size()) && activeVertices[face[0]] &&
         activeVertices[face[1]] && activeVertices[face[2]]) {
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+      MT_THROW_IF(
+          faceIdx >= activeFaces.size(),
+          "Face index {} exceeds activeFaces size {}",
+          faceIdx,
+          activeFaces.size());
       activeFaces[faceIdx] = true;
     }
   }
@@ -1075,7 +1115,11 @@ std::vector<bool> verticesToPolys(
         break;
       }
     }
-    // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
+    MT_THROW_IF(
+        polyIdx >= activePolys.size(),
+        "Polygon index {} exceeds activePolys size {}",
+        polyIdx,
+        activePolys.size());
     activePolys[polyIdx] = allActive;
     offset += polySize;
   }
