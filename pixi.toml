@@ -40,7 +40,6 @@ drjit-cpp = ">=1.2.0,<2"
 fmt = ">=11.2.0,<12"
 fx-gltf = ">=2.0.0,<3"
 indicators = ">=2.3,<3"
-kokkos = ">=4.6.2,<5"
 ms-gsl = ">=4.2.0,<5"
 nlohmann_json = ">=3.12.0,<4"
 openfbx = ">=0.9,<0.10"
@@ -238,12 +237,11 @@ wheel_publish = { cmd = """
 [target.linux-64.dependencies]
 nvtx-c = ">=3.1.0" # TODO: Add to pytorch as run dep
 sysroot_linux-64 = ">=2.28,<3"
-patchelf = ">=0.17.2,<0.18"
-auditwheel = ">=6.4.2,<7"
-podman = ">=5.0.0,<6"
 tracy-profiler-gui = ">=0.11.1,<0.13"  # not available on linux-aarch64
 cibuildwheel = ">=2.22.0,<3"  # not available on linux-aarch64
 twine = ">=6.1.0,<7"  # not available on linux-aarch64
+# NOTE: patchelf, auditwheel, podman are in [feature.gpu-wheel-build] only —
+# they are wheel-repair/container tools not needed by GPU test environments.
 
 [target.linux-64.tasks]
 # Linux variant-aware wheel build uses cibuildwheel to produce manylinux_2_28 wheels
@@ -579,7 +577,6 @@ drjit-cpp = ">=1.2.0,<2"
 fmt = ">=11.2.0,<12"
 fx-gltf = ">=2.0.0,<3"
 indicators = ">=2.3,<3"
-kokkos = ">=4.6.2,<5"
 ms-gsl = ">=4.2.0,<5"
 nlohmann_json = ">=3.12.0,<4"
 openfbx = ">=0.9,<0.10"
@@ -615,6 +612,10 @@ jinja2 = ">=3.1.0,<4"
 cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 pip = ">=25.2,<26"
+# Wheel repair and container tools — only needed for wheel-build environments
+patchelf = ">=0.17.2,<0.18"
+auditwheel = ">=6.4.2,<7"
+podman = ">=5.0.0,<6"
 
 
 [feature.gpu-wheel-build-py312]
