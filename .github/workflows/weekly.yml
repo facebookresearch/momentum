@@ -14,16 +14,39 @@ jobs:
     runs-on: 4-core-ubuntu-gpu-t4
     env:
       FULL_CUDA_VERSION: "12.9.0"
+      # Redirect rattler package cache to workspace partition (maximize-build-space
+      # only frees /home/runner/work, not /home/runner/.cache where rattler defaults)
+      RATTLER_CACHE_DIR: ${{ github.workspace }}/_rattler_cache
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794 # master
         with:
-          root-reserve-mb: 32768
+          root-reserve-mb: 8192
           remove-dotnet: true
           remove-android: true
           remove-haskell: true
           remove-codeql: true
           remove-docker-images: true
+
+      - name: Free additional disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/local/graalvm || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /usr/local/.ghcup || true
+          sudo rm -rf /opt/hostedtoolcache || true
+          sudo rm -rf /usr/share/swift || true
+          sudo rm -rf /usr/share/miniconda || true
+          sudo rm -rf /usr/share/az_* || true
+          sudo rm -rf /usr/share/kotlinc || true
+          sudo rm -rf /opt/microsoft || true
+          sudo rm -rf /opt/pipx || true
+          sudo rm -rf /imagegeneration || true
+          sudo apt-get clean || true
+          sudo rm -rf /home/runner/.cache/* || true
+          df -h
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -36,10 +59,23 @@ jobs:
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.5
         with:
-          environments: py312-cuda129
-          cache: true
+          # run-install: false + no environments — we install manually below with retry.
+          # cache: false avoids filling /home/runner/.cache/rattler with large CUDA packages.
+          cache: false
+          run-install: false
+
+      - name: Install pixi environment (with retry)
+        # GPU runner conda-forge CDN is unreliable; retry up to 3 times
+        run: |
+          for i in 1 2 3; do
+            pixi install -e py312-cuda129 --locked && break
+            echo "pixi install attempt $i/3 failed, retrying in 30s..."
+            sleep 30
+          done
 
       - name: Build and test PyMomentum (GPU)
+        # With standalone mdspan (no Kokkos runtime), nvcc_wrapper is no longer
+        # used, so Ninja works without module scanning issues.
         run: |
           pixi run -e py312-cuda129 test_py
 
