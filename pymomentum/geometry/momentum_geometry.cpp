@@ -23,6 +23,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
 #include <momentum/common/checks.h>
+#include <momentum/common/exception.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/shape/blend_shape_io.h>
@@ -407,15 +408,35 @@ std::vector<bool> bonesToVertices(
     size_t maxCoefIdx = momentum::kInvalidIndex;
     for (size_t jCoefIdx = 0; jCoefIdx < skinWeights.weight.row(iVert).size(); ++jCoefIdx) {
       float w = skinWeights.weight.row(iVert)[jCoefIdx];
+      if (w == 0.f) {
+        continue;
+      }
       if (w > maxWeight) {
         maxWeight = w;
         maxCoefIdx = jCoefIdx;
       }
-      if (bones[skinWeights.index(iVert, jCoefIdx)]) {
+      const size_t boneIdx = skinWeights.index(iVert, jCoefIdx);
+      MT_THROW_IF(
+          boneIdx >= bones.size(),
+          "Bone index {} from skin weights exceeds bones vector size {}",
+          boneIdx,
+          bones.size());
+      if (bones[boneIdx]) {
         sumWeight += w;
       }
     }
+
+    if (maxCoefIdx == momentum::kInvalidIndex) {
+      result[iVert] = false;
+      continue;
+    }
+
     size_t maxBoneIdx = skinWeights.index(iVert, maxCoefIdx);
+    MT_THROW_IF(
+        maxBoneIdx >= bones.size(),
+        "Max bone index {} from skin weights exceeds bones vector size {}",
+        maxBoneIdx,
+        bones.size());
 
     result[iVert] = (bones[maxBoneIdx] && sumWeight >= 0.5f);
   }
@@ -438,6 +459,7 @@ std::vector<size_t> bitsetToList(const std::vector<bool>& bits) {
 std::vector<bool> listToBitset(const std::vector<size_t>& list, const size_t sz) {
   std::vector<bool> result(sz);
   for (const auto& x : list) {
+    MT_THROW_IF(x >= sz, "Index {} in list exceeds bitset size {}", x, sz);
     result[x] = true;
   }
   return result;
@@ -456,8 +478,12 @@ std::vector<size_t> getUpperBodyJoints(const momentum::Skeleton& skeleton) {
   // mark all joints above this joint:
   size_t cur = upperBodyRoot_idx;
   while (cur != momentum::kInvalidIndex) {
+    MT_THROW_IF(
+        cur >= skeleton.joints.size(),
+        "Joint index {} exceeds skeleton size {}",
+        cur,
+        skeleton.joints.size());
     result.push_back(cur);
-    assert(cur < skeleton.joints.size());
     cur = skeleton.joints[cur].parent;
   }
 
@@ -488,14 +514,19 @@ momentum::Character stripLowerBodyVertices(const momentum::Character& character)
 std::tuple<float, Eigen::VectorXf, Eigen::MatrixXf, float> getMppcaModel(
     const momentum::Mppca& mppca,
     int iModel) {
-  MT_THROW_IF(iModel >= mppca.p, "Out of range iModel in Mppca.getModel()");
+  MT_THROW_IF(
+      iModel < 0 || iModel >= mppca.p, "Out of range iModel {} in Mppca.getModel()", iModel);
 
   const Eigen::Index dim = mppca.mu.cols();
 
   // The MPPCA model in momentum only stores the final covariance, not
   // the intermediate quantities, so to get these we need to do an eigenvalue
   // decomposition:
-  assert((size_t)iModel < mppca.Cinv.size());
+  MT_THROW_IF(
+      static_cast<size_t>(iModel) >= mppca.Cinv.size(),
+      "iModel {} exceeds Cinv size {} in Mppca.getModel()",
+      iModel,
+      mppca.Cinv.size());
   Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> Cinv_eigs(mppca.Cinv[iModel]);
 
   // Eigenvalues of the inverse are the inverse of the eigenvalues:
@@ -588,7 +619,6 @@ std::shared_ptr<momentum::Mppca> createMppcaModel(
 
     W_in.resize(nModels);
     for (py::ssize_t iMix = 0; iMix < nModels; iMix++) {
-      assert(iMix < W_in.size());
       W_in[iMix].resize(dimension, nPCA);
       for (py::ssize_t jPCA = 0; jPCA < nPCA; jPCA++) {
         for (py::ssize_t kDim = 0; kDim < dimension; kDim++) {

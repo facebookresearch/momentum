@@ -780,12 +780,15 @@ void rasterizeSkeleton(
     }
 
     size_t grandparent = character.skeleton.joints[iJoint].parent;
-    while (grandparent != momentum::kInvalidIndex && !activeJoints[grandparent]) {
+    while (grandparent != momentum::kInvalidIndex) {
       MT_THROW_IF(
           grandparent >= character.skeleton.joints.size(),
           "Grandparent joint index {} exceeds skeleton size {}",
           grandparent,
           character.skeleton.joints.size());
+      if (activeJoints[grandparent]) {
+        break;
+      }
       grandparent = character.skeleton.joints[grandparent].parent;
     }
 

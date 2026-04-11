@@ -26,6 +26,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTe
   Eigen::VectorXf pi(nMixtures);
   Eigen::VectorXf sigma(nMixtures);
   MT_THROW_IF(mppca.Cinv.size() != nMixtures, "Invalid Mppca");
+  MT_THROW_IF(nMixtures == 0, "Mppca has no mixture components");
   for (Eigen::Index iMix = 0; iMix < nMixtures; ++iMix) {
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> Cinv_eigs(mppca.Cinv[iMix]);
 
@@ -43,7 +44,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTe
     C_eigenvalues.array() -= sigma2;
 
     // Find the rank of W:
-    int W_rank = C_eigenvalues.size();
+    Eigen::Index W_rank = C_eigenvalues.size();
     for (Eigen::Index i = 0; i < C_eigenvalues.size(); ++i) {
       if (C_eigenvalues(i) < 0.0001) {
         W_rank = i;
@@ -52,7 +53,10 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTe
     }
 
     if (iMix == 0) {
-      W = at::zeros({(int)nMixtures, (int)W_rank, (int)mppca.d});
+      W = at::zeros(
+          {static_cast<int64_t>(nMixtures),
+           static_cast<int64_t>(W_rank),
+           static_cast<int64_t>(mppca.d)});
     }
 
     for (Eigen::Index jComponent = 0; jComponent < W_rank && jComponent < W.size(1); ++jComponent) {
@@ -78,7 +82,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor> mppcaToTe
     for (Eigen::Index i = 0; i < mppca.names.size() && i < mppca.d; ++i) {
       auto paramIdx = (*paramTransform)->getParameterIdByName(mppca.names[i]);
       if (paramIdx != momentum::kInvalidIndex) {
-        parameterIndices[i] = (int)paramIdx;
+        parameterIndices[i] = static_cast<int>(paramIdx);
       }
     }
   }
