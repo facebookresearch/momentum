@@ -529,7 +529,7 @@ jobs:
       - name: Publish CPU to TestPyPI
         if: |
           github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
@@ -537,7 +537,7 @@ jobs:
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
           (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
 
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
@@ -567,7 +567,7 @@ jobs:
       - name: Publish GPU to TestPyPI
         if: |
           github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi == 'true'
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
@@ -575,4 +575,4 @@ jobs:
         if: |
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
           (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true' && github.event.inputs.test_pypi != 'true')
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
