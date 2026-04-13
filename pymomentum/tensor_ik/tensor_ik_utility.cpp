@@ -153,6 +153,11 @@ std::vector<std::shared_ptr<momentum::SkeletonErrorFunctionT<T>>> buildMomentumE
     at::Tensor errorFunctionWeights,
     const std::vector<int>& weightsMap,
     const int64_t iBatch) {
+  MT_THROW_IF(
+      iBatch < 0 || static_cast<size_t>(iBatch) >= characters.size(),
+      "Batch index {} out of range for characters vector of size {}",
+      iBatch,
+      characters.size());
   const auto& character = *characters[iBatch];
   at::Tensor weights_cur = errorFunctionWeights.select(0, iBatch);
 

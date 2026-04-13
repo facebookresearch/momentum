@@ -46,9 +46,10 @@ mppcaToArrays(
 
   // Process each mixture component
   MT_THROW_IF(mppca.Cinv.size() != nMixtures, "Invalid Mppca");
+  MT_THROW_IF(nMixtures == 0, "Mppca has no mixture components");
 
   Eigen::VectorXf sigma_vec(nMixtures);
-  int W_rank = 0; // Will be determined from first mixture
+  Eigen::Index W_rank = 0; // Will be determined from first mixture
 
   // First pass: determine W rank from first mixture
   {
