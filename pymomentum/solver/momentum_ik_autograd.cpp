@@ -885,7 +885,7 @@ std::vector<at::Tensor> ResidualFunction<T>::forward(
 
 template <typename T>
 std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> ResidualFunction<T>::backward(
-    const std::vector<const momentum::Character*>& characters,
+    [[maybe_unused]] const std::vector<const momentum::Character*>& characters,
     [[maybe_unused]] const momentum::ParameterSet& activeParams,
     [[maybe_unused]] const momentum::ParameterSet& sharedParams,
     at::Tensor modelParams_init,
