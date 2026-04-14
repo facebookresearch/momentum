@@ -73,7 +73,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@ee02a1537ce3071a004a6b08c41e72f0fdc42d9a # v3.4.1
 
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: wheels-cpu-linux
           path: ./wheelhouse/*.whl
@@ -179,7 +179,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: wheels-cpu-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -294,7 +294,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: wheels-gpu-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -351,7 +351,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: wheels-gpu-linux
           path: ./wheelhouse/*.whl
