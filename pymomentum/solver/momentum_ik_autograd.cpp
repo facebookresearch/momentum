@@ -888,7 +888,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> ResidualFunction<T>:
     const std::vector<const momentum::Character*>& characters,
     [[maybe_unused]] const momentum::ParameterSet& activeParams,
     [[maybe_unused]] const momentum::ParameterSet& sharedParams,
-    at::Tensor modelParams_init,
+    [[maybe_unused]] at::Tensor modelParams_init,
     const std::vector<at::Tensor>& results,
     const std::vector<at::Tensor>& dLoss_dResults,
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
