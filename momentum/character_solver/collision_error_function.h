@@ -21,12 +21,17 @@ namespace momentum {
 template <typename T>
 class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
+  /// @param filterRestPoseOverlaps When true (default), capsule pairs that overlap in the
+  ///   rest pose are excluded from collision checking. Set to false for characters where
+  ///   limbs are close to the body in bind pose (e.g., beefy characters) and you still
+  ///   want collision avoidance between those pairs.
   explicit CollisionErrorFunctionT(
       const Skeleton& skel,
       const ParameterTransform& pt,
-      const CollisionGeometry& cg);
+      const CollisionGeometry& cg,
+      bool filterRestPoseOverlaps = true);
 
-  explicit CollisionErrorFunctionT(const Character& character);
+  explicit CollisionErrorFunctionT(const Character& character, bool filterRestPoseOverlaps = true);
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& params,
@@ -52,7 +57,7 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   [[nodiscard]] std::vector<Vector2i> getCollisionPairs() const;
 
  protected:
-  void updateCollisionPairs();
+  void updateCollisionPairs(bool filterRestPoseOverlaps = true);
 
   /// Update collisionState_ and aabbs_ given the new skeleton state.
   void computeBroadPhase(const SkeletonStateT<T>& state);
