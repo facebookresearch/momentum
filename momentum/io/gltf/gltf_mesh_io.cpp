@@ -353,6 +353,7 @@ void addSkinWeights(
             jointIdxInSkin,
             skin.joints.size());
         const auto& nodeIdx = skin.joints[jointIdxInSkin];
+        MT_CHECK(nodeIdx < nodeToObjectMap.size(), "{}: {}", nodeIdx, nodeToObjectMap.size());
         const auto& jointIndex = nodeToObjectMap[nodeIdx];
         if (jointIndex != kInvalidIndex) {
           skinWeights->index(kVertexOffset + v, i * 4 + d) = (uint32_t)jointIndex;

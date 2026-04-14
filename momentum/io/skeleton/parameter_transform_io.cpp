@@ -8,6 +8,7 @@
 #include "momentum/io/skeleton/parameter_transform_io.h"
 
 #include "momentum/character/skeleton.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 #include "momentum/common/string.h"
 #include "momentum/io/common/stream_utils.h"
@@ -697,7 +698,7 @@ std::string writeModelDefinition(
       // Write all parameter=value pairs
       for (const auto& [paramIndex, value] : constraint.parameterIdValue) {
         if (paramIndex < parameterTransform.name.size()) {
-          oss << " " << parameterTransform.name[paramIndex] << "=" << value;
+          oss << " " << parameterTransform.name.at(paramIndex) << "=" << value;
         }
       }
       oss << "\n";

@@ -243,16 +243,17 @@ size_t validateAndResolveChannel(
     return kInvalidIndex;
   }
 
-  const auto boneIdx = nodeToObjectMap[channel.target.node];
+  // Bounds already validated above
+  const auto boneIdx = nodeToObjectMap.at(channel.target.node);
   MT_THROW_IF(
       boneIdx >= skeleton.joints.size(),
       "Bone index {} is larger than the number of joints in the skeleton ({})",
       boneIdx,
       skeleton.joints.size());
 
-  const auto& node = model.nodes[channel.target.node];
+  const auto& node = model.nodes.at(channel.target.node);
   MT_THROW_IF(
-      node.name != skeleton.joints[boneIdx].name,
+      node.name != skeleton.joints.at(boneIdx).name,
       "Bone mismatch between gltf and character; GLTF: {}, Character: {}",
       node.name,
       skeleton.joints[boneIdx].name);
@@ -310,16 +311,31 @@ bool applyChannelDataToStates(
   // Apply the transform component to each frame
   if (translations_m.size() == states.size()) {
     for (size_t i = 0; i < states.size(); ++i) {
+      MT_THROW_IF(
+          boneIdx >= states[i].jointState.size(),
+          "Bone index {} exceeds jointState size {}",
+          boneIdx,
+          states[i].jointState.size());
       states[i].jointState[boneIdx].localTransform.translation = toCm() * translations_m[i];
     }
   }
   if (rotations.size() == states.size()) {
     for (size_t i = 0; i < states.size(); ++i) {
+      MT_THROW_IF(
+          boneIdx >= states[i].jointState.size(),
+          "Bone index {} exceeds jointState size {}",
+          boneIdx,
+          states[i].jointState.size());
       states[i].jointState[boneIdx].localTransform.rotation = rotations[i];
     }
   }
   if (scales.size() == states.size()) {
     for (size_t i = 0; i < states.size(); ++i) {
+      MT_THROW_IF(
+          boneIdx >= states[i].jointState.size(),
+          "Bone index {} exceeds jointState size {}",
+          boneIdx,
+          states[i].jointState.size());
       states[i].jointState[boneIdx].localTransform.scale = scales[i].x();
     }
   }
