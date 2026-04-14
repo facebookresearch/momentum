@@ -11,6 +11,7 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/utility.h"
 
@@ -20,25 +21,29 @@ template <typename T>
 CollisionErrorFunctionT<T>::CollisionErrorFunctionT(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    const CollisionGeometry& cg)
+    const CollisionGeometry& cg,
+    bool filterRestPoseOverlaps)
     : SkeletonErrorFunctionT<T>(skel, pt), collisionGeometry_(cg) {
-  updateCollisionPairs();
+  updateCollisionPairs(filterRestPoseOverlaps);
 }
 
 template <typename T>
-CollisionErrorFunctionT<T>::CollisionErrorFunctionT(const Character& character)
+CollisionErrorFunctionT<T>::CollisionErrorFunctionT(
+    const Character& character,
+    bool filterRestPoseOverlaps)
     : CollisionErrorFunctionT(
           character.skeleton,
           character.parameterTransform,
           character.collision
               ? *character.collision
               : throw std::invalid_argument(
-                    "Attempting to create collision error function with a character that has no collision geometries")) {
+                    "Attempting to create collision error function with a character that has no collision geometries"),
+          filterRestPoseOverlaps) {
   // Do nothing
 }
 
 template <typename T>
-void CollisionErrorFunctionT<T>::updateCollisionPairs() {
+void CollisionErrorFunctionT<T>::updateCollisionPairs(bool filterRestPoseOverlaps) {
   validPairs_.clear();
 
   const SkeletonStateT<T> state(
@@ -66,7 +71,9 @@ void CollisionErrorFunctionT<T>::updateCollisionPairs() {
   T overlap;
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = i + 1; j < n; ++j) {
-      if (overlaps(
+      // Skip pairs that already overlap in rest pose (unless disabled).
+      if (filterRestPoseOverlaps &&
+          overlaps(
               collisionState_.origin[i],
               collisionState_.direction[i],
               collisionState_.radius[i],
@@ -81,6 +88,7 @@ void CollisionErrorFunctionT<T>::updateCollisionPairs() {
         continue;
       }
 
+      // Skip adjacent joints (common ancestor distance <= 1).
       size_t p0 = collisionGeometry_[i].parent;
       size_t p1 = collisionGeometry_[j].parent;
       size_t count = 0;
@@ -270,6 +278,7 @@ double CollisionErrorFunctionT<T>::getError(
   computeBroadPhase(state);
 
   double error = 0;
+  size_t collidingCount = 0;
   for (const auto& pair : validPairs_) {
     T distance;
     Vector2<T> cp;
@@ -277,8 +286,16 @@ double CollisionErrorFunctionT<T>::getError(
     if (!checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
       continue;
     }
+    collidingCount++;
     error += sqr(overlap) * kCollisionWeight * this->weight_;
   }
+
+  MT_LOGD(
+      "CollisionError: {} colliding / {} valid pairs, error={:.8f}, weight={:.4f}",
+      collidingCount,
+      validPairs_.size(),
+      error,
+      this->weight_);
 
   return error;
 }
