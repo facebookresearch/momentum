@@ -23,7 +23,15 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
       intrinsicsModel_(std::move(intrinsicsModel)),
       cameraParent_(cameraParent),
       cameraOffset_(cameraOffset),
-      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {}
+      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {
+  // Initialize intrinsics mapping for joint intrinsics optimization.
+  // If the parameter transform contains intrinsics parameters for this camera,
+  // the mapping will have active params and getGradient/getJacobian will compute
+  // derivatives w.r.t. those parameters.
+  if (!intrinsicsModel_->name().empty()) {
+    intrinsicsMapping_.emplace(pt, *intrinsicsModel_);
+  }
+}
 
 template <typename T>
 CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
@@ -35,7 +43,11 @@ CameraProjectionErrorFunctionT<T>::CameraProjectionErrorFunctionT(
       intrinsicsModel_(camera.intrinsicsModel()),
       cameraParent_(cameraParent),
       cameraOffset_(camera.eyeFromWorld()),
-      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {}
+      skeletonDerivative_(skel, pt, this->activeJointParams_, this->enabledParameters_) {
+  if (!intrinsicsModel_->name().empty()) {
+    intrinsicsMapping_.emplace(pt, *intrinsicsModel_);
+  }
+}
 
 template <typename T>
 void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraintT<T>& constraint) {
@@ -44,10 +56,15 @@ void CameraProjectionErrorFunctionT<T>::addConstraint(const ProjectionConstraint
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/) {
   double error = 0;
+
+  // Update intrinsics from model parameters if the mapping is active
+  const auto& intrinsics = (intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams())
+      ? intrinsicsMapping_->updateIntrinsics(params)
+      : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -70,7 +87,7 @@ double CameraProjectionErrorFunctionT<T>::getError(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics
-    const auto [projected, valid] = intrinsicsModel_->project(p_eye);
+    const auto [projected, valid] = intrinsics.project(p_eye);
     if (!valid) {
       continue;
     }
@@ -84,11 +101,16 @@ double CameraProjectionErrorFunctionT<T>::getError(
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::VectorX<T>> gradient) {
   double error = 0;
+
+  // Update intrinsics from model parameters if the mapping is active
+  const bool hasIntrinsics = intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams();
+  const auto& intrinsics =
+      hasIntrinsics ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -116,7 +138,7 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -148,10 +170,6 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
     }
 
     // Walk 2: Camera-parent chain (negative sign)
-    // The lever arm uses p_world because we differentiate eyeFromWorld * p_world
-    // w.r.t. q through eyeFromWorld. The negative sign is because increasing
-    // camera joint parameters moves the camera, which has the opposite effect
-    // on the projected point.
     if (cameraParent_ != kInvalidIndex) {
       const Eigen::Vector2<T> weightedResidual = -wgt * residual;
       std::array<Eigen::Vector3<T>, 1> worldVecs = {p_world};
@@ -167,6 +185,14 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
           jointState,
           jointGrad);
     }
+
+    // Intrinsics gradient: accumulate d(error)/d(intrinsics)
+    if (hasIntrinsics) {
+      const auto [proj_intr, J_intr, valid_intr] = intrinsics.projectIntrinsicsJacobian(p_eye);
+      if (valid_intr) {
+        intrinsicsMapping_->addGradient(J_intr, residual, wgt, jointGrad);
+      }
+    }
   }
 
   gradient += jointGrad;
@@ -175,13 +201,18 @@ double CameraProjectionErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double CameraProjectionErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& /*params*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& /*meshState*/,
     Eigen::Ref<Eigen::MatrixX<T>> jacobian,
     Eigen::Ref<Eigen::VectorX<T>> residual,
     int& usedRows) {
   double error = 0;
+
+  // Update intrinsics from model parameters if the mapping is active
+  const bool hasIntrinsics = intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams();
+  const auto& intrinsics =
+      hasIntrinsics ? intrinsicsMapping_->updateIntrinsics(params) : *intrinsicsModel_;
 
   const auto& jointState = skeletonState.jointState;
 
@@ -205,7 +236,7 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
     const Eigen::Vector3<T> p_eye = eyeFromWorld * p_world;
 
     // Project through intrinsics with Jacobian
-    const auto [projected, J_eye_3x3, valid] = intrinsicsModel_->projectJacobian(p_eye);
+    const auto [projected, J_eye_3x3, valid] = intrinsics.projectJacobian(p_eye);
     if (!valid) {
       continue;
     }
@@ -252,6 +283,14 @@ double CameraProjectionErrorFunctionT<T>::getJacobian(
           jointState,
           jacobian,
           rowIndex);
+    }
+
+    // Intrinsics Jacobian: populate columns for camera intrinsic parameters
+    if (hasIntrinsics) {
+      const auto [proj_intr, J_intr, valid_intr] = intrinsics.projectIntrinsicsJacobian(p_eye);
+      if (valid_intr) {
+        intrinsicsMapping_->addJacobian(J_intr, wgt, rowIndex, jacobian);
+      }
     }
   }
 

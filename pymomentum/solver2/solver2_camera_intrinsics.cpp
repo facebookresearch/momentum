@@ -126,9 +126,13 @@ void addCameraIntrinsicsBindings(pybind11::module_& m) {
   m.def(
       "add_camera_intrinsics_parameters",
       [](const mm::Character& character,
-         const mm::IntrinsicsModel& intrinsicsModel) -> mm::Character {
+         const mm::IntrinsicsModel& intrinsicsModel,
+         bool tieFocalLength) -> mm::Character {
         auto [paramTransform, paramLimits] = mm::addCameraIntrinsicsParameters(
-            character.parameterTransform, character.parameterLimits, intrinsicsModel);
+            character.parameterTransform,
+            character.parameterLimits,
+            intrinsicsModel,
+            tieFocalLength);
         mm::Character result = character;
         result.parameterTransform = std::move(paramTransform);
         result.parameterLimits = std::move(paramLimits);
@@ -147,9 +151,13 @@ replace the existing parameters rather than duplicating them.
 
 :param character: The character whose parameter transform to augment.
 :param intrinsics_model: The camera intrinsics model whose parameters to add (must have a name set).
+:param tie_focal_length: If True, add a single "f" parameter instead of separate "fx"/"fy".
+    The single parameter controls both fx and fy, combining gradients from horizontal and
+    vertical residuals. Recommended for cameras with square pixels.
 :return: A new Character with the augmented parameter transform.)",
       py::arg("character"),
-      py::arg("intrinsics_model"));
+      py::arg("intrinsics_model"),
+      py::arg("tie_focal_length") = false);
 
   m.def(
       "extract_camera_intrinsics",

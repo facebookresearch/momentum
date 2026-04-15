@@ -18,6 +18,7 @@
 namespace momentum {
 
 inline constexpr const char* kIntrinsicsParamPrefix = "intrinsics_";
+inline constexpr const char* kTiedFocalLengthSuffix = "f";
 
 /// Add camera intrinsics parameters to the parameter transform.
 /// Names follow "intrinsics_{cameraName}_{paramName}" convention.
@@ -27,12 +28,16 @@ inline constexpr const char* kIntrinsicsParamPrefix = "intrinsics_";
 /// @param paramTransform The parameter transform to augment
 /// @param paramLimits The parameter limits to augment
 /// @param intrinsicsModel The intrinsics model whose parameters to add (must have a non-empty name)
+/// @param tieFocalLength If true, add a single "f" parameter instead of separate "fx"/"fy".
+///   The single parameter controls both fx and fy, combining gradients from horizontal and
+///   vertical residuals. Recommended for cameras with square pixels.
 /// @return Tuple of updated (paramTransform, paramLimits)
 /// @throws if intrinsicsModel.name() is empty
 [[nodiscard]] std::tuple<ParameterTransform, ParameterLimits> addCameraIntrinsicsParameters(
     ParameterTransform paramTransform,
     ParameterLimits paramLimits,
-    const IntrinsicsModel& intrinsicsModel);
+    const IntrinsicsModel& intrinsicsModel,
+    bool tieFocalLength = false);
 
 /// Extract camera intrinsic parameter values from model parameters.
 ///
