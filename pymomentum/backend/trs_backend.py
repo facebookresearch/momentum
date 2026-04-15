@@ -195,49 +195,6 @@ def global_trs_state_from_local_trs_state_no_grad(
 
 
 @th.jit.script
-def ik_from_global_state(
-    global_state_t: th.Tensor,
-    global_state_r: th.Tensor,
-    global_state_s: th.Tensor,
-    prefix_mul_indices: List[th.Tensor],
-    use_double_precision: bool = True,
-) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
-    dtype = global_state_t.dtype
-
-    if use_double_precision:
-        local_state_t = global_state_t.clone().double()
-        local_state_r = global_state_r.clone().double()
-        local_state_s = global_state_s.clone().double()
-    else:
-        local_state_t = global_state_t.clone()
-        local_state_r = global_state_r.clone()
-        local_state_s = global_state_s.clone()
-
-    # Compose the inverse of the FK transforms, in reverse order.
-    for prefix_mul_index in prefix_mul_indices[::-1]:
-        joint = prefix_mul_index[0]
-        parent = prefix_mul_index[1]
-
-        s1 = local_state_s[:, parent].reciprocal()
-        r1 = trs.rotmat_inverse(local_state_r[:, parent])
-        t1 = local_state_t[:, parent]
-
-        s2 = local_state_s[:, joint]
-        r2 = local_state_r[:, joint]
-        t2 = local_state_t[:, joint]
-
-        local_state_s[:, joint] = s1 * s2
-        local_state_r[:, joint] = trs.rotmat_multiply(r1, r2)
-        local_state_t[:, joint] = trs.rotmat_rotate_vector(r1, (t2 - t1) * s1)
-
-    return (
-        local_state_t.to(dtype),
-        local_state_r.to(dtype),
-        local_state_s.to(dtype),
-    )
-
-
-@th.jit.script
 def global_trs_state_from_local_trs_state_backprop(
     joint_state_t: th.Tensor,
     joint_state_r: th.Tensor,

@@ -227,12 +227,14 @@ class Skeleton(torch.nn.Module):
         global_trs: pym_trs.TRSTransform,
     ) -> pym_trs.TRSTransform:
         """
-        Convert global TRS state to local TRS state using inverse kinematics.
+        Convert global TRS state to local TRS state.
 
-        This function performs inverse kinematics on the global TRS transformations
-        to compute the local joint transformations. This is the TRS equivalent of
-        skeleton_state_to_local_skeleton_state(). It's useful when you have global
-        TRS states and need to extract the local transformations for each joint.
+        This function computes local joint transformations from global TRS transformations
+        by multiplying each joint's global transform by the inverse of its parent's global
+        transform. This is the TRS equivalent of skeleton_state_to_local_skeleton_state().
+
+        The computation is fully vectorized and parallel across all joints, making it
+        efficient for GPU execution.
 
         Args:
             global_trs: Global TRS transform tuple (translation, rotation_matrix, scale) where:
@@ -247,22 +249,25 @@ class Skeleton(torch.nn.Module):
                 - scale: Local joint scales, shape (batch_size, num_joints, 1)
 
         Note:
-            This function uses the TRS backend's ik_from_global_state for efficient
-            inverse kinematics computation. It's the inverse operation of
-            local_trs_to_global_trs().
+            For root joints (parent index == -1), the global transform is returned as-is
+            since they have no parent. This is the inverse operation of local_trs_to_global_trs().
         """
-        global_state_t, global_state_r, global_state_s = global_trs
-        return trs_backend.ik_from_global_state(
-            global_state_t=global_state_t,
-            global_state_r=global_state_r,
-            global_state_s=global_state_s,
-            prefix_mul_indices=list(
-                self.pmi.split(
-                    split_size=self._pmi_buffer_sizes,
-                    dim=1,
-                )
-            ),
-        )
+        joint_parents = self.joint_parents
+
+        # Get parent TRS states (clamp to handle root joints with parent=-1)
+        parent_indices = torch.clamp(joint_parents, min=0)
+        parent_trs = pym_trs.index_select(global_trs, -2, parent_indices)
+
+        # local = parent^(-1) * global
+        local_trs = pym_trs.multiply(pym_trs.inverse(parent_trs), global_trs)
+
+        # Expand joint_parents for broadcasting
+        jp = joint_parents
+        while jp.ndim + 1 < global_trs[0].ndim:
+            jp = jp[None, ...]
+
+        # For root joints (parent == -1), keep the global state
+        return pym_trs.where(jp >= 0, local_trs, global_trs)
 
     def local_skeleton_state_to_skeleton_state(
         self, local_skel_state: torch.Tensor
