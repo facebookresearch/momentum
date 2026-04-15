@@ -892,7 +892,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> ResidualFunction<T>:
     const std::vector<at::Tensor>& results,
     const std::vector<at::Tensor>& dLoss_dResults,
     const std::vector<std::unique_ptr<TensorErrorFunction<T>>>& errorFunctions,
-    at::Tensor errorFunctionWeights,
+    [[maybe_unused]] at::Tensor errorFunctionWeights,
     [[maybe_unused]] size_t numActiveErrorFunctions,
     const std::vector<int>& weightsMap) {
   const at::Tensor& grad_resid = dLoss_dResults[0];
