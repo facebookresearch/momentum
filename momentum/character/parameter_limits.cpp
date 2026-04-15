@@ -9,6 +9,7 @@
 
 #include "momentum/character/parameter_transform.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 
 namespace momentum {
 
@@ -47,9 +48,9 @@ JointParameters applyPassiveJointParameterLimits(
 
     const auto& data = limit.data.minMaxJoint;
     const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
-    MT_CHECK(
-        parameterIndex <= static_cast<size_t>(jointParams.size()),
-        "{} vs {}",
+    MT_THROW_IF(
+        parameterIndex >= static_cast<size_t>(jointParams.size()),
+        "Parameter index {} out of bounds (size: {})",
         parameterIndex,
         jointParams.size());
     if (res(parameterIndex) < data.limits[0]) {

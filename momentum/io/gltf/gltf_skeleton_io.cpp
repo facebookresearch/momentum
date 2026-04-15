@@ -86,7 +86,7 @@ void loadHierarchyRecursive(
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension) {
   MT_THROW_IF(
-      (nodeId < 0) || (nodeId > model.nodes.size()),
+      (nodeId < 0) || (nodeId >= model.nodes.size()),
       "Invalid node id found in the gltf hierarchy: {}",
       nodeId);
   const auto& node = model.nodes[nodeId];

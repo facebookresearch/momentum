@@ -11,6 +11,7 @@
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/types.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/common/exception.h>
 
 namespace momentum {
 
@@ -87,7 +88,7 @@ class SkeletonErrorFunctionT {
       const SkeletonStateT<T>& /* state */,
       const MeshStateT<T>& /* meshState */,
       Eigen::Ref<Eigen::MatrixX<T>> /* hessian */) {
-    throw;
+    MT_THROW("getHessian is not implemented for this error function");
   }
 
   virtual double getSolverDerivatives(
