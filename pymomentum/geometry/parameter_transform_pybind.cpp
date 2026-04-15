@@ -74,6 +74,7 @@ void registerParameterTransformBindings(
             }
 
             parameterTransform.offsets.setZero(nJointParams);
+            parameterTransform.activeJointParams = parameterTransform.computeActiveJointParams();
             return parameterTransform;
           }),
           R"(Create a parameter transform from a sparse matrix.
@@ -128,6 +129,7 @@ void registerParameterTransformBindings(
             parameterTransform.transform.resize(nJointParams, nModelParams);
             parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
             parameterTransform.offsets.setZero(nJointParams);
+            parameterTransform.activeJointParams = parameterTransform.computeActiveJointParams();
             return parameterTransform;
           }),
           R"(Create a parameter transform from a dense numpy array.
