@@ -81,13 +81,12 @@ std::vector<size_t> sampleFrames(
     const size_t numSamples) {
   // sample frames so that we get the most variance from the initial input
   const auto numFrames = static_cast<size_t>(initialMotion.cols());
+  if (numFrames == 0) {
+    return {};
+  }
   MT_CHECK(frameStride > 0, "frameStride must be > 0.");
   size_t solvedFrames = (numFrames - 1) / frameStride + 1;
-
   std::vector<size_t> frameIndices;
-  if (solvedFrames == 0) {
-    return frameIndices;
-  }
   const size_t numActualSamples = std::min(numSamples, solvedFrames);
 
   // get the indices of the parameters to be used
