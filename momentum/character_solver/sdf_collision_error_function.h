@@ -297,7 +297,7 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const;
 
   const Character& character_; ///< Reference to the character
-  const SDFCollisionGeometry& sdfColliders_; ///< Reference to SDF colliders
+  SDFCollisionGeometry sdfColliders_; ///< Owned copy of SDF colliders
 
   // Contiguous vertex organization for efficient processing
   std::vector<size_t> activeVertexIndices_; ///< All active vertex indices

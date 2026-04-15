@@ -204,6 +204,7 @@ solver2_sources = [
     "solver2/solver2_error_functions.cpp",
     "solver2/solver2_projection_error_functions.cpp",
     "solver2/solver2_pybind.cpp",
+    "solver2/solver2_sdf_error_functions.cpp",
     "solver2/solver2_sequence_error_functions.cpp",
     "solver2/solver2_utility.cpp",
 ]
