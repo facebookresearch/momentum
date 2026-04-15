@@ -107,6 +107,11 @@ void createLocatorNodes(
 
     // set parent if it has one
     if (loc.parent != kInvalidIndex) {
+      MT_THROW_IF(
+          loc.parent >= skeletonNodes.size(),
+          "Locator parent index {} exceeds skeletonNodes size {}",
+          loc.parent,
+          skeletonNodes.size());
       skeletonNodes[loc.parent]->AddChild(locatorNode);
     }
   }
@@ -150,6 +155,11 @@ void createCollisionGeometryNodes(
     collisionNode->LclScaling.Set(FbxDouble3(1));
 
     if (collision.parent != kInvalidIndex) {
+      MT_THROW_IF(
+          collision.parent >= skeletonNodes.size(),
+          "Collision parent index {} exceeds skeletonNodes size {}",
+          collision.parent,
+          skeletonNodes.size());
       skeletonNodes[collision.parent]->AddChild(collisionNode);
     } else {
       MT_LOGE("Found a collision node with no parent");
@@ -762,6 +772,11 @@ SkeletonNodeResult createSkeletonNodes(const Character& character, ::fbxsdk::Fbx
     const auto& joint = character.skeleton.joints[i];
     auto* skeletonNode = result.jointToNodeMap[i];
     if (joint.parent != kInvalidIndex) {
+      MT_THROW_IF(
+          joint.parent >= result.nodes.size(),
+          "Joint parent index {} exceeds nodes size {}",
+          joint.parent,
+          result.nodes.size());
       result.nodes[joint.parent]->AddChild(skeletonNode);
     }
   }

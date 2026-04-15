@@ -12,6 +12,7 @@
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/character/types.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
@@ -986,6 +987,11 @@ MatrixXf parseAnimation(
   const size_t numFrames = ceil(totalSeconds * fps) + 1;
   motion.setZero(skeleton.joints.size() * kParametersPerJoint, numFrames);
 
+  MT_THROW_IF(
+      boneFbxNodes.size() < skeleton.joints.size(),
+      "boneFbxNodes size {} is less than skeleton joints size {}",
+      boneFbxNodes.size(),
+      skeleton.joints.size());
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
     // Load the rest pose into the animation; for channels that aren't animated, Maya
     // won't export a curve node and so this is the only way to get the rest pose set

@@ -14,6 +14,7 @@
 #include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
@@ -790,7 +791,12 @@ void addLocatorsToModel(
     auto& node = model.nodes.back();
 
     // add node as child to parent joint
-    model.nodes[jointToNodeMap[loc.parent]].children.push_back(static_cast<int32_t>(nodeIndex));
+    MT_THROW_IF(
+        loc.parent >= jointToNodeMap.size(),
+        "Locator parent index {} exceeds jointToNodeMap size {}",
+        loc.parent,
+        jointToNodeMap.size());
+    model.nodes.at(jointToNodeMap[loc.parent]).children.push_back(static_cast<int32_t>(nodeIndex));
 
     // add values for the tapered capsule
     node.name = loc.name;

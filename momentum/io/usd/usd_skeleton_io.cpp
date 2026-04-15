@@ -8,6 +8,7 @@
 #include "momentum/io/usd/usd_skeleton_io.h"
 
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 #include "momentum/io/usd/usd_utils.h"
 
@@ -96,6 +97,12 @@ std::vector<std::string> buildHierarchicalPaths(const Skeleton& skeleton) {
     if (skeleton.joints[i].parent == kInvalidIndex) {
       paths[i] = skeleton.joints[i].name;
     } else {
+      MT_THROW_IF(
+          skeleton.joints[i].parent >= paths.size(),
+          "Parent joint index {} exceeds paths size {} for joint {}",
+          skeleton.joints[i].parent,
+          paths.size(),
+          i);
       paths[i] = paths[skeleton.joints[i].parent] + "/" + skeleton.joints[i].name;
     }
   }
@@ -167,6 +174,11 @@ Skeleton loadSkeletonFromUsd(const UsdStageRefPtr& stage) {
           // Convert world-space to local-space by removing parent's world transform
           Eigen::Matrix4f localMatrix;
           if (skeleton.joints[i].parent != kInvalidIndex) {
+            MT_THROW_IF(
+                skeleton.joints[i].parent >= bindTransforms.size(),
+                "Parent joint index {} exceeds bindTransforms size {}",
+                skeleton.joints[i].parent,
+                bindTransforms.size());
             Eigen::Matrix4f parentWorld =
                 toEigenMatrix4f(bindTransforms[skeleton.joints[i].parent]);
             localMatrix = parentWorld.inverse() * worldMatrix;
@@ -228,7 +240,7 @@ void saveCollisionGeometryToUsd(
   for (size_t i = 0; i < collision.size(); ++i) {
     const auto& capsule = collision[i];
     const std::string jointName = (capsule.parent < skeleton.joints.size())
-        ? skeleton.joints[capsule.parent].name
+        ? skeleton.joints.at(capsule.parent).name
         : "unknown";
     const std::string primName = sanitizePrimName(jointName + "_col_" + std::to_string(i));
 
@@ -344,7 +356,7 @@ void saveLocatorsToUsd(
     prim.CreateAttribute(_tokens->momentumName, SdfValueTypeNames->String).Set(loc.name);
 
     const std::string parentName =
-        (loc.parent < skeleton.joints.size()) ? skeleton.joints[loc.parent].name : "";
+        (loc.parent < skeleton.joints.size()) ? skeleton.joints.at(loc.parent).name : "";
     prim.CreateAttribute(_tokens->momentumParent, SdfValueTypeNames->String).Set(parentName);
 
     prim.CreateAttribute(_tokens->momentumOffset, SdfValueTypeNames->Float3)

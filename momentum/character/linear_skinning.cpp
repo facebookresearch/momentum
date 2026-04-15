@@ -10,6 +10,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
 
@@ -556,6 +557,12 @@ Vector3<T> getSkinnedLocatorPosition(
       break;
     }
     const auto boneIndex = locator.parents[k];
+    MT_THROW_IF(
+        boneIndex >= state.jointState.size() || boneIndex >= inverseBindPose.size(),
+        "Bone index {} exceeds jointState size {} or inverseBindPose size {}",
+        boneIndex,
+        state.jointState.size(),
+        inverseBindPose.size());
     const auto& jointState = state.jointState[boneIndex];
 
     worldPos +=

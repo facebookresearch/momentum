@@ -9,6 +9,7 @@
 
 #include "momentum/character/parameter_transform.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 
 namespace momentum {
@@ -80,8 +81,18 @@ ModelParameters applyModelParameterScales(
         parameterTransform.numAllModelParameters());
     for (Eigen::Index iParam = 0; iParam < parameterTransform.numAllModelParameters(); iParam++) {
       if (scalingParams.test(iParam)) {
+        MT_THROW_IF(
+            static_cast<size_t>(iParam) >= parameterTransform.name.size(),
+            "Parameter index {} exceeds parameter name count {}",
+            iParam,
+            parameterTransform.name.size());
         auto subsetParamIdx =
             scalingTransform.getParameterIdByName(parameterTransform.name[iParam]);
+        MT_THROW_IF(
+            subsetParamIdx >= static_cast<size_t>(scaleParametersSubset.size()),
+            "Subset parameter index {} exceeds scaleParametersSubset size {}",
+            subsetParamIdx,
+            scaleParametersSubset.size());
         modelIdentity[iParam] = scaleParametersSubset(subsetParamIdx);
 
         // Add the identity parameters into the motion:

@@ -93,6 +93,11 @@ std::vector<std::vector<SkinnedLocatorConstraint>> createSkinnedConstraintData(
       }
       size_t locatorIdx = query->second;
 
+      MT_THROW_IF(
+          locatorIdx >= locators.size(),
+          "Skinned locator index {} exceeds locators size {}",
+          locatorIdx,
+          locators.size());
       SkinnedLocatorConstraint skinnedConstraint;
       skinnedConstraint.locatorIndex = gsl::narrow_cast<int>(locatorIdx);
       skinnedConstraint.targetPosition = jMarker.pos.cast<float>();
