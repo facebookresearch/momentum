@@ -18,6 +18,7 @@
 #include <dispenso/parallel_for.h>
 
 #include <numeric>
+#include <tuple>
 
 #ifndef __vectorcall
 #define __vectorcall
@@ -60,19 +61,25 @@ void SimdPositionConstraints::addConstraint(
   MT_CHECK(jointIndex < constraintCount.size());
 
   // add the constraint to the corresponding arrays of the jointIndex if there's enough space
-  auto index = constraintCount[jointIndex].fetch_add(1, std::memory_order_relaxed);
-  if (index < kMaxConstraints) {
-    const auto finalIndex = jointIndex * kMaxConstraints + index;
-    offsetX[finalIndex] = offset.x();
-    offsetY[finalIndex] = offset.y();
-    offsetZ[finalIndex] = offset.z();
-    targetX[finalIndex] = target.x();
-    targetY[finalIndex] = target.y();
-    targetZ[finalIndex] = target.z();
-    weights[finalIndex] = targetWeight;
-  } else {
-    constraintCount[jointIndex]--;
+  uint32_t index = 0;
+  while (true) {
+    index = constraintCount[jointIndex];
+    if (index == kMaxConstraints) {
+      return;
+    }
+    if (constraintCount[jointIndex].compare_exchange_weak(index, index + (uint32_t)1)) {
+      break;
+    }
   }
+
+  const auto finalIndex = jointIndex * kMaxConstraints + index;
+  offsetX[finalIndex] = offset.x();
+  offsetY[finalIndex] = offset.y();
+  offsetZ[finalIndex] = offset.z();
+  targetX[finalIndex] = target.x();
+  targetY[finalIndex] = target.y();
+  targetZ[finalIndex] = target.z();
+  weights[finalIndex] = targetWeight;
 }
 
 VectorXi SimdPositionConstraints::getNumConstraints() const {
@@ -161,16 +168,23 @@ double SimdPositionErrorFunction::getGradient(
     return 0.0f;
   }
 
-  // Storage for joint errors
-  std::vector<double> jointErrors(constraints_->numJoints);
+  // Storage for per-thread error and gradient
+  std::vector<std::tuple<double, VectorXd>> ets_error_grad;
 
   // Loop over all joints, as these are our base units
   auto dispensoOptions = dispenso::ParForOptions();
   dispensoOptions.maxThreads = maxThreads_;
   dispenso::parallel_for(
+      ets_error_grad,
+      [&]() -> std::tuple<double, VectorXd> {
+        return {0.0, VectorXd::Zero(parameterTransform_.numAllModelParameters())};
+      },
       0,
       constraints_->numJoints,
-      [&](const size_t jointId) {
+      [&](std::tuple<double, VectorXd>& error_grad_local, const size_t jointId) {
+        double& error_local = std::get<0>(error_grad_local);
+        auto& grad_local = std::get<1>(error_grad_local);
+
         const size_t constraintCount = constraints_->constraintCount[jointId];
         const auto& jointState_cons = state.jointState[jointId];
         auto jointError = drjit::zeros<DoubleP>(); // use double to prevent rounding errors
@@ -229,7 +243,7 @@ double SimdPositionErrorFunction::getGradient(
                 for (auto ptIndex = parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
                      ptIndex < parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
                      ++ptIndex) {
-                  gradient[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
+                  grad_local[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
                       drjit::sum(val) * parameterTransform_.transform.valuePtr()[ptIndex];
                 }
               }
@@ -244,7 +258,7 @@ double SimdPositionErrorFunction::getGradient(
                      ptIndex <
                      parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
                      ++ptIndex) {
-                  gradient[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
+                  grad_local[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
                       drjit::sum(val) * parameterTransform_.transform.valuePtr()[ptIndex];
                 }
               }
@@ -257,7 +271,7 @@ double SimdPositionErrorFunction::getGradient(
               for (auto ptIndex = parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
                    ptIndex < parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
                    ++ptIndex) {
-                gradient[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
+                grad_local[parameterTransform_.transform.innerIndexPtr()[ptIndex]] +=
                     drjit::sum(val) * parameterTransform_.transform.valuePtr()[ptIndex];
               }
             }
@@ -267,14 +281,27 @@ double SimdPositionErrorFunction::getGradient(
           }
         }
 
-        jointErrors[jointId] += drjit::sum(jointError);
+        error_local += drjit::sum(jointError);
       },
       dispensoOptions);
 
+  double error = 0.0;
+  if (!ets_error_grad.empty()) {
+    ets_error_grad[0] = std::accumulate(
+        ets_error_grad.begin() + 1,
+        ets_error_grad.end(),
+        ets_error_grad[0],
+        [](const auto& a, const auto& b) -> std::tuple<double, VectorXd> {
+          return {std::get<0>(a) + std::get<0>(b), std::get<1>(a) + std::get<1>(b)};
+        });
+
+    // finalize the gradient
+    gradient += std::get<1>(ets_error_grad[0]).cast<float>() * weight_;
+    error = std::get<0>(ets_error_grad[0]);
+  }
+
   // Sum the SIMD error register for final result
-  const double error =
-      kPositionWeight * weight_ * std::accumulate(jointErrors.begin(), jointErrors.end(), 0.0);
-  return static_cast<float>(error);
+  return static_cast<float>(kPositionWeight * weight_ * error);
 }
 
 __vectorcall DRJIT_INLINE void jacobian_jointParams_to_modelParams(
