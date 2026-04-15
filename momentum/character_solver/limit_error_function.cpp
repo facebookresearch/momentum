@@ -270,10 +270,10 @@ T computeHalfPlaneGradient(
   }
   const T error = residual * residual * limitWeight * tWeight;
   if (enabledParameters.test(data.param1)) {
-    gradient[data.param1] += T(2) * residual * T(data.normal[0]) * tWeight;
+    gradient[data.param1] += T(2) * residual * T(data.normal[0]) * limitWeight * tWeight;
   }
   if (enabledParameters.test(data.param2)) {
-    gradient[data.param2] += T(2) * residual * T(data.normal[1]) * tWeight;
+    gradient[data.param2] += T(2) * residual * T(data.normal[1]) * limitWeight * tWeight;
   }
   return error;
 }
