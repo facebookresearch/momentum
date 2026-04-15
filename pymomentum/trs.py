@@ -497,6 +497,80 @@ def rotmat_rotate_vector(r: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
     return torch.einsum("...ij,...j->...i", r, v)
 
 
+def index_select(trs: TRSTransform, dim: int, indices: torch.Tensor) -> TRSTransform:
+    """
+    Select elements from a TRS transform along a dimension.
+
+    This is equivalent to calling torch.index_select on each component of the TRS
+    transform. The dimension is interpreted consistently across all components:
+    for translation and scale, the dimension is used directly; for rotation matrices
+    (which have one extra dimension for the 3x3 matrix rows), the dimension is
+    adjusted to account for the extra matrix dimension.
+
+    :parameter trs: The TRS transform tuple to select from.
+    :type trs: TRSTransform
+    :parameter dim: The dimension to select along. This should be a batch/joint dimension,
+                    not a dimension within the transformation itself (e.g., the 3 in
+                    translation or the 3x3 in rotation). Negative indexing is supported.
+    :type dim: int
+    :parameter indices: The indices to select.
+    :type indices: torch.Tensor
+    :return: The selected TRS transform tuple.
+    :rtype: TRSTransform
+    """
+    t, r, s = trs
+
+    # For rotation matrices, we need to adjust the dimension since they have
+    # shape [..., 3, 3] instead of [..., 3] or [..., 1]
+    # Translation/scale have one trailing dim, rotation has two trailing dims
+    # So if dim is negative, we subtract 1 to account for the extra dimension
+    if dim < 0:
+        r_dim = dim - 1  # Adjust for the one extra dimension (row vs just the 3)
+    else:
+        r_dim = dim
+
+    return (
+        t.index_select(dim, indices),
+        r.index_select(r_dim, indices),
+        s.index_select(dim, indices),
+    )
+
+
+def where(
+    condition: torch.Tensor, trs_true: TRSTransform, trs_false: TRSTransform
+) -> TRSTransform:
+    """
+    Select elements from two TRS transforms based on a condition.
+
+    This is equivalent to calling torch.where on each component of the TRS transforms,
+    with appropriate broadcasting for translation, rotation matrix, and scale.
+
+    :parameter condition: Boolean condition tensor. Will be broadcast to match
+                          the shapes of the TRS components.
+    :type condition: torch.Tensor
+    :parameter trs_true: TRS transform to select from where condition is True.
+    :type trs_true: TRSTransform
+    :parameter trs_false: TRS transform to select from where condition is False.
+    :type trs_false: TRSTransform
+    :return: The resulting TRS transform tuple.
+    :rtype: TRSTransform
+    """
+    t_true, r_true, s_true = trs_true
+    t_false, r_false, s_false = trs_false
+
+    # Expand condition for broadcasting with each component
+    # Translation and scale: [..., 3] and [..., 1] need condition [..., 1]
+    # Rotation: [..., 3, 3] needs condition [..., 1, 1]
+    cond_ts = condition[..., None]  # for translation and scale
+    cond_r = condition[..., None, None]  # for rotation
+
+    return (
+        torch.where(cond_ts, t_true, t_false),
+        torch.where(cond_r, r_true, r_false),
+        torch.where(cond_ts, s_true, s_false),
+    )
+
+
 def rotmat_from_euler_xyz(euler: torch.Tensor) -> torch.Tensor:
     """
     Create rotation matrices from XYZ Euler angles.

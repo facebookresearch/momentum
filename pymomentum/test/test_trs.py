@@ -637,6 +637,137 @@ class TestTRS(unittest.TestCase):
             torch.allclose(batch_rotmat[2], self._rotation_y(math.pi / 2), atol=1e-6)
         )
 
+    def test_index_select(self) -> None:
+        """Test selecting elements from a TRS transform along a dimension."""
+        batch_size = 2
+        num_joints = 6
+
+        # Create a TRS transform with known values
+        t = (
+            torch.arange(batch_size * num_joints * 3)
+            .view(batch_size, num_joints, 3)
+            .float()
+        )
+        r = (
+            torch.eye(3)
+            .unsqueeze(0)
+            .unsqueeze(0)
+            .expand(batch_size, num_joints, 3, 3)
+            .clone()
+        )
+        # Make each joint's rotation matrix slightly different for verification
+        for j in range(num_joints):
+            r[:, j, 0, 0] = float(j)  # Mark each joint's rotation
+        s = (
+            torch.arange(batch_size * num_joints)
+            .view(batch_size, num_joints, 1)
+            .float()
+            + 1
+        )
+
+        trs_input = (t, r, s)
+
+        # Select specific indices along the joint dimension
+        indices = torch.tensor([0, 2, 4])
+        result = pym_trs.index_select(trs_input, -2, indices)
+
+        # Check shapes
+        self.assertEqual(result[0].shape, (batch_size, 3, 3))  # translation
+        self.assertEqual(result[1].shape, (batch_size, 3, 3, 3))  # rotation
+        self.assertEqual(result[2].shape, (batch_size, 3, 1))  # scale
+
+        # Check values - should have selected joints 0, 2, 4
+        # For translation (shape batch, joints, 3): dim -2 selects on joints
+        expected_t = t.index_select(-2, indices)
+        # For rotation (shape batch, joints, 3, 3): dim -3 selects on joints
+        expected_r = r.index_select(-3, indices)
+        # For scale (shape batch, joints, 1): dim -2 selects on joints
+        expected_s = s.index_select(-2, indices)
+
+        self.assertTrue(torch.allclose(result[0], expected_t))
+        self.assertTrue(torch.allclose(result[1], expected_r))
+        self.assertTrue(torch.allclose(result[2], expected_s))
+
+        # Verify the rotation matrices have the expected joint indices
+        self.assertEqual(result[1][0, 0, 0, 0].item(), 0.0)  # joint 0
+        self.assertEqual(result[1][0, 1, 0, 0].item(), 2.0)  # joint 2
+        self.assertEqual(result[1][0, 2, 0, 0].item(), 4.0)  # joint 4
+
+    def test_where(self) -> None:
+        """Test conditional selection between two TRS transforms."""
+        batch_size = 2
+        num_joints = 4
+
+        # Create two TRS transforms with distinct values
+        t_true = torch.ones(batch_size, num_joints, 3)
+        r_true = (
+            torch.eye(3)
+            .unsqueeze(0)
+            .unsqueeze(0)
+            .expand(batch_size, num_joints, 3, 3)
+            .clone()
+        )
+        s_true = torch.ones(batch_size, num_joints, 1) * 2.0
+
+        t_false = torch.zeros(batch_size, num_joints, 3)
+        r_false = torch.zeros(batch_size, num_joints, 3, 3)
+        s_false = torch.zeros(batch_size, num_joints, 1)
+
+        trs_true = (t_true, r_true, s_true)
+        trs_false = (t_false, r_false, s_false)
+
+        # Condition: first two joints are True, last two are False
+        condition = torch.tensor([True, True, False, False])
+
+        result = pym_trs.where(condition, trs_true, trs_false)
+
+        # Check that first two joints have trs_true values
+        self.assertTrue(torch.allclose(result[0][:, :2], t_true[:, :2]))
+        self.assertTrue(torch.allclose(result[1][:, :2], r_true[:, :2]))
+        self.assertTrue(torch.allclose(result[2][:, :2], s_true[:, :2]))
+
+        # Check that last two joints have trs_false values
+        self.assertTrue(torch.allclose(result[0][:, 2:], t_false[:, 2:]))
+        self.assertTrue(torch.allclose(result[1][:, 2:], r_false[:, 2:]))
+        self.assertTrue(torch.allclose(result[2][:, 2:], s_false[:, 2:]))
+
+    def test_where_with_batched_condition(self) -> None:
+        """Test where with a condition that has batch dimensions."""
+        batch_size = 2
+        num_joints = 3
+
+        t_true = torch.ones(batch_size, num_joints, 3)
+        r_true = (
+            torch.eye(3)
+            .unsqueeze(0)
+            .unsqueeze(0)
+            .expand(batch_size, num_joints, 3, 3)
+            .clone()
+        )
+        s_true = torch.ones(batch_size, num_joints, 1)
+
+        t_false = torch.zeros(batch_size, num_joints, 3)
+        r_false = torch.zeros(batch_size, num_joints, 3, 3)
+        s_false = torch.zeros(batch_size, num_joints, 1)
+
+        trs_true = (t_true, r_true, s_true)
+        trs_false = (t_false, r_false, s_false)
+
+        # Condition varies per batch element
+        condition = torch.tensor([[True, False, True], [False, True, False]])
+
+        result = pym_trs.where(condition, trs_true, trs_false)
+
+        # Check batch 0: joints 0,2 should be true, joint 1 should be false
+        self.assertTrue(torch.allclose(result[0][0, 0], t_true[0, 0]))
+        self.assertTrue(torch.allclose(result[0][0, 1], t_false[0, 1]))
+        self.assertTrue(torch.allclose(result[0][0, 2], t_true[0, 2]))
+
+        # Check batch 1: joint 1 should be true, joints 0,2 should be false
+        self.assertTrue(torch.allclose(result[0][1, 0], t_false[1, 0]))
+        self.assertTrue(torch.allclose(result[0][1, 1], t_true[1, 1]))
+        self.assertTrue(torch.allclose(result[0][1, 2], t_false[1, 2]))
+
 
 if __name__ == "__main__":
     unittest.main()
