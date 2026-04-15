@@ -228,10 +228,10 @@ std::string resolveStringProperty(const ofbx::Object& object, const char* name) 
   const ofbx::IElementProperty* x = getElementProperty(element, 4);
   MT_THROW_IF(x == nullptr, "Unable to find property {} in {}", name, object.name);
   if (x->getType() == ofbx::IElementProperty::STRING) {
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char result[65536];
-    x->getValue().toString(result);
-    return {result};
+    const auto& val = x->getValue();
+    const size_t len = val.end - val.begin;
+    std::string result(reinterpret_cast<const char*>(val.begin), len);
+    return result;
   } else {
     MT_THROW("For property {}, expected string but got {}.", name, propertyTypeStr(x->getType()));
   }
@@ -257,7 +257,7 @@ VecArray extractPropertyArrayImp(const ofbx::IElementProperty* prop, const char*
       int(vecLength),
       nScalar);
 
-  std::vector<double> vals(nScalar);
+  std::vector<EltType> vals(nScalar);
   prop->getValues(vals.data(), (int)(sizeof(EltType) * vals.size()));
 
   VecArray result;

@@ -88,6 +88,12 @@ void FbxMemoryStream::Seek(const FbxInt64& pOffset, const FbxFile::ESeekPos& pSe
       position_ = offset;
       break;
   }
+  // Clamp position to valid range to prevent out-of-bounds reads
+  if (position_ < 0) {
+    position_ = 0;
+  } else if (position_ > length_) {
+    position_ = length_;
+  }
 }
 
 #if FBX_VERSION_GE(2020, 3, 2)
