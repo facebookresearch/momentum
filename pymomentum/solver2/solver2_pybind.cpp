@@ -657,7 +657,10 @@ Note that if you're trying to actually solve a problem using SGD, you should con
               throw std::runtime_error(
                   "Expected parameters to be of size " + std::to_string(self.getNumParameters()));
             }
-            self.solve(parameters);
+            {
+              py::gil_scoped_release release;
+              self.solve(parameters);
+            }
             return parameters;
           },
           py::arg("model_parameters"))

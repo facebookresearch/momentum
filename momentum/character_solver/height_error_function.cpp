@@ -76,9 +76,7 @@ HeightErrorFunctionT<T>::HeightErrorFunctionT(
       character_(character),
       targetHeight_(targetHeight),
       upDirection_(upDirection.normalized()),
-      k_(k),
-      skeletonState_(),
-      meshState_() {
+      k_(k) {
   MT_CHECK(k > 0, "k must be greater than 0, got {}", k);
   MT_CHECK(character.mesh != nullptr, "HeightErrorFunction requires a character with a mesh");
 
@@ -119,12 +117,13 @@ ModelParametersT<T> HeightErrorFunctionT<T>::applyActiveParameters(
 }
 
 template <typename T>
-typename HeightErrorFunctionT<T>::HeightResult HeightErrorFunctionT<T>::calculateHeight() const {
+typename HeightErrorFunctionT<T>::HeightResult HeightErrorFunctionT<T>::calculateHeight(
+    const MeshStateT<T>& meshState) const {
   MT_PROFILE_FUNCTION();
 
-  MT_CHECK_NOTNULL(meshState_.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
-  if (meshState_.posedMesh_->vertices.empty()) {
+  if (meshState.posedMesh_->vertices.empty()) {
     return {T(0), {}, {}, {}, {}};
   }
 
@@ -140,8 +139,8 @@ typename HeightErrorFunctionT<T>::HeightResult HeightErrorFunctionT<T>::calculat
   std::priority_queue<ProjectionPair, std::vector<ProjectionPair>, std::greater<>> maxQueue;
 
   // Populate the priority queues
-  for (size_t i = 0; i < meshState_.posedMesh_->vertices.size(); ++i) {
-    const T projection = upDirection_.dot(meshState_.posedMesh_->vertices[i]);
+  for (size_t i = 0; i < meshState.posedMesh_->vertices.size(); ++i) {
+    const T projection = upDirection_.dot(meshState.posedMesh_->vertices[i]);
 
     // For k lowest projections
     if (minQueue.size() < k_) {
@@ -207,13 +206,15 @@ double HeightErrorFunctionT<T>::getError(
   const ModelParametersT<T> activeOnlyParams = applyActiveParameters(modelParameters);
 
   // Update skeleton state with active parameters only
-  skeletonState_.set(
+  SkeletonStateT<T> skeletonState;
+  skeletonState.set(
       this->parameterTransform_.template cast<T>().apply(activeOnlyParams), this->skeleton_, false);
 
   // Update internal mesh state using the modified parameters
-  meshState_.update(activeOnlyParams, skeletonState_, character_);
+  MeshStateT<T> meshState;
+  meshState.update(activeOnlyParams, skeletonState, character_);
 
-  const auto heightResult = calculateHeight();
+  const auto heightResult = calculateHeight(meshState);
   const T heightDiff = heightResult.height - targetHeight_;
 
   return this->weight_ * heightDiff * heightDiff;
@@ -231,13 +232,15 @@ double HeightErrorFunctionT<T>::getGradient(
   const ModelParametersT<T> activeOnlyParams = applyActiveParameters(modelParameters);
 
   // Update skeleton state with active parameters only
-  skeletonState_.set(
+  SkeletonStateT<T> skeletonState;
+  skeletonState.set(
       this->parameterTransform_.template cast<T>().apply(activeOnlyParams), this->skeleton_, true);
 
   // Update internal mesh state
-  meshState_.update(activeOnlyParams, skeletonState_, character_);
+  MeshStateT<T> meshState;
+  meshState.update(activeOnlyParams, skeletonState, character_);
 
-  const auto heightResult = calculateHeight();
+  const auto heightResult = calculateHeight(meshState);
   const T heightDiff = heightResult.height - targetHeight_;
 
   const T wgt = T(2) * heightDiff * this->weight_;
@@ -247,6 +250,8 @@ double HeightErrorFunctionT<T>::getGradient(
     calculateVertexGradient(
         heightResult.maxVertexIndices[i],
         wgt * heightResult.maxVertexWeights[i] * upDirection_,
+        skeletonState,
+        meshState,
         gradient);
   }
 
@@ -255,6 +260,8 @@ double HeightErrorFunctionT<T>::getGradient(
     calculateVertexGradient(
         heightResult.minVertexIndices[i],
         -wgt * heightResult.minVertexWeights[i] * upDirection_,
+        skeletonState,
+        meshState,
         gradient);
   }
 
@@ -280,13 +287,15 @@ double HeightErrorFunctionT<T>::getJacobian(
   const ModelParametersT<T> activeOnlyParams = applyActiveParameters(modelParameters);
 
   // Update skeleton state with active parameters only
-  skeletonState_.set(
+  SkeletonStateT<T> skeletonState;
+  skeletonState.set(
       this->parameterTransform_.template cast<T>().apply(activeOnlyParams), this->skeleton_, true);
 
   // Update internal mesh state
-  meshState_.update(activeOnlyParams, skeletonState_, character_);
+  MeshStateT<T> meshState;
+  meshState.update(activeOnlyParams, skeletonState, character_);
 
-  const auto heightResult = calculateHeight();
+  const auto heightResult = calculateHeight(meshState);
   const T heightDiff = heightResult.height - targetHeight_;
 
   const T wgt = std::sqrt(this->weight_);
@@ -300,6 +309,8 @@ double HeightErrorFunctionT<T>::getJacobian(
     calculateVertexJacobian(
         heightResult.maxVertexIndices[i],
         wgt * heightResult.maxVertexWeights[i] * upDirection_,
+        skeletonState,
+        meshState,
         jac_row);
   }
 
@@ -308,6 +319,8 @@ double HeightErrorFunctionT<T>::getJacobian(
     calculateVertexJacobian(
         heightResult.minVertexIndices[i],
         -wgt * heightResult.minVertexWeights[i] * upDirection_,
+        skeletonState,
+        meshState,
         jac_row);
   }
 
@@ -325,13 +338,15 @@ template <typename Derived>
 void HeightErrorFunctionT<T>::calculateVertexJacobian(
     size_t vertexIndex,
     const Eigen::Vector3<T>& jacobianDirection,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& meshState,
     Eigen::MatrixBase<Derived>& jacobian) const {
   MT_PROFILE_FUNCTION();
 
-  MT_CHECK_NOTNULL(meshState_.restMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState_.restMesh_, skeletonState_, vertexIndex);
+      this->character_, *meshState.restMesh_, skeletonState, vertexIndex);
 
   while (!skinningIter.finished()) {
     size_t jointIndex = 0;
@@ -341,7 +356,7 @@ void HeightErrorFunctionT<T>::calculateVertexJacobian(
 
     MT_CHECK(jointIndex < this->skeleton_.joints.size());
 
-    const auto& jointState = skeletonState_.jointState[jointIndex];
+    const auto& jointState = skeletonState.jointState[jointIndex];
     const size_t paramIndex = jointIndex * kParametersPerJoint;
     const Eigen::Vector3<T> posd = pos - jointState.translation();
 
@@ -391,7 +406,7 @@ void HeightErrorFunctionT<T>::calculateVertexJacobian(
               .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
               .template cast<T>();
       Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(vertexIndex, d_restPos, d_worldPos);
+      calculateDWorldPos(vertexIndex, d_restPos, skeletonState, d_worldPos);
 
       jacobian(0, paramIdx) += jacobianDirection.dot(d_worldPos);
     }
@@ -411,7 +426,7 @@ void HeightErrorFunctionT<T>::calculateVertexJacobian(
               .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
               .template cast<T>();
       Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(vertexIndex, d_restPos, d_worldPos);
+      calculateDWorldPos(vertexIndex, d_restPos, skeletonState, d_worldPos);
 
       jacobian(0, paramIdx) += jacobianDirection.dot(d_worldPos);
     }
@@ -422,13 +437,15 @@ template <typename T>
 void HeightErrorFunctionT<T>::calculateVertexGradient(
     size_t vertexIndex,
     const Eigen::Vector3<T>& gradientDirection,
+    const SkeletonStateT<T>& skeletonState,
+    const MeshStateT<T>& meshState,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
   MT_PROFILE_FUNCTION();
 
-  MT_CHECK_NOTNULL(meshState_.restMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
 
   SkinningWeightIteratorT<T> skinningIter(
-      this->character_, *meshState_.restMesh_, skeletonState_, vertexIndex);
+      this->character_, *meshState.restMesh_, skeletonState, vertexIndex);
 
   while (!skinningIter.finished()) {
     size_t jointIndex = 0;
@@ -438,7 +455,7 @@ void HeightErrorFunctionT<T>::calculateVertexGradient(
 
     MT_CHECK(jointIndex < this->skeleton_.joints.size());
 
-    const auto& jointState = skeletonState_.jointState[jointIndex];
+    const auto& jointState = skeletonState.jointState[jointIndex];
     const size_t paramIndex = jointIndex * kParametersPerJoint;
     const Eigen::Vector3<T> posd = pos - jointState.translation();
 
@@ -488,7 +505,7 @@ void HeightErrorFunctionT<T>::calculateVertexGradient(
               .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
               .template cast<T>();
       Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(vertexIndex, d_restPos, d_worldPos);
+      calculateDWorldPos(vertexIndex, d_restPos, skeletonState, d_worldPos);
 
       gradient[paramIdx] += gradientDirection.dot(d_worldPos);
     }
@@ -508,7 +525,7 @@ void HeightErrorFunctionT<T>::calculateVertexGradient(
               .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
               .template cast<T>();
       Eigen::Vector3<T> d_worldPos = Eigen::Vector3<T>::Zero();
-      calculateDWorldPos(vertexIndex, d_restPos, d_worldPos);
+      calculateDWorldPos(vertexIndex, d_restPos, skeletonState, d_worldPos);
 
       gradient[paramIdx] += gradientDirection.dot(d_worldPos);
     }
@@ -519,6 +536,7 @@ template <typename T>
 void HeightErrorFunctionT<T>::calculateDWorldPos(
     size_t vertexIndex,
     const Eigen::Vector3<T>& d_restPos,
+    const SkeletonStateT<T>& skeletonState,
     Eigen::Vector3<T>& d_worldPos) const {
   const auto& skinWeights = *character_.skinWeights;
 
@@ -527,7 +545,7 @@ void HeightErrorFunctionT<T>::calculateDWorldPos(
     const auto parentBone = skinWeights.index(vertexIndex, i);
     if (w > 0) {
       d_worldPos += w *
-          (skeletonState_.jointState[parentBone].transform.toLinear() *
+          (skeletonState.jointState[parentBone].transform.toLinear() *
            (character_.inverseBindPose[parentBone].linear().template cast<T>() * d_restPos));
     }
   }
