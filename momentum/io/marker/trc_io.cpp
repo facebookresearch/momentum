@@ -47,6 +47,7 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
   }
   const double frameRate = std::stod(tokens[0]);
   const size_t numMarkers = std::stoi(tokens[3]);
+  const std::string unitStr = tokens[4];
   res.fps = static_cast<float>(frameRate);
 
   // get line with marker names and parse it
@@ -86,7 +87,7 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
         markers[i].occluded = false;
         Vector3d p{
             std::stod(tokens[pos + 0]), std::stod(tokens[pos + 1]), std::stod(tokens[pos + 2])};
-        p = toMomentumVector3(p, up, tokens[4]);
+        p = toMomentumVector3(p, up, unitStr);
         markers[i].pos = p;
       }
     }
