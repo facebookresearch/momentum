@@ -26,7 +26,6 @@
 #include <momentum/character_solver/vertex_normal_error_function.h>
 #include <momentum/character_solver/vertex_plane_error_function.h>
 #include <momentum/character_solver/vertex_position_error_function.h>
-#include <momentum/character_solver/vertex_sdf_error_function.h>
 #include <pymomentum/python_utility/eigen_quaternion.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
@@ -1374,75 +1373,11 @@ tangent space of the rotation group, which is invariant to the choice of coordin
           },
           R"(Returns the pairs of colliding elements.)");
 
-  // Vertex SDF error function
-  py::class_<
-      mm::VertexSDFErrorFunction,
-      mm::SkeletonErrorFunction,
-      std::shared_ptr<mm::VertexSDFErrorFunction>>(m, "VertexSDFErrorFunction")
-      .def(
-          "__repr__",
-          [](const mm::VertexSDFErrorFunction& self) {
-            return fmt::format(
-                "VertexSDFErrorFunction(weight={}, num_constraints={})",
-                self.getWeight(),
-                self.getNumConstraints());
-          })
-      .def(
-          py::init<>([](const mm::Character& character,
-                        const mm::SDFColliderT<float>& sdfCollider,
-                        float weight) {
-            validateWeight(weight, "weight");
-            auto result = std::make_shared<mm::VertexSDFErrorFunction>(character, sdfCollider);
-            result->setWeight(weight);
-            return result;
-          }),
-          R"(A skeleton error function that penalizes deviation of mesh vertex SDF distance from a target value.
-
-Unlike CollisionErrorFunction (which penalizes only penetration), this targets an arbitrary signed
-distance value against a single SDF, enabling use cases like fitting a mesh to a target isosurface.
-
-:param character: The character to use.
-:param sdf_collider: The SDF collider to test against (with optional parent joint and offset).
-:param weight: The weight applied to the error function.)",
-          py::arg("character"),
-          py::arg("sdf_collider"),
-          py::kw_only(),
-          py::arg("weight") = 1.0f)
-      .def(
-          "add_constraint",
-          [](mm::VertexSDFErrorFunction& self,
-             int vertexIndex,
-             float targetDistance,
-             float weight) {
-            validateWeight(weight, "weight");
-            mm::VertexSDFConstraintT<float> constraint;
-            constraint.vertexIndex = vertexIndex;
-            constraint.targetDistance = targetDistance;
-            constraint.weight = weight;
-            self.addConstraint(constraint);
-          },
-          R"(Add a constraint specifying a target signed distance for a vertex.
-
-:param vertex_index: The mesh vertex index.
-:param target_distance: The target signed distance value (0 = surface, positive = outside, negative = inside).
-:param weight: Per-constraint weight (default: 1.0).)",
-          py::arg("vertex_index"),
-          py::arg("target_distance"),
-          py::kw_only(),
-          py::arg("weight") = 1.0f)
-      .def(
-          "clear_constraints",
-          &mm::VertexSDFErrorFunction::clearConstraints,
-          R"(Clear all constraints.)")
-      .def_property_readonly(
-          "num_constraints",
-          [](const mm::VertexSDFErrorFunctionT<float>& self) { return self.getNumConstraints(); },
-          R"(The number of active constraints.)");
-
   // Call sub-registration functions
   addAimAxisErrorFunctions(m);
   addProjectionErrorFunctions(m);
   addDistanceErrorFunctions(m);
+  addSDFErrorFunctions(m);
 }
 
 } // namespace pymomentum

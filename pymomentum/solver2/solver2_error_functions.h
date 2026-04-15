@@ -20,4 +20,6 @@ void addProjectionErrorFunctions(pybind11::module_& m);
 
 void addDistanceErrorFunctions(pybind11::module_& m);
 
+void addSDFErrorFunctions(pybind11::module_& m);
+
 } // namespace pymomentum

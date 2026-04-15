@@ -81,7 +81,7 @@ SDFCollisionErrorFunctionT<T>::SDFCollisionErrorFunctionT(
     uint8_t maxCollisionsPerVertex)
     : SkeletonErrorFunctionT<T>(character.skeleton, character.parameterTransform),
       character_(character),
-      sdfColliders_(sdfColliders),
+      sdfColliders_(sdfColliders), // copy; SDFCollider is cheap (transform + size_t + shared_ptr)
       maxCollisionsPerVertex_(maxCollisionsPerVertex) {
   MT_CHECK_NOTNULL(character_.mesh, "Character must have a mesh for SDF collision detection");
   MT_CHECK_NOTNULL(
