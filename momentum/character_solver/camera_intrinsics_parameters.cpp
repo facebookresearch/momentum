@@ -34,7 +34,8 @@ Eigen::Index findParamIndex(const ParameterTransform& paramTransform, const std:
 std::tuple<ParameterTransform, ParameterLimits> addCameraIntrinsicsParameters(
     ParameterTransform paramTransform,
     ParameterLimits paramLimits,
-    const IntrinsicsModel& intrinsicsModel) {
+    const IntrinsicsModel& intrinsicsModel,
+    bool tieFocalLength) {
   const std::string& effectiveName = intrinsicsModel.name();
   MT_CHECK(
       !effectiveName.empty(),
@@ -56,11 +57,26 @@ std::tuple<ParameterTransform, ParameterLimits> addCameraIntrinsicsParameters(
   // Build the parameter set for this camera
   ParameterSet paramSet;
 
-  // Append parameters
-  paramTransform.name.reserve(paramTransform.name.size() + paramNames.size());
+  // When tieFocalLength is true, replace separate "fx"/"fy" with a single "f"
+  std::vector<std::string> addedNames;
+  bool fAdded = false;
   for (const auto& paramName : paramNames) {
+    if (tieFocalLength && (paramName == "fx" || paramName == "fy")) {
+      if (!fAdded) {
+        addedNames.push_back(std::string(kTiedFocalLengthSuffix));
+        fAdded = true;
+      }
+      // skip fy (already covered by "f")
+    } else {
+      addedNames.push_back(paramName);
+    }
+  }
+
+  // Append parameters
+  paramTransform.name.reserve(paramTransform.name.size() + addedNames.size());
+  for (const auto& name : addedNames) {
     paramSet.set(paramTransform.name.size());
-    paramTransform.name.push_back(prefix + paramName);
+    paramTransform.name.push_back(prefix + name);
   }
 
   // Store the named parameter set
@@ -82,9 +98,13 @@ Eigen::VectorXf extractCameraIntrinsics(
   Eigen::VectorXf result = intrinsicsModel.getIntrinsicParameters();
   const std::string prefix = makePrefix(intrinsicsModel.name());
   const auto paramNames = intrinsicsModel.getParameterNames();
+  const Eigen::Index tiedFIdx = findParamIndex(paramTransform, prefix + kTiedFocalLengthSuffix);
 
   for (size_t i = 0; i < paramNames.size(); ++i) {
-    const auto paramIdx = findParamIndex(paramTransform, prefix + paramNames[i]);
+    auto paramIdx = findParamIndex(paramTransform, prefix + paramNames[i]);
+    if (paramIdx < 0 && tiedFIdx >= 0 && (paramNames[i] == "fx" || paramNames[i] == "fy")) {
+      paramIdx = tiedFIdx;
+    }
     if (paramIdx >= 0 && paramIdx < modelParams.size()) {
       result(static_cast<Eigen::Index>(i)) = modelParams(paramIdx);
     }
@@ -99,9 +119,13 @@ void setCameraIntrinsics(
   const std::string prefix = makePrefix(intrinsicsModel.name());
   const auto paramNames = intrinsicsModel.getParameterNames();
   const Eigen::VectorXf intrinsicValues = intrinsicsModel.getIntrinsicParameters();
+  const Eigen::Index tiedFIdx = findParamIndex(paramTransform, prefix + kTiedFocalLengthSuffix);
 
   for (size_t i = 0; i < paramNames.size(); ++i) {
-    const auto paramIdx = findParamIndex(paramTransform, prefix + paramNames[i]);
+    auto paramIdx = findParamIndex(paramTransform, prefix + paramNames[i]);
+    if (paramIdx < 0 && tiedFIdx >= 0 && (paramNames[i] == "fx" || paramNames[i] == "fy")) {
+      paramIdx = tiedFIdx;
+    }
     if (paramIdx >= 0 && paramIdx < modelParams.size()) {
       modelParams(paramIdx) = intrinsicValues(static_cast<Eigen::Index>(i));
     }
@@ -140,8 +164,17 @@ CameraIntrinsicsMapping<T>::CameraIntrinsicsMapping(
   const std::string prefix = makePrefix(intrinsicsModel.name());
   const auto paramNames = intrinsicsModel.getParameterNames();
   modelParamIndices.resize(paramNames.size());
+
+  // Check for tied focal length: a single "f" parameter that controls both fx and fy.
+  const Eigen::Index tiedFIdx = findParamIndex(paramTransform, prefix + kTiedFocalLengthSuffix);
+
   for (size_t i = 0; i < paramNames.size(); ++i) {
     modelParamIndices[i] = findParamIndex(paramTransform, prefix + paramNames[i]);
+    // Fall back to tied "f" for fx/fy if separate params not found
+    if (modelParamIndices[i] < 0 && tiedFIdx >= 0 &&
+        (paramNames[i] == "fx" || paramNames[i] == "fy")) {
+      modelParamIndices[i] = tiedFIdx;
+    }
   }
 }
 
