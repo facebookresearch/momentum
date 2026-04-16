@@ -11,6 +11,7 @@
 #include "momentum/common/log.h"
 
 #include <fstream>
+#include <limits>
 
 namespace momentum {
 
@@ -134,6 +135,10 @@ void saveMmo(
   }
 
   std::ofstream fs(filename, std::ios::out | std::ios::binary);
+  if (!fs.is_open()) {
+    MT_LOGW("{}: Failed to open file for writing: {}", __func__, filename);
+    return;
+  }
   // write out sizes
   size_t data = 0;
   data = parameterNames.size(); // number of parameters
@@ -269,11 +274,44 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
   fs.read((char*)&nJoints, sizeof(size_t));
   fs.read((char*)&nFrames, sizeof(size_t));
 
+  if (!fs.good()) {
+    MT_LOGW("{}: Failed to read header from file {}", __func__, filename);
+    return result;
+  }
+
+  // Validate sizes to prevent excessive allocation from malformed files
+  constexpr size_t kMaxDimension = 10'000'000;
+  constexpr size_t kMaxStringLength = 10'000;
+  if (nParams > kMaxDimension || nJoints > kMaxDimension || nFrames > kMaxDimension) {
+    MT_LOGW(
+        "{}: Unreasonable dimensions in file {}: nParams={}, nJoints={}, nFrames={}",
+        __func__,
+        filename,
+        nParams,
+        nJoints,
+        nFrames);
+    return result;
+  }
+
+  // Guard against integer overflow in size calculations
+  if (nJoints != 0 && nJoints > std::numeric_limits<size_t>::max() / kParametersPerJoint) {
+    MT_LOGW("{}: Integer overflow in scale size for file {}", __func__, filename);
+    return result;
+  }
+  if (nParams != 0 && nFrames != 0 && nParams > std::numeric_limits<size_t>::max() / nFrames) {
+    MT_LOGW("{}: Integer overflow in pose matrix size for file {}", __func__, filename);
+    return result;
+  }
+
   // load parameter names
   for (size_t i = 0; i < nParams; i++) {
     // read parameter name
     size_t count = 0;
     fs.read((char*)&count, sizeof(size_t));
+    if (!fs.good() || count > kMaxStringLength) {
+      MT_LOGW("{}: Invalid parameter name length in file {}", __func__, filename);
+      return result;
+    }
     std::string name;
     name.resize(count);
     fs.read((char*)name.data(), count);
@@ -282,9 +320,13 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
 
   // load joint names
   for (size_t i = 0; i < nJoints; i++) {
-    // read parameter name
+    // read joint name
     size_t count = 0;
     fs.read((char*)&count, sizeof(size_t));
+    if (!fs.good() || count > kMaxStringLength) {
+      MT_LOGW("{}: Invalid joint name length in file {}", __func__, filename);
+      return result;
+    }
     std::string name;
     name.resize(count);
     fs.read((char*)name.data(), count);
@@ -294,10 +336,18 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
   // read offsets and re-arrange them according to the map
   scale = VectorXf(nJoints * kParametersPerJoint);
   fs.read((char*)scale.data(), scale.size() * sizeof(float));
+  if (!fs.good()) {
+    MT_LOGW("{}: Failed to read scale data from file {}", __func__, filename);
+    return result;
+  }
 
   // read frames and re-arrange them according to the map
   poses = MatrixXf(nParams, nFrames);
   fs.read((char*)poses.data(), poses.size() * sizeof(float));
+  if (!fs.good()) {
+    MT_LOGW("{}: Failed to read pose data from file {}", __func__, filename);
+    return result;
+  }
 
   return result;
 }
