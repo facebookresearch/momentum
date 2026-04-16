@@ -175,7 +175,7 @@ StateSimilarity SkeletonStateT<T>::compare(
   result.positionRMSE = std::sqrt(
       result.positionError.squaredNorm() / static_cast<float>(result.positionError.size()));
   result.orientationRMSE = std::sqrt(
-      result.orientationError.squaredNorm() / static_cast<float>(result.positionError.size()));
+      result.orientationError.squaredNorm() / static_cast<float>(result.orientationError.size()));
   result.positionMax = result.positionError.maxCoeff();
   result.orientationMax = result.orientationError.maxCoeff();
 

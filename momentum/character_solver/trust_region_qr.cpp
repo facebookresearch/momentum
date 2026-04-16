@@ -242,7 +242,8 @@ void TrustRegionQRT<T>::doIteration() {
     // This is the decrease of the function relative to what we _expected_ the function to
     // decrease by.  It is eq. 4.4 in Nocedal and Wright.
     const T quadraticModelEval = evalQuadraticModel(searchDir_sub);
-    const T rho = (this->error_ - error_new) / (this->error_ - quadraticModelEval);
+    const T denominator = this->error_ - quadraticModelEval;
+    const T rho = (denominator == T(0)) ? T(0) : (this->error_ - error_new) / denominator;
     MT_LOGI_IF(
         this->verbose_,
         "Error orig: {}; error new: {}; quadratic model: {}; rho: {}",

@@ -18,7 +18,7 @@ struct DistanceConstraintDataT {
   Eigen::Vector3<T> origin = Eigen::Vector3<T>::Zero(); // origin in world space
   T target{}; // distance target in world space
   size_t parent{}; // parent joint of the constraint
-  Eigen::Vector3<T> offset; // relative offset to the parent
+  Eigen::Vector3<T> offset = Eigen::Vector3<T>::Zero(); // relative offset to the parent
   T weight{}; // constraint weight
   // comment for now
   static DistanceConstraintDataT<T> createFromLocator(const momentum::Locator& locator);

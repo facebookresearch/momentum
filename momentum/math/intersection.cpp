@@ -101,7 +101,10 @@ std::vector<std::pair<int32_t, int32_t>> intersectMeshBruteForce(const MeshT<T>&
     const Eigen::Vector3<T> v0 = mesh.vertices[faceVerts[0]];
     const Eigen::Vector3<T> v1 = mesh.vertices[faceVerts[1]];
     const Eigen::Vector3<T> v2 = mesh.vertices[faceVerts[2]];
-    faceNormals[iFace] = (v1 - v0).cross(v2 - v0).normalized();
+    const auto cross = (v1 - v0).cross(v2 - v0);
+    const T crossNorm = cross.norm();
+    faceNormals[iFace] =
+        (crossNorm > T(0)) ? (cross / crossNorm).eval() : Eigen::Vector3<T>::Zero();
   }
   // calculate all face intersections brute force
   for (size_t iFace0 = 0; iFace0 < mesh.faces.size(); iFace0++) {
@@ -130,7 +133,10 @@ std::vector<std::pair<int32_t, int32_t>> intersectMesh(const MeshT<T>& mesh) {
     const Eigen::Vector3<T> v0 = mesh.vertices[faceVerts[0]];
     const Eigen::Vector3<T> v1 = mesh.vertices[faceVerts[1]];
     const Eigen::Vector3<T> v2 = mesh.vertices[faceVerts[2]];
-    faceNormals[iFace] = (v1 - v0).cross(v2 - v0).normalized();
+    const auto cross = (v1 - v0).cross(v2 - v0);
+    const T crossNorm = cross.norm();
+    faceNormals[iFace] =
+        (crossNorm > T(0)) ? (cross / crossNorm).eval() : Eigen::Vector3<T>::Zero();
 
     auto& aabb = aabbs[iFace];
     aabb.aabb.min() = v0;

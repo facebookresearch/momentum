@@ -231,7 +231,10 @@ void applySSD(
             // add up normals
             outputn.noalias() += topLeft * nml * weight;
           }
-          outputn.normalize();
+          const T nmlNorm = outputn.norm();
+          if (nmlNorm > T(0)) {
+            outputn /= nmlNorm;
+          }
         }
       },
       options);
