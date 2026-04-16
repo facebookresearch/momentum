@@ -18,6 +18,7 @@
 #include <rerun.hpp>
 
 #include <string>
+#include <unordered_map>
 
 using namespace rerun;
 using namespace momentum;
@@ -67,22 +68,44 @@ int main(int argc, char* argv[]) {
 
     const auto kNumModelParams = character.parameterTransform.numAllModelParameters();
 
-    // Sinusoidal motion for each joint, one at a time
+    // Build a lookup from model parameter index to its min/max limits.
+    std::unordered_map<Eigen::Index, std::pair<float, float>> paramLimitsMap;
+    for (const auto& limit : character.parameterLimits) {
+      if (limit.type == MinMax) {
+        paramLimitsMap[limit.data.minMax.parameterIndex] = {
+            limit.data.minMax.limits[0], limit.data.minMax.limits[1]};
+      }
+    }
+
+    // Sinusoidal motion for each joint, one at a time.
+    // Each DOF sweeps within its parameter limits (or a default range if no limits).
     const int framesPerDoF = 100;
     const auto totalDoFs = character.parameterTransform.transform.cols();
     const auto kNumFrames = framesPerDoF * totalDoFs;
     MatrixXf motion = MatrixXf::Zero(kNumModelParams, kNumFrames);
     const float fps = 30.0f;
     const float frequency = 1.0f;
-    const float amplitude = 1.0f;
-    for (auto j = 0; j < totalDoFs; ++j) {
-      for (auto i = 0; i < framesPerDoF; ++i) {
-        int frameIndex = j * framesPerDoF + i;
+    const float defaultAmplitude = 0.5f; // radians, for DOFs without limits
+    for (Eigen::Index j = 0; j < totalDoFs; ++j) {
+      float lower = -defaultAmplitude;
+      float upper = defaultAmplitude;
+      auto it = paramLimitsMap.find(j);
+      if (it != paramLimitsMap.end()) {
+        lower = it->second.first;
+        upper = it->second.second;
+      }
+
+      // Sweep from lower to upper: midpoint + half_range * sin(...)
+      const float midpoint = (lower + upper) * 0.5f;
+      const float halfRange = (upper - lower) * 0.5f;
+
+      for (int i = 0; i < framesPerDoF; ++i) {
+        const auto frameIndex = static_cast<int>(j) * framesPerDoF + i;
         if (frameIndex >= kNumFrames) {
-          break; // Prevent exceeding total frames
+          break;
         }
-        const float time = i / fps;
-        motion(j, frameIndex) = amplitude * std::sin(2.0f * pi() * frequency * time);
+        const float time = static_cast<float>(i) / fps;
+        motion(j, frameIndex) = midpoint + halfRange * std::sin(twopi<float>() * frequency * time);
       }
     }
 

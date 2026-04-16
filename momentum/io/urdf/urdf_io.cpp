@@ -6,15 +6,39 @@
  */
 
 #include "momentum/io/urdf/urdf_io.h"
+#include "momentum/io/urdf/urdf_mesh_io.h"
+
+#include "momentum/character/skeleton_state.h"
+#include "momentum/common/log.h"
 #include "momentum/math/constants.h"
 
 #include <urdf_model/link.h>
+#include <urdf_model/model.h>
 #include <urdf_model/pose.h>
 #include <urdf_parser/urdf_parser.h>
+
+#include <unordered_map>
 
 namespace momentum {
 
 namespace {
+
+/// Per-link visual data collected during skeleton parsing.
+struct LinkVisualData {
+  size_t jointIndex{};
+  std::vector<urdf::VisualSharedPtr> visuals;
+};
+
+/// Deferred mimic joint data, resolved after the full skeleton is built.
+struct MimicData {
+  std::string mimickedJointName; // URDF joint name to mimic
+  float multiplier{};
+  float offset{}; // radians for revolute, meters for prismatic
+  Eigen::Index jointParamsBaseIndex{}; // this joint's parameter base index
+  int axisIdx{}; // principal axis index (0=X, 1=Y, 2=Z)
+  float sign{}; // axis sign (+1/-1)
+  bool isRotation{}; // true for revolute/continuous, false for prismatic
+};
 
 template <typename T>
 struct ParsingData {
@@ -23,6 +47,14 @@ struct ParsingData {
   std::vector<Eigen::Triplet<float>> triplets;
   ParameterLimits limits;
   size_t totalDoFs = 0;
+
+  std::vector<LinkVisualData> linkVisuals;
+
+  /// Maps URDF joint name → model parameter index (for mimic joint resolution).
+  std::unordered_map<std::string, Eigen::Index> urdfJointNameToModelParamIdx;
+
+  /// Mimic joints deferred until all joints are processed.
+  std::vector<MimicData> mimicJoints;
 };
 
 template <typename S>
@@ -58,11 +90,119 @@ template <typename S>
   }
 }
 
+/// Returns the principal axis index (0=X, 1=Y, 2=Z) and sign (+1/-1) for a URDF axis vector.
+///
+/// URDF joints specify an arbitrary axis direction, but Momentum's joint parameters are
+/// defined along fixed principal axes (tx/ty/tz, rx/ry/rz). Rather than aligning the URDF
+/// axis to Momentum's X axis via preRotation (which would create a rotated internal frame
+/// that differs from the URDF link frame), we map the DOF directly to the matching principal
+/// axis. This preserves frame compatibility with URDF visual meshes and animation data.
+///
+/// For negative axes (e.g., (0,0,-1)), the sign is -1 and the parameter transform coefficient
+/// is negated, so that a positive URDF joint angle still corresponds to rotation around the
+/// positive axis direction.
+///
+/// @return A pair of (axis index, sign): axis index 0=X, 1=Y, 2=Z; sign is +1 or -1.
+/// @throws If the axis is not aligned with a principal axis (e.g., (0.707, 0, 0.707)).
+[[nodiscard]] std::pair<int, float> getPrincipalAxis(const urdf::Vector3& axis) {
+  const auto ax = static_cast<float>(axis.x);
+  const auto ay = static_cast<float>(axis.y);
+  const auto az = static_cast<float>(axis.z);
+  constexpr float kTol = 1e-4f;
+
+  if (std::abs(std::abs(ax) - 1.0f) < kTol && std::abs(ay) < kTol && std::abs(az) < kTol) {
+    return {0, ax > 0 ? 1.0f : -1.0f};
+  }
+  if (std::abs(ax) < kTol && std::abs(std::abs(ay) - 1.0f) < kTol && std::abs(az) < kTol) {
+    return {1, ay > 0 ? 1.0f : -1.0f};
+  }
+  if (std::abs(ax) < kTol && std::abs(ay) < kTol && std::abs(std::abs(az) - 1.0f) < kTol) {
+    return {2, az > 0 ? 1.0f : -1.0f};
+  }
+
+  MT_THROW(
+      "Non-principal joint axis ({}, {}, {}) is not supported. "
+      "Only axes aligned with X, Y, or Z are supported.",
+      ax,
+      ay,
+      az);
+}
+
+/// Loads a single mesh from a URDF visual geometry element.
+///
+/// For mesh file references, resolves the path and loads STL or OBJ files.
+/// For primitive geometries (box, cylinder, sphere), generates the mesh procedurally.
+/// Returns std::nullopt if the geometry type is unsupported or the mesh file cannot be loaded.
+std::optional<Mesh> loadVisualMesh(
+    const urdf::Geometry& geometry,
+    const filesystem::path& urdfDir) {
+  switch (geometry.type) {
+    case urdf::Geometry::MESH: {
+      const auto& urdfMesh = dynamic_cast<const urdf::Mesh&>(geometry);
+      if (urdfDir.empty()) {
+        MT_LOGW("Cannot resolve mesh path without URDF directory: {}", urdfMesh.filename);
+        return std::nullopt;
+      }
+      const auto resolvedPath = resolveMeshPath(urdfMesh.filename, urdfDir);
+      if (!resolvedPath) {
+        return std::nullopt;
+      }
+
+      const auto ext = resolvedPath->extension().string();
+      std::optional<Mesh> mesh;
+      if (ext == ".stl" || ext == ".STL") {
+        mesh = loadStlMesh(*resolvedPath);
+      } else if (ext == ".obj" || ext == ".OBJ") {
+        mesh = loadObjMesh(*resolvedPath);
+      } else {
+        MT_LOGW("Unsupported mesh format '{}': {}", ext, resolvedPath->string());
+        return std::nullopt;
+      }
+
+      if (!mesh) {
+        return std::nullopt;
+      }
+
+      // Apply scale from URDF mesh element
+      const Eigen::Vector3f scale(
+          static_cast<float>(urdfMesh.scale.x),
+          static_cast<float>(urdfMesh.scale.y),
+          static_cast<float>(urdfMesh.scale.z));
+      if (!scale.isApprox(Eigen::Vector3f::Ones())) {
+        for (auto& v : mesh->vertices) {
+          v = v.cwiseProduct(scale);
+        }
+      }
+      return mesh;
+    }
+    case urdf::Geometry::BOX: {
+      const auto& box = dynamic_cast<const urdf::Box&>(geometry);
+      return generateBoxMesh(
+          static_cast<float>(box.dim.x),
+          static_cast<float>(box.dim.y),
+          static_cast<float>(box.dim.z));
+    }
+    case urdf::Geometry::CYLINDER: {
+      const auto& cyl = dynamic_cast<const urdf::Cylinder&>(geometry);
+      return generateCylinderMesh(static_cast<float>(cyl.radius), static_cast<float>(cyl.length));
+    }
+    case urdf::Geometry::SPHERE: {
+      const auto& sphere = dynamic_cast<const urdf::Sphere&>(geometry);
+      return generateSphereMesh(static_cast<float>(sphere.radius));
+    }
+    default:
+      MT_LOGW("Unknown URDF geometry type: {}", static_cast<int>(geometry.type));
+      return std::nullopt;
+  }
+}
+
+constexpr std::array<const char*, 3> kTranslationNames = {"tx", "ty", "tz"};
+constexpr std::array<const char*, 3> kRotationNames = {"rx", "ry", "rz"};
+
 template <typename T>
 bool loadUrdfSkeletonRecursive(
     ParsingData<T>& data,
     size_t parentJointId,
-    const Quaternionf& parentJointAxis,
     const urdf::ModelInterface* urdfModel,
     const urdf::Link* urdfLink) {
   MT_THROW_IF(urdfLink == nullptr, "URDF link is null.");
@@ -78,7 +218,7 @@ bool loadUrdfSkeletonRecursive(
       urdfLink->name);
 
   Joint joint;
-  joint.name = urdfLink->name; // Use link name or joint name?
+  joint.name = urdfLink->name;
   joint.parent = parentJointId;
 
   const Eigen::Index jointId = data.skeleton.joints.size();
@@ -88,53 +228,109 @@ bool loadUrdfSkeletonRecursive(
   //---------------------------
   // Parse Parameter transform
   //---------------------------
-
-  Quaternionf jointAxis = Quaternionf::Identity();
+  //
+  // URDF joints specify an arbitrary axis direction for their DOF. Instead of aligning that
+  // axis to Momentum's X axis via preRotation (which would create a rotated internal frame),
+  // we map the DOF directly to the corresponding principal axis parameter (rx/ry/rz for
+  // revolute, tx/ty/tz for prismatic). This preserves the URDF link frame as the joint's
+  // local frame, making visual meshes and animation data directly compatible.
 
   if (urdfJoint != nullptr) {
-    // Set parameter transform based on joint type
+    // Check if this joint mimics another joint. Mimic joints don't create their own model
+    // parameter — they reuse the mimicked joint's parameter with a multiplier and offset.
+    const bool isMimic = urdfJoint->mimic != nullptr;
+
     switch (urdfJoint->type) {
       case urdf::Joint::PRISMATIC: {
-        data.parameterTransform.name.push_back(fmt::format("joint{}_tx", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 0, modelParamsBaseIndex, 1.0f);
-        data.totalDoFs += 1;
+        const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
+        if (isMimic) {
+          MimicData mimic;
+          mimic.mimickedJointName = urdfJoint->mimic->joint_name;
+          mimic.multiplier = static_cast<float>(urdfJoint->mimic->multiplier);
+          mimic.offset = static_cast<float>(urdfJoint->mimic->offset);
+          mimic.jointParamsBaseIndex = jointParamsBaseIndex;
+          mimic.axisIdx = axisIdx;
+          mimic.sign = sign;
+          mimic.isRotation = false;
+          data.mimicJoints.push_back(mimic);
+        } else {
+          data.parameterTransform.name.push_back(urdfJoint->name);
+          data.triplets.emplace_back(jointParamsBaseIndex + axisIdx, modelParamsBaseIndex, sign);
+          data.urdfJointNameToModelParamIdx[urdfJoint->name] = modelParamsBaseIndex;
+          data.totalDoFs += 1;
+        }
         break;
       }
       case urdf::Joint::REVOLUTE:
       case urdf::Joint::CONTINUOUS: {
-        data.parameterTransform.name.push_back(fmt::format("joint{}_rx", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 3, modelParamsBaseIndex, 1.0f);
-        data.totalDoFs += 1;
+        const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
+        if (isMimic) {
+          MimicData mimic;
+          mimic.mimickedJointName = urdfJoint->mimic->joint_name;
+          mimic.multiplier = static_cast<float>(urdfJoint->mimic->multiplier);
+          mimic.offset = static_cast<float>(urdfJoint->mimic->offset);
+          mimic.jointParamsBaseIndex = jointParamsBaseIndex;
+          mimic.axisIdx = axisIdx;
+          mimic.sign = sign;
+          mimic.isRotation = true;
+          data.mimicJoints.push_back(mimic);
+        } else {
+          data.parameterTransform.name.push_back(urdfJoint->name);
+          data.triplets.emplace_back(
+              jointParamsBaseIndex + 3 + axisIdx, modelParamsBaseIndex, sign);
+          data.urdfJointNameToModelParamIdx[urdfJoint->name] = modelParamsBaseIndex;
+          data.totalDoFs += 1;
+        }
         break;
       }
       case urdf::Joint::FLOATING: {
-        data.parameterTransform.name.push_back(fmt::format("joint{}_tx", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 0, modelParamsBaseIndex + 0, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_ty", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 1, modelParamsBaseIndex + 1, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_tz", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 2, modelParamsBaseIndex + 2, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_rx", jointId));
+        // Floating joints have 6 DOFs; use the URDF joint name with axis suffixes.
+        // Translation parameters use a 10x scaling factor so that a unit change in
+        // model parameter space produces 10 cm of translation. This makes translation
+        // easier to change relative to rotation in optimization.
+        constexpr float kFloatingTranslationScale = 10.0f;
+        const auto& jn = urdfJoint->name;
+        data.parameterTransform.name.push_back(fmt::format("{}_tx", jn));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + 0, modelParamsBaseIndex + 0, kFloatingTranslationScale);
+        data.parameterTransform.name.push_back(fmt::format("{}_ty", jn));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + 1, modelParamsBaseIndex + 1, kFloatingTranslationScale);
+        data.parameterTransform.name.push_back(fmt::format("{}_tz", jn));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + 2, modelParamsBaseIndex + 2, kFloatingTranslationScale);
+        data.parameterTransform.name.push_back(fmt::format("{}_rx", jn));
         data.triplets.emplace_back(jointParamsBaseIndex + 3, modelParamsBaseIndex + 3, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_ry", jointId));
+        data.parameterTransform.name.push_back(fmt::format("{}_ry", jn));
         data.triplets.emplace_back(jointParamsBaseIndex + 4, modelParamsBaseIndex + 4, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_rz", jointId));
+        data.parameterTransform.name.push_back(fmt::format("{}_rz", jn));
         data.triplets.emplace_back(jointParamsBaseIndex + 5, modelParamsBaseIndex + 5, 1.0f);
         data.totalDoFs += 6;
         break;
       }
       case urdf::Joint::PLANAR: {
-        data.parameterTransform.name.push_back(fmt::format("joint{}_tx", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 1, modelParamsBaseIndex + 0, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_ty", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 2, modelParamsBaseIndex + 1, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("joint{}_tz", jointId));
-        data.triplets.emplace_back(jointParamsBaseIndex + 3, modelParamsBaseIndex + 2, 1.0f);
+        // The axis defines the plane normal. DOFs are translation along the two in-plane
+        // axes and rotation around the normal.
+        const auto [normalIdx, sign] = getPrincipalAxis(urdfJoint->axis);
+        const int planeAxis0 = (normalIdx + 1) % 3;
+        const int planeAxis1 = (normalIdx + 2) % 3;
+        const auto& jn = urdfJoint->name;
+        data.parameterTransform.name.push_back(
+            fmt::format("{}_{}", jn, kTranslationNames[planeAxis0]));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + planeAxis0, modelParamsBaseIndex + 0, 1.0f);
+        data.parameterTransform.name.push_back(
+            fmt::format("{}_{}", jn, kTranslationNames[planeAxis1]));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + planeAxis1, modelParamsBaseIndex + 1, 1.0f);
+        data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kRotationNames[normalIdx]));
+        data.triplets.emplace_back(
+            jointParamsBaseIndex + 3 + normalIdx, modelParamsBaseIndex + 2, sign);
         data.totalDoFs += 3;
         break;
       }
       case urdf::Joint::FIXED: {
-        // Do nothing
+        // No degrees of freedom
         break;
       }
       default: {
@@ -142,42 +338,41 @@ bool loadUrdfSkeletonRecursive(
       }
     }
 
-    // Update pre-rotation based on joint axis
-    switch (urdfJoint->type) {
-      case urdf::Joint::REVOLUTE:
-      case urdf::Joint::CONTINUOUS:
-      case urdf::Joint::PRISMATIC:
-      case urdf::Joint::PLANAR: {
-        jointAxis = Quaternionf::FromTwoVectors(
-            Vector3f::UnitX(), toMomentumVector3<float>(urdfJoint->axis));
-        break;
-      }
-      default: {
-        // Do nothing
-        break;
-      }
-    }
-
-    // Parse joint limits (required only for revolute and prismatic joint)
-    if (auto urdfJointLimits = urdfJoint->limits) {
+    // Parse joint limits (required only for non-mimic revolute and prismatic joints).
+    // Mimic joints are driven by the mimicked joint's parameter, so their limits don't
+    // correspond to an independent model parameter.
+    if (!isMimic && urdfJoint->limits) {
+      auto urdfJointLimits = urdfJoint->limits;
       switch (urdfJoint->type) {
         case urdf::Joint::REVOLUTE: {
+          const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
           ParameterLimit jointLimits;
           jointLimits.type = MinMax;
           jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          jointLimits.data.minMax.limits[0] = urdfJointLimits->lower; // rad
-          jointLimits.data.minMax.limits[1] = urdfJointLimits->upper;
+          if (sign > 0) {
+            jointLimits.data.minMax.limits[0] = urdfJointLimits->lower; // rad
+            jointLimits.data.minMax.limits[1] = urdfJointLimits->upper;
+          } else {
+            // Negative axis: model param = -urdf_angle, so limits are negated and swapped
+            jointLimits.data.minMax.limits[0] = -urdfJointLimits->upper;
+            jointLimits.data.minMax.limits[1] = -urdfJointLimits->lower;
+          }
           jointLimits.weight = 1.0f;
           data.limits.push_back(jointLimits);
           break;
         }
         case urdf::Joint::PRISMATIC: {
+          const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
           ParameterLimit jointLimits;
           jointLimits.type = MinMax;
           jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          // meters in URDF, centimeters in Momentum
-          jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
-          jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
+          if (sign > 0) {
+            jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
+            jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
+          } else {
+            jointLimits.data.minMax.limits[0] = -toCm<float>(urdfJointLimits->upper);
+            jointLimits.data.minMax.limits[1] = -toCm<float>(urdfJointLimits->lower);
+          }
           jointLimits.weight = 1.0f;
           data.limits.push_back(jointLimits);
           break;
@@ -192,55 +387,34 @@ bool loadUrdfSkeletonRecursive(
 
   // Set Joint Offset
   //
-  // In Momentum, the joint transformation from parent to child is defined as:
-  //   T(x; p) = T_offset(p) * T(x)
-  // where:
-  //   x represents the model parameters, corresponding to the URDF's joint angles.
-  //   p represents the joint properties, parsed from the URDF joint properties.
+  // The preRotation is simply the URDF joint origin rotation — the transform from the parent
+  // link frame to the child link frame at bind pose. No axis alignment is applied because DOFs
+  // are mapped directly to the corresponding principal axis parameter (rx/ry/rz).
   //
-  // The URDF defines joint transformations differently, involving both link frames and joint
-  // frames. The link frame transformation is defined as:
-  //   T_child(x; p) = T_parent(x; p) * T_offset(p)
-  // when x is assumed to be zero.
-  //
-  // The joint frame transformation is defined as:
-  //   T_parent(x; p) * T_offset(p) * T_joint_axis(p)
-  //
-  // The final joint transformation from parent to child is:
-  //   T_child = T_parent * T_offset(p) * T(x)
-  //
-  // However, T(x) is applied in the "joint frame," defined by:
-  //   T_parent * T_joint_origin * T_joint_axis
-  // rather than just:
-  //   T_parent * T_joint_origin
-  //
-  // Therefore, the final joint transformation from parent to child is:
-  //   T = (T_parent_axis(p))^(-1) * T_joint_origin(p) * T_axis(p) * T(x)
-  //
-  // To align with Momentum's convention, T_offset should be calculated as:
-  //   T_offset = (T_parent_axis(p))^(-1) * T_joint_origin(p) * T_axis(p)
-  //
-  // For 1-DOF joints, such as revolute and prismatic joints, the joint frame is aligned with the
-  // axis along its x-axis, according to the URDF convention. Similarly, for planar joints, the
-  // plane normal is aligned with the x-axis.
-  //
-  // Reference: https://wiki.ros.org/urdf/XML/joint
+  // This means the Momentum joint frame coincides with the URDF link frame, which makes visual
+  // meshes and animation data directly compatible without any frame correction.
   if (urdfJoint != nullptr) {
     const urdf::Pose& urdfPose = urdfJoint->parent_to_joint_origin_transform;
-    joint.preRotation =
-        parentJointAxis.inverse() * toMomentumQuaternion<float>(urdfPose.rotation) * jointAxis;
-    joint.translationOffset =
-        parentJointAxis.inverse() * toMomentumVector3<float>(urdfPose.position) * toCm<float>();
+    joint.preRotation = toMomentumQuaternion<float>(urdfPose.rotation);
+    joint.translationOffset = toMomentumVector3<float>(urdfPose.position) * toCm<float>();
   } else {
-    joint.preRotation = parentJointAxis.inverse() * jointAxis;
+    joint.preRotation = Quaternionf::Identity();
     joint.translationOffset.setZero();
   }
 
   data.skeleton.joints.push_back(joint);
 
+  // Collect visual elements for mesh loading
+  if (!urdfLink->visual_array.empty()) {
+    LinkVisualData visualData;
+    visualData.jointIndex = static_cast<size_t>(jointId);
+    visualData.visuals = urdfLink->visual_array;
+    data.linkVisuals.push_back(std::move(visualData));
+  }
+
   // Continue parsing child links and joints
   for (const auto& childLink : urdfLink->child_links) {
-    if (!loadUrdfSkeletonRecursive(data, jointId, jointAxis, urdfModel, childLink.get())) {
+    if (!loadUrdfSkeletonRecursive(data, jointId, urdfModel, childLink.get())) {
       return false;
     }
   }
@@ -248,8 +422,135 @@ bool loadUrdfSkeletonRecursive(
   return true;
 }
 
+/// Resolves mimic joints by mapping each mimic joint's DOF to the mimicked joint's model
+/// parameter via the parameter transform.
 template <typename T>
-CharacterT<T> loadUrdfCharacterFromUrdfModel(urdf::ModelInterfaceSharedPtr urdfModel) {
+void resolveMimicJoints(ParsingData<T>& data) {
+  for (const auto& mimic : data.mimicJoints) {
+    auto it = data.urdfJointNameToModelParamIdx.find(mimic.mimickedJointName);
+    if (it == data.urdfJointNameToModelParamIdx.end()) {
+      MT_LOGW("Mimic joint references unknown joint '{}', skipping.", mimic.mimickedJointName);
+      continue;
+    }
+    const Eigen::Index mimickedModelParamIdx = it->second;
+    const float coefficient = mimic.sign * mimic.multiplier;
+
+    if (mimic.isRotation) {
+      data.triplets.emplace_back(
+          mimic.jointParamsBaseIndex + 3 + mimic.axisIdx, mimickedModelParamIdx, coefficient);
+      data.parameterTransform.offsets[mimic.jointParamsBaseIndex + 3 + mimic.axisIdx] =
+          mimic.sign * mimic.offset;
+    } else {
+      data.triplets.emplace_back(
+          mimic.jointParamsBaseIndex + mimic.axisIdx, mimickedModelParamIdx, coefficient);
+      data.parameterTransform.offsets[mimic.jointParamsBaseIndex + mimic.axisIdx] =
+          mimic.sign * toCm<float>(mimic.offset);
+    }
+  }
+}
+
+/// Extracts per-vertex color from a URDF visual's material, returning white if no color is set.
+/// Sets hasColor to true if the material has a non-black color.
+Eigen::Vector3b extractVertexColor(const urdf::Visual& visual, bool& hasColor) {
+  if (visual.material &&
+      (visual.material->color.r > 0 || visual.material->color.g > 0 ||
+       visual.material->color.b > 0)) {
+    const auto& c = visual.material->color;
+    hasColor = true;
+    return {
+        static_cast<uint8_t>(std::clamp(c.r, 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(std::clamp(c.g, 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(std::clamp(c.b, 0.0f, 1.0f) * 255.0f)};
+  }
+  return {255, 255, 255};
+}
+
+/// Builds a combined mesh and skin weights from per-link visual data.
+/// Returns nullopt if no visual meshes were loaded.
+template <typename T>
+std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
+    const ParsingData<T>& data,
+    const filesystem::path& urdfDir) {
+  if (data.linkVisuals.empty()) {
+    return std::nullopt;
+  }
+
+  const SkeletonStateT<float> bindState(data.parameterTransform.bindPose(), data.skeleton, false);
+
+  Mesh combinedMesh;
+  SkinWeights skinWeights;
+  bool hasAnyColor = false;
+
+  for (const auto& linkVisual : data.linkVisuals) {
+    const size_t jointIdx = linkVisual.jointIndex;
+    const auto& jointWorldTransform = bindState.jointState[jointIdx].transform;
+
+    for (const auto& visual : linkVisual.visuals) {
+      if (!visual || !visual->geometry) {
+        continue;
+      }
+
+      auto meshOpt = loadVisualMesh(*visual->geometry, urdfDir);
+      if (!meshOpt) {
+        continue;
+      }
+
+      // Convert from meters (URDF) to centimeters (Momentum) and apply transforms
+      for (auto& v : meshOpt->vertices) {
+        v *= toCm<float>();
+      }
+      const auto visualOrigin = toMomentumTransform<float>(visual->origin);
+      const Eigen::Vector3f visualTranslation = visualOrigin.translation * toCm<float>();
+      for (auto& v : meshOpt->vertices) {
+        v = visualOrigin.rotation * v + visualTranslation;
+      }
+      for (auto& v : meshOpt->vertices) {
+        v = jointWorldTransform.rotation * v + jointWorldTransform.translation;
+      }
+
+      const Eigen::Vector3b vertexColor = extractVertexColor(*visual, hasAnyColor);
+
+      // Merge into the combined mesh
+      const auto vertexOffset = static_cast<int32_t>(combinedMesh.vertices.size());
+      combinedMesh.vertices.insert(
+          combinedMesh.vertices.end(), meshOpt->vertices.begin(), meshOpt->vertices.end());
+      for (const auto& face : meshOpt->faces) {
+        combinedMesh.faces.push_back(
+            {face[0] + vertexOffset, face[1] + vertexOffset, face[2] + vertexOffset});
+      }
+      combinedMesh.colors.resize(combinedMesh.vertices.size(), vertexColor);
+
+      // Extend skin weights: all new vertices are rigidly bound to this joint
+      const auto prevVertexCount = skinWeights.index.rows();
+      const auto newVertexCount =
+          prevVertexCount + static_cast<Eigen::Index>(meshOpt->vertices.size());
+      skinWeights.index.conservativeResize(newVertexCount, Eigen::NoChange);
+      skinWeights.weight.conservativeResize(newVertexCount, Eigen::NoChange);
+      skinWeights.index.bottomRows(newVertexCount - prevVertexCount).setZero();
+      skinWeights.weight.bottomRows(newVertexCount - prevVertexCount).setZero();
+      for (auto vi = prevVertexCount; vi < newVertexCount; ++vi) {
+        skinWeights.index(vi, 0) = static_cast<uint32_t>(jointIdx);
+        skinWeights.weight(vi, 0) = 1.0f;
+      }
+    }
+  }
+
+  if (!hasAnyColor) {
+    combinedMesh.colors.clear();
+  }
+
+  if (combinedMesh.vertices.empty()) {
+    return std::nullopt;
+  }
+
+  combinedMesh.updateNormals();
+  return std::make_pair(std::move(combinedMesh), std::move(skinWeights));
+}
+
+template <typename T>
+CharacterT<T> loadUrdfCharacterFromUrdfModel(
+    urdf::ModelInterfaceSharedPtr urdfModel,
+    const filesystem::path& urdfDir) {
   const urdf::Link* root = urdfModel->getRoot().get();
   MT_THROW_IF(!root, "Failed to parse URDF file from. No root link found.");
 
@@ -271,26 +572,52 @@ CharacterT<T> loadUrdfCharacterFromUrdfModel(urdf::ModelInterfaceSharedPtr urdfM
     root = root->child_links[0].get();
   }
 
-  if (!loadUrdfSkeletonRecursive(
-          data, kInvalidIndex, Quaternionf::Identity(), urdfModel.get(), root)) {
+  if (!loadUrdfSkeletonRecursive(data, kInvalidIndex, urdfModel.get(), root)) {
     MT_THROW("Failed to parse URDF.");
   }
 
-  Skeleton& skeleton = data.skeleton;
-  ParameterTransform& parameterTransform = data.parameterTransform;
-  auto& triplets = data.triplets;
-
-  const size_t numJoints = skeleton.joints.size();
+  const size_t numJoints = data.skeleton.joints.size();
   const size_t numJointParameters = numJoints * kParametersPerJoint;
   const size_t numModelParameters = data.totalDoFs;
-  parameterTransform.offsets.setZero(numJointParameters);
-  parameterTransform.transform.resize(numJointParameters, numModelParameters);
-  parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
-  parameterTransform.activeJointParams = parameterTransform.computeActiveJointParams();
+  data.parameterTransform.offsets.setZero(numJointParameters);
 
-  // TODO: Parse collision geometries
+  resolveMimicJoints(data);
 
-  return CharacterT<T>(data.skeleton, data.parameterTransform, data.limits);
+  data.parameterTransform.transform.resize(numJointParameters, numModelParameters);
+  data.parameterTransform.transform.setFromTriplets(data.triplets.begin(), data.triplets.end());
+  data.parameterTransform.activeJointParams = data.parameterTransform.computeActiveJointParams();
+
+  const std::string robotName = urdfModel->getName();
+
+  auto meshResult = buildCombinedMesh(data, urdfDir);
+  if (meshResult) {
+    auto& [mesh, skinWeights] = *meshResult;
+    return CharacterT<T>(
+        data.skeleton,
+        data.parameterTransform,
+        data.limits,
+        LocatorList{},
+        &mesh,
+        &skinWeights,
+        nullptr, // collision
+        nullptr, // poseShapes
+        {}, // blendShapes
+        {}, // faceExpressionBlendShapes
+        robotName);
+  }
+
+  return CharacterT<T>(
+      data.skeleton,
+      data.parameterTransform,
+      data.limits,
+      LocatorList{},
+      nullptr, // mesh
+      nullptr, // skinWeights
+      nullptr, // collision
+      nullptr, // poseShapes
+      {}, // blendShapes
+      {}, // faceExpressionBlendShapes
+      robotName);
 }
 
 } // namespace
@@ -308,7 +635,7 @@ CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath) {
   }
 
   try {
-    return loadUrdfCharacterFromUrdfModel<T>(urdfModel);
+    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, filepath.parent_path());
   } catch (const std::exception& e) {
     MT_THROW(
         "Failed to create Character from URDF file: {}. Error: {}", filepath.string(), e.what());
@@ -336,7 +663,7 @@ CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
   }
 
   try {
-    return loadUrdfCharacterFromUrdfModel<T>(urdfModel);
+    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, {});
   } catch (const std::exception& e) {
     MT_THROW("Failed to create Character from URDF bytes. Error: {}", e.what());
   } catch (...) {
@@ -346,5 +673,36 @@ CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
 
 template CharacterT<float> loadUrdfCharacter(std::span<const std::byte> bytes);
 template CharacterT<double> loadUrdfCharacter(std::span<const std::byte> bytes);
+
+template <typename T>
+CharacterT<T> loadUrdfCharacter(
+    std::span<const std::byte> bytes,
+    const filesystem::path& meshBasePath) {
+  urdf::ModelInterfaceSharedPtr urdfModel;
+
+  try {
+    std::string urdfString(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    urdfModel = urdf::parseURDF(urdfString);
+  } catch (const std::exception& e) {
+    MT_THROW("Failed to read URDF file from URDF bytes. Error: {}", e.what());
+  } catch (...) {
+    MT_THROW("Failed to read URDF file from URDF bytes");
+  }
+
+  try {
+    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, meshBasePath);
+  } catch (const std::exception& e) {
+    MT_THROW("Failed to create Character from URDF bytes. Error: {}", e.what());
+  } catch (...) {
+    MT_THROW("Failed to create Character from URDF bytes");
+  }
+}
+
+template CharacterT<float> loadUrdfCharacter(
+    std::span<const std::byte> bytes,
+    const filesystem::path& meshBasePath);
+template CharacterT<double> loadUrdfCharacter(
+    std::span<const std::byte> bytes,
+    const filesystem::path& meshBasePath);
 
 } // namespace momentum
