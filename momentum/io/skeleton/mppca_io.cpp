@@ -12,6 +12,7 @@
 #include "momentum/math/mppca.h"
 
 #include <fstream>
+#include <limits>
 
 namespace momentum {
 
@@ -46,6 +47,27 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
     inputStream.read((char*)&od, sizeof(od));
     inputStream.read((char*)&op, sizeof(op));
 
+    MT_THROW_IF(!inputStream.good(), "Error loading Mppca model: failed to read dimensions.");
+
+    // Validate sizes to prevent excessive allocation from malformed files
+    constexpr uint64_t kMaxDimension = 10'000'000;
+    constexpr uint64_t kMaxStringLength = 10'000;
+    MT_THROW_IF(
+        od > kMaxDimension || op > kMaxDimension,
+        "Error loading Mppca model: unreasonable dimensions od={}, op={}.",
+        od,
+        op);
+
+    // Guard against integer overflow in od * od (used for Cinv matrices)
+    MT_THROW_IF(
+        od != 0 && od > std::numeric_limits<uint64_t>::max() / od,
+        "Error loading Mppca model: integer overflow in Cinv size calculation.");
+
+    // Guard against integer overflow in op * od (used for mu matrix)
+    MT_THROW_IF(
+        op != 0 && od != 0 && op > std::numeric_limits<uint64_t>::max() / od,
+        "Error loading Mppca model: integer overflow in mu size calculation.");
+
     // set data on result
     result->d = od;
     result->p = op;
@@ -55,6 +77,9 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
     for (size_t i = 0; i < od; i++) {
       uint64_t count = 0;
       inputStream.read((char*)&count, sizeof(uint64_t));
+      MT_THROW_IF(
+          !inputStream.good() || count > kMaxStringLength,
+          "Error loading Mppca model: invalid name length.");
       result->names[i].resize(count);
       inputStream.read((char*)result->names[i].data(), count);
     }
@@ -67,12 +92,15 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
 
     // load Rpre, Cinv, and mu
     inputStream.read((char*)result->Rpre.data(), sizeof(float) * op);
+    MT_THROW_IF(!inputStream.good(), "Error loading Mppca model: failed to read Rpre data.");
     for (size_t i = 0; i < op; i++) {
       result->Cinv[i] = MatrixXf(od, od);
       inputStream.read((char*)result->Cinv[i].data(), sizeof(float) * od * od);
+      MT_THROW_IF(!inputStream.good(), "Error loading Mppca model: failed to read Cinv data.");
       result->L[i] = result->Cinv[i].llt().matrixL().transpose();
     }
     inputStream.read((char*)result->mu.data(), sizeof(float) * op * od);
+    MT_THROW_IF(!inputStream.good(), "Error loading Mppca model: failed to read mu data.");
 
     return result;
   } catch (std::exception& e) {

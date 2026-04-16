@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <istream>
+#include <limits>
 #include <vector>
 
 namespace momentum {
@@ -42,9 +43,15 @@ void readShapeVectors(
     uint64_t numCols,
     int expectedShapes,
     int expectedVertices) {
+  // Guard against integer overflow in numRows * numCols
+  MT_THROW_IF(
+      numRows != 0 && numCols > std::numeric_limits<uint64_t>::max() / numRows,
+      "Integer overflow in shape vectors size calculation.");
+
   // load shapeVectors
   shapeVectors.resize(numRows, numCols);
   data.read((char*)shapeVectors.data(), sizeof(float) * numRows * numCols);
+  MT_THROW_IF(!data.good(), "Failed to read shape vectors data.");
 
   // resize to few shapes
   if (expectedShapes > 0) {
@@ -76,6 +83,14 @@ BlendShapeBase loadBlendShapeBase(std::istream& data, int expectedShapes, int ex
   uint64_t numCols = 0;
   data.read((char*)&numRows, sizeof(numRows));
   data.read((char*)&numCols, sizeof(numCols));
+  MT_THROW_IF(!data.good(), "Failed to read blend shape base dimensions.");
+
+  constexpr uint64_t kMaxDimension = 10'000'000;
+  MT_THROW_IF(
+      numRows > kMaxDimension || numCols > kMaxDimension,
+      "Unreasonable blend shape base dimensions: numRows={}, numCols={}.",
+      numRows,
+      numCols);
 
   // read shape vectors
   readShapeVectors(data, shapeVectors, numRows, numCols, expectedShapes, expectedVertices);
@@ -100,10 +115,19 @@ BlendShape loadBlendShape(std::istream& data, int expectedShapes, int expectedVe
   uint64_t numCols = 0;
   data.read((char*)&numRows, sizeof(numRows));
   data.read((char*)&numCols, sizeof(numCols));
+  MT_THROW_IF(!data.good(), "Failed to read blend shape dimensions.");
+
+  constexpr uint64_t kMaxDimension = 10'000'000;
+  MT_THROW_IF(
+      numRows > kMaxDimension || numCols > kMaxDimension,
+      "Unreasonable blend shape dimensions: numRows={}, numCols={}.",
+      numRows,
+      numCols);
 
   // read mean shape
   baseShape.resize(numRows / 3);
   data.read((char*)baseShape.data(), sizeof(float) * numRows);
+  MT_THROW_IF(!data.good(), "Failed to read blend shape base shape data.");
 
   if (expectedVertices > 0) {
     baseShape.resize(std::min(baseShape.size(), gsl::narrow<size_t>(expectedVertices)));
