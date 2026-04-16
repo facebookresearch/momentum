@@ -12,8 +12,6 @@
 
 #include <pybind11/pybind11.h>
 
-#include <ATen/ATen.h>
-
 namespace pymomentum {
 
 void registerParameterTransformBindings(

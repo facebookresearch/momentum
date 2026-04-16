@@ -27,7 +27,6 @@
 #include <pybind11/stl.h>
 #include <pymomentum/python_utility/eigen_quaternion.h>
 #include <Eigen/Core>
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
 
 #include <algorithm>
 #include <limits>
