@@ -8,7 +8,6 @@
 import unittest
 
 import numpy as np
-import torch
 from pymomentum.geometry import (
     Character,
     ParameterTransform,
@@ -27,14 +26,11 @@ class TestParameterTransform(unittest.TestCase):
         model_params = uniform_random_to_model_parameters(
             character, np.random.rand(1, 10).astype(np.float32)
         ).squeeze()
-        joint_params_1 = torch.from_numpy(
-            character.parameter_transform.apply(model_params[None, :])
+        joint_params_1 = character.parameter_transform.apply(
+            model_params[None, :]
         ).flatten()
-        # transform is now a numpy array, so convert to tensor for matmul
-        joint_params_2 = torch.matmul(
-            torch.from_numpy(transform), torch.from_numpy(model_params)
-        )
-        self.assertTrue(torch.allclose(joint_params_1, joint_params_2))
+        joint_params_2 = transform @ model_params
+        np.testing.assert_allclose(joint_params_1, joint_params_2)
 
     def test_parameter_transform_round_trip(self) -> None:
         """Test that converting parameter transform to dense matrix and back is lossless."""
@@ -58,12 +54,10 @@ class TestParameterTransform(unittest.TestCase):
             character, np.random.rand(5, 10).astype(np.float32)
         )
 
-        joint_params_original = torch.from_numpy(original_pt.apply(model_params))
-        joint_params_new = torch.from_numpy(new_pt.apply(model_params))
+        joint_params_original = original_pt.apply(model_params)
+        joint_params_new = new_pt.apply(model_params)
 
-        self.assertTrue(
-            torch.allclose(joint_params_original, joint_params_new, atol=1e-6)
-        )
+        np.testing.assert_allclose(joint_params_original, joint_params_new, atol=1e-6)
 
         # Verify parameter names are preserved
         self.assertEqual(original_pt.names, new_pt.names)

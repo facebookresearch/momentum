@@ -12,29 +12,21 @@ import unittest
 import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
-import torch
 
 
 class TestFBX(unittest.TestCase):
     def setUp(self) -> None:
         self.character = pym_test_utils.create_test_character()
-        torch.manual_seed(0)  # ensure repeatability
 
         nBatch = 5
         nParams = self.character.parameter_transform.size
         np.random.seed(0)  # ensure repeatability
-        self.model_params = torch.from_numpy(
-            pym_geometry.uniform_random_to_model_parameters(
-                self.character, np.random.rand(nBatch, nParams).astype(np.float32)
-            )
-        ).double()
-        self.joint_params = torch.from_numpy(
-            self.character.parameter_transform.apply(self.model_params.numpy())
-        )
-        self.skeleton_state = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                self.character, self.model_params.numpy()
-            )
+        self.model_params = pym_geometry.uniform_random_to_model_parameters(
+            self.character, np.random.rand(nBatch, nParams).astype(np.float32)
+        ).astype(np.float64)
+        self.joint_params = self.character.parameter_transform.apply(self.model_params)
+        self.skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            self.character, self.model_params
         )
 
     def test_load_animation(self) -> None:
@@ -94,8 +86,8 @@ class TestFBX(unittest.TestCase):
             )
         )
 
-        skel_state = torch.from_numpy(
-            pym_geometry.joint_parameters_to_skeleton_state(character, joint_params)
+        skel_state = pym_geometry.joint_parameters_to_skeleton_state(
+            character, joint_params
         )
 
         skel_state_first = skel_state[0]
@@ -133,7 +125,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx(
                 path=temp_file.name,
                 character=self.character,
-                motion=self.model_params.numpy(),
+                motion=self.model_params,
                 offsets=offsets,
                 fps=60,
             )
@@ -152,7 +144,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx(
                 path=temp_file.name,
                 character=self.character,
-                motion=self.model_params.numpy(),
+                motion=self.model_params,
                 offsets=offsets,
                 fps=60,
                 options=options,
@@ -168,7 +160,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx_with_joint_params(
                 path=temp_file.name,
                 character=self.character,
-                joint_params=self.joint_params.numpy(),
+                joint_params=self.joint_params,
                 fps=60,
             )
             self._verify_fbx(temp_file.name)
@@ -185,7 +177,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx_with_joint_params(
                 path=temp_file.name,
                 character=self.character,
-                joint_params=self.joint_params.numpy(),
+                joint_params=self.joint_params,
                 fps=60,
                 options=options,
             )
@@ -201,7 +193,7 @@ class TestFBX(unittest.TestCase):
                 path=temp_file.name,
                 character=self.character,
                 fps=60,
-                skel_states=self.skeleton_state.numpy(),
+                skel_states=self.skeleton_state,
             )
             self._verify_fbx(temp_file.name)
 
@@ -224,7 +216,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx(
                 path=temp_file.name,
                 character=self.character,
-                motion=self.model_params.numpy(),
+                motion=self.model_params,
                 offsets=offsets,
                 fps=60,
                 options=options,
@@ -242,7 +234,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save_fbx_with_joint_params(
                 path=temp_file.name,
                 character=self.character,
-                joint_params=self.joint_params.numpy(),
+                joint_params=self.joint_params,
                 fps=60,
                 options=options,
             )
@@ -260,7 +252,7 @@ class TestFBX(unittest.TestCase):
                 path=temp_file.name,
                 character=self.character,
                 fps=60,
-                motion=self.model_params.numpy(),
+                motion=self.model_params,
             )
             # Verify file can be loaded
             self._verify_fbx(temp_file.name)
@@ -339,7 +331,7 @@ class TestFBX(unittest.TestCase):
             pym_geometry.Character.save(
                 path=temp_file.name,
                 character=self.character,
-                motion=self.model_params[:nFrames].numpy(),
+                motion=self.model_params[:nFrames],
                 fps=60,
                 markers=markers_per_frame,
             )
