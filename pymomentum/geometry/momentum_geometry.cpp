@@ -11,9 +11,6 @@
 #include "pymomentum/array_utility/batch_accessor.h"
 #include "pymomentum/array_utility/geometry_accessors.h"
 #include "pymomentum/python_utility/python_utility.h"
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
-#include "pymomentum/tensor_utility/autograd_utility.h"
-#include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>

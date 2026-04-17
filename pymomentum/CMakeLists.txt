@@ -186,9 +186,6 @@ mt_python_binding(
   NAME geometry
   PYMOMENTUM_HEADERS_VARS geometry_public_headers
   PYMOMENTUM_SOURCES_VARS geometry_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
     array_utility
     character
@@ -202,14 +199,6 @@ mt_python_binding(
     io_skeleton
     io_urdf
     python_utility
-    tensor_momentum
-    tensor_utility
-    torch_bridge
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
 )
 
 if(MOMENTUM_BUILD_IO_USD)
@@ -281,9 +270,6 @@ mt_python_binding(
   NAME solver2
   PYMOMENTUM_HEADERS_VARS solver2_public_headers
   PYMOMENTUM_SOURCES_VARS solver2_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
     array_utility
     camera
@@ -291,14 +277,9 @@ mt_python_binding(
     character_solver
     character_sequence_solver
     math
+    python_utility
     skeleton
     solver
-    torch_bridge
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
 )
 
 mt_python_binding(
@@ -310,7 +291,7 @@ mt_python_binding(
     marker_tracker
     math
     process_markers
-    torch_bridge
+    python_utility
 )
 
 mt_python_binding(
