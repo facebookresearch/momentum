@@ -17,11 +17,10 @@
 
 #else
 
-#include <cassert>
+#include <momentum/common/exception.h>
 
-// TODO: Support asserts with messages as XR_CHECK does
-#define MT_CHECK(condition, ...) assert(condition)
-#define MT_CHECK_LT(val1, val2, ...) assert(val1 < val2)
-#define MT_CHECK_NOTNULL(ptr, ...) assert(ptr != nullptr)
+#define MT_CHECK(condition, ...) MT_THROW_IF(!(condition), ##__VA_ARGS__)
+#define MT_CHECK_LT(val1, val2, ...) MT_THROW_IF(!((val1) < (val2)), ##__VA_ARGS__)
+#define MT_CHECK_NOTNULL(ptr, ...) MT_THROW_IF((ptr) == nullptr, ##__VA_ARGS__)
 
 #endif

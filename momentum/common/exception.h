@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
+#include <type_traits>
 
 /// Throws an exception of a specified type with a formatted message.
 /// @param Exception The type of exception to throw.
@@ -64,11 +65,17 @@ template <typename Exception = DefaultException, typename... Args>
   throw Exception{fmt::format(format, std::forward<Args>(args)...)};
 }
 
-// Overload for throwing exceptions that do not require any message or whose constructors do not
-// take any arguments.
+// Overload for throwing exceptions without a message.
+// Uses if-constexpr to handle both default-constructible exceptions (e.g.
+// std::bad_array_new_length) and exceptions that require a string argument (e.g.
+// std::runtime_error, std::logic_error).
 template <typename Exception>
 [[noreturn]] void throwImpl() {
-  throw Exception{};
+  if constexpr (std::is_constructible_v<Exception>) {
+    throw Exception{};
+  } else {
+    throw Exception{""};
+  }
 }
 
 #else

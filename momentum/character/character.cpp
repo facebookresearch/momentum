@@ -262,6 +262,9 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
       // find the last not disabled parent joint
       while (currentParent == kInvalidIndex && sIndex != kInvalidIndex) {
         sIndex = skeleton.joints[sIndex].parent;
+        if (sIndex == kInvalidIndex) {
+          break;
+        }
         currentParent = lastJoint[sIndex];
       }
       // calculate the new offset of the joint in the new parent space
