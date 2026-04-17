@@ -60,7 +60,11 @@ arvr::logging::LogResult pythonLogCallback(
 
   // Acquire the GIL before calling into Python:
   py::gil_scoped_acquire gil;
-  py::print(std::string(prefix) + message);
+  // Decode with 'replace' to handle non-UTF-8 bytes (e.g. on macOS):
+  auto msg = std::string(prefix) + message;
+  auto decoded =
+      py::reinterpret_steal<py::object>(PyUnicode_DecodeUTF8(msg.data(), msg.size(), "replace"));
+  py::print(decoded);
 
   return arvr::logging::LogResult::Accepted;
 }
