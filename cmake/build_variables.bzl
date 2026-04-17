@@ -617,10 +617,12 @@ io_usd_gltf_roundtrip_test_sources = [
 
 io_urdf_public_headers = [
     "io/urdf/urdf_io.h",
+    "io/urdf/urdf_mesh_io.h",
 ]
 
 io_urdf_sources = [
     "io/urdf/urdf_io.cpp",
+    "io/urdf/urdf_mesh_io.cpp",
 ]
 
 io_urdf_test_sources = [
