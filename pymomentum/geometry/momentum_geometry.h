@@ -8,6 +8,7 @@
 #pragma once
 
 #include <momentum/character/character.h>
+#include <momentum/io/skeleton/locator_io.h>
 #include <momentum/math/mppca.h>
 
 #include <pybind11/numpy.h>
@@ -61,6 +62,11 @@ momentum::Character loadLocatorsFromBytes(
 momentum::Character loadConfigFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes);
+
+void saveLocatorsToFile(
+    const momentum::Character& character,
+    const std::string& locatorsPath,
+    momentum::LocatorSpace space = momentum::LocatorSpace::Global);
 
 momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath);
 momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes);

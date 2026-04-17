@@ -93,6 +93,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - simplify(enabled_parameters)
   // - load_locators(filename)
   // - load_locators_from_bytes(locator_bytes)
+  // - save_locators(filename, space)
   // - load_model_definition(filename)
   // - load_model_definition_from_bytes(model_bytes)
   //
@@ -710,6 +711,23 @@ motion's scale parameters.
 :param locator_bytes: A byte array containing the locators.
 :return: A valid :class:`Character`.)",
           py::arg("locator_bytes"))
+      // saveLocatorsToFile(character, filename, space)
+      .def(
+          "save_locators",
+          &pymomentum::saveLocatorsToFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save this character's locators to a .locators file.
+
+The output format matches momentum's canonical .locators JSON produced by the C++
+``momentum::saveLocators`` function, including optional ``limitWeight`` and
+``skinOffset`` fields when set.
+
+:param filename: Output path for the .locators file.
+:param space: Coordinate space for locator positions. :class:`LocatorSpace.Global`
+              (default) writes FK-computed world-space positions using the character's
+              bind pose; :class:`LocatorSpace.Local` writes raw joint-space offsets.)",
+          py::arg("filename"),
+          py::arg("space") = momentum::LocatorSpace::Global)
       // localModelDefinitionFromFile(character, modelFile)
       .def(
           "load_model_definition",
