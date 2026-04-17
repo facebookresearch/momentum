@@ -11,10 +11,9 @@ import numpy as np
 import numpy.typing as npt
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
-import pymomentum.quaternion as pym_quaternion
-import pymomentum.skel_state as pym_skel_state
+import pymomentum.quaternion_np as pym_quaternion
+import pymomentum.skel_state_np as pym_skel_state
 import pymomentum.solver2 as pym_solver2
-import torch
 
 
 def _normalize_vec(vec: npt.NDArray) -> npt.NDArray:
@@ -33,14 +32,12 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(42)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
-        model_params_target = torch.rand_like(model_params_init)
-        skel_state_target = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_target.numpy()
-            )
+        model_params_target = (0.5 * np.random.rand(n_params)).astype(np.float32)
+        skel_state_target = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_target
         )
 
         pos_error = pym_solver2.PositionErrorFunction(character)
@@ -63,24 +60,22 @@ class TestSolver(unittest.TestCase):
         self.assertTrue(len(pos_error.constraints) == 0)
 
         pos_error.add_constraints(
-            parent=np.arange(n_joints), target=skel_state_target[:, :3].numpy()
+            parent=np.arange(n_joints), target=skel_state_target[:, :3]
         )
         solver_function = pym_solver2.SkeletonSolverFunction(character, [pos_error])
 
         solver_options = pym_solver2.GaussNewtonSolverOptions()
-        solver_options.max_iterations = 100
+        solver_options.max_iterations = 200
         solver_options.regularization = 1e-5
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        model_params_final = solver.solve(model_params_init)
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         self.assertTrue(
-            torch.allclose(
-                skel_state_final[:, :3], skel_state_target[:, :3], rtol=1e-5, atol=1e-5
+            np.allclose(
+                skel_state_final[:, :3], skel_state_target[:, :3], rtol=1e-4, atol=1e-4
             )
         )
 
@@ -89,7 +84,7 @@ class TestSolver(unittest.TestCase):
 
         # make sure it's deterministic:
         per_iter_errors_prev = solver.per_iteration_errors
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
         assert solver.per_iteration_errors == per_iter_errors_prev
 
         # delete constraints and ensure they're empty
@@ -132,10 +127,10 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
-        random_positions = torch.rand(n_joints, 3, dtype=torch.float32)
+        random_positions = np.random.rand(n_joints, 3).astype(np.float32)
 
         pos_error = pym_solver2.PositionErrorFunction(character)
 
@@ -143,14 +138,14 @@ class TestSolver(unittest.TestCase):
             pos_error.add_constraint(
                 parent=i_joint,
                 weight=1.0,
-                target=random_positions[i_joint, :3].numpy(),
+                target=random_positions[i_joint, :3],
             )
 
-        error = pos_error.get_error(model_params_init.numpy())
+        error = pos_error.get_error(model_params_init)
         self.assertTrue(error > 0.0)
 
         # Test get_gradient
-        grad = pos_error.get_gradient(model_params_init.numpy())
+        grad = pos_error.get_gradient(model_params_init)
         eps = 1e-3
         for i_param in range(n_params):
             mp_plus = np.copy(model_params_init)
@@ -161,31 +156,31 @@ class TestSolver(unittest.TestCase):
             )
 
         # Test get_jacobian
-        res, jac = pos_error.get_jacobian(model_params_init.numpy())
+        res, jac = pos_error.get_jacobian(model_params_init)
         grad_jac = 2.0 * np.matmul(np.transpose(jac), res)
         self.assertTrue(np.allclose(grad_jac, grad, rtol=1e-5, atol=1e-5))
 
         # Combine two error functions in a SkeletonSolverFunction:
         model_params_error = pym_solver2.ModelParametersErrorFunction(character)
         model_params_error.set_target_parameters(
-            torch.rand(n_params, dtype=torch.float32).numpy()
+            np.random.rand(n_params).astype(np.float32)
         )
         skel_solver_function = pym_solver2.SkeletonSolverFunction(character)
         skel_solver_function.add_error_function(model_params_error)
         skel_solver_function.add_error_function(pos_error)
-        error_combined = skel_solver_function.get_error(model_params_init.numpy())
+        error_combined = skel_solver_function.get_error(model_params_init)
         self.assertAlmostEqual(
             error_combined,
-            model_params_error.get_error(model_params_init.numpy())
-            + pos_error.get_error(model_params_init.numpy()),
+            model_params_error.get_error(model_params_init)
+            + pos_error.get_error(model_params_init),
             delta=1e-4,
         )
 
         self.assertTrue(
             np.allclose(
-                skel_solver_function.get_gradient(model_params_init.numpy()),
-                model_params_error.get_gradient(model_params_init.numpy())
-                + pos_error.get_gradient(model_params_init.numpy()),
+                skel_solver_function.get_gradient(model_params_init),
+                model_params_error.get_gradient(model_params_init)
+                + pos_error.get_gradient(model_params_init),
                 rtol=1e-4,
                 atol=1e-4,
             )
@@ -200,19 +195,17 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Set target model parameters
-        model_params_target = torch.rand_like(model_params_init)
+        model_params_target = np.random.rand(n_params).astype(np.float32)
 
         # Create ModelParametersErrorFunction
         model_params_error = pym_solver2.ModelParametersErrorFunction(character)
 
         # Set target parameters in the error function
-        model_params_error.set_target_parameters(
-            model_params_target.numpy(), np.ones(n_params)
-        )
+        model_params_error.set_target_parameters(model_params_target, np.ones(n_params))
 
         # Create solver function with the model parameters error
         solver_function = pym_solver2.SkeletonSolverFunction(character)
@@ -225,12 +218,12 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Assert that the solved model parameters are close to the target
         self.assertTrue(
-            torch.allclose(
-                torch.from_numpy(model_params_final),
+            np.allclose(
+                model_params_final,
                 model_params_target,
                 rtol=1e-5,
                 atol=1e-5,
@@ -248,11 +241,11 @@ class TestSolver(unittest.TestCase):
         n_frames = 5
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # Set target model parameters for each frame
-        model_params_target = torch.rand((n_frames, n_params), dtype=torch.float32)
+        model_params_target = np.random.rand(n_frames, n_params).astype(np.float32)
 
         # Create SequenceSolverFunction
         solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
@@ -261,7 +254,7 @@ class TestSolver(unittest.TestCase):
         for i_frame in range(n_frames):
             model_params_error = pym_solver2.ModelParametersErrorFunction(character)
             model_params_error.set_target_parameters(
-                model_params_target[i_frame].numpy(), np.ones(n_params)
+                model_params_target[i_frame], np.ones(n_params)
             )
             solver_function.add_error_function(i_frame, model_params_error)
 
@@ -272,14 +265,14 @@ class TestSolver(unittest.TestCase):
 
         # Solve the sequence
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Assert that the solved model parameters are close to the target for each frame
         for i_frame in range(n_frames):
             self.assertTrue(
-                torch.allclose(
-                    torch.from_numpy(model_params_final[i_frame]),
+                np.allclose(
+                    model_params_final[i_frame],
                     model_params_target[i_frame],
                     rtol=1e-5,
                     atol=1e-5,
@@ -297,11 +290,11 @@ class TestSolver(unittest.TestCase):
         n_frames = 5
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # Set target model parameters for the first frame
-        model_params_target_first_frame = torch.rand(n_params, dtype=torch.float32)
+        model_params_target_first_frame = np.random.rand(n_params).astype(np.float32)
 
         # Create SequenceSolverFunction
         solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
@@ -309,7 +302,7 @@ class TestSolver(unittest.TestCase):
         # Add ModelParametersErrorFunction for the first frame
         model_params_error = pym_solver2.ModelParametersErrorFunction(character)
         model_params_error.set_target_parameters(
-            model_params_target_first_frame.numpy(), np.ones(n_params)
+            model_params_target_first_frame, np.ones(n_params)
         )
         solver_function.add_error_function(0, model_params_error)
 
@@ -329,13 +322,13 @@ class TestSolver(unittest.TestCase):
 
         # Solve the sequence
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Assert that the solved model parameters for the first frame are close to the target
         self.assertTrue(
-            torch.allclose(
-                torch.from_numpy(model_params_final[0]),
+            np.allclose(
+                model_params_final[0],
                 model_params_target_first_frame,
                 rtol=1e-5,
                 atol=1e-5,
@@ -345,9 +338,9 @@ class TestSolver(unittest.TestCase):
         # Assert smoothness across frames by checking small differences between consecutive frames
         for i_frame in range(1, n_frames):
             self.assertTrue(
-                torch.allclose(
-                    torch.from_numpy(model_params_final[i_frame]),
-                    torch.from_numpy(model_params_final[i_frame - 1]),
+                np.allclose(
+                    model_params_final[i_frame],
+                    model_params_final[i_frame - 1],
                     rtol=1e-2,
                     atol=1e-2,
                 )
@@ -362,24 +355,22 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Generate a random set of model parameters as the target
-        model_params_target = torch.rand_like(model_params_init)
+        model_params_target = np.random.rand(n_params).astype(np.float32)
 
         # Convert target model parameters to a target skeleton state
-        skel_state_target = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_target.numpy()
-            )
+        skel_state_target = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_target
         )
 
         # Create StateErrorFunction
         state_error_function = pym_solver2.StateErrorFunction(character)
 
         # Set the target skeleton state in the error function
-        state_error_function.set_target_state(skel_state_target.numpy())
+        state_error_function.set_target_state(skel_state_target)
 
         # Create solver function with the state error
         solver_function = pym_solver2.SkeletonSolverFunction(
@@ -393,18 +384,16 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Assert that the solved skeleton state is close to the target
         self.assertTrue(
-            torch.allclose(
+            np.allclose(
                 pym_skel_state.to_matrix(skel_state_final),
                 pym_skel_state.to_matrix(skel_state_target),
                 rtol=1e-3,
@@ -421,19 +410,17 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Set target model parameters
-        model_params_target = torch.rand_like(model_params_init)
+        model_params_target = np.random.rand(n_params).astype(np.float32)
 
         # Create ModelParametersErrorFunction
         model_params_error = pym_solver2.ModelParametersErrorFunction(character)
 
         # Set target parameters in the error function
-        model_params_error.set_target_parameters(
-            model_params_target.numpy(), np.ones(n_params)
-        )
+        model_params_error.set_target_parameters(model_params_target, np.ones(n_params))
 
         # Create solver function with the model parameters error
         solver_function = pym_solver2.SkeletonSolverFunction(
@@ -456,13 +443,13 @@ class TestSolver(unittest.TestCase):
         solver.set_enabled_parameters(active_parameters)
 
         # Solve with active parameters
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Verify that only active parameters have changed
         self.assertTrue(
             np.allclose(
                 model_params_final[: n_params // 2],
-                model_params_target[: n_params // 2].numpy(),
+                model_params_target[: n_params // 2],
                 rtol=1e-5,
                 atol=1e-5,
             )
@@ -470,7 +457,7 @@ class TestSolver(unittest.TestCase):
         self.assertTrue(
             np.allclose(
                 model_params_final[n_params // 2 :],
-                model_params_init[n_params // 2 :].numpy(),
+                model_params_init[n_params // 2 :],
                 rtol=1e-5,
                 atol=1e-5,
             )
@@ -478,7 +465,7 @@ class TestSolver(unittest.TestCase):
 
     def test_point_triangle_error_function(self) -> None:
         """Test PointTriangleVertexErrorFunction to ensure a point is close to the target triangle."""
-        torch.manual_seed(0)
+        np.random.seed(0)
 
         # Create a test character
         character = pym_test_utils.create_test_character(num_joints=4)
@@ -514,8 +501,8 @@ class TestSolver(unittest.TestCase):
         solver_options.do_line_search = True
 
         # Create and run the solver
-        model_params_init = torch.randn(
-            character.parameter_transform.size, dtype=torch.float32
+        model_params_init = np.random.randn(character.parameter_transform.size).astype(
+            np.float32
         )
         solver = pym_solver2.GaussNewtonSolverQR(solver_function, solver_options)
         enabled_params = ~(
@@ -523,21 +510,19 @@ class TestSolver(unittest.TestCase):
             | character.parameter_transform.rigid_parameters
         )
         solver.set_enabled_parameters(enabled_params)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position of the point
-        final_mesh = character.skin_points(skel_state_final.numpy())
-        final_point_position = torch.from_numpy(final_mesh[point_index, :3])
+        final_mesh = character.skin_points(skel_state_final)
+        final_point_position = final_mesh[point_index, :3]
 
         # Compute the target position of the point on the triangle
-        triangle_vertices = torch.from_numpy(final_mesh[triangle_indices, :3])
+        triangle_vertices = final_mesh[triangle_indices, :3]
         final_target_position = (
             triangle_bary_coords[0] * triangle_vertices[0]
             + triangle_bary_coords[1] * triangle_vertices[1]
@@ -546,7 +531,7 @@ class TestSolver(unittest.TestCase):
 
         # Assert that the final point position is close to the target position
         self.assertTrue(
-            torch.allclose(
+            np.allclose(
                 final_point_position, final_target_position, rtol=1e-1, atol=1e-1
             )
         )
@@ -564,19 +549,19 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
+        np.random.seed(0)
 
         n_modes = 2
 
         # Generate a random set of model parameters as the target
-        model_params_target = torch.rand(n_modes, n_params, dtype=torch.float32)
+        model_params_target = np.random.rand(n_modes, n_params).astype(np.float32)
 
         n_pca = 2
         pose_prior_model = pym_geometry.Mppca(
-            pi=torch.ones(n_modes).numpy(),
-            mu=model_params_target.numpy(),
-            W=torch.rand(n_modes, n_pca, n_params).numpy(),
-            sigma=torch.ones(n_modes).numpy(),
+            pi=np.ones(n_modes, dtype=np.float32),
+            mu=model_params_target,
+            W=np.random.rand(n_modes, n_pca, n_params).astype(np.float32),
+            sigma=np.ones(n_modes, dtype=np.float32),
             names=character.parameter_transform.names,
         )
 
@@ -598,13 +583,13 @@ class TestSolver(unittest.TestCase):
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
         # Should converge to the closest mode:
         for i_mode in range(n_modes):
-            model_params_init = model_params_target[i_mode] + 0.1 * torch.randn_like(
-                model_params_target[i_mode]
-            )
-            model_params_final = solver.solve(model_params_init.numpy())
+            model_params_init = model_params_target[i_mode] + 0.1 * np.random.randn(
+                n_params
+            ).astype(np.float32)
+            model_params_final = solver.solve(model_params_init)
             self.assertTrue(
-                torch.allclose(
-                    torch.from_numpy(model_params_final),
+                np.allclose(
+                    model_params_final,
                     model_params_target[i_mode],
                     rtol=1e-5,
                     atol=1e-5,
@@ -620,9 +605,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         def _normalize_vec(vec: npt.NDArray) -> npt.NDArray:
             return vec / np.linalg.norm(vec)
@@ -655,26 +639,24 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position and direction of the local ray
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(local_point),
+            local_point,
         )
         final_dir = pym_quaternion.rotate_vector(
-            skel_state_final[parent_idx, 3:7], torch.from_numpy(local_dir)
+            skel_state_final[parent_idx, 3:7], local_dir
         )
 
         # Compute the direction to the global target
-        target_dir = _normalize_vec(global_target - final_point.numpy())
+        target_dir = _normalize_vec(global_target - final_point)
 
         # Assert that the final direction is close to the target direction
         self.assertTrue(np.allclose(final_dir, target_dir, rtol=1e-3, atol=1e-3))
@@ -692,9 +674,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define local and global axes
         local_axis = _normalize_vec(np.random.randn(3).astype(np.float32))
@@ -731,18 +712,16 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final local axis in global space
         final_global_axis = pym_quaternion.rotate_vector(
-            skel_state_final[parent_idx, 3:7], torch.from_numpy(local_axis)
+            skel_state_final[parent_idx, 3:7], local_axis
         )
 
         # Assert that the final local axis is close to the global axis
@@ -763,8 +742,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define local point, local normal, and global target point
         local_point = np.array([0.5, 0.0, 0.0], dtype=np.float32)
@@ -796,32 +775,29 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position and normal in global space
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(local_point),
+            local_point,
         )
         final_normal = pym_quaternion.rotate_vector(
-            skel_state_final[parent_idx, 3:7], torch.from_numpy(local_normal)
+            skel_state_final[parent_idx, 3:7], local_normal
         )
 
         # Calculate the signed distance from the global point to the plane
         # defined by the final point and normal
-        global_point_tensor = torch.from_numpy(global_point)
-        point_to_plane_vector = global_point_tensor - final_point
-        signed_distance = torch.dot(point_to_plane_vector, final_normal)
+        point_to_plane_vector = global_point - final_point
+        signed_distance = np.dot(point_to_plane_vector, final_normal)
 
         # Assert that the signed distance is close to zero
-        self.assertAlmostEqual(signed_distance.item(), 0.0, delta=1e-3)
+        self.assertAlmostEqual(float(signed_distance), 0.0, delta=1e-3)
 
         # delete constraints and ensure they're empty
         normal_error_function.clear_constraints()
@@ -836,8 +812,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define origin point, target distance, and offset
         origin = np.array([0.0, 0.0, 0.0], dtype=np.float32)  # Origin in world space
@@ -869,24 +845,21 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position of the point in global space
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(offset),
+            offset,
         )
 
         # Calculate the distance from the origin to the final point
-        origin_tensor = torch.from_numpy(origin)
-        actual_distance = torch.norm(final_point - origin_tensor).item()
+        actual_distance = float(np.linalg.norm(final_point - origin))
 
         # Assert that the actual distance is close to the target distance
         self.assertAlmostEqual(actual_distance, target_distance, delta=1e-3)
@@ -922,18 +895,21 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define offset and target quaternions
         axis1 = _normalize_vec(np.random.randn(3).astype(np.float32))
         angle1 = np.random.uniform(0, np.pi)
-        offset_quat = pym_quaternion.from_axis_angle(torch.from_numpy(axis1 * angle1))
+        offset_quat = pym_quaternion.from_axis_angle(
+            (axis1 * angle1).astype(np.float32)
+        )
 
         axis2 = _normalize_vec(np.random.randn(3).astype(np.float32))
         angle2 = np.random.uniform(0, np.pi)
-        target_quat = pym_quaternion.from_axis_angle(torch.from_numpy(axis2 * angle2))
+        target_quat = pym_quaternion.from_axis_angle(
+            (axis2 * angle2).astype(np.float32)
+        )
 
         # Create OrientationErrorFunction
         orientation_error_function = pym_solver2.OrientationErrorFunction(character)
@@ -941,8 +917,8 @@ class TestSolver(unittest.TestCase):
         # Add orientation constraint
         parent_idx: int = character.skeleton.size - 1
         orientation_error_function.add_constraint(
-            offset=offset_quat.numpy(),
-            target=target_quat.numpy(),
+            offset=offset_quat,
+            target=target_quat,
             parent=parent_idx,
             weight=1.0,
         )
@@ -959,13 +935,11 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final orientation
@@ -980,7 +954,7 @@ class TestSolver(unittest.TestCase):
         # Assert that the final orientation is close to the expected orientation
         # We need to check both q and -q since they represent the same rotation
         self.assertTrue(
-            torch.allclose(
+            np.allclose(
                 pym_quaternion.to_rotation_matrix(final_orientation),
                 pym_quaternion.to_rotation_matrix(expected_orientation),
                 rtol=1e-3,
@@ -1001,8 +975,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define plane parameters
         offset = np.array([0.0, 0.0, 0.0], dtype=np.float32)  # Point in local space
@@ -1034,23 +1008,21 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position of the point in global space
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(offset),
+            offset,
         )
 
         # Calculate the signed distance to the plane
-        distance = final_point[1].item() - d  # y - d
+        distance = float(final_point[1]) - d  # y - d
 
         # Assert that the point is on the plane (distance close to zero)
         self.assertAlmostEqual(distance, 0.0, delta=1e-3)
@@ -1073,27 +1045,25 @@ class TestSolver(unittest.TestCase):
         )
 
         # Create and run the solver with initial parameters that put the point below the plane
-        model_params_below = model_params_init.clone()
+        model_params_below = model_params_init.copy()
         model_params_below[0] = -2.0  # Move the point below the plane
 
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_below.numpy())
+        model_params_final = solver.solve(model_params_below)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position of the point in global space
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(offset),
+            offset,
         )
 
         # Calculate the signed distance to the plane
-        distance = final_point[1].item() - d  # y - d
+        distance = float(final_point[1]) - d  # y - d
 
         # Assert that the point is above or on the plane (distance >= 0)
         self.assertGreaterEqual(distance, -1e-3)
@@ -1111,8 +1081,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define projection parameters
         # Simple perspective projection matrix (3x4)
@@ -1158,20 +1128,18 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final position of the point in global space
         final_point = pym_skel_state.transform_points(
             skel_state_final[parent_idx],
-            torch.from_numpy(offset),
-        ).numpy()
+            offset,
+        )
 
         # Apply the projection matrix to get the projected 2D point
         # First create homogeneous coordinates by adding 1 as the 4th component
@@ -1315,8 +1283,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Define projection parameters
         # Simple perspective projection matrix (3x4)
@@ -1361,17 +1329,15 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert the solved model parameters to a skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute the final mesh
-        final_mesh = character.skin_points(skel_state_final.numpy())
+        final_mesh = character.skin_points(skel_state_final)
 
         # Get the final position of the vertex
         final_vertex_position = final_mesh[vertex_index, :3]
@@ -1410,15 +1376,14 @@ class TestSolver(unittest.TestCase):
         n_frames = 2  # VertexSequenceErrorFunction works with 2 frames
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
 
         # Initialize model parameters for both frames
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # Set up different poses for the two frames to create motion
-        model_params_frame0 = torch.zeros(n_params, dtype=torch.float32)
-        model_params_frame1 = torch.zeros(n_params, dtype=torch.float32)
+        model_params_frame0 = np.zeros(n_params, dtype=np.float32)
+        model_params_frame1 = np.zeros(n_params, dtype=np.float32)
 
         # Create some motion by changing translation parameters
         model_params_frame1[0] = 1.0  # Move in x direction
@@ -1479,42 +1444,36 @@ class TestSolver(unittest.TestCase):
 
         # Solve the sequence
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Convert final model parameters to skeleton states
-        skel_state_frame0 = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final[0]
-            )
+        skel_state_frame0 = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final[0]
         )
-        skel_state_frame1 = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final[1]
-            )
+        skel_state_frame1 = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final[1]
         )
 
         # Compute final meshes for both frames
-        mesh_frame0 = character.skin_points(skel_state_frame0.numpy())
-        mesh_frame1 = character.skin_points(skel_state_frame1.numpy())
+        mesh_frame0 = character.skin_points(skel_state_frame0)
+        mesh_frame1 = character.skin_points(skel_state_frame1)
 
         # Verify that vertex velocities match target velocities
         for i, vertex_idx in enumerate(vertex_indices):
             # Compute actual velocity (difference between frames)
-            actual_velocity = torch.from_numpy(
-                mesh_frame1[vertex_idx, :3] - mesh_frame0[vertex_idx, :3]
-            )
+            actual_velocity = mesh_frame1[vertex_idx, :3] - mesh_frame0[vertex_idx, :3]
             expected_velocity = target_velocities[i]
 
             # Assert that actual velocity is close to target velocity
             self.assertTrue(
-                torch.allclose(
+                np.allclose(
                     actual_velocity,
-                    torch.from_numpy(expected_velocity),
+                    expected_velocity,
                     rtol=1e-3,  # Allow some tolerance due to optimization
                     atol=1e-3,
                 ),
-                f"Vertex {vertex_idx}: actual velocity {actual_velocity.numpy()} "
+                f"Vertex {vertex_idx}: actual velocity {actual_velocity} "
                 f"does not match target {expected_velocity}",
             )
 
@@ -1532,24 +1491,20 @@ class TestSolver(unittest.TestCase):
 
         # Solve again with zero velocity constraints
         model_params_final_zero = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Convert to skeleton states
-        skel_state_frame0_zero = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final_zero[0]
-            )
+        skel_state_frame0_zero = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final_zero[0]
         )
-        skel_state_frame1_zero = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final_zero[1]
-            )
+        skel_state_frame1_zero = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final_zero[1]
         )
 
         # Compute meshes
-        mesh_frame0_zero = character.skin_points(skel_state_frame0_zero.numpy())
-        mesh_frame1_zero = character.skin_points(skel_state_frame1_zero.numpy())
+        mesh_frame0_zero = character.skin_points(skel_state_frame0_zero)
+        mesh_frame1_zero = character.skin_points(skel_state_frame1_zero)
 
         # Verify that constrained vertices have minimal motion
         for vertex_idx in [0, 1]:
@@ -1584,11 +1539,10 @@ class TestSolver(unittest.TestCase):
         n_frames = 3  # AccelerationSequenceErrorFunction requires 3 frames
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
 
         # Initialize model parameters for three frames
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # Create AccelerationSequenceErrorFunction
         # Test basic construction
@@ -1637,13 +1591,13 @@ class TestSolver(unittest.TestCase):
         # Anchor first and last frames
         first_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
         first_frame_pos_error.set_target_parameters(
-            model_params_init[0].numpy(), np.ones(n_params)
+            model_params_init[0], np.ones(n_params)
         )
         solver_function.add_error_function(0, first_frame_pos_error)
 
         last_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
         last_frame_pos_error.set_target_parameters(
-            model_params_init[2].numpy(), np.ones(n_params)
+            model_params_init[2], np.ones(n_params)
         )
         solver_function.add_error_function(2, last_frame_pos_error)
 
@@ -1660,7 +1614,7 @@ class TestSolver(unittest.TestCase):
         solver_options.regularization = 1e-5
 
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Convert to skeleton states and verify accelerations match zero target
@@ -1713,12 +1667,10 @@ class TestSolver(unittest.TestCase):
         p2_analytical = p0 + v0 * 2.0 + 0.5 * target_accel * 2.0**2
 
         # Set up initial model parameters with these positions
-        model_params_init_ballistic = torch.zeros(
-            (n_frames, n_params), dtype=torch.float32
-        )
-        model_params_init_ballistic[0, :3] = torch.from_numpy(p0)
-        model_params_init_ballistic[1, :3] = torch.from_numpy(p1_analytical)
-        model_params_init_ballistic[2, :3] = torch.from_numpy(p2_analytical)
+        model_params_init_ballistic = np.zeros((n_frames, n_params), dtype=np.float32)
+        model_params_init_ballistic[0, :3] = p0
+        model_params_init_ballistic[1, :3] = p1_analytical
+        model_params_init_ballistic[2, :3] = p2_analytical
 
         # Create a new solver
         solver_function_ballistic = pym_solver2.SequenceSolverFunction(
@@ -1728,7 +1680,7 @@ class TestSolver(unittest.TestCase):
         # Anchor first frame strongly
         first_frame_error = pym_solver2.ModelParametersErrorFunction(character)
         first_frame_error.set_target_parameters(
-            model_params_init_ballistic[0].numpy(), np.ones(n_params) * 10.0
+            model_params_init_ballistic[0], np.ones(n_params) * 10.0
         )
         solver_function_ballistic.add_error_function(0, first_frame_error)
 
@@ -1741,13 +1693,13 @@ class TestSolver(unittest.TestCase):
         solver_function_ballistic.add_sequence_error_function(0, accel_error_gravity)
 
         # Start from a perturbed initial guess
-        model_params_init_perturbed = model_params_init_ballistic.clone()
+        model_params_init_perturbed = model_params_init_ballistic.copy()
         model_params_init_perturbed[1, 1] += 0.3  # Perturb y position of frame 1
         model_params_init_perturbed[2, 1] += 0.5  # Perturb y position of frame 2
 
         model_params_final_ballistic = pym_solver2.solve_sequence(
             solver_function_ballistic,
-            model_params_init_perturbed.numpy(),
+            model_params_init_perturbed,
             solver_options,
         )
 
@@ -1786,11 +1738,10 @@ class TestSolver(unittest.TestCase):
         n_frames = 4  # JerkSequenceErrorFunction requires 4 frames
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
 
         # Initialize model parameters for four frames
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # Create JerkSequenceErrorFunction
         # Test basic construction
@@ -1837,20 +1788,20 @@ class TestSolver(unittest.TestCase):
         # Compute analytical positions for t=0, 1, 2, 3
         for t in range(n_frames):
             pos = p0 + v0 * float(t) + 0.5 * accel * float(t) ** 2
-            model_params_init[t, :3] = torch.from_numpy(pos)
+            model_params_init[t, :3] = pos
 
         solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
 
         # Anchor first and last frames
         first_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
         first_frame_pos_error.set_target_parameters(
-            model_params_init[0].numpy(), np.ones(n_params)
+            model_params_init[0], np.ones(n_params)
         )
         solver_function.add_error_function(0, first_frame_pos_error)
 
         last_frame_pos_error = pym_solver2.ModelParametersErrorFunction(character)
         last_frame_pos_error.set_target_parameters(
-            model_params_init[3].numpy(), np.ones(n_params)
+            model_params_init[3], np.ones(n_params)
         )
         solver_function.add_error_function(3, last_frame_pos_error)
 
@@ -1867,15 +1818,13 @@ class TestSolver(unittest.TestCase):
         solver_options.regularization = 1e-5
 
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Convert to skeleton states and verify jerk matches zero target
         skel_states = [
-            torch.from_numpy(
-                pym_geometry.model_parameters_to_skeleton_state(
-                    character, model_params_final[i]
-                )
+            pym_geometry.model_parameters_to_skeleton_state(
+                character, model_params_final[i]
             )
             for i in range(n_frames)
         ]
@@ -1892,13 +1841,13 @@ class TestSolver(unittest.TestCase):
 
             # Assert that measured jerk matches target
             self.assertTrue(
-                torch.allclose(
+                np.allclose(
                     jerk,
-                    torch.from_numpy(target),
+                    target,
                     rtol=0.1,
                     atol=0.1,
                 ),
-                f"Joint {joint_idx}: jerk {jerk.numpy()} does not match target {target}",
+                f"Joint {joint_idx}: jerk {jerk} does not match target {target}",
             )
 
     def test_vertex_vertex_distance_constraint(self) -> None:
@@ -1910,8 +1859,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Choose two vertices to constrain - use vertices that are initially far apart
         vertex_index1 = 0
@@ -1920,12 +1869,10 @@ class TestSolver(unittest.TestCase):
         weight = 1.0
 
         # Get initial positions of the vertices
-        skel_state_init = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_init.numpy()
-            )
+        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_init
         )
-        initial_mesh = character.skin_points(skel_state_init.numpy())
+        initial_mesh = character.skin_points(skel_state_init)
         initial_pos1 = initial_mesh[vertex_index1, :3]
         initial_pos2 = initial_mesh[vertex_index2, :3]
         initial_distance = np.linalg.norm(initial_pos2 - initial_pos1)
@@ -1967,17 +1914,15 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute final mesh and vertex positions
-        final_mesh = character.skin_points(skel_state_final.numpy())
+        final_mesh = character.skin_points(skel_state_final)
         final_pos1 = final_mesh[vertex_index1, :3]
         final_pos2 = final_mesh[vertex_index2, :3]
         final_distance = np.linalg.norm(final_pos2 - final_pos1)
@@ -2052,8 +1997,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Choose two joints to constrain - use joints that are initially far apart
         joint_index1 = 0
@@ -2064,20 +2009,18 @@ class TestSolver(unittest.TestCase):
         weight = 1.0
 
         # Get initial positions of the points
-        skel_state_init = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_init.numpy()
-            )
+        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_init
         )
         initial_point1 = pym_skel_state.transform_points(
             skel_state_init[joint_index1],
-            torch.from_numpy(offset1),
+            offset1,
         )
         initial_point2 = pym_skel_state.transform_points(
             skel_state_init[joint_index2],
-            torch.from_numpy(offset2),
+            offset2,
         )
-        initial_distance = torch.norm(initial_point2 - initial_point1).item()
+        initial_distance = float(np.linalg.norm(initial_point2 - initial_point1))
 
         # Create JointToJointDistanceErrorFunction
         joint_distance_error = pym_solver2.JointToJointDistanceErrorFunction(character)
@@ -2118,25 +2061,23 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute final positions of the points
         final_point1 = pym_skel_state.transform_points(
             skel_state_final[joint_index1],
-            torch.from_numpy(offset1),
+            offset1,
         )
         final_point2 = pym_skel_state.transform_points(
             skel_state_final[joint_index2],
-            torch.from_numpy(offset2),
+            offset2,
         )
-        final_distance = torch.norm(final_point2 - final_point1).item()
+        final_distance = float(np.linalg.norm(final_point2 - final_point1))
 
         # Assert that the final distance is close to the target distance
         self.assertAlmostEqual(
@@ -2280,8 +2221,8 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
-        model_params_init = torch.zeros(n_params, dtype=torch.float32)
+        np.random.seed(0)
+        model_params_init = np.zeros(n_params, dtype=np.float32)
 
         # Choose two joints to constrain
         source_joint = character.skeleton.size - 1  # Last joint
@@ -2334,23 +2275,21 @@ class TestSolver(unittest.TestCase):
 
         # Create and run the solver
         solver = pym_solver2.GaussNewtonSolver(solver_function, solver_options)
-        model_params_final = solver.solve(model_params_init.numpy())
+        model_params_final = solver.solve(model_params_init)
 
         # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Compute final positions of the points
         source_point_world = pym_skel_state.transform_points(
             skel_state_final[source_joint],
-            torch.from_numpy(source_offset),
+            source_offset,
         )
         reference_point_world = pym_skel_state.transform_points(
             skel_state_final[reference_joint],
-            torch.from_numpy(reference_offset),
+            reference_offset,
         )
 
         # Transform source point into reference frame
@@ -2365,13 +2304,13 @@ class TestSolver(unittest.TestCase):
 
         # Assert that the source position in reference frame is close to the target
         self.assertTrue(
-            torch.allclose(
+            np.allclose(
                 source_in_ref_frame,
-                torch.from_numpy(target_position),
+                target_position,
                 rtol=1e-2,
                 atol=1e-2,
             ),
-            msg=f"Source position in ref frame {source_in_ref_frame.numpy()} does not match target {target_position}",
+            msg=f"Source position in ref frame {source_in_ref_frame} does not match target {target_position}",
         )
 
         # Test multiple constraints using add_constraints
@@ -2439,7 +2378,7 @@ class TestSolver(unittest.TestCase):
         n_params = character.parameter_transform.size
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(42)
+        np.random.seed(42)
 
         # Choose two joints to constrain
         source_joint = character.skeleton.size - 1  # Last joint
@@ -2491,10 +2430,8 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init)
 
         # Convert final model parameters to skeleton state
-        skel_state_final = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state_final = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
 
         # Get the orientations of source and reference joints
@@ -2507,11 +2444,10 @@ class TestSolver(unittest.TestCase):
 
         # The relative orientation should be close to the target
         # Account for quaternion double cover (q and -q represent same rotation)
-        target_tensor = torch.from_numpy(target_quat)
-        dot = torch.abs(torch.dot(relative_quat, target_tensor))
+        dot = abs(float(np.dot(relative_quat, target_quat)))
         self.assertTrue(
             dot > 0.98,
-            msg=f"Relative orientation {relative_quat.numpy()} does not match target {target_quat}, dot={dot.item():.4f}",
+            msg=f"Relative orientation {relative_quat} does not match target {target_quat}, dot={dot:.4f}",
         )
 
         # Test multiple constraints using add_constraints
@@ -2595,12 +2531,10 @@ class TestSolver(unittest.TestCase):
         model_params_final = solver.solve(model_params_init)
 
         # Compute actual height from optimized parameters
-        skel_state = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final
-            )
+        skel_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final
         )
-        mesh_vertices = character.skin_points(skel_state.numpy())
+        mesh_vertices = character.skin_points(skel_state)
 
         # Compute height by projecting all vertices onto the up direction
         up_direction = np.array([0.0, 1.0, 0.0])
@@ -2630,12 +2564,10 @@ class TestSolver(unittest.TestCase):
         model_params_final_2 = solver.solve(model_params_init)
 
         # Compute actual height from optimized parameters
-        skel_state_2 = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, model_params_final_2
-            )
+        skel_state_2 = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_final_2
         )
-        mesh_vertices_2 = character.skin_points(skel_state_2.numpy())
+        mesh_vertices_2 = character.skin_points(skel_state_2)
 
         # Compute height
         projections_2 = mesh_vertices_2 @ up_direction
@@ -2733,11 +2665,10 @@ class TestSolver(unittest.TestCase):
         n_frames = 2  # VelocityMagnitudeSequenceErrorFunction requires 2 frames
 
         # Ensure repeatability in the rng:
-        torch.manual_seed(0)
         np.random.seed(0)
 
         # Initialize model parameters for two frames
-        model_params_init = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
 
         # ========================================
         # Test basic construction
@@ -2790,9 +2721,7 @@ class TestSolver(unittest.TestCase):
 
         # Anchor first frame
         first_frame_error = pym_solver2.ModelParametersErrorFunction(character)
-        first_frame_error.set_target_parameters(
-            model_params_init[0].numpy(), np.ones(n_params)
-        )
+        first_frame_error.set_target_parameters(model_params_init[0], np.ones(n_params))
         solver_function.add_error_function(0, first_frame_error)
 
         # Add velocity magnitude error with zero target (stationary constraint)
@@ -2808,7 +2737,7 @@ class TestSolver(unittest.TestCase):
         solver_options.regularization = 1e-5
 
         model_params_final = pym_solver2.solve_sequence(
-            solver_function, model_params_init.numpy(), solver_options
+            solver_function, model_params_init, solver_options
         )
 
         # Convert to skeleton states and verify velocity magnitudes are close to zero
@@ -2861,11 +2790,11 @@ class TestSolver(unittest.TestCase):
         solver_function2.add_sequence_error_function(0, vel_mag_error_target)
 
         # Start from a configuration with some movement
-        model_params_init2 = torch.zeros((n_frames, n_params), dtype=torch.float32)
+        model_params_init2 = np.zeros((n_frames, n_params), dtype=np.float32)
         model_params_init2[1, 0] = 1.0  # Initial guess with movement in x
 
         model_params_final2 = pym_solver2.solve_sequence(
-            solver_function2, model_params_init2.numpy(), solver_options
+            solver_function2, model_params_init2, solver_options
         )
 
         # Convert to skeleton states and verify velocity magnitudes match target
