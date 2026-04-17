@@ -82,6 +82,7 @@ std::shared_ptr<const Mppca> loadMppca(std::istream& inputStream) {
           "Error loading Mppca model: invalid name length.");
       result->names[i].resize(count);
       inputStream.read((char*)result->names[i].data(), count);
+      MT_THROW_IF(!inputStream.good(), "Error loading Mppca model: failed to read name data.");
     }
 
     // prepare data structures

@@ -294,7 +294,7 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
   }
 
   // Guard against integer overflow in size calculations
-  if (nJoints != 0 && nJoints > std::numeric_limits<size_t>::max() / kParametersPerJoint) {
+  if (nJoints > std::numeric_limits<size_t>::max() / kParametersPerJoint) {
     MT_LOGW("{}: Integer overflow in scale size for file {}", __func__, filename);
     return result;
   }
@@ -315,6 +315,10 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
     std::string name;
     name.resize(count);
     fs.read((char*)name.data(), count);
+    if (!fs.good()) {
+      MT_LOGW("{}: Failed to read parameter name data from file {}", __func__, filename);
+      return result;
+    }
     parameterNames.push_back(name);
   }
 
@@ -330,6 +334,10 @@ std::tuple<MatrixXf, VectorXf, std::vector<std::string>, std::vector<std::string
     std::string name;
     name.resize(count);
     fs.read((char*)name.data(), count);
+    if (!fs.good()) {
+      MT_LOGW("{}: Failed to read joint name data from file {}", __func__, filename);
+      return result;
+    }
     jointNames.push_back(name);
   }
 

@@ -79,6 +79,10 @@ PoseShape loadPoseShape(const std::string& filename, const Character& character)
   std::string base;
   base.resize(count);
   data.read((char*)base.data(), count);
+  if (!data.good()) {
+    MT_LOGW("{}: Failed to read base joint name data from file {}", __func__, filename);
+    return result;
+  }
   result.baseJoint = character.skeleton.getJointIdByName(base);
   MT_CHECK(result.baseJoint != kInvalidIndex);
   MT_CHECK(
@@ -97,6 +101,10 @@ PoseShape loadPoseShape(const std::string& filename, const Character& character)
     }
     names[i].resize(count);
     data.read((char*)names[i].data(), count);
+    if (!data.good()) {
+      MT_LOGW("{}: Failed to read joint name data from file {}", __func__, filename);
+      return result;
+    }
   }
 
   // read mean shape
