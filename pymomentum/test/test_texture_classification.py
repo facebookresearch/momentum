@@ -8,7 +8,7 @@
 import unittest
 
 import numpy as np
-import pymomentum.geometry as pym
+import pymomentum.geometry as pym  # @manual=:geometry
 
 
 def _make_quad_mesh() -> pym.Mesh:

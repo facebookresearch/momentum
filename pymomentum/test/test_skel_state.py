@@ -9,8 +9,8 @@ import unittest
 from typing import Tuple
 
 import numpy as np
-import pymomentum.geometry as pym_geometry
-import pymomentum.geometry_test_utils as pym_test_utils
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import torch

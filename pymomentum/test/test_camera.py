@@ -8,7 +8,7 @@
 import unittest
 
 import numpy as np
-import pymomentum.camera as pym_camera
+import pymomentum.camera as pym_camera  # @manual=:camera
 
 
 class TestCamera(unittest.TestCase):

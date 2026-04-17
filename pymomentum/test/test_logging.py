@@ -7,7 +7,7 @@
 
 import unittest
 
-import pymomentum.geometry as pym_geometry
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
 
 
 class TestLogging(unittest.TestCase):
