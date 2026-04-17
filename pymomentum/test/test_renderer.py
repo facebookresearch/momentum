@@ -10,9 +10,9 @@ import unittest
 
 import numpy as np
 import torch  # isort: skip  # Must be imported before pymomentum C++ extensions
-import pymomentum.camera as pym_camera
-import pymomentum.geometry as pym_geometry
-import pymomentum.renderer as pym_renderer
+import pymomentum.camera as pym_camera  # @manual=:camera
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.renderer as pym_renderer  # @manual=:renderer
 from numpy.typing import NDArray
 
 

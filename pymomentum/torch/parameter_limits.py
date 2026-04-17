@@ -5,7 +5,7 @@
 
 from typing import Any, List, Optional
 
-import pymomentum.geometry as pym_geometry
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.skel_state as pym_skel_state
 import torch
 

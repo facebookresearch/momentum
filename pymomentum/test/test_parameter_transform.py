@@ -8,7 +8,7 @@
 import unittest
 
 import numpy as np
-from pymomentum.geometry import (
+from pymomentum.geometry import (  # @manual=:geometry
     Character,
     ParameterTransform,
     uniform_random_to_model_parameters,

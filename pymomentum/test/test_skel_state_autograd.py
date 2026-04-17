@@ -9,9 +9,9 @@ import unittest
 from typing import Optional
 
 import numpy as np
-import pymomentum.diff_geometry as pym_diff_geometry
-import pymomentum.geometry as pym_geometry
-import pymomentum.geometry_test_utils as pym_test_utils
+import pymomentum.diff_geometry as pym_diff_geometry  # @manual=:diff_geometry
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import torch

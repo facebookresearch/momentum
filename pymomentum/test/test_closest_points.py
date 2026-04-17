@@ -9,7 +9,7 @@ import unittest
 
 import numpy as np
 import numpy.typing as npt
-import pymomentum.geometry as geometry
+import pymomentum.geometry as geometry  # @manual=:geometry
 
 
 def _brute_force_closest_points(
