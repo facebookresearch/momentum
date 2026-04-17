@@ -10,13 +10,12 @@ import unittest
 import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
-import torch
 
 
 class TestLegacyJsonIO(unittest.TestCase):
     def setUp(self) -> None:
         self.character = pym_test_utils.create_test_character()
-        torch.manual_seed(0)  # ensure repeatability
+        np.random.seed(0)  # ensure repeatability
 
     def test_round_trip_conversion(self) -> None:
         """Test that Character -> Legacy JSON -> Character preserves data."""
