@@ -9,11 +9,11 @@ import unittest
 
 import numpy as np
 import numpy.typing as npt
-import pymomentum.geometry as pym_geometry
-import pymomentum.geometry_test_utils as pym_test_utils
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.quaternion_np as pym_quaternion
 import pymomentum.skel_state_np as pym_skel_state
-import pymomentum.solver2 as pym_solver2
+import pymomentum.solver2 as pym_solver2  # @manual=:solver2
 
 
 def _normalize_vec(vec: npt.NDArray) -> npt.NDArray:

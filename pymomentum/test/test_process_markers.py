@@ -10,9 +10,9 @@ import tempfile
 import unittest
 
 import numpy as np
-import pymomentum.geometry as pym_geometry
-import pymomentum.geometry_test_utils as pym_test_utils
-from pymomentum.marker_tracking import (
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
+from pymomentum.marker_tracking import (  # @manual=:marker_tracking
     calibrate_markers,
     CalibrationConfig,
     ModelOptions,

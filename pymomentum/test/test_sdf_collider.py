@@ -16,7 +16,7 @@ class TestSDFCollider(unittest.TestCase):
 
     def test_import(self) -> None:
         """Test that SDFCollider can be imported."""
-        from pymomentum import geometry
+        from pymomentum import geometry  # @manual=:geometry
 
         # Should be able to access the class
         self.assertTrue(hasattr(geometry, "SDFCollider"))
@@ -48,7 +48,7 @@ class TestSDFCollider(unittest.TestCase):
 
     def test_create_collider_with_sdf(self) -> None:
         """Test creating an SDFCollider with an SDF."""
-        from pymomentum import axel, geometry
+        from pymomentum import axel, geometry  # @manual=:geometry
 
         # Create a simple sphere SDF
         bounds = axel.BoundingBox(
