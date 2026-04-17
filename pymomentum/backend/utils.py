@@ -17,7 +17,7 @@ within pymomentum for the backend porting effort.
 from typing import List, Tuple
 
 import numpy as np
-import pymomentum.geometry as pym_geometry
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import torch
 
 

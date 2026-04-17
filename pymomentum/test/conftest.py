@@ -22,7 +22,7 @@ import os
 collect_ignore: list[str] = []
 
 try:
-    import pymomentum.io_usd as _io_usd  # noqa: F401
+    import pymomentum.io_usd as _io_usd  # noqa: F401  # @manual=:io_usd
 
     usd_available = True
 except ImportError:

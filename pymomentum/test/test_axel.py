@@ -6,7 +6,7 @@
 import unittest
 
 import numpy as np
-import pymomentum.axel as axel
+import pymomentum.axel as axel  # @manual=:axel
 
 
 class TestAxel(unittest.TestCase):
