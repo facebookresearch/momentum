@@ -7,8 +7,10 @@
 
 import unittest
 
-from pymomentum.geometry import Character
-from pymomentum.geometry_test_utils import create_test_character
+from pymomentum.geometry import Character  # @manual=:geometry
+from pymomentum.geometry_test_utils import (  # @manual=:geometry_test_utils
+    create_test_character,
+)
 
 
 class TestSkeleton(unittest.TestCase):
