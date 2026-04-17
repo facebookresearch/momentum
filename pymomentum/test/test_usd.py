@@ -10,10 +10,19 @@ import unittest
 from typing import Optional
 
 import numpy as np
-import pymomentum.geometry as pym_geometry  # @manual=:geometry
-import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
-import pymomentum.io_usd as pym_io_usd  # @manual=:io_usd
-import pymomentum.skel_state_np as pym_skel_state
+
+try:
+    import pymomentum.io_usd as pym_io_usd  # @manual=:io_usd
+
+    _io_usd_available = pym_io_usd.is_usd_available()
+except ImportError:
+    pym_io_usd = None  # type: ignore[assignment]
+    _io_usd_available = False
+
+if _io_usd_available:
+    import pymomentum.geometry as pym_geometry  # @manual=:geometry
+    import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
+    import pymomentum.skel_state_np as pym_skel_state
 
 
 def load_tests(
@@ -26,10 +35,10 @@ def load_tests(
 
     This prevents 'Skipping' notifications in CI by not discovering
     the tests at all, rather than discovering and then skipping them.
-    Works with uses_legacy_listing = True (static listing handles
-    this correctly by finding 0 tests when load_tests returns empty).
+    Works with supports_static_listing = False so the runner calls
+    load_tests() to discover tests instead of static analysis.
     """
-    if not pym_io_usd.is_usd_available():
+    if not _io_usd_available:
         return unittest.TestSuite()
     return standard_tests
 
