@@ -43,6 +43,7 @@
 #include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/marker/coordinate_system.h>
 #include <momentum/io/shape/blend_shape_io.h>
+#include <momentum/io/skeleton/locator_io.h>
 #include <momentum/math/intersection.h>
 #include <momentum/math/mesh.h>
 #include <momentum/math/mppca.h>
@@ -89,6 +90,16 @@ PYBIND11_MODULE(geometry, m) {
   py::enum_<mm::FbxCoordSystem>(m, "FbxCoordSystem")
       .value("RightHanded", mm::FbxCoordSystem::RightHanded)
       .value("LeftHanded", mm::FbxCoordSystem::LeftHanded);
+
+  py::enum_<mm::LocatorSpace>(
+      m,
+      "LocatorSpace",
+      "Coordinate space used when writing locators to a .locators file. "
+      "Global writes forward-kinematically-computed world-space positions "
+      "(useful for authoring in Maya/Blender without parenting). "
+      "Local writes raw joint-space offsets (useful for transferring locators between models).")
+      .value("Global", mm::LocatorSpace::Global)
+      .value("Local", mm::LocatorSpace::Local);
 
   // =====================================================
   // momentum::GltfFileFormat enum

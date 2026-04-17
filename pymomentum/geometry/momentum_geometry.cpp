@@ -204,6 +204,15 @@ momentum::Character loadLocatorsFromBytes(
   return result;
 }
 
+void saveLocatorsToFile(
+    const momentum::Character& character,
+    const std::string& locatorsPath,
+    momentum::LocatorSpace space) {
+  MT_THROW_IF(locatorsPath.empty(), "Missing locators path.");
+  momentum::saveLocators(
+      filesystem::path(locatorsPath), character.locators, character.skeleton, space);
+}
+
 momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath) {
   return momentum::loadUrdfCharacter<float>(urdfPath);
 }
