@@ -286,6 +286,10 @@ geometry_test_utils_sources = [
     "geometry_test_utils/geometry_test_utils_pybind.cpp",
 ]
 
+rerun_vis_sources = [
+    "rerun_vis.py",
+]
+
 camera_sources = [
     "camera/camera_pybind.cpp",
 ]
