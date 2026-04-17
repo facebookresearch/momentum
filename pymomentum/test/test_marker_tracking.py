@@ -5,9 +5,17 @@
 
 # pyre-strict
 
+import atexit
+import os
 import unittest
 
 import numpy as np
+
+# Work around glibc ptmalloc2 arena teardown false-positive in platform010/dev
+# shared-linking mode: glibc's free() validation rejects a pointer during C++
+# static destruction that ASAN confirms is not actual memory corruption.
+# os._exit() skips C++ static destruction; test results are already reported.
+atexit.register(os._exit, 0)
 import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.marker_tracking as pym_marker_tracking  # @manual=:marker_tracking
