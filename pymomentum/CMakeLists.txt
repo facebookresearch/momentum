@@ -384,6 +384,11 @@ mt_python_library(
   PRESERVE_DIRECTORY_STRUCTURE
 )
 
+mt_python_library(
+  NAME rerun_vis
+  PYMOMENTUM_SOURCES_VARS rerun_vis_sources
+)
+
 #===============================================================================
 # Tests
 #===============================================================================
