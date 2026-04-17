@@ -389,6 +389,11 @@ mt_python_library(
   PYMOMENTUM_SOURCES_VARS rerun_vis_sources
 )
 
+mt_python_library(
+  NAME viser_vis
+  PYMOMENTUM_SOURCES_VARS viser_vis_sources
+)
+
 #===============================================================================
 # Tests
 #===============================================================================

@@ -290,6 +290,10 @@ rerun_vis_sources = [
     "rerun_vis.py",
 ]
 
+viser_vis_sources = [
+    "viser_vis.py",
+]
+
 camera_sources = [
     "camera/camera_pybind.cpp",
 ]
