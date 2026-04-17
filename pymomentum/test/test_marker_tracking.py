@@ -11,8 +11,7 @@ import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.marker_tracking as pym_marker_tracking
-import pymomentum.skel_state as pym_skel_state
-import torch
+import pymomentum.skel_state_np as pym_skel_state
 
 
 class TestMarkerTracking(unittest.TestCase):
@@ -29,11 +28,9 @@ class TestMarkerTracking(unittest.TestCase):
         print("mesh_vertex_position: ", mesh_vertex_position)
 
         rest_model_params = np.zeros((1, character.parameter_transform.size))
-        rest_skeleton_state = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, rest_model_params
-            )[0]  # Remove batch dimension
-        )
+        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, rest_model_params
+        )[0]  # Remove batch dimension
         parent_joint_idx = character.skin_weights.index[mesh_vertex_idx][0]
 
         # Create a locator positioned at the mesh vertex
@@ -42,8 +39,8 @@ class TestMarkerTracking(unittest.TestCase):
             parent=parent_joint_idx,
             offset=pym_skel_state.transform_points(
                 pym_skel_state.inverse(rest_skeleton_state[parent_joint_idx]),
-                torch.from_numpy(mesh_vertex_position),
-            ).numpy(),  # Position it at the mesh vertex
+                mesh_vertex_position,
+            ),  # Position it at the mesh vertex
             attached_to_skin=True,
         )
 
@@ -188,27 +185,25 @@ class TestMarkerTracking(unittest.TestCase):
         # Verify that the world position is preserved
         # Compute the world position of the converted locator in rest pose
         rest_model_params = np.zeros((1, character.parameter_transform.size))
-        rest_skeleton_state = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, rest_model_params
-            )[0]
-        )
+        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, rest_model_params
+        )[0]
 
         # Transform the offset to world space using the parent bone's transform
         converted_world_pos = pym_skel_state.transform_points(
             rest_skeleton_state[converted_locator.parent],
-            torch.from_numpy(converted_locator.offset),
+            converted_locator.offset,
         )
 
         # Compare with original skinned locator position
-        original_world_pos = torch.from_numpy(test_skinned_locator.position)
-        position_diff = torch.norm(converted_world_pos - original_world_pos).item()
+        original_world_pos = test_skinned_locator.position
+        position_diff = np.linalg.norm(converted_world_pos - original_world_pos)
 
         self.assertLess(
             position_diff,
             0.01,
             msg=f"Converted locator world position should match original skinned locator position. "
-            f"Original: {original_world_pos.numpy()}, Converted: {converted_world_pos.numpy()}, "
+            f"Original: {original_world_pos}, Converted: {converted_world_pos}, "
             f"Diff: {position_diff}",
         )
 
@@ -221,8 +216,6 @@ class TestMarkerTracking(unittest.TestCase):
 
     def test_marker_tracking_with_skinned_locators(self) -> None:
         """Test marker tracking with skinned locators created from mesh vertices."""
-        torch.manual_seed(42)  # Ensure repeatability
-
         # Create a test character with mesh and skin weights
         character = pym_test_utils.create_test_character(num_joints=5)
         self.assertIsNotNone(character.mesh)
@@ -585,8 +578,6 @@ class TestMarkerTracking(unittest.TestCase):
 
     def test_get_locator_error_with_skinned_locators(self) -> None:
         """Test get_locator_error computes similar errors for regular and skinned locators."""
-        torch.manual_seed(42)
-
         # Create a test character with mesh and skin weights
         character = pym_test_utils.create_test_character(num_joints=5)
         self.assertIsNotNone(character.mesh)
@@ -604,11 +595,9 @@ class TestMarkerTracking(unittest.TestCase):
         rest_model_params = np.zeros(
             (1, character.parameter_transform.size), dtype=np.float32
         )
-        rest_skeleton_state = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(
-                character, rest_model_params
-            )[0]
-        )
+        rest_skeleton_state = pym_geometry.model_parameters_to_skeleton_state(
+            character, rest_model_params
+        )[0]
         parent_joint_idx = character.skin_weights.index[mesh_vertex_idx][0]
 
         # Create a locator positioned at the mesh vertex
@@ -617,8 +606,8 @@ class TestMarkerTracking(unittest.TestCase):
             parent=parent_joint_idx,
             offset=pym_skel_state.transform_points(
                 pym_skel_state.inverse(rest_skeleton_state[parent_joint_idx]),
-                torch.from_numpy(mesh_vertex_position),
-            ).numpy(),
+                mesh_vertex_position,
+            ),
             attached_to_skin=True,
         )
 

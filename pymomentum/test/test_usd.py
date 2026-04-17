@@ -13,8 +13,7 @@ import numpy as np
 import pymomentum.geometry as pym_geometry
 import pymomentum.geometry_test_utils as pym_test_utils
 import pymomentum.io_usd as pym_io_usd
-import pymomentum.skel_state as pym_skel_state
-import torch
+import pymomentum.skel_state_np as pym_skel_state
 
 
 def load_tests(
@@ -238,8 +237,8 @@ class TestUsd(unittest.TestCase):
         model_params = np.random.random(
             (frames, len(ref.parameter_transform.names))
         ).astype(np.float32)
-        skeleton_states = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(ref, model_params)
+        skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
+            ref, model_params
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -248,7 +247,7 @@ class TestUsd(unittest.TestCase):
                 path=path,
                 character=ref,
                 fps=120,
-                skel_states=skeleton_states.numpy(),
+                skel_states=skeleton_states,
             )
 
             char, skel_states_read, timestamps = (
@@ -257,9 +256,9 @@ class TestUsd(unittest.TestCase):
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
             self.assertEqual(skel_states_read.shape, skeleton_states.shape)
-            torch.testing.assert_allclose(
+            np.testing.assert_allclose(
                 pym_skel_state.to_matrix(skeleton_states),
-                pym_skel_state.to_matrix(torch.from_numpy(skel_states_read)),
+                pym_skel_state.to_matrix(skel_states_read),
                 rtol=1e-3,
                 atol=1e-3,
             )
@@ -272,8 +271,8 @@ class TestUsd(unittest.TestCase):
         model_params = np.random.random(
             (frames, len(ref.parameter_transform.names))
         ).astype(np.float32)
-        skeleton_states = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(ref, model_params)
+        skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
+            ref, model_params
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -282,7 +281,7 @@ class TestUsd(unittest.TestCase):
                 path=path,
                 character=ref,
                 fps=60,
-                skel_states=skeleton_states.numpy(),
+                skel_states=skeleton_states,
             )
 
             with open(path, "rb") as f:
@@ -294,9 +293,9 @@ class TestUsd(unittest.TestCase):
 
             self.assertEqual(char.skeleton.size, ref.skeleton.size)
             self.assertEqual(skel_states_read.shape, skeleton_states.shape)
-            torch.testing.assert_allclose(
+            np.testing.assert_allclose(
                 pym_skel_state.to_matrix(skeleton_states),
-                pym_skel_state.to_matrix(torch.from_numpy(skel_states_read)),
+                pym_skel_state.to_matrix(skel_states_read),
                 rtol=1e-3,
                 atol=1e-3,
             )
@@ -370,13 +369,13 @@ class TestUsd(unittest.TestCase):
             # joint params from USD TRS (quaternion->Euler + log2 scale round-trip),
             # introducing small numerical differences vs the model-parameter path.
             for i in range(n_frames):
-                skel_state_from_motion = torch.from_numpy(
+                skel_state_from_motion = (
                     pym_geometry.model_parameters_to_skeleton_state(char1, motion1[i])
                 )
                 self.assertTrue(
                     np.allclose(
                         pym_skel_state.to_matrix(skel_state_from_motion),
-                        pym_skel_state.to_matrix(torch.from_numpy(skel_states[i])),
+                        pym_skel_state.to_matrix(skel_states[i]),
                         atol=1e-3,
                         rtol=1e-3,
                     ),
@@ -534,8 +533,8 @@ class TestUsd(unittest.TestCase):
         model_params = np.random.random(
             (frames, len(ref.parameter_transform.names))
         ).astype(np.float32)
-        skeleton_states = torch.from_numpy(
-            pym_geometry.model_parameters_to_skeleton_state(ref, model_params)
+        skeleton_states = pym_geometry.model_parameters_to_skeleton_state(
+            ref, model_params
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -544,7 +543,7 @@ class TestUsd(unittest.TestCase):
                 path=path,
                 character=ref,
                 fps=60,
-                skel_states=skeleton_states.numpy(),
+                skel_states=skeleton_states,
             )
             self.assertTrue(os.path.exists(path))
 
