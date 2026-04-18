@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/character_solver/simd_collision_error_function.h"
+#include "momentum/character_solver_simd/simd_collision_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"

@@ -335,33 +335,6 @@ using SimdPositionErrorFunction_const_p = ::std::shared_ptr<const SimdPositionEr
 using SimdPositionErrorFunction_const_u = ::std::unique_ptr<const SimdPositionErrorFunction>;
 using SimdPositionErrorFunction_const_w = ::std::weak_ptr<const SimdPositionErrorFunction>;
 
-class SimdNormalErrorFunctionAVX;
-
-using SimdNormalErrorFunctionAVX_p = ::std::shared_ptr<SimdNormalErrorFunctionAVX>;
-using SimdNormalErrorFunctionAVX_u = ::std::unique_ptr<SimdNormalErrorFunctionAVX>;
-using SimdNormalErrorFunctionAVX_w = ::std::weak_ptr<SimdNormalErrorFunctionAVX>;
-using SimdNormalErrorFunctionAVX_const_p = ::std::shared_ptr<const SimdNormalErrorFunctionAVX>;
-using SimdNormalErrorFunctionAVX_const_u = ::std::unique_ptr<const SimdNormalErrorFunctionAVX>;
-using SimdNormalErrorFunctionAVX_const_w = ::std::weak_ptr<const SimdNormalErrorFunctionAVX>;
-
-class SimdPlaneErrorFunctionAVX;
-
-using SimdPlaneErrorFunctionAVX_p = ::std::shared_ptr<SimdPlaneErrorFunctionAVX>;
-using SimdPlaneErrorFunctionAVX_u = ::std::unique_ptr<SimdPlaneErrorFunctionAVX>;
-using SimdPlaneErrorFunctionAVX_w = ::std::weak_ptr<SimdPlaneErrorFunctionAVX>;
-using SimdPlaneErrorFunctionAVX_const_p = ::std::shared_ptr<const SimdPlaneErrorFunctionAVX>;
-using SimdPlaneErrorFunctionAVX_const_u = ::std::unique_ptr<const SimdPlaneErrorFunctionAVX>;
-using SimdPlaneErrorFunctionAVX_const_w = ::std::weak_ptr<const SimdPlaneErrorFunctionAVX>;
-
-class SimdPositionErrorFunctionAVX;
-
-using SimdPositionErrorFunctionAVX_p = ::std::shared_ptr<SimdPositionErrorFunctionAVX>;
-using SimdPositionErrorFunctionAVX_u = ::std::unique_ptr<SimdPositionErrorFunctionAVX>;
-using SimdPositionErrorFunctionAVX_w = ::std::weak_ptr<SimdPositionErrorFunctionAVX>;
-using SimdPositionErrorFunctionAVX_const_p = ::std::shared_ptr<const SimdPositionErrorFunctionAVX>;
-using SimdPositionErrorFunctionAVX_const_u = ::std::unique_ptr<const SimdPositionErrorFunctionAVX>;
-using SimdPositionErrorFunctionAVX_const_w = ::std::weak_ptr<const SimdPositionErrorFunctionAVX>;
-
 template <typename T>
 class AimDirErrorFunctionT;
 using AimDirErrorFunction = AimDirErrorFunctionT<float>;

@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "momentum/character_solver/plane_error_function.h"
-#include "momentum/character_solver/simd_plane_error_function.h"
+#include "momentum/character_solver_simd/simd_plane_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/parameter_transform.h"
@@ -71,13 +71,5 @@ TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
     VALIDATE_IDENTICAL(
         float, errorFunction, errorFunction_simd, skeleton, transform, parameters, 0.1f, 5e-1f);
     timeJacobian(character, errorFunction_simd, parameters, "SimdPlaneErrorFunction");
-
-#ifdef MOMENTUM_ENABLE_AVX
-    SimdPlaneErrorFunctionAVX errorFunction_simd_avx(skeleton, transform);
-    errorFunction_simd_avx.setConstraints(&cl_simd);
-    VALIDATE_IDENTICAL(
-        float, errorFunction, errorFunction_simd_avx, skeleton, transform, parameters, 0.1f, 5e-1f);
-    timeJacobian(character, errorFunction_simd_avx, parameters, "SimdPlaneErrorFunctionAVX");
-#endif
   }
 }

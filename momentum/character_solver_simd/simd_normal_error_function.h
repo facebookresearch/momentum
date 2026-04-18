@@ -15,28 +15,25 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
-#include <vector>
 
 namespace momentum {
 
-struct SimdPlaneConstraints final {
+struct SimdNormalConstraints {
  public:
-  explicit SimdPlaneConstraints(const Skeleton* skel);
-
-  ~SimdPlaneConstraints();
-
-  SimdPlaneConstraints(const SimdPlaneConstraints&) = delete;
-  SimdPlaneConstraints& operator=(const SimdPlaneConstraints&) = delete;
-  SimdPlaneConstraints(SimdPlaneConstraints&&) = delete;
-  SimdPlaneConstraints& operator=(SimdPlaneConstraints&&) = delete;
+  explicit SimdNormalConstraints(const Skeleton* skel);
+  ~SimdNormalConstraints();
+  SimdNormalConstraints(const SimdNormalConstraints&) = delete;
+  SimdNormalConstraints& operator=(const SimdNormalConstraints&) = delete;
+  SimdNormalConstraints(SimdNormalConstraints&&) = delete;
+  SimdNormalConstraints& operator=(SimdNormalConstraints&&) = delete;
 
   void clearConstraints();
 
-  void addConstraint(
+  bool addConstraint(
       size_t jointIndex,
       const Vector3f& offset,
-      const Vector3f& targetNormal,
-      float targetOffset,
+      const Vector3f& normal,
+      const Vector3f& target,
       float targetWeight);
 
   [[nodiscard]] VectorXi getNumConstraints() const;
@@ -55,7 +52,9 @@ struct SimdPlaneConstraints final {
   float* normalX;
   float* normalY;
   float* normalZ;
-  float* targets;
+  float* targetX;
+  float* targetY;
+  float* targetZ;
   // array for constraint weight
   float* weights;
 
@@ -64,21 +63,22 @@ struct SimdPlaneConstraints final {
   int numJoints;
 };
 
-/// A highly optimized error function for "point-on-plane" or "point-in-half-plane" errors.
+/// A highly optimized error function for "point-to-plane" (signed) distance errors. See
+/// NormalErrorFunction for detailed explanation.
 ///
-/// This function is recommended for use only when dealing with a large number of constraints. For a
-/// smaller number of constraints, consider using the generic PlaneErrorFunction.
+/// This function should primarily be used when dealing with a large number of constraints. For
+/// smaller numbers of constraints, consider using the generic NormalErrorFunction.
 ///
 /// @warning Due to the multi-threaded evaluation of the error/gradient, the functions are
-/// non-deterministic. This might lead to numerical inconsistencies, resulting in slightly different
-/// outcomes on multiple calls with the same data.
-class SimdPlaneErrorFunction : public SkeletonErrorFunction {
+/// non-deterministic, which may cause numerical inconsistencies. As a result, slightly different
+/// results may occur on multiple calls with the same data.
+class SimdNormalErrorFunction : public SkeletonErrorFunction {
  public:
   /// @param maxThreads An optional parameter that specifies the maximum number of threads to be
   /// used with dispenso::parallel_for. If this parameter is set to zero, the function will run in
   /// serial mode, i.e., it will not use any additional threads. By default, the value is set to the
   /// maximum allowable size of a uint32_t, which is also the default for dispenso.
-  explicit SimdPlaneErrorFunction(
+  explicit SimdNormalErrorFunction(
       const Skeleton& skel,
       const ParameterTransform& pt,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
@@ -87,32 +87,34 @@ class SimdPlaneErrorFunction : public SkeletonErrorFunction {
   /// used with dispenso::parallel_for. If this parameter is set to zero, the function will run in
   /// serial mode, i.e., it will not use any additional threads. By default, the value is set to the
   /// maximum allowable size of a uint32_t, which is also the default for dispenso.
-  explicit SimdPlaneErrorFunction(
+  explicit SimdNormalErrorFunction(
       const Character& character,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   [[nodiscard]] double getError(
       const ModelParameters& params,
       const SkeletonState& state,
-      const MeshState& /* unused */) override;
+      const MeshState& meshState) final;
 
   double getGradient(
       const ModelParameters& params,
       const SkeletonState& state,
-      const MeshState& /* meshState */,
-      Ref<VectorXf> gradient) override;
+      const MeshState& meshState,
+      Ref<VectorXf> gradient) final;
 
   double getJacobian(
       const ModelParameters& params,
       const SkeletonState& state,
-      const MeshState& /* meshState */,
+      const MeshState& meshState,
       Ref<MatrixXf> jacobian,
       Ref<VectorXf> residual,
       int& usedRows) override;
 
   [[nodiscard]] size_t getJacobianSize() const override;
 
-  void setConstraints(const SimdPlaneConstraints* cstrs);
+  void setConstraints(const SimdNormalConstraints* cstrs) {
+    constraints_ = cstrs;
+  }
 
  protected:
   // weights for the error functions
@@ -121,49 +123,9 @@ class SimdPlaneErrorFunction : public SkeletonErrorFunction {
   mutable std::vector<size_t> jacobianOffset_;
 
   // constraints to use
-  const SimdPlaneConstraints* constraints_;
+  const SimdNormalConstraints* constraints_;
 
   uint32_t maxThreads_;
 };
-
-#ifdef MOMENTUM_ENABLE_AVX
-
-// A version of SimdPlaneErrorFunction where the Jacobian has been hand-unrolled using
-// AVX instructions.  On some platforms this performs better than the generic SIMD version
-// but it only works on Intel platforms that support AVX.
-class SimdPlaneErrorFunctionAVX : public SimdPlaneErrorFunction {
- public:
-  explicit SimdPlaneErrorFunctionAVX(
-      const Skeleton& skel,
-      const ParameterTransform& pt,
-      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
-
-  explicit SimdPlaneErrorFunctionAVX(
-      const Character& character,
-      uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
-
-  [[nodiscard]] double getError(
-      const ModelParameters& params,
-      const SkeletonState& state,
-      const MeshState& /* unused */) final;
-
-  double getGradient(
-      const ModelParameters& params,
-      const SkeletonState& state,
-      const MeshState& /* unused */,
-      Ref<VectorXf> gradient) final;
-
-  double getJacobian(
-      const ModelParameters& params,
-      const SkeletonState& state,
-      const MeshState& /* unused */,
-      Ref<MatrixXf> jacobian,
-      Ref<VectorXf> residual,
-      int& usedRows) final;
-
-  [[nodiscard]] size_t getJacobianSize() const final;
-};
-
-#endif // MOMENTUM_ENABLE_AVX
 
 } // namespace momentum

@@ -9,7 +9,7 @@
 
 #include "momentum/character_solver/collision_error_function.h"
 #include "momentum/character_solver/collision_error_function_stateless.h"
-#include "momentum/character_solver/simd_collision_error_function.h"
+#include "momentum/character_solver_simd/simd_collision_error_function.h"
 
 #include "momentum/character/character.h"
 #include "momentum/character/mesh_state.h"

@@ -361,9 +361,9 @@ mt_library(
 )
 
 mt_library(
-  NAME simd_constraints
-  HEADERS_VARS simd_constraints_public_headers
-  SOURCES_VARS simd_constraints_sources
+  NAME character_solver_simd
+  HEADERS_VARS character_solver_simd_public_headers
+  SOURCES_VARS character_solver_simd_sources
   PUBLIC_LINK_LIBRARIES
     character_solver
     simd
@@ -394,7 +394,7 @@ mt_library(
     skeleton
     character
     character_solver
-    simd_constraints
+    character_solver_simd
     character_sequence_solver
 )
 
@@ -846,13 +846,13 @@ if(MOMENTUM_BUILD_TESTING)
 
   if(NOT APPLE) # TODO: Fix
     mt_test(
-      NAME simd_constraints_test
-      SOURCES_VARS simd_constraints_test_sources
+      NAME character_solver_simd_test
+      SOURCES_VARS character_solver_simd_test_sources
       LINK_LIBRARIES
         character_solver
+        character_solver_simd
         character_test_helpers
         error_function_helper
-        simd_constraints
     )
   endif()
 
