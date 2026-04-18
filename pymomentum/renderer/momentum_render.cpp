@@ -411,14 +411,15 @@ buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWi
     //   x points up
     //   y points forward
     //   z points to the hand's left
-    Eigen::Affine3f wristLocalToWorldXF = Eigen::Affine3f::Identity();
+    at::Tensor batchMat = wristTransformation.select(0, iBatch).contiguous();
+    Eigen::Affine3f wristLocalToWorldXF;
+    wristLocalToWorldXF.matrix() =
+        Eigen::Map<const Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(batchMat.data_ptr<float>());
     const Eigen::Vector3f hand_up_world = wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitY();
     const Eigen::Vector3f hand_forward_world =
         -1.0 * wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitZ();
 
-    at::Tensor wristtranslation_mm =
-        wristTransformation.select(0, iBatch).select(1, iBatch).slice(0, 0, 3).contiguous();
-    const Eigen::Vector3f hand_center_world_cm = toEigenMap<float>(wristtranslation_mm) * 0.1;
+    const Eigen::Vector3f hand_center_world_cm = wristLocalToWorldXF.translation() * 0.1;
 
     const float cameraDistanceToHand_cm = 0.5f * 100; // 0.5 meters away.
     const Eigen::Vector3f& camera_up_world = hand_up_world;
@@ -457,7 +458,10 @@ buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int 
     //   x points up
     //   y points forward
     //   z points to the hand's left
-    Eigen::Affine3f wristLocalToWorldXF = Eigen::Affine3f::Identity();
+    at::Tensor batchMat = wristTransformation.select(0, iBatch).contiguous();
+    Eigen::Affine3f wristLocalToWorldXF;
+    wristLocalToWorldXF.matrix() =
+        Eigen::Map<const Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(batchMat.data_ptr<float>());
     const Eigen::Vector3f hand_up_world = wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitY();
     const Eigen::Vector3f hand_forward_world =
         -1.0 * wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitZ();

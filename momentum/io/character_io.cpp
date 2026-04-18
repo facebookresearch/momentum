@@ -55,7 +55,12 @@ namespace {
     const filesystem::path& filepath,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No) {
   if (format == CharacterFormat::Gltf) {
-    return loadGltfCharacter(filepath);
+    auto character = loadGltfCharacter(filepath);
+    if (loadBlendShapes == LoadBlendShapes::No) {
+      character.blendShape.reset();
+      character.faceExpressionBlendShape.reset();
+    }
+    return character;
   } else if (format == CharacterFormat::Fbx) {
     return loadFbxCharacter(filepath, KeepLocators::Yes, Permissive::No, loadBlendShapes);
   } else if (format == CharacterFormat::Usd) {
@@ -74,7 +79,12 @@ namespace {
     const std::span<const std::byte> fileBuffer,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No) {
   if (format == CharacterFormat::Gltf) {
-    return loadGltfCharacter(fileBuffer);
+    auto character = loadGltfCharacter(fileBuffer);
+    if (loadBlendShapes == LoadBlendShapes::No) {
+      character.blendShape.reset();
+      character.faceExpressionBlendShape.reset();
+    }
+    return character;
   } else if (format == CharacterFormat::Fbx) {
     return loadFbxCharacter(fileBuffer, KeepLocators::Yes, Permissive::No, loadBlendShapes);
   } else if (format == CharacterFormat::Usd) {
