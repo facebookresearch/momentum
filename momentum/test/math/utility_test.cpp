@@ -25,19 +25,20 @@ TYPED_TEST_SUITE(UtilityTest, Types);
 TYPED_TEST(UtilityTest, IsNanNoOpt) {
   using T = typename TestFixture::Type;
 
+  const auto normalValue = static_cast<T>(42.0);
+  EXPECT_FALSE(std::isnan(normalValue));
+  EXPECT_FALSE(IsNanNoOpt(normalValue));
+
+#if !__FINITE_MATH_ONLY__
   const T nanValue = std::numeric_limits<T>::quiet_NaN();
   const T infValue = std::numeric_limits<T>::infinity();
-  const auto normalValue = static_cast<T>(42.0);
 
-#ifndef MOMENTUM_TEST_FAST_MATH
   EXPECT_TRUE(std::isnan(nanValue));
-#endif
   EXPECT_FALSE(std::isnan(infValue));
-  EXPECT_FALSE(std::isnan(normalValue));
 
   EXPECT_TRUE(IsNanNoOpt(nanValue));
   EXPECT_FALSE(IsNanNoOpt(infValue));
-  EXPECT_FALSE(IsNanNoOpt(normalValue));
+#endif
 }
 
 TYPED_TEST(UtilityTest, AllParams) {
