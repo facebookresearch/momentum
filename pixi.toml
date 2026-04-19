@@ -555,6 +555,22 @@ rerun-sdk = ">=0.23.3,<0.24"
 librerun-sdk = ">=0.23.3,<0.24"
 
 #==============
+# Feature: viser (visualization)
+# Bundled into every CPU/GPU dev environment alongside rerun-latest so the
+# pixi-based dev loop (and OSS CI) can always exercise the viser_vis tests.
+# Kept as its own feature for symmetry with rerun-latest/rerun-legacy and to
+# make future version pinning easier.
+# End users installing from PyPI keep viser optional via the
+# `pymomentum-cpu[viser]` extra in pyproject-pypi.toml.j2.
+#==============
+
+[feature.viser]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
+
+[feature.viser.pypi-dependencies]
+viser = ">=1.0.24,<2"
+
+#==============
 # Feature: Minimal Build (for GPU wheel builds with limited disk space)
 # This feature includes only the essential dependencies for building pymomentum
 # It's significantly smaller than the full default environment (~1.5GB vs ~4GB)
@@ -659,14 +675,14 @@ wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentu
 #==============
 
 [environments]
-# CPU environments (includes latest rerun)
-py312 = ["py312", "rerun-latest"]
-py313 = ["py313", "rerun-latest"]
+# CPU environments (includes latest rerun + viser)
+py312 = ["py312", "rerun-latest", "viser"]
+py313 = ["py313", "rerun-latest", "viser"]
 
 # GPU development environments (requires CUDA on host)
 # Use these for testing GPU features locally
-py312-cuda129 = ["py312-cuda129", "rerun-latest"]
-gpu = ["py312-cuda129", "rerun-latest"]
+py312-cuda129 = ["py312-cuda129", "rerun-latest", "viser"]
+gpu = ["py312-cuda129", "rerun-latest", "viser"]
 
 # GPU wheel build environments (no CUDA required on host)
 # Use these for building GPU wheels - builds happen in containers
@@ -675,12 +691,13 @@ gpu-wheel-build-py312 = ["gpu-wheel-build", "gpu-wheel-build-py312"]
 gpu-wheel-build-py313 = ["gpu-wheel-build", "gpu-wheel-build-py313"]
 
 # Minimal build environment (for GPU wheel builds with limited disk space in containers)
+# Intentionally omits viser to keep the image small.
 minimal-build = ["minimal-build", "rerun-latest"]
 
 # Legacy dependencies environments (for internal BUCK build compatibility testing)
 # Uses rerun 0.23.x to match internal build system
-legacy-deps = ["py312", "rerun-legacy"]
-legacy-deps-py313 = ["py313", "rerun-legacy"]
+legacy-deps = ["py312", "rerun-legacy", "viser"]
+legacy-deps-py313 = ["py313", "rerun-legacy", "viser"]
 
 # Default environment
-default = ["py312", "rerun-latest"]
+default = ["py312", "rerun-latest", "viser"]
