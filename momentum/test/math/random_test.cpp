@@ -117,7 +117,7 @@ void testUniformDynamicMatrixScalarBounds(int rows, int cols, Scalar min, Scalar
       << "type: " << typeid(T).name() << "\nrand: " << rand.transpose() << "\nmin: " << min
       << "\nmax: " << max;
   if constexpr (std::is_floating_point_v<Scalar>) {
-#if defined(MOMENTUM_TEST_FAST_MATH)
+#if __FINITE_MATH_ONLY__
     EXPECT_TRUE((rand.array() <= max).all())
         << "type: " << typeid(T).name() << "\nrand: " << rand.transpose() << "\nmin: " << min
         << "\nmax: " << max;
@@ -141,7 +141,7 @@ void testUniformDynamicVectorScalarBounds(int size, Scalar min, Scalar max) {
       << "type: " << typeid(T).name() << "\nrand: " << rand.transpose() << "\nmin: " << min
       << "\nmax: " << max;
   if constexpr (std::is_floating_point_v<Scalar>) {
-#if defined(MOMENTUM_TEST_FAST_MATH)
+#if __FINITE_MATH_ONLY__
     EXPECT_TRUE((rand.array() <= max).all())
         << "type: " << typeid(T).name() << "\nrand: " << rand.transpose() << "\nmin: " << min
         << "\nmax: " << max;

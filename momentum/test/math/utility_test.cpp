@@ -11,6 +11,9 @@
 
 #include <gtest/gtest.h>
 
+#include <bit>
+#include <cstdint>
+
 using namespace momentum;
 
 using Types = testing::Types<float, double>;
@@ -29,15 +32,28 @@ TYPED_TEST(UtilityTest, IsNanNoOpt) {
   EXPECT_FALSE(std::isnan(normalValue));
   EXPECT_FALSE(IsNanNoOpt(normalValue));
 
-#if !__FINITE_MATH_ONLY__
-  const T nanValue = std::numeric_limits<T>::quiet_NaN();
-  const T infValue = std::numeric_limits<T>::infinity();
-
-  EXPECT_TRUE(std::isnan(nanValue));
-  EXPECT_FALSE(std::isnan(infValue));
+  // Construct NaN/Inf via bit-cast to avoid -Wnan-infinity-disabled under
+  // -ffinite-math-only. IsNanNoOpt's whole purpose is to detect NaN even when
+  // fast-math elides std::isnan, so its assertions must run unconditionally —
+  // otherwise the function's no-opt contract is untested in the fast-math build.
+  T nanValue;
+  T infValue;
+  if constexpr (std::is_same_v<T, float>) {
+    nanValue = std::bit_cast<float>(std::uint32_t{0x7fc00000});
+    infValue = std::bit_cast<float>(std::uint32_t{0x7f800000});
+  } else {
+    static_assert(std::is_same_v<T, double>);
+    nanValue = std::bit_cast<double>(std::uint64_t{0x7ff8000000000000});
+    infValue = std::bit_cast<double>(std::uint64_t{0x7ff0000000000000});
+  }
 
   EXPECT_TRUE(IsNanNoOpt(nanValue));
   EXPECT_FALSE(IsNanNoOpt(infValue));
+
+#if !__FINITE_MATH_ONLY__
+  // std::isnan is unreliable under -ffinite-math-only.
+  EXPECT_TRUE(std::isnan(nanValue));
+  EXPECT_FALSE(std::isnan(infValue));
 #endif
 }
 
