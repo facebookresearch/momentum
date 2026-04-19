@@ -40,9 +40,17 @@ jobs:
           cache: true
 
       - name: Build and test PyMomentum
+        env:
+          MOMENTUM_BUILD_WITH_FBXSDK: "ON"
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          MOMENTUM_BUILD_WITH_FBXSDK=ON \
-            pixi run test_py
+          pixi run build_py
+          pixi run install
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env so pytest's exit code reaches bash -e.
+          eval "$(pixi shell-hook)"
+          pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'
 
       - name: Build Python API Doc
         run: |
@@ -67,8 +75,15 @@ jobs:
           cache: true
 
       - name: Build and test PyMomentum
+        env:
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          pixi run -e py313 test_py
+          pixi run -e py313 build_py
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env so pytest's exit code reaches bash -e.
+          eval "$(pixi shell-hook -e py313)"
+          pytest pymomentum/test/ -k 'not TestRendering'
 
   pymomentum-ubuntu-arm64:
     name: nightly-py-py312-ubuntu-arm64
@@ -84,5 +99,12 @@ jobs:
           cache: true
 
       - name: Build and test PyMomentum
+        env:
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          pixi run -e py312 test_py
+          pixi run -e py312 build_py
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env so pytest's exit code reaches bash -e.
+          eval "$(pixi shell-hook -e py312)"
+          pytest pymomentum/test/ -k 'not TestRendering'

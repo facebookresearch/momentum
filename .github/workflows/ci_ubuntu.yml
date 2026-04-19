@@ -75,8 +75,19 @@ jobs:
           cache: true
 
       - name: Build and test PyMomentum
+        env:
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          pixi run -e py312 test_py
+          pixi run -e py312 build_py
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env, then we capture pytest's exit code
+          # explicitly and `exit $status` to guarantee the step fails on errors.
+          eval "$(pixi shell-hook -e py312)"
+          status=0
+          pytest pymomentum/test/ -k 'not TestRendering' || status=$?
+          echo "===PYTEST_EXIT_CODE=$status==="
+          exit $status
 
       - name: Build Python API Doc
         run: |

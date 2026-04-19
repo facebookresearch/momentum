@@ -104,8 +104,17 @@ jobs:
           cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Build and test PyMomentum
+        shell: bash
+        env:
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          pixi run -e ${{ matrix.pixi_env }} test_py
+          pixi run -e ${{ matrix.pixi_env }} build_py
+          pixi run -e ${{ matrix.pixi_env }} install
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env so pytest's exit code reaches bash -e.
+          eval "$(pixi shell-hook -e ${{ matrix.pixi_env }} --shell bash)"
+          pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'
 
       - name: Print sccache stats
         run: sccache --show-stats

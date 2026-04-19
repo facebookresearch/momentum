@@ -76,8 +76,15 @@ jobs:
       - name: Build and test PyMomentum (GPU)
         # With standalone mdspan (no Kokkos runtime), nvcc_wrapper is no longer
         # used, so Ninja works without module scanning issues.
+        env:
+          MOMENTUM_MODELS_PATH: momentum/
         run: |
-          pixi run -e py312-cuda129 test_py
+          pixi run -e py312-cuda129 build_py
+          # Bypass `pixi run` for pytest: in GHA the `pixi run -- pytest`
+          # exit code is silently swallowed (passes locally, fails in CI).
+          # shell-hook activates the env so pytest's exit code reaches bash -e.
+          eval "$(pixi shell-hook -e py312-cuda129)"
+          pytest pymomentum/test/ -k 'not TestRendering'
 
   pymomentum-windows-gpu:
     # Disabled: 4-core-windows-gpu-t4 runner has Visual Studio 2019 but conda
