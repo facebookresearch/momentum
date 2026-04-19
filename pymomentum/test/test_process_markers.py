@@ -5,19 +5,17 @@
 
 # pyre-strict
 
-import atexit
 import math
-import os
 import tempfile
 import unittest
 
 import numpy as np
 
-# Work around glibc ptmalloc2 arena teardown false-positive in platform010/dev
-# shared-linking mode: glibc's free() validation rejects a pointer during C++
-# static destruction that ASAN confirms is not actual memory corruption.
-# os._exit() skips C++ static destruction; test results are already reported.
-atexit.register(os._exit, 0)
+# Note: an atexit.register(os._exit, 0) workaround previously lived here to
+# suppress a glibc ptmalloc2 false-positive specific to the platform010/dev
+# shared-linking mode. It was removed because (a) pymomentum builds use
+# @fbcode//mode/opt rather than platform010/dev, and (b) the workaround
+# silently masked pytest's non-zero exit codes on the OSS GitHub CI path.
 import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 from pymomentum.marker_tracking import (  # @manual=:marker_tracking
