@@ -43,6 +43,10 @@ template_structs = [
 
 [[fwd]]
 subdirectory = "character_solver"
+# Note: the SIMD constraint structs and error functions are kept here for backward compatibility
+# with downstream code that includes <momentum/character_solver/fwd.h>. Their definitions live in
+# the sibling `character_solver_simd/` folder, and new code should prefer
+# `<momentum/character_solver_simd/fwd.h>`.
 structs = [
     "ConstraintData",
     "GaussNewtonSolverQROptions",
@@ -69,9 +73,6 @@ classes = [
     "SimdNormalErrorFunction",
     "SimdPlaneErrorFunction",
     "SimdPositionErrorFunction",
-    "SimdNormalErrorFunctionAVX",
-    "SimdPlaneErrorFunctionAVX",
-    "SimdPositionErrorFunctionAVX",
 ]
 template_classes = [
     "AimDirErrorFunction",
@@ -116,6 +117,35 @@ template_classes = [
     "VertexProjectionErrorFunction",
     "VertexSDFErrorFunction",
     "VertexVertexDistanceErrorFunction",
+]
+
+[[fwd]]
+subdirectory = "character_solver_simd"
+structs = [
+    "SimdAimConstraints",
+    "SimdDistanceConstraints",
+    "SimdFixedAxisConstraints",
+    "SimdJointToJointDistanceConstraints",
+    "SimdNormalConstraints",
+    "SimdOrientationConstraints",
+    "SimdPlaneConstraints",
+    "SimdPositionConstraints",
+    "SimdProjectionConstraints",
+]
+classes = [
+    "SimdAimDistErrorFunction",
+    "SimdDistanceErrorFunction",
+    "SimdFixedAxisErrorFunction",
+    "SimdJointToJointDistanceErrorFunction",
+    "SimdNormalErrorFunction",
+    "SimdOrientationErrorFunction",
+    "SimdPlaneErrorFunction",
+    "SimdPositionErrorFunction",
+    "SimdProjectionErrorFunction",
+    "SimdStateErrorFunction",
+]
+template_classes = [
+    "SimdCollisionErrorFunction",
 ]
 
 [[fwd]]

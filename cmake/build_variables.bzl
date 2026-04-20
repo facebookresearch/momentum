@@ -383,25 +383,49 @@ character_solver_test_sources = [
     "test/character_solver/vertex_vertex_distance_error_function_test.cpp",
 ]
 
-simd_constraints_public_headers = [
-    "character_solver/simd_collision_error_function.h",
-    "character_solver/simd_normal_error_function.h",
-    "character_solver/simd_plane_error_function.h",
-    "character_solver/simd_position_error_function.h",
+character_solver_simd_public_headers = [
+    "character_solver_simd/fwd.h",
+    "character_solver_simd/simd_aim_error_function.h",
+    "character_solver_simd/simd_collision_error_function.h",
+    "character_solver_simd/simd_constraints_base.h",
+    "character_solver_simd/simd_distance_error_function.h",
+    "character_solver_simd/simd_fixed_axis_error_function.h",
+    "character_solver_simd/simd_helpers.h",
+    "character_solver_simd/simd_joint_to_joint_distance_error_function.h",
+    "character_solver_simd/simd_normal_error_function.h",
+    "character_solver_simd/simd_orientation_error_function.h",
+    "character_solver_simd/simd_plane_error_function.h",
+    "character_solver_simd/simd_position_error_function.h",
+    "character_solver_simd/simd_projection_error_function.h",
+    "character_solver_simd/simd_state_error_function.h",
 ]
 
-simd_constraints_sources = [
-    "character_solver/simd_collision_error_function.cpp",
-    "character_solver/simd_normal_error_function.cpp",
-    "character_solver/simd_plane_error_function.cpp",
-    "character_solver/simd_position_error_function.cpp",
+character_solver_simd_sources = [
+    "character_solver_simd/simd_aim_error_function.cpp",
+    "character_solver_simd/simd_collision_error_function.cpp",
+    "character_solver_simd/simd_distance_error_function.cpp",
+    "character_solver_simd/simd_fixed_axis_error_function.cpp",
+    "character_solver_simd/simd_joint_to_joint_distance_error_function.cpp",
+    "character_solver_simd/simd_normal_error_function.cpp",
+    "character_solver_simd/simd_orientation_error_function.cpp",
+    "character_solver_simd/simd_plane_error_function.cpp",
+    "character_solver_simd/simd_position_error_function.cpp",
+    "character_solver_simd/simd_projection_error_function.cpp",
+    "character_solver_simd/simd_state_error_function.cpp",
 ]
 
-simd_constraints_test_sources = [
-    "test/character_solver/simd_collision_error_function_test.cpp",
-    "test/character_solver/simd_normal_error_function_test.cpp",
-    "test/character_solver/simd_plane_error_function_test.cpp",
-    "test/character_solver/simd_position_error_function_test.cpp",
+character_solver_simd_test_sources = [
+    "test/character_solver_simd/simd_aim_error_function_test.cpp",
+    "test/character_solver_simd/simd_collision_error_function_test.cpp",
+    "test/character_solver_simd/simd_distance_error_function_test.cpp",
+    "test/character_solver_simd/simd_fixed_axis_error_function_test.cpp",
+    "test/character_solver_simd/simd_joint_to_joint_distance_error_function_test.cpp",
+    "test/character_solver_simd/simd_normal_error_function_test.cpp",
+    "test/character_solver_simd/simd_orientation_error_function_test.cpp",
+    "test/character_solver_simd/simd_plane_error_function_test.cpp",
+    "test/character_solver_simd/simd_position_error_function_test.cpp",
+    "test/character_solver_simd/simd_projection_error_function_test.cpp",
+    "test/character_solver_simd/simd_state_error_function_test.cpp",
 ]
 
 character_sequence_solver_public_headers = [
