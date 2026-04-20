@@ -154,6 +154,12 @@ dependencies = [
     "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Windows' and python_version == '3.13'",
 ]
 
+# Opt-in extras. Visualization stacks are large and have transitive deps
+# users may not want; keep them out of the base install.
+# Install with: pip install pymomentum-cpu[viser]
+[project.optional-dependencies]
+viser = ["viser>=1.0.24,<2"]
+
 [project.urls]
 Homepage = "https://github.com/facebookresearch/momentum"
 Documentation = "https://facebookresearch.github.io/momentum/"
