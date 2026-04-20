@@ -12,7 +12,13 @@ from unittest.mock import MagicMock
 import numpy as np
 import pymomentum.geometry as geo  # @manual=:geometry
 import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_utils
-from pymomentum.rerun_vis import log_character, log_joints, log_locators, log_mesh
+from pymomentum.rerun_vis import (
+    log_animation,
+    log_character,
+    log_joints,
+    log_locators,
+    log_mesh,
+)
 
 try:
     import rerun as rr
@@ -130,6 +136,155 @@ if _HAS_RERUN:
             paths_no_mesh = [c.args[0] for c in mock_rec.log.call_args_list]
             self.assertNotIn("ch_nm/mesh", paths_no_mesh)
             self.assertIn("ch_nm/joints", paths_no_mesh)
+
+        def _make_animation_inputs(
+            self, n_frames: int
+        ) -> tuple[geo.Character, np.ndarray, np.ndarray, list[geo.Mesh]]:
+            """Build (character, joint_params, skel_states, posed_meshes) for n_frames."""
+            character, _ = self._make_character_and_skel_state()
+            model_params = np.zeros(
+                (n_frames, character.parameter_transform.size), dtype=np.float32
+            )
+            joint_params = character.parameter_transform.apply(model_params)
+            skel_states = geo.joint_parameters_to_skeleton_state(
+                character, joint_params
+            )
+            posed_meshes = [
+                character.pose_mesh(joint_params[i]) for i in range(n_frames)
+            ]
+            return character, joint_params, skel_states, posed_meshes
+
+        def test_log_animation_sends_columns(self) -> None:
+            character, _, skel_states, posed_meshes = self._make_animation_inputs(5)
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec,
+                "test/anim",
+                character,
+                skel_states,
+                posed_meshes=posed_meshes,
+                fps=30.0,
+            )
+
+            # First-frame mesh log establishes triangle_indices/albedo at frame 0.
+            log_paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertIn("test/anim/mesh", log_paths)
+
+            # send_columns is used for: vertex positions (4 remaining frames),
+            # bones static + dynamic, per-joint transforms, locators static + dynamic.
+            send_paths = [c.args[0] for c in mock_rec.send_columns.call_args_list]
+            self.assertIn("test/anim/mesh", send_paths)
+            self.assertIn("test/anim/joints", send_paths)
+            # Per-joint transforms: one send_columns per joint.
+            joint_subpaths = [
+                p for p in send_paths if p.startswith("test/anim/joints/")
+            ]
+            self.assertEqual(len(joint_subpaths), character.skeleton.size)
+            if character.locators:
+                self.assertIn("test/anim/locators", send_paths)
+
+        def test_log_animation_without_mesh(self) -> None:
+            character, _, skel_states, _ = self._make_animation_inputs(3)
+
+            mock_rec = MagicMock()
+            log_animation(mock_rec, "test/no_mesh", character, skel_states, fps=30.0)
+
+            # No mesh means no log() for the mesh entity and no send_columns to it.
+            log_paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertNotIn("test/no_mesh/mesh", log_paths)
+            send_paths = [c.args[0] for c in mock_rec.send_columns.call_args_list]
+            self.assertNotIn("test/no_mesh/mesh", send_paths)
+            # Joints are still logged.
+            self.assertIn("test/no_mesh/joints", send_paths)
+
+        def test_log_animation_with_frame_offset(self) -> None:
+            character, _, skel_states, _ = self._make_animation_inputs(4)
+            offset = 100
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec,
+                "test/offset",
+                character,
+                skel_states,
+                fps=30.0,
+                frame_offset=offset,
+            )
+
+            # Time columns passed to send_columns must start at frame_offset.
+            for call in mock_rec.send_columns.call_args_list:
+                for col in call.kwargs["indexes"]:
+                    if col.timeline_name == "frame_index":
+                        first_idx = int(np.asarray(col.times)[0])
+                        self.assertGreaterEqual(first_idx, offset)
+
+        def test_log_animation_single_frame_with_mesh(self) -> None:
+            # Regression test: 1-frame case used to trigger
+            # "num_positions % 3 == 0" on the viewer side because rec.log and
+            # send_columns both wrote vertex_positions at the same time point.
+            character, _, skel_states, posed_meshes = self._make_animation_inputs(1)
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec,
+                "test/one",
+                character,
+                skel_states,
+                posed_meshes=posed_meshes,
+                fps=30.0,
+            )
+
+            # First-frame mesh comes from rec.log; no send_columns to the mesh
+            # entity (would overlap at frame 0 and break the viewer).
+            log_paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertIn("test/one/mesh", log_paths)
+            mesh_send_calls = [
+                c
+                for c in mock_rec.send_columns.call_args_list
+                if c.args[0] == "test/one/mesh"
+            ]
+            self.assertEqual(mesh_send_calls, [])
+
+        def test_log_animation_single_frame_without_mesh(self) -> None:
+            character, _, skel_states, _ = self._make_animation_inputs(1)
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec, "test/one_no_mesh", character, skel_states, fps=30.0
+            )
+
+            send_paths = [c.args[0] for c in mock_rec.send_columns.call_args_list]
+            self.assertIn("test/one_no_mesh/joints", send_paths)
+
+        def test_log_animation_chunked(self) -> None:
+            """Simulate chunked sending as the viewer does for long animations."""
+            character, joint_params, skel_states, _ = self._make_animation_inputs(10)
+            chunk_size = 4
+
+            mock_rec = MagicMock()
+            for start in range(0, 10, chunk_size):
+                end = min(start + chunk_size, 10)
+                chunk_meshes = [
+                    character.pose_mesh(joint_params[i]) for i in range(start, end)
+                ]
+                log_animation(
+                    mock_rec,
+                    "test/chunked",
+                    character,
+                    skel_states[start:end],
+                    posed_meshes=chunk_meshes,
+                    fps=30.0,
+                    frame_offset=start,
+                )
+
+            # 3 chunks (4+4+2 frames) → each re-logs the first-frame mesh.
+            mesh_log_calls = [
+                c
+                for c in mock_rec.log.call_args_list
+                if c.args[0] == "test/chunked/mesh"
+            ]
+            self.assertEqual(len(mesh_log_calls), 3)
 
 
 def load_tests(
