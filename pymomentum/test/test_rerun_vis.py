@@ -10,8 +10,8 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy as np
-import pymomentum.geometry as geo
-import pymomentum.geometry_test_utils as test_utils
+import pymomentum.geometry as geo  # @manual=:geometry
+import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_utils
 from pymomentum.rerun_vis import log_character, log_joints, log_locators, log_mesh
 
 try:
