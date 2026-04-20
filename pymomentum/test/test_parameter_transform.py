@@ -13,7 +13,9 @@ from pymomentum.geometry import (  # @manual=:geometry
     ParameterTransform,
     uniform_random_to_model_parameters,
 )
-from pymomentum.geometry_test_utils import create_test_character
+from pymomentum.geometry_test_utils import (  # @manual=:geometry_test_utils
+    create_test_character,
+)
 
 
 class TestParameterTransform(unittest.TestCase):

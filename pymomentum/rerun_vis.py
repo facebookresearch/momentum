@@ -48,7 +48,7 @@ from pymomentum.quaternion_np import (
 
 if TYPE_CHECKING:
     import rerun as rr
-    from pymomentum.geometry import Character, Mesh
+    from pymomentum.geometry import Character, Mesh  # @manual=:geometry
 
 
 def log_mesh(

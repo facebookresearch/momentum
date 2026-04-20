@@ -8,8 +8,8 @@
 import unittest
 
 import numpy as np
-import pymomentum.geometry as geo
-import pymomentum.geometry_test_utils as test_utils
+import pymomentum.geometry as geo  # @manual=:geometry
+import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_utils
 
 try:
     import viser

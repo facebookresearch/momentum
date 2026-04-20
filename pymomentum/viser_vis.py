@@ -56,7 +56,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     import viser
-    from pymomentum.geometry import Character, Mesh
+    from pymomentum.geometry import Character, Mesh  # @manual=:geometry
 
 
 @dataclass
