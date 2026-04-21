@@ -59,4 +59,17 @@ MarkerSequence loadOpenFbxMarkerSequence(
     const filesystem::path& filename,
     bool stripNamespaces = true);
 
+/// Load a MarkerSequence from an in-memory FBX byte buffer.
+///
+/// Same semantics as the filename overload but parses the FBX scene from a buffer instead of
+/// reading from disk. OpenFBX accepts a raw byte pointer + length, so this is true zero-copy.
+///
+/// @param[in] inputData Buffer holding the FBX file contents.
+/// @param[in] stripNamespaces Removes namespace from joints when true. True by default.
+/// @return A MarkerSequence object containing the marker animation data, or an empty sequence
+///         if no markers or animations are found.
+MarkerSequence loadOpenFbxMarkerSequence(
+    std::span<const std::byte> inputData,
+    bool stripNamespaces = true);
+
 } // namespace momentum

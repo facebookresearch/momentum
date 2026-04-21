@@ -16,31 +16,26 @@
 
 namespace momentum {
 
-MarkerSequence loadTrc(const std::string& filename, UpVector up) {
+MarkerSequence loadTrc(std::istream& stream, UpVector up) {
   MarkerSequence res;
   res.fps = 0.f;
-
-  std::ifstream infile(filename);
-  if (!infile.is_open()) {
-    return res;
-  }
 
   std::string line;
 
   // parse header
-  GetLineCrossPlatform(infile, line);
+  GetLineCrossPlatform(stream, line);
   if (line.find("PathFileType\t4\t(X/Y/Z)") == std::string::npos) {
     return res;
   }
 
-  GetLineCrossPlatform(infile, line);
+  GetLineCrossPlatform(stream, line);
   if (line.find(
           "DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\tOrigDataRate\tOrigDataStartFrame\tOrigNumFrames") ==
       std::string::npos) {
     return res;
   }
 
-  GetLineCrossPlatform(infile, line);
+  GetLineCrossPlatform(stream, line);
   auto tokens = tokenize(line, " \t\r\n");
   if (tokens.size() != 8) {
     return res;
@@ -51,7 +46,7 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
   res.fps = static_cast<float>(frameRate);
 
   // get line with marker names and parse it
-  GetLineCrossPlatform(infile, line);
+  GetLineCrossPlatform(stream, line);
   tokens = tokenize(line, " \t\r\n");
   if (tokens.size() != numMarkers + 2) {
     res.fps = 0.0f;
@@ -63,9 +58,9 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
   }
 
   // ignore next line
-  GetLineCrossPlatform(infile, line);
+  GetLineCrossPlatform(stream, line);
 
-  while (GetLineCrossPlatform(infile, line)) {
+  while (GetLineCrossPlatform(stream, line)) {
     tokens = tokenize(line, "\t", false);
     // check for right size
     if (tokens.size() != numMarkers * 3 + 2) {
@@ -97,6 +92,19 @@ MarkerSequence loadTrc(const std::string& filename, UpVector up) {
   }
 
   return res;
+}
+
+MarkerSequence loadTrc(const std::string& filename, UpVector up) {
+  std::ifstream infile(filename);
+  if (!infile.is_open()) {
+    return MarkerSequence{};
+  }
+  return loadTrc(static_cast<std::istream&>(infile), up);
+}
+
+MarkerSequence loadTrc(std::span<const std::byte> bytes, UpVector up) {
+  ispanstream stream(bytes);
+  return loadTrc(static_cast<std::istream&>(stream), up);
 }
 
 } // namespace momentum

@@ -129,6 +129,12 @@ std::vector<momentum::MarkerSequence> loadMarkersFromFile(
     bool mainSubjectOnly = true,
     momentum::UpVector up = momentum::UpVector::Y);
 
+std::vector<momentum::MarkerSequence> loadMarkersFromBytes(
+    const pybind11::bytes& bytes,
+    const std::string& format,
+    bool mainSubjectOnly = true,
+    momentum::UpVector up = momentum::UpVector::Y);
+
 /// Utility function to convert pybind11::array_t<float> to SkeletonState vector
 /// This is shared between saveGLTFCharacterToFileFromSkelStates and
 /// GltfBuilder::addSkeletonStates

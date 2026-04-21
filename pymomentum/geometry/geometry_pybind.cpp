@@ -794,6 +794,26 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       py::arg("main_subject_only") = true,
       py::arg("up") = mm::UpVector::Y);
 
+  m.def(
+      "load_markers_from_bytes",
+      &loadMarkersFromBytes,
+      R"(Load 3d mocap marker data from an in-memory byte buffer.
+
+Same semantics as load_markers, but takes the file contents as bytes plus an explicit
+format hint (since bytes don't carry an extension). Useful for loading from cloud
+storage without spilling to disk.
+
+:param bytes: The marker file contents.
+:param format: File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx").
+:param main_subject_only: True to load only one subject's data.
+:param up: The up vector to use for the coordinate system, default to Y.
+:return: an array of MarkerSequence, one per subject in the file.
+      )",
+      py::arg("bytes"),
+      py::arg("format"),
+      py::arg("main_subject_only") = true,
+      py::arg("up") = mm::UpVector::Y);
+
   // mapModelParameters(motionData, sourceCharacter, targetCharacter)
   // Note: This overload is registered FIRST to ensure proper overload resolution.
   // When called with (array, Character, Character), pybind11 will match this first.

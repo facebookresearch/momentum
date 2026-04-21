@@ -1053,6 +1053,10 @@ MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stri
   return loadOpenFbxMarkerSequence(filename, stripNamespaces);
 }
 
+MarkerSequence loadFbxMarkerSequence(std::span<const std::byte> inputSpan, bool stripNamespaces) {
+  return loadOpenFbxMarkerSequence(inputSpan, stripNamespaces);
+}
+
 #ifdef MOMENTUM_WITH_FBX_SDK
 
 void saveFbx(

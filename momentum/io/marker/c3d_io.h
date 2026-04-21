@@ -10,6 +10,8 @@
 #include <momentum/character/marker.h>
 #include <momentum/io/marker/coordinate_system.h>
 
+#include <span>
+
 namespace momentum {
 
 /// Loads all the subjects from a C3D file into a vector of MarkerSequences.
@@ -26,5 +28,20 @@ namespace momentum {
     const std::string& filename,
     UpVector up = UpVector::Y,
     std::span<const std::string> validMarkerNames = {});
+
+#ifdef MOMENTUM_WITH_EZC3D_ISTREAM
+/// Loads all the subjects from an in-memory C3D byte buffer into a vector of MarkerSequences.
+///
+/// Same semantics as the filename overload, but reads from a buffer instead of a file.
+///
+/// @param[in] bytes Buffer holding the C3D file contents.
+/// @param[in] up (Optional) The up-vector convention of the input data.
+/// @param[in] validMarkerNames (Optional) Marker-name allowlist.
+/// @return std::vector<MarkerSequence> A vector containing the marker sequences from the buffer.
+[[nodiscard]] std::vector<MarkerSequence> loadC3d(
+    std::span<const std::byte> bytes,
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
+#endif
 
 } // namespace momentum

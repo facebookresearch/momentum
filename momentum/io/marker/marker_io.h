@@ -11,6 +11,8 @@
 #include <momentum/io/marker/coordinate_system.h>
 
 #include <optional>
+#include <span>
+#include <string>
 #include <vector>
 
 namespace momentum {
@@ -52,5 +54,38 @@ namespace momentum {
 /// returned.
 /// @note This function is exposed mainly for unit tests.
 [[nodiscard]] int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences);
+
+/// Loads all actor sequences from an in-memory marker file buffer (c3d, trc, glb, fbx).
+///
+/// Same semantics as the filename overload, but takes a byte buffer plus an explicit format
+/// hint (since bytes don't carry an extension). All four formats use a true-bytes path with no
+/// temporary file: c3d via the patched ezc3d istream constructor, trc via std::istringstream,
+/// glb via fx::gltf's byte-span loader, and fbx via OpenFBX's native buffer API.
+///
+/// @param[in] bytes Marker file contents.
+/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx").
+/// @param[in] up (Optional) Up-vector convention of the input data.
+/// @param[in] validMarkerNames (Optional) Marker-name allowlist (c3d only).
+/// @return Vector of MarkerSequences. Empty on unknown format or read error.
+[[nodiscard]] std::vector<MarkerSequence> loadMarkers(
+    std::span<const std::byte> bytes,
+    const std::string& format,
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
+
+/// Loads the main subject's marker data from an in-memory marker file buffer.
+///
+/// Convenience wrapper around the buffer-based loadMarkers + findMainSubjectIndex.
+///
+/// @param[in] bytes Marker file contents.
+/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx").
+/// @param[in] up (Optional) Up-vector convention of the input data.
+/// @param[in] validMarkerNames (Optional) Marker-name allowlist (c3d only).
+/// @return The main subject's sequence, or empty optional if no main subject is found.
+[[nodiscard]] std::optional<MarkerSequence> loadMarkersForMainSubject(
+    std::span<const std::byte> bytes,
+    const std::string& format,
+    UpVector up = UpVector::Y,
+    std::span<const std::string> validMarkerNames = {});
 
 } // namespace momentum
