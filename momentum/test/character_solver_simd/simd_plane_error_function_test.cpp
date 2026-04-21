@@ -23,9 +23,14 @@
 
 using namespace momentum;
 
-// TODO: Test for double once we have SIMD implementation for double
-TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
-  // create skeleton and reference values
+namespace {
+
+// Compares SimdPlaneErrorFunction against the scalar PlaneErrorFunction across
+// the full constraint-count sweep. Parameterized over the half-plane flag so the same
+// sweep covers both equality (point-on-plane) and inequality (point-above-plane)
+// formulations and verifies the half-plane mask zeroes-out above-the-plane constraints
+// identically to the scalar reference.
+void runSimdPlaneEquivalenceSweep(bool above) {
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
   const ParameterTransform& transform = character.parameterTransform;
@@ -47,13 +52,15 @@ TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
     const auto parameters = uniform<VectorXf>(transform.numAllModelParameters(), -0.5, 0.5);
 
     std::vector<PlaneData> cl;
-    PlaneErrorFunction errorFunction(skeleton, transform);
+    PlaneErrorFunction errorFunction(skeleton, transform, above);
     errorFunction.setWeight(PlaneErrorFunction::kLegacyWeight);
     for (size_t iCons = 0; iCons < nConstraints; ++iCons) {
+      // Sample d in a range that straddles the joint origin so a healthy mix of
+      // active/inactive constraints exists in half-plane mode.
       cl.emplace_back(
           uniform<Vector3f>(0, 1),
           uniform<Vector3f>(0, 1).normalized(),
-          uniform<float>(0, 1),
+          uniform<float>(-1, 1),
           2,
           uniform<float>(0, 1));
     }
@@ -63,7 +70,7 @@ TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
     for (const auto& c : cl) {
       cl_simd.addConstraint(c.parent, c.offset, c.normal, c.d, c.weight);
     }
-    SimdPlaneErrorFunction errorFunction_simd(skeleton, transform);
+    SimdPlaneErrorFunction errorFunction_simd(skeleton, transform, above);
     errorFunction_simd.setConstraints(&cl_simd);
 
     // TODO: the result difference between SimdPlaneError and PlaneError is larger than that with
@@ -72,4 +79,15 @@ TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
         float, errorFunction, errorFunction_simd, skeleton, transform, parameters, 0.1f, 5e-1f);
     timeJacobian(character, errorFunction_simd, parameters, "SimdPlaneErrorFunction");
   }
+}
+
+} // namespace
+
+// TODO: Test for double once we have SIMD implementation for double
+TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
+  runSimdPlaneEquivalenceSweep(/*above=*/false);
+}
+
+TEST(Momentum_ErrorFunctions, SimdPlaneFunctionHalfPlaneIsSame) {
+  runSimdPlaneEquivalenceSweep(/*above=*/true);
 }

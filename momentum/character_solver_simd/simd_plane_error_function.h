@@ -69,11 +69,18 @@ struct SimdPlaneConstraints final {
 /// This function is recommended for use only when dealing with a large number of constraints. For a
 /// smaller number of constraints, consider using the generic PlaneErrorFunction.
 ///
+/// When `above` is true (half-plane mode), constraints contribute zero error/gradient/Jacobian
+/// whenever the constrained point lies above the plane (signed distance > 0). This matches the
+/// scalar `PlaneErrorFunctionT` half-plane semantics.
+///
 /// @warning Due to the multi-threaded evaluation of the error/gradient, the functions are
 /// non-deterministic. This might lead to numerical inconsistencies, resulting in slightly different
 /// outcomes on multiple calls with the same data.
 class SimdPlaneErrorFunction : public SkeletonErrorFunction {
  public:
+  /// @param above If true, this is a half-plane (inequality) constraint: only points at-or-below
+  /// the plane (signed distance <= 0) contribute. If false (default), this is a point-on-plane
+  /// (equality) constraint and all constraints contribute.
   /// @param maxThreads An optional parameter that specifies the maximum number of threads to be
   /// used with dispenso::parallel_for. If this parameter is set to zero, the function will run in
   /// serial mode, i.e., it will not use any additional threads. By default, the value is set to the
@@ -81,14 +88,19 @@ class SimdPlaneErrorFunction : public SkeletonErrorFunction {
   explicit SimdPlaneErrorFunction(
       const Skeleton& skel,
       const ParameterTransform& pt,
+      bool above = false,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
+  /// @param above If true, this is a half-plane (inequality) constraint: only points at-or-below
+  /// the plane (signed distance <= 0) contribute. If false (default), this is a point-on-plane
+  /// (equality) constraint and all constraints contribute.
   /// @param maxThreads An optional parameter that specifies the maximum number of threads to be
   /// used with dispenso::parallel_for. If this parameter is set to zero, the function will run in
   /// serial mode, i.e., it will not use any additional threads. By default, the value is set to the
   /// maximum allowable size of a uint32_t, which is also the default for dispenso.
   explicit SimdPlaneErrorFunction(
       const Character& character,
+      bool above = false,
       uint32_t maxThreads = std::numeric_limits<uint32_t>::max());
 
   [[nodiscard]] double getError(
@@ -122,6 +134,10 @@ class SimdPlaneErrorFunction : public SkeletonErrorFunction {
 
   // constraints to use
   const SimdPlaneConstraints* constraints_;
+
+  /// True for an inequality "above the plane" constraint; false for an equality "on the plane"
+  /// constraint. Mirrors `PlaneErrorFunctionT::halfPlane_` semantics.
+  bool above_;
 
   uint32_t maxThreads_;
 };
