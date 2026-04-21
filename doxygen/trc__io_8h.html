@@ -98,6 +98,8 @@ $(document).ready(function(){initNavTree('trc__io_8h.html',''); initResizable();
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="marker_8h_source.html">momentum/character/marker.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="io_2marker_2coordinate__system_8h_source.html">momentum/io/marker/coordinate_system.h</a>&gt;</code><br />
+<code>#include &lt;istream&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
 </div>
 <p><a href="trc__io_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -111,6 +113,12 @@ Functions</h2></td></tr>
 <tr class="memitem:aff997e0d661bcb969f96f3375f5df612" id="r_aff997e0d661bcb969f96f3375f5df612"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aff997e0d661bcb969f96f3375f5df612">momentum::loadTrc</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">UpVector</a> up=<a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0">UpVector::Y</a>)</td></tr>
 <tr class="memdesc:aff997e0d661bcb969f96f3375f5df612"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads marker data from a TRC file into a <a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a>.  <br /></td></tr>
 <tr class="separator:aff997e0d661bcb969f96f3375f5df612"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c69daa6f144a40802eaf735afb2b1bd" id="r_a5c69daa6f144a40802eaf735afb2b1bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a5c69daa6f144a40802eaf735afb2b1bd">momentum::loadTrc</a> (std::istream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">stream</a>, <a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">UpVector</a> up=<a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0">UpVector::Y</a>)</td></tr>
+<tr class="memdesc:a5c69daa6f144a40802eaf735afb2b1bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads marker data from a TRC input stream into a <a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a>.  <br /></td></tr>
+<tr class="separator:a5c69daa6f144a40802eaf735afb2b1bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a807bb51d05674e4aa7fab51c8d41e559" id="r_a807bb51d05674e4aa7fab51c8d41e559"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a807bb51d05674e4aa7fab51c8d41e559">momentum::loadTrc</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>, <a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cd">UpVector</a> up=<a class="el" href="namespacemomentum.html#a380a931c41256deb7ff10909e20a33cda57cec4137b614c87cb4e24a3d003a3e0">UpVector::Y</a>)</td></tr>
+<tr class="memdesc:a807bb51d05674e4aa7fab51c8d41e559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads marker data from an in-memory TRC byte buffer into a <a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a>.  <br /></td></tr>
+<tr class="separator:a807bb51d05674e4aa7fab51c8d41e559"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -118,7 +126,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_75c22d8fe85779426aa0eb5df8068da4.html">marker</a></li><li class="navelem"><a class="el" href="trc__io_8h.html">trc_io.h</a></li>
-    <li class="footer">Generated on Tue Apr 21 2026 08:25:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 19:25:33 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

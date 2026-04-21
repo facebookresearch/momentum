@@ -1,0 +1,920 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.marker_tracking &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.torch" href="torch.html" />
+    <link rel="prev" title="pymomentum.solver2" href="solver2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.marker_tracking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig"><code class="docutils literal notranslate"><span class="pre">BaseConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.__init__"><code class="docutils literal notranslate"><span class="pre">BaseConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.debug"><code class="docutils literal notranslate"><span class="pre">BaseConfig.debug</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.loss_alpha"><code class="docutils literal notranslate"><span class="pre">BaseConfig.loss_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.max_iter"><code class="docutils literal notranslate"><span class="pre">BaseConfig.max_iter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig.min_vis_percent"><code class="docutils literal notranslate"><span class="pre">BaseConfig.min_vis_percent</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.__init__"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.calib_shape"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.calib_shape</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.enforce_floor_in_first_frame</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.first_frame_pose_constraint_set</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.global_scale_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.global_scale_only</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.greedy_sampling</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.locators_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.locators_only</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.major_iter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.mesh_constraint_weight"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.mesh_constraint_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.target_height_cm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig"><code class="docutils literal notranslate"><span class="pre">GapFillConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.__init__"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.blend_off_frames"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.blend_off_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.enabled"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.enabled</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_displacement"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.max_gap_displacement</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_frames"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.max_gap_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_frames_stationary"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.max_gap_frames_stationary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.min_visible_frames"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.min_visible_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig.velocity_window_frames"><code class="docutils literal notranslate"><span class="pre">GapFillConfig.velocity_window_frames</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig"><code class="docutils literal notranslate"><span class="pre">GloveConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig.__init__"><code class="docutils literal notranslate"><span class="pre">GloveConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig.orientation_weight"><code class="docutils literal notranslate"><span class="pre">GloveConfig.orientation_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig.position_weight"><code class="docutils literal notranslate"><span class="pre">GloveConfig.position_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig.wrist_joint_names"><code class="docutils literal notranslate"><span class="pre">GloveConfig.wrist_joint_names</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.__init__"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.joint_name"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.joint_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.orientation"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.orientation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.position"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.valid"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.valid</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions"><code class="docutils literal notranslate"><span class="pre">ModelOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.__init__"><code class="docutils literal notranslate"><span class="pre">ModelOptions.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.locators"><code class="docutils literal notranslate"><span class="pre">ModelOptions.locators</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.model"><code class="docutils literal notranslate"><span class="pre">ModelOptions.model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions.parameters"><code class="docutils literal notranslate"><span class="pre">ModelOptions.parameters</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig"><code class="docutils literal notranslate"><span class="pre">RefineConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.__init__"><code class="docutils literal notranslate"><span class="pre">RefineConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.calib_id"><code class="docutils literal notranslate"><span class="pre">RefineConfig.calib_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.calib_locators"><code class="docutils literal notranslate"><span class="pre">RefineConfig.calib_locators</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig.regularizer"><code class="docutils literal notranslate"><span class="pre">RefineConfig.regularizer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig"><code class="docutils literal notranslate"><span class="pre">TrackingConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.__init__"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.active_params"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.active_params</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.collision_error_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.collision_error_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.gap_fill_config"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.gap_fill_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.marker_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.marker_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.mesh_constraint_weight"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.mesh_constraint_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig.smoothing_weights"><code class="docutils literal notranslate"><span class="pre">TrackingConfig.smoothing_weights</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.calibrate_markers"><code class="docutils literal notranslate"><span class="pre">calibrate_markers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators"><code class="docutils literal notranslate"><span class="pre">convert_locators_to_skinned_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators"><code class="docutils literal notranslate"><span class="pre">convert_skinned_locators_to_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.get_locator_error"><code class="docutils literal notranslate"><span class="pre">get_locator_error()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_marker_file"><code class="docutils literal notranslate"><span class="pre">process_marker_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.process_markers"><code class="docutils literal notranslate"><span class="pre">process_markers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.refine_motion"><code class="docutils literal notranslate"><span class="pre">refine_motion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.save_motion"><code class="docutils literal notranslate"><span class="pre">save_motion()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.marker_tracking</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/marker_tracking.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.marker_tracking">
+<span id="pymomentum-marker-tracking"></span><h1>pymomentum.marker_tracking<a class="headerlink" href="#module-pymomentum.marker_tracking" title="Link to this heading"></a></h1>
+<p>Module for exposing the C++ APIs of the marker tracking pipeline</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">BaseConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Represents base config class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.BaseConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.BaseConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False) -&gt; None</p></li>
+</ol>
+<p>Create a BaseConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.debug">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.debug" title="Link to this definition"></a></dt>
+<dd><p>Whether to output debugging info</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.loss_alpha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss_alpha</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.loss_alpha" title="Link to this definition"></a></dt>
+<dd><p>Parameter to control the loss function</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.max_iter">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_iter</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.max_iter" title="Link to this definition"></a></dt>
+<dd><p>Max iterations</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.BaseConfig.min_vis_percent">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_vis_percent</span></span><a class="headerlink" href="#pymomentum.marker_tracking.BaseConfig.min_vis_percent" title="Link to this definition"></a></dt>
+<dd><p>Minimum percentage of visible markers to be used</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">CalibrationConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig" title="pymomentum.marker_tracking.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></a></p>
+<p>Config for the body scale calibration step</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.CalibrationConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, calib_frames: int = 100, major_iter: int = 3, global_scale_only: bool = False, locators_only: bool = False, greedy_sampling: int = 0, enforce_floor_in_first_frame: bool = False, first_frame_pose_constraint_set: str = ‘’, calib_shape: bool = False, target_height_cm: float = 0.0, mesh_constraint_weight: float = 1.0) -&gt; None</p></li>
+</ol>
+<p>Create a CalibrationConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-odd">param calib_frames<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of frames used for model calibration</p>
+</dd>
+<dt class="field-even">param major_iter<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of calibration loops to run</p>
+</dd>
+<dt class="field-odd">param global_scale_only<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Calibrate only the global scale and not all proportions</p>
+</dd>
+<dt class="field-even">param locators_only<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrate only the locator offsets</p>
+</dd>
+<dt class="field-odd">param greedy_sampling<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Enable greedy frame sampling with the given stride</p>
+</dd>
+<dt class="field-even">param enforce_floor_in_first_frame<span class="colon">:</span></dt>
+<dd class="field-even"><p>Force floor contact in first frame</p>
+</dd>
+<dt class="field-odd">param first_frame_pose_constraint_set<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Name of pose constraint set to use in first frame</p>
+</dd>
+<dt class="field-even">param target_height_cm<span class="colon">:</span></dt>
+<dd class="field-even"><p>Target height for character in cm.  Defaults to 0 (unspecified).</p>
+</dd>
+<dt class="field-odd">param mesh_constraint_weight<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Weight multiplier for mesh surface constraints during calibration.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.calib_frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.calib_frames" title="Link to this definition"></a></dt>
+<dd><p>Number of frames used for model calibration</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.calib_shape">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_shape</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.calib_shape" title="Link to this definition"></a></dt>
+<dd><p>Calibrate shape parameters</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enforce_floor_in_first_frame</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.enforce_floor_in_first_frame" title="Link to this definition"></a></dt>
+<dd><p>Force floor contact in first frame</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first_frame_pose_constraint_set</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.first_frame_pose_constraint_set" title="Link to this definition"></a></dt>
+<dd><p>Name of pose constraint set to use in first frame</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.global_scale_only">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_scale_only</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.global_scale_only" title="Link to this definition"></a></dt>
+<dd><p>Calibrate only the global scale and not all proportions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.greedy_sampling">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">greedy_sampling</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.greedy_sampling" title="Link to this definition"></a></dt>
+<dd><p>Enable greedy frame sampling with the given stride</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.locators_only">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locators_only</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.locators_only" title="Link to this definition"></a></dt>
+<dd><p>Calibrate only the locator offsets</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.major_iter">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">major_iter</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter" title="Link to this definition"></a></dt>
+<dd><p>Number of calibration loops to run</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.mesh_constraint_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh_constraint_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.mesh_constraint_weight" title="Link to this definition"></a></dt>
+<dd><p>Weight multiplier for mesh surface constraints during calibration</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.target_height_cm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_height_cm</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm" title="Link to this definition"></a></dt>
+<dd><p>Target height for the character in cm (0 means no target height specified)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">GapFillConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Config for marker gap filling and dropout blending</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig" title="pymomentum.marker_tracking.GapFillConfig"><span class="pre">pymomentum.marker_tracking.GapFillConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.blend_off_frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blend_off_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.blend_off_frames" title="Link to this definition"></a></dt>
+<dd><p>Frames over which to blend off permanent dropouts (cosine ramp)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.enabled">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enabled</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.enabled" title="Link to this definition"></a></dt>
+<dd><p>Master switch; when False (default), gap filling is skipped entirely</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.max_gap_displacement">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_gap_displacement</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_displacement" title="Link to this definition"></a></dt>
+<dd><p>Displacement threshold (cm) above which standard max_gap_frames applies</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.max_gap_frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_gap_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_frames" title="Link to this definition"></a></dt>
+<dd><p>Max gap length (frames) to interpolate; longer gaps treated as permanent</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.max_gap_frames_stationary">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_gap_frames_stationary</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.max_gap_frames_stationary" title="Link to this definition"></a></dt>
+<dd><p>Extended max gap (frames) for near-stationary markers; blends to max_gap_frames as displacement approaches max_gap_displacement</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.min_visible_frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_visible_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.min_visible_frames" title="Link to this definition"></a></dt>
+<dd><p>Minimum visible segment length (frames); shorter segments between gaps are suppressed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GapFillConfig.velocity_window_frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">velocity_window_frames</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GapFillConfig.velocity_window_frames" title="Link to this definition"></a></dt>
+<dd><p>Visible frames used for velocity estimation in extrapolation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">GloveConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Configuration for glove constraints in marker tracking.</p>
+<p>Controls how data glove observations are integrated into the marker tracking
+solver, including constraint weights and which wrist joints to attach glove
+bones to.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><span class="pre">pymomentum.marker_tracking.GloveConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveConfig.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveConfig.orientation_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveConfig.orientation_weight" title="Link to this definition"></a></dt>
+<dd><p>Weight for orientation constraints between glove and finger joints.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveConfig.position_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveConfig.position_weight" title="Link to this definition"></a></dt>
+<dd><p>Weight for position constraints between glove and finger joints.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveConfig.wrist_joint_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wrist_joint_names</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveConfig.wrist_joint_names" title="Link to this definition"></a></dt>
+<dd><p>Names of the left and right wrist joints in the skeleton.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">GloveSensorObservation</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Single glove sensor observation for one finger joint in one frame.</p>
+<p>Represents a measurement from a data glove sensor, providing position
+and orientation of a finger joint in the glove’s local coordinate frame.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.GloveSensorObservation) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.GloveSensorObservation, joint_name: str, position: numpy.ndarray[numpy.float32[3, 1]] = array([0., 0., 0.], dtype=float32), orientation: numpy.ndarray[4] = array([0., 0., 0., 1.], dtype=float32), valid: bool = True) -&gt; None</p></li>
+</ol>
+<p>Create a GloveSensorObservation with specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint_name</strong> – Skeleton joint name (e.g. “b_l_thumb0”).</p></li>
+<li><p><strong>position</strong> – Position in glove-local frame as a 3D vector.</p></li>
+<li><p><strong>orientation</strong> – Orientation in glove-local frame as a quaternion [x, y, z, w].</p></li>
+<li><p><strong>valid</strong> – Whether this observation is valid (False if sensor data is missing/occluded).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.joint_name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">joint_name</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.joint_name" title="Link to this definition"></a></dt>
+<dd><p>Skeleton joint name (e.g. “b_l_thumb0”).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.orientation">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.orientation" title="Link to this definition"></a></dt>
+<dd><p>Orientation in glove-local frame as a quaternion [x, y, z, w].</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.position">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.position" title="Link to this definition"></a></dt>
+<dd><p>Position in glove-local frame as a 3D vector.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.valid">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.valid" title="Link to this definition"></a></dt>
+<dd><p>Whether this observation is valid (False if sensor data is missing/occluded).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">ModelOptions</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Model options to specify the template model, parameter transform and locator mappings</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.ModelOptions, model: str, parameters: str, locators: str) -&gt; None</p></li>
+</ol>
+<p>Create ModelOptions with specified file paths.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param model<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to template model file with locators e.g. character.glb</p>
+</dd>
+<dt class="field-even">param parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path of parameter transform model file e.g. character.model</p>
+</dd>
+<dt class="field-odd">param locators<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to locator mapping file e.g. character.locators</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.locators">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locators</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.locators" title="Link to this definition"></a></dt>
+<dd><p>Path to locator mapping file e.g. character.locators</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.model">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.model" title="Link to this definition"></a></dt>
+<dd><p>Path to template model file with locators e.g. character.glb</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.ModelOptions.parameters">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#pymomentum.marker_tracking.ModelOptions.parameters" title="Link to this definition"></a></dt>
+<dd><p>Path of parameter transform model file e.g. character.model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">RefineConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig" title="pymomentum.marker_tracking.TrackingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrackingConfig</span></code></a></p>
+<p>Config for refining a tracked motion.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.RefineConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.RefineConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, marker_weight: float = 1.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32), regularizer: float = 0.0, calib_id: bool = False, calib_locators: bool = False) -&gt; None</p></li>
+</ol>
+<p>Create a RefineConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param debug<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-odd">param smoothing<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weight; 0 to disable</p>
+</dd>
+<dt class="field-even">param collision_error_weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>Collision error weight; 0 to disable</p>
+</dd>
+<dt class="field-odd">param marker_weight<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Multiplier for marker position constraint weight; 0 to disable markers</p>
+</dd>
+<dt class="field-even">param smoothing_weights<span class="colon">:</span></dt>
+<dd class="field-even"><p>Smoothing weights per model parameter</p>
+</dd>
+<dt class="field-odd">param regularizer<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Regularize the time-invariant parameters to prevent large changes</p>
+</dd>
+<dt class="field-even">param calib_id<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrate identity parameters</p>
+</dd>
+<dt class="field-odd">param calib_locators<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Calibrate locator offsets</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.calib_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_id</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.calib_id" title="Link to this definition"></a></dt>
+<dd><p>Calibrate identity parameters; default to False.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.calib_locators">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calib_locators</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.calib_locators" title="Link to this definition"></a></dt>
+<dd><p>Calibrate locator offsets; default to False.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.RefineConfig.regularizer">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regularizer</span></span><a class="headerlink" href="#pymomentum.marker_tracking.RefineConfig.regularizer" title="Link to this definition"></a></dt>
+<dd><p>Regularize the time-invariant parameters to prevent large changes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">TrackingConfig</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.marker_tracking.BaseConfig" title="pymomentum.marker_tracking.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></a></p>
+<p>Config for the tracking optimization step</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.TrackingConfig, min_vis_percent: float = 0.0, loss_alpha: float = 2.0, max_iter: int = 30, regularization: float = 0.05000000074505806, debug: bool = False, smoothing: float = 0.0, collision_error_weight: float = 0.0, marker_weight: float = 1.0, smoothing_weights: numpy.ndarray[numpy.float32[m, 1]] = array([], dtype=float32)) -&gt; None</p></li>
+</ol>
+<p>Create a TrackingConfig with specified parameters.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param min_vis_percent<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum percentage of visible markers to be used</p>
+</dd>
+<dt class="field-even">param loss_alpha<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parameter to control the loss function</p>
+</dd>
+<dt class="field-odd">param max_iter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum number of iterations</p>
+</dd>
+<dt class="field-even">param regularization<span class="colon">:</span></dt>
+<dd class="field-even"><p>Regularization parameter (lambda) for solver</p>
+</dd>
+<dt class="field-odd">param debug<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether to output debugging info</p>
+</dd>
+<dt class="field-even">param smoothing<span class="colon">:</span></dt>
+<dd class="field-even"><p>Smoothing weight; 0 to disable</p>
+</dd>
+<dt class="field-odd">param collision_error_weight<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Collision error weight; 0 to disable</p>
+</dd>
+<dt class="field-even">param marker_weight<span class="colon">:</span></dt>
+<dd class="field-even"><p>Multiplier for marker position constraint weight; 0 to disable markers</p>
+</dd>
+<dt class="field-odd">param smoothing_weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Smoothing weights per model parameter</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.active_params">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active_params</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.active_params" title="Link to this definition"></a></dt>
+<dd><p>Optional boolean numpy array to restrict which parameters are optimized during tracking.</p>
+<p>When set, this is ANDed with the internally-computed pose parameters (which already exclude
+identity and locator parameters). Use the character’s <a class="reference internal" href="geometry.html#pymomentum.geometry.ParameterTransform" title="pymomentum.geometry.ParameterTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterTransform</span></code></a>
+to construct a meaningful set, e.g. to exclude finger DOFs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pt</span> <span class="o">=</span> <span class="n">character</span><span class="o">.</span><span class="n">parameter_transform</span>
+<span class="n">active</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">pose_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">active</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">pt</span><span class="o">.</span><span class="n">parameter_sets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fingers&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">active</span><span class="p">))</span>
+<span class="n">tracking_config</span><span class="o">.</span><span class="n">active_params</span> <span class="o">=</span> <span class="n">active</span>
+</pre></div>
+</div>
+<p>Set to None (default) to use the solver’s default parameter set.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.collision_error_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collision_error_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.collision_error_weight" title="Link to this definition"></a></dt>
+<dd><p>Collision error weight; 0 to disable</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.gap_fill_config">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gap_fill_config</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.gap_fill_config" title="Link to this definition"></a></dt>
+<dd><p>Config for marker gap filling and dropout blending</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.marker_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.marker_weight" title="Link to this definition"></a></dt>
+<dd><p>Multiplier for marker position constraint weight; 0 to disable markers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.mesh_constraint_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mesh_constraint_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.mesh_constraint_weight" title="Link to this definition"></a></dt>
+<dd><p>Weight multiplier for mesh surface constraints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.smoothing">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smoothing</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.smoothing" title="Link to this definition"></a></dt>
+<dd><p>Smoothing weight; 0 to disable</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.TrackingConfig.smoothing_weights">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">smoothing_weights</span></span><a class="headerlink" href="#pymomentum.marker_tracking.TrackingConfig.smoothing_weights" title="Link to this definition"></a></dt>
+<dd><p>Smoothing weights per model parameter. The size of this vector should be
+equal to number of model parameters and this overrides the value specific in smoothing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.calibrate_markers">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">calibrate_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glove_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><span class="pre">pymomentum.marker_tracking.GloveConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.calibrate_markers" title="Link to this definition"></a></dt>
+<dd><p>Calibrate a character model using marker data without running full tracking.</p>
+<p>This function performs only the calibration step (scaling, locator offsets, and optionally
+shape parameters) without running per-frame tracking on all frames. This is useful when you
+want to calibrate on a ROM (range of motion) sequence but don’t need the tracked motion for
+that sequence.</p>
+<p>The calibration modifies the character in-place (updating locators if configured) and returns
+the calibrated identity parameters. These can then be used with <a class="reference internal" href="#pymomentum.marker_tracking.process_markers" title="pymomentum.marker_tracking.process_markers"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_markers()</span></code></a> or
+<code class="xref py py-func docutils literal notranslate"><span class="pre">track_poses()</span></code> for tracking other sequences.</p>
+<p>When glove data is provided via <code class="docutils literal notranslate"><span class="pre">left_glove_data</span></code> / <code class="docutils literal notranslate"><span class="pre">right_glove_data</span></code> and a
+<a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a>, the solver adds glove-to-finger constraints during calibration.
+This improves locator calibration by providing additional constraint information from the
+data glove sensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character to be calibrated. Will be modified in-place if locator
+calibration is enabled.</p></li>
+<li><p><strong>identity</strong> – Identity parameters, pass in empty array for default identity.</p></li>
+<li><p><strong>marker_data</strong> – A list of marker data for each frame (from ROM/calibration sequence).</p></li>
+<li><p><strong>calibration_config</strong> – Calibration config specifying number of frames, iterations, etc.</p></li>
+<li><p><strong>first_frame</strong> – First frame to be used for calibration.</p></li>
+<li><p><strong>max_frames</strong> – Max number of frames to be used for calibration (0 for all).</p></li>
+<li><p><strong>left_glove_data</strong> – Per-frame glove sensor observations for the left hand.
+Each element is a list of <a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveSensorObservation</span></code></a> for that frame.</p></li>
+<li><p><strong>right_glove_data</strong> – Per-frame glove sensor observations for the right hand.</p></li>
+<li><p><strong>glove_config</strong> – Optional <a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a> controlling constraint weights and
+wrist joint names. Must be provided if glove data is non-empty.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Calibrated identity parameters (scaling parameters).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.convert_locators_to_skinned_locators">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">convert_locators_to_skinned_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_skin_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.029999999329447746</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_diameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.marker_tracking.convert_locators_to_skinned_locators" title="Link to this definition"></a></dt>
+<dd><p>Convert regular locators to skinned locators based on mesh proximity.</p>
+<p>This function converts locators attached to specific joints into skinned locators
+that are weighted across multiple joints based on the underlying mesh skin weights.
+For each locator, it:</p>
+<ol class="arabic simple">
+<li><p>Computes the locator’s world space position using the rest skeleton state</p></li>
+<li><p>Finds the closest point on the character’s mesh surface that is skinned to the same
+bone as the locator (this is to avoid skinning the locator to the wrong bone)</p></li>
+<li><p>If the distance is within max_distance, converts the locator to a skinned locator
+with bone weights interpolated from the closest mesh triangle</p></li>
+<li><p>Otherwise, keeps the original locator unchanged</p></li>
+</ol>
+<p>The resulting skinned locators maintain the same world space position but are now
+influenced by multiple joints through skin weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character with mesh, skin weights, and locators to convert</p></li>
+<li><p><strong>max_distance</strong> – Maximum distance from mesh surface to convert a locator (default: 3.0)</p></li>
+<li><p><strong>min_skin_weight</strong> – Minimum skin weight threshold for considering a mesh triangle as
+belonging to the same bone as the locator (default: 0.03)</p></li>
+<li><p><strong>verbose</strong> – If True, print diagnostic messages about locators that could not be
+converted (default: False)</p></li>
+<li><p><strong>marker_diameter</strong> – Marker diameter in centimeters. When positive, the skinned locator
+position is offset toward the mesh surface by half this value to account for the physical
+marker sitting on top of the skin (default: 0.0)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New character with converted skinned locators and remaining regular locators</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.convert_skinned_locators_to_locators">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">convert_skinned_locators_to_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.marker_tracking.convert_skinned_locators_to_locators" title="Link to this definition"></a></dt>
+<dd><p>Convert skinned locators to regular locators by selecting the bone with highest weight.</p>
+<p>This function is useful when exporting to file formats that don’t support skinned locators
+(e.g., Maya). Each skinned locator is converted to a regular locator by:</p>
+<ol class="arabic simple">
+<li><p>Finding the bone with the highest skin weight from the skinned locator’s bone influences</p></li>
+<li><p>Transforming the locator’s position from rest pose space to the local coordinate space
+of the selected bone</p></li>
+<li><p>Creating a regular locator attached to that bone with the computed offset</p></li>
+</ol>
+<p>The resulting locators can be exported to formats like Maya that only support single-parent
+attachments. Any existing regular locators in the character are preserved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>character</strong> – Character with skinned locators to convert</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New character with skinned locators converted to regular locators</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.get_locator_error">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">get_locator_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.get_locator_error" title="Link to this definition"></a></dt>
+<dd><p>Compute average and maximum marker tracking errors across all frames.</p>
+<p>This is a utility function for evaluating tracking quality by measuring the
+Euclidean distance between observed marker positions and their corresponding
+locator positions on the character. It provides both average error per frame
+and the maximum error encountered across all markers and frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>marker_data</strong> – List of marker observations for each frame. Each frame contains
+a list of Marker objects with position and occlusion information.</p></li>
+<li><p><strong>motion</strong> – Solved motion parameters matrix. Can be in Python layout (frames, params)
+or C++ layout (params, frames) - the function handles both.</p></li>
+<li><p><strong>character</strong> – Character model with locators that correspond to the markers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (average_error, max_error) in world units (typically meters or cm
+depending on your character scale). average_error is the mean error per frame
+across all frames, max_error is the single largest marker error found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.process_marker_file">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">process_marker_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_marker_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig" title="pymomentum.marker_tracking.TrackingConfig"><span class="pre">pymomentum.marker_tracking.TrackingConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions" title="pymomentum.marker_tracking.ModelOptions"><span class="pre">pymomentum.marker_tracking.ModelOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.process_marker_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.process_markers">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">process_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.TrackingConfig" title="pymomentum.marker_tracking.TrackingConfig"><span class="pre">pymomentum.marker_tracking.TrackingConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glove_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><span class="pre">pymomentum.marker_tracking.GloveConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.process_markers" title="Link to this definition"></a></dt>
+<dd><p>Process markers given character and identity.</p>
+<p>Calibrates the character model (if enabled) and tracks per-frame poses from marker data.</p>
+<p>When glove data is provided via <code class="docutils literal notranslate"><span class="pre">left_glove_data</span></code> / <code class="docutils literal notranslate"><span class="pre">right_glove_data</span></code> and a
+<a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a>, the solver adds glove-to-finger constraints during both
+calibration and per-frame tracking. This produces more accurate results for
+characters wearing data gloves alongside optical markers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character to be used for tracking.</p></li>
+<li><p><strong>identity</strong> – Identity parameters, pass in empty array for default identity.</p></li>
+<li><p><strong>marker_data</strong> – A list of marker data for each frame.</p></li>
+<li><p><strong>tracking_config</strong> – Tracking config to be used for tracking.</p></li>
+<li><p><strong>calibration_config</strong> – Calibration config to be used for calibration.</p></li>
+<li><p><strong>calibrate</strong> – Whether to calibrate the model.</p></li>
+<li><p><strong>first_frame</strong> – First frame to be processed.</p></li>
+<li><p><strong>max_frames</strong> – Max number of frames to be processed.</p></li>
+<li><p><strong>left_glove_data</strong> – Per-frame glove sensor observations for the left hand.
+Each element is a list of <a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveSensorObservation</span></code></a> for that frame.</p></li>
+<li><p><strong>right_glove_data</strong> – Per-frame glove sensor observations for the right hand.</p></li>
+<li><p><strong>glove_config</strong> – Optional <a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a> controlling constraint weights and
+wrist joint names. Must be provided if glove data is non-empty.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transform parameters for each frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.refine_motion">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">refine_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.RefineConfig" title="pymomentum.marker_tracking.RefineConfig"><span class="pre">pymomentum.marker_tracking.RefineConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.refine_motion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.save_motion">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">save_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_marker_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.save_motion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solver2.html" class="btn btn-neutral float-left" title="pymomentum.solver2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="torch.html" class="btn btn-neutral float-right" title="pymomentum.torch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

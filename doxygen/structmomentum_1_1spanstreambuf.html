@@ -133,6 +133,12 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a0208a9352777d6ab0f245cd948fdf4d5" id="r_a0208a9352777d6ab0f245cd948fdf4d5"><td class="memItemLeft" align="right" valign="top">std::streamsize&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1spanstreambuf.html#a0208a9352777d6ab0f245cd948fdf4d5">xsputn</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">char_type</a> *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">s</a>, std::streamsize <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
 <tr class="memdesc:a0208a9352777d6ab0f245cd948fdf4d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a sequence of characters to the output buffer.  <br /></td></tr>
 <tr class="separator:a0208a9352777d6ab0f245cd948fdf4d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6397445d77dc4359054850044d4cb6f3" id="r_a6397445d77dc4359054850044d4cb6f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pos_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1spanstreambuf.html#a6397445d77dc4359054850044d4cb6f3">seekoff</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">off_type</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">off</a>, std::ios_base::seekdir <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">way</a>, std::ios_base::openmode <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">which</a>=std::ios_base::in) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="memdesc:a6397445d77dc4359054850044d4cb6f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seek to an offset relative to <code>way</code> (begin/cur/end).  <br /></td></tr>
+<tr class="separator:a6397445d77dc4359054850044d4cb6f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9102ae54667a274cb669a382be4c92d0" id="r_a9102ae54667a274cb669a382be4c92d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pos_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1spanstreambuf.html#a9102ae54667a274cb669a382be4c92d0">seekpos</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pos_type</a> pos, std::ios_base::openmode <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">which</a>=std::ios_base::in) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="memdesc:a9102ae54667a274cb669a382be4c92d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seek to an absolute position from the start of the buffer.  <br /></td></tr>
+<tr class="separator:a9102ae54667a274cb669a382be4c92d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stream buffer based on a span. </p>
@@ -300,6 +306,97 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a6397445d77dc4359054850044d4cb6f3" name="a6397445d77dc4359054850044d4cb6f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6397445d77dc4359054850044d4cb6f3">&#9670;&#160;</a></span>seekoff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">spanstreambuf::pos_type momentum::spanstreambuf::seekoff </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">off_type</a>&#160;</td>
+          <td class="paramname"><em>off</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ios_base::seekdir&#160;</td>
+          <td class="paramname"><em>way</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ios_base::openmode&#160;</td>
+          <td class="paramname"><em>which</em> = <code>std::ios_base::in</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Seek to an offset relative to <code>way</code> (begin/cur/end). </p>
+<p>Required for callers that need random access (e.g., binary parsers like ezc3d that use seekg/tellg). </p>
+
+<p class="definition">Definition at line <a class="el" href="stream__utils_8cpp_source.html#l00034">34</a> of file <a class="el" href="stream__utils_8cpp_source.html">stream_utils.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="stream__utils_8cpp_source.html#l00070">seekpos()</a>.</p>
+
+</div>
+</div>
+<a id="a9102ae54667a274cb669a382be4c92d0" name="a9102ae54667a274cb669a382be4c92d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9102ae54667a274cb669a382be4c92d0">&#9670;&#160;</a></span>seekpos()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">spanstreambuf::pos_type momentum::spanstreambuf::seekpos </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pos_type</a>&#160;</td>
+          <td class="paramname"><em>pos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ios_base::openmode&#160;</td>
+          <td class="paramname"><em>which</em> = <code>std::ios_base::in</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Seek to an absolute position from the start of the buffer. </p>
+
+<p class="definition">Definition at line <a class="el" href="stream__utils_8cpp_source.html#l00070">70</a> of file <a class="el" href="stream__utils_8cpp_source.html">stream_utils.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="stream__utils_8cpp_source.html#l00034">seekoff()</a>.</p>
+
+</div>
+</div>
 <a id="a0208a9352777d6ab0f245cd948fdf4d5" name="a0208a9352777d6ab0f245cd948fdf4d5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0208a9352777d6ab0f245cd948fdf4d5">&#9670;&#160;</a></span>xsputn()</h2>
 
@@ -360,7 +457,7 @@ Protected Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1spanstreambuf.html">spanstreambuf</a></li>
-    <li class="footer">Generated on Tue Apr 21 2026 08:25:24 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 19:25:34 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

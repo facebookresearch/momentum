@@ -5,6 +5,7 @@ var openfbx__loader_8h =
     [ "loadOpenFbxCharacterWithMotion", "openfbx__loader_8h.html#ad9db409949ee3cde649c107cf290934d", null ],
     [ "loadOpenFbxCharacterWithMotion", "openfbx__loader_8h.html#a67b8ed52aaffc5de85aaf6f46d13865e", null ],
     [ "loadOpenFbxMarkerSequence", "openfbx__loader_8h.html#a480c0a639cb61a996de246271b5eb492", null ],
+    [ "loadOpenFbxMarkerSequence", "openfbx__loader_8h.html#a77be8d26df51e57c1807fb590e2128bf", null ],
     [ "kMomentumMarkerProperty", "openfbx__loader_8h.html#ad1095656dd88919f719407d3a1453b5c", null ],
     [ "kMomentumMarkersRootProperty", "openfbx__loader_8h.html#a3ef3eb97d0041e2ef65fa9506e08109e", null ]
 ];

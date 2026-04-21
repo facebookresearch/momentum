@@ -14,6 +14,7 @@ var fbx__io_8h =
     [ "loadFbxCharacterWithMotion", "fbx__io_8h.html#a8fad9e2a2e742a38d5acbacbb9b3e3a6", null ],
     [ "loadFbxCharacterWithMotion", "fbx__io_8h.html#a3b5e1ccde169eb166d05c6f8e863ed9d", null ],
     [ "loadFbxMarkerSequence", "fbx__io_8h.html#abc666d76743223e47341a8701b8d3103", null ],
+    [ "loadFbxMarkerSequence", "fbx__io_8h.html#a5e721069de03bfa04ff43db8eb8abecd", null ],
     [ "saveFbx", "fbx__io_8h.html#a789a22b9fe0e094e5c6d2f2b511d11d6", null ],
     [ "saveFbxModel", "fbx__io_8h.html#aed331104264000cd2dfd265d649cf90b", null ],
     [ "saveFbxWithJointParams", "fbx__io_8h.html#a452372931c61158a9688eb2e538a1a50", null ],

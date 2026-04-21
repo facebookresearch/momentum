@@ -6,5 +6,7 @@ var structmomentum_1_1spanstreambuf =
     [ "spanstreambuf", "structmomentum_1_1spanstreambuf.html#ae27263c44cb4fa99c69a3cd27e8218ad", null ],
     [ "operator=", "structmomentum_1_1spanstreambuf.html#af18c844386b329b8b3707a93841cc331", null ],
     [ "operator=", "structmomentum_1_1spanstreambuf.html#a782e3961019daa527868c7d3c9d5d328", null ],
+    [ "seekoff", "structmomentum_1_1spanstreambuf.html#a6397445d77dc4359054850044d4cb6f3", null ],
+    [ "seekpos", "structmomentum_1_1spanstreambuf.html#a9102ae54667a274cb669a382be4c92d0", null ],
     [ "xsputn", "structmomentum_1_1spanstreambuf.html#a0208a9352777d6ab0f245cd948fdf4d5", null ]
 ];
