@@ -66,6 +66,51 @@ std::optional<MarkerSequence> loadMarkersForMainSubject(
   }
 }
 
+std::vector<MarkerSequence> loadMarkers(
+    std::span<const std::byte> bytes,
+    const std::string& format,
+    UpVector up,
+    std::span<const std::string> validMarkerNames) {
+  try {
+    if (format == ".trc") {
+      return {loadTrc(bytes, up)};
+    } else if (format == ".glb") {
+      return {loadMarkerSequence(bytes)};
+    } else if (format == ".fbx") {
+      return {loadFbxMarkerSequence(bytes)};
+    } else if (format == ".c3d") {
+#ifdef MOMENTUM_WITH_EZC3D_ISTREAM
+      return loadC3d(bytes, up, validMarkerNames);
+#else
+      // ezc3d does not support reading from a stream; load c3d files by path instead.
+      MT_LOGE("{}: in-memory c3d loading is not supported", __func__);
+      return {};
+#endif
+    } else {
+      MT_LOGE("{}: Unknown marker format '{}' for {}-byte buffer", __func__, format, bytes.size());
+      return {};
+    }
+  } catch (...) {
+    MT_LOGE("{}: Unknown error reading {} buffer", __func__, format);
+    return {};
+  }
+}
+
+std::optional<MarkerSequence> loadMarkersForMainSubject(
+    std::span<const std::byte> bytes,
+    const std::string& format,
+    UpVector up,
+    std::span<const std::string> validMarkerNames) {
+  const std::vector<MarkerSequence> markerSequences =
+      loadMarkers(bytes, format, up, validMarkerNames);
+  const int subjectID = findMainSubjectIndex(markerSequences);
+  if (subjectID < 0) {
+    return {};
+  } else {
+    return {markerSequences.at(subjectID)};
+  }
+}
+
 int findMainSubjectIndex(std::span<const MarkerSequence> markerSequences) {
   if (markerSequences.empty()) {
     return -1;

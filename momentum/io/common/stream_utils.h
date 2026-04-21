@@ -40,6 +40,16 @@ struct spanstreambuf : std::streambuf {
   /// @param n The number of characters to write.
   /// @return The number of characters successfully written.
   std::streamsize xsputn(const char_type* s, std::streamsize n) override;
+
+  /// Seek to an offset relative to ``way`` (begin/cur/end). Required for callers that
+  /// need random access (e.g., binary parsers like ezc3d that use seekg/tellg).
+  pos_type seekoff(
+      off_type off,
+      std::ios_base::seekdir way,
+      std::ios_base::openmode which = std::ios_base::in) override;
+
+  /// Seek to an absolute position from the start of the buffer.
+  pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in) override;
 };
 
 /// istream that takes a span of const bytes as input.

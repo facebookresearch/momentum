@@ -158,4 +158,16 @@ MatrixXf loadFbxBlendShapeWeights(const filesystem::path& filename);
 ///         markers or animations are found.
 MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces = true);
 
+/// Loads a MarkerSequence from an in-memory FBX byte buffer.
+///
+/// Same semantics as the filename overload. Uses OpenFBX, which natively accepts a byte
+/// buffer, so this is true zero-copy.
+///
+/// @param[in] inputSpan Buffer holding the FBX file contents.
+/// @param stripNamespaces Removes namespace from joints when true. True by default.
+/// @return A MarkerSequence object containing the marker animation data.
+MarkerSequence loadFbxMarkerSequence(
+    std::span<const std::byte> inputSpan,
+    bool stripNamespaces = true);
+
 } // namespace momentum

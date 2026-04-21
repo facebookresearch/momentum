@@ -169,6 +169,16 @@ std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
 /// @return A MarkerSequence object containing the loaded motion capture marker data.
 MarkerSequence loadMarkerSequence(const filesystem::path& filename);
 
+/// Load a marker sequence from an in-memory glTF byte buffer.
+///
+/// Same semantics as the filename overload but reads the glTF document from a buffer instead
+/// of a file path. Useful when the glTF data is already in memory (e.g., fetched from blob
+/// storage) and you want to avoid spilling it to disk.
+///
+/// @param[in] byteSpan Buffer holding the glTF (.glb) file contents.
+/// @return A MarkerSequence object containing the loaded motion capture marker data.
+MarkerSequence loadMarkerSequence(std::span<const std::byte> byteSpan);
+
 /// Create a glTF document from a character.
 ///
 /// This function creates a glTF document containing the character data and optionally motion,

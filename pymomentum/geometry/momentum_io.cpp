@@ -417,6 +417,27 @@ std::vector<momentum::MarkerSequence> loadMarkersFromFile(
   }
 }
 
+std::vector<momentum::MarkerSequence> loadMarkersFromBytes(
+    const pybind11::bytes& bytes,
+    const std::string& format,
+    const bool mainSubjectOnly,
+    const momentum::UpVector up) {
+  // pybind11::bytes -> std::string_view -> span<const std::byte> (no copy).
+  const std::string_view view = static_cast<std::string_view>(bytes);
+  const std::span<const std::byte> byteSpan(
+      reinterpret_cast<const std::byte*>(view.data()), view.size());
+  if (mainSubjectOnly) {
+    const auto markerSequence = momentum::loadMarkersForMainSubject(byteSpan, format, up);
+    if (markerSequence.has_value()) {
+      return {markerSequence.value()};
+    } else {
+      return {};
+    }
+  } else {
+    return momentum::loadMarkers(byteSpan, format, up);
+  }
+}
+
 bool isFbxsdkAvailable() {
 #ifdef MOMENTUM_WITH_FBX_SDK
   return true;

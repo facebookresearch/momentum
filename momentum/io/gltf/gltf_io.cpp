@@ -395,10 +395,11 @@ fx::gltf::Document makeCharacterDocument(
   return fileBuilder.getDocument();
 }
 
-MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
+namespace {
+
+MarkerSequence loadMarkerSequenceFromModel(fx::gltf::Document model) {
   MarkerSequence result;
 
-  fx::gltf::Document model = loadModel(filename);
   if (model.animations.empty()) {
     return result;
   }
@@ -417,7 +418,10 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
     }
 
     // get the node for the channel
-    const auto& node = model.nodes[channel.target.node];
+    if (channel.target.node < 0 || static_cast<size_t>(channel.target.node) >= model.nodes.size()) {
+      continue;
+    }
+    const auto& node = model.nodes.at(channel.target.node);
 
     // ignore skins and cameras; don't ignore meshes because a marker node may have a mesh for viz
     if (node.skin >= 0 || node.camera >= 0) {
@@ -468,6 +472,16 @@ MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
   }
 
   return result;
+}
+
+} // namespace
+
+MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
+  return loadMarkerSequenceFromModel(loadModel(filename));
+}
+
+MarkerSequence loadMarkerSequence(std::span<const std::byte> byteSpan) {
+  return loadMarkerSequenceFromModel(loadModel(byteSpan));
 }
 
 void saveGltfCharacter(

@@ -1444,10 +1444,12 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
       stripNamespaces);
 }
 
-MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
-  auto buffer = readFileToBuffer(filename);
-  MT_THROW_IF(buffer.size() > INT32_MAX, "File too large for OpenFBX.");
-  auto fbxCharDataRaw = gsl::make_span(buffer);
+MarkerSequence loadOpenFbxMarkerSequence(
+    std::span<const std::byte> inputData,
+    bool stripNamespaces) {
+  auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
+  const size_t length = fbxCharDataRaw.size();
+  MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
 
   auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
   // We don't currently use blend shapes for anything and they can be very
@@ -1457,7 +1459,7 @@ MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool 
       ofbx::LoadFlags::IGNORE_BLEND_SHAPES;
 
   std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
-      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(buffer.size()), (ofbx::u16)loadFlags),
+      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(length), (ofbx::u16)loadFlags),
       ofbx_deleter);
   MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
   MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
@@ -1473,6 +1475,11 @@ MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool 
   }
 
   return parseMarkerSequence(scene.get(), scene->getRoot(), scene->getSceneFrameRate());
+}
+
+MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
+  auto buffer = readFileToBuffer(filename);
+  return loadOpenFbxMarkerSequence(gsl::as_bytes(gsl::make_span(buffer)), stripNamespaces);
 }
 
 } // namespace momentum
