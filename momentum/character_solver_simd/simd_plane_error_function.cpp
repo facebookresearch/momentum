@@ -103,13 +103,17 @@ void SimdPlaneConstraints::clearConstraints() {
 SimdPlaneErrorFunction::SimdPlaneErrorFunction(
     const Skeleton& skel,
     const ParameterTransform& pt,
+    bool above,
     uint32_t maxThreads)
-    : SkeletonErrorFunction(skel, pt), maxThreads_(maxThreads) {
+    : SkeletonErrorFunction(skel, pt), above_(above), maxThreads_(maxThreads) {
   constraints_ = nullptr;
 }
 
-SimdPlaneErrorFunction::SimdPlaneErrorFunction(const Character& character, uint32_t maxThreads)
-    : SimdPlaneErrorFunction(character.skeleton, character.parameterTransform, maxThreads) {
+SimdPlaneErrorFunction::SimdPlaneErrorFunction(
+    const Character& character,
+    bool above,
+    uint32_t maxThreads)
+    : SimdPlaneErrorFunction(character.skeleton, character.parameterTransform, above, maxThreads) {
   // Do nothing
 }
 
@@ -152,10 +156,15 @@ double SimdPlaneErrorFunction::getError(
       const auto target = drjit::load<FloatP>(&constraints_->targets[constraintOffsetIndex]);
       const FloatP dist = dot(pos_world, normal_world) - target;
 
-      // Calculate error as squared distance: err = constraintWeight * dist * dist
+      // For half-plane (above_=true), mask out constraints whose point lies above the plane
+      // (dist > 0); only points at-or-below the plane contribute.
+      const FloatP mask =
+          above_ ? drjit::select(dist > 0.0f, FloatP(0.0f), FloatP(1.0f)) : FloatP(1.0f);
+
+      // Calculate error as squared distance: err = constraintWeight * dist * dist * mask
       const auto constraintWeight =
           drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-      error += constraintWeight * drjit::square(dist);
+      error += constraintWeight * drjit::square(dist) * mask;
     }
   }
 
@@ -215,14 +224,20 @@ double SimdPlaneErrorFunction::getGradient(
           const auto target = drjit::load<FloatP>(&constraints_->targets[constraintOffsetIndex]);
           const FloatP dist = dot(pos_world, normal_world) - target;
 
-          // Calculate error as squared distance: err = constraintWeight * dist * dist
+          // For half-plane (above_=true), mask out constraints whose point lies above the plane
+          // (dist > 0); only points at-or-below the plane contribute.
+          const FloatP mask =
+              above_ ? drjit::select(dist > 0.0f, FloatP(0.0f), FloatP(1.0f)) : FloatP(1.0f);
+
+          // Calculate error as squared distance: err = constraintWeight * dist * dist * mask
           const auto constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-          jointError += constraintWeight * drjit::square(dist);
+          jointError += constraintWeight * drjit::square(dist) * mask;
 
           // Pre-calculate values for the gradient: wgt = 2.0 * kPlaneWeight * constraintWeight *
-          // dist
-          const FloatP wgt = 2.0f * kPlaneWeight * constraintWeight * dist;
+          // dist * mask. Multiplying by mask zeroes the gradient contribution when the half-plane
+          // constraint is inactive (point above the plane).
+          const FloatP wgt = 2.0f * kPlaneWeight * constraintWeight * dist * mask;
 
           // Loop over all joints the constraint is attached to and calculate gradient
           size_t jointIndex = jointId;
@@ -368,13 +383,20 @@ double SimdPlaneErrorFunction::getJacobian(
           const auto target = drjit::load<FloatP>(&constraints_->targets[constraintOffsetIndex]);
           const FloatP dist = dot(pos_world, normal_world) - target;
 
-          // Calculate error as squared distance: err = constraintWeight * dist * dist
+          // For half-plane (above_=true), mask out constraints whose point lies above the plane
+          // (dist > 0); only points at-or-below the plane contribute.
+          const FloatP mask =
+              above_ ? drjit::select(dist > 0.0f, FloatP(0.0f), FloatP(1.0f)) : FloatP(1.0f);
+
+          // Calculate error as squared distance: err = constraintWeight * dist * dist * mask
           const auto constraintWeight =
               drjit::load<FloatP>(&constraints_->weights[constraintOffsetIndex]);
-          jointError += constraintWeight * drjit::square(dist);
+          jointError += constraintWeight * drjit::square(dist) * mask;
 
           // Calculate square-root of weight: wgt = sqrt(kPlaneWeight * weight * constraintWeight)
-          const FloatP wgt = drjit::sqrt(kPlaneWeight * weight_ * constraintWeight);
+          // and apply the half-plane mask so both the residual (dist * wgt) and the Jacobian rows
+          // (geometric_d * wgt) are zeroed for inactive half-plane constraints.
+          const FloatP wgt = drjit::sqrt(kPlaneWeight * weight_ * constraintWeight) * mask;
 
           // Calculate residual: res = wgt * dist
           drjit::store(residual.segment(jacobianOffsetCur, kSimdPacketSize).data(), dist * wgt);
