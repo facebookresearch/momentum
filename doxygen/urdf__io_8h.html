@@ -96,6 +96,9 @@ $(document).ready(function(){initNavTree('urdf__io_8h.html',''); initResizable()
   <div class="headertitle"><div class="title">urdf_io.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>URDF character loader for Momentum.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="filesystem_8h_source.html">momentum/common/filesystem.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
@@ -118,14 +121,47 @@ Functions</h2></td></tr>
 <tr class="memitem:a078ce9604575c703fe300b0d02597d9e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a078ce9604575c703fe300b0d02597d9e">momentum::loadUrdfCharacter</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>)</td></tr>
 <tr class="memdesc:a078ce9604575c703fe300b0d02597d9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a character from a URDF file using the provided byte data.  <br /></td></tr>
 <tr class="separator:a078ce9604575c703fe300b0d02597d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c96f192310d906f0b7ad76ae9ec8375" id="r_a7c96f192310d906f0b7ad76ae9ec8375"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
+<tr class="memitem:a7c96f192310d906f0b7ad76ae9ec8375"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterT.html">CharacterT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7c96f192310d906f0b7ad76ae9ec8375">momentum::loadUrdfCharacter</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">meshBasePath</a>)</td></tr>
+<tr class="memdesc:a7c96f192310d906f0b7ad76ae9ec8375"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a character from a URDF file using the provided byte data, with a base path for resolving mesh file references.  <br /></td></tr>
+<tr class="separator:a7c96f192310d906f0b7ad76ae9ec8375"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>URDF character loader for Momentum. </p>
+<h2><a class="anchor" id="autotoc_md0"></a>
+URDF-to-Momentum Frame Convention</h2>
+<p>URDF and Momentum have different conventions for representing joint degrees of freedom. This loader maps between them as follows:</p>
+<p><b>URDF convention:</b></p><ul>
+<li>Each joint specifies an arbitrary <code>axis</code> direction (e.g., <code>&lt;axis xyz="0 0 1"/&gt;</code>) that defines the direction of rotation (revolute) or translation (prismatic).</li>
+<li>The axis is just a direction vector — it does NOT define the local coordinate system.</li>
+<li>The link frame is defined solely by the joint's <code>&lt;origin&gt;</code> transform (xyz + rpy).</li>
+<li>Visual meshes are positioned relative to the link frame.</li>
+</ul>
+<p><b>Momentum convention:</b></p><ul>
+<li>Joint DOFs are applied along fixed local axes: <code>rx</code>/<code>ry</code>/<code>rz</code> for rotation, <code>tx</code>/<code>ty</code>/<code>tz</code> for translation.</li>
+<li><code>preRotation</code> defines the parent-to-child frame rotation at bind pose.</li>
+</ul>
+<p><b>How this loader bridges the two:</b></p><ul>
+<li>DOFs are mapped to the <b>natural principal axis</b> matching the URDF axis direction. For example, a revolute joint with axis <code>(0,0,1)</code> maps to <code>rz</code>, not <code>rx</code>.</li>
+<li><code>preRotation</code> is set to the URDF joint origin rotation <b>only</b> — no axis alignment rotation is baked in. This means the Momentum joint frame coincides with the URDF link frame.</li>
+<li>Visual meshes can be transformed using the joint world transform directly, with no frame correction needed.</li>
+</ul>
+<p><b>Why this matters for animation:</b></p><ul>
+<li>URDF has no official animation format. Motion data typically comes from BVH or other formats that express rotations in the joint's local frame.</li>
+<li>Because we preserve the URDF link frame (no axis remapping), animation data can be applied directly to the corresponding <code>rx</code>/<code>ry</code>/<code>rz</code> parameter without any frame conversion.</li>
+<li>If axis alignment were baked into <code>preRotation</code>, external animation data would need to account for the internal frame rotation, which no external tool would know to do.</li>
+</ul>
+<p><b>Limitation:</b> Only principal axes (±X, ±Y, ±Z) are supported. Non-principal axes (e.g., <code>(0.707, 0, 0.707)</code>) will throw an error.</p>
+<p><b>Units:</b> URDF uses meters; Momentum uses centimeters. All positions are converted automatically. </p>
+
+<p class="definition">Definition in file <a class="el" href="urdf__io_8h_source.html">urdf_io.h</a>.</p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_4297f711d4568e603196250a862d58ff.html">urdf</a></li><li class="navelem"><a class="el" href="urdf__io_8h.html">urdf_io.h</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 16:03:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 08:05:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

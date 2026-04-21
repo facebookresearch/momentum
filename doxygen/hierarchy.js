@@ -29,7 +29,6 @@ var hierarchy =
     [ "momentum::CollisionGeometryStateT< T >", "structmomentum_1_1CollisionGeometryStateT.html", null ],
     [ "momentum::CollisionErrorFunctionStatelessT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html", null ],
     [ "momentum::CollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],
-    [ "momentum::SimdCollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1SimdCollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],
     [ "momentum::ColumnIndexedMatrix< MatrixType >", "classmomentum_1_1ColumnIndexedMatrix.html", null ],
     [ "momentum::ConstraintData", "structmomentum_1_1ConstraintData.html", [
       [ "momentum::AimDataT< T >", "structmomentum_1_1AimDataT.html", null ],
@@ -73,6 +72,7 @@ var hierarchy =
       [ "momentum::FullyDifferentiableStateErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableStateErrorFunctionT.html", null ],
       [ "momentum::UnionErrorFunctionT< T >", "classmomentum_1_1UnionErrorFunctionT.html", null ]
     ] ],
+    [ "momentum::GapFillConfig", "structmomentum_1_1GapFillConfig.html", null ],
     [ "momentum::GeneralizedLossT< T >", "classmomentum_1_1GeneralizedLossT.html", [
       [ "momentum::SimdGeneralizedLossT< T >", "classmomentum_1_1SimdGeneralizedLossT.html", null ]
     ] ],
@@ -146,9 +146,7 @@ var hierarchy =
       [ "momentum::VelocityMagnitudeSequenceErrorFunctionT< T >", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html", null ],
       [ "momentum::VertexSequenceErrorFunctionT< T >", "classmomentum_1_1VertexSequenceErrorFunctionT.html", null ]
     ] ],
-    [ "momentum::SimdNormalConstraints", "structmomentum_1_1SimdNormalConstraints.html", null ],
-    [ "momentum::SimdPlaneConstraints", "structmomentum_1_1SimdPlaneConstraints.html", null ],
-    [ "momentum::SimdPositionConstraints", "structmomentum_1_1SimdPositionConstraints.html", null ],
+    [ "momentum::SimdCollisionErrorFunctionT< T >", "classmomentum_1_1SimdCollisionErrorFunctionT.html", null ],
     [ "momentum::SkeletonDerivativeT< T >", "classmomentum_1_1SkeletonDerivativeT.html", null ],
     [ "momentum::SkeletonErrorFunctionT< T >", "classmomentum_1_1SkeletonErrorFunctionT.html", [
       [ "momentum::JointErrorFunctionT< T, AimDataT< T >, 3, 2, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
@@ -214,10 +212,6 @@ var hierarchy =
         [ "momentum::FullyDifferentiableProjectionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableProjectionErrorFunctionT.html", null ]
       ] ],
       [ "momentum::SDFCollisionErrorFunctionT< T >", "classmomentum_1_1SDFCollisionErrorFunctionT.html", null ],
-      [ "momentum::SimdCollisionErrorFunctionT< T >", "classmomentum_1_1SimdCollisionErrorFunctionT.html", null ],
-      [ "momentum::SimdNormalErrorFunction", "classmomentum_1_1SimdNormalErrorFunction.html", null ],
-      [ "momentum::SimdPlaneErrorFunction", "classmomentum_1_1SimdPlaneErrorFunction.html", null ],
-      [ "momentum::SimdPositionErrorFunction", "classmomentum_1_1SimdPositionErrorFunction.html", null ],
       [ "momentum::SkinnedLocatorErrorFunctionT< T >", "classmomentum_1_1SkinnedLocatorErrorFunctionT.html", null ],
       [ "momentum::SkinnedLocatorTriangleErrorFunctionT< T >", "classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html", null ],
       [ "momentum::StateErrorFunctionT< T >", "classmomentum_1_1StateErrorFunctionT.html", [

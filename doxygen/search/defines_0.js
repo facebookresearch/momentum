@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_5f_5fvectorcall_0',['__vectorcall',['../simd__normal__error__function_8cpp.html#aa088132c2b7a83450a38272743634159',1,'__vectorcall:&#160;simd_normal_error_function.cpp'],['../simd__plane__error__function_8cpp.html#aa088132c2b7a83450a38272743634159',1,'__vectorcall:&#160;simd_plane_error_function.cpp'],['../simd__position__error__function_8cpp.html#aa088132c2b7a83450a38272743634159',1,'__vectorcall:&#160;simd_position_error_function.cpp']]]
+  ['drjit_5fversion_5fge_0',['DRJIT_VERSION_GE',['../simd_8h.html#af9d8c44af3a1f69f94a424549c2634e9',1,'simd.h']]]
 ];

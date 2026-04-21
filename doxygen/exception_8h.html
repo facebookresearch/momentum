@@ -102,6 +102,7 @@ $(document).ready(function(){initNavTree('exception_8h.html',''); initResizable(
 <code>#include &lt;cstdio&gt;</code><br />
 <code>#include &lt;cstdlib&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
 </div>
 <p><a href="exception_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -162,13 +163,13 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">...</td><td>The message and format specifiers. <div class="fragment"><div class="line"><a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(<span class="stringliteral">&quot;Error occurred: {}&quot;</span>, errorDetail);</div>
-<div class="ttc" id="aexception_8h_html_a4d17a9ca866d9cde9827cc39ab49a5e6"><div class="ttname"><a href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a></div><div class="ttdeci">#define MT_THROW(...)</div><div class="ttdoc">Throws a std::runtime_error with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00030">exception.h:30</a></div></div>
+<div class="ttc" id="aexception_8h_html_a4d17a9ca866d9cde9827cc39ab49a5e6"><div class="ttname"><a href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a></div><div class="ttdeci">#define MT_THROW(...)</div><div class="ttdoc">Throws a std::runtime_error with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00031">exception.h:31</a></div></div>
 </div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00030">30</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00031">31</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
 
 </div>
 </div>
@@ -203,13 +204,13 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">Condition</td><td>The condition to evaluate. </td></tr>
     <tr><td class="paramname">...</td><td>The message and format specifiers. <div class="fragment"><div class="line"><a class="code hl_define" href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a>(x == <span class="keyword">nullptr</span>, <span class="stringliteral">&quot;x cannot be nullptr&quot;</span>);</div>
-<div class="ttc" id="aexception_8h_html_a9b406adb60f122613db3463c42c4d6ec"><div class="ttname"><a href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a></div><div class="ttdeci">#define MT_THROW_IF(Condition,...)</div><div class="ttdoc">Conditionally throws a std::runtime_error with a formatted message if the condition is true.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00052">exception.h:52</a></div></div>
+<div class="ttc" id="aexception_8h_html_a9b406adb60f122613db3463c42c4d6ec"><div class="ttname"><a href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a></div><div class="ttdeci">#define MT_THROW_IF(Condition,...)</div><div class="ttdoc">Conditionally throws a std::runtime_error with a formatted message if the condition is true.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00053">exception.h:53</a></div></div>
 </div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00052">52</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00053">53</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
 
 </div>
 </div>
@@ -255,13 +256,13 @@ Functions</h2></td></tr>
     <tr><td class="paramname">Exception</td><td>The type of exception to throw. </td></tr>
     <tr><td class="paramname">...</td><td>The message and format specifiers. <div class="fragment"><div class="line"><a class="code hl_define" href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a>(x &gt; y, std::out_of_range, <span class="stringliteral">&quot;x ({}) is greater than y ({})&quot;</span>, x, y);</div>
 <div class="line"><a class="code hl_define" href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a>(x &gt; y, std::bad_array_new_length); <span class="comment">// No message</span></div>
-<div class="ttc" id="aexception_8h_html_a60b753237325b6cc993ef71153931fa1"><div class="ttname"><a href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a></div><div class="ttdeci">#define MT_THROW_IF_T(Condition, Exception,...)</div><div class="ttdoc">Conditionally throws an exception of a specified type with a formatted message if the condition is tr...</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00041">exception.h:41</a></div></div>
+<div class="ttc" id="aexception_8h_html_a60b753237325b6cc993ef71153931fa1"><div class="ttname"><a href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">MT_THROW_IF_T</a></div><div class="ttdeci">#define MT_THROW_IF_T(Condition, Exception,...)</div><div class="ttdoc">Conditionally throws an exception of a specified type with a formatted message if the condition is tr...</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00042">exception.h:42</a></div></div>
 </div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00041">41</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00042">42</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
 
 </div>
 </div>
@@ -297,13 +298,13 @@ Functions</h2></td></tr>
     <tr><td class="paramname">Exception</td><td>The type of exception to throw. </td></tr>
     <tr><td class="paramname">...</td><td>The message and format specifiers. <div class="fragment"><div class="line"><a class="code hl_define" href="exception_8h.html#a3a7ce53b2d0d490351e840b64b716680">MT_THROW_T</a>(std::invalid_argument, <span class="stringliteral">&quot;Invalid argument: {}&quot;</span>, arg);</div>
 <div class="line"><a class="code hl_define" href="exception_8h.html#a3a7ce53b2d0d490351e840b64b716680">MT_THROW_T</a>(std::bad_array_new_length); <span class="comment">// No message</span></div>
-<div class="ttc" id="aexception_8h_html_a3a7ce53b2d0d490351e840b64b716680"><div class="ttname"><a href="exception_8h.html#a3a7ce53b2d0d490351e840b64b716680">MT_THROW_T</a></div><div class="ttdeci">#define MT_THROW_T(Exception,...)</div><div class="ttdoc">Throws an exception of a specified type with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00023">exception.h:23</a></div></div>
+<div class="ttc" id="aexception_8h_html_a3a7ce53b2d0d490351e840b64b716680"><div class="ttname"><a href="exception_8h.html#a3a7ce53b2d0d490351e840b64b716680">MT_THROW_T</a></div><div class="ttdeci">#define MT_THROW_T(Exception,...)</div><div class="ttdoc">Throws an exception of a specified type with a formatted message.</div><div class="ttdef"><b>Definition</b> <a href="exception_8h_source.html#l00024">exception.h:24</a></div></div>
 </div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00023">23</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="exception_8h_source.html#l00024">24</a> of file <a class="el" href="exception_8h_source.html">exception.h</a>.</p>
 
 </div>
 </div>
@@ -313,7 +314,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="exception_8h.html">exception.h</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 16:03:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 08:05:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

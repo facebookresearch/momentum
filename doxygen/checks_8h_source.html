@@ -117,21 +117,21 @@ $(document).ready(function(){initNavTree('checks_8h_source.html',''); initResiza
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;<a class="code" href="exception_8h.html">momentum/common/exception.h</a>&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// TODO: Support asserts with messages as XR_CHECK does</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">   23</a></span><span class="preprocessor">#define MT_CHECK(condition, ...) assert(condition)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="checks_8h.html#ad67ad67968b8406d0941273ef067d703">   24</a></span><span class="preprocessor">#define MT_CHECK_LT(val1, val2, ...) assert(val1 &lt; val2)</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="checks_8h.html#a942a8cc83d122b732a0bfe8183e45cea">   25</a></span><span class="preprocessor">#define MT_CHECK_NOTNULL(ptr, ...) assert(ptr != nullptr)</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">   22</a></span><span class="preprocessor">#define MT_CHECK(condition, ...) MT_THROW_IF(!(condition), ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="checks_8h.html#ad67ad67968b8406d0941273ef067d703">   23</a></span><span class="preprocessor">#define MT_CHECK_LT(val1, val2, ...) MT_THROW_IF(!((val1) &lt; (val2)), ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="checks_8h.html#a942a8cc83d122b732a0bfe8183e45cea">   24</a></span><span class="preprocessor">#define MT_CHECK_NOTNULL(ptr, ...) MT_THROW_IF((ptr) == nullptr, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="checks_8h.html">checks.h</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 16:03:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 08:05:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

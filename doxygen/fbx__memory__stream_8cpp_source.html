@@ -188,35 +188,41 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8cpp_source.html',
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>      position_ = <a class="code hl_variable" href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a>;</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  }</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#if FBX_VERSION_GE(2020, 3, 2)</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>FbxInt64 FbxMemoryStream::GetPosition()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keywordtype">long</span> FbxMemoryStream::GetPosition()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">return</span> position_;</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#if FBX_VERSION_GE(2020, 3, 2)</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keywordtype">void</span> FbxMemoryStream::SetPosition(FbxInt64 pPosition) {</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keywordtype">void</span> FbxMemoryStream::SetPosition(<span class="keywordtype">long</span> pPosition) {</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  position_ = pPosition;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>}</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keywordtype">int</span> FbxMemoryStream::GetError()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keywordflow">return</span> errorCode_;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="keywordtype">void</span> FbxMemoryStream::ClearError() {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  errorCode_ = 0;</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="comment">// Clamp position to valid range to prevent out-of-bounds reads</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">if</span> (position_ &lt; 0) {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    position_ = 0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (position_ &gt; length_) {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    position_ = length_;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  }</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#if FBX_VERSION_GE(2020, 3, 2)</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>FbxInt64 FbxMemoryStream::GetPosition()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keywordtype">long</span> FbxMemoryStream::GetPosition()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="keywordflow">return</span> position_;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#if FBX_VERSION_GE(2020, 3, 2)</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keywordtype">void</span> FbxMemoryStream::SetPosition(FbxInt64 pPosition) {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="keywordtype">void</span> FbxMemoryStream::SetPosition(<span class="keywordtype">long</span> pPosition) {</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  position_ = pPosition;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>}</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="keywordtype">int</span> FbxMemoryStream::GetError()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="keywordflow">return</span> errorCode_;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>}</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_WITH_FBX_SDK</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keywordtype">void</span> FbxMemoryStream::ClearError() {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  errorCode_ = 0;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>}</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_WITH_FBX_SDK</span></div>
 <div class="ttc" id="abvh__io_8cpp_html_a8682ffa8d7135ad161ce7397b54cc16c"><div class="ttname"><a href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a></div><div class="ttdeci">Vector3f offset</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00039">bvh_io.cpp:39</a></div></div>
 <div class="ttc" id="afbx__memory__stream_8h_html"><div class="ttname"><a href="fbx__memory__stream_8h.html">fbx_memory_stream.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
@@ -227,7 +233,7 @@ $(document).ready(function(){initNavTree('fbx__memory__stream_8cpp_source.html',
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__memory__stream_8cpp.html">fbx_memory_stream.cpp</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 16:03:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 08:05:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

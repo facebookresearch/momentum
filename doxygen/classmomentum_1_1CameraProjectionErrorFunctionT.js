@@ -15,6 +15,7 @@ var classmomentum_1_1CameraProjectionErrorFunctionT =
     [ "cameraOffset_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#ad4511d545da0eb01140ce57f0f6de24e", null ],
     [ "cameraParent_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a68fc66430b977fd19d493cede91e2915", null ],
     [ "constraints_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#a2f714fb487f155d264a8120449c42c20", null ],
+    [ "intrinsicsMapping_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#ad36c6bbbd445a5263ee6cd2b95276115", null ],
     [ "intrinsicsModel_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c", null ],
     [ "skeletonDerivative_", "classmomentum_1_1CameraProjectionErrorFunctionT.html#aa9a5324606a31f4cdfdf21d1cd7412af", null ]
 ];

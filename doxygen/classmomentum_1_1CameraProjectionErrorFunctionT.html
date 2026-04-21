@@ -174,6 +174,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a2f714fb487f155d264a8120449c42c20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbb6fca9d3dbd63ad858cab2d532782c" id="r_abbb6fca9d3dbd63ad858cab2d532782c"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">IntrinsicsModelT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c">intrinsicsModel_</a></td></tr>
 <tr class="separator:abbb6fca9d3dbd63ad858cab2d532782c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad36c6bbbd445a5263ee6cd2b95276115" id="r_ad36c6bbbd445a5263ee6cd2b95276115"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="structmomentum_1_1CameraIntrinsicsMapping.html">CameraIntrinsicsMapping</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#ad36c6bbbd445a5263ee6cd2b95276115">intrinsicsMapping_</a></td></tr>
+<tr class="separator:ad36c6bbbd445a5263ee6cd2b95276115"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68fc66430b977fd19d493cede91e2915" id="r_a68fc66430b977fd19d493cede91e2915"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#a68fc66430b977fd19d493cede91e2915">cameraParent_</a></td></tr>
 <tr class="separator:a68fc66430b977fd19d493cede91e2915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4511d545da0eb01140ce57f0f6de24e" id="r_ad4511d545da0eb01140ce57f0f6de24e"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, 3, Eigen::Affine &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#ad4511d545da0eb01140ce57f0f6de24e">cameraOffset_</a></td></tr>
@@ -201,7 +203,7 @@ class momentum::CameraProjectionErrorFunctionT&lt; T &gt;</div><p>Error function
 <p>The camera is rigidly attached to a skeleton joint (cameraParent) with a fixed offset (cameraOffset). If cameraParent is kInvalidIndex, the camera is static in world space (cameraOffset is used directly as eyeFromWorld).</p>
 <p>Each constraint specifies a 3D point attached to a joint and a target 2D pixel. The error is the squared distance between the projected point and the target. </p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00044">44</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00046">46</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a8b731cd917fadbb2705744c0785e59d8" name="a8b731cd917fadbb2705744c0785e59d8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8b731cd917fadbb2705744c0785e59d8">&#9670;&#160;</a></span>CameraProjectionErrorFunctionT() <span class="overload">[1/2]</span></h2>
@@ -251,6 +253,8 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00016">16</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00106">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::intrinsicsMapping_</a>, and <a class="el" href="camera__projection__error__function_8h_source.html#l00105">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::intrinsicsModel_</a>.</p>
+
 </div>
 </div>
 <a id="ae00a12869f9ab5e6c791e5045dd89695" name="ae00a12869f9ab5e6c791e5045dd89695"></a>
@@ -295,7 +299,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Convenience constructor that extracts intrinsics and extrinsics from a Camera. </p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00029">29</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00037">37</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00106">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::intrinsicsMapping_</a>, and <a class="el" href="camera__projection__error__function_8h_source.html#l00105">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::intrinsicsModel_</a>.</p>
 
 </div>
 </div>
@@ -318,7 +324,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00041">41</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00053">53</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -347,9 +353,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00081">81</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00083">83</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00102">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00104">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
 
 </div>
 </div>
@@ -378,9 +384,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00097">97</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00099">99</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00102">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00104">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
 
 </div>
 </div>
@@ -409,9 +415,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00089">89</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00091">91</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00102">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00104">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
 
 </div>
 </div>
@@ -459,9 +465,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a9004873fbd8970a3c7026c425f7585f7">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00046">46</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00058">58</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, and <a class="el" href="tracker__utils_8cpp_source.html#l00153">valid</a>.</p>
+<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, and <a class="el" href="tracker__utils_8cpp_source.html#l00158">valid</a>.</p>
 
 </div>
 </div>
@@ -515,9 +521,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a8edd68fc2cc8b2d67048c5b3fe69541a">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00086">86</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00103">103</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00153">valid</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
+<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00158">valid</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
@@ -583,9 +589,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a68eb5c4782e23bc8e92ec7701947d6cf">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00177">177</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00203">203</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00153">valid</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
+<p class="reference">References <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00158">valid</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
@@ -616,7 +622,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00264">264</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8cpp_source.html#l00303">303</a> of file <a class="el" href="camera__projection__error__function_8cpp_source.html">camera_projection_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -645,9 +651,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00093">93</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00095">95</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00102">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00104">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
 
 </div>
 </div>
@@ -677,9 +683,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00085">85</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00087">87</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00102">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
+<p class="reference">References <a class="el" href="camera__projection__error__function_8h_source.html#l00104">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::constraints_</a>.</p>
 
 </div>
 </div>
@@ -706,7 +712,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00105">105</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00108">108</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -732,7 +738,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00104">104</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00107">107</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -758,9 +764,37 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00102">102</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00104">104</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="camera__projection__error__function_8h_source.html#l00081">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::clearConstraints()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00097">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::empty()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00089">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getConstraints()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00093">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getNumConstraints()</a>, and <a class="el" href="camera__projection__error__function_8h_source.html#l00085">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::setConstraints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="camera__projection__error__function_8h_source.html#l00083">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::clearConstraints()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00099">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::empty()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00091">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getConstraints()</a>, <a class="el" href="camera__projection__error__function_8h_source.html#l00095">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getNumConstraints()</a>, and <a class="el" href="camera__projection__error__function_8h_source.html#l00087">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::setConstraints()</a>.</p>
+
+</div>
+</div>
+<a id="ad36c6bbbd445a5263ee6cd2b95276115" name="ad36c6bbbd445a5263ee6cd2b95276115"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad36c6bbbd445a5263ee6cd2b95276115">&#9670;&#160;</a></span>intrinsicsMapping_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="structmomentum_1_1CameraIntrinsicsMapping.html">CameraIntrinsicsMapping</a>&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt; &gt; <a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html">momentum::CameraProjectionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::intrinsicsMapping_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00106">106</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="camera__projection__error__function_8cpp_source.html#l00037">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::CameraProjectionErrorFunctionT()</a>, and <a class="el" href="camera__projection__error__function_8cpp_source.html#l00016">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::CameraProjectionErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -786,7 +820,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00103">103</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00105">105</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="camera__projection__error__function_8cpp_source.html#l00037">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::CameraProjectionErrorFunctionT()</a>, and <a class="el" href="camera__projection__error__function_8cpp_source.html#l00016">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::CameraProjectionErrorFunctionT()</a>.</p>
 
 </div>
 </div>
@@ -812,7 +848,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00106">106</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="camera__projection__error__function_8h_source.html#l00109">109</a> of file <a class="el" href="camera__projection__error__function_8h_source.html">camera_projection_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -826,7 +862,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html">CameraProjectionErrorFunctionT</a></li>
-    <li class="footer">Generated on Thu Apr 9 2026 16:03:25 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 21 2026 08:05:02 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
