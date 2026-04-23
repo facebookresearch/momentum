@@ -55,7 +55,7 @@ py::array_t<bool> parameterSetToArray(
 
 // Convert a boolean numpy array to a ParameterSet
 // If the array is empty and defaultParamSet is not NO_DEFAULT, return the default set
-// Note: DefaultParameterSet enum is defined in tensor_momentum/tensor_parameter_transform.h
+// Note: DefaultParameterSet enum is defined in array_utility/default_parameter_set.h
 momentum::ParameterSet arrayToParameterSet(
     const momentum::ParameterTransform& parameterTransform,
     const py::array_t<bool>& paramSet,

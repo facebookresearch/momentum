@@ -162,12 +162,6 @@ PYBIND11_MODULE(axel, m) {
   m.attr("__name__") = "pymomentum.axel";
   m.doc() = "Python bindings for Axel library classes including SignedDistanceField.";
 
-#ifdef PYMOMENTUM_LIMITED_TORCH_API
-  m.attr("AUTOGRAD_ENABLED") = false;
-#else
-  m.attr("AUTOGRAD_ENABLED") = true;
-#endif
-
   // Bind HoleFillingMethod enum
   py::enum_<axel::HoleFillingMethod>(m, "HoleFillingMethod", R"(Method for filling mesh holes.
 

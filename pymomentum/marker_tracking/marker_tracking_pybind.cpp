@@ -65,9 +65,6 @@ PYBIND11_MODULE(marker_tracking, m) {
   m.doc() = "Module for exposing the C++ APIs of the marker tracking pipeline ";
   m.attr("__name__") = "pymomentum.marker_tracking";
 
-  // Torch C++ deps removed from this target; autograd is never available.
-  m.attr("AUTOGRAD_ENABLED") = false;
-
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
 
