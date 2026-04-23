@@ -21,9 +21,11 @@
 
 namespace pymomentum {
 
-at::Tensor createZBuffer(const momentum::Camera& camera, float far_clip = FLT_MAX);
-at::Tensor createRGBBuffer(const momentum::Camera& camera, std::optional<Eigen::Vector3f> bgColor);
-at::Tensor createIndexBuffer(const momentum::Camera& camera);
+pybind11::array_t<float> createZBuffer(const momentum::Camera& camera, float far_clip = FLT_MAX);
+pybind11::array_t<float> createRGBBuffer(
+    const momentum::Camera& camera,
+    std::optional<Eigen::Vector3f> bgColor);
+pybind11::array_t<int32_t> createIndexBuffer(const momentum::Camera& camera);
 
 momentum::rasterizer::PhongMaterial createPhongMaterial(
     const std::optional<Eigen::Vector3f>& diffuseColor,
@@ -34,16 +36,16 @@ momentum::rasterizer::PhongMaterial createPhongMaterial(
     const std::optional<pybind11::array_t<const float>>& emissiveTexture);
 
 void alphaMatte(
-    at::Tensor zBuffer,
-    at::Tensor rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const pybind11::buffer& rgbBuffer,
     const pybind11::array& tgtRgbImage,
     float alpha = 1.0f);
 
 void rasterizeLines(
     at::Tensor positions,
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     float width,
     const std::optional<Eigen::Vector3f>& color,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
@@ -54,8 +56,8 @@ void rasterizeLines(
 void rasterizeCircles(
     at::Tensor positions,
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     float lineThickness,
     float radius,
     const std::optional<Eigen::Vector3f>& lineColor,
@@ -68,8 +70,8 @@ void rasterizeCircles(
 void rasterizeCameraFrustum(
     const momentum::Camera& frustumCamera,
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     float lineWidth,
     float distance,
     size_t numSamples,
@@ -82,8 +84,8 @@ void rasterizeCameraFrustum(
 /// Rasterize a grid of lines in the x-z plane (with y up).
 void rasterizeGrid(
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
@@ -98,18 +100,18 @@ void rasterizeGrid(
 
 void rasterizeLines2D(
     at::Tensor positions,
-    at::Tensor rgbBuffer,
+    const pybind11::buffer& rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
-    std::optional<at::Tensor> zBuffer,
+    const std::optional<pybind11::buffer>& zBuffer,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeText(
     at::Tensor positions,
     const std::vector<std::string>& texts,
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     const std::optional<Eigen::Vector3f>& color,
     int textScale,
     momentum::rasterizer::HorizontalAlignment horizontalAlignment,
@@ -122,30 +124,30 @@ void rasterizeText(
 void rasterizeText2D(
     at::Tensor positions,
     const std::vector<std::string>& texts,
-    at::Tensor rgbBuffer,
+    const pybind11::buffer& rgbBuffer,
     const std::optional<Eigen::Vector3f>& color,
     int textScale,
     momentum::rasterizer::HorizontalAlignment horizontalAlignment,
     momentum::rasterizer::VerticalAlignment verticalAlignment,
-    std::optional<at::Tensor> zBuffer,
+    const std::optional<pybind11::buffer>& zBuffer,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeCircles2D(
     at::Tensor positions,
-    at::Tensor rgbBuffer,
+    const pybind11::buffer& rgbBuffer,
     float lineThickness,
     float radius,
     const std::optional<Eigen::Vector3f>& lineColor,
     std::optional<Eigen::Vector3f> fillColor,
-    std::optional<at::Tensor> zBuffer,
+    const std::optional<pybind11::buffer>& zBuffer,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeTransforms(
     at::Tensor transforms,
     const momentum::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     float scale,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights,

@@ -31,7 +31,7 @@ class TestRendering(unittest.TestCase):
         def rasterize_spheres_with_lights(
             lights: list[pym_renderer.Light] | None,
             camera_param: pym_camera.Camera = camera,
-        ) -> torch.Tensor:
+        ) -> NDArray[np.float32]:
             z_buffer = pym_renderer.create_z_buffer(camera_param)
             rgb_buffer = pym_renderer.create_rgb_buffer(camera_param)
 
@@ -45,16 +45,16 @@ class TestRendering(unittest.TestCase):
             )
             return rgb_buffer
 
-        def mean_absolute_difference(t1: torch.Tensor, t2: torch.Tensor) -> float:
-            return torch.mean(torch.abs(t1 - t2)).item()
+        def mean_absolute_difference(
+            t1: NDArray[np.float32], t2: NDArray[np.float32]
+        ) -> float:
+            return float(np.mean(np.abs(t1 - t2)))
 
         default_lighting = rasterize_spheres_with_lights(None)
         lights_at_camera = rasterize_spheres_with_lights(
             [pym_renderer.Light.create_point_light(camera.center_of_projection)]
         )
-        # pyre-fixme[6]: For 2nd argument expected `SupportsDunderLT[_T]` but got
-        #  `float`.
-        self.assertGreater(torch.mean(default_lighting), 0.15)
+        self.assertGreater(np.mean(default_lighting), 0.15)
         front_directional_lighting = rasterize_spheres_with_lights(
             [
                 pym_renderer.Light.create_directional_light(
@@ -73,10 +73,8 @@ class TestRendering(unittest.TestCase):
             mean_absolute_difference(default_lighting, front_directional_lighting), 0.05
         )
         self.assertGreater(
-            torch.mean(front_directional_lighting),
-            # pyre-fixme[6]: For 2nd argument expected `SupportsDunderLT[_T]` but
-            #  got `Tensor`.
-            torch.mean(default_lighting),
+            np.mean(front_directional_lighting),
+            np.mean(default_lighting),
         )
 
         back_lighting = rasterize_spheres_with_lights(
@@ -89,7 +87,7 @@ class TestRendering(unittest.TestCase):
 
         # We should see very little light coming from the back:
         self.assertLess(
-            mean_absolute_difference(back_lighting, torch.zeros_like(default_lighting)),
+            mean_absolute_difference(back_lighting, np.zeros_like(default_lighting)),
             1e-4,
         )
 
@@ -101,12 +99,8 @@ class TestRendering(unittest.TestCase):
                 )
             ]
         )
-        # pyre-fixme[6]: For 2nd argument expected `SupportsDunderLT[_T]` but got
-        #  `float`.
-        self.assertGreater(torch.mean(left_lighting[:, : image_width // 2]), 0.1)
-        # pyre-fixme[6]: For 2nd argument expected `SupportsDunderGT[_T]` but got
-        #  `float`.
-        self.assertLess(torch.mean(left_lighting[:, image_width // 2 :]), 1e-5)
+        self.assertGreater(np.mean(left_lighting[:, : image_width // 2]), 0.1)
+        self.assertLess(np.mean(left_lighting[:, image_width // 2 :]), 1e-5)
 
         # All lighting should be from the right side:
         right_lighting = rasterize_spheres_with_lights(
@@ -116,12 +110,8 @@ class TestRendering(unittest.TestCase):
                 )
             ]
         )
-        # pyre-fixme[6]: For 2nd argument expected `SupportsDunderGT[_T]` but got
-        #  `float`.
-        self.assertLess(torch.mean(right_lighting[:, : image_width // 2]), 1e-5)
-        # pyre-fixme[6]: For 2nd argument expected `SupportsDunderLT[_T]` but got
-        #  `float`.
-        self.assertGreater(torch.mean(right_lighting[:, image_width // 2 :]), 0.1)
+        self.assertLess(np.mean(right_lighting[:, : image_width // 2]), 1e-5)
+        self.assertGreater(np.mean(right_lighting[:, image_width // 2 :]), 0.1)
 
     def test_subdivide_uneven(self) -> None:
         """Check that we can do uneven subdivision where only some edges are split."""
@@ -389,13 +379,13 @@ class TestRendering(unittest.TestCase):
         cop_new = camera_new.center_of_projection
         np.testing.assert_allclose(cop_old, cop_new, rtol=1e-4, atol=1e-4)
 
-    def _get_rendered_mask(self, z_buffer: torch.Tensor) -> torch.Tensor:
+    def _get_rendered_mask(self, z_buffer: NDArray[np.float32]) -> NDArray[np.bool_]:
         """Return a boolean mask of pixels that were actually rendered.
 
         The z-buffer is initialized to far_clip (FLT_MAX by default).
         Rendered pixels have depth values significantly smaller than FLT_MAX.
         """
-        far_clip = torch.tensor(3.4028234663852886e38, dtype=z_buffer.dtype)
+        far_clip = np.float32(3.4028234663852886e38)
         return z_buffer < far_clip
 
     def _rasterize_quad(
@@ -403,7 +393,7 @@ class TestRendering(unittest.TestCase):
         camera: pym_camera.Camera,
         texture_coordinates: torch.Tensor | None = None,
         texture_triangles: torch.Tensor | None = None,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """Rasterize a large front-facing quad and return (z_buffer, rgb_buffer).
 
         The quad spans [-5, -5, 5] to [5, 5, 5] to fill the viewport.
@@ -467,23 +457,23 @@ class TestRendering(unittest.TestCase):
         #    rendered pixels should have depth close to 5.
         rendered_depths = z_tex[rendered_mask]
         self.assertTrue(
-            torch.all(rendered_depths > 4.0).item(),
+            np.all(rendered_depths > 4.0).item(),
             f"Min depth {rendered_depths.min().item()} is too small (expected > 4.0)",
         )
         self.assertTrue(
-            torch.all(rendered_depths < 6.0).item(),
+            np.all(rendered_depths < 6.0).item(),
             f"Max depth {rendered_depths.max().item()} is too large (expected < 6.0)",
         )
 
         # 3. Verify texture coordinates don't change the geometry: depth
         #    buffers should be identical with and without texture coordinates.
-        torch.testing.assert_close(z_tex, z_no_tex)
+        np.testing.assert_allclose(z_tex, z_no_tex)
 
         # 4. Verify the rgb_buffer has visible (non-zero) rendered pixels,
         #    confirming that lighting was applied to the rendered geometry.
         rendered_rgb = rgb_tex[rendered_mask]
         self.assertTrue(
-            torch.any(rendered_rgb > 0).item(),
+            np.any(rendered_rgb > 0).item(),
             "No visible pixels in rgb_buffer after rendering",
         )
 
@@ -528,17 +518,17 @@ class TestRendering(unittest.TestCase):
         # 2. Verify depth values are correct (quad at z=5).
         rendered_depths = z_tex[rendered_mask]
         self.assertTrue(
-            torch.all(rendered_depths > 4.0).item(),
+            np.all(rendered_depths > 4.0).item(),
             f"Min depth {rendered_depths.min().item()} is too small (expected > 4.0)",
         )
         self.assertTrue(
-            torch.all(rendered_depths < 6.0).item(),
+            np.all(rendered_depths < 6.0).item(),
             f"Max depth {rendered_depths.max().item()} is too large (expected < 6.0)",
         )
 
         # 3. Verify texture coordinates don't change the geometry: the depth
         #    buffers should be identical regardless of texture coordinates.
-        torch.testing.assert_close(z_tex, z_no_tex)
+        np.testing.assert_allclose(z_tex, z_no_tex)
 
         # 4. Verify the same number of pixels were rendered in both cases,
         #    confirming that the separate texture_triangles don't affect
@@ -549,7 +539,7 @@ class TestRendering(unittest.TestCase):
         # 5. Verify the rgb_buffer has visible (lit) pixels.
         rendered_rgb = rgb_tex[rendered_mask]
         self.assertTrue(
-            torch.any(rendered_rgb > 0).item(),
+            np.any(rendered_rgb > 0).item(),
             "No visible pixels in rgb_buffer after rendering",
         )
 
@@ -592,7 +582,7 @@ class TestRendering(unittest.TestCase):
 
         def rasterize_triangle(
             tex_tri: torch.Tensor,
-        ) -> tuple[torch.Tensor, torch.Tensor]:
+        ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
             z_buf = pym_renderer.create_z_buffer(camera)
             rgb_buf = pym_renderer.create_rgb_buffer(camera)
             pym_renderer.rasterize_mesh(
@@ -630,23 +620,23 @@ class TestRendering(unittest.TestCase):
         # 2. Verify depth values are correct (triangle at z=5).
         depths_a = z_buffer_a[rendered_mask_a]
         self.assertTrue(
-            torch.all(depths_a > 4.0).item(),
+            np.all(depths_a > 4.0).item(),
             f"Min depth {depths_a.min().item()} is too small (expected > 4.0)",
         )
         self.assertTrue(
-            torch.all(depths_a < 6.0).item(),
+            np.all(depths_a < 6.0).item(),
             f"Max depth {depths_a.max().item()} is too large (expected < 6.0)",
         )
 
         # 3. Verify geometry is identical regardless of which texture
         #    coordinates are referenced — the z-buffers and rendered pixel
         #    masks should match exactly.
-        torch.testing.assert_close(z_buffer_a, z_buffer_b)
-        self.assertTrue(torch.equal(rendered_mask_a, rendered_mask_b))
+        np.testing.assert_allclose(z_buffer_a, z_buffer_b)
+        self.assertTrue(np.array_equal(rendered_mask_a, rendered_mask_b))
 
         # 4. Verify the rgb_buffer has visible (lit) pixels.
         rendered_rgb_a = rgb_buffer_a[rendered_mask_a]
         self.assertTrue(
-            torch.any(rendered_rgb_a > 0).item(),
+            np.any(rendered_rgb_a > 0).item(),
             "No visible pixels in rgb_buffer after rendering",
         )
