@@ -12,7 +12,6 @@
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/rasterizer/text_rasterizer.h>
 
-#include <ATen/ATen.h>
 #include <pybind11/numpy.h>
 #include <Eigen/Geometry>
 #include <cfloat>
@@ -42,7 +41,7 @@ void alphaMatte(
     float alpha = 1.0f);
 
 void rasterizeLines(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -54,7 +53,7 @@ void rasterizeLines(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeCircles(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -99,7 +98,7 @@ void rasterizeGrid(
 // without camera projection or z-buffer
 
 void rasterizeLines2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const pybind11::buffer& rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
@@ -107,7 +106,7 @@ void rasterizeLines2D(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeText(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const std::vector<std::string>& texts,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
@@ -122,7 +121,7 @@ void rasterizeText(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeText2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const std::vector<std::string>& texts,
     const pybind11::buffer& rgbBuffer,
     const std::optional<Eigen::Vector3f>& color,
@@ -133,7 +132,7 @@ void rasterizeText2D(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeCircles2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const pybind11::buffer& rgbBuffer,
     float lineThickness,
     float radius,
@@ -143,7 +142,7 @@ void rasterizeCircles2D(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeTransforms(
-    at::Tensor transforms,
+    pybind11::buffer transforms,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
