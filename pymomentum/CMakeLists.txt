@@ -328,9 +328,6 @@ if(MOMENTUM_BUILD_RENDERER)
     NAME renderer
     PYMOMENTUM_HEADERS_VARS renderer_public_headers
     PYMOMENTUM_SOURCES_VARS renderer_sources
-    INCLUDE_DIRECTORIES
-      ${ATEN_INCLUDE_DIR}
-      ${TORCH_INCLUDE_DIRS}
     LINK_LIBRARIES
       array_utility
       character
@@ -338,14 +335,6 @@ if(MOMENTUM_BUILD_RENDERER)
       math
       rasterizer
       skeleton
-      tensor_momentum
-      tensor_utility
-      torch_bridge
-      ${ATEN_LIBRARIES}
-      ${TORCH_LIBRARIES}
-      ${torch_python}
-    COMPILE_OPTIONS
-      ${TORCH_CXX_FLAGS}
   )
 endif()
 

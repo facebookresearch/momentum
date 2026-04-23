@@ -793,9 +793,15 @@ void rasterizeSkeleton(
     if (activeInfo.ndim != 1 || static_cast<size_t>(activeInfo.shape[0]) != nJoints) {
       throw std::runtime_error(
           fmt::format(
-              "active_joints must be a 1D array with {} elements but got shape [{}]",
+              "active_joints must be a 1D array with {} elements but got shape {}",
               nJoints,
-              activeInfo.shape[0]));
+              formatArrayDims(activeInfo.shape)));
+    }
+    if (activeInfo.itemsize != 1) {
+      throw std::runtime_error(
+          fmt::format(
+              "active_joints must be a bool or uint8 array but got itemsize={}",
+              activeInfo.itemsize));
     }
     auto* ptr = static_cast<uint8_t*>(activeInfo.ptr);
     for (size_t k = 0; k < nJoints; ++k) {

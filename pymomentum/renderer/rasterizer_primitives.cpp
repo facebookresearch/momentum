@@ -654,11 +654,9 @@ void rasterizeTransforms(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
-  // Get buffer info for raw pointer access (requires GIL)
-  // The transforms buffer has shape (nTransforms, 4, 4) and is row-major (C-contiguous).
-  // Element [i][r][c] is at offset i*16 + r*4 + c.
+  // Get buffer info for creating Eigen map (requires GIL)
   auto transformsInfo = transforms.request();
-  const auto* transformsPtr = static_cast<const float*>(transformsInfo.ptr);
+  auto transformsMap = bufferToEigenMap<float>(transformsInfo);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -669,11 +667,11 @@ void rasterizeTransforms(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nTransforms; ++i) {
-    // Access element [i][row][col] = transformsPtr[i*16 + row*4 + col]
-    const float* m = transformsPtr + i * 16;
-    const Eigen::Vector3f origin(m[0 * 4 + 3], m[1 * 4 + 3], m[2 * 4 + 3]);
+    // Row-major numpy → column-major Eigen, so transpose
+    const Eigen::Matrix4f mat = transformsMap.segment<16>(16 * i).reshaped(4, 4).transpose();
+    const Eigen::Vector3f origin = mat.col(3).head<3>();
     for (int j = 0; j < 3; ++j) {
-      const Eigen::Vector3f col_j(m[0 * 4 + j], m[1 * 4 + j], m[2 * 4 + j]);
+      const Eigen::Vector3f col_j = mat.col(j).head<3>();
       const float length = col_j.norm();
       if (length == 0) {
         continue;
