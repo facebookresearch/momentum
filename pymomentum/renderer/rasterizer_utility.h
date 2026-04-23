@@ -9,12 +9,14 @@
 
 #include "pymomentum/tensor_utility/tensor_utility.h"
 
+#include <momentum/common/aligned.h>
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/simd/simd.h>
 
 #include <ATen/ATen.h>
 #include <fmt/format.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
 #include <optional>
@@ -111,6 +113,202 @@ Span<T, R> make_mdspan(const py::buffer_info& info) {
   return Span<T, R>(static_cast<T*>(info.ptr), MappingType(ExtentsType(extents), strides));
 }
 
+// make_mdspan from pybind11::buffer (calls request() internally - requires GIL)
+template <typename T, size_t R>
+Span<T, R> make_mdspan(const pybind11::buffer& buf) {
+  auto info = buf.request();
+  return make_mdspan<T, R>(info);
+}
+
+// make_mdspan from optional pybind11::buffer
+template <typename T, size_t R>
+Span<T, R> make_mdspan(const std::optional<pybind11::buffer>& buf) {
+  if (!buf.has_value()) {
+    return Span<T, R>();
+  }
+  return make_mdspan<T, R>(*buf);
+}
+
+// Create an aligned numpy array for SIMD operations with proper stride handling.
+// Shape contains the logical dimensions (actual width).
+// Row strides are padded internally for SIMD alignment.
+template <typename T>
+pybind11::array_t<T> create_aligned_array(const std::vector<py::ssize_t>& shape) {
+  constexpr size_t alignment = momentum::kSimdAlignment;
+
+  if (shape.empty()) {
+    throw std::runtime_error("Shape cannot be empty");
+  }
+
+  // For images, shape is either [height, width] or [height, width, channels]
+  // The row stride should be based on paddedWidth, not the logical width
+  const py::ssize_t height = shape[0];
+  const py::ssize_t width = shape.size() > 1 ? shape[1] : 1;
+  const py::ssize_t channels = shape.size() > 2 ? shape[2] : 1;
+
+  // Compute padded width for SIMD alignment
+  const py::ssize_t paddedWidth =
+      momentum::rasterizer::padImageWidthForRasterizer(static_cast<int32_t>(width));
+
+  // Build strides in element counts
+  std::vector<py::ssize_t> strides_in_elements;
+  if (shape.size() == 2) {
+    // 2D array: [height, width]
+    strides_in_elements = {paddedWidth, 1};
+  } else if (shape.size() == 3) {
+    // 3D array: [height, width, channels]
+    strides_in_elements = {paddedWidth * channels, channels, 1};
+  } else {
+    throw std::runtime_error("Only 2D and 3D arrays are supported");
+  }
+
+  // Convert strides to bytes for pybind11
+  std::vector<py::ssize_t> strides_in_bytes;
+  strides_in_bytes.reserve(strides_in_elements.size());
+  for (auto stride : strides_in_elements) {
+    strides_in_bytes.push_back(stride * static_cast<py::ssize_t>(sizeof(T)));
+  }
+
+  // Calculate total size: height * paddedWidth * channels
+  const py::ssize_t total_size = height * paddedWidth * channels;
+
+  // Allocate aligned memory using momentum's cross-platform aligned allocation
+  T* ptr = momentum::alignedAlloc<T, alignment>(total_size);
+
+  // Create a capsule to manage the memory - will be called when array is destroyed
+  py::capsule deallocator(ptr, [](void* p) { momentum::aligned_free(p); });
+
+  // Create numpy array with aligned memory and custom strides
+  return pybind11::array_t<T>(
+      shape, // logical shape (actual width, not padded)
+      strides_in_bytes, // strides in bytes (row stride uses paddedWidth)
+      ptr, // data pointer
+      deallocator // capsule for cleanup
+  );
+}
+
+// Validate a rasterizer buffer's shape, dtype, and strides against expected dimensions.
+inline void validateBuffer(
+    const pybind11::buffer& buffer,
+    const char* name,
+    int expectedRank,
+    const std::string& expectedFormat,
+    const std::vector<int64_t>& expectedShape) {
+  auto info = buffer.request();
+
+  if (info.format != expectedFormat) {
+    throw std::runtime_error(
+        fmt::format(
+            "{} has incorrect data type. Expected {} but got {}",
+            name,
+            expectedFormat,
+            info.format));
+  }
+
+  if (info.ndim != expectedRank) {
+    throw std::runtime_error(
+        fmt::format(
+            "{} has incorrect dimensions. Expected {} dimensions but got {}",
+            name,
+            expectedRank,
+            info.ndim));
+  }
+
+  for (int i = 0; i < expectedRank; ++i) {
+    if (info.shape[i] != expectedShape[i]) {
+      throw std::runtime_error(
+          fmt::format(
+              "{} has incorrect shape at dimension {}. Expected {} but got {}",
+              name,
+              i,
+              expectedShape[i],
+              info.shape[i]));
+    }
+  }
+
+  // Compute padded width for SIMD alignment from the logical width
+  const int64_t width = expectedRank >= 2 ? expectedShape[1] : 1;
+  const int64_t paddedWidth =
+      momentum::rasterizer::padImageWidthForRasterizer(static_cast<int32_t>(width));
+
+  // Compute expected strides based on paddedWidth
+  std::vector<int64_t> expectedStridesInElements;
+  if (expectedRank == 2) {
+    expectedStridesInElements = {paddedWidth, 1};
+  } else if (expectedRank == 3) {
+    int64_t channels = expectedShape[2];
+    expectedStridesInElements = {paddedWidth * channels, channels, 1};
+  } else {
+    throw std::runtime_error("Only 2D and 3D arrays are supported");
+  }
+
+  // Validate strides
+  for (int i = 0; i < expectedRank; ++i) {
+    int64_t expectedStrideInBytes = expectedStridesInElements[i] * info.itemsize;
+    if (info.strides[i] != expectedStrideInBytes) {
+      throw std::runtime_error(
+          fmt::format(
+              "{} has incorrect stride at dimension {}. Expected {} bytes but got {}",
+              name,
+              i,
+              expectedStrideInBytes,
+              info.strides[i]));
+    }
+  }
+}
+
+// Buffer-based validation for rasterizer buffers (z, rgb, surface normals, etc.)
+inline void validateRasterizerBuffers(
+    const momentum::rasterizer::Camera& camera,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer = {},
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer = {},
+    const std::optional<pybind11::buffer>& vertexIndexBuffer = {},
+    const std::optional<pybind11::buffer>& triangleIndexBuffer = {}) {
+  const int32_t imageHeight = camera.imageHeight();
+  const int32_t imageWidth = camera.imageWidth();
+
+  validateBuffer(
+      zBuffer, "zBuffer", 2, py::format_descriptor<float>::format(), {imageHeight, imageWidth});
+
+  if (rgbBuffer.has_value()) {
+    validateBuffer(
+        *rgbBuffer,
+        "rgbBuffer",
+        3,
+        py::format_descriptor<float>::format(),
+        {imageHeight, imageWidth, 3});
+  }
+
+  if (surfaceNormalsBuffer.has_value()) {
+    validateBuffer(
+        *surfaceNormalsBuffer,
+        "surfaceNormalsBuffer",
+        3,
+        py::format_descriptor<float>::format(),
+        {imageHeight, imageWidth, 3});
+  }
+
+  if (vertexIndexBuffer.has_value()) {
+    validateBuffer(
+        *vertexIndexBuffer,
+        "vertexIndexBuffer",
+        2,
+        py::format_descriptor<int32_t>::format(),
+        {imageHeight, imageWidth});
+  }
+
+  if (triangleIndexBuffer.has_value()) {
+    validateBuffer(
+        *triangleIndexBuffer,
+        "triangleIndexBuffer",
+        2,
+        py::format_descriptor<int32_t>::format(),
+        {imageHeight, imageWidth});
+  }
+}
+
+// Tensor-based validation (legacy - kept for functions not yet migrated to buffer API)
 inline std::tuple<
     at::Tensor,
     std::optional<at::Tensor>,

@@ -385,11 +385,11 @@ Notes:
       py::arg("triangles"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
-      py::arg("vertex_index_buffer") = std::optional<at::Tensor>{},
-      py::arg("triangle_index_buffer") = std::optional<at::Tensor>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("vertex_index_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("triangle_index_buffer") = std::optional<pybind11::buffer>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("texture_coordinates") = std::optional<at::Tensor>{},
       py::arg("texture_triangles") = std::optional<at::Tensor>{},
@@ -425,7 +425,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("triangles"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("thickness") = 1.0f,
       py::arg("color") = std::optional<Eigen::Vector3f>{},
@@ -459,8 +459,8 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("center"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("radius") = std::optional<at::Tensor>{},
       py::arg("color") = std::optional<at::Tensor>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
@@ -495,7 +495,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("camera_frustum"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::arg("line_thickness") = 1.0f,
       py::arg("distance") = 10.0f,
       py::arg("num_samples") = 20,
@@ -534,8 +534,8 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("end_position"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("radius") = std::optional<at::Tensor>{},
       py::arg("color") = std::optional<at::Tensor>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
@@ -578,8 +578,8 @@ has two radius values, one for the start and end of the capsule, and the ends of
       py::arg("length"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::kw_only(),
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -614,8 +614,8 @@ has two radius values, one for the start and end of the capsule, and the ends of
       py::arg("camera"),
       py::arg("z_buffer"),
       py::kw_only(),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("scale") = 1.0f,
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -675,9 +675,9 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("skeleton_state"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("sphere_material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("cylinder_material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -722,11 +722,11 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("skeleton_state"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
-      py::arg("vertex_index_buffer") = std::optional<at::Tensor>{},
-      py::arg("triangle_index_buffer") = std::optional<at::Tensor>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("vertex_index_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("triangle_index_buffer") = std::optional<pybind11::buffer>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("per_vertex_diffuse_color") = std::optional<at::Tensor>{},
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -761,9 +761,9 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 )",
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
-      py::arg("surface_normals_buffer") = std::optional<at::Tensor>{},
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
       py::arg("material1") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("material2") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -802,7 +802,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 )",
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("thickness") = 1.0f,
       py::arg("color") = std::optional<Eigen::Vector3f>{},
@@ -835,7 +835,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("positions"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("thickness") = 1.0f,
       py::arg("color") = std::optional<Eigen::Vector3f>{},
@@ -868,7 +868,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("positions"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("line_thickness") = 1.0f,
       py::arg("radius") = 3.0f,
@@ -897,7 +897,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("rgb_buffer"),
       py::arg("thickness") = 1.0f,
       py::arg("color") = std::optional<Eigen::Vector3f>{},
-      py::arg("z_buffer") = std::optional<at::Tensor>{},
+      py::arg("z_buffer") = std::optional<pybind11::buffer>{},
       py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
 
   m.def(
@@ -920,7 +920,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("radius") = 3.0f,
       py::arg("line_color") = std::optional<Eigen::Vector3f>{},
       py::arg("fill_color") = std::optional<Eigen::Vector3f>{},
-      py::arg("z_buffer") = std::optional<at::Tensor>{},
+      py::arg("z_buffer") = std::optional<pybind11::buffer>{},
       py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
 
   m.def(
@@ -930,7 +930,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 
 :param camera: Camera to render from.
 
-:return: A z_buffer torch.Tensor (height, padded_width) suitable for use in the :meth:`rasterize` function.
+:return: A z_buffer numpy array with shape (height, padded_width) suitable for use in the :meth:`rasterize` function.
 )",
       py::arg("camera"),
       py::arg("far_clip") = FLT_MAX);
@@ -943,7 +943,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 :param camera: Camera to render from.
 :param background_color: Background color, defaults to all-black (0, 0, 0).
 
-:return: A rgb_buffer torch.Tensor (height, padded_width, 3) suitable for use in the :meth:`rasterize` function. After rasterization, use `rgb_buffer[:, 0 : camera.image_width, :]` to get the rendered image.
+:return: A rgb_buffer numpy array with shape (height, padded_width, 3) suitable for use in the :meth:`rasterize` function. After rasterization, use `rgb_buffer[:, 0 : camera.image_width, :]` to get the rendered image.
 )",
       py::arg("camera"),
       py::arg("background_color") = std::optional<Eigen::Vector3f>{});
@@ -951,11 +951,11 @@ See detailed notes under :meth:`rasterize_mesh`, above.
   m.def(
       "create_index_buffer",
       &createIndexBuffer,
-      R"(Creates a padded RGB buffer suitable for storing triangle or vertex indices during rasterization.
+      R"(Creates a padded buffer suitable for storing triangle or vertex indices during rasterization.
 
 :param camera: Camera to render from.
 
-:return: An integer tensor (height, padded_width) suitable for passing in as an index buffer to the :meth:`rasterize` function.
+:return: An integer numpy array with shape (height, padded_width) suitable for passing in as an index buffer to the :meth:`rasterize` function.
 )",
       py::arg("camera"));
 
@@ -1046,7 +1046,7 @@ Projects 3D positions to image space using the camera and renders text strings a
       py::arg("texts"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("rgb_buffer") = std::optional<at::Tensor>{},
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("color") = Eigen::Vector3f(1.0f, 1.0f, 1.0f),
       py::arg("text_scale") = 1,
@@ -1079,6 +1079,6 @@ Projects 3D positions to image space using the camera and renders text strings a
       py::arg("text_scale") = 1,
       py::arg("horizontal_alignment") = momentum::rasterizer::HorizontalAlignment::Left,
       py::arg("vertical_alignment") = momentum::rasterizer::VerticalAlignment::Top,
-      py::arg("z_buffer") = std::optional<at::Tensor>{},
+      py::arg("z_buffer") = std::optional<pybind11::buffer>{},
       py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
 }
