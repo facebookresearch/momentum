@@ -8,6 +8,7 @@
 #include "pymomentum/renderer/software_rasterizer.h"
 
 #include "pymomentum/array_utility/array_utility.h"
+#include "pymomentum/array_utility/geometry_accessors.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
 
 #include <momentum/character/character.h>
@@ -486,12 +487,13 @@ void rasterizeCapsules(
   // Capsules are closed surfaces so we might as well always cull:
   const bool backfaceCulling = true;
 
+  // Use TransformAccessor to parse 4x4 matrices from the buffer (requires GIL)
+  TransformAccessor<float> transformAccessor(transformation, LeadingDimensions{}, nCapsules);
+  const auto capsuleMatrices = transformAccessor.getMatrices({});
+
   // Get buffer infos for creating Eigen maps (requires GIL)
-  auto transformationInfo = transformation.request();
   auto radiusInfo = radius.request();
   auto lengthInfo = length.request();
-
-  auto transformationMap = bufferToEigenMap<float>(transformationInfo);
   auto radiusMap = bufferToEigenMap<float>(radiusInfo);
   auto lengthMap = bufferToEigenMap<float>(lengthInfo);
 
@@ -504,8 +506,7 @@ void rasterizeCapsules(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nCapsules; ++i) {
-    const Eigen::Matrix4f transform =
-        transformationMap.segment<16>(16 * i).reshaped(4, 4).transpose();
+    const Eigen::Matrix4f& transform = capsuleMatrices[i];
 
     const Eigen::Vector2f radiusVal = radiusMap.segment<2>(2 * i);
     const float lengthVal = lengthMap(i);
@@ -520,7 +521,7 @@ void rasterizeCapsules(
             radiusVal[1],
             lengthVal),
         camera,
-        modelMatrix * transform.matrix(),
+        modelMatrix * transform,
         nearClip,
         materialCur,
         zBufferMdspan,
@@ -590,7 +591,7 @@ SkeletonRenderingAssets initSkeletonAssets(
 void rasterizeSkeletonJoints(
     const SkeletonRenderingAssets& assets,
     const std::vector<bool>& activeJoints,
-    const Eigen::Ref<const Eigen::VectorXf>& skelStateMap,
+    const momentum::TransformListT<float>& jointTransforms,
     const momentum::rasterizer::Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -611,7 +612,7 @@ void rasterizeSkeletonJoints(
     }
 
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translate(skelStateMap.segment<3>(8 * jJoint));
+    transform.translate(jointTransforms[jJoint].translation);
     transform.scale(sphereRadius);
 
     if (!assets.jointCircles.empty()) {
@@ -654,7 +655,7 @@ void rasterizeSkeletonBones(
     const SkeletonRenderingAssets& assets,
     SkeletonStyle style,
     const std::vector<std::pair<size_t, size_t>>& jointConnections,
-    const Eigen::Ref<const Eigen::VectorXf>& skelStateMap,
+    const momentum::TransformListT<float>& jointTransforms,
     const momentum::rasterizer::Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
@@ -668,15 +669,8 @@ void rasterizeSkeletonBones(
     const std::optional<Eigen::Vector2f>& imageOffset,
     float cylinderRadius) {
   for (const auto& [childJoint, parentJoint] : jointConnections) {
-    const auto parentXF = momentum::Transform(
-        skelStateMap.segment<3>(8 * parentJoint),
-        Eigen::Quaternionf(skelStateMap.segment<4>(8 * parentJoint + 3)),
-        skelStateMap(8 * parentJoint + 7));
-
-    const auto childXF = momentum::Transform(
-        skelStateMap.segment<3>(8 * childJoint),
-        Eigen::Quaternionf(skelStateMap.segment<4>(8 * childJoint + 3)),
-        skelStateMap(8 * childJoint + 7));
+    const auto& parentXF = jointTransforms[parentJoint];
+    const auto& childXF = jointTransforms[childJoint];
 
     const Eigen::Vector3f diff = childXF.translation - parentXF.translation;
     const float length = diff.norm();
@@ -850,9 +844,9 @@ void rasterizeSkeleton(
       cylinderLengthSubdivisions,
       cylinderRadiusSubdivisions);
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto skelStateInfo = skeletonState.request();
-  auto skelStateMap = bufferToEigenMap<float>(skelStateInfo);
+  // Use SkeletonStateAccessor to parse joint transforms from the buffer (requires GIL)
+  SkeletonStateAccessor<float> skelStateAccessor(skeletonState, LeadingDimensions{}, nJoints);
+  const auto jointTransforms = skelStateAccessor.getTransforms({});
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -865,7 +859,7 @@ void rasterizeSkeleton(
   rasterizeSkeletonJoints(
       assets,
       activeJoints,
-      skelStateMap,
+      jointTransforms,
       camera,
       modelMatrix,
       nearClip,
@@ -883,7 +877,7 @@ void rasterizeSkeleton(
       assets,
       style,
       jointConnections,
-      skelStateMap,
+      jointTransforms,
       camera,
       modelMatrix,
       nearClip,
@@ -952,9 +946,9 @@ void rasterizeCharacter(
 
   const auto nJoints = character.skeleton.joints.size();
 
-  // Get buffer infos for creating Eigen maps (requires GIL)
-  auto skelStateInfo = skeletonState.request();
-  auto skelStateMap = bufferToEigenMap<float>(skelStateInfo);
+  // Use SkeletonStateAccessor to parse joint transforms from the buffer (requires GIL)
+  SkeletonStateAccessor<float> skelStateAccessor(skeletonState, LeadingDimensions{}, nJoints);
+  const auto jointTransforms = skelStateAccessor.getTransforms({});
 
   std::optional<py::buffer_info> perVertexColorInfo;
   if (perVertexDiffuseColor.has_value()) {
@@ -973,15 +967,9 @@ void rasterizeCharacter(
   // Release GIL before rendering
   pybind11::gil_scoped_release release;
 
-  std::vector<momentum::JointState> jointStates(character.skeleton.joints.size());
+  std::vector<momentum::JointState> jointStates(nJoints);
   for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
-    const auto tf = momentum::Transform(
-        skelStateMap.segment<3>(8 * jJoint),
-        Eigen::Quaternionf(skelStateMap.segment<4>(8 * jJoint + 3)),
-        skelStateMap(8 * jJoint + 7));
-
-    auto& js = jointStates.at(jJoint);
-    js.transform = tf;
+    jointStates[jJoint].transform = jointTransforms[jJoint];
   }
 
   momentum::Mesh posedMesh = *character.mesh;
