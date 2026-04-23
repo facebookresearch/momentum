@@ -442,11 +442,11 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 
 See detailed notes under :meth:`rasterize_mesh`, above.
 
-:param center: (nSpheres x 3) Tensor of sphere centers.
+:param center: (nSpheres x 3) numpy.ndarray of sphere centers.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
-:param radius: (nSpheres) Optional Tensor of per-sphere radius values (defaults to 1).
-:param color: (nSpheres x 3) optional Tensor of per-sphere colors (defaults to using the passed-in material).
+:param radius: (nSpheres) Optional numpy.ndarray of per-sphere radius values (defaults to 1).
+:param color: (nSpheres x 3) optional numpy.ndarray of per-sphere colors (defaults to using the passed-in material).
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
 :param lights: Lights to use in renderering, in world-space.  If none are given, a default light setup is used.
 :param model_matrix: Additional matrix to apply to the model.  Unlike the camera transforms, it is allowed to have scaling and/or shearing.
@@ -461,8 +461,8 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("z_buffer"),
       py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
-      py::arg("radius") = std::optional<at::Tensor>{},
-      py::arg("color") = std::optional<at::Tensor>{},
+      py::arg("radius") = std::optional<pybind11::buffer>{},
+      py::arg("color") = std::optional<pybind11::buffer>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::kw_only(),
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -514,11 +514,11 @@ A cylinder is defined as extending from start_position to end_position with the 
 
 See detailed notes under :meth:`rasterize_mesh`, above.
 
-:param start_position: (nCylinders x 3) torch.Tensor of starting positions.
-:param end_position: (nCylinders x 3) torch.Tensor of ending positions.
+:param start_position: (nCylinders x 3) numpy.ndarray of starting positions.
+:param end_position: (nCylinders x 3) numpy.ndarray of ending positions.
 :param camera: Camera to render from.
-:param radius: (nSpheres) Optional tensor of per-cylinder radius values (defaults to 1).
-:param color: (nVert x 3) Optional Tensor of per-cylinder colors (defaults to using the material parameter).
+:param radius: (nCylinders) Optional numpy.ndarray of per-cylinder radius values (defaults to 1).
+:param color: (nCylinders x 3) Optional numpy.ndarray of per-cylinder colors (defaults to using the material parameter).
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
 :param lights: Lights to use in renderering, in world-space.  If none are given, a default light setup is used.
@@ -536,8 +536,8 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("z_buffer"),
       py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
       py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
-      py::arg("radius") = std::optional<at::Tensor>{},
-      py::arg("color") = std::optional<at::Tensor>{},
+      py::arg("radius") = std::optional<pybind11::buffer>{},
+      py::arg("color") = std::optional<pybind11::buffer>{},
       py::arg("material") = std::optional<momentum::rasterizer::PhongMaterial>{},
       py::kw_only(),
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
@@ -557,9 +557,9 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 A capsule is defined as extending along the x axis in the local space defined by the transform.  It
 has two radius values, one for the start and end of the capsule, and the ends of the capsules are spheres.
 
-:param transformation: (nCapsules x 4 x 4) torch.Tensor of transformations from capsule-local space (oriented along the x axis) to world space.
-:param radius: (nCapsules x 2) torch.Tensor of per-capsule start and end radius values.
-:param length: (nCapsules) torch.Tensor of per-capsule length values.
+:param transformation: (nCapsules x 4 x 4) numpy.ndarray of transformations from capsule-local space (oriented along the x axis) to world space.
+:param radius: (nCapsules x 2) numpy.ndarray of per-capsule start and end radius values.
+:param length: (nCapsules) numpy.ndarray of per-capsule length values.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
