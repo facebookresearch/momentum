@@ -595,7 +595,7 @@ has two radius values, one for the start and end of the capsule, and the ends of
       &rasterizeTransforms,
       R"(Rasterize a set of transforms as little frames using arrows.
 
-  :param transforms: (n x 4 x 4) torch.Tensor of transforms to render.
+  :param transforms: (n x 4 x 4) numpy.ndarray of transforms to render.
   :param camera: Camera to render from.
   :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
   :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
@@ -822,7 +822,7 @@ The advantage of using rasterization to draw lines instead of just drawing them 
 
 See detailed notes under :meth:`rasterize_mesh`, above.
 
-:param positions: (nLines x 2 x 3) torch.Tensor of start/end positions.
+:param positions: (nLines x 2 x 3) numpy.ndarray of start/end positions.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
@@ -853,7 +853,7 @@ The advantage of using rasterization to draw circles instead of just drawing the
 
 See detailed notes under :meth:`rasterize_mesh`, above.
 
-:param positions: (nCircles x 3) torch.Tensor of circle centers.
+:param positions: (nCircles x 3) numpy.ndarray of circle centers.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
@@ -886,7 +886,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       &rasterizeLines2D,
       R"(Rasterize lines directly in 2D image space without camera projection or z-buffer.
 
-:param positions: (nLines x 4) torch.Tensor of line start/end positions in image space [start_x, start_y, end_x, end_y].
+:param positions: (nLines x 4) numpy.ndarray of line start/end positions in image space [start_x, start_y, end_x, end_y].
 :param rgb_buffer: RGB-buffer to render geometry onto.
 :param thickness: Thickness of the lines.
 :param color: Line color.
@@ -905,7 +905,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       &rasterizeCircles2D,
       R"(Rasterize circles directly in 2D image space without camera projection or z-buffer.
 
-:param positions: (nCircles x 2) torch.Tensor of circle centers in image space [x, y].
+:param positions: (nCircles x 2) numpy.ndarray of circle centers in image space [x, y].
 :param rgb_buffer: RGB-buffer to render geometry onto.
 :param line_thickness: Thickness of the circle outline.
 :param radius: Radius of the circle.
@@ -1028,7 +1028,7 @@ This is useful for rendering shadows using the classic projection shadows techni
 
 Projects 3D positions to image space using the camera and renders text strings at those locations using an embedded bitmap font.
 
-:param positions: (nTexts x 3) torch.Tensor of 3D positions in world coordinates.
+:param positions: (nTexts x 3) numpy.ndarray of 3D positions in world coordinates.
 :param texts: List of strings to render at each position.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
@@ -1062,7 +1062,7 @@ Projects 3D positions to image space using the camera and renders text strings a
       &rasterizeText2D,
       R"(Rasterize text directly in 2D image space without camera projection or depth testing.
 
-:param positions: (nTexts x 2) torch.Tensor of 2D positions in image coordinates.
+:param positions: (nTexts x 2) numpy.ndarray of 2D positions in image coordinates.
 :param texts: List of strings to render at each position.
 :param rgb_buffer: RGB-buffer to render geometry onto.
 :param color: RGB color for the text. Defaults to white (1, 1, 1).

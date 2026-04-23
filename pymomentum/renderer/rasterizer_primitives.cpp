@@ -7,9 +7,8 @@
 
 #include "pymomentum/renderer/rasterizer_primitives.h"
 
+#include "pymomentum/array_utility/array_utility.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
-#include "pymomentum/tensor_momentum/tensor_momentum_utility.h"
-#include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/image.h>
@@ -26,6 +25,7 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
+using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
 using rasterizer_detail::validateRasterizerBuffers;
@@ -180,7 +180,7 @@ void alphaMatte(
 }
 
 void rasterizeLines(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -198,17 +198,15 @@ void rasterizeLines(
 
   const int nLinesBindingId = -1;
 
-  TensorChecker checker("rasterize");
-  positions = checker.validateAndFixTensor(
-      positions,
-      "positions",
-      {nLinesBindingId, 2, 3},
-      {"nLines", "start_end", "xyz"},
-      at::kFloat,
-      true,
-      false);
+  ArrayChecker checker("rasterize_lines");
+  checker.validateBuffer(
+      positions, "positions", {nLinesBindingId, 2, 3}, {"nLines", "start_end", "xyz"}, false);
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
+
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -218,7 +216,7 @@ void rasterizeLines(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeLines(
-      toEigenMap<float>(positions),
+      positionsMap,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
@@ -231,7 +229,7 @@ void rasterizeLines(
 }
 
 void rasterizeCircles(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -251,9 +249,9 @@ void rasterizeCircles(
 
   const int nCirclesBindingId = -1;
 
-  TensorChecker checker("rasterize");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nCirclesBindingId, 3}, {"nCircles", "xyz"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_circles");
+  checker.validateBuffer(
+      positions, "positions", {nCirclesBindingId, 3}, {"nCircles", "xyz"}, false);
 
   // If no color is provided, use fill=white as default.
   if (!lineColor.has_value() && !fillColor.has_value()) {
@@ -261,6 +259,10 @@ void rasterizeCircles(
   }
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
+
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -270,7 +272,7 @@ void rasterizeCircles(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeCircles(
-      toEigenMap<float>(positions),
+      positionsMap,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
@@ -410,7 +412,7 @@ void rasterizeGrid(
 }
 
 void rasterizeLines2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const pybind11::buffer& rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
@@ -420,15 +422,13 @@ void rasterizeLines2D(
 
   const int nLinesBindingId = -1;
 
-  TensorChecker checker("rasterize_lines_2d");
-  positions = checker.validateAndFixTensor(
-      positions,
-      "positions",
-      {nLinesBindingId, 2, 2},
-      {"nLines", "start_end", "xy"},
-      at::kFloat,
-      true,
-      false);
+  ArrayChecker checker("rasterize_lines_2d");
+  checker.validateBuffer(
+      positions, "positions", {nLinesBindingId, 2, 2}, {"nLines", "start_end", "xy"}, false);
+
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
 
   // Create mdspans while holding GIL
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -438,7 +438,7 @@ void rasterizeLines2D(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeLines2D(
-      toEigenMap<float>(positions),
+      positionsMap,
       color.value_or(Eigen::Vector3f::Ones()),
       thickness,
       rgbBufferMdspan,
@@ -447,7 +447,7 @@ void rasterizeLines2D(
 }
 
 void rasterizeText(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const std::vector<std::string>& texts,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
@@ -464,22 +464,24 @@ void rasterizeText(
 
   const int nTextBindingId = -1;
 
-  TensorChecker checker("rasterize_text");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nTextBindingId, 3}, {"nTexts", "xyz"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_text");
+  checker.validateBuffer(positions, "positions", {nTextBindingId, 3}, {"nTexts", "xyz"}, false);
 
-  const int64_t numTexts = checker.getBoundValue(nTextBindingId);
+  const auto numTexts = checker.getBoundValue(nTextBindingId);
   if (numTexts != static_cast<int64_t>(texts.size())) {
     throw std::runtime_error(
         fmt::format(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  const Eigen::Ref<const Eigen::VectorXf> positionsFlat = toEigenMap<float>(positions);
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+
   std::vector<Eigen::Vector3f> positionsVec;
   positionsVec.reserve(numTexts);
   for (int i = 0; i < numTexts; ++i) {
-    positionsVec.emplace_back(positionsFlat.segment<3>(3 * i));
+    positionsVec.emplace_back(positionsMap.segment<3>(3 * i));
   }
 
   // Create mdspans while holding GIL
@@ -506,7 +508,7 @@ void rasterizeText(
 }
 
 void rasterizeText2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const std::vector<std::string>& texts,
     const pybind11::buffer& rgbBuffer,
     const std::optional<Eigen::Vector3f>& color,
@@ -519,22 +521,24 @@ void rasterizeText2D(
 
   const int nTextBindingId = -1;
 
-  TensorChecker checker("rasterize_text_2d");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nTextBindingId, 2}, {"nTexts", "xy"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_text_2d");
+  checker.validateBuffer(positions, "positions", {nTextBindingId, 2}, {"nTexts", "xy"}, false);
 
-  const int64_t numTexts = checker.getBoundValue(nTextBindingId);
+  const auto numTexts = checker.getBoundValue(nTextBindingId);
   if (numTexts != static_cast<int64_t>(texts.size())) {
     throw std::runtime_error(
         fmt::format(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  const Eigen::Ref<const Eigen::VectorXf> positionsFlat = toEigenMap<float>(positions);
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+
   std::vector<Eigen::Vector2f> positionsVec;
   positionsVec.reserve(numTexts);
   for (int i = 0; i < numTexts; ++i) {
-    positionsVec.emplace_back(positionsFlat.segment<2>(2 * i));
+    positionsVec.emplace_back(positionsMap.segment<2>(2 * i));
   }
 
   // Create mdspans while holding GIL
@@ -557,7 +561,7 @@ void rasterizeText2D(
 }
 
 void rasterizeCircles2D(
-    at::Tensor positions,
+    pybind11::buffer positions,
     const pybind11::buffer& rgbBuffer,
     float lineThickness,
     float radius,
@@ -569,14 +573,17 @@ void rasterizeCircles2D(
 
   const int nCirclesBindingId = -1;
 
-  TensorChecker checker("rasterize_circles_2d");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nCirclesBindingId, 2}, {"nCircles", "xy"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_circles_2d");
+  checker.validateBuffer(positions, "positions", {nCirclesBindingId, 2}, {"nCircles", "xy"}, false);
 
   // If no color is provided, use fill=white as default.
   if (!lineColor.has_value() && !fillColor.has_value()) {
     fillColor = Eigen::Vector3f::Ones();
   }
+
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto positionsInfo = positions.request();
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
 
   // Create mdspans while holding GIL
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -586,7 +593,7 @@ void rasterizeCircles2D(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeCircles2D(
-      toEigenMap<float>(positions),
+      positionsMap,
       lineColor,
       fillColor,
       lineThickness,
@@ -597,7 +604,7 @@ void rasterizeCircles2D(
 }
 
 void rasterizeTransforms(
-    at::Tensor transforms,
+    pybind11::buffer transforms,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -621,15 +628,12 @@ void rasterizeTransforms(
 
   const int nTransformsBindingId = -1;
 
-  TensorChecker checker("rasterize");
-
-  transforms = checker.validateAndFixTensor(
+  ArrayChecker checker("rasterize_transforms");
+  checker.validateBuffer(
       transforms,
       "transforms",
       {nTransformsBindingId, 4, 4},
       {"nTransforms", "rows", "cols"},
-      at::kFloat,
-      true,
       false);
 
   const float c1 = 1.0f;
@@ -650,6 +654,12 @@ void rasterizeTransforms(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
+  // Get buffer info for raw pointer access (requires GIL)
+  // The transforms buffer has shape (nTransforms, 4, 4) and is row-major (C-contiguous).
+  // Element [i][r][c] is at offset i*16 + r*4 + c.
+  auto transformsInfo = transforms.request();
+  const auto* transformsPtr = static_cast<const float*>(transformsInfo.ptr);
+
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -658,13 +668,12 @@ void rasterizeTransforms(
   // Release GIL before rendering
   pybind11::gil_scoped_release release;
 
-  const auto transformsCur = transforms.select(0, 0);
-  const auto a = transformsCur.accessor<float, 3>();
-
   for (int i = 0; i < nTransforms; ++i) {
-    const Eigen::Vector3f origin(a[i][0][3], a[i][1][3], a[i][2][3]);
+    // Access element [i][row][col] = transformsPtr[i*16 + row*4 + col]
+    const float* m = transformsPtr + i * 16;
+    const Eigen::Vector3f origin(m[0 * 4 + 3], m[1 * 4 + 3], m[2 * 4 + 3]);
     for (int j = 0; j < 3; ++j) {
-      const Eigen::Vector3f col_j(a[i][0][j], a[i][1][j], a[i][2][j]);
+      const Eigen::Vector3f col_j(m[0 * 4 + j], m[1 * 4 + j], m[2 * 4 + j]);
       const float length = col_j.norm();
       if (length == 0) {
         continue;
