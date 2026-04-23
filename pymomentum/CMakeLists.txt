@@ -332,6 +332,7 @@ if(MOMENTUM_BUILD_RENDERER)
       ${ATEN_INCLUDE_DIR}
       ${TORCH_INCLUDE_DIRS}
     LINK_LIBRARIES
+      array_utility
       character
       common
       math
