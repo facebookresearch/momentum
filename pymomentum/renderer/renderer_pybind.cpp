@@ -8,9 +8,6 @@
 #include <pymomentum/renderer/mesh_processing.h>
 #include <pymomentum/renderer/momentum_render.h>
 #include <pymomentum/renderer/software_rasterizer.h>
-#include <pymomentum/tensor_momentum/tensor_parameter_transform.h>
-#include <pymomentum/tensor_momentum/tensor_skeleton_state.h>
-#include <pymomentum/torch_bridge.h>
 
 #include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
@@ -35,13 +32,6 @@ PYBIND11_MODULE(renderer, m) {
   m.attr("__name__") = "pymomentum.renderer";
   m.doc() = "Functions for rendering momentum models.";
 
-#ifdef PYMOMENTUM_LIMITED_TORCH_API
-  m.attr("AUTOGRAD_ENABLED") = false;
-#else
-  m.attr("AUTOGRAD_ENABLED") = true;
-#endif
-
-  pybind11::module_::import("torch"); // @dep=//caffe2:torch
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
   py::module_ camera_module = pybind11::module_::import(
@@ -223,55 +213,6 @@ PYBIND11_MODULE(renderer, m) {
           py::arg("xf"));
 
   m.def(
-      "build_cameras_for_body",
-      [](const momentum::Character& character,
-         at::Tensor jointParameters,
-         int imageHeight,
-         int imageWidth,
-         float focalLength_mm,
-         bool horizontal,
-         float cameraAngle) {
-        if (PyErr_WarnEx(
-                PyExc_DeprecationWarning,
-                "build_cameras_for_body() is deprecated, use create_camera_for_body() instead. "
-                "The new function takes skeleton_states (numpy.ndarray) instead of joint_parameters "
-                "(torch.Tensor) and returns a single Camera instead of a list.",
-                1) == -1) {
-          throw py::error_already_set();
-        }
-        return buildCamerasForBody(
-            character,
-            std::move(jointParameters),
-            imageHeight,
-            imageWidth,
-            focalLength_mm,
-            horizontal,
-            cameraAngle);
-      },
-      R"(Build a batched vector of cameras that roughly face the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.
-
-.. deprecated::
-    Use :func:`create_camera_for_body` instead.  The new function takes ``skeleton_states``
-    (``numpy.ndarray``) instead of ``joint_parameters`` (``torch.Tensor``) and returns a single
-    :class:`~pymomentum.camera.Camera` instead of a list.
-
-:param character: Character to use.
-:param joint_parameters: torch.Tensor of size (nBatch x [nFrames] x nJointParameters) or size (nJointParameters); can be computed from the modelParameters using :math:`ParameterTransform.apply`.
-:param image_height: Height of the target image.
-:param image_width: Width of the target image.
-:param focal_length_mm: 35mm-equivalent focal length; e.g. focalLength=50 corresponds to a "normal" lens.
-:param horizontal: whether the cameras are placed horizontally, assuming the Y axis is the world up direction.
-:param camera_angle: what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.
-:return: List of cameras, one for each element of the batch.)",
-      py::arg("character"),
-      py::arg("joint_parameters"),
-      py::arg("image_height"),
-      py::arg("image_width"),
-      py::arg("focal_length_mm") = 50.0f,
-      py::arg("horizontal") = false,
-      py::arg("camera_angle") = 0.0f);
-
-  m.def(
       "create_camera_for_body",
       &createCameraForBody,
       R"(Create a camera that roughly faces the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.
@@ -293,26 +234,14 @@ PYBIND11_MODULE(renderer, m) {
       py::arg("camera_angle") = 0.0f);
 
   m.def(
-      "build_cameras_for_hand",
-      &buildCamerasForHand,
-      R"(Build a vector of cameras that roughly face inward from the front of the hand.
+      "create_camera_for_hand",
+      &createCameraForHand,
+      R"(Create a camera that roughly faces inward from the front of the hand.
 
-:param wristTransformation: Wrist transformation.
-:param imageHeight: Height of the target image.
-:param imageWidth: Width of the target image.
-:return: List of cameras, one for each element of the batch.)",
-      py::arg("wrist_transformation"),
-      py::arg("image_height"),
-      py::arg("image_width"));
-
-  m.def(
-      "build_cameras_for_hand_surface",
-      &buildCamerasForHandSurface,
-      R"(Build a vector of cameras that face over the plane.
-
-:param imageHeight: Height of the target image.
-:param imageWidth: Width of the target image.
-:return: List of cameras, one for each element of the batch.)",
+:param wrist_transformation: (4 x 4) numpy.ndarray wrist transformation matrix. The translation (column 3) is in millimeters and will be converted to centimeters internally.
+:param image_height: Height of the target image.
+:param image_width: Width of the target image.
+:return: a :class:`Camera`.)",
       py::arg("wrist_transformation"),
       py::arg("image_height"),
       py::arg("image_width"));
@@ -886,7 +815,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       &rasterizeLines2D,
       R"(Rasterize lines directly in 2D image space without camera projection or z-buffer.
 
-:param positions: (nLines x 4) numpy.ndarray of line start/end positions in image space [start_x, start_y, end_x, end_y].
+:param positions: (nLines x 2 x 2) numpy.ndarray of line start/end positions in image space [[start_x, start_y], [end_x, end_y]].
 :param rgb_buffer: RGB-buffer to render geometry onto.
 :param thickness: Thickness of the lines.
 :param color: Line color.

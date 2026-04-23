@@ -7,9 +7,6 @@
 
 #include "pymomentum/renderer/momentum_render.h"
 
-#include "pymomentum/tensor_momentum/tensor_parameter_transform.h"
-#include "pymomentum/tensor_utility/tensor_utility.h"
-
 #include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/linear_skinning.h>
@@ -196,58 +193,6 @@ momentum::Camera makeOutsideInCameraForBody(
   return frameMesh(result, character, skelStates);
 }
 
-std::vector<momentum::Camera> buildCamerasForBody(
-    const momentum::Character& character,
-    at::Tensor jointParameters,
-    int imageHeight,
-    int imageWidth,
-    float focalLength_mm,
-    bool horizontal,
-    float cameraAngle) {
-  jointParameters = flattenJointParameters(character, jointParameters);
-
-  // If the user passes in a tensor of dimension [n x nJointParams] we assume
-  // the n refers to the batch dimension, and add the nFrames dimension of 1
-  // so it becomes [batchSize x 1 x nJointParams].
-  // If the tensor is [nJointParams], we will add the nFrames dimension of 1
-  // so it becomes [1 x nJointParams].
-  if (jointParameters.ndimension() < 3) {
-    jointParameters = jointParameters.unsqueeze(-2);
-  }
-
-  const int nFramesBinding = -1;
-
-  TensorChecker checker("buildCamerasForBody");
-  jointParameters = checker.validateAndFixTensor(
-      jointParameters,
-      "jointParameters",
-      {nFramesBinding, (int)character.parameterTransform.numJointParameters()},
-      {"nFrames", "nJointParams"},
-      at::kFloat,
-      true,
-      false);
-
-  const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::Camera> result(nBatch);
-
-  for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
-    at::Tensor sequence_cur = jointParameters.select(0, iBatch);
-
-    const auto nFrames = sequence_cur.size(0);
-    std::vector<momentum::SkeletonState> skelStates;
-    skelStates.reserve(nFrames);
-    for (int64_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-      at::Tensor jointParameters_cur = sequence_cur.select(0, iFrame);
-      skelStates.emplace_back(toEigenMap<float>(jointParameters_cur), character.skeleton);
-    }
-
-    result[iBatch] = makeOutsideInCameraForBody(
-        character, skelStates, imageHeight, imageWidth, focalLength_mm, horizontal, cameraAngle);
-  } // end for iBatch
-
-  return result;
-}
-
 momentum::Camera createCameraForBody(
     const momentum::Character& character,
     const py::array_t<float>& skeletonStates,
@@ -349,16 +294,6 @@ momentum::Camera createCameraForBody(
   }
 }
 
-template <typename T2, typename T1>
-std::vector<Eigen::Vector3<T2>> castVector(const std::vector<Eigen::Vector3<T1>>& vec) {
-  std::vector<Eigen::Vector3<T2>> result;
-  result.reserve(vec.size());
-  for (const auto& v : vec) {
-    result.push_back(v.template cast<T2>());
-  }
-  return result;
-}
-
 Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
     const Eigen::VectorXi& faceIndices,
     const Eigen::VectorXi& faceOffsets) {
@@ -390,97 +325,39 @@ Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
   return result;
 }
 
-std::vector<momentum::Camera>
-buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWidth) {
-  TensorChecker checker("buildCamerasForHand");
-  wristTransformation = checker.validateAndFixTensor(
-      wristTransformation,
-      "wristTransformation",
-      {4, 4},
-      {"nTransformMatrixRows", "nTransformMatrixCols"},
-      at::kFloat,
-      true,
-      false);
+momentum::Camera createCameraForHand(
+    const py::array_t<float>& wristTransformation,
+    int imageHeight,
+    int imageWidth) {
+  if (wristTransformation.ndim() != 2 || wristTransformation.shape(0) != 4 ||
+      wristTransformation.shape(1) != 4) {
+    throw std::runtime_error(
+        fmt::format(
+            "create_camera_for_hand: wrist_transformation must be a 4x4 matrix, got shape ({}, {})",
+            wristTransformation.shape(0),
+            wristTransformation.shape(1)));
+  }
 
-  const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::Camera> result(nBatch);
-  momentum::SkeletonState skelState;
+  auto accessor = wristTransformation.unchecked<2>();
 
-  for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
-    // in spine-local coords,
-    //   x points up
-    //   y points forward
-    //   z points to the hand's left
-    at::Tensor batchMat = wristTransformation.select(0, iBatch).contiguous();
-    Eigen::Affine3f wristLocalToWorldXF;
-    wristLocalToWorldXF.matrix() =
-        Eigen::Map<const Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(batchMat.data_ptr<float>());
-    const Eigen::Vector3f hand_up_world = wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f hand_forward_world =
-        -1.0 * wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitZ();
+  // Extract the wrist translation (column 3 of the 4x4 matrix) and convert mm → cm
+  const Eigen::Vector3f hand_center_world_cm(
+      accessor(0, 3) * 0.1f, accessor(1, 3) * 0.1f, accessor(2, 3) * 0.1f);
 
-    const Eigen::Vector3f hand_center_world_cm = wristLocalToWorldXF.translation() * 0.1;
+  // Camera looks inward from the front of the hand
+  // Using fixed Y-up and Z-forward conventions
+  const Eigen::Vector3f camera_up_world = Eigen::Vector3f::UnitY();
+  const Eigen::Vector3f camera_forward_world = Eigen::Vector3f::UnitZ();
 
-    const float cameraDistanceToHand_cm = 0.5f * 100; // 0.5 meters away.
-    const Eigen::Vector3f& camera_up_world = hand_up_world;
-    const Eigen::Vector3f camera_forward_world = -hand_forward_world;
+  const float cameraDistanceToHand_cm = 0.5f * 100; // 0.5 meters away
 
-    result[iBatch] = makeOutsideInCamera(
-        camera_up_world,
-        camera_forward_world,
-        hand_center_world_cm,
-        cameraDistanceToHand_cm,
-        imageHeight,
-        imageWidth);
-  } // end for iBatch
-
-  return result;
-}
-
-std::vector<momentum::Camera>
-buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int imageWidth) {
-  TensorChecker checker("buildCamerasForHand");
-  wristTransformation = checker.validateAndFixTensor(
-      wristTransformation,
-      "wristTransformation",
-      {4, 4},
-      {"nTransformMatrixRows", "nTransformMatrixCols"},
-      at::kFloat,
-      true,
-      false);
-
-  const auto nBatch = checker.getBatchSize();
-  std::vector<momentum::Camera> result(nBatch);
-  momentum::SkeletonState skelState;
-
-  for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
-    // in spine-local coords,
-    //   x points up
-    //   y points forward
-    //   z points to the hand's left
-    at::Tensor batchMat = wristTransformation.select(0, iBatch).contiguous();
-    Eigen::Affine3f wristLocalToWorldXF;
-    wristLocalToWorldXF.matrix() =
-        Eigen::Map<const Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(batchMat.data_ptr<float>());
-    const Eigen::Vector3f hand_up_world = wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f hand_forward_world =
-        -1.0 * wristLocalToWorldXF.rotation() * Eigen::Vector3f::UnitZ();
-
-    const Eigen::Vector3f hand_center_world_cm = wristLocalToWorldXF.translation();
-    const float cameraDistanceToHand_cm = 0.5f * 100; // 0.5 meters away.
-    const Eigen::Vector3f& camera_up_world = hand_up_world;
-    const Eigen::Vector3f camera_forward_world = -hand_forward_world;
-
-    result[iBatch] = makeOutsideInCamera(
-        camera_up_world,
-        camera_forward_world,
-        hand_center_world_cm,
-        cameraDistanceToHand_cm,
-        imageHeight,
-        imageWidth);
-  } // end for iBatch
-
-  return result;
+  return makeOutsideInCamera(
+      camera_up_world,
+      camera_forward_world,
+      hand_center_world_cm,
+      cameraDistanceToHand_cm,
+      imageHeight,
+      imageWidth);
 }
 
 } // namespace pymomentum

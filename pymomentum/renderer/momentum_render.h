@@ -10,7 +10,6 @@
 #include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 
-#include <ATen/ATen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
@@ -18,28 +17,6 @@
 #include <vector>
 
 namespace pymomentum {
-
-// Returned camera is in cm unit.
-std::vector<momentum::Camera> buildCamerasForBodyJoints(
-    at::Tensor jointLocalToWorldTransforms,
-    int spineJointIndexToOrientCamera,
-    int imageHeight,
-    int imageWidth);
-
-// Build a vector of cameras that roughly face the body (default: facing the
-// front of the body). If horizontal is true, the cameras are placed
-// horizontally, assuming the Y axis is the world up direction. Returned camera
-// is in cm unit.
-// cameraAngle: control from what angle the camera looks at the body. Default:
-// 0, looking at the front. Pi/2: looking at the body left side.
-std::vector<momentum::Camera> buildCamerasForBody(
-    const momentum::Character& character,
-    at::Tensor jointParameters,
-    int imageHeight,
-    int imageWidth,
-    float focalLength_mm,
-    bool horizontal,
-    float cameraAngle = 0.0f);
 
 momentum::Camera createCameraForBody(
     const momentum::Character& character,
@@ -50,14 +27,13 @@ momentum::Camera createCameraForBody(
     bool horizontal,
     float cameraAngle = 0.0f);
 
+momentum::Camera createCameraForHand(
+    const pybind11::array_t<float>& wristTransformation,
+    int imageHeight,
+    int imageWidth);
+
 Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
     const Eigen::VectorXi& faceIndices,
     const Eigen::VectorXi& faceOffsets);
-
-std::vector<momentum::Camera>
-buildCamerasForHand(at::Tensor wristTransformation, int imageHeight, int imageWidth);
-
-std::vector<momentum::Camera>
-buildCamerasForHandSurface(at::Tensor wristTransformation, int imageHeight, int imageWidth);
 
 } // namespace pymomentum
