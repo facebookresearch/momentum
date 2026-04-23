@@ -9,8 +9,6 @@
 
 #include "pymomentum/array_utility/array_utility.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
-#include "pymomentum/tensor_momentum/tensor_momentum_utility.h"
-#include "pymomentum/tensor_utility/tensor_utility.h"
 
 #include <momentum/character/character.h>
 #include <momentum/character/linear_skinning.h>
@@ -40,14 +38,6 @@ using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
 using rasterizer_detail::validateRasterizerBuffers;
-
-std::optional<at::Tensor> maybeSelect(std::optional<at::Tensor> tensor, int64_t index) {
-  if (!tensor) {
-    return {};
-  }
-
-  return tensor->select(0, index);
-}
 
 // rasterize with CameraData3d which considers distortion
 void rasterizeMesh(
@@ -755,7 +745,7 @@ void rasterizeSkeletonBones(
 
 void rasterizeSkeleton(
     const momentum::Character& character,
-    at::Tensor skeletonState,
+    const pybind11::buffer& skeletonState,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -765,7 +755,7 @@ void rasterizeSkeleton(
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix_in,
     bool backfaceCulling,
-    std::optional<at::Tensor> activeJoints_in,
+    std::optional<pybind11::buffer> activeJoints_in,
     float nearClip,
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset,
@@ -783,15 +773,12 @@ void rasterizeSkeleton(
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
-  TensorChecker checker("rasterize_skeleton");
-
-  skeletonState = checker.validateAndFixTensor(
+  ArrayChecker checker("rasterize_skeleton");
+  checker.validateBuffer(
       skeletonState,
-      "skeletonState",
+      "skeleton_state",
       {(int)character.skeleton.joints.size(), 8},
       {"nJoints", "pos+rot+scale"},
-      at::kFloat,
-      true,
       false);
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
@@ -802,8 +789,18 @@ void rasterizeSkeleton(
 
   std::vector<bool> activeJoints(nJoints);
   if (activeJoints_in.has_value()) {
-    activeJoints =
-        tensorToJointSet(character.skeleton, *activeJoints_in, DefaultJointSet::ALL_ONES);
+    auto activeInfo = activeJoints_in->request();
+    if (activeInfo.ndim != 1 || static_cast<size_t>(activeInfo.shape[0]) != nJoints) {
+      throw std::runtime_error(
+          fmt::format(
+              "active_joints must be a 1D array with {} elements but got shape [{}]",
+              nJoints,
+              activeInfo.shape[0]));
+    }
+    auto* ptr = static_cast<uint8_t*>(activeInfo.ptr);
+    for (size_t k = 0; k < nJoints; ++k) {
+      activeJoints[k] = (ptr[k] != 0);
+    }
   } else {
     // Make all joints active except b_world, which we usually don't want to
     // render because it's confusing:
@@ -847,7 +844,9 @@ void rasterizeSkeleton(
       cylinderLengthSubdivisions,
       cylinderRadiusSubdivisions);
 
-  const auto skelStateMap = toEigenMap<float>(skeletonState);
+  // Get buffer info for creating Eigen map (requires GIL)
+  auto skelStateInfo = skeletonState.request();
+  auto skelStateMap = bufferToEigenMap<float>(skelStateInfo);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -895,7 +894,7 @@ void rasterizeSkeleton(
 
 void rasterizeCharacter(
     const momentum::Character& character,
-    at::Tensor skeletonState,
+    const pybind11::buffer& skeletonState,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -903,7 +902,7 @@ void rasterizeCharacter(
     const std::optional<pybind11::buffer>& vertexIndexBuffer,
     const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
-    std::optional<at::Tensor> perVertexDiffuseColor,
+    std::optional<pybind11::buffer> perVertexDiffuseColor,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix_in,
     bool backfaceCulling,
@@ -923,25 +922,20 @@ void rasterizeCharacter(
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
-  TensorChecker checker("rasterize_character");
-
-  skeletonState = checker.validateAndFixTensor(
+  ArrayChecker checker("rasterize_character");
+  checker.validateBuffer(
       skeletonState,
-      "skeletonState",
+      "skeleton_state",
       {(int)character.skeleton.joints.size(), 8},
       {"nJoints", "pos+rot+scale"},
-      at::kFloat,
-      true,
       false);
 
-  if (perVertexDiffuseColor) {
-    perVertexDiffuseColor = checker.validateAndFixTensor(
+  if (perVertexDiffuseColor.has_value()) {
+    checker.validateBuffer(
         *perVertexDiffuseColor,
-        "perVertexDiffuseColor",
+        "per_vertex_diffuse_color",
         {(int)character.mesh->vertices.size(), 3},
         {"nVertices", "rgb"},
-        at::kFloat,
-        true,
         false);
   }
 
@@ -951,6 +945,17 @@ void rasterizeCharacter(
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
   const auto nJoints = character.skeleton.joints.size();
+
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto skelStateInfo = skeletonState.request();
+  auto skelStateMap = bufferToEigenMap<float>(skelStateInfo);
+
+  std::optional<py::buffer_info> perVertexColorInfo;
+  if (perVertexDiffuseColor.has_value()) {
+    perVertexColorInfo = perVertexDiffuseColor->request();
+  }
+  Eigen::VectorXf emptyFloatVec;
+  auto perVertexColorMap = bufferToEigenMap<float>(perVertexColorInfo, emptyFloatVec);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -962,11 +967,7 @@ void rasterizeCharacter(
   // Release GIL before rendering
   pybind11::gil_scoped_release release;
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel
-
   std::vector<momentum::JointState> jointStates(character.skeleton.joints.size());
-  const auto skelStateMap = toEigenMap<float>(skeletonState);
   for (size_t jJoint = 0; jJoint < nJoints; ++jJoint) {
     const auto tf = momentum::Transform(
         skelStateMap.segment<3>(8 * jJoint),
@@ -990,8 +991,7 @@ void rasterizeCharacter(
       posedMesh.faces,
       posedMesh.texcoords,
       posedMesh.texcoord_faces,
-      perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
-                                        : Eigen::VectorXf{},
+      perVertexColorMap,
       camera,
       modelMatrix,
       nearClip,
