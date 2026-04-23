@@ -14,7 +14,6 @@
 #include <momentum/rasterizer/fwd.h>
 #include <momentum/rasterizer/rasterizer.h>
 
-#include <ATen/ATen.h>
 #include <pybind11/numpy.h>
 #include <Eigen/Geometry>
 
@@ -123,7 +122,7 @@ enum class SkeletonStyle {
 
 void rasterizeSkeleton(
     const momentum::Character& character,
-    at::Tensor skeletonState,
+    const pybind11::buffer& skeletonState,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -133,7 +132,7 @@ void rasterizeSkeleton(
     std::optional<std::vector<momentum::rasterizer::Light>> lights,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
-    std::optional<at::Tensor> activeJoints,
+    std::optional<pybind11::buffer> activeJoints,
     float nearClip,
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset,
@@ -146,7 +145,7 @@ void rasterizeSkeleton(
 
 void rasterizeCharacter(
     const momentum::Character& character,
-    at::Tensor skeletonState,
+    const pybind11::buffer& skeletonState,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -154,7 +153,7 @@ void rasterizeCharacter(
     const std::optional<pybind11::buffer>& vertexIndexBuffer,
     const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
-    std::optional<at::Tensor> perVertexDiffuseColor,
+    std::optional<pybind11::buffer> perVertexDiffuseColor,
     std::optional<std::vector<momentum::rasterizer::Light>> lights,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
