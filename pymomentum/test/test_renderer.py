@@ -36,9 +36,9 @@ class TestRendering(unittest.TestCase):
             rgb_buffer = pym_renderer.create_rgb_buffer(camera_param)
 
             pym_renderer.rasterize_spheres(
-                center=torch.as_tensor([[0, 0, 20]], dtype=torch.float32),
+                center=np.array([[0, 0, 20]], dtype=np.float32),
                 lights=lights,
-                radius=torch.as_tensor([5], dtype=torch.float32),
+                radius=np.array([5], dtype=np.float32),
                 camera=camera_param,
                 rgb_buffer=rgb_buffer,
                 z_buffer=z_buffer,
