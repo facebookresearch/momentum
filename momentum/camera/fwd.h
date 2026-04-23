@@ -11,7 +11,6 @@
 
 namespace momentum {
 
-// Forward declarations for camera types
 template <typename T>
 class CameraT;
 

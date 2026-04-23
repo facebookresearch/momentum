@@ -19,7 +19,6 @@
 
 namespace momentum {
 
-// Default constructor is VGA res.
 template <typename T>
 CameraT<T>::CameraT()
     : intrinsicsModel_(
@@ -29,14 +28,12 @@ CameraT<T>::CameraT()
               (5.0 / 3.6) * 640,
               (5.0 / 3.6) * 640)) {}
 
-// Constructor implementation for CameraT.
 template <typename T>
 CameraT<T>::CameraT(
     std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel,
     const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld)
     : eyeFromWorld_(eyeFromWorld), intrinsicsModel_(intrinsicsModel) {}
 
-// Constructor for PinholeIntrinsicsModelT with explicit principal point.
 template <typename T>
 PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     int32_t imageWidth,
@@ -47,7 +44,6 @@ PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     T cy)
     : IntrinsicsModelT<T>(imageWidth, imageHeight), fx_(fx), fy_(fy), cx_(cx), cy_(cy) {}
 
-// Constructor for PinholeIntrinsicsModelT with principal point at image center.
 template <typename T>
 PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
     int32_t imageWidth,
@@ -60,7 +56,6 @@ PinholeIntrinsicsModelT<T>::PinholeIntrinsicsModelT(
       cx_(T(imageWidth) / T(2)),
       cy_(T(imageHeight) / T(2)) {}
 
-// Constructor for OpenCVIntrinsicsModelT with optional distortion parameters.
 template <typename T>
 OpenCVIntrinsicsModelT<T>::OpenCVIntrinsicsModelT(
     int32_t imageWidth,
@@ -120,7 +115,6 @@ PinholeIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point) cons
   const T z_inv = T(1) / z;
   const T z_inv_sq = z_inv * z_inv;
 
-  // Project the point
   const T u = fx_ * x * z_inv + cx_;
   const T v = fy_ * y * z_inv + cy_;
   Eigen::Vector3<T> projectedPoint(u, v, z);
@@ -153,9 +147,10 @@ std::shared_ptr<const IntrinsicsModelT<T>> PinholeIntrinsicsModelT<T>::resize(
   T scaleX = T(imageWidth) / T(this->imageWidth());
   T scaleY = T(imageHeight) / T(this->imageHeight());
 
-  // Apply the correct formula for camera center as noted in the comment:
-  // cx = (old_cx + 0.5) * new_sizex / old_sizex - 0.5;
-  // cy = (old_cy + 0.5) * new_sizey / old_sizey - 0.5;
+  // Apply pixel-center-aligned scaling formula for principal point:
+  // cx_new = (cx_old + 0.5) * scale_x - 0.5
+  // This accounts for the fact that pixel (i, j) spans [i, i+1) x [j, j+1) with
+  // center at (i+0.5, j+0.5), ensuring geometric consistency under resolution changes.
   T old_cx = this->cx();
   T old_cy = this->cy();
   T new_cx = (old_cx + T(0.5)) * scaleX - T(0.5);
@@ -210,7 +205,7 @@ std::pair<Eigen::Vector3<T>, bool> PinholeIntrinsicsModelT<T>::unproject(
 
 template <typename T>
 Eigen::Index PinholeIntrinsicsModelT<T>::numIntrinsicParameters() const {
-  return 4; // fx, fy, cx, cy
+  return 4;
 }
 
 template <typename T>
@@ -292,7 +287,6 @@ PinholeIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& p
   return {projectedPoint, jacobian, true};
 }
 
-// Base class implementations for IntrinsicsModelT
 template <typename T>
 std::shared_ptr<const IntrinsicsModelT<T>> IntrinsicsModelT<T>::resample(T factor) const {
   return resize(
@@ -314,7 +308,6 @@ std::shared_ptr<const IntrinsicsModelT<T>> IntrinsicsModelT<T>::upsample(T facto
       static_cast<int32_t>(this->imageHeight() * factor));
 }
 
-// OpenCVIntrinsicsModelT implementation
 template <typename T>
 std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVIntrinsicsModelT<T>::project(
     const Vector3P<T>& point) const {
@@ -400,7 +393,6 @@ OpenCVIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point) const
   const T xpp = xp * radial_factor + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * xp * xp);
   const T ypp = yp * radial_factor + dp.p1 * (rsqr + T(2) * yp * yp) + T(2) * dp.p2 * xp * yp;
 
-  // Project the point
   const T u = fx_ * xpp + cx_;
   const T v = fy_ * ypp + cy_;
   Eigen::Vector3<T> projectedPoint(u, v, z);
@@ -502,7 +494,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
 
   // Newton's method with backtracking line search to solve the nonlinear projection equation
   for (int iter = 0; iter < maxIterations; ++iter) {
-    // Use projectJacobian to get both the projected point and Jacobian
     const auto [projectedPoint, jacobian, isValid] = projectJacobian(p_cur);
 
     if (!isValid) {
@@ -515,7 +506,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
         projectedPoint.template head<2>() - imagePoint.template head<2>();
     const T residual_norm = residual.norm();
 
-    // Check convergence
     if (residual_norm < tolerance) {
       return {p_cur, true};
     }
@@ -532,7 +522,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
 
     // Check if the solution is valid (no NaN or infinite values)
     if (!delta.allFinite()) {
-      // QR solve failed, return failure
       return {p_init, false};
     }
 
@@ -556,7 +545,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
       // Try step: x_new = x + alpha * delta
       p_new.template head<2>() = p_cur.template head<2>() + alpha * delta;
 
-      // Evaluate cost at new point
       const auto [new_projectedPoint, new_isValid] = project(p_new);
 
       if (!new_isValid) {
@@ -575,7 +563,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
         break;
       }
 
-      // Reduce step size
       alpha *= rho;
     }
 
@@ -583,7 +570,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
       return {p_init, false};
     }
 
-    // Update the 3D point
     p_cur = p_new;
   }
 
@@ -593,7 +579,7 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::unproject(
 
 template <typename T>
 Eigen::Index OpenCVIntrinsicsModelT<T>::numIntrinsicParameters() const {
-  return 14; // fx, fy, cx, cy, k1-k6, p1-p4
+  return 14;
 }
 
 template <typename T>
@@ -671,7 +657,6 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
   const T xpp = xp * radial_factor + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * xp * xp);
   const T ypp = yp * radial_factor + dp.p1 * (rsqr + T(2) * yp * yp) + T(2) * dp.p2 * xp * yp;
 
-  // Project the point
   const T u = fx_ * xpp + cx_;
   const T v = fy_ * ypp + cy_;
   Eigen::Vector3<T> projectedPoint(u, v, z);
@@ -753,8 +738,6 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
   return {projectedPoint, jacobian, true};
 }
 
-// OpenCVFisheyeIntrinsicsModelT implementation
-
 template <typename T>
 OpenCVFisheyeIntrinsicsModelT<T>::OpenCVFisheyeIntrinsicsModelT(
     int32_t imageWidth,
@@ -833,7 +816,6 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVFisheyeIntrinsicsMode
     // Compute scale factor
     const T scale = (r > T(1e-8)) ? thetaD / r : T(1);
 
-    // Apply scale
     const T xpp = scale * a;
     const T ypp = scale * b;
 
@@ -883,7 +865,6 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVFisheyeIntrinsicsModelT<T>::project(
   // Compute scale factor: theta_d / r, handle r->0 singularity
   T scale = (r > T(1e-8)) ? thetaD / r : T(1);
 
-  // Apply scale
   T xpp = scale * a;
   T ypp = scale * b;
 
@@ -939,7 +920,6 @@ OpenCVFisheyeIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point
   const T xpp = scale * a;
   const T ypp = scale * b;
 
-  // Project the point
   const T u = fx_ * xpp + cx_;
   const T v = fy_ * ypp + cy_;
   Eigen::Vector3<T> projectedPoint(u, v, z);
@@ -1112,13 +1092,12 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVFisheyeIntrinsicsModelT<T>::unproject(
   const T a = xpp * unscale;
   const T b = ypp * unscale;
 
-  // Convert to 3D point
   return {Eigen::Vector3<T>(a * depth, b * depth, depth), true};
 }
 
 template <typename T>
 Eigen::Index OpenCVFisheyeIntrinsicsModelT<T>::numIntrinsicParameters() const {
-  return 8; // fx, fy, cx, cy, k1, k2, k3, k4
+  return 8;
 }
 
 template <typename T>
@@ -1408,7 +1387,6 @@ CameraT<T>::framePoints(const std::vector<Eigen::Vector3<T>>& points, T minZ, T 
   // Calculate bounding box of points in eye space
   Eigen::AlignedBox<T, 3> bbox_eye;
   for (const auto& p_world : points) {
-    // Transform world point to eye space
     bbox_eye.extend(eyeFromWorld_ * p_world);
   }
 
@@ -1470,7 +1448,6 @@ Vector3P<T> CameraT<T>::transformWorldToEye(const Vector3P<T>& worldPoints) cons
 
 template <typename T>
 Eigen::Vector3<T> CameraT<T>::transformWorldToEye(const Eigen::Vector3<T>& worldPoint) const {
-  // Transform world point to camera space using Eigen operations
   return eyeFromWorld_ * worldPoint;
 }
 
@@ -1480,23 +1457,19 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> CameraT<T>::project(
   // Transform all world points to camera space using SIMD operations
   const Vector3P<T> eyePoints = transformWorldToEye(worldPoints);
 
-  // Use the intrinsics model's SIMD project method directly
   return intrinsicsModel_->project(eyePoints);
 }
 
 template <typename T>
 std::pair<Eigen::Vector3<T>, bool> CameraT<T>::project(const Eigen::Vector3<T>& worldPoint) const {
-  // Transform world point to camera space using helper function
   const Eigen::Vector3<T> eyePoint = transformWorldToEye(worldPoint);
 
-  // Use the intrinsics model to project to image coordinates
   return intrinsicsModel_->project(eyePoint);
 }
 
 template <typename T>
 std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 2, 3>, bool> CameraT<T>::projectJacobian(
     const Eigen::Vector3<T>& worldPoint) const {
-  // Transform world point to camera space using helper function
   const Eigen::Vector3<T> eyePoint = transformWorldToEye(worldPoint);
 
   // Get the Jacobian of projection with respect to camera coordinates
@@ -1510,7 +1483,6 @@ std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 2, 3>, bool> CameraT<T>::projectJ
   // coordinates)
   const Eigen::Matrix<T, 2, 3> J_proj_eye = jacobian_eye.template topRows<2>();
 
-  // Get the rotation part of the world-to-eye transform
   const Eigen::Matrix<T, 3, 3> R_eye_world = eyeFromWorld_.linear();
 
   // Apply chain rule: J_proj_world = J_proj_eye * R_eye_world
@@ -1529,26 +1501,20 @@ CameraT<T>::unproject(const Vector3P<T>& imagePoints, int maxIterations, T toler
   auto validMask = drjit::full<typename PacketT::MaskType>(true);
 
   for (size_t i = 0; i < PacketT::Size; ++i) {
-    // Extract 3D image point for this element (u, v, z)
     Eigen::Vector3<T> imagePoint(imagePoints.x()[i], imagePoints.y()[i], imagePoints.z()[i]);
 
-    // Unproject to camera space using the intrinsics model
     auto [eyePoint, isValid] = intrinsicsModel_->unproject(imagePoint, maxIterations, tolerance);
 
-    // Check if unprojection was successful
     if (!isValid) {
       validMask[i] = false;
-      // Set to zero for invalid points
       worldPoints.x()[i] = T(0);
       worldPoints.y()[i] = T(0);
       worldPoints.z()[i] = T(0);
       continue;
     }
 
-    // Transform from camera space to world space
     const Eigen::Vector3<T> worldPoint = worldFromEye() * eyePoint;
 
-    // Store the result
     worldPoints.x()[i] = worldPoint(0);
     worldPoints.y()[i] = worldPoint(1);
     worldPoints.z()[i] = worldPoint(2);
@@ -1560,20 +1526,17 @@ CameraT<T>::unproject(const Vector3P<T>& imagePoints, int maxIterations, T toler
 template <typename T>
 std::pair<Eigen::Vector3<T>, bool>
 CameraT<T>::unproject(const Eigen::Vector3<T>& imagePoint, int maxIterations, T tolerance) const {
-  // Unproject to camera space using the intrinsics model
   auto [eyePoint, isValid] = intrinsicsModel_->unproject(imagePoint, maxIterations, tolerance);
 
   if (!isValid) {
     return {Eigen::Vector3<T>::Zero(), false};
   }
 
-  // Transform from camera space to world space
   const Eigen::Vector3<T> worldPoint = worldFromEye() * eyePoint;
 
   return {worldPoint, true};
 }
 
-// Explicit template instantiations
 template class CameraT<float>;
 template class CameraT<double>;
 template class IntrinsicsModelT<float>;
