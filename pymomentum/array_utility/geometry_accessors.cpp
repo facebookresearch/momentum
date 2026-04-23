@@ -924,6 +924,30 @@ std::pair<int, int> IntScalarArrayAccessor::minmax() const {
   return {minVal, maxVal};
 }
 
+// ============================================================================
+// ScalarArrayAccessor implementation
+// ============================================================================
+
+template <typename T>
+ScalarArrayAccessor<T>::ScalarArrayAccessor(const py::buffer& buffer, py::ssize_t expectedSize)
+    : ScalarArrayAccessor(buffer.request(), expectedSize) {}
+
+template <typename T>
+ScalarArrayAccessor<T>::ScalarArrayAccessor(const py::buffer_info& info, py::ssize_t expectedSize)
+    : size_(expectedSize) {
+  MT_THROW_IF(info.ndim != 1, "ScalarArrayAccessor: expected 1D array, got {}D", info.ndim);
+  MT_THROW_IF(
+      info.shape[0] != expectedSize,
+      "ScalarArrayAccessor: expected size {}, got {}",
+      expectedSize,
+      info.shape[0]);
+  data_ = static_cast<T*>(info.ptr);
+  stride_ = info.strides[0] / static_cast<py::ssize_t>(sizeof(T));
+}
+
+template class ScalarArrayAccessor<float>;
+template class ScalarArrayAccessor<double>;
+
 //
 // TransformAccessor implementation
 // ============================================================================

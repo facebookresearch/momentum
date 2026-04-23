@@ -549,6 +549,27 @@ class IntScalarArrayAccessor {
   SourceDtype dtype_;
 };
 
+// Stride-aware accessor for 1D scalar arrays (e.g. radius, length buffers).
+template <typename T>
+class ScalarArrayAccessor {
+ public:
+  ScalarArrayAccessor(const py::buffer& buffer, py::ssize_t expectedSize);
+  ScalarArrayAccessor(const py::buffer_info& info, py::ssize_t expectedSize);
+
+  [[nodiscard]] py::ssize_t size() const {
+    return size_;
+  }
+
+  [[nodiscard]] T get(py::ssize_t index) const {
+    return data_[index * stride_];
+  }
+
+ private:
+  T* data_{};
+  py::ssize_t size_{};
+  py::ssize_t stride_{};
+};
+
 // Note: TransformInputFormat is defined in array_utility.h
 
 // Unified accessor for transforms that handles both skeleton state and matrix formats.
