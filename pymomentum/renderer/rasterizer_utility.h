@@ -129,6 +129,49 @@ Span<T, R> make_mdspan(const std::optional<pybind11::buffer>& buf) {
   return make_mdspan<T, R>(*buf);
 }
 
+// Create a flat Eigen::Map from a contiguous buffer.
+// The buffer must be row-major (C-contiguous) for correct element ordering.
+// This is the buffer-based equivalent of toEigenMap<T>(at::Tensor).
+template <typename T>
+Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> bufferToEigenMap(const py::buffer_info& info) {
+  // Verify the innermost dimension is contiguous (stride == 1 element)
+  if (info.ndim >= 1) {
+    const auto innermostStride = info.strides[info.ndim - 1] / static_cast<py::ssize_t>(sizeof(T));
+    if (innermostStride != 1) {
+      throw std::runtime_error(
+          "Buffer must be contiguous in the innermost dimension for rasterization");
+    }
+  }
+
+  // For 2D buffers, verify row-major layout
+  if (info.ndim == 2) {
+    const auto rowStride = info.strides[0] / static_cast<py::ssize_t>(sizeof(T));
+    const auto expectedRowStride = info.shape[1];
+    if (rowStride != expectedRowStride) {
+      throw std::runtime_error("Buffer must be row-major (C-contiguous) for rasterization");
+    }
+  }
+
+  // Total number of elements
+  py::ssize_t numel = 1;
+  for (py::ssize_t i = 0; i < info.ndim; ++i) {
+    numel *= info.shape[i];
+  }
+
+  return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>(static_cast<T*>(info.ptr), numel);
+}
+
+// bufferToEigenMap from optional buffer_info, returning an empty fallback if absent.
+template <typename T>
+Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> bufferToEigenMap(
+    const std::optional<py::buffer_info>& info,
+    Eigen::Matrix<T, Eigen::Dynamic, 1>& emptyFallback) {
+  if (!info.has_value()) {
+    return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>(emptyFallback.data(), 0);
+  }
+  return bufferToEigenMap<T>(*info);
+}
+
 // Create an aligned numpy array for SIMD operations with proper stride handling.
 // Shape contains the logical dimensions (actual width).
 // Row strides are padded internally for SIMD alignment.

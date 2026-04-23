@@ -22,12 +22,15 @@
 
 namespace pymomentum {
 
-// A SIMD-based software rasterizer that supports the Nimble camera model
-// and per-pixel Phong shading/lighting.
+// Contiguous numpy array that enforces exact dtype and C-contiguous layout.
+// Rejects mismatched dtypes (e.g. float64 where float32 is expected) with a clear error.
+template <typename T>
+using ContiguousArray = pybind11::array_t<T, pybind11::array::c_style>;
+
 void rasterizeMesh(
-    at::Tensor positions,
-    std::optional<at::Tensor> normals,
-    at::Tensor triangles,
+    const ContiguousArray<float>& positions,
+    std::optional<ContiguousArray<float>> normals,
+    const ContiguousArray<int32_t>& triangles,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -35,9 +38,9 @@ void rasterizeMesh(
     const std::optional<pybind11::buffer>& vertexIndexBuffer,
     const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
-    std::optional<at::Tensor> textureCoordinates,
-    std::optional<at::Tensor> textureTriangles,
-    std::optional<at::Tensor> perVertexDiffuseColor,
+    std::optional<ContiguousArray<float>> textureCoordinates,
+    std::optional<ContiguousArray<int32_t>> textureTriangles,
+    std::optional<ContiguousArray<float>> perVertexDiffuseColor,
     std::optional<std::vector<momentum::rasterizer::Light>> lights,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
@@ -46,8 +49,8 @@ void rasterizeMesh(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeWireframe(
-    at::Tensor positions,
-    at::Tensor triangles,
+    const ContiguousArray<float>& positions,
+    const ContiguousArray<int32_t>& triangles,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,

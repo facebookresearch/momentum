@@ -7,6 +7,7 @@
 
 #include "pymomentum/renderer/software_rasterizer.h"
 
+#include "pymomentum/array_utility/array_utility.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
 #include "pymomentum/tensor_momentum/tensor_momentum_utility.h"
 #include "pymomentum/tensor_utility/tensor_utility.h"
@@ -35,6 +36,7 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
+using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
 using rasterizer_detail::validateRasterizerBuffers;
@@ -49,9 +51,9 @@ std::optional<at::Tensor> maybeSelect(std::optional<at::Tensor> tensor, int64_t 
 
 // rasterize with CameraData3d which considers distortion
 void rasterizeMesh(
-    at::Tensor positions,
-    std::optional<at::Tensor> normals,
-    at::Tensor triangles,
+    const ContiguousArray<float>& positions,
+    std::optional<ContiguousArray<float>> normals,
+    const ContiguousArray<int32_t>& triangles,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -59,9 +61,9 @@ void rasterizeMesh(
     const std::optional<pybind11::buffer>& vertexIndexBuffer,
     const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
-    std::optional<at::Tensor> textureCoordinates,
-    std::optional<at::Tensor> textureTriangles,
-    std::optional<at::Tensor> perVertexDiffuseColor,
+    std::optional<ContiguousArray<float>> textureCoordinates,
+    std::optional<ContiguousArray<int32_t>> textureTriangles,
+    std::optional<ContiguousArray<float>> perVertexDiffuseColor,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
@@ -78,54 +80,35 @@ void rasterizeMesh(
   const int nTrisBindingID = -2;
   const int nTexCoordsBindingID = -3;
 
-  TensorChecker checker("rasterize");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nVertsBindingID, 3}, {"nVertices", "xyz"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_mesh");
+  checker.validateBuffer(positions, "positions", {nVertsBindingID, 3}, {"nVertices", "xyz"}, false);
 
   if (normals.has_value()) {
-    normals = checker.validateAndFixTensor(
-        normals.value(),
-        "normals",
-        {nVertsBindingID, 3},
-        {"nVertices", "xyz"},
-        at::kFloat,
-        true,
-        true);
+    checker.validateBuffer(*normals, "normals", {nVertsBindingID, 3}, {"nVertices", "xyz"}, true);
   }
 
-  triangles = checker.validateAndFixTensor(
-      triangles, "triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, at::kInt, true, false);
+  checker.validateBuffer(triangles, "triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, false);
 
   if (textureCoordinates.has_value()) {
-    textureCoordinates = checker.validateAndFixTensor(
-        textureCoordinates.value(),
+    checker.validateBuffer(
+        *textureCoordinates,
         "texture_coordinates",
         {nTexCoordsBindingID, 2},
         {"nTexCoords", "uv"},
-        at::kFloat,
-        true,
         false);
   }
 
   if (textureTriangles.has_value()) {
-    textureTriangles = checker.validateAndFixTensor(
-        textureTriangles.value(),
-        "triangles",
-        {nTrisBindingID, 3},
-        {"nTriangles", "xyz"},
-        at::kInt,
-        true,
-        false);
+    checker.validateBuffer(
+        *textureTriangles, "texture_triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, false);
   }
 
   if (perVertexDiffuseColor.has_value()) {
-    perVertexDiffuseColor = checker.validateAndFixTensor(
-        perVertexDiffuseColor.value(),
-        "perVertexDiffuseColor",
+    checker.validateBuffer(
+        *perVertexDiffuseColor,
+        "per_vertex_diffuse_color",
         {nVertsBindingID, 3},
         {"nVerts", "rgb"},
-        at::kFloat,
-        true,
         false);
   }
 
@@ -134,12 +117,38 @@ void rasterizeMesh(
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
-  Eigen::VectorXf emptyTextureCoords;
-  Eigen::VectorXf emptyNormals;
-  Eigen::VectorXi emptyTextureTriangles;
-  Eigen::VectorXf emptyPerVertexDiffuseColor;
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto positionsInfo = positions.request();
+  auto trianglesInfo = triangles.request();
 
-  // Create mdspans while holding GIL (make_mdspan calls request() internally)
+  std::optional<py::buffer_info> normalsInfo;
+  if (normals.has_value()) {
+    normalsInfo = normals->request();
+  }
+  std::optional<py::buffer_info> texCoordsInfo;
+  if (textureCoordinates.has_value()) {
+    texCoordsInfo = textureCoordinates->request();
+  }
+  std::optional<py::buffer_info> texTrianglesInfo;
+  if (textureTriangles.has_value()) {
+    texTrianglesInfo = textureTriangles->request();
+  }
+  std::optional<py::buffer_info> perVertexColorInfo;
+  if (perVertexDiffuseColor.has_value()) {
+    perVertexColorInfo = perVertexDiffuseColor->request();
+  }
+
+  // Create Eigen maps from buffer data
+  Eigen::VectorXf emptyFloatVec;
+  Eigen::VectorXi emptyIntVec;
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  auto normalsMap = bufferToEigenMap<float>(normalsInfo, emptyFloatVec);
+  auto trianglesMap = bufferToEigenMap<int32_t>(trianglesInfo);
+  auto texCoordsMap = bufferToEigenMap<float>(texCoordsInfo, emptyFloatVec);
+  auto texTrianglesMap = bufferToEigenMap<int32_t>(texTrianglesInfo, emptyIntVec);
+  auto perVertexColorMap = bufferToEigenMap<float>(perVertexColorInfo, emptyFloatVec);
+
+  // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
   auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
@@ -150,13 +159,12 @@ void rasterizeMesh(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeMesh(
-      toEigenMap<float>(positions),
-      normals.has_value() ? toEigenMap<float>(*normals) : emptyNormals,
-      toEigenMap<int>(triangles),
-      textureCoordinates.has_value() ? toEigenMap<float>(*textureCoordinates) : emptyTextureCoords,
-      textureTriangles.has_value() ? toEigenMap<int32_t>(*textureTriangles) : emptyTextureTriangles,
-      perVertexDiffuseColor.has_value() ? toEigenMap<float>(*perVertexDiffuseColor)
-                                        : emptyPerVertexDiffuseColor,
+      positionsMap,
+      normalsMap,
+      trianglesMap,
+      texCoordsMap,
+      texTrianglesMap,
+      perVertexColorMap,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
@@ -173,8 +181,8 @@ void rasterizeMesh(
 }
 
 void rasterizeWireframe(
-    at::Tensor positions,
-    at::Tensor triangles,
+    const ContiguousArray<float>& positions,
+    const ContiguousArray<int32_t>& triangles,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -194,14 +202,18 @@ void rasterizeWireframe(
   const int nVertsBindingID = -1;
   const int nTrisBindingID = -2;
 
-  TensorChecker checker("rasterize");
-  positions = checker.validateAndFixTensor(
-      positions, "positions", {nVertsBindingID, 3}, {"nVertices", "xyz"}, at::kFloat, true, false);
-
-  triangles = checker.validateAndFixTensor(
-      triangles, "triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, at::kInt, true, false);
+  ArrayChecker checker("rasterize_wireframe");
+  checker.validateBuffer(positions, "positions", {nVertsBindingID, 3}, {"nVertices", "xyz"}, false);
+  checker.validateBuffer(triangles, "triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, false);
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
+
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto positionsInfo = positions.request();
+  auto trianglesInfo = triangles.request();
+
+  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  auto trianglesMap = bufferToEigenMap<int32_t>(trianglesInfo);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -211,8 +223,8 @@ void rasterizeWireframe(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeWireframe(
-      toEigenMap<float>(positions),
-      toEigenMap<int>(triangles),
+      positionsMap,
+      trianglesMap,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,

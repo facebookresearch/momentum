@@ -399,13 +399,21 @@ class TestRendering(unittest.TestCase):
         The quad spans [-5, -5, 5] to [5, 5, 5] to fill the viewport.
         Back-face culling is disabled so winding order does not matter.
         """
-        positions = torch.tensor(
-            [[-5, -5, 5], [5, -5, 5], [5, 5, 5], [-5, 5, 5]], dtype=torch.float32
+        positions = np.array(
+            [[-5, -5, 5], [5, -5, 5], [5, 5, 5], [-5, 5, 5]], dtype=np.float32
         )
-        normals = torch.tensor(
-            [[0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=torch.float32
+        normals = np.array(
+            [[0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=np.float32
         )
-        triangles = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.int32)
+        triangles = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32)
+
+        # Convert optional torch texture args to numpy if provided
+        tex_coords_np = (
+            texture_coordinates.numpy() if texture_coordinates is not None else None
+        )
+        tex_tris_np = (
+            texture_triangles.numpy() if texture_triangles is not None else None
+        )
 
         z_buffer = pym_renderer.create_z_buffer(camera)
         rgb_buffer = pym_renderer.create_rgb_buffer(camera)
@@ -416,8 +424,8 @@ class TestRendering(unittest.TestCase):
             camera,
             z_buffer,
             rgb_buffer,
-            texture_coordinates=texture_coordinates,
-            texture_triangles=texture_triangles,
+            texture_coordinates=tex_coords_np,
+            texture_triangles=tex_tris_np,
             back_face_culling=False,
         )
         return z_buffer, rgb_buffer
@@ -565,23 +573,19 @@ class TestRendering(unittest.TestCase):
         )
 
         # A large triangle with 3 vertices that fills the viewport.
-        positions = torch.tensor(
-            [[-5, -5, 5], [5, -5, 5], [0, 5, 5]], dtype=torch.float32
-        )
-        normals = torch.tensor(
-            [[0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=torch.float32
-        )
-        triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+        positions = np.array([[-5, -5, 5], [5, -5, 5], [0, 5, 5]], dtype=np.float32)
+        normals = np.array([[0, 0, -1], [0, 0, -1], [0, 0, -1]], dtype=np.float32)
+        triangles = np.array([[0, 1, 2]], dtype=np.int32)
 
         # 6 texture coordinates — more than 3 vertices. This is common in real
         # meshes where UV seams require duplicated texture coordinates.
-        tex_coords = torch.tensor(
+        tex_coords = np.array(
             [[0, 0], [1, 0], [0.5, 1], [0.5, 0], [1, 0.5], [0, 0.5]],
-            dtype=torch.float32,
+            dtype=np.float32,
         )
 
         def rasterize_triangle(
-            tex_tri: torch.Tensor,
+            tex_tri: NDArray[np.int32],
         ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
             z_buf = pym_renderer.create_z_buffer(camera)
             rgb_buf = pym_renderer.create_rgb_buffer(camera)
@@ -599,12 +603,12 @@ class TestRendering(unittest.TestCase):
             return z_buf, rgb_buf
 
         # Render with texture_triangles referencing the first three tex coords.
-        tex_triangles_a = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+        tex_triangles_a = np.array([[0, 1, 2]], dtype=np.int32)
         z_buffer_a, rgb_buffer_a = rasterize_triangle(tex_triangles_a)
 
         # Render with texture_triangles referencing the last three tex coords
         # (indices 3, 4, 5) — exercises the extra texture coordinates.
-        tex_triangles_b = torch.tensor([[3, 4, 5]], dtype=torch.int32)
+        tex_triangles_b = np.array([[3, 4, 5]], dtype=np.int32)
         z_buffer_b, rgb_buffer_b = rasterize_triangle(tex_triangles_b)
 
         # 1. Verify geometry was rendered in both cases.
