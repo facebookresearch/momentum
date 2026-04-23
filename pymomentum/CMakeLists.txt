@@ -333,6 +333,7 @@ if(MOMENTUM_BUILD_RENDERER)
       ${TORCH_INCLUDE_DIRS}
     LINK_LIBRARIES
       character
+      common
       math
       rasterizer
       skeleton

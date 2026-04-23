@@ -53,11 +53,11 @@ void rasterizeMesh(
     std::optional<at::Tensor> normals,
     at::Tensor triangles,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
-    std::optional<at::Tensor> vertexIndexBuffer,
-    std::optional<at::Tensor> triangleIndexBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
+    const std::optional<pybind11::buffer>& vertexIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<at::Tensor> textureCoordinates,
     std::optional<at::Tensor> textureTriangles,
@@ -69,7 +69,6 @@ void rasterizeMesh(
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -130,15 +129,8 @@ void rasterizeMesh(
         false);
   }
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer) =
-      validateRasterizerBuffers(
-          checker,
-          camera,
-          zBuffer,
-          rgbBuffer,
-          surfaceNormalsBuffer,
-          vertexIndexBuffer,
-          triangleIndexBuffer);
+  validateRasterizerBuffers(
+      camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
@@ -146,6 +138,17 @@ void rasterizeMesh(
   Eigen::VectorXf emptyNormals;
   Eigen::VectorXi emptyTextureTriangles;
   Eigen::VectorXf emptyPerVertexDiffuseColor;
+
+  // Create mdspans while holding GIL (make_mdspan calls request() internally)
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+  auto vertexIndexBufferMdspan = make_mdspan<int, 2>(vertexIndexBuffer);
+  auto triangleIndexBufferMdspan = make_mdspan<int, 2>(triangleIndexBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
+
   momentum::rasterizer::rasterizeMesh(
       toEigenMap<float>(positions),
       normals.has_value() ? toEigenMap<float>(*normals) : emptyNormals,
@@ -158,11 +161,11 @@ void rasterizeMesh(
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
       material.value_or(momentum::rasterizer::PhongMaterial{}),
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
-      make_mdspan<float, 3>(surfaceNormalsBuffer),
-      make_mdspan<int, 2>(vertexIndexBuffer),
-      make_mdspan<int, 2>(triangleIndexBuffer),
+      zBufferMdspan,
+      rgbBufferMdspan,
+      surfaceNormalsBufferMdspan,
+      vertexIndexBufferMdspan,
+      triangleIndexBufferMdspan,
       lights_eye,
       backfaceCulling,
       depthOffset,
@@ -173,8 +176,8 @@ void rasterizeWireframe(
     at::Tensor positions,
     at::Tensor triangles,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
     float thickness,
     const std::optional<Eigen::Vector3f>& color,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
@@ -183,7 +186,6 @@ void rasterizeWireframe(
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -199,13 +201,15 @@ void rasterizeWireframe(
   triangles = checker.validateAndFixTensor(
       triangles, "triangles", {nTrisBindingID, 3}, {"nTriangles", "xyz"}, at::kInt, true, false);
 
-  std::tie(zBuffer, rgbBuffer, std::ignore, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, {}, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel.
-  Eigen::VectorXf emptyTextureCoords;
-  Eigen::VectorXi emptyTextureTriangles;
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
+
   momentum::rasterizer::rasterizeWireframe(
       toEigenMap<float>(positions),
       toEigenMap<int>(triangles),
@@ -214,8 +218,8 @@ void rasterizeWireframe(
       nearClip,
       color.value_or(Eigen::Vector3f{1, 1, 1}),
       thickness,
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
+      zBufferMdspan,
+      rgbBufferMdspan,
       backfaceCulling,
       depthOffset,
       imageOffset.value_or(Eigen::Vector2f::Zero()));
@@ -224,9 +228,9 @@ void rasterizeWireframe(
 void rasterizeSpheres(
     at::Tensor center,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     std::optional<at::Tensor> radius,
     std::optional<at::Tensor> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
@@ -238,7 +242,6 @@ void rasterizeSpheres(
     const std::optional<Eigen::Vector2f>& imageOffset,
     int subdivisionLevel) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -262,8 +265,7 @@ void rasterizeSpheres(
         *color, "color", {nSpheresBindingID, 3}, {"nSpheres", "rgb"}, at::kFloat, true, false);
   }
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
 
   const auto nSpheres = checker.getBoundValue(nSpheresBindingID);
 
@@ -271,8 +273,13 @@ void rasterizeSpheres(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nSpheres; ++i) {
     const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
@@ -291,9 +298,9 @@ void rasterizeSpheres(
         modelMatrix * transform.matrix(),
         nearClip,
         materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        zBufferMdspan,
+        rgbBufferMdspan,
+        surfaceNormalsBufferMdspan,
         {},
         {},
         lights_eye,
@@ -307,9 +314,9 @@ void rasterizeCylinders(
     at::Tensor start_position,
     at::Tensor end_position,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     std::optional<at::Tensor> radius,
     std::optional<at::Tensor> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
@@ -322,7 +329,6 @@ void rasterizeCylinders(
     int lengthSubdivisions,
     int radiusSubdivisions) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -361,8 +367,7 @@ void rasterizeCylinders(
         *color, "color", {nCylindersBindingID, 3}, {"nCylinders", "rgb"}, at::kFloat, true, false);
   }
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
 
   const auto nCylinders = checker.getBoundValue(nCylindersBindingID);
 
@@ -370,6 +375,14 @@ void rasterizeCylinders(
       momentum::rasterizer::makeCylinder(radiusSubdivisions, lengthSubdivisions);
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
+
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
@@ -397,9 +410,9 @@ void rasterizeCylinders(
         modelMatrix * transform.matrix(),
         nearClip,
         materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        zBufferMdspan,
+        rgbBufferMdspan,
+        surfaceNormalsBufferMdspan,
         {},
         {},
         lights_eye,
@@ -414,9 +427,9 @@ void rasterizeCapsules(
     at::Tensor radius,
     at::Tensor length,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix_in,
@@ -426,7 +439,6 @@ void rasterizeCapsules(
     int cylinderLengthSubdivisions,
     int cylinderRadiusSubdivisions) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -458,8 +470,7 @@ void rasterizeCapsules(
   length = checker.validateAndFixTensor(
       length, "length", {nCapsulesBindingId}, {"nCapsules"}, at::kFloat, true, false);
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
 
   const auto nCapsules = checker.getBoundValue(nCapsulesBindingId);
 
@@ -467,6 +478,14 @@ void rasterizeCapsules(
 
   // Capsules are closed surfaces so we might as well always cull:
   const bool backfaceCulling = true;
+
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
@@ -491,9 +510,9 @@ void rasterizeCapsules(
         modelMatrix * transform.matrix(),
         nearClip,
         materialCur,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        zBufferMdspan,
+        rgbBufferMdspan,
+        surfaceNormalsBufferMdspan,
         {},
         {},
         lights_eye,
@@ -715,9 +734,9 @@ void rasterizeSkeleton(
     const momentum::Character& character,
     at::Tensor skeletonState,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& jointMaterial,
     const std::optional<momentum::rasterizer::PhongMaterial>& cylinderMaterial,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
@@ -734,7 +753,6 @@ void rasterizeSkeleton(
     int cylinderRadiusSubdivisions,
     SkeletonStyle style) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -753,8 +771,7 @@ void rasterizeSkeleton(
       true,
       false);
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
 
   const auto nJoints = character.skeleton.joints.size();
 
@@ -809,6 +826,14 @@ void rasterizeSkeleton(
 
   const auto skelStateMap = toEigenMap<float>(skeletonState);
 
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
+
   rasterizeSkeletonJoints(
       assets,
       activeJoints,
@@ -817,9 +842,9 @@ void rasterizeSkeleton(
       modelMatrix,
       nearClip,
       jointMaterial,
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
-      make_mdspan<float, 3>(surfaceNormalsBuffer),
+      zBufferMdspan,
+      rgbBufferMdspan,
+      surfaceNormalsBufferMdspan,
       lights_eye,
       backfaceCulling,
       depthOffset,
@@ -835,9 +860,9 @@ void rasterizeSkeleton(
       modelMatrix,
       nearClip,
       cylinderMaterial,
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
-      make_mdspan<float, 3>(surfaceNormalsBuffer),
+      zBufferMdspan,
+      rgbBufferMdspan,
+      surfaceNormalsBufferMdspan,
       lights_eye,
       backfaceCulling,
       depthOffset,
@@ -849,11 +874,11 @@ void rasterizeCharacter(
     const momentum::Character& character,
     at::Tensor skeletonState,
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
-    std::optional<at::Tensor> vertexIndexBuffer,
-    std::optional<at::Tensor> triangleIndexBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
+    const std::optional<pybind11::buffer>& vertexIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<at::Tensor> perVertexDiffuseColor,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
@@ -864,7 +889,6 @@ void rasterizeCharacter(
     const std::optional<Eigen::Vector2f>& imageOffset,
     std::optional<Eigen::Vector3f> wireframeColor) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (!character.skinWeights || !character.mesh) {
     throw std::runtime_error("Mesh is missing from character.");
@@ -898,19 +922,22 @@ void rasterizeCharacter(
         false);
   }
 
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer) =
-      validateRasterizerBuffers(
-          checker,
-          camera,
-          zBuffer,
-          rgbBuffer,
-          surfaceNormalsBuffer,
-          vertexIndexBuffer,
-          triangleIndexBuffer);
+  validateRasterizerBuffers(
+      camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
   const auto nJoints = character.skeleton.joints.size();
+
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+  auto vertexIndexBufferMdspan = make_mdspan<int, 2>(vertexIndexBuffer);
+  auto triangleIndexBufferMdspan = make_mdspan<int, 2>(triangleIndexBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
 
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
@@ -946,11 +973,11 @@ void rasterizeCharacter(
       modelMatrix,
       nearClip,
       material.value_or(momentum::rasterizer::PhongMaterial{}),
-      make_mdspan<float, 2>(zBuffer),
-      make_mdspan<float, 3>(rgbBuffer),
-      make_mdspan<float, 3>(surfaceNormalsBuffer),
-      make_mdspan<int, 2>(vertexIndexBuffer),
-      make_mdspan<int, 2>(triangleIndexBuffer),
+      zBufferMdspan,
+      rgbBufferMdspan,
+      surfaceNormalsBufferMdspan,
+      vertexIndexBufferMdspan,
+      triangleIndexBufferMdspan,
       lights_eye,
       backfaceCulling,
       depthOffset,
@@ -965,8 +992,8 @@ void rasterizeCharacter(
         nearClip,
         *wireframeColor,
         1.0f,
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
+        zBufferMdspan,
+        rgbBufferMdspan,
         backfaceCulling,
         depthOffset - 0.001,
         imageOffset.value_or(Eigen::Vector2f::Zero()));
@@ -975,9 +1002,9 @@ void rasterizeCharacter(
 
 void rasterizeCheckerboard(
     const momentum::rasterizer::Camera& camera,
-    at::Tensor zBuffer,
-    std::optional<at::Tensor> rgbBuffer,
-    std::optional<at::Tensor> surfaceNormalsBuffer,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
     const std::optional<momentum::rasterizer::PhongMaterial>& material1_in,
     const std::optional<momentum::rasterizer::PhongMaterial>& material2_in,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
@@ -990,7 +1017,6 @@ void rasterizeCheckerboard(
     int numChecks,
     int subdivisions) {
   drjit::scoped_flush_denormals flushDenorm(true);
-  pybind11::gil_scoped_release release;
 
   if (nearClip <= 0) {
     throw std::runtime_error("near_clip should be positive.");
@@ -1010,10 +1036,7 @@ void rasterizeCheckerboard(
 
   const auto lights_eye = convertLightsToEyeSpace(std::move(lights_world), camera);
 
-  TensorChecker checker("rasterize_checkerboard");
-
-  std::tie(zBuffer, rgbBuffer, surfaceNormalsBuffer, std::ignore, std::ignore) =
-      validateRasterizerBuffers(checker, camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
+  validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
 
   const auto& meshes = momentum::rasterizer::makeCheckerboard(width, numChecks, subdivisions);
 
@@ -1024,6 +1047,14 @@ void rasterizeCheckerboard(
       material2_in.value_or(
           momentum::rasterizer::PhongMaterial{Eigen::Vector3f(0.5f, 0.5f, 0.5f)})};
 
+  // Create mdspans while holding GIL
+  auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
+  auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
+  auto surfaceNormalsBufferMdspan = make_mdspan<float, 3>(surfaceNormalsBuffer);
+
+  // Release GIL before rendering
+  pybind11::gil_scoped_release release;
+
   // We don't expect batched to be the common case, so don't try to process
   // the batches in parallel
   for (int k = 0; k < 2; ++k) {
@@ -1033,9 +1064,9 @@ void rasterizeCheckerboard(
         modelMatrix.value_or(Eigen::Matrix4f::Identity()),
         nearClip,
         materials[k],
-        make_mdspan<float, 2>(zBuffer),
-        make_mdspan<float, 3>(rgbBuffer),
-        make_mdspan<float, 3>(surfaceNormalsBuffer),
+        zBufferMdspan,
+        rgbBufferMdspan,
+        surfaceNormalsBufferMdspan,
         {},
         {},
         lights_eye,
