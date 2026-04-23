@@ -8,6 +8,7 @@
 #include "pymomentum/renderer/rasterizer_primitives.h"
 
 #include "pymomentum/array_utility/array_utility.h"
+#include "pymomentum/array_utility/geometry_accessors.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
 
 #include <momentum/rasterizer/geometry.h>
@@ -654,9 +655,9 @@ void rasterizeTransforms(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto transformsInfo = transforms.request();
-  auto transformsMap = bufferToEigenMap<float>(transformsInfo);
+  // Use TransformAccessor to parse 4x4 matrices from the buffer (requires GIL)
+  TransformAccessor<float> transformAccessor(transforms, LeadingDimensions{}, nTransforms);
+  const auto transformMatrices = transformAccessor.getMatrices({});
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -667,8 +668,7 @@ void rasterizeTransforms(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nTransforms; ++i) {
-    // Row-major numpy → column-major Eigen, so transpose
-    const Eigen::Matrix4f mat = transformsMap.segment<16>(16 * i).reshaped(4, 4).transpose();
+    const Eigen::Matrix4f& mat = transformMatrices[i];
     const Eigen::Vector3f origin = mat.col(3).head<3>();
     for (int j = 0; j < 3; ++j) {
       const Eigen::Vector3f col_j = mat.col(j).head<3>();
