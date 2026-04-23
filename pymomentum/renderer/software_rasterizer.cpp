@@ -238,13 +238,13 @@ void rasterizeWireframe(
 }
 
 void rasterizeSpheres(
-    at::Tensor center,
+    const pybind11::buffer& center,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
     const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
-    std::optional<at::Tensor> radius,
-    std::optional<at::Tensor> color,
+    std::optional<pybind11::buffer> radius,
+    std::optional<pybind11::buffer> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix_in,
@@ -263,18 +263,15 @@ void rasterizeSpheres(
 
   const int nSpheresBindingID = -1;
 
-  TensorChecker checker("rasterize");
-  center = checker.validateAndFixTensor(
-      center, "center", {nSpheresBindingID, 3}, {"nSpheres", "xyz"}, at::kFloat, true, false);
+  ArrayChecker checker("rasterize_spheres");
+  checker.validateBuffer(center, "center", {nSpheresBindingID, 3}, {"nSpheres", "xyz"}, false);
 
-  if (radius) {
-    *radius = checker.validateAndFixTensor(
-        *radius, "radius", {nSpheresBindingID}, {"nSpheres"}, at::kFloat, true, false);
+  if (radius.has_value()) {
+    checker.validateBuffer(*radius, "radius", {nSpheresBindingID}, {"nSpheres"}, false);
   }
 
-  if (color) {
-    *color = checker.validateAndFixTensor(
-        *color, "color", {nSpheresBindingID, 3}, {"nSpheres", "rgb"}, at::kFloat, true, false);
+  if (color.has_value()) {
+    checker.validateBuffer(*color, "color", {nSpheresBindingID, 3}, {"nSpheres", "rgb"}, false);
   }
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, {}, {});
@@ -285,6 +282,22 @@ void rasterizeSpheres(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto centerInfo = center.request();
+  std::optional<py::buffer_info> radiusInfo;
+  if (radius.has_value()) {
+    radiusInfo = radius->request();
+  }
+  std::optional<py::buffer_info> colorInfo;
+  if (color.has_value()) {
+    colorInfo = color->request();
+  }
+
+  Eigen::VectorXf emptyFloatVec;
+  auto centerMap = bufferToEigenMap<float>(centerInfo);
+  auto radiusMap = bufferToEigenMap<float>(radiusInfo, emptyFloatVec);
+  auto colorMap = bufferToEigenMap<float>(colorInfo, emptyFloatVec);
+
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -294,14 +307,14 @@ void rasterizeSpheres(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nSpheres; ++i) {
-    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+    const float radiusVal = radius.has_value() ? radiusMap(i) : 1.0f;
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color) {
-      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+    if (color.has_value()) {
+      materialCur.diffuseColor = colorMap.segment<3>(3 * i);
     }
 
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translate(toEigenMap<float>(center).segment<3>(3 * i));
+    transform.translate(centerMap.segment<3>(3 * i));
     transform.scale(radiusVal);
 
     momentum::rasterizer::rasterizeMesh(
@@ -323,14 +336,14 @@ void rasterizeSpheres(
 }
 
 void rasterizeCylinders(
-    at::Tensor start_position,
-    at::Tensor end_position,
+    const pybind11::buffer& start_position,
+    const pybind11::buffer& end_position,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
     const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
-    std::optional<at::Tensor> radius,
-    std::optional<at::Tensor> color,
+    std::optional<pybind11::buffer> radius,
+    std::optional<pybind11::buffer> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix_in,
@@ -350,33 +363,19 @@ void rasterizeCylinders(
 
   const int nCylindersBindingID = -1;
 
-  TensorChecker checker("rasterize");
-  start_position = checker.validateAndFixTensor(
-      start_position,
-      "start_position",
-      {nCylindersBindingID, 3},
-      {"nCylinders", "xyz"},
-      at::kFloat,
-      true,
-      false);
+  ArrayChecker checker("rasterize_cylinders");
+  checker.validateBuffer(
+      start_position, "start_position", {nCylindersBindingID, 3}, {"nCylinders", "xyz"}, false);
 
-  end_position = checker.validateAndFixTensor(
-      end_position,
-      "end_position",
-      {nCylindersBindingID, 3},
-      {"nCylinders", "xyz"},
-      at::kFloat,
-      true,
-      false);
+  checker.validateBuffer(
+      end_position, "end_position", {nCylindersBindingID, 3}, {"nCylinders", "xyz"}, false);
 
-  if (radius) {
-    *radius = checker.validateAndFixTensor(
-        *radius, "radius", {nCylindersBindingID}, {"nSpheres"}, at::kFloat, true, false);
+  if (radius.has_value()) {
+    checker.validateBuffer(*radius, "radius", {nCylindersBindingID}, {"nCylinders"}, false);
   }
 
-  if (color) {
-    *color = checker.validateAndFixTensor(
-        *color, "color", {nCylindersBindingID, 3}, {"nCylinders", "rgb"}, at::kFloat, true, false);
+  if (color.has_value()) {
+    checker.validateBuffer(*color, "color", {nCylindersBindingID, 3}, {"nCylinders", "rgb"}, false);
   }
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
@@ -388,6 +387,24 @@ void rasterizeCylinders(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto startPosInfo = start_position.request();
+  auto endPosInfo = end_position.request();
+  std::optional<py::buffer_info> radiusInfo;
+  if (radius.has_value()) {
+    radiusInfo = radius->request();
+  }
+  std::optional<py::buffer_info> colorInfo;
+  if (color.has_value()) {
+    colorInfo = color->request();
+  }
+
+  Eigen::VectorXf emptyFloatVec;
+  auto startPosMap = bufferToEigenMap<float>(startPosInfo);
+  auto endPosMap = bufferToEigenMap<float>(endPosInfo);
+  auto radiusMap = bufferToEigenMap<float>(radiusInfo, emptyFloatVec);
+  auto colorMap = bufferToEigenMap<float>(colorInfo, emptyFloatVec);
+
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -396,16 +413,13 @@ void rasterizeCylinders(
   // Release GIL before rendering
   pybind11::gil_scoped_release release;
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel
-
   for (int i = 0; i < nCylinders; ++i) {
-    const Eigen::Vector3f startPos = toEigenMap<float>(start_position).segment<3>(3 * i);
-    const Eigen::Vector3f endPos = toEigenMap<float>(end_position).segment<3>(3 * i);
-    const float radiusVal = radius ? toEigenMap<float>(*radius)(i) : 1.0f;
+    const Eigen::Vector3f startPos = startPosMap.segment<3>(3 * i);
+    const Eigen::Vector3f endPos = endPosMap.segment<3>(3 * i);
+    const float radiusVal = radius.has_value() ? radiusMap(i) : 1.0f;
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color) {
-      materialCur.diffuseColor = toEigenMap<float>(*color).segment<3>(3 * i);
+    if (color.has_value()) {
+      materialCur.diffuseColor = colorMap.segment<3>(3 * i);
     }
 
     const float length = (endPos - startPos).norm();
@@ -435,9 +449,9 @@ void rasterizeCylinders(
 }
 
 void rasterizeCapsules(
-    at::Tensor transformation,
-    at::Tensor radius,
-    at::Tensor length,
+    const pybind11::buffer& transformation,
+    const pybind11::buffer& radius,
+    const pybind11::buffer& length,
     const momentum::rasterizer::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
@@ -460,27 +474,18 @@ void rasterizeCapsules(
 
   const int nCapsulesBindingId = -1;
 
-  TensorChecker checker("rasterize");
-  transformation = checker.validateAndFixTensor(
+  ArrayChecker checker("rasterize_capsules");
+  checker.validateBuffer(
       transformation,
       "transformation",
       {nCapsulesBindingId, 4, 4},
       {"nCapsules", "rows", "cols"},
-      at::kFloat,
-      true,
       false);
 
-  radius = checker.validateAndFixTensor(
-      radius,
-      "radius",
-      {nCapsulesBindingId, 2},
-      {"nCapsules", "startEnd"},
-      at::kFloat,
-      true,
-      false);
+  checker.validateBuffer(
+      radius, "radius", {nCapsulesBindingId, 2}, {"nCapsules", "startEnd"}, false);
 
-  length = checker.validateAndFixTensor(
-      length, "length", {nCapsulesBindingId}, {"nCapsules"}, at::kFloat, true, false);
+  checker.validateBuffer(length, "length", {nCapsulesBindingId}, {"nCapsules"}, false);
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, surfaceNormalsBuffer);
 
@@ -491,6 +496,15 @@ void rasterizeCapsules(
   // Capsules are closed surfaces so we might as well always cull:
   const bool backfaceCulling = true;
 
+  // Get buffer infos for creating Eigen maps (requires GIL)
+  auto transformationInfo = transformation.request();
+  auto radiusInfo = radius.request();
+  auto lengthInfo = length.request();
+
+  auto transformationMap = bufferToEigenMap<float>(transformationInfo);
+  auto radiusMap = bufferToEigenMap<float>(radiusInfo);
+  auto lengthMap = bufferToEigenMap<float>(lengthInfo);
+
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -499,15 +513,12 @@ void rasterizeCapsules(
   // Release GIL before rendering
   pybind11::gil_scoped_release release;
 
-  // We don't expect batched to be the common case, so don't try to process
-  // the batches in parallel
-
   for (int i = 0; i < nCapsules; ++i) {
     const Eigen::Matrix4f transform =
-        toEigenMap<float>(transformation).segment<16>(16 * i).reshaped(4, 4).transpose();
+        transformationMap.segment<16>(16 * i).reshaped(4, 4).transpose();
 
-    const Eigen::Vector2f radiusVal = toEigenMap<float>(radius).segment<2>(2 * i);
-    const float lengthVal = toEigenMap<float>(length)(i);
+    const Eigen::Vector2f radiusVal = radiusMap.segment<2>(2 * i);
+    const float lengthVal = lengthMap(i);
 
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
 

@@ -63,13 +63,13 @@ void rasterizeWireframe(
     const std::optional<Eigen::Vector2f>& imageOffset);
 
 void rasterizeSpheres(
-    at::Tensor center,
+    const pybind11::buffer& center,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
     const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
-    std::optional<at::Tensor> radius,
-    std::optional<at::Tensor> color,
+    std::optional<pybind11::buffer> radius,
+    std::optional<pybind11::buffer> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
@@ -80,14 +80,14 @@ void rasterizeSpheres(
     int subdivisionLevel);
 
 void rasterizeCylinders(
-    at::Tensor start_position,
-    at::Tensor end_position,
+    const pybind11::buffer& start_position,
+    const pybind11::buffer& end_position,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
     const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
-    std::optional<at::Tensor> radius,
-    std::optional<at::Tensor> color,
+    std::optional<pybind11::buffer> radius,
+    std::optional<pybind11::buffer> color,
     const std::optional<momentum::rasterizer::PhongMaterial>& material,
     std::optional<std::vector<momentum::rasterizer::Light>> lights,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
@@ -99,9 +99,9 @@ void rasterizeCylinders(
     int radiusSubdivisions);
 
 void rasterizeCapsules(
-    at::Tensor transformation,
-    at::Tensor radius,
-    at::Tensor length,
+    const pybind11::buffer& transformation,
+    const pybind11::buffer& radius,
+    const pybind11::buffer& length,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
