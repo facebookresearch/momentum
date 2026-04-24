@@ -26,7 +26,6 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
-using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
 using rasterizer_detail::validateRasterizerBuffers;
@@ -205,9 +204,16 @@ void rasterizeLines(
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  const auto nLines = checker.getBoundValue(nLinesBindingId);
+
+  VectorArrayAccessor<float, 3> posAccessor(positions, LeadingDimensions{{nLines}}, 2);
+  std::vector<Eigen::Vector3f> positionsVec;
+  positionsVec.reserve(nLines * 2);
+  for (py::ssize_t i = 0; i < nLines; ++i) {
+    auto view = posAccessor.view({i});
+    positionsVec.push_back(view.get(0));
+    positionsVec.push_back(view.get(1));
+  }
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -217,7 +223,7 @@ void rasterizeLines(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeLines(
-      positionsMap,
+      positionsVec,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
@@ -261,9 +267,10 @@ void rasterizeCircles(
 
   validateRasterizerBuffers(camera, zBuffer, rgbBuffer, {}, {}, {});
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  const auto nCircles = checker.getBoundValue(nCirclesBindingId);
+
+  VectorArrayAccessor<float, 3> posAccessor(positions, LeadingDimensions{}, nCircles);
+  auto positionsVec = posAccessor.get({});
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -273,7 +280,7 @@ void rasterizeCircles(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeCircles(
-      positionsMap,
+      positionsVec,
       camera,
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
@@ -427,9 +434,16 @@ void rasterizeLines2D(
   checker.validateBuffer(
       positions, "positions", {nLinesBindingId, 2, 2}, {"nLines", "start_end", "xy"}, false);
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  const auto nLines = checker.getBoundValue(nLinesBindingId);
+
+  VectorArrayAccessor<float, 2> posAccessor(positions, LeadingDimensions{{nLines}}, 2);
+  std::vector<Eigen::Vector2f> positionsVec;
+  positionsVec.reserve(nLines * 2);
+  for (py::ssize_t i = 0; i < nLines; ++i) {
+    auto view = posAccessor.view({i});
+    positionsVec.push_back(view.get(0));
+    positionsVec.push_back(view.get(1));
+  }
 
   // Create mdspans while holding GIL
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -439,7 +453,7 @@ void rasterizeLines2D(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeLines2D(
-      positionsMap,
+      positionsVec,
       color.value_or(Eigen::Vector3f::Ones()),
       thickness,
       rgbBufferMdspan,
@@ -475,15 +489,8 @@ void rasterizeText(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
-
-  std::vector<Eigen::Vector3f> positionsVec;
-  positionsVec.reserve(numTexts);
-  for (int i = 0; i < numTexts; ++i) {
-    positionsVec.emplace_back(positionsMap.segment<3>(3 * i));
-  }
+  VectorArrayAccessor<float, 3> posAccessor(positions, LeadingDimensions{}, numTexts);
+  auto positionsVec = posAccessor.get({});
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -532,15 +539,8 @@ void rasterizeText2D(
             "Mismatch between number of positions ({}) and texts ({})", numTexts, texts.size()));
   }
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
-
-  std::vector<Eigen::Vector2f> positionsVec;
-  positionsVec.reserve(numTexts);
-  for (int i = 0; i < numTexts; ++i) {
-    positionsVec.emplace_back(positionsMap.segment<2>(2 * i));
-  }
+  VectorArrayAccessor<float, 2> posAccessor(positions, LeadingDimensions{}, numTexts);
+  auto positionsVec = posAccessor.get({});
 
   // Create mdspans while holding GIL
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -582,9 +582,10 @@ void rasterizeCircles2D(
     fillColor = Eigen::Vector3f::Ones();
   }
 
-  // Get buffer info for creating Eigen map (requires GIL)
-  auto positionsInfo = positions.request();
-  auto positionsMap = bufferToEigenMap<float>(positionsInfo);
+  const auto nCircles = checker.getBoundValue(nCirclesBindingId);
+
+  VectorArrayAccessor<float, 2> posAccessor(positions, LeadingDimensions{}, nCircles);
+  auto positionsVec = posAccessor.get({});
 
   // Create mdspans while holding GIL
   auto rgbBufferMdspan = make_mdspan<float, 3>(rgbBuffer);
@@ -594,7 +595,7 @@ void rasterizeCircles2D(
   pybind11::gil_scoped_release release;
 
   momentum::rasterizer::rasterizeCircles2D(
-      positionsMap,
+      positionsVec,
       lineColor,
       fillColor,
       lineThickness,

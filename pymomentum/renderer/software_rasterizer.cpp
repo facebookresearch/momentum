@@ -273,21 +273,19 @@ void rasterizeSpheres(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
-  // Get buffer infos for creating Eigen maps (requires GIL)
-  auto centerInfo = center.request();
-  std::optional<py::buffer_info> radiusInfo;
+  VectorArrayAccessor<float, 3> centerAccessor(center, LeadingDimensions{}, nSpheres);
+  auto centerView = centerAccessor.view({});
+
+  std::optional<ScalarArrayAccessor<float>> radiusAccessor;
   if (radius.has_value()) {
-    radiusInfo = radius->request();
-  }
-  std::optional<py::buffer_info> colorInfo;
-  if (color.has_value()) {
-    colorInfo = color->request();
+    radiusAccessor.emplace(*radius, nSpheres);
   }
 
-  Eigen::VectorXf emptyFloatVec;
-  auto centerMap = bufferToEigenMap<float>(centerInfo);
-  auto radiusMap = bufferToEigenMap<float>(radiusInfo, emptyFloatVec);
-  auto colorMap = bufferToEigenMap<float>(colorInfo, emptyFloatVec);
+  std::optional<typename VectorArrayAccessor<float, 3>::ElementView> colorView;
+  if (color.has_value()) {
+    VectorArrayAccessor<float, 3> colorAccessor(*color, LeadingDimensions{}, nSpheres);
+    colorView = colorAccessor.view({});
+  }
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -298,14 +296,14 @@ void rasterizeSpheres(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nSpheres; ++i) {
-    const float radiusVal = radius.has_value() ? radiusMap(i) : 1.0f;
+    const float radiusVal = radiusAccessor ? radiusAccessor->get(i) : 1.0f;
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color.has_value()) {
-      materialCur.diffuseColor = colorMap.segment<3>(3 * i);
+    if (colorView) {
+      materialCur.diffuseColor = colorView->get(i);
     }
 
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.translate(centerMap.segment<3>(3 * i));
+    transform.translate(centerView.get(i));
     transform.scale(radiusVal);
 
     momentum::rasterizer::rasterizeMesh(
@@ -378,23 +376,21 @@ void rasterizeCylinders(
 
   const Eigen::Matrix4f modelMatrix = modelMatrix_in.value_or(Eigen::Matrix4f::Identity());
 
-  // Get buffer infos for creating Eigen maps (requires GIL)
-  auto startPosInfo = start_position.request();
-  auto endPosInfo = end_position.request();
-  std::optional<py::buffer_info> radiusInfo;
+  VectorArrayAccessor<float, 3> startPosAccessor(start_position, LeadingDimensions{}, nCylinders);
+  auto startPosView = startPosAccessor.view({});
+  VectorArrayAccessor<float, 3> endPosAccessor(end_position, LeadingDimensions{}, nCylinders);
+  auto endPosView = endPosAccessor.view({});
+
+  std::optional<ScalarArrayAccessor<float>> radiusAccessor;
   if (radius.has_value()) {
-    radiusInfo = radius->request();
-  }
-  std::optional<py::buffer_info> colorInfo;
-  if (color.has_value()) {
-    colorInfo = color->request();
+    radiusAccessor.emplace(*radius, nCylinders);
   }
 
-  Eigen::VectorXf emptyFloatVec;
-  auto startPosMap = bufferToEigenMap<float>(startPosInfo);
-  auto endPosMap = bufferToEigenMap<float>(endPosInfo);
-  auto radiusMap = bufferToEigenMap<float>(radiusInfo, emptyFloatVec);
-  auto colorMap = bufferToEigenMap<float>(colorInfo, emptyFloatVec);
+  std::optional<typename VectorArrayAccessor<float, 3>::ElementView> colorView;
+  if (color.has_value()) {
+    VectorArrayAccessor<float, 3> colorAccessor(*color, LeadingDimensions{}, nCylinders);
+    colorView = colorAccessor.view({});
+  }
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -405,12 +401,12 @@ void rasterizeCylinders(
   pybind11::gil_scoped_release release;
 
   for (int i = 0; i < nCylinders; ++i) {
-    const Eigen::Vector3f startPos = startPosMap.segment<3>(3 * i);
-    const Eigen::Vector3f endPos = endPosMap.segment<3>(3 * i);
-    const float radiusVal = radius.has_value() ? radiusMap(i) : 1.0f;
+    const Eigen::Vector3f startPos = startPosView.get(i);
+    const Eigen::Vector3f endPos = endPosView.get(i);
+    const float radiusVal = radiusAccessor ? radiusAccessor->get(i) : 1.0f;
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
-    if (color.has_value()) {
-      materialCur.diffuseColor = colorMap.segment<3>(3 * i);
+    if (colorView) {
+      materialCur.diffuseColor = colorView->get(i);
     }
 
     const float length = (endPos - startPos).norm();
@@ -487,15 +483,12 @@ void rasterizeCapsules(
   // Capsules are closed surfaces so we might as well always cull:
   const bool backfaceCulling = true;
 
-  // Use TransformAccessor to parse 4x4 matrices from the buffer (requires GIL)
   TransformAccessor<float> transformAccessor(transformation, LeadingDimensions{}, nCapsules);
   const auto capsuleMatrices = transformAccessor.getMatrices({});
 
-  // Get buffer infos for creating Eigen maps (requires GIL)
-  auto radiusInfo = radius.request();
-  auto lengthInfo = length.request();
-  auto radiusMap = bufferToEigenMap<float>(radiusInfo);
-  auto lengthMap = bufferToEigenMap<float>(lengthInfo);
+  VectorArrayAccessor<float, 2> radiusAccessor(radius, LeadingDimensions{}, nCapsules);
+  auto radiusView = radiusAccessor.view({});
+  ScalarArrayAccessor<float> lengthAccessor(length, nCapsules);
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -508,8 +501,8 @@ void rasterizeCapsules(
   for (int i = 0; i < nCapsules; ++i) {
     const Eigen::Matrix4f& transform = capsuleMatrices[i];
 
-    const Eigen::Vector2f radiusVal = radiusMap.segment<2>(2 * i);
-    const float lengthVal = lengthMap(i);
+    const Eigen::Vector2f radiusVal = radiusView.get(i);
+    const float lengthVal = lengthAccessor.get(i);
 
     auto materialCur = material.value_or(momentum::rasterizer::PhongMaterial());
 
