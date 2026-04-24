@@ -13,6 +13,7 @@
 #include "pymomentum/geometry/array_skeleton_state.h"
 #include "pymomentum/geometry/array_vertex_normals.h"
 #include "pymomentum/geometry/character_pybind.h"
+#include "pymomentum/geometry/fbx_builder_pybind.h"
 #include "pymomentum/geometry/gltf_builder_pybind.h"
 #include "pymomentum/geometry/limit_pybind.h"
 #include "pymomentum/geometry/locators_pybind.h"
@@ -1432,7 +1433,8 @@ included or excluded whole.
       py::arg("region_colors"),
       py::arg("num_binary_search_steps") = 8);
 
-  // Register GltfBuilder bindings
+  // Register builder bindings
+  registerFbxBuilderBindings(m);
   registerGltfBuilderBindings(m);
 
   // Register logging bindings
