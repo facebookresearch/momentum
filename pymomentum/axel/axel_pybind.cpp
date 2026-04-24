@@ -9,6 +9,7 @@
 #include <axel/DualContouring.h>
 #include <axel/MeshToSdf.h>
 #include <axel/SignedDistanceField.h>
+#include <axel/SignedDistanceFieldIO.h>
 #include <axel/common/Types.h>
 #include <axel/math/MeshHoleFilling.h>
 #include <momentum/common/exception.h>
@@ -279,6 +280,11 @@ Available methods:
           "total_voxels",
           &axel::SignedDistanceField<float>::totalVoxels,
           "Get the total number of voxels in the SDF.")
+      .def_property(
+          "parent_joint",
+          &axel::SignedDistanceField<float>::parentJoint,
+          &axel::SignedDistanceField<float>::setParentJoint,
+          "Optional parent joint name for skeleton association (e.g., 'c_spine2').")
       .def(
           "sample",
           [](const axel::SignedDistanceField<float>& self, const py::array_t<float>& positions) {
@@ -1061,6 +1067,86 @@ Example usage::
       py::arg("vertex_mask") = py::array_t<bool>(),
       py::arg("iterations") = 1,
       py::arg("step") = 0.5f);
+
+  // SDF serialization
+  m.def(
+      "save_sdf_to_msgpack",
+      &axel::saveSdfToMsgpack<float>,
+      R"(Save a signed distance field to a msgpack file.
+
+The file stores the SDF's bounding box, grid resolution, and all voxel distance
+values in a compact binary format.
+
+:param sdf: The :class:`SignedDistanceField` to save.
+:param path: Output file path (should end in .msgpack).
+
+Example usage::
+
+    import pymomentum.axel as axel
+
+    sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=1.0)
+    axel.save_sdf_to_msgpack(sdf, "/tmp/my_sdf.msgpack"))",
+      py::arg("sdf"),
+      py::arg("path"));
+
+  m.def(
+      "load_sdf_from_msgpack",
+      &axel::loadSdfFromMsgpack<float>,
+      R"(Load a signed distance field from a msgpack file.
+
+:param path: Input file path.
+:return: The loaded :class:`SignedDistanceField`.
+:raises RuntimeError: If the file cannot be read or parsed.
+
+Example usage::
+
+    import pymomentum.axel as axel
+
+    sdf = axel.load_sdf_from_msgpack("/tmp/my_sdf.msgpack")
+    print(f"Loaded SDF with resolution {sdf.resolution}"))",
+      py::arg("path"));
+
+  m.def(
+      "save_sdfs_to_msgpack",
+      &axel::saveSdfsToMsgpack<float>,
+      R"(Save multiple named signed distance fields to a single msgpack file.
+
+Each SDF's :attr:`parent_joint` (if set) is serialized alongside the SDF data.
+Only float32 precision is supported from Python.
+
+:param sdfs: Dictionary mapping names to :class:`SignedDistanceField` objects.
+:param path: Output file path (should end in .msgpack).
+
+Example usage::
+
+    import pymomentum.axel as axel
+
+    chest_sdf = axel.mesh_to_sdf(chest_verts, chest_tris, voxel_size=1.0)
+    chest_sdf.parent_joint = "c_spine2"
+    axel.save_sdfs_to_msgpack({"chest": chest_sdf}, "/tmp/body_sdfs.msgpack"))",
+      py::arg("sdfs"),
+      py::arg("path"));
+
+  m.def(
+      "load_sdfs_from_msgpack",
+      &axel::loadSdfsFromMsgpack<float>,
+      R"(Load multiple named signed distance fields from a single msgpack file.
+
+Each SDF's :attr:`parent_joint` is restored from the file if present.
+Only float32 precision is supported from Python.
+
+:param path: Input file path.
+:return: Dictionary mapping names to :class:`SignedDistanceField` objects.
+:raises RuntimeError: If the file cannot be read or parsed.
+
+Example usage::
+
+    import pymomentum.axel as axel
+
+    sdfs = axel.load_sdfs_from_msgpack("/tmp/body_sdfs.msgpack")
+    for name, sdf in sdfs.items():
+        print(f"{name}: joint={sdf.parent_joint}, resolution={sdf.resolution}"))",
+      py::arg("path"));
 
   // Register TriBvh bindings
   registerTriBvhBindings(m);
