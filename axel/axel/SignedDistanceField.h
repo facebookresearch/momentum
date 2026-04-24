@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <Eigen/Core>
@@ -201,6 +202,21 @@ class SignedDistanceField {
   [[nodiscard]] std::vector<Scalar>& data();
 
   /**
+   * Get the optional parent joint name. Used by collision systems to associate
+   * this SDF with a skeleton joint for coordinate frame transforms.
+   *
+   * @return The parent joint name, or empty string if not set
+   */
+  [[nodiscard]] const std::string& parentJoint() const;
+
+  /**
+   * Set the parent joint name.
+   *
+   * @param name Skeleton joint name (e.g., "c_spine2" for chest)
+   */
+  void setParentJoint(const std::string& name);
+
+  /**
    * Fill the entire SDF with a constant value.
    *
    * @param value The value to fill with
@@ -251,6 +267,7 @@ class SignedDistanceField {
   Eigen::Vector3<Index> resolution_;
   Vector3 voxelSize_;
   std::vector<Scalar> data_;
+  std::string parentJoint_;
 };
 
 using SignedDistanceFieldf = SignedDistanceField<float>;

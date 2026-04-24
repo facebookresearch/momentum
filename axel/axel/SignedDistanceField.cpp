@@ -274,6 +274,16 @@ void SignedDistanceField<ScalarType>::clear() {
 }
 
 template <typename ScalarType>
+const std::string& SignedDistanceField<ScalarType>::parentJoint() const {
+  return parentJoint_;
+}
+
+template <typename ScalarType>
+void SignedDistanceField<ScalarType>::setParentJoint(const std::string& name) {
+  parentJoint_ = name;
+}
+
+template <typename ScalarType>
 SignedDistanceField<ScalarType> SignedDistanceField<ScalarType>::createSphere(
     Scalar radius,
     const Eigen::Vector3<Index>& resolution,
