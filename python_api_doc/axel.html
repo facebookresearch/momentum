@@ -84,6 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.gradient"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.gradient()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.grid_to_world"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.grid_to_world()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.is_valid_index"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.is_valid_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.parent_joint"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.parent_joint</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.resolution"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.resolution</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.sample"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.sample()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.sample_with_gradient"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.sample_with_gradient()</span></code></a></li>
@@ -106,7 +107,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.fill_holes"><code class="docutils literal notranslate"><span class="pre">fill_holes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.load_sdf_from_msgpack"><code class="docutils literal notranslate"><span class="pre">load_sdf_from_msgpack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.load_sdfs_from_msgpack"><code class="docutils literal notranslate"><span class="pre">load_sdfs_from_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.mesh_to_sdf"><code class="docutils literal notranslate"><span class="pre">mesh_to_sdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.save_sdf_to_msgpack"><code class="docutils literal notranslate"><span class="pre">save_sdf_to_msgpack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.save_sdfs_to_msgpack"><code class="docutils literal notranslate"><span class="pre">save_sdfs_to_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.smooth_mesh_laplacian"><code class="docutils literal notranslate"><span class="pre">smooth_mesh_laplacian()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.triangulate_quads"><code class="docutils literal notranslate"><span class="pre">triangulate_quads()</span></code></a></li>
 </ul>
@@ -468,6 +473,12 @@ ensuring adequate padding even for very thin mesh regions.</p>
 <dd class="field-even"><p>True if indices are within valid range.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.SignedDistanceField.parent_joint">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_joint</span></span><a class="headerlink" href="#pymomentum.axel.SignedDistanceField.parent_joint" title="Link to this definition"></a></dt>
+<dd><p>Optional parent joint name for skeleton association (e.g., ‘c_spine2’).</p>
 </dd></dl>
 
 <dl class="py property">
@@ -840,6 +851,57 @@ Ignored for other methods.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.load_sdf_from_msgpack">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">load_sdf_from_msgpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></span><a class="headerlink" href="#pymomentum.axel.load_sdf_from_msgpack" title="Link to this definition"></a></dt>
+<dd><p>Load a signed distance field from a msgpack file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Input file path.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>RuntimeError</strong> – If the file cannot be read or parsed.</p>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdf_from_msgpack</span><span class="p">(</span><span class="s2">&quot;/tmp/my_sdf.msgpack&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded SDF with resolution </span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.load_sdfs_from_msgpack">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">load_sdfs_from_msgpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.axel.load_sdfs_from_msgpack" title="Link to this definition"></a></dt>
+<dd><p>Load multiple named signed distance fields from a single msgpack file.</p>
+<p>Each SDF’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">parent_joint</span></code> is restored from the file if present.
+Only float32 precision is supported from Python.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Input file path.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping names to <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> objects.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>RuntimeError</strong> – If the file cannot be read or parsed.</p>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="n">sdfs</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdfs_from_msgpack</span><span class="p">(</span><span class="s2">&quot;/tmp/body_sdfs.msgpack&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: joint=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">parent_joint</span><span class="si">}</span><span class="s2">, resolution=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.axel.mesh_to_sdf">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">mesh_to_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.axel.mesh_to_sdf" title="Link to this definition"></a></dt>
 <dd><p>Overloaded function.</p>
@@ -984,6 +1046,53 @@ but the same grid layout.</p>
 <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">...</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">...</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">sdf</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.save_sdf_to_msgpack">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">save_sdf_to_msgpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.save_sdf_to_msgpack" title="Link to this definition"></a></dt>
+<dd><p>Save a signed distance field to a msgpack file.</p>
+<p>The file stores the SDF’s bounding box, grid resolution, and all voxel distance
+values in a compact binary format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> – The <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> to save.</p></li>
+<li><p><strong>path</strong> – Output file path (should end in .msgpack).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">axel</span><span class="o">.</span><span class="n">save_sdf_to_msgpack</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="s2">&quot;/tmp/my_sdf.msgpack&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.save_sdfs_to_msgpack">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">save_sdfs_to_msgpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.save_sdfs_to_msgpack" title="Link to this definition"></a></dt>
+<dd><p>Save multiple named signed distance fields to a single msgpack file.</p>
+<p>Each SDF’s <code class="xref py py-attr docutils literal notranslate"><span class="pre">parent_joint</span></code> (if set) is serialized alongside the SDF data.
+Only float32 precision is supported from Python.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdfs</strong> – Dictionary mapping names to <a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a> objects.</p></li>
+<li><p><strong>path</strong> – Output file path (should end in .msgpack).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
+
+<span class="n">chest_sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">chest_verts</span><span class="p">,</span> <span class="n">chest_tris</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">chest_sdf</span><span class="o">.</span><span class="n">parent_joint</span> <span class="o">=</span> <span class="s2">&quot;c_spine2&quot;</span>
+<span class="n">axel</span><span class="o">.</span><span class="n">save_sdfs_to_msgpack</span><span class="p">({</span><span class="s2">&quot;chest&quot;</span><span class="p">:</span> <span class="n">chest_sdf</span><span class="p">},</span> <span class="s2">&quot;/tmp/body_sdfs.msgpack&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
