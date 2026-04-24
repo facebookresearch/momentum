@@ -3,6 +3,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
+import tempfile
 import unittest
 
 import numpy as np
@@ -1240,6 +1242,78 @@ class TestAxel(unittest.TestCase):
         # First should miss due to max distance (triangle_id == -1), second should hit
         self.assertEqual(triangle_ids[0], -1)
         self.assertGreaterEqual(triangle_ids[1], 0)
+
+    def test_save_load_sdf_msgpack(self):
+        """Test single SDF save/load roundtrip via msgpack."""
+        bounds = axel.BoundingBox(
+            np.array([-1.0, -2.0, -3.0]), np.array([4.0, 5.0, 6.0])
+        )
+        resolution = np.array([3, 4, 5], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bounds, resolution)
+        data = np.asarray(sdf)
+        for i in range(3):
+            for j in range(4):
+                for k in range(5):
+                    data[i, j, k] = float(i * 100 + j * 10 + k) * 0.1
+
+        with tempfile.NamedTemporaryFile(suffix=".msgpack", delete=False) as f:
+            path = f.name
+
+        try:
+            axel.save_sdf_to_msgpack(sdf, path)
+            loaded = axel.load_sdf_from_msgpack(path)
+
+            np.testing.assert_array_equal(loaded.resolution, sdf.resolution)
+            np.testing.assert_array_almost_equal(
+                np.array(loaded), np.array(sdf), decimal=5
+            )
+        finally:
+            os.unlink(path)
+
+    def test_save_load_sdfs_msgpack(self):
+        """Test multiple named SDFs save/load roundtrip via msgpack."""
+        sdfs = {}
+        for name, radius in [("chest", 1.0), ("r_upperarm", 2.0), ("head", 0.5)]:
+            bounds = axel.BoundingBox(
+                np.array([-radius * 1.2] * 3), np.array([radius * 1.2] * 3)
+            )
+            res = np.array([4, 4, 4], dtype=np.int32)
+            sdf = axel.SignedDistanceField(bounds, res)
+            data = np.asarray(sdf)
+            for i in range(4):
+                for j in range(4):
+                    for k in range(4):
+                        pos = sdf.grid_to_world(np.array([i, j, k], dtype=np.float32))
+                        data[i, j, k] = float(np.linalg.norm(pos)) - radius
+            sdfs[name] = sdf
+
+        with tempfile.NamedTemporaryFile(suffix=".msgpack", delete=False) as f:
+            path = f.name
+
+        try:
+            sdfs["chest"].parent_joint = "c_spine2"
+            sdfs["r_upperarm"].parent_joint = "r_uparm"
+            axel.save_sdfs_to_msgpack(sdfs, path)
+            loaded = axel.load_sdfs_from_msgpack(path)
+
+            self.assertEqual(set(loaded.keys()), set(sdfs.keys()))
+            for name in sdfs:
+                np.testing.assert_array_equal(
+                    loaded[name].resolution, sdfs[name].resolution
+                )
+                np.testing.assert_array_almost_equal(
+                    np.array(loaded[name]), np.array(sdfs[name]), decimal=5
+                )
+            self.assertEqual(loaded["chest"].parent_joint, "c_spine2")
+            self.assertEqual(loaded["r_upperarm"].parent_joint, "r_uparm")
+            self.assertEqual(loaded["head"].parent_joint, "")
+        finally:
+            os.unlink(path)
+
+    def test_load_sdf_nonexistent_file(self):
+        """Test that loading from a nonexistent file raises RuntimeError."""
+        with self.assertRaises(RuntimeError):
+            axel.load_sdf_from_msgpack("/nonexistent/path/sdf.msgpack")
 
 
 if __name__ == "__main__":
