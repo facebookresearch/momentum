@@ -11,6 +11,7 @@ find_dependency(drjit CONFIG)
 find_dependency(Eigen3 3.4.0 CONFIG)
 find_dependency(Microsoft.GSL CONFIG)
 find_dependency(Dispenso CONFIG)
+find_dependency(nlohmann_json CONFIG)
 
 if(@MOMENTUM_ENABLE_PROFILING@)
   find_dependency(Tracy CONFIG)

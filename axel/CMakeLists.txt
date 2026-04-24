@@ -17,6 +17,7 @@ find_package(drjit CONFIG REQUIRED)
 find_package(Eigen3 3.4.0 CONFIG REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(Dispenso CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 #===============================================================================
 # Build axel
@@ -43,6 +44,7 @@ set(headers
   axel/MeshToSdf.h
   axel/Ray.h
   axel/SignedDistanceField.h
+  axel/SignedDistanceFieldIO.h
   axel/SimdKdTree.h
   axel/TriBvh.h
 )
@@ -56,6 +58,7 @@ set(sources
   axel/DualContouring.cpp
   axel/MeshToSdf.cpp
   axel/SignedDistanceField.cpp
+  axel/SignedDistanceFieldIO.cpp
   axel/SimdKdTree.cpp
   axel/TriBvh.cpp
 )
@@ -81,6 +84,7 @@ target_link_libraries(${target_name}
     Microsoft.GSL::GSL
     Dispenso::dispenso
     drjit
+    nlohmann_json::nlohmann_json
 )
 
 if(MSVC)
