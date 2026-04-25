@@ -16,6 +16,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/log.h"
 #include "momentum/common/profile.h"
 #include "momentum/math/mesh.h"
 
@@ -95,9 +96,10 @@ namespace {
 // Helper struct for reprojection result
 template <typename T>
 struct ReprojectionResult {
-  Eigen::Vector3i triangleIndices;
-  Eigen::Vector3<T> baryCoords;
-  Eigen::Vector3<T> closestPoint;
+  Eigen::Vector3i triangleIndices = Eigen::Vector3i::Constant(-1);
+  Eigen::Vector3<T> baryCoords = Eigen::Vector3<T>::Zero();
+  Eigen::Vector3<T> closestPoint = Eigen::Vector3<T>::Zero();
+  bool valid = false;
 };
 
 // Find the closest candidate triangle and compute reprojection
@@ -135,6 +137,7 @@ ReprojectionResult<T> findClosestCandidateTriangle(
       result.triangleIndices = candidate.vertexIndices;
       result.baryCoords = bary;
       result.closestPoint = targetPoint;
+      result.valid = true;
     }
   }
 
@@ -154,6 +157,16 @@ SkinnedLocatorTriangleConstraintT<T> getEffectiveConstraint(
   // Find closest candidate triangle
   ReprojectionResult<T> reproj =
       findClosestCandidateTriangle(mesh, locatorPos, constr.candidateTriangles, constr.depth);
+
+  // If reprojection failed (e.g., NaN vertices → all candidates skipped), fall back to original
+  if (!reproj.valid) {
+    MT_LOGI(
+        "SkinnedLocatorTriangle: reprojection failed for locatorIndex {} "
+        "({} candidates, all had NaN/Inf distances). Using original constraint.",
+        constr.locatorIndex,
+        constr.candidateTriangles.size());
+    return constr;
+  }
 
   // Create effective constraint with reprojected triangle
   SkinnedLocatorTriangleConstraintT<T> effective;
