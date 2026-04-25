@@ -8,6 +8,7 @@
 #pragma once
 
 #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
 #include <Eigen/Geometry>
@@ -40,29 +41,29 @@ struct type_caster<Eigen::Quaternion<Scalar>> {
   /// Standard pybind11 type caster interface
   PYBIND11_TYPE_CASTER(Type, const_name("numpy.ndarray[4]"));
 
-  /// Python -> C++ conversion: delegate to Vector4 caster
-  bool load(handle src, bool convert) {
-    // Use the existing pybind11 Vector4 type caster
-    type_caster<Vector4> vec_caster;
-    if (!vec_caster.load(src, convert)) {
+  /// Python -> C++ conversion: read [x, y, z, w] from numpy array
+  bool load(handle src, bool /*convert*/) {
+    auto array =
+        pybind11::array_t<Scalar, pybind11::array::c_style | pybind11::array::forcecast>::ensure(
+            src);
+    if (!array || array.size() != 4) {
       return false;
     }
-
-    // Extract the Vector4 and construct quaternion
-    // Vector4 is [x, y, z, w], Quaternion constructor is (w, x, y, z)
-    const Vector4& coeffs = vec_caster;
-    value = Type(coeffs(3), coeffs(0), coeffs(1), coeffs(2));
-
+    const Scalar* data = array.data();
+    // Array is [x, y, z, w], Quaternion ctor is (w, x, y, z)
+    value = Type(data[3], data[0], data[1], data[2]);
     return true;
   }
 
-  /// C++ -> Python conversion: delegate to Vector4 caster
-  static handle cast(const Type& src, return_value_policy policy, handle parent) {
-    // Get coefficients as Vector4 [x, y, z, w]
-    Vector4 coeffs = src.coeffs();
-
-    // Use the existing pybind11 Vector4 type caster
-    return type_caster<Vector4>::cast(coeffs, policy, parent);
+  /// C++ -> Python conversion: return [x, y, z, w] numpy array
+  static handle cast(const Type& src, return_value_policy /*policy*/, handle /*parent*/) {
+    auto result = pybind11::array_t<Scalar>(4);
+    auto* buf = result.mutable_data();
+    buf[0] = src.x();
+    buf[1] = src.y();
+    buf[2] = src.z();
+    buf[3] = src.w();
+    return result.release();
   }
 
   /// Support for const pointer return

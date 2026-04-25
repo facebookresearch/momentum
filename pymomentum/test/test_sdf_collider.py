@@ -68,6 +68,27 @@ class TestSDFCollider(unittest.TestCase):
             collider.translation, np.array([0.5, 0.5, 0.5], dtype=np.float32)
         )
 
+    def test_rotation_round_trip(self) -> None:
+        """Test that rotation kwarg is stored and returned correctly."""
+        from pymomentum import geometry
+
+        # 90-degree rotation around Z: quat [x, y, z, w]
+        s = float(np.sin(np.pi / 4))
+        c = float(np.cos(np.pi / 4))
+        rot_quat = np.array([0.0, 0.0, s, c], dtype=np.float32)
+
+        collider = geometry.SDFCollider(rotation=rot_quat)
+        stored = np.asarray(collider.rotation)
+        np.testing.assert_allclose(stored, rot_quat, atol=1e-6)
+
+    def test_default_rotation_is_identity(self) -> None:
+        """Test that default rotation is identity quaternion [0, 0, 0, 1]."""
+        from pymomentum import geometry
+
+        collider = geometry.SDFCollider()
+        identity = np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32)
+        np.testing.assert_allclose(np.asarray(collider.rotation), identity, atol=1e-6)
+
     def test_repr(self) -> None:
         """Test SDFCollider __repr__."""
         from pymomentum import geometry
