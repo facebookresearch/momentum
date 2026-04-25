@@ -38,12 +38,6 @@
 
 namespace momentum {
 
-/// Number of floats in an AVX-256 register.
-inline constexpr size_t kAvxPacketSize = 8;
-
-/// Byte alignment required for AVX-256 loads/stores.
-inline constexpr size_t kAvxAlignment = kAvxPacketSize * sizeof(float);
-
 /// Number of floats in the platform's default SIMD register (chosen by DrJit).
 inline constexpr size_t kSimdPacketSize = drjit::DefaultSize;
 

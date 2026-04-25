@@ -23,7 +23,7 @@
 using namespace momentum;
 
 // Verify SIMD distance error function matches the scalar reference at multiple constraint counts
-// that exercise both partial and full SIMD/AVX packets.
+// that exercise both partial and full SIMD packets.
 TEST(Momentum_ErrorFunctions, SimdDistanceFunctionIsSame) {
   const bool verbose = false;
 
@@ -33,15 +33,7 @@ TEST(Momentum_ErrorFunctions, SimdDistanceFunctionIsSame) {
 
   SimdDistanceConstraints cl_simd(&skeleton);
   const std::initializer_list<size_t> constraintCounts = {
-      0ul,
-      1ul,
-      kAvxPacketSize - 1,
-      kAvxPacketSize,
-      kAvxPacketSize + 1,
-      kSimdPacketSize - 1,
-      kSimdPacketSize,
-      kSimdPacketSize + 1,
-      100ul};
+      0ul, 1ul, kSimdPacketSize - 1, kSimdPacketSize, kSimdPacketSize + 1, 100ul};
 
   for (size_t nConstraints : constraintCounts) {
     if (verbose) {
