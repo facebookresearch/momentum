@@ -259,6 +259,45 @@ class TestAxel(unittest.TestCase):
             data_array_after_clear, np.zeros((2, 2, 2), dtype=np.float32)
         )
 
+    def test_sdf_buffer_protocol_axis_order(self):
+        """Test that buffer protocol indexing matches C++ sample() on a non-cubic grid.
+
+        Uses a non-cubic grid with asymmetric values at specific grid points to
+        detect axis transposition bugs (e.g. C-order vs Fortran-order strides).
+        """
+        min_corner = np.array([0.0, 0.0, 0.0])
+        max_corner = np.array([3.0, 5.0, 7.0])
+        bbox = axel.BoundingBox(min_corner, max_corner)
+
+        # Non-cubic resolution is critical: nx != ny != nz ensures that
+        # swapping axes produces different results.
+        resolution = np.array([3, 5, 7], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bbox, resolution)
+
+        # Write distinct values at asymmetric grid positions via the
+        # buffer protocol view.
+        sdf_view = np.asarray(sdf)
+        sdf_view[:] = 0.0
+        sdf_view[1, 0, 0] = 10.0  # Only x offset
+        sdf_view[0, 1, 0] = 20.0  # Only y offset
+        sdf_view[0, 0, 1] = 30.0  # Only z offset
+        sdf_view[2, 3, 5] = 99.0  # Asymmetric point (i!=j!=k)
+
+        # sample() at exact grid points should return the values we wrote.
+        # voxel_size = (max - min) / resolution = (1.0, 1.0, 1.0)
+        self.assertAlmostEqual(sdf.sample(np.array([1.0, 0.0, 0.0])), 10.0, places=5)
+        self.assertAlmostEqual(sdf.sample(np.array([0.0, 1.0, 0.0])), 20.0, places=5)
+        self.assertAlmostEqual(sdf.sample(np.array([0.0, 0.0, 1.0])), 30.0, places=5)
+        self.assertAlmostEqual(sdf.sample(np.array([2.0, 3.0, 5.0])), 99.0, places=5)
+
+        # Also verify that a round-trip through np.array() (which copies to
+        # C-contiguous) preserves the correct indexing.
+        sdf_copy = np.array(sdf)
+        self.assertAlmostEqual(sdf_copy[1, 0, 0], 10.0)
+        self.assertAlmostEqual(sdf_copy[0, 1, 0], 20.0)
+        self.assertAlmostEqual(sdf_copy[0, 0, 1], 30.0)
+        self.assertAlmostEqual(sdf_copy[2, 3, 5], 99.0)
+
     def test_mesh_to_sdf_tetrahedron(self):
         """Test mesh_to_sdf with a simple tetrahedron mesh."""
         # Create a simple tetrahedron mesh
