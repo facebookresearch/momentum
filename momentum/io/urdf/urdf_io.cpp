@@ -92,15 +92,17 @@ template <typename S>
 
 /// Returns the principal axis index (0=X, 1=Y, 2=Z) and sign (+1/-1) for a URDF axis vector.
 ///
-/// URDF joints specify an arbitrary axis direction, but Momentum's joint parameters are
-/// defined along fixed principal axes (tx/ty/tz, rx/ry/rz). Rather than aligning the URDF
-/// axis to Momentum's X axis via preRotation (which would create a rotated internal frame
-/// that differs from the URDF link frame), we map the DOF directly to the matching principal
-/// axis. This preserves frame compatibility with URDF visual meshes and animation data.
+/// The imported Momentum node represents the child link carrying its incoming URDF joint. Since
+/// the local frame is kept equal to the URDF child link frame, we do not spend preRotation on
+/// aligning arbitrary URDF axes to a canonical axis. Instead, we only accept URDF axes already
+/// aligned with a principal axis and map the DOF onto the matching Momentum parameter.
 ///
-/// For negative axes (e.g., (0,0,-1)), the sign is -1 and the parameter transform coefficient
-/// is negated, so that a positive URDF joint angle still corresponds to rotation around the
-/// positive axis direction.
+/// For negative axes (e.g., (0,0,-1)), the sign tracks how the URDF scalar joint coordinate maps
+/// into the preserved child-link frame's local principal-axis parameter. The imported model
+/// parameter itself stays equal to the URDF joint scalar, so limits remain in the same coordinate.
+/// This also means the exposed model parameter is not always numerically equal to the local
+/// positive-axis rx/ry/rz slot used by Momentum FK; for a negative axis, the local slot receives
+/// the negated value through the parameter transform.
 ///
 /// @return A pair of (axis index, sign): axis index 0=X, 1=Y, 2=Z; sign is +1 or -1.
 /// @throws If the axis is not aligned with a principal axis (e.g., (0.707, 0, 0.707)).
@@ -218,6 +220,8 @@ bool loadUrdfSkeletonRecursive(
       urdfLink->name);
 
   Joint joint;
+  // The imported Momentum node is identified by the child link. It stores the incoming URDF
+  // joint that moves that link, rather than creating a separate "joint frame" node.
   joint.name = urdfLink->name;
   joint.parent = parentJointId;
 
@@ -229,11 +233,16 @@ bool loadUrdfSkeletonRecursive(
   // Parse Parameter transform
   //---------------------------
   //
-  // URDF joints specify an arbitrary axis direction for their DOF. Instead of aligning that
-  // axis to Momentum's X axis via preRotation (which would create a rotated internal frame),
-  // we map the DOF directly to the corresponding principal axis parameter (rx/ry/rz for
-  // revolute, tx/ty/tz for prismatic). This preserves the URDF link frame as the joint's
-  // local frame, making visual meshes and animation data directly compatible.
+  // URDF expresses motion on a joint between links, but attached data is authored in the child
+  // link frame. Our imported Momentum node therefore keeps the child link frame as its local
+  // frame and stores the incoming URDF joint's DOF on that node. We do not introduce a separate
+  // internal axis-alignment frame.
+  //
+  // As a result, we map the URDF DOF directly to the corresponding principal-axis parameter
+  // (rx/ry/rz for revolute, tx/ty/tz for prismatic) inside the preserved link frame. For
+  // negative URDF axes, the parameter transform carries a negative coefficient into the local
+  // principal axis so the imported model parameter remains the URDF joint scalar coordinate
+  // rather than the local positive-axis rotation used internally by Momentum FK.
 
   if (urdfJoint != nullptr) {
     // Check if this joint mimics another joint. Mimic joints don't create their own model
@@ -311,7 +320,7 @@ bool loadUrdfSkeletonRecursive(
       case urdf::Joint::PLANAR: {
         // The axis defines the plane normal. DOFs are translation along the two in-plane
         // axes and rotation around the normal.
-        const auto [normalIdx, sign] = getPrincipalAxis(urdfJoint->axis);
+        const int normalIdx = getPrincipalAxis(urdfJoint->axis).first;
         const int planeAxis0 = (normalIdx + 1) % 3;
         const int planeAxis1 = (normalIdx + 2) % 3;
         const auto& jn = urdfJoint->name;
@@ -325,7 +334,7 @@ bool loadUrdfSkeletonRecursive(
             jointParamsBaseIndex + planeAxis1, modelParamsBaseIndex + 1, 1.0f);
         data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kRotationNames[normalIdx]));
         data.triplets.emplace_back(
-            jointParamsBaseIndex + 3 + normalIdx, modelParamsBaseIndex + 2, sign);
+            jointParamsBaseIndex + 3 + normalIdx, modelParamsBaseIndex + 2, 1.0f);
         data.totalDoFs += 3;
         break;
       }
@@ -345,34 +354,21 @@ bool loadUrdfSkeletonRecursive(
       auto urdfJointLimits = urdfJoint->limits;
       switch (urdfJoint->type) {
         case urdf::Joint::REVOLUTE: {
-          const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
           ParameterLimit jointLimits;
           jointLimits.type = MinMax;
           jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          if (sign > 0) {
-            jointLimits.data.minMax.limits[0] = urdfJointLimits->lower; // rad
-            jointLimits.data.minMax.limits[1] = urdfJointLimits->upper;
-          } else {
-            // Negative axis: model param = -urdf_angle, so limits are negated and swapped
-            jointLimits.data.minMax.limits[0] = -urdfJointLimits->upper;
-            jointLimits.data.minMax.limits[1] = -urdfJointLimits->lower;
-          }
+          jointLimits.data.minMax.limits[0] = urdfJointLimits->lower; // rad
+          jointLimits.data.minMax.limits[1] = urdfJointLimits->upper;
           jointLimits.weight = 1.0f;
           data.limits.push_back(jointLimits);
           break;
         }
         case urdf::Joint::PRISMATIC: {
-          const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
           ParameterLimit jointLimits;
           jointLimits.type = MinMax;
           jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          if (sign > 0) {
-            jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
-            jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
-          } else {
-            jointLimits.data.minMax.limits[0] = -toCm<float>(urdfJointLimits->upper);
-            jointLimits.data.minMax.limits[1] = -toCm<float>(urdfJointLimits->lower);
-          }
+          jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
+          jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
           jointLimits.weight = 1.0f;
           data.limits.push_back(jointLimits);
           break;
@@ -388,11 +384,12 @@ bool loadUrdfSkeletonRecursive(
   // Set Joint Offset
   //
   // The preRotation is simply the URDF joint origin rotation — the transform from the parent
-  // link frame to the child link frame at bind pose. No axis alignment is applied because DOFs
-  // are mapped directly to the corresponding principal axis parameter (rx/ry/rz).
+  // link frame to the child link frame at bind pose. No extra axis-alignment rotation is baked
+  // in, because the imported Momentum node is meant to coincide with the URDF child link frame.
   //
-  // This means the Momentum joint frame coincides with the URDF link frame, which makes visual
-  // meshes and animation data directly compatible without any frame correction.
+  // If we axis-aligned the local frame here, every quantity authored in the child link frame
+  // (visuals, collisions, inertials, descendant joint origins, external animation data) would
+  // need an additional frame conversion.
   if (urdfJoint != nullptr) {
     const urdf::Pose& urdfPose = urdfJoint->parent_to_joint_origin_transform;
     joint.preRotation = toMomentumQuaternion<float>(urdfPose.rotation);
