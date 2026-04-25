@@ -13,12 +13,13 @@ var searchData=
   ['regularizer_10',['regularizer',['../structmomentum_1_1RefineConfig.html#a5e819dc131e4662059b46b14b94b975d',1,'momentum::RefineConfig']]],
   ['restmesh_5f_11',['restMesh_',['../structmomentum_1_1MeshStateT.html#ad281c3ff04d74875034b434cc34112b0',1,'momentum::MeshStateT']]],
   ['rootindex_12',['rootIndex',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a9742dddffa46dec648fcbe579087855b',1,'momentum::GltfBuilder::Impl::CharacterData']]],
-  ['rotation_13',['rotation',['../structmomentum_1_1TransformT.html#ab95039e987a72c96d1ff1b94cb1d8732',1,'momentum::TransformT']]],
-  ['rotationaxis_14',['rotationaxis',['../structmomentum_1_1JointStateT.html#a4b62cc0d1c0ad0a377abea09b5f04ed1',1,'momentum::JointStateT::rotationAxis'],['../namespacemomentum.html#ad7a4eb26abfc152149b61fb2dd13e66f',1,'momentum::RotationAxis']]],
-  ['rotationerrortype_15',['rotationErrorType',['../state__sequence__error__function_8cpp.html#a2371bff367e0ca0971c9b72e22b1aba6',1,'state_sequence_error_function.cpp']]],
-  ['rotationeulerxyz_16',['rotationEulerXYZ',['../structmomentum_1_1GloveOffset.html#a100ab0a62047ed5c4977dcceaa12069d',1,'momentum::GloveOffset']]],
-  ['rotationresidualsize_17',['rotationResidualSize',['../state__sequence__error__function_8cpp.html#ad7f737985de85678c15beeb5f8c76ebb',1,'state_sequence_error_function.cpp']]],
-  ['rotdiff_18',['rotDiff',['../state__sequence__error__function_8cpp.html#a71dc309a99d6cf1a64193e546af689e7',1,'state_sequence_error_function.cpp']]],
-  ['rpre_19',['Rpre',['../structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6',1,'momentum::MppcaT']]],
-  ['rwgt_20',['rwgt',['../state__sequence__error__function_8cpp.html#ae86c7abe050d7c99c1fee27944e49e5c',1,'state_sequence_error_function.cpp']]]
+  ['rootnode_13',['rootNode',['../structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html#adc49a66360e462c9173f560cf6d04965',1,'momentum::fbx_internal::SkeletonNodeResult']]],
+  ['rotation_14',['rotation',['../structmomentum_1_1TransformT.html#ab95039e987a72c96d1ff1b94cb1d8732',1,'momentum::TransformT']]],
+  ['rotationaxis_15',['rotationaxis',['../structmomentum_1_1JointStateT.html#a4b62cc0d1c0ad0a377abea09b5f04ed1',1,'momentum::JointStateT::rotationAxis'],['../namespacemomentum.html#ad7a4eb26abfc152149b61fb2dd13e66f',1,'momentum::RotationAxis']]],
+  ['rotationerrortype_16',['rotationErrorType',['../state__sequence__error__function_8cpp.html#a2371bff367e0ca0971c9b72e22b1aba6',1,'state_sequence_error_function.cpp']]],
+  ['rotationeulerxyz_17',['rotationEulerXYZ',['../structmomentum_1_1GloveOffset.html#a100ab0a62047ed5c4977dcceaa12069d',1,'momentum::GloveOffset']]],
+  ['rotationresidualsize_18',['rotationResidualSize',['../state__sequence__error__function_8cpp.html#ad7f737985de85678c15beeb5f8c76ebb',1,'state_sequence_error_function.cpp']]],
+  ['rotdiff_19',['rotDiff',['../state__sequence__error__function_8cpp.html#a71dc309a99d6cf1a64193e546af689e7',1,'state_sequence_error_function.cpp']]],
+  ['rpre_20',['Rpre',['../structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6',1,'momentum::MppcaT']]],
+  ['rwgt_21',['rwgt',['../state__sequence__error__function_8cpp.html#ae86c7abe050d7c99c1fee27944e49e5c',1,'state_sequence_error_function.cpp']]]
 ];

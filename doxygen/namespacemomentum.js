@@ -1,6 +1,7 @@
 var namespacemomentum =
 [
     [ "detail", "namespacemomentum_1_1detail.html", "namespacemomentum_1_1detail" ],
+    [ "fbx_internal", "namespacemomentum_1_1fbx__internal.html", "namespacemomentum_1_1fbx__internal" ],
     [ "io_detail", "namespacemomentum_1_1io__detail.html", "namespacemomentum_1_1io__detail" ],
     [ "AccelerationSequenceErrorFunctionT", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", "classmomentum_1_1AccelerationSequenceErrorFunctionT" ],
     [ "AimDataT", "structmomentum_1_1AimDataT.html", "structmomentum_1_1AimDataT" ],
@@ -35,6 +36,7 @@ var namespacemomentum =
     [ "DistanceErrorFunctionT", "classmomentum_1_1DistanceErrorFunctionT.html", "classmomentum_1_1DistanceErrorFunctionT" ],
     [ "EigenStrongType", "structmomentum_1_1EigenStrongType.html", "structmomentum_1_1EigenStrongType" ],
     [ "ErrorFunctionDerivativesT", "structmomentum_1_1ErrorFunctionDerivativesT.html", "structmomentum_1_1ErrorFunctionDerivativesT" ],
+    [ "FbxBuilder", "classmomentum_1_1FbxBuilder.html", "classmomentum_1_1FbxBuilder" ],
     [ "FbxCoordSystemInfo", "structmomentum_1_1FbxCoordSystemInfo.html", "structmomentum_1_1FbxCoordSystemInfo" ],
     [ "FileSaveOptions", "structmomentum_1_1FileSaveOptions.html", "structmomentum_1_1FileSaveOptions" ],
     [ "FiniteDifferenceSequenceErrorFunctionT", "classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html", "classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" ],

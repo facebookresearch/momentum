@@ -145,6 +145,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.with_skinned_locators"><code class="docutils literal notranslate"><span class="pre">Character.with_skinned_locators()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder"><code class="docutils literal notranslate"><span class="pre">FbxBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.__init__"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_character"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.add_character()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_marker_sequence"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.add_marker_sequence()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_motion"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.add_motion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_motion_with_joint_params"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.add_motion_with_joint_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_rigid_body"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.add_rigid_body()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder.save"><code class="docutils literal notranslate"><span class="pre">FbxBuilder.save()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.FbxCoordSystem"><code class="docutils literal notranslate"><span class="pre">FbxCoordSystem</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxCoordSystem.LeftHanded"><code class="docutils literal notranslate"><span class="pre">FbxCoordSystem.LeftHanded</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.FbxCoordSystem.RightHanded"><code class="docutils literal notranslate"><span class="pre">FbxCoordSystem.RightHanded</span></code></a></li>
@@ -1735,6 +1745,121 @@ It can be used to solve for facial expressions.</p>
 </dd>
 </dl>
 </div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">FbxBuilder</span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A builder class for creating FBX files with multiple characters and animations.</p>
+<p>FbxBuilder allows you to incrementally construct an FBX scene by adding
+skinned characters, rigid bodies, motions, and marker data. This is useful
+for creating scenes with multiple characters/objects in a single FBX file.</p>
+<p>Note: FBX saving requires the Autodesk FBX SDK and is only available on
+Linux x86_64, Windows x86_64, and macOS.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a new FbxBuilder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_character">
+<span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_character" title="Link to this definition"></a></dt>
+<dd><p>Add a skinned character (skeleton + mesh with skin weights) to the scene.</p>
+<p>Creates the skeleton hierarchy, mesh with skin deformer, locators,
+collision geometry, and metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to add.</p></li>
+<li><p><strong>options</strong> – File save options controlling mesh, locators, collisions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_marker_sequence">
+<span class="sig-name descname"><span class="pre">add_marker_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_sequence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_marker_sequence" title="Link to this definition"></a></dt>
+<dd><p>Add a marker sequence to the scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fps</strong> – Frame rate for the marker animation.</p></li>
+<li><p><strong>marker_sequence</strong> – Marker data per frame: marker_sequence[frame][marker].</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_motion">
+<span class="sig-name descname"><span class="pre">add_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion" title="Link to this definition"></a></dt>
+<dd><p>Add model-parameter animation for a previously added character.</p>
+<p>Converts model parameters to joint parameters, then creates animation
+curves. Also extracts and animates blend shape weights when applicable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to animate (must match a previously added character).</p></li>
+<li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
+<li><p><strong>motion</strong> – Model parameters matrix with shape (nFrames, nModelParams). None for no animation.</p></li>
+<li><p><strong>offsets</strong> – Identity/offset parameters for the bind pose. None to use default bind pose.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_motion_with_joint_params">
+<span class="sig-name descname"><span class="pre">add_motion_with_joint_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion_with_joint_params" title="Link to this definition"></a></dt>
+<dd><p>Add joint-parameter animation for a previously added character.</p>
+<p>Uses joint parameters directly, bypassing the activeJointParams check.
+This is useful for rigid bodies or characters with simple parameterization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to animate (must match a previously added character).</p></li>
+<li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
+<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_rigid_body">
+<span class="sig-name descname"><span class="pre">add_rigid_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_rigid_body" title="Link to this definition"></a></dt>
+<dd><p>Add a rigid body (skeleton + mesh parented to a joint, no skinning).</p>
+<p>For props/objects where the entire mesh moves rigidly with a joint.
+The mesh is parented under the specified joint node instead of the scene
+root, so it inherits the skeleton’s animation without needing skin weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character to add as a rigid body.</p></li>
+<li><p><strong>name</strong> – Optional name override. Uses character.name if empty.</p></li>
+<li><p><strong>parent_joint</strong> – Index of the joint to parent the mesh under. Defaults to 0
+(the root joint).</p></li>
+<li><p><strong>options</strong> – File save options (mesh option is respected).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.save" title="Link to this definition"></a></dt>
+<dd><p>Save the FBX scene to a file.</p>
+<p>After saving, the builder is consumed and should not be used further.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> – Output file path.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

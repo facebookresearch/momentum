@@ -60,6 +60,7 @@ var hierarchy =
       [ "momentum::ModelParametersT< T >", "structmomentum_1_1ModelParametersT.html", null ]
     ] ],
     [ "momentum::ErrorFunctionDerivativesT< T >", "structmomentum_1_1ErrorFunctionDerivativesT.html", null ],
+    [ "momentum::FbxBuilder", "classmomentum_1_1FbxBuilder.html", null ],
     [ "momentum::FbxCoordSystemInfo", "structmomentum_1_1FbxCoordSystemInfo.html", null ],
     [ "momentum::FileSaveOptions", "structmomentum_1_1FileSaveOptions.html", null ],
     [ "momentum::FullyDifferentiableSkeletonErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableSkeletonErrorFunctionT.html", [
@@ -81,12 +82,14 @@ var hierarchy =
     [ "momentum::GloveOffset", "structmomentum_1_1GloveOffset.html", null ],
     [ "momentum::GloveSensorObservation", "structmomentum_1_1GloveSensorObservation.html", null ],
     [ "momentum::GltfBuilder", "classmomentum_1_1GltfBuilder.html", null ],
+    [ "momentum::FbxBuilder::Impl", "structmomentum_1_1FbxBuilder_1_1Impl.html", null ],
     [ "momentum::GltfBuilder::Impl", "structmomentum_1_1GltfBuilder_1_1Impl.html", null ],
     [ "momentum::InverseParameterTransformT< T >", "structmomentum_1_1InverseParameterTransformT.html", null ],
     [ "momentum::IOOptions", "structmomentum_1_1IOOptions.html", null ],
     [ "std::istream", null, [
       [ "momentum::ispanstream", "structmomentum_1_1ispanstream.html", null ]
     ] ],
+    [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", null ],
     [ "momentum::JointStateT< T >", "structmomentum_1_1JointStateT.html", null ],
     [ "momentum::JointT< T >", "structmomentum_1_1JointT.html", null ],
     [ "momentum::JointToJointDistanceConstraintT< T >", "structmomentum_1_1JointToJointDistanceConstraintT.html", null ],
@@ -105,6 +108,7 @@ var hierarchy =
     [ "momentum::LowRankCovarianceMatrixT< T >", "classmomentum_1_1LowRankCovarianceMatrixT.html", null ],
     [ "momentum::Marker", "structmomentum_1_1Marker.html", null ],
     [ "momentum::MarkerSequence", "structmomentum_1_1MarkerSequence.html", null ],
+    [ "momentum::fbx_internal::MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", null ],
     [ "momentum::MeshStateT< T >", "structmomentum_1_1MeshStateT.html", null ],
     [ "momentum::MeshT< T >", "structmomentum_1_1MeshT.html", null ],
     [ "momentum::ModelOptions", "structmomentum_1_1ModelOptions.html", null ],
@@ -222,6 +226,7 @@ var hierarchy =
       [ "momentum::VertexSDFErrorFunctionT< T >", "classmomentum_1_1VertexSDFErrorFunctionT.html", null ],
       [ "momentum::VertexVertexDistanceErrorFunctionT< T >", "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html", null ]
     ] ],
+    [ "momentum::fbx_internal::SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", null ],
     [ "momentum::SkeletonStateT< T >", "structmomentum_1_1SkeletonStateT.html", null ],
     [ "momentum::SkeletonStateT< float >", "structmomentum_1_1SkeletonStateT.html", null ],
     [ "momentum::SkeletonT< T >", "structmomentum_1_1SkeletonT.html", null ],

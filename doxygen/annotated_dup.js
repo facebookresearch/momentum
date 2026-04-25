@@ -4,6 +4,11 @@ var annotated_dup =
       [ "detail", "namespacemomentum_1_1detail.html", [
         [ "is_compatible_to_uniform_int_distribution", "structmomentum_1_1detail_1_1is__compatible__to__uniform__int__distribution.html", null ]
       ] ],
+      [ "fbx_internal", "namespacemomentum_1_1fbx__internal.html", [
+        [ "JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", "structmomentum_1_1fbx__internal_1_1JointCurveSetup" ],
+        [ "MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult" ],
+        [ "SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult" ]
+      ] ],
       [ "io_detail", "namespacemomentum_1_1io__detail.html", [
         [ "SectionContent", "classmomentum_1_1io__detail_1_1SectionContent.html", "classmomentum_1_1io__detail_1_1SectionContent" ],
         [ "SectionSegment", "structmomentum_1_1io__detail_1_1SectionSegment.html", "structmomentum_1_1io__detail_1_1SectionSegment" ]
@@ -41,6 +46,7 @@ var annotated_dup =
       [ "DistanceErrorFunctionT", "classmomentum_1_1DistanceErrorFunctionT.html", "classmomentum_1_1DistanceErrorFunctionT" ],
       [ "EigenStrongType", "structmomentum_1_1EigenStrongType.html", "structmomentum_1_1EigenStrongType" ],
       [ "ErrorFunctionDerivativesT", "structmomentum_1_1ErrorFunctionDerivativesT.html", "structmomentum_1_1ErrorFunctionDerivativesT" ],
+      [ "FbxBuilder", "classmomentum_1_1FbxBuilder.html", "classmomentum_1_1FbxBuilder" ],
       [ "FbxCoordSystemInfo", "structmomentum_1_1FbxCoordSystemInfo.html", "structmomentum_1_1FbxCoordSystemInfo" ],
       [ "FileSaveOptions", "structmomentum_1_1FileSaveOptions.html", "structmomentum_1_1FileSaveOptions" ],
       [ "FiniteDifferenceSequenceErrorFunctionT", "classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html", "classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT" ],
