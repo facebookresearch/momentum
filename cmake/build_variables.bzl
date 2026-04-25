@@ -566,16 +566,19 @@ io_shape_test_sources = [
 ]
 
 io_fbx_public_headers = [
+    "io/fbx/fbx_builder.h",
     "io/fbx/fbx_io.h",
 ]
 
 io_fbx_private_headers = [
+    "io/fbx/fbx_io_internal.h",
     "io/fbx/fbx_memory_stream.h",
     "io/fbx/openfbx_loader.h",
     "io/fbx/polygon_data.h",
 ]
 
 io_fbx_sources = [
+    "io/fbx/fbx_builder.cpp",
     "io/fbx/fbx_io.cpp",
     "io/fbx/fbx_memory_stream.cpp",
     "io/fbx/openfbx_loader.cpp",
@@ -583,6 +586,7 @@ io_fbx_sources = [
 ]
 
 io_fbx_test_sources = [
+    "test/io/io_fbx_builder_test.cpp",
     "test/io/io_fbx_test.cpp",
 ]
 
