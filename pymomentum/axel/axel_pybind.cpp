@@ -385,19 +385,22 @@ More efficient than calling sample() and gradient() separately.
         const auto& res = self.resolution();
         auto& data = self.data();
 
+        // The internal storage uses column-major (Fortran) order where x varies
+        // fastest: linearIndex(i, j, k) = k * nx * ny + j * nx + i.
+        // Declare matching Fortran-order strides so that
+        // np.asarray(sdf)[i, j, k] == sdf.at(i, j, k).
         return py::buffer_info(
             data.data(), // Pointer to buffer
             sizeof(float), // Size of one scalar
-            py::format_descriptor<float>::format(), // Python format
-                                                    // descriptor
+            py::format_descriptor<float>::format(), // Python format descriptor
             3, // Number of dimensions
             {static_cast<py::ssize_t>(res.x()), // Shape: nx
              static_cast<py::ssize_t>(res.y()), //        ny
              static_cast<py::ssize_t>(res.z())}, //        nz
-            {sizeof(float) * static_cast<py::ssize_t>(res.y()) *
-                 static_cast<py::ssize_t>(res.z()), // Strides: x dimension
-             sizeof(float) * static_cast<py::ssize_t>(res.z()), //          y dimension
-             sizeof(float)} //          z dimension
+            {sizeof(float), // Stride x: i varies fastest
+             sizeof(float) * static_cast<py::ssize_t>(res.x()), // Stride y: j
+             sizeof(float) * static_cast<py::ssize_t>(res.x()) * static_cast<py::ssize_t>(res.y())}
+            // Stride z: k varies slowest
         );
       })
       .def("__repr__", [](const axel::SignedDistanceField<float>& self) {
