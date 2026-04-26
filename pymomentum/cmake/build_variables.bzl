@@ -248,6 +248,7 @@ marker_tracking_extensions_sources = [
 gpu_character_sources = [
     "torch/character.py",
     "torch/parameter_limits.py",
+    "torch/sdf_collision.py",
     "torch/utility.py",
 ]
 
