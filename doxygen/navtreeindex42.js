@@ -1,9 +1,5 @@
 var NAVTREEINDEX42 =
 {
-"velocity__magnitude__sequence__error__function_8cpp.html":[3,0,1,20],
-"velocity__magnitude__sequence__error__function_8cpp_source.html":[3,0,1,20],
-"velocity__magnitude__sequence__error__function_8h.html":[3,0,1,21],
-"velocity__magnitude__sequence__error__function_8h.html#a836334ec7f4027de24eb23e07171cf8b":[3,0,1,21,1],
 "velocity__magnitude__sequence__error__function_8h_source.html":[3,0,1,21],
 "vertex__error__function_8cpp.html":[3,0,2,71],
 "vertex__error__function_8cpp_source.html":[3,0,2,71],

@@ -41,8 +41,6 @@ var simd_8h =
     [ "operator+", "simd_8h.html#afcd9811378ba1090c63a0065ba0333bb", null ],
     [ "operator-", "simd_8h.html#a3b477c9e843b9d7b0cc96a3021f50811", null ],
     [ "operator-", "simd_8h.html#a474b1438f72da40a9b695682834d8cf3", null ],
-    [ "kAvxAlignment", "simd_8h.html#afbe10e16212eab335f14435015e5bd88", null ],
-    [ "kAvxPacketSize", "simd_8h.html#a0fc2afe43b2fd442387d507fd40cdea0", null ],
     [ "kSimdAlignment", "simd_8h.html#a48aa47b7e646b6dc4ed28a60cc6a75a1", null ],
     [ "kSimdPacketSize", "simd_8h.html#a2f9ed099fa9b206312926f7d04f8ddd9", null ]
 ];

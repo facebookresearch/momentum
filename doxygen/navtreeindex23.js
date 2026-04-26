@@ -1,6 +1,5 @@
 var NAVTREEINDEX23 =
 {
-"namespacemomentum.html#a277f31054d032f793d375a0ec053e52f":[1,0,2,340],
 "namespacemomentum.html#a279c4d96f61b931891fbb301f7b5f032":[1,0,2,859],
 "namespacemomentum.html#a27da6d001287c5c00fe6e4f11e4d9abc":[1,0,2,493],
 "namespacemomentum.html#a27ec03d5b9de4e83cb24856f875d5762":[1,0,2,263],
@@ -90,7 +89,7 @@ var NAVTREEINDEX23 =
 "namespacemomentum.html#a2f900b73d9fc502b4b3dea878ec9cbc5":[1,0,2,1218],
 "namespacemomentum.html#a2f9c92ad13f1415cdca34045995174a1":[1,0,2,2381],
 "namespacemomentum.html#a2f9e22329e02c73909ba8adc756b974e":[1,0,2,376],
-"namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9":[1,0,2,2781],
+"namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9":[1,0,2,2779],
 "namespacemomentum.html#a2fa04ee08fd542c41836bf77ef02f933":[1,0,2,1547],
 "namespacemomentum.html#a2fa3be5441fed27f6146a904f6da3ef9":[1,0,2,869],
 "namespacemomentum.html#a2fbed6abd182b947970d8ae590b96b4b":[1,0,2,2095],
@@ -237,7 +236,7 @@ var NAVTREEINDEX23 =
 "namespacemomentum.html#a3d1d254540707daf7af2e4df37b05261":[1,0,2,569],
 "namespacemomentum.html#a3d44b2ce87e791f14b3c65f7ceea7516":[1,0,2,1998],
 "namespacemomentum.html#a3d44f5c2f806579aefe9d6f9c025c000":[1,0,2,2728],
-"namespacemomentum.html#a3d4f30593990f976a757ea6ce487001d":[1,0,2,2774],
+"namespacemomentum.html#a3d4f30593990f976a757ea6ce487001d":[1,0,2,2772],
 "namespacemomentum.html#a3d87cb8ed585e1dc6d57dec146b10cf6":[1,0,2,421],
 "namespacemomentum.html#a3d8e5289ee3b84b822ecee3bb5f3042e":[1,0,2,1503],
 "namespacemomentum.html#a3d958d710dfdbce1b308088c18f9fd69":[1,0,2,1480],
@@ -249,5 +248,6 @@ var NAVTREEINDEX23 =
 "namespacemomentum.html#a3e8ea6426f1740c01bd21bed6edb6d41":[1,0,2,1525],
 "namespacemomentum.html#a3ea1dde6a08d08f94a8f2814725545e1":[1,0,2,2419],
 "namespacemomentum.html#a3ec1e4ab4791dad808fd35ae00296e26":[1,0,2,2648],
-"namespacemomentum.html#a3ece825a442a4ff4c1b41b6a4667c345":[1,0,2,1595]
+"namespacemomentum.html#a3ece825a442a4ff4c1b41b6a4667c345":[1,0,2,1595],
+"namespacemomentum.html#a3ed436af361f4838adbffe740e6aedcb":[1,0,2,1776]
 };

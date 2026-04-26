@@ -2853,8 +2853,6 @@ var namespacemomentum =
     [ "writePoseConstraints", "namespacemomentum.html#a85a2abf83eef8c0b11464ddb61a0714b", null ],
     [ "Dynamic", "namespacemomentum.html#a807173313bd65586aa1f92c60ac5e61d", null ],
     [ "kAllFrames", "namespacemomentum.html#a2b47b8c684f633c3d64046a9d456d00e", null ],
-    [ "kAvxAlignment", "namespacemomentum.html#afbe10e16212eab335f14435015e5bd88", null ],
-    [ "kAvxPacketSize", "namespacemomentum.html#a0fc2afe43b2fd442387d507fd40cdea0", null ],
     [ "kDefaultExtrapolateFactor", "namespacemomentum.html#a1e54e03d01c8dee568b7943561825fe5", null ],
     [ "kDefaultExtrapolateMaxDelta", "namespacemomentum.html#ad3db0a570d65ff49c89aadde824c8986", null ],
     [ "kGltfCoordinateSystem", "namespacemomentum.html#a22b7b65dd16f821b652b4423af618f02", null ],
