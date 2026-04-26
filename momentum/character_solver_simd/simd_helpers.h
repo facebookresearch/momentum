@@ -12,10 +12,6 @@
 
 #include <Eigen/Core>
 
-#ifdef MOMENTUM_ENABLE_AVX
-#include <immintrin.h>
-#endif
-
 #ifndef __vectorcall
 #define __vectorcall
 #endif
@@ -51,25 +47,5 @@ __vectorcall DRJIT_INLINE void jacobian_jointParams_to_modelParams(
             parameterTransform_.transform.valuePtr()[index] * jacobian_jointParams);
   }
 }
-
-#ifdef MOMENTUM_ENABLE_AVX
-
-/// Horizontal sum of 8 floats in an AVX-256 register, accumulating in double precision.
-///
-/// The conversion to double prevents the catastrophic cancellation that can occur when summing
-/// many small squared residuals at single precision.
-inline double __vectorcall sum8(const __m256 x) {
-  const __m128 high = _mm256_extractf128_ps(x, 1);
-  const __m128 low = _mm256_castps256_ps128(x);
-  const __m256d val = _mm256_add_pd(_mm256_cvtps_pd(high), _mm256_cvtps_pd(low));
-  const __m128d valupper = _mm256_extractf128_pd(val, 1);
-  const __m128d vallower = _mm256_castpd256_pd128(val);
-  _mm256_zeroupper();
-  const __m128d valval = _mm_add_pd(valupper, vallower);
-  const __m128d res = _mm_add_pd(_mm_permute_pd(valval, 1), valval);
-  return _mm_cvtsd_f64(res);
-}
-
-#endif // MOMENTUM_ENABLE_AVX
 
 } // namespace momentum

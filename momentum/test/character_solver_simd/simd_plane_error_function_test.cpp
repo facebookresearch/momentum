@@ -39,10 +39,6 @@ void runSimdPlaneEquivalenceSweep(bool above) {
   const std::initializer_list<size_t> constraints = {
       0ul,
       1ul,
-      kAvxPacketSize - 1,
-      kAvxPacketSize,
-      kAvxPacketSize + 1,
-      kAvxPacketSize * 2,
       kSimdPacketSize - 1,
       kSimdPacketSize,
       kSimdPacketSize + 1,

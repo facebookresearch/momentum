@@ -31,15 +31,7 @@ TEST(Momentum_ErrorFunctions, SimdFixedAxisFunctionIsSame) {
 
   SimdFixedAxisConstraints cl_simd(&skeleton);
   const std::initializer_list<size_t> constraintCounts = {
-      0ul,
-      1ul,
-      kAvxPacketSize - 1,
-      kAvxPacketSize,
-      kAvxPacketSize + 1,
-      kSimdPacketSize - 1,
-      kSimdPacketSize,
-      kSimdPacketSize + 1,
-      100ul};
+      0ul, 1ul, kSimdPacketSize - 1, kSimdPacketSize, kSimdPacketSize + 1, 100ul};
 
   for (size_t nConstraints : constraintCounts) {
     if (verbose) {
