@@ -603,6 +603,76 @@ TEST(IoUrdfTest, MimicJoint) {
   EXPECT_FLOAT_EQ(pt.transform.coeff(2 * kParametersPerJoint + 5, 0), 2.0f);
 }
 
+TEST(IoUrdfTest, NegativeAxisUsesSignedUrdfModelParameter) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="negative_axis_robot">
+      <link name="base_link"/>
+      <link name="child_link"/>
+      <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="child_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-0.25" upper="1.0" effort="100" velocity="1"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  ASSERT_EQ(character.skeleton.joints.size(), 2);
+  ASSERT_EQ(character.parameterTransform.name.size(), 1);
+  ASSERT_EQ(character.parameterLimits.size(), 1);
+
+  constexpr Eigen::Index kChildRyIndex = 1 * kParametersPerJoint + RY;
+  EXPECT_FLOAT_EQ(character.parameterTransform.transform.coeff(kChildRyIndex, 0), -1.0f);
+  EXPECT_FLOAT_EQ(character.parameterLimits[0].data.minMax.limits[0], -0.25f);
+  EXPECT_FLOAT_EQ(character.parameterLimits[0].data.minMax.limits[1], 1.0f);
+
+  const ModelParameters modelParams(Eigen::VectorXf::Constant(1, 0.5f));
+  const JointParameters jointParams = character.parameterTransform.apply(modelParams);
+  EXPECT_FLOAT_EQ(jointParams[kChildRyIndex], -0.5f);
+}
+
+TEST(IoUrdfTest, NegativeAxisMimicUsesSignedUrdfModelParameter) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="negative_axis_mimic_robot">
+      <link name="base_link"/>
+      <link name="link1"/>
+      <link name="link2"/>
+      <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="link1"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-0.5" upper="1.2" effort="100" velocity="1"/>
+      </joint>
+      <joint name="joint2" type="revolute">
+        <parent link="base_link"/>
+        <child link="link2"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-3.14" upper="3.14" effort="100" velocity="1"/>
+        <mimic joint="joint1" multiplier="2" offset="0.1"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  ASSERT_EQ(character.parameterTransform.name.size(), 1);
+
+  constexpr Eigen::Index kJoint1RyIndex = 1 * kParametersPerJoint + RY;
+  constexpr Eigen::Index kJoint2RyIndex = 2 * kParametersPerJoint + RY;
+  EXPECT_FLOAT_EQ(character.parameterTransform.transform.coeff(kJoint1RyIndex, 0), -1.0f);
+  EXPECT_FLOAT_EQ(character.parameterTransform.transform.coeff(kJoint2RyIndex, 0), -2.0f);
+  EXPECT_FLOAT_EQ(character.parameterTransform.offsets[kJoint2RyIndex], -0.1f);
+}
+
 TEST(IoUrdfTest, MaterialColors) {
   const std::string urdfContent = R"(
     <?xml version="1.0"?>

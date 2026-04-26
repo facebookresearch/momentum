@@ -20,41 +20,46 @@ namespace momentum {
 ///
 /// ## URDF-to-Momentum Frame Convention
 ///
-/// URDF and Momentum have different conventions for representing joint degrees of freedom.
-/// This loader maps between them as follows:
+/// URDF and Momentum organize skeletons differently, so this loader has to choose what a
+/// Momentum "joint" node means.
 ///
 /// **URDF convention:**
-/// - Each joint specifies an arbitrary `axis` direction (e.g., `<axis xyz="0 0 1"/>`)
-///   that defines the direction of rotation (revolute) or translation (prismatic).
-/// - The axis is just a direction vector — it does NOT define the local coordinate system.
-/// - The link frame is defined solely by the joint's `<origin>` transform (xyz + rpy).
-/// - Visual meshes are positioned relative to the link frame.
+/// - A URDF `joint` connects a parent link to a child link.
+/// - The joint contributes the parent-to-child bind-pose transform (`<origin>`) and the
+///   motion axis (`<axis>`).
+/// - Data attached to the child link — visuals, collisions, inertials, and descendant joint
+///   origins — is authored in the child link frame.
 ///
 /// **Momentum convention:**
-/// - Joint DOFs are applied along fixed local axes: `rx`/`ry`/`rz` for rotation,
-///   `tx`/`ty`/`tz` for translation.
-/// - `preRotation` defines the parent-to-child frame rotation at bind pose.
+/// - Each skeleton node stores a local frame (`preRotation` + translation offset) plus
+///   parameters on fixed local principal axes: `rx`/`ry`/`rz`, `tx`/`ty`/`tz`.
 ///
-/// **How this loader bridges the two:**
-/// - DOFs are mapped to the **natural principal axis** matching the URDF axis direction.
-///   For example, a revolute joint with axis `(0,0,1)` maps to `rz`, not `rx`.
-/// - `preRotation` is set to the URDF joint origin rotation **only** — no axis alignment
-///   rotation is baked in. This means the Momentum joint frame coincides with the URDF
-///   link frame.
-/// - Visual meshes can be transformed using the joint world transform directly, with no
-///   frame correction needed.
+/// **Loader choice: child-link-centric import**
+/// - The imported Momentum node corresponds to the URDF child link and carries that link's
+///   incoming URDF joint.
+/// - `preRotation` is set to the URDF joint origin rotation only, so the imported local frame
+///   stays equal to the URDF child link frame.
+/// - This keeps child-link-authored data directly compatible with the imported skeleton.
 ///
-/// **Why this matters for animation:**
-/// - URDF has no official animation format. Motion data typically comes from BVH or other
-///   formats that express rotations in the joint's local frame.
-/// - Because we preserve the URDF link frame (no axis remapping), animation data can be
-///   applied directly to the corresponding `rx`/`ry`/`rz` parameter without any frame
-///   conversion.
-/// - If axis alignment were baked into `preRotation`, external animation data would need
-///   to account for the internal frame rotation, which no external tool would know to do.
+/// **Consequence for DOF mapping:**
+/// - DOFs are mapped onto the matching Momentum principal axis inside the preserved link frame.
+///   For example, a revolute joint with axis `(0,0,1)` maps to `rz`.
+/// - The exposed model parameter preserves the URDF joint scalar coordinate. If the URDF axis
+///   points along `-X`, `-Y`, or `-Z`, the parameter transform therefore carries a `-1`
+///   coefficient into the corresponding local Momentum principal axis.
+/// - In other words, under this link-preserving convention the exposed model parameter is not
+///   always numerically equal to the local positive-axis `rx`/`ry`/`rz` entry used by Momentum
+///   FK. For negative-axis joints, a positive model parameter produces a negative local
+///   principal-axis rotation.
+/// - Because the model parameter stays in URDF joint coordinates, revolute and prismatic limits
+///   and mimic relations remain in the same coordinate as the imported model parameter.
+/// - We do not bake an extra axis-alignment rotation into `preRotation`. Doing so would make
+///   the imported local frame differ from the URDF child link frame, and every child-link-
+///   authored quantity would need frame conversion.
 ///
 /// **Limitation:** Only principal axes (±X, ±Y, ±Z) are supported. Non-principal axes
-/// (e.g., `(0.707, 0, 0.707)`) will throw an error.
+/// (e.g., `(0.707, 0, 0.707)`) would require an additional axis-alignment frame or a more
+/// general joint representation, so the loader rejects them.
 ///
 /// **Units:** URDF uses meters; Momentum uses centimeters. All positions are converted
 /// automatically.
