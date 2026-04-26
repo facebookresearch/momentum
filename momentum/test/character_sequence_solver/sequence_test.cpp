@@ -1054,3 +1054,45 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_ZeroErrorFo
       kVelocityMagnitudeEpsilon<double> * skeleton.joints.size();
   EXPECT_NEAR(error, expectedError, 1e-15);
 }
+
+TEST(
+    Momentum_SequenceErrorFunctions,
+    JerkSequenceError_SkeletonParameterTransformConstructorMatchesCharacterConstructor) {
+  // Verify that constructing JerkSequenceErrorFunction from Skeleton + ParameterTransform
+  // produces the same results as constructing from Character.
+  const Character character = createTestCharacter();
+  const Skeleton& skeleton = character.skeleton;
+  const ParameterTransform& transform = character.parameterTransform;
+
+  // Construct using both constructors
+  JerkSequenceErrorFunctiond fromCharacter(character);
+  JerkSequenceErrorFunctiond fromSkelPt(skeleton, transform);
+
+  // Both should have the same number of frames (4 for jerk stencil)
+  EXPECT_EQ(fromCharacter.numFrames(), 4u);
+  EXPECT_EQ(fromSkelPt.numFrames(), 4u);
+
+  // Both should have the same Jacobian size
+  EXPECT_EQ(fromSkelPt.getJacobianSize(), fromCharacter.getJacobianSize());
+
+  // Both should have the same stencil coefficients [1, -3, 3, -1]
+  const std::vector<double> expectedStencil = {1.0, -3.0, 3.0, -1.0};
+  EXPECT_EQ(fromSkelPt.getStencilCoefficients(), expectedStencil);
+  EXPECT_EQ(fromCharacter.getStencilCoefficients(), expectedStencil);
+
+  // Both should produce the same error for the same input
+  const ParameterTransformd transformD = transform.cast<double>();
+  auto parameters = randomModelParameters(character, 4);
+  std::vector<SkeletonStated> skelStates(4);
+  for (size_t iFrame = 0; iFrame < 4; ++iFrame) {
+    skelStates[iFrame] = SkeletonStated(transformD.apply(parameters[iFrame]), skeleton);
+  }
+  std::vector<MeshStated> meshStates(4);
+
+  const double errorFromCharacter = fromCharacter.getError(parameters, skelStates, meshStates);
+  const double errorFromSkelPt = fromSkelPt.getError(parameters, skelStates, meshStates);
+  EXPECT_DOUBLE_EQ(errorFromSkelPt, errorFromCharacter);
+
+  // Verify the Skeleton+ParameterTransform constructor also produces correct gradients
+  testGradientAndJacobian<double>(fromSkelPt, parameters, character, 2e-3f, 1e-5f, true);
+}
