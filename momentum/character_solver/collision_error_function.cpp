@@ -10,9 +10,11 @@
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character_solver/error_function_utils.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/log.h"
 #include "momentum/common/profile.h"
+#include "momentum/math/constants.h"
 #include "momentum/math/utility.h"
 
 namespace momentum {
@@ -66,43 +68,13 @@ void CollisionErrorFunctionT<T>::updateCollisionPairs(bool filterRestPoseOverlap
     return;
   }
 
-  T distance;
-  Vector2<T> cp;
-  T overlap;
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = i + 1; j < n; ++j) {
-      // Skip pairs that already overlap in rest pose (unless disabled).
-      if (filterRestPoseOverlaps &&
-          overlaps(
-              collisionState_.origin[i],
-              collisionState_.direction[i],
-              collisionState_.radius[i],
-              collisionState_.delta[i],
-              collisionState_.origin[j],
-              collisionState_.direction[j],
-              collisionState_.radius[j],
-              collisionState_.delta[j],
-              distance,
-              cp,
-              overlap)) {
-        continue;
-      }
-
-      // Skip adjacent joints (common ancestor distance <= 1).
-      size_t p0 = collisionGeometry_[i].parent;
-      size_t p1 = collisionGeometry_[j].parent;
-      size_t count = 0;
-      while (p0 != p1) {
-        if (p0 > p1) {
-          p0 = this->skeleton_.joints[p0].parent;
-        } else {
-          p1 = this->skeleton_.joints[p1].parent;
-        }
-        count++;
-      }
-
-      if (count > 1) {
-        validPairs_.push_back({i, j, p0});
+      if (isValidCollisionPair(
+              collisionState_, collisionGeometry_, this->skeleton_, i, j, filterRestPoseOverlaps)) {
+        const size_t lca = this->skeleton_.commonAncestor(
+            collisionGeometry_[i].parent, collisionGeometry_[j].parent);
+        validPairs_.push_back({i, j, lca});
       }
     }
   }
@@ -157,7 +129,8 @@ void CollisionErrorFunctionT<T>::accumulateGradientAlongChain(
     T weight,
     size_t startJoint,
     size_t stopJoint,
-    Ref<VectorX<T>> gradient) const {
+    Ref<VectorX<T>> gradient,
+    T scaleCorrection) const {
   size_t jointIndex = startJoint;
   while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
     const auto& jointState = state.jointState[jointIndex];
@@ -167,31 +140,18 @@ void CollisionErrorFunctionT<T>::accumulateGradientAlongChain(
     for (size_t d = 0; d < 3; d++) {
       if (this->activeJointParams_[paramIndex + d]) {
         const T val = direction.dot(jointState.getTranslationDerivative(d)) * weight;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-             ++index) {
-          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
+        gradient_jointParams_to_modelParams(
+            val, paramIndex + d, this->parameterTransform_, gradient);
       }
       if (this->activeJointParams_[paramIndex + 3 + d]) {
         const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * weight;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index) {
-          gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
+        gradient_jointParams_to_modelParams(
+            val, paramIndex + 3 + d, this->parameterTransform_, gradient);
       }
     }
     if (this->activeJointParams_[paramIndex + 6]) {
-      const T val = direction.dot(jointState.getScaleDerivative(posd)) * weight;
-      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-           index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-           ++index) {
-        gradient[this->parameterTransform_.transform.innerIndexPtr()[index]] +=
-            val * this->parameterTransform_.transform.valuePtr()[index];
-      }
+      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * weight;
+      gradient_jointParams_to_modelParams(val, paramIndex + 6, this->parameterTransform_, gradient);
     }
 
     jointIndex = this->skeleton_.joints[jointIndex].parent;
@@ -207,7 +167,8 @@ void CollisionErrorFunctionT<T>::accumulateJacobianAlongChain(
     size_t startJoint,
     size_t stopJoint,
     Ref<MatrixX<T>> jacobian,
-    int row) const {
+    int row,
+    T scaleCorrection) const {
   size_t jointIndex = startJoint;
   while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
     const auto& jointState = state.jointState[jointIndex];
@@ -217,31 +178,19 @@ void CollisionErrorFunctionT<T>::accumulateJacobianAlongChain(
     for (size_t d = 0; d < 3; d++) {
       if (this->activeJointParams_[paramIndex + d]) {
         const T val = direction.dot(jointState.getTranslationDerivative(d)) * factor;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 1];
-             ++index) {
-          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
+        jacobian_jointParams_to_modelParams(
+            val, paramIndex + d, row, this->parameterTransform_, jacobian);
       }
       if (this->activeJointParams_[paramIndex + 3 + d]) {
         const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * factor;
-        for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 3 + d];
-             index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + d + 3 + 1];
-             ++index) {
-          jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-              val * this->parameterTransform_.transform.valuePtr()[index];
-        }
+        jacobian_jointParams_to_modelParams(
+            val, paramIndex + 3 + d, row, this->parameterTransform_, jacobian);
       }
     }
     if (this->activeJointParams_[paramIndex + 6]) {
-      const T val = direction.dot(jointState.getScaleDerivative(posd)) * factor;
-      for (auto index = this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6];
-           index < this->parameterTransform_.transform.outerIndexPtr()[paramIndex + 6 + 1];
-           ++index) {
-        jacobian(row, this->parameterTransform_.transform.innerIndexPtr()[index]) +=
-            val * this->parameterTransform_.transform.valuePtr()[index];
-      }
+      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * factor;
+      jacobian_jointParams_to_modelParams(
+          val, paramIndex + 6, row, this->parameterTransform_, jacobian);
     }
 
     jointIndex = this->skeleton_.joints[jointIndex].parent;
@@ -334,6 +283,12 @@ double CollisionErrorFunctionT<T>::getGradient(
     const Vector3<T> direction = position_i - position_j;
     const T wgt = -T(2) * kCollisionWeight * this->weight_ * (overlap / distance);
 
+    // Effective radii at the closest points (for scale derivative correction)
+    const T radiusA_at_cp =
+        collisionState_.radius[pair.indexA][0] + cp[0] * collisionState_.delta[pair.indexA];
+    const T radiusB_at_cp =
+        collisionState_.radius[pair.indexB][0] + cp[1] * collisionState_.delta[pair.indexB];
+
     accumulateGradientAlongChain(
         state,
         position_i,
@@ -341,7 +296,8 @@ double CollisionErrorFunctionT<T>::getGradient(
         wgt,
         collisionGeometry_[pair.indexA].parent,
         pair.commonAncestor,
-        gradient);
+        gradient,
+        -distance * radiusA_at_cp * ln2<T>());
     accumulateGradientAlongChain(
         state,
         position_j,
@@ -349,7 +305,26 @@ double CollisionErrorFunctionT<T>::getGradient(
         -wgt,
         collisionGeometry_[pair.indexB].parent,
         pair.commonAncestor,
-        gradient);
+        gradient,
+        distance * radiusB_at_cp * ln2<T>());
+
+    // Scale derivatives above the common ancestor: translation and rotation derivatives cancel
+    // above the LCA (both capsule endpoints move identically), but scale derivatives do not
+    // because the two endpoints are at different distances from the scaled joint, and scaling
+    // also changes capsule radii.
+    {
+      const T netScaleVal =
+          (direction.squaredNorm() - distance * (radiusA_at_cp + radiusB_at_cp)) * ln2<T>() * wgt;
+      size_t ancestorIndex = pair.commonAncestor;
+      while (ancestorIndex != kInvalidIndex) {
+        const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+        if (this->activeJointParams_[paramIndex + 6]) {
+          gradient_jointParams_to_modelParams(
+              netScaleVal, paramIndex + 6, this->parameterTransform_, gradient);
+        }
+        ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+      }
+    }
   }
 
   return error;
@@ -404,8 +379,14 @@ double CollisionErrorFunctionT<T>::getJacobian(
     const Vector3<T> position_j =
         collisionState_.origin[pair.indexB] + collisionState_.direction[pair.indexB] * cp[1];
     const Vector3<T> direction = position_i - position_j;
-    const T fac = T(2) / distance * wgt;
+    const T fac = wgt / distance;
     const int row = pos++;
+
+    // Effective radii at the closest points (for scale derivative correction)
+    const T radiusA_at_cp =
+        collisionState_.radius[pair.indexA][0] + cp[0] * collisionState_.delta[pair.indexA];
+    const T radiusB_at_cp =
+        collisionState_.radius[pair.indexB][0] + cp[1] * collisionState_.delta[pair.indexB];
 
     accumulateJacobianAlongChain(
         state,
@@ -415,7 +396,8 @@ double CollisionErrorFunctionT<T>::getJacobian(
         collisionGeometry_[pair.indexA].parent,
         pair.commonAncestor,
         jacobian,
-        row);
+        row,
+        -distance * radiusA_at_cp * ln2<T>());
     accumulateJacobianAlongChain(
         state,
         position_j,
@@ -424,7 +406,23 @@ double CollisionErrorFunctionT<T>::getJacobian(
         collisionGeometry_[pair.indexB].parent,
         pair.commonAncestor,
         jacobian,
-        row);
+        row,
+        distance * radiusB_at_cp * ln2<T>());
+
+    // Scale derivatives above the common ancestor
+    {
+      const T netScaleVal = -fac * ln2<T>() * direction.squaredNorm() +
+          wgt * (radiusA_at_cp + radiusB_at_cp) * ln2<T>();
+      size_t ancestorIndex = pair.commonAncestor;
+      while (ancestorIndex != kInvalidIndex) {
+        const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+        if (this->activeJointParams_[paramIndex + 6]) {
+          jacobian_jointParams_to_modelParams(
+              netScaleVal, paramIndex + 6, row, this->parameterTransform_, jacobian);
+        }
+        ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+      }
+    }
 
     residual(row) = overlap * wgt;
   }

@@ -74,6 +74,7 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   /// Accumulate gradient contributions along a joint chain from startJoint up to (but not
   /// including) stopJoint. The sign of weight controls the push direction.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
   void accumulateGradientAlongChain(
       const SkeletonStateT<T>& state,
       const Vector3<T>& position,
@@ -81,10 +82,12 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       T weight,
       size_t startJoint,
       size_t stopJoint,
-      Ref<VectorX<T>> gradient) const;
+      Ref<VectorX<T>> gradient,
+      T scaleCorrection = T(0)) const;
 
   /// Accumulate Jacobian contributions along a joint chain from startJoint up to (but not
   /// including) stopJoint. The sign of factor controls the push direction.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
   void accumulateJacobianAlongChain(
       const SkeletonStateT<T>& state,
       const Vector3<T>& position,
@@ -93,7 +96,8 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       size_t startJoint,
       size_t stopJoint,
       Ref<MatrixX<T>> jacobian,
-      int row) const;
+      int row,
+      T scaleCorrection = T(0)) const;
 
   /// Pre-computed valid collision pair with common ancestor.
   struct CollisionPairInfo {
