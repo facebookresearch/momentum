@@ -8,6 +8,7 @@
 #include "momentum/character/collision_geometry_state.h"
 
 #include "momentum/character/skeleton_state.h"
+#include "momentum/character/types.h"
 
 namespace momentum {
 
@@ -25,11 +26,13 @@ void CollisionGeometryStateT<T>::update(
   // calculate data from the geometry (can be parallelized)
   for (size_t i = 0; i < numElements; ++i) {
     const auto& tc = collisionGeometry[i];
-    const auto& js = skeletonState.jointState[tc.parent];
-    const TransformT<T> transform = js.transform * tc.transformation.cast<T>();
+    const TransformT<T> parentTransform = (tc.parent == kInvalidIndex)
+        ? TransformT<T>()
+        : skeletonState.jointState[tc.parent].transform;
+    const TransformT<T> transform = parentTransform * tc.transformation.cast<T>();
     origin[i] = transform.translation;
     direction[i].noalias() = transform.getAxisX() * transform.scale * tc.length;
-    radius[i].noalias() = tc.radius.cast<T>() * js.transform.scale;
+    radius[i].noalias() = tc.radius.cast<T>() * parentTransform.scale;
     delta[i] = radius[i][1] - radius[i][0];
   }
 }

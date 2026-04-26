@@ -75,6 +75,7 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
       T& overlap) const;
 
   /// Accumulate gradient contributions along a joint chain.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
   void accumulateGradientAlongChain(
       const SkeletonStateT<T>& state,
       const Vector3<T>& position,
@@ -82,9 +83,11 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
       T weight,
       size_t startJoint,
       size_t stopJoint,
-      Ref<VectorX<T>> gradient) const;
+      Ref<VectorX<T>> gradient,
+      T scaleCorrection = T(0)) const;
 
   /// Accumulate Jacobian contributions along a joint chain.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
   void accumulateJacobianAlongChain(
       const SkeletonStateT<T>& state,
       const Vector3<T>& position,
@@ -93,7 +96,8 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
       size_t startJoint,
       size_t stopJoint,
       Ref<MatrixX<T>> jacobian,
-      int row) const;
+      int row,
+      T scaleCorrection = T(0)) const;
 
   /// Pre-computed valid collision pair with common ancestor.
   struct CollisionPairInfo {

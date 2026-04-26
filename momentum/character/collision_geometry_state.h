@@ -9,6 +9,7 @@
 
 #include <momentum/character/collision_geometry.h>
 #include <momentum/character/fwd.h>
+#include <momentum/character/skeleton.h>
 
 #include <axel/BoundingBox.h>
 
@@ -125,6 +126,68 @@ void updateAabb(
 
   aabb.aabb.min() = minA.cwiseMin(minB);
   aabb.aabb.max() = maxA.cwiseMax(maxB);
+}
+
+/// Determines whether a pair of collision geometry capsules should be included as a valid
+/// collision pair.
+///
+/// A pair is excluded if:
+/// - The capsules overlap in rest pose (permanently overlapping, e.g. adjacent body parts),
+///   unless @p filterRestPoseOverlaps is false
+/// - The capsules are attached to the same joint or directly adjacent joints
+///
+/// @param collisionState The collision geometry state in rest pose
+/// @param collisionGeometry The collision geometry definition
+/// @param skeleton The skeleton used for adjacency checks
+/// @param i Index of the first capsule
+/// @param j Index of the second capsule
+/// @param filterRestPoseOverlaps When true, exclude pairs that overlap in rest pose
+/// @return True if the pair is a valid collision pair (should be checked for collisions)
+template <typename T, typename S>
+[[nodiscard]] bool isValidCollisionPair(
+    const CollisionGeometryStateT<T>& collisionState,
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonT<S>& skeleton,
+    size_t i,
+    size_t j,
+    bool filterRestPoseOverlaps = true) {
+  const size_t p0 = collisionGeometry[i].parent;
+  const size_t p1 = collisionGeometry[j].parent;
+
+  // World-fixed capsules (kInvalidIndex parent):
+  // - If both are world-fixed, they can't collide with each other in a meaningful way.
+  // - If exactly one is world-fixed, it's always a valid collision pair (no rest-pose
+  //   overlap or adjacency checks apply since the world geometry is independent of
+  //   the character's skeleton).
+  if (p0 == kInvalidIndex || p1 == kInvalidIndex) {
+    return p0 != p1;
+  }
+
+  // Check for same or adjacent joints
+  if (skeleton.isSameOrAdjacentJoints(p0, p1)) {
+    return false;
+  }
+
+  if (!filterRestPoseOverlaps) {
+    return true;
+  }
+
+  // Check for rest-pose overlap (permanently overlapping pairs like adjacent body parts)
+  T distance;
+  Vector2<T> cp;
+  T overlap;
+  return !overlaps(
+      collisionState.origin[i],
+      collisionState.direction[i],
+      collisionState.radius[i],
+      collisionState.delta[i],
+      collisionState.origin[j],
+      collisionState.direction[j],
+      collisionState.radius[j],
+      collisionState.delta[j],
+      distance,
+      cp,
+      overlap);
 }
 
 } // namespace momentum
