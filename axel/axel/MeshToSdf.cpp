@@ -116,19 +116,31 @@ void meshToSdfImpl(
   const ScalarType bandWidthWorld = config.narrowBandWidth * voxelSize.maxCoeff();
 
   // STEP 1: Initialize narrow band with exact triangle distances
-  std::cout << "Step 1: Narrow band initialization..." << std::endl;
+  if (config.verbose) {
+    std::cout << "Step 1: Narrow band initialization..." << std::endl;
+  }
   initializeNarrowBand(vertices, triangles, sdf, bandWidthWorld);
-  std::cout << "Narrow band initialized" << std::endl;
+  if (config.verbose) {
+    std::cout << "Narrow band initialized" << std::endl;
+  }
 
   // STEP 2: Fast marching propagation to fill entire grid
-  std::cout << "Step 2: Fast marching propagation..." << std::endl;
+  if (config.verbose) {
+    std::cout << "Step 2: Fast marching propagation..." << std::endl;
+  }
   fastMarchingPropagate(sdf);
-  std::cout << "Fast marching completed" << std::endl;
+  if (config.verbose) {
+    std::cout << "Fast marching completed" << std::endl;
+  }
 
   // STEP 3: Apply signs based on inside/outside determination
-  std::cout << "Step 3: Applying signs..." << std::endl;
+  if (config.verbose) {
+    std::cout << "Step 3: Applying signs..." << std::endl;
+  }
   applySignsToDistanceField(sdf, vertices, triangles);
-  std::cout << "Signs applied" << std::endl;
+  if (config.verbose) {
+    std::cout << "Signs applied" << std::endl;
+  }
 
   // Apply distance clamping if configured
   if (config.maxDistance > ScalarType{0}) {

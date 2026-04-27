@@ -266,6 +266,43 @@ Available methods:
           py::arg("bounds"),
           py::arg("resolution"),
           py::arg("data"))
+      .def(
+          py::init([](const axel::BoundingBox<float>& bounds, const py::array_t<float>& data) {
+            auto info = data.request();
+            MT_THROW_IF(
+                info.ndim != 3,
+                "data must be a 3D array with shape (nx, ny, nz), got ndim={}",
+                info.ndim);
+            const auto nx = static_cast<axel::Index>(info.shape[0]);
+            const auto ny = static_cast<axel::Index>(info.shape[1]);
+            const auto nz = static_cast<axel::Index>(info.shape[2]);
+            const Eigen::Vector3<axel::Index> resolution(nx, ny, nz);
+
+            // Copy data respecting strides (handles both C and Fortran order)
+            std::vector<float> flatData(static_cast<size_t>(nx) * ny * nz);
+            const auto* src = static_cast<const float*>(info.ptr);
+            for (axel::Index k = 0; k < nz; ++k) {
+              for (axel::Index j = 0; j < ny; ++j) {
+                for (axel::Index i = 0; i < nx; ++i) {
+                  const auto srcIdx = i * (info.strides[0] / sizeof(float)) +
+                      j * (info.strides[1] / sizeof(float)) + k * (info.strides[2] / sizeof(float));
+                  // Internal storage: k * nx * ny + j * nx + i
+                  flatData[k * nx * ny + j * nx + i] = src[srcIdx];
+                }
+              }
+            }
+            return axel::SignedDistanceField<float>(bounds, resolution, std::move(flatData));
+          }),
+          R"(Create a signed distance field from a bounding box and a 3D numpy array.
+
+The array shape ``(nx, ny, nz)`` determines the grid resolution. Data is
+copied from the array into the SDF's internal storage, correctly handling
+both C-contiguous and Fortran-contiguous memory layouts.
+
+:param bounds: 3D bounding box defining the spatial extent of the SDF.
+:param data: 3D numpy array of shape (nx, ny, nz) with float32 distance values.)",
+          py::arg("bounds"),
+          py::arg("data"))
       .def_property_readonly(
           "bounds", &axel::SignedDistanceField<float>::bounds, "Get the bounding box of the SDF.")
       .def_property_readonly(

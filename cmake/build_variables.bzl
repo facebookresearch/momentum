@@ -213,6 +213,7 @@ character_public_headers = [
     "character/sdf_collision_geometry.h",
     "character/skinned_locator.h",
     "character/skin_weights.h",
+    "character/texture_classification.h",
 ]
 
 character_sources = [
@@ -229,6 +230,7 @@ character_sources = [
     "character/mesh_state.cpp",
     "character/pose_shape.cpp",
     "character/skin_weights.cpp",
+    "character/texture_classification.cpp",
 ]
 
 character_test_sources = [

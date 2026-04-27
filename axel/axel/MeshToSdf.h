@@ -36,6 +36,9 @@ struct MeshToSdfConfig {
 
   /// Numerical tolerance for computations
   Scalar tolerance = std::numeric_limits<Scalar>::epsilon() * Scalar{1000};
+
+  /// Print progress messages to stdout
+  bool verbose = false;
 };
 
 /**
