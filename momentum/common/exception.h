@@ -39,6 +39,8 @@
 ///   MT_THROW_IF_T(x > y, std::out_of_range, "x ({}) is greater than y ({})", x, y);
 ///   MT_THROW_IF_T(x > y, std::bad_array_new_length); // No message
 /// @endcode
+// TODO: Wrap macro body in `do { ... } while (0)` to avoid dangling-else bugs when used
+// inside an `if`/`else` without braces.
 #define MT_THROW_IF_T(Condition, Exception, ...) \
   if (Condition) {                               \
     MT_THROW_T(Exception, ##__VA_ARGS__);        \
@@ -59,16 +61,15 @@ using DefaultException = std::runtime_error;
 
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
 
-// Helper function template to throw with formatted message
 template <typename Exception = DefaultException, typename... Args>
 [[noreturn]] void throwImpl(fmt::format_string<Args...> format, Args&&... args) {
   throw Exception{fmt::format(format, std::forward<Args>(args)...)};
 }
 
-// Overload for throwing exceptions without a message.
-// Uses if-constexpr to handle both default-constructible exceptions (e.g.
-// std::bad_array_new_length) and exceptions that require a string argument (e.g.
-// std::runtime_error, std::logic_error).
+/// No-message overload. Selects a default-constructed exception when possible (e.g.
+/// `std::bad_array_new_length`); otherwise falls back to constructing from an empty string,
+/// which is required for exceptions like `std::runtime_error`/`std::logic_error` that have
+/// no default constructor.
 template <typename Exception>
 [[noreturn]] void throwImpl() {
   if constexpr (std::is_constructible_v<Exception>) {
@@ -80,8 +81,7 @@ template <typename Exception>
 
 #else
 
-// Fallback for platforms without exception support
-// Log the error message to stderr and abort.
+/// Fallback when exceptions are disabled: write the formatted message to stderr and abort.
 template <typename Exception = DefaultException, typename... Args>
 [[noreturn]] void throwImpl(fmt::format_string<Args...> format, Args&&... args) {
   std::fprintf(
@@ -89,7 +89,6 @@ template <typename Exception = DefaultException, typename... Args>
   std::abort();
 }
 
-// Overload for exceptions without a message.
 template <typename Exception>
 [[noreturn]] void throwImpl() {
   std::fputs("FATAL ERROR (no message)\n", stderr);

@@ -9,7 +9,17 @@
 
 #include <memory>
 
-// Define smart pointers for a type
+/// Define the standard set of smart-pointer type aliases for type @p x.
+///
+/// Generates six aliases following the project naming convention:
+///   - `x##_p`        — `std::shared_ptr<x>`
+///   - `x##_u`        — `std::unique_ptr<x>`
+///   - `x##_w`        — `std::weak_ptr<x>`
+///   - `x##_const_p`  — `std::shared_ptr<const x>`
+///   - `x##_const_u`  — `std::unique_ptr<const x>`
+///   - `x##_const_w`  — `std::weak_ptr<const x>`
+///
+/// @pre @p x must be a previously declared (or forward-declared) type name.
 #ifndef MOMENTUM_DEFINE_POINTERS
 #define MOMENTUM_DEFINE_POINTERS(x)               \
   using x##_p = ::std::shared_ptr<x>;             \
@@ -20,14 +30,18 @@
   using x##_const_w = ::std::weak_ptr<const x>;
 #endif // MOMENTUM_DEFINE_POINTERS
 
-// Forward-declare a struct, define smart pointers
+/// Forward-declare struct @p x and define its smart-pointer aliases.
+///
+/// @see MOMENTUM_DEFINE_POINTERS for the generated alias names.
 #ifndef MOMENTUM_FWD_DECLARE_STRUCT
 #define MOMENTUM_FWD_DECLARE_STRUCT(x) \
   struct x;                            \
   MOMENTUM_DEFINE_POINTERS(x);
 #endif // MOMENTUM_FWD_DECLARE_STRUCT
 
-// Forward-declare a class, define smart pointers
+/// Forward-declare class @p x and define its smart-pointer aliases.
+///
+/// @see MOMENTUM_DEFINE_POINTERS for the generated alias names.
 #ifndef MOMENTUM_FWD_DECLARE_CLASS
 // NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_CLASS(x) \
@@ -36,11 +50,19 @@
 // NOLINTEND(bugprone-macro-parentheses)
 #endif // MOMENTUM_FWD_DECLARE_CLASS
 
-// Forward-declare a templated class, define smart pointers for the class and its variants
-// Use the standard backward-compatible naming scheme:
-//    template <typename T> class BarT;
-//    using Bar = BarT<float>;
-//    using Bard = BarT<double>;
+/// Forward-declare a single-template-parameter class @p x##T and define
+/// `float`/`double` instantiation aliases plus their smart-pointer aliases.
+///
+/// Uses the project's backward-compatible naming scheme:
+/// @code
+///    template <typename T> class BarT;
+///    using Bar = BarT<float>;
+///    using Bard = BarT<double>;
+/// @endcode
+/// Smart-pointer aliases are generated for both `Bar` and `Bard`
+/// (e.g. `Bar_p`, `Bard_p`, ...).
+///
+/// @pre @p x##T must be a class template with exactly one type parameter.
 #ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS
 // NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS(x) \
@@ -53,11 +75,19 @@
 // NOLINTEND(bugprone-macro-parentheses)
 #endif // MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS
 
-// Forward-declare a templated struct, define smart pointers for the struct and its variants
-// Use the standard backward-compatible naming scheme:
-//    template <typename T> struct BarT;
-//    using Bar = BarT<float>;
-//    using Bard = BarT<double>;
+/// Forward-declare a single-template-parameter struct @p x##T and define
+/// `float`/`double` instantiation aliases plus their smart-pointer aliases.
+///
+/// Uses the project's backward-compatible naming scheme:
+/// @code
+///    template <typename T> struct BarT;
+///    using Bar = BarT<float>;
+///    using Bard = BarT<double>;
+/// @endcode
+/// Smart-pointer aliases are generated for both `Bar` and `Bard`
+/// (e.g. `Bar_p`, `Bard_p`, ...).
+///
+/// @pre @p x##T must be a struct template with exactly one type parameter.
 #ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT
 // NOLINTBEGIN(bugprone-macro-parentheses)
 #define MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT(x) \

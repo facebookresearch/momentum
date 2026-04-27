@@ -98,6 +98,10 @@ inline void aligned_free(void* ptr) {
 
 #endif
 
+/// Rounds `value` up to the nearest multiple of `alignment` (in bytes).
+///
+/// @pre `alignment` must be non-zero. Throws `std::invalid_argument` otherwise.
+/// @return The smallest multiple of `alignment` that is >= `value`.
 inline constexpr std::size_t roundUpToAlignment(std::size_t value, std::size_t alignment) {
   MT_THROW_IF_T(alignment == 0, std::invalid_argument, "Alignment must be non-zero");
   return ((value + alignment - 1) / alignment) * alignment;
@@ -106,7 +110,12 @@ inline constexpr std::size_t roundUpToAlignment(std::size_t value, std::size_t a
 /// Allocates a block of memory that can hold `n` elements of type `T` with the specified alignment.
 ///
 /// This function is intended to be used in the `AlignedAllocator::allocate()` method and throws
-/// exceptions as `std::allocator<T>::allocate` does.
+/// exceptions as `std::allocator<T>::allocate` does. The allocated size is rounded up to a multiple
+/// of `Alignment` so it satisfies the size requirements of `std::aligned_alloc` on platforms where
+/// it is used. The returned pointer must be released with `aligned_free`.
+///
+/// @throws std::bad_array_new_length if `n * sizeof(T)` would overflow.
+/// @throws std::bad_alloc if the underlying aligned allocation fails.
 template <typename T, std::size_t Alignment = alignof(T)>
 [[nodiscard]] T* alignedAlloc(std::size_t n) {
   MT_THROW_IF_T(std::numeric_limits<std::size_t>::max() / sizeof(T) < n, std::bad_array_new_length);
@@ -154,9 +163,7 @@ class AlignedAllocator {
   AlignedAllocator() noexcept = default;
 
   template <class U>
-  explicit AlignedAllocator(const AlignedAllocator<U, Alignment>& /*other*/) noexcept {
-    // Empty
-  }
+  explicit AlignedAllocator(const AlignedAllocator<U, Alignment>& /*other*/) noexcept {}
 
   /// Allocates a block of memory that can hold `n` elements of type `T`.
   ///
@@ -169,8 +176,8 @@ class AlignedAllocator {
   /// Deallocates a block of memory that was previously allocated by `allocate`.
   ///
   /// @param[in] ptr A pointer to the first byte of the memory block to deallocate.
-  /// @param size The size of the memory block to deallocate. This parameter is not used, but it is
-  /// included to maintain compatibility with `std::allocator`.
+  /// @param n The number of elements in the block. Unused; included to match the
+  /// `std::allocator` interface.
   void deallocate(T* ptr, std::size_t /*n*/) noexcept {
     aligned_free(ptr);
   }
