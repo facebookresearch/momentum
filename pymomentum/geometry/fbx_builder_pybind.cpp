@@ -119,6 +119,33 @@ This is useful for rigid bodies or characters with simple parameterization.
           py::arg("fps") = 120.0f,
           py::arg("joint_params") = std::nullopt)
       .def(
+          "add_animated_mesh",
+          [](mm::FbxBuilder& builder,
+             const mm::Character& character,
+             const std::string& name,
+             float fps,
+             const std::optional<Eigen::MatrixXf>& jointParams) {
+            mm::MatrixXf transposedJointParams;
+            if (jointParams.has_value() && jointParams->size() > 0) {
+              transposedJointParams = jointParams->transpose();
+            }
+            builder.addAnimatedMesh(character, name, fps, transposedJointParams);
+          },
+          R"(Add an animated mesh (no skeleton) to the scene.
+
+Creates a standalone mesh node and animates its transform directly from
+the root joint parameters. Use this for props/objects that should appear
+as a simple animated mesh without any skeleton hierarchy.
+
+:param character: The character providing the mesh geometry.
+:param name: Name for the mesh node.
+:param fps: Animation frame rate in frames per second.
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).)",
+          py::arg("character"),
+          py::arg("name"),
+          py::arg("fps") = 120.0f,
+          py::arg("joint_params") = std::nullopt)
+      .def(
           "add_marker_sequence",
           [](mm::FbxBuilder& builder,
              float fps,
