@@ -145,11 +145,11 @@ $(document).ready(function(){initNavTree('vertex__sequence__error__function_8cpp
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00042" data-start="{" data-end="}">
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classmomentum_1_1VertexSequenceErrorFunctionT.html#a1d65fbef5164100cf59b5496e5dd1a32">   42</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classmomentum_1_1VertexSequenceErrorFunctionT.html#a1d65fbef5164100cf59b5496e5dd1a32">VertexSequenceErrorFunctionT&lt;T&gt;::addConstraint</a>(</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">int</span> vertexIndex,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="texture__classification_8cpp.html#a7f9fb645a4065d27b29141670aee59e4">vertexIndex</a>,</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> weight,</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; targetVelocity) {</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(vertexIndex &gt;= 0 &amp;&amp; ((<span class="keywordtype">size_t</span>)vertexIndex) &lt; character_.mesh-&gt;vertices.size());</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  constraints_.push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">VertexVelocityConstraintT&lt;T&gt;</a>{vertexIndex, weight, targetVelocity});</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_variable" href="texture__classification_8cpp.html#a7f9fb645a4065d27b29141670aee59e4">vertexIndex</a> &gt;= 0 &amp;&amp; ((<span class="keywordtype">size_t</span>)<a class="code hl_variable" href="texture__classification_8cpp.html#a7f9fb645a4065d27b29141670aee59e4">vertexIndex</a>) &lt; character_.mesh-&gt;vertices.size());</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  constraints_.push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">VertexVelocityConstraintT&lt;T&gt;</a>{<a class="code hl_variable" href="texture__classification_8cpp.html#a7f9fb645a4065d27b29141670aee59e4">vertexIndex</a>, weight, targetVelocity});</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
 </div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
@@ -511,6 +511,7 @@ $(document).ready(function(){initNavTree('vertex__sequence__error__function_8cpp
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html_a729d4cf7474cfcf21a280816ba6b2f88"><div class="ttname"><a href="structmomentum_1_1CharacterT.html#a729d4cf7474cfcf21a280816ba6b2f88">momentum::CharacterT::skinWeights</a></div><div class="ttdeci">SkinWeights_u skinWeights</div><div class="ttdoc">Defines how mesh vertices are influenced by joints.</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00050">character.h:50</a></div></div>
 <div class="ttc" id="astructmomentum_1_1CharacterT_html_aeb93206998e7280dc14d8f8edc9b074e"><div class="ttname"><a href="structmomentum_1_1CharacterT.html#aeb93206998e7280dc14d8f8edc9b074e">momentum::CharacterT::mesh</a></div><div class="ttdeci">Mesh_u mesh</div><div class="ttdoc">3D mesh representing the character's surface</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00047">character.h:47</a></div></div>
+<div class="ttc" id="atexture__classification_8cpp_html_a7f9fb645a4065d27b29141670aee59e4"><div class="ttname"><a href="texture__classification_8cpp.html#a7f9fb645a4065d27b29141670aee59e4">vertexIndex</a></div><div class="ttdeci">int vertexIndex</div><div class="ttdef"><b>Definition</b> <a href="texture__classification_8cpp_source.html#l00206">texture_classification.cpp:206</a></div></div>
 <div class="ttc" id="avertex__sequence__error__function_8h_html"><div class="ttname"><a href="vertex__sequence__error__function_8h.html">vertex_sequence_error_function.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -518,7 +519,7 @@ $(document).ready(function(){initNavTree('vertex__sequence__error__function_8cpp
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="vertex__sequence__error__function_8cpp.html">vertex_sequence_error_function.cpp</a></li>
-    <li class="footer">Generated on Sun Apr 26 2026 16:32:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

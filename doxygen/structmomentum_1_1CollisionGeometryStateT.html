@@ -128,7 +128,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 struct momentum::CollisionGeometryStateT&lt; T &gt;</div><p>Represents collision geometry states using a Structure of Arrays (SoA) format. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00019">19</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00020">20</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ad21db757e7569020951383b801808b8a" name="ad21db757e7569020951383b801808b8a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad21db757e7569020951383b801808b8a">&#9670;&#160;</a></span>update()</h2>
@@ -160,9 +160,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Updates the state based on a given skeleton state and collision geometry. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8cpp_source.html#l00015">15</a> of file <a class="el" href="collision__geometry__state_8cpp_source.html">collision_geometry_state.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8cpp_source.html#l00016">16</a> of file <a class="el" href="collision__geometry__state_8cpp_source.html">collision_geometry_state.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="transform_8h_source.html#l00162">momentum::TransformT&lt; T &gt;::getAxisX()</a>, <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00162">momentum::TransformT&lt; T &gt;::getAxisX()</a>, <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00200">momentum::kInvalidIndex</a>, <a class="el" href="transform_8h_source.html#l00028">momentum::TransformT&lt; T &gt;::scale</a>, and <a class="el" href="transform_8h_source.html#l00027">momentum::TransformT&lt; T &gt;::translation</a>.</p>
 
 </div>
 </div>
@@ -183,7 +183,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Signed difference between the capsule's radii (radius[1] - radius[0]). </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00046">46</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00047">47</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00147">momentum::isValidCollisionPair()</a>.</p>
 
 </div>
 </div>
@@ -203,7 +205,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Capsule's direction vector (representing the X-axis) in global coordinates. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00040">40</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00041">41</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00147">momentum::isValidCollisionPair()</a>.</p>
 
 </div>
 </div>
@@ -223,7 +227,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Capsule's origin in global coordinates. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00037">37</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00038">38</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00147">momentum::isValidCollisionPair()</a>.</p>
 
 </div>
 </div>
@@ -243,7 +249,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Scaled radii of the capsule's endpoints. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00043">43</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00044">44</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00147">momentum::isValidCollisionPair()</a>.</p>
 
 </div>
 </div>
@@ -257,7 +265,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html">CollisionGeometryStateT</a></li>
-    <li class="footer">Generated on Sun Apr 26 2026 16:32:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

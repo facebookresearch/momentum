@@ -11,6 +11,7 @@ var structmomentum_1_1SkeletonT =
     [ "getJointIdByName", "structmomentum_1_1SkeletonT.html#a4527772cd814be6f2bd6d742234f251f", null ],
     [ "getJointNames", "structmomentum_1_1SkeletonT.html#ac9aaec7e80183040d9916ea4d9e91910", null ],
     [ "isAncestor", "structmomentum_1_1SkeletonT.html#ae29d62356015fb5b600addfd37c0b454", null ],
+    [ "isSameOrAdjacentJoints", "structmomentum_1_1SkeletonT.html#afc73b1e4de3d1f830896a3ad28aacc19", null ],
     [ "operator=", "structmomentum_1_1SkeletonT.html#aa8722f72355056de162bbf93a049e685", null ],
     [ "operator=", "structmomentum_1_1SkeletonT.html#a7472f5d74ddcc0510119777513e9e4e2", null ],
     [ "joints", "structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56", null ]

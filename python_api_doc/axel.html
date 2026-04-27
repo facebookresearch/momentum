@@ -406,6 +406,21 @@ ensuring adequate padding even for very thin mesh regions.</p>
 </ul>
 </dd>
 </dl>
+<ol class="arabic simple" start="3">
+<li><p>__init__(self: pymomentum.axel.SignedDistanceField, bounds: pymomentum.axel.BoundingBox, data: numpy.ndarray[numpy.float32]) -&gt; None</p></li>
+</ol>
+<p>Create a signed distance field from a bounding box and a 3D numpy array.</p>
+<p>The array shape <code class="docutils literal notranslate"><span class="pre">(nx,</span> <span class="pre">ny,</span> <span class="pre">nz)</span></code> determines the grid resolution. Data is
+copied from the array into the SDF’s internal storage, correctly handling
+both C-contiguous and Fortran-contiguous memory layouts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds</strong> – 3D bounding box defining the spatial extent of the SDF.</p></li>
+<li><p><strong>data</strong> – 3D numpy array of shape (nx, ny, nz) with float32 distance values.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

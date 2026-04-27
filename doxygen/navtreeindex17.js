@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"globals_vars.html":[3,1,2],
 "glove__utils_8cpp.html":[3,0,7,3],
 "glove__utils_8cpp.html#a264cefb9d00e4935f617b8e1b20ff362":[3,0,7,3,3],
 "glove__utils_8cpp.html#a3851f2daef57442a2173f96c06b246a5":[3,0,7,3,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "legacy__json__io_8h.html#a22704b35028ff556f65511e894130287":[3,0,6,4,1,5],
 "legacy__json__io_8h.html#a6427a4ba73f7b967e4acfa6e24d925c0":[3,0,6,4,1,1],
 "legacy__json__io_8h.html#acc1e828c422dcfd37fa24558c901168b":[3,0,6,4,1,2],
-"legacy__json__io_8h.html#afa58aef2bb58fd1c62d4217db610eeb7":[3,0,6,4,1,4],
-"legacy__json__io_8h.html#aff65874a0db0e0aa74a5c38a3b661844":[3,0,6,4,1,0]
+"legacy__json__io_8h.html#afa58aef2bb58fd1c62d4217db610eeb7":[3,0,6,4,1,4]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX20 =
 {
+"math_2types_8h.html#a92206bbe295841890301ce393bc8b2e0":[3,0,8,25,13],
 "math_2types_8h.html#a92780857f74d985bc6fdc67ea9e29238":[3,0,8,25,236],
 "math_2types_8h.html#a9367938e92431c2376a89f5345606b64":[3,0,8,25,192],
 "math_2types_8h.html#a946ab1953d1fb51ba0a9d204ed46b68e":[3,0,8,25,91],
@@ -248,6 +249,5 @@ var NAVTREEINDEX20 =
 "mppca__io_8h.html#ad0778f4670c7fffe2ed4cbdd0ef39ac1":[3,0,6,8,3,3],
 "mppca__io_8h_source.html":[3,0,6,8,3],
 "multipose__solver_8cpp.html":[3,0,1,9],
-"multipose__solver_8cpp_source.html":[3,0,1,9],
-"multipose__solver_8h.html":[3,0,1,10]
+"multipose__solver_8cpp_source.html":[3,0,1,9]
 };

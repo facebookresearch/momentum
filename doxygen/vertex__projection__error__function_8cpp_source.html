@@ -139,12 +139,12 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldVecs</a>.size() == 1, <span class="stringliteral">&quot;Expected exactly one world vector for vertex projection&quot;</span>);</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a> = this-&gt;constraints_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constrIndex</a>];</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; v = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldVecs</a>[0];</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">worldVecs</a>[0];</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="comment">// Project 3D point to 2D using the projection matrix</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="comment">// p_hom = P * [v; 1]</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  Eigen::Vector4&lt;T&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vHom</a>;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vHom</a> &lt;&lt; v, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vHom</a> &lt;&lt; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1);</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">const</span> Eigen::Vector3&lt;T&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pHom</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.projectionMatrix * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">vHom</a>;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="comment">// Near-clip: skip vertices behind the camera (matching legacy _nearClip = 1.0)</span></div>
@@ -196,6 +196,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html">momentum::ParameterTransformT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1VertexProjectionDataT_html"><div class="ttname"><a href="structmomentum_1_1VertexProjectionDataT.html">momentum::VertexProjectionDataT</a></div><div class="ttdoc">Constraint data for a vertex 2D projection target.</div><div class="ttdef"><b>Definition</b> <a href="vertex__projection__error__function_8h_source.html#l00018">vertex_projection_error_function.h:18</a></div></div>
+<div class="ttc" id="atexture__classification_8cpp_html_a48d9522e58fa05906c6dba23e5745a72"><div class="ttname"><a href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a></div><div class="ttdeci">float v</div><div class="ttdef"><b>Definition</b> <a href="texture__classification_8cpp_source.html#l00025">texture_classification.cpp:25</a></div></div>
 <div class="ttc" id="avertex__projection__error__function_8h_html"><div class="ttname"><a href="vertex__projection__error__function_8h.html">vertex_projection_error_function.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -203,7 +204,7 @@ $(document).ready(function(){initNavTree('vertex__projection__error__function_8c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="vertex__projection__error__function_8cpp.html">vertex_projection_error_function.cpp</a></li>
-    <li class="footer">Generated on Sun Apr 26 2026 16:32:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -1,5 +1,6 @@
 var NAVTREEINDEX16 =
 {
+"fbx__builder_8h_source.html":[3,0,6,2,1],
 "fbx__io_8cpp.html":[3,0,6,2,2],
 "fbx__io_8cpp.html#a3b5e1ccde169eb166d05c6f8e863ed9d":[3,0,6,2,2,4],
 "fbx__io_8cpp.html#a452372931c61158a9688eb2e538a1a50":[3,0,6,2,2,9],
@@ -248,6 +249,5 @@ var NAVTREEINDEX16 =
 "generalized__loss_8h_source.html":[3,0,8,8],
 "globals.html":[3,1,0],
 "globals_defs.html":[3,1,3],
-"globals_func.html":[3,1,1],
-"globals_vars.html":[3,1,2]
+"globals_func.html":[3,1,1]
 };

@@ -1,6 +1,7 @@
 var collision__geometry__state_8h =
 [
     [ "momentum::CollisionGeometryStateT< T >", "structmomentum_1_1CollisionGeometryStateT.html", "structmomentum_1_1CollisionGeometryStateT" ],
+    [ "isValidCollisionPair", "collision__geometry__state_8h.html#af8cb47fe46f5943736c3f897699b0923", null ],
     [ "overlaps", "collision__geometry__state_8h.html#af6147994fdcc226edada1f6c7a94c63f", null ],
     [ "updateAabb", "collision__geometry__state_8h.html#aa3b5f5adf242e78c8e1c21b93a0efb24", null ]
 ];

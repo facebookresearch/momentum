@@ -134,6 +134,7 @@ var hierarchy =
     [ "momentum::ProjectionConstraintT< T >", "structmomentum_1_1ProjectionConstraintT.html", null ],
     [ "momentum::Random< Generator_ >", "classmomentum_1_1Random.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
+    [ "momentum::RegionColorsView", "structmomentum_1_1RegionColorsView.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
     [ "momentum::RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", null ],
     [ "momentum::SDFColliderT< S >", "structmomentum_1_1SDFColliderT.html", null ],
@@ -268,6 +269,7 @@ var hierarchy =
       [ "momentum::spanstreambuf", "structmomentum_1_1spanstreambuf.html", null ]
     ] ],
     [ "momentum::TaperedCapsuleT< S >", "structmomentum_1_1TaperedCapsuleT.html", null ],
+    [ "momentum::TextureView", "structmomentum_1_1TextureView.html", null ],
     [ "momentum::TransformT< T >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::TransformT< float >", "structmomentum_1_1TransformT.html", null ],
     [ "momentum::TransformT< S >", "structmomentum_1_1TransformT.html", null ],

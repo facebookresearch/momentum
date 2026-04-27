@@ -135,8 +135,8 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  }</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keyword">auto</span> result = std::make_unique&lt;Mesh&gt;(*mesh);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; v : result-&gt;vertices) {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    v *= scale;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> : result-&gt;vertices) {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> *= scale;</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  }</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">return</span> result;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
@@ -185,8 +185,8 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> scale) {</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_typedef" href="namespacemomentum.html#a72995f508ccba8e3b0c5de349e57f94a">TransformationList</a> result = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">transformations</a>;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(scale &gt; 0.0f);</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; t : result) {</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    t.translation() *= scale;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#afea36502e9d227ff62c5fb2719a246f2">t</a> : result) {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <a class="code hl_variable" href="texture__classification_8cpp.html#afea36502e9d227ff62c5fb2719a246f2">t</a>.translation() *= scale;</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  }</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keywordflow">return</span> result;</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}</div>
@@ -478,8 +478,8 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
 <div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>  <span class="comment">// apply the full transformation to the blendshape basis</span></div>
 <div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  std::vector&lt;Vector3f&gt; baseShape = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShapeTransformed</a>-&gt;getBaseShape();</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; v : baseShape) {</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    v = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xform</a> * v;</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> : baseShape) {</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xform</a> * <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a>;</div>
 <div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  }</div>
 <div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendShapeTransformed</a>-&gt;setBaseShape(baseShape);</div>
 <div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
@@ -503,12 +503,12 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>  }</div>
 <div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
 <div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>  <span class="keyword">auto</span> result = std::make_unique&lt;Mesh&gt;(*mesh);</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; v : result-&gt;vertices) {</div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    v = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xf</a> * v;</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> : result-&gt;vertices) {</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xf</a> * <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a>;</div>
 <div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>  }</div>
 <div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span> </div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; v : result-&gt;normals) {</div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    v = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xf</a>.linear() * v;</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> : result-&gt;normals) {</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>    <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">xf</a>.linear() * <a class="code hl_variable" href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a>;</div>
 <div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>  }</div>
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
 <div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>  <span class="keywordflow">return</span> result;</div>
@@ -1733,6 +1733,8 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div class="ttc" id="astructmomentum_1_1RigidTransformNodeResult_html"><div class="ttname"><a href="structmomentum_1_1RigidTransformNodeResult.html">momentum::RigidTransformNodeResult</a></div><div class="ttdoc">Result of addRigidTransformNode containing the new character and indices of the added bone and parame...</div><div class="ttdef"><b>Definition</b> <a href="character__utility_8h_source.html#l00206">character_utility.h:206</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html_a88a0732a2701920900c3bf2b25650f56"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56">momentum::SkeletonT::joints</a></div><div class="ttdeci">JointList joints</div><div class="ttdoc">The list of joints in this skeleton.</div><div class="ttdef"><b>Definition</b> <a href="skeleton_8h_source.html#l00024">skeleton.h:24</a></div></div>
+<div class="ttc" id="atexture__classification_8cpp_html_a48d9522e58fa05906c6dba23e5745a72"><div class="ttname"><a href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a></div><div class="ttdeci">float v</div><div class="ttdef"><b>Definition</b> <a href="texture__classification_8cpp_source.html#l00025">texture_classification.cpp:25</a></div></div>
+<div class="ttc" id="atexture__classification_8cpp_html_afea36502e9d227ff62c5fb2719a246f2"><div class="ttname"><a href="texture__classification_8cpp.html#afea36502e9d227ff62c5fb2719a246f2">t</a></div><div class="ttdeci">float t</div><div class="ttdef"><b>Definition</b> <a href="texture__classification_8cpp_source.html#l00207">texture_classification.cpp:207</a></div></div>
 <div class="ttc" id="aurdf__io_8cpp_html_a138cea75a91f412af90739ae8ffb336b"><div class="ttname"><a href="urdf__io_8cpp.html#a138cea75a91f412af90739ae8ffb336b">limits</a></div><div class="ttdeci">ParameterLimits limits</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00048">urdf_io.cpp:48</a></div></div>
 <div class="ttc" id="aurdf__io_8cpp_html_a6827879151157521bb9062fc01b74f2e"><div class="ttname"><a href="urdf__io_8cpp.html#a6827879151157521bb9062fc01b74f2e">triplets</a></div><div class="ttdeci">std::vector&lt; Eigen::Triplet&lt; float &gt; &gt; triplets</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00047">urdf_io.cpp:47</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -1741,7 +1743,7 @@ $(document).ready(function(){initNavTree('character__utility_8cpp_source.html','
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="character__utility_8cpp.html">character_utility.cpp</a></li>
-    <li class="footer">Generated on Sun Apr 26 2026 16:32:07 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

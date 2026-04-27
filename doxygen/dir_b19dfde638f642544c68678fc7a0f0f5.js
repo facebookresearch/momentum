@@ -45,5 +45,7 @@ var dir_b19dfde638f642544c68678fc7a0f0f5 =
     [ "skin_weights.cpp", "skin__weights_8cpp.html", null ],
     [ "skin_weights.h", "skin__weights_8h.html", "skin__weights_8h" ],
     [ "skinned_locator.h", "skinned__locator_8h.html", "skinned__locator_8h" ],
+    [ "texture_classification.cpp", "texture__classification_8cpp.html", "texture__classification_8cpp" ],
+    [ "texture_classification.h", "texture__classification_8h.html", "texture__classification_8h" ],
     [ "types.h", "character_2types_8h.html", "character_2types_8h" ]
 ];
