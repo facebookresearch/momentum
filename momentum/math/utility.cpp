@@ -42,15 +42,16 @@ Quaternion<T> quaternionExpMap(const Vector3<T>& v) {
   constexpr T kSmallAngleThreshold = Eps<T>(T(3.5e-4), T(1.5e-8));
 
   if (theta < kSmallAngleThreshold) {
-    // Taylor series expansion of exp map near zero:
-    // exp(v) ≈ [1, v/2] for small ||v||
-    // We can refine this with higher order terms for better accuracy
+    // Taylor expansion of exp(v) = [cos(theta/2), sin(theta/2)/theta * v] about
+    // theta = 0, truncated at O(theta^2). The expansion avoids the cancellation that
+    // would occur in 1 - cos(theta/2) and the 0/0 division in sin(theta/2)/theta for
+    // tiny theta. The truncation error is ~O(theta^4), which at the threshold
+    // (sqrt(eps)) is on the order of eps^2 — well below floating-point precision.
+    // The explicit normalize() compensates for the residual ~theta^4 deviation from
+    // unit norm; the standard branch below produces a unit quaternion analytically
+    // and so does not need it.
     const T theta2 = theta * theta;
-
-    // Second-order approximation: scalar = 1 - theta^2/8
     const T w = T(1) - theta2 / T(8);
-
-    // Second-order approximation: vector = v/2 * (1 - theta^2/24)
     const T scale = T(0.5) * (T(1) - theta2 / T(24));
 
     Quaternion<T> q(w, scale * v.x(), scale * v.y(), scale * v.z());
@@ -86,43 +87,33 @@ Vector3<T> quaternionLogMap(const Quaternion<T>& q) {
   constexpr T kSmallAngleThreshold = Eps<T>(T(3.5e-4), T(1.5e-8));
 
   if (vecNorm < kSmallAngleThreshold) {
-    // Quaternion is close to identity or -identity
     if (w > T(0)) {
-      // Close to identity: log(q) ≈ 2 * vec * (1 + vec.squaredNorm()/6)
-      // Using first-order approximation is sufficient for stability
+      // Close to identity: Taylor-expand log(q) = 2*atan2(||v||,w)/||v|| * v about
+      // ||v||=0 keeping w = sqrt(1-||v||^2). To O(||v||^2): log(q) ≈ 2*v*(1 + ||v||^2/6).
+      // This avoids the 0/0 in atan2/||v||.
       const T vecNorm2 = vec.squaredNorm();
       const T scale = T(2) * (T(1) + vecNorm2 / T(6));
       return scale * vec;
     } else {
-      // Close to -identity (180-degree rotation)
-      // The log is not unique here; we need to choose a branch
-      // Return a rotation of pi radians around an arbitrary axis
-      // We pick the x-axis for consistency
+      // Close to -identity (a pi rotation): the log is multi-valued — any axis n
+      // gives the same -identity quaternion via exp(pi*n). We pick the x-axis
+      // arbitrarily for determinism. Callers that need a continuous log near pi
+      // should track the rotation axis externally.
       return Vector3<T>(pi<T>(), T(0), T(0));
     }
   }
 
-  // Standard computation: log([w, v]) = atan2(||v||, w) / ||v|| * v
+  // Standard computation: log([w, v]) = 2 * atan2(||v||, w) / ||v|| * v.
+  // atan2 (rather than acos(w)) is used for accuracy near both 0 and pi.
   const T theta = T(2) * std::atan2(vecNorm, w);
   const T scale = theta / vecNorm;
 
   return scale * vec;
 }
 
-/// Computes the derivative of the logmap with respect to quaternion components.
-///
-/// Given a quaternion q with coeffs [x, y, z, w], computes the Jacobian matrix J where:
-/// J(i,j) = d(log(q)[i]) / dq.coeffs()[j]
-/// where log(q) is the 3D rotation vector and q.coeffs() = [x, y, z, w].
-///
-/// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
-/// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
-/// https://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
-///
-/// @tparam T The scalar type
-/// @param q The input quaternion (should be normalized)
-/// @return 3x4 Jacobian matrix where column j is the gradient w.r.t. q.coeffs()[j]
-///         i.e., columns are ordered as [d/dx, d/dy, d/dz, d/dw]
+// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
+// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
+// https://www.cs.cmu.edu/~spiff/moedit99/expmap.pdf
 template <typename T>
 Eigen::Matrix<T, 3, 4> quaternionLogMapDerivative(const Quaternion<T>& q) {
   // Ensure the quaternion is normalized
@@ -214,7 +205,7 @@ Vector3<T> rotationMatrixToEulerXYZ(const Matrix3<T>& m, EulerConvention convent
   // Reference: https://en.wikipedia.org/wiki/Euler_angles
   // Rotation matrix representation:
   // | r00 r01 r02 |   |  cy*cz             -cy*sz              sy    |
-  // | r10 r11 r12 | = |  cx*sz + sx*sy*cz   cx*cz - s1*s2*s3  -sx*cy |
+  // | r10 r11 r12 | = |  cx*sz + sx*sy*cz   cx*cz - sx*sy*sz  -sx*cy |
   // | r20 r21 r22 |   |  ...                ...                cx*cy |
 
   // Computes the rotation matrix from Euler angles similarly in the following way but with a
@@ -227,17 +218,17 @@ Vector3<T> rotationMatrixToEulerXYZ(const Matrix3<T>& m, EulerConvention convent
       res.y() = std::asin(m(0, 2));
       res.z() = std::atan2(-m(0, 1), m(0, 0));
     } else {
-      // Case sin(y) is close to -1:
-      // So cos(y) == 0 which leads to m(0, 0), m(0, 1), m(0, 1), and m(0, 2) becoming
-      // zero. So we use other non-zero elements in the rotation matrix
+      // Gimbal lock at sin(y) == -1: cos(y) == 0, so all entries with cy as a factor
+      // (m(0,0), m(0,1), m(1,2), m(2,2)) become zero. Use the remaining non-zero
+      // elements (m(1,0), m(1,1)) and choose res.x() = 0 to resolve the family of
+      // solutions; analytically the result has -res.x() - atan2(...) freedom.
       res.x() = 0; // any angle can be OK, but we choose zero
       res.y() = -pi<T>() * T(0.5); // choose in [-pi, pi]
       res.z() = std::atan2(m(1, 0), m(1, 1)); // -res.x() - atan2(...) but we use res.x() == 0
     }
   } else {
-    // Case sin(y) is close to 1:
-    // So cos(y) == 0 which leads to m(0, 0), m(0, 1), m(0, 1), and m(0, 2) becoming
-    // zero. So we use other non-zero elements in the rotation matrix
+    // Gimbal lock at sin(y) == 1: same zero pattern as the sin(y) == -1 branch above;
+    // here the analytical freedom is res.x() - atan2(...).
     res.x() = 0; // any angle can be OK, but we choose zero
     res.y() = pi<T>() * T(0.5); // choose in [-pi, pi]
     res.z() = std::atan2(m(1, 0), m(1, 1)); // res.x() - atan2(...) but we use res.x() == 0
@@ -253,7 +244,11 @@ Vector3<T> rotationMatrixToEulerZYX(const Matrix3<T>& m, EulerConvention convent
   }
 
   // Reference: https://en.wikipedia.org/wiki/Euler_angles
-  // Rotation matrix representation:
+  // Rotation matrix representation. NOTE: in the matrix below, (cx,sx) denotes cos/sin
+  // of the FIRST returned angle (the Z rotation in ZYX), and (cz,sz) denotes the LAST
+  // (the X rotation). This labels-by-output-position convention is the opposite of the
+  // labels-by-rotation-axis convention used by eulerZYXToRotationMatrix; the indices
+  // and signs below are consistent under this aliasing.
   // | r00 r01 r02 |   |  cx*cy   cx*sy*sz - sx*cz   sx*sz + cx*sy*cz |
   // | r10 r11 r12 | = |  sx*cy   ...                ...              |
   // | r20 r21 r22 |   | -sy      cy*sz              cy*cz            |
@@ -268,21 +263,22 @@ Vector3<T> rotationMatrixToEulerZYX(const Matrix3<T>& m, EulerConvention convent
       res.y() = std::asin(-m(2, 0));
       res.z() = std::atan2(m(2, 1), m(2, 2));
     } else {
-      // Case sin(y) is close to 1:
-      // So cos(y) == 0 which leads to m(0, 0), m(1, 0), m(2, 1), and m(2, 2) becoming
-      // zero. So we use other non-zero elements in the rotation matrix
+      // Gimbal lock at sin(y) close to 1 (since m(2,0) == -sin(y) is close to -1):
+      // cos(y) == 0 zeros m(0,0), m(1,0), m(2,1), m(2,2). Recover res.z from the
+      // remaining non-zero entries m(0,1), m(0,2); res.x has analytic freedom and
+      // we pin it to 0.
       res.x() = 0; // any angle can be OK, but we choose zero
       res.y() = pi<T>() * T(0.5); // choose in [-pi, pi]
       res.z() = std::atan2(m(0, 1), m(0, 2)); // res.x() - atan2(...) but we use res.x() == 0
     }
   } else {
-    // Case sin(y) is close to -1:
-    // So cos(y) == 0 which leads to m(0, 0), m(1, 0), m(2, 1), and m(2, 2) becoming
-    // zero. So we use other non-zero elements in the rotation matrix
+    // Gimbal lock at sin(y) close to -1 (since m(2,0) == -sin(y) is close to 1):
+    // same zero pattern as above. The negated arguments to atan2 below are required
+    // because the analytic family is -res.x() - atan2(...), which simplifies to
+    // atan2(-m(0,1), -m(0,2)) at res.x()==0 — NOT the same as atan2(m(0,1),m(0,2)).
     res.x() = 0; // any angle can be OK, but we choose zero
     res.y() = -pi<T>() * T(0.5); // choose in [-pi, pi]
     res.z() = std::atan2(-m(0, 1), -m(0, 2)); // -res.x() - atan2(...) but we use res.x() == 0
-    // Note that this is not identical to std::atan2(m(0, 1), m(0, 2))
   }
   return res;
 }
@@ -385,6 +381,11 @@ Matrix3<T> eulerZYXToRotationMatrix(const Vector3<T>& angles, EulerConvention co
 
 template <typename T>
 Vector3<T> quaternionToEuler(const Quaternion<T>& q) {
+  // Standard closed-form XYZ Tait-Bryan extraction. Caller must pass a normalized
+  // quaternion; if not, the asin argument can exceed [-1,1] and produce NaN. There
+  // is no gimbal-lock guard here because callers (skeleton_state) work in regimes
+  // where |2(wy - zx)| < 1.
+  // TODO: Clamp the asin argument to [-1, 1] for robustness if non-unit inputs are possible.
   Vector3<T> res;
   res.x() =
       std::atan2(T(2) * (q.w() * q.x() + q.y() * q.z()), T(1) - T(2) * (sqr(q.x()) + sqr(q.y())));
@@ -395,9 +396,16 @@ Vector3<T> quaternionToEuler(const Quaternion<T>& q) {
 }
 
 Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::span<const float> w) {
+  // Markley et al. "Averaging Quaternions": the average is the unit eigenvector of
+  // M = sum_i w_i^2 * q_i * q_i^T corresponding to the largest eigenvalue. This is
+  // sign-invariant (q and -q produce the same outer product), so it sidesteps the
+  // double-cover ambiguity that breaks naive coefficient averaging.
+  // NOTE: When the i-th weight is missing, this falls back to weight 1, NOT to
+  // (sum of provided weights)/N — partially-specified weight vectors will yield
+  // an unevenly weighted average. Pass a complete `w` or none at all.
+  // NOTE: Weights enter quadratically because each q_i contributes (w_i*q_i)(w_i*q_i)^T.
   Matrix4f Q = Matrix4f::Zero();
 
-  // calculate the matrix
   for (size_t i = 0; i < q.size(); i++) {
     if (i < w.size()) {
       Q += (q[i].coeffs() * w[i]) * (q[i].coeffs() * w[i]).transpose();
@@ -406,7 +414,8 @@ Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::spa
     }
   }
 
-  // get the largest eigenvector of the matrix
+  // SelfAdjointEigenSolver sorts eigenvalues ascending, so col(3) is the eigenvector
+  // for the largest eigenvalue — i.e. the average quaternion (up to sign).
   return Quaternionf(Eigen::SelfAdjointEigenSolver<Matrix4f>(Q).eigenvectors().col(3));
 }
 
@@ -437,6 +446,13 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
     const Eigen::Vector3<T>& o2,
     const Eigen::Vector3<T>& d2,
     const T maxDist) {
+  // Standard "closest points on two segments" algorithm: parametrize the segments as
+  // o_i + t * d_i for t in [0,1] and minimize the squared distance subject to that
+  // box constraint. The variables a,b,c,d,e and D = ac-b^2 are the standard names from
+  // the Geometric Tools formulation; sN/sD and tN/tD are the numerator/denominator of
+  // the s and t parameters carried as fractions to defer division until after clamping.
+  // d1 and d2 are NOT required to be unit vectors; their magnitudes set the segment
+  // length, and the returned res values are the parametric distances along d1/d2.
   Eigen::Vector2<T> res;
 
   const T maxSquareDist = maxDist * maxDist;
@@ -454,7 +470,12 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   T tN;
   T tD = D;
 
-  // check if lines are nearly parallel
+  // D is the determinant of the 2x2 normal-equations matrix; when small, the segments
+  // are nearly parallel (or one direction has near-zero length) and the linear system
+  // is ill-conditioned, so we pin s=0 and solve for t along d2 only.
+  // TODO: T(1e-7) is a hard-coded tolerance independent of T's precision. For double
+  // this is conservative but for float it is roughly 1 ulp at unit scale; consider
+  // using Eps<T>(...) like the Euler routines do.
   if (D < T(1e-7)) {
     sN = T(0);
     sD = T(1);
@@ -637,13 +658,13 @@ template std::tuple<bool, double, Eigen::Vector2<double>> closestPointsOnSegment
 
 namespace {
 
-/// Computes a rotation matrix for a single axis rotation.
+// Rotation matrix for a single axis rotation.
 template <typename T>
 Matrix3<T> singleAxisRotationMatrix(int axis, T angle) {
   return AngleAxis<T>(angle, Vector3<T>::Unit(axis)).toRotationMatrix();
 }
 
-/// Computes the derivative of a single axis rotation matrix with respect to the angle.
+// Derivative of a single axis rotation matrix with respect to the angle.
 template <typename T>
 Matrix3<T> singleAxisRotationMatrixDerivative(int axis, T angle) {
   Matrix3<T> dR = Matrix3<T>::Zero();
@@ -670,13 +691,15 @@ Matrix3<T> singleAxisRotationMatrixDerivative(int axis, T angle) {
   return dR;
 }
 
-/// Computes a rotation matrix for two axis rotations.
+// Rotation matrix for a composition R(axis1) * R(axis0). Note the order: axis0 is
+// applied first (innermost), then axis1 — this matches the intrinsic angle ordering
+// used by the Levenberg-Marquardt callers below.
 template <typename T>
 Matrix3<T> twoAxisRotationMatrix(int axis0, int axis1, const Vector2<T>& angles) {
   return singleAxisRotationMatrix(axis1, angles[1]) * singleAxisRotationMatrix(axis0, angles[0]);
 }
 
-/// Computes the derivatives of a two axis rotation matrix with respect to both angles.
+// Returns (dR/dangle0, dR/dangle1) for R = R(axis1) * R(axis0), via the product rule.
 template <typename T>
 std::pair<Matrix3<T>, Matrix3<T>>
 twoAxisRotationMatrixDerivatives(int axis0, int axis1, const Vector2<T>& angles) {
@@ -688,7 +711,9 @@ twoAxisRotationMatrixDerivatives(int axis0, int axis1, const Vector2<T>& angles)
   return {R1 * dR0, dR1 * R0};
 }
 
-/// Levenberg-Marquardt solver for scalar optimization.
+// Levenberg-Marquardt solver minimizing ||R(axis, angle) - target||_F^2 in the angle.
+// Despite the name, this is a plain Gauss-Newton step (no LM damping term is added).
+// TODO: Either add real LM damping or rename to gaussNewtonSolveScalar to match behavior.
 template <typename T>
 T levenbergMarquardtSolveScalar(
     const Matrix3<T>& target,
@@ -707,30 +732,40 @@ T levenbergMarquardtSolveScalar(
     const Matrix3<T> residualMatrix = R - target;
     const T residual = residualMatrix.squaredNorm();
 
-    // Check convergence
+    // Convergence: residual already small, OR residual decreased by less than tolerance
+    // since the last iteration. NOTE: the second clause also fires when the residual
+    // *increased* (previousResidual - residual is negative), so this also acts as a
+    // divergence guard rather than a strict monotone-progress check. It does NOT roll
+    // back the diverging step — the last `angle` is whatever the last GN iteration left.
     if (residual < tolerance || (previousResidual - residual) < tolerance) {
       break;
     }
     previousResidual = residual;
 
-    // Compute Jacobian (derivative of squared norm with respect to angle)
-    // d/da ||R(a) - target||^2 = 2 * trace((R(a) - target)^T * dR/da)
+    // Jacobian of the FLATTENED residual r(a) = vec(R(a) - target) w.r.t. the angle a
+    // (a 9x1 column). This is the residual-vector Jacobian, NOT the gradient of the
+    // squared norm — the householderQr().solve below performs a least-squares step
+    // J * delta ≈ -r, which is the Gauss-Newton update.
     const Matrix3<T> dR = singleAxisRotationMatrixDerivative(axis, angle);
     const Eigen::Matrix<T, 9, 1> jacobian = dR.reshaped(9, 1);
 
     const Eigen::Vector<T, 9> residualVector = residualMatrix.reshaped(9, 1);
 
-    // Levenberg-Marquardt step
+    // Gauss-Newton step (no LM damping is added — see TODO above).
     const Eigen::Vector<T, 1> delta = jacobian.householderQr().solve(-residualVector);
 
-    // Update with step size control
+    // No line search or trust-region — we trust the Gauss-Newton direction directly.
     angle += delta(0);
   }
 
   return angle;
 }
 
-/// Levenberg-Marquardt solver for two-parameter optimization using proper vector residuals.
+// Levenberg-Marquardt solver minimizing ||R(axis0, axis1, angles) - target||_F^2 in the
+// two-vector of angles. As with the scalar version, this is currently a Gauss-Newton step
+// (the comment about (J^T J + lambda I) below describes the intended LM update, not what
+// is actually solved by the householder QR call).
+// TODO: Add proper LM damping (lambda) or rename this to gaussNewtonSolveTwoAxis.
 template <typename T>
 Vector2<T> levenbergMarquardtSolveTwoAxis(
     const Matrix3<T>& target,
@@ -751,7 +786,9 @@ Vector2<T> levenbergMarquardtSolveTwoAxis(
     const Matrix3<T> residualMatrix = R - target;
     const T residualNorm = residualMatrix.squaredNorm();
 
-    // Check convergence
+    // Same convergence/divergence behavior as the scalar version above: the second
+    // clause exits both on slow progress and on residual increase, without rolling
+    // back the diverging step.
     if (residualNorm < tolerance || (previousResidualNorm - residualNorm) < tolerance) {
       break;
     }
@@ -764,8 +801,8 @@ Vector2<T> levenbergMarquardtSolveTwoAxis(
     jacobian.template block<9, 1>(0, 0) = dR0.reshaped(9, 1);
     jacobian.template block<9, 1>(0, 1) = dR1.reshaped(9, 1);
 
-    // Gauss-Newton approximation: H ≈ J^T J
-    // Solve: (J^T J + λI) δθ = -J^T r
+    // Gauss-Newton step solved as a 9x2 linear least-squares: minimize ||J*delta + r||.
+    // No LM damping (lambda) is applied; see TODO above the function.
     const Vector2<T> delta = jacobian.householderQr().solve(-residualVector);
 
     // Check if solution is valid
@@ -819,7 +856,6 @@ Vector2<T> rotationMatrixToTwoAxisEuler(const Matrix3<T>& m, int axis0, int axis
           rotationMatrixToOneAxisEuler(m, axis0), rotationMatrixToOneAxisEuler(m, axis1)});
 }
 
-// Explicit template instantiations
 template float rotationMatrixToOneAxisEuler(const Matrix3<float>& m, int axis0);
 template double rotationMatrixToOneAxisEuler(const Matrix3<double>& m, int axis0);
 

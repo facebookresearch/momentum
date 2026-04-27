@@ -91,6 +91,13 @@ MatrixX<T> pseudoInverse(const SparseMatrix<T>& mat);
 /// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
 /// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
 ///
+/// @note The exp map is used internally by `JointStateT::set()` to convert the 3 Euler rotation
+/// parameters [rx, ry, rz] into a quaternion. The log map is used by
+/// `skeletonStateToJointParameters()` for the inverse conversion. The exp map is numerically
+/// robust for small angles (Taylor series expansion), important because most joint rotations are
+/// small perturbations from rest pose during optimization. For 180 degree rotations (near -I
+/// quaternion), a consistent branch is chosen to avoid discontinuities.
+///
 /// @tparam T The scalar type
 /// @param v The rotation vector (axis-angle representation)
 /// @return The corresponding unit quaternion
@@ -107,6 +114,14 @@ Quaternion<T> quaternionExpMap(const Vector3<T>& v);
 /// Reference: "Practical Parameterization of Rotations Using the Exponential Map"
 /// by F. Sebastian Grassia, Journal of Graphics Tools, 1998.
 ///
+/// @note The exp map is used internally by `JointStateT::set()` to convert the 3 Euler rotation
+/// parameters [rx, ry, rz] into a quaternion. The log map is used by
+/// `skeletonStateToJointParameters()` for the inverse conversion. The exp map is numerically
+/// robust for small angles (Taylor series expansion), important because most joint rotations are
+/// small perturbations from rest pose during optimization. For 180 degree rotations (near -I
+/// quaternion), a consistent branch is chosen to avoid discontinuities.
+///
+/// @pre `q` should be normalized.
 /// @tparam T The scalar type
 /// @param q The input quaternion (should be normalized)
 /// @return The corresponding rotation vector (axis-angle representation)
@@ -133,6 +148,13 @@ template <typename T>
 Eigen::Matrix<T, 3, 4> quaternionLogMapDerivative(const Quaternion<T>& q);
 
 /// The Euler angles convention.
+///
+/// @note Momentum's skeleton state uses Extrinsic XYZ convention throughout.
+/// `quaternionToEuler()` returns Extrinsic XYZ angles. `JointStateT::set()` applies rotations in
+/// reverse order (Z, Y, X) which is equivalent to Extrinsic XYZ. Relationship between
+/// conventions: Extrinsic XYZ = Intrinsic ZYX (same rotation matrix, different description).
+/// `eulerToRotationMatrix(angles, 0, 1, 2, Extrinsic)` = `RotZ(c) * RotY(b) * RotX(a)` =
+/// `eulerToRotationMatrix(angles, 2, 1, 0, Intrinsic)`.
 enum class EulerConvention {
   /// The intrinsic convention. Intrinsic rotations (also called local, relative, or body-fixed
   /// rotations) are performed around the axes of the coordinate system that is attached to the
@@ -276,7 +298,13 @@ Vector3<T> quaternionToEuler(const Quaternion<T>& q);
 
 /// Computes the weighted average of multiple quaternions
 ///
-/// Uses the method described in Markley et al. "Averaging Quaternions"
+/// Uses the method described in Markley et al. "Averaging Quaternions". Finds the eigenvector of
+/// the 4x4 quaternion outer product matrix corresponding to the largest eigenvalue.
+///
+/// @note Used in `simplify()` when merging child joint rotations into ancestors, and in motion
+/// processing when blending pose estimates.
+///
+/// @pre If `w` is provided, its size must match `q`.
 /// @param q Array of quaternions to average
 /// @param w Optional weights for each quaternion (defaults to equal weights)
 /// @return The average quaternion

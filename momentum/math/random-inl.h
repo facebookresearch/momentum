@@ -23,9 +23,10 @@ using UniformIntDist = std::uniform_int_distribution<IntType>;
 template <typename RealType>
 using NormalRealDist = std::normal_distribution<RealType>;
 
-/// Check whether \c T can be used for std::uniform_int_distribution<T>
-/// Reference:
-/// https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
+// Whitelists the integer types that std::uniform_int_distribution<T> permits.
+// The standard restricts the IntType template parameter to (un)signed
+// short/int/long/long long; using e.g. char or int8_t is undefined behavior.
+// Ref: https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
 template <typename T>
 struct is_compatible_to_uniform_int_distribution
     : std::disjunction<
@@ -57,49 +58,49 @@ using is_base_of_matrix = is_base_of_template<Eigen::MatrixBase, T>;
 template <typename T>
 inline constexpr bool is_base_of_matrix_v = is_base_of_matrix<T>::value;
 
+// Note: when T is neither floating-point nor a whitelisted integer type
+// (e.g. bool, char, int8_t, uint8_t), no branch is taken and the function
+// returns a value-initialized T. TODO: consider a static_assert to fail at
+// compile time instead of silently returning T{}.
 template <typename T, typename Generator>
 [[nodiscard]] T generateScalarUniform(const T& min, const T& max, Generator& generator) {
-  // Real types
   if constexpr (std::is_floating_point_v<T>) {
+    // std::uniform_real_distribution generates on the half-open interval
+    // [min, max); some implementations may return max due to rounding.
     UniformRealDist<T> dist(min, max);
     return dist(generator);
-  }
-  // Integer types
-  else if constexpr (is_compatible_to_uniform_int_distribution_v<T>) {
+  } else if constexpr (is_compatible_to_uniform_int_distribution_v<T>) {
+    // Closed interval [min, max] for integer distribution.
     UniformIntDist<T> dist(min, max);
     return dist(generator);
   }
 }
 
-// Generates a random vector/matrix element-wisely
+// Generates a random vector/matrix element-wise. The four `if constexpr`
+// branches dispatch to the matching Eigen NullaryExpr overload (matrix vs
+// vector, dynamic vs fixed) since each takes a different signature for the
+// size arguments and the generator lambda.
 template <typename Derived, typename Generator>
 [[nodiscard]] typename Derived::PlainObject generateMatrixUniform(
     const Eigen::MatrixBase<Derived>& min,
     const Eigen::MatrixBase<Derived>& max,
     Generator& generator) {
-  // Dynamic matrix
   if constexpr (!Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr(
         min.rows(), min.cols(), [&](const Eigen::Index i, const Eigen::Index j) {
           return generateScalarUniform<typename Derived::Scalar>(min(i, j), max(i, j), generator);
         });
-  }
-  // Fixed matrix
-  else if constexpr (
+  } else if constexpr (
       !Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i, const Eigen::Index j) {
       return generateScalarUniform<typename Derived::Scalar>(min(i, j), max(i, j), generator);
     });
-  }
-  // Dynamic vector
-  else if constexpr (
+  } else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr(min.size(), [&](const Eigen::Index i) {
       return generateScalarUniform<typename Derived::Scalar>(min[i], max[i], generator);
     });
-  }
-  // Fixed vector
-  else if constexpr (
+  } else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i) {
       return generateScalarUniform<typename Derived::Scalar>(min[i], max[i], generator);
@@ -109,59 +110,53 @@ template <typename Derived, typename Generator>
 
 template <typename T, typename Generator>
 [[nodiscard]] T generateUniform(const T& min, const T& max, Generator& generator) {
-  // Scalar types
   if constexpr (std::is_arithmetic_v<T>) {
     return generateScalarUniform(min, max, generator);
-  }
-  // Matrix types
-  else if constexpr (is_base_of_matrix_v<T>) {
+  } else if constexpr (is_base_of_matrix_v<T>) {
     return generateMatrixUniform(min, max, generator);
   }
 }
 
 template <typename T, typename Generator>
 [[nodiscard]] T generateScalarNormal(const T& mean, const T& sigma, Generator& generator) {
-  // Real types
   if constexpr (std::is_floating_point_v<T>) {
     NormalRealDist<T> dist(mean, sigma);
     return dist(generator);
-  }
-  // Integer types
-  else if constexpr (is_compatible_to_uniform_int_distribution_v<T>) {
+  } else if constexpr (is_compatible_to_uniform_int_distribution_v<T>) {
+    // No discrete normal distribution exists in <random>; sample from a float
+    // normal then round to the nearest integer. TODO: this can overflow T for
+    // tail samples — `std::round` returns a float that is then implicitly
+    // narrowed without bounds checking. Also, using float (not double) limits
+    // precision for 64-bit integer T.
     const float realNumber = NormalRealDist<float>(mean, sigma)(generator);
     return std::round(realNumber);
   }
 }
 
-// Generates a random vector/matrix element-wisely
+// Generates a random vector/matrix element-wise. Each element is drawn
+// independently — this is NOT a multivariate normal (no covariance structure);
+// `sigma` supplies a per-element standard deviation.
 template <typename Derived, typename Generator>
 [[nodiscard]] typename Derived::PlainObject generateMatrixNormal(
     const Eigen::MatrixBase<Derived>& mean,
     const Eigen::MatrixBase<Derived>& sigma,
     Generator& generator) {
-  // Dynamic matrix
   if constexpr (!Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr(
         mean.rows(), mean.cols(), [&](const Eigen::Index i, const Eigen::Index j) {
           return generateScalarNormal<typename Derived::Scalar>(mean(i, j), sigma(i, j), generator);
         });
-  }
-  // Fixed matrix
-  else if constexpr (
+  } else if constexpr (
       !Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i, const Eigen::Index j) {
       return generateScalarNormal<typename Derived::Scalar>(mean(i, j), sigma(i, j), generator);
     });
-  }
-  // Dynamic vector
-  else if constexpr (
+  } else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime == Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr(mean.size(), [&](const Eigen::Index i) {
       return generateScalarNormal<typename Derived::Scalar>(mean[i], sigma[i], generator);
     });
-  }
-  // Fixed vector
-  else if constexpr (
+  } else if constexpr (
       Derived::IsVectorAtCompileTime && Derived::SizeAtCompileTime != Eigen::Dynamic) {
     return Derived::PlainObject::NullaryExpr([&](const Eigen::Index i) {
       return generateScalarNormal<typename Derived::Scalar>(mean[i], sigma[i], generator);
@@ -171,12 +166,9 @@ template <typename Derived, typename Generator>
 
 template <typename T, typename Generator>
 [[nodiscard]] T generateNormal(const T& mean, const T& sigma, Generator& generator) {
-  // Scalar types
   if constexpr (std::is_arithmetic_v<T>) {
     return generateScalarNormal(mean, sigma, generator);
-  }
-  // Matrix types
-  else if constexpr (is_base_of_matrix_v<T>) {
+  } else if constexpr (is_base_of_matrix_v<T>) {
     return generateMatrixNormal(mean, sigma, generator);
   }
 }
@@ -190,9 +182,7 @@ Random<Generator>& Random<Generator>::GetSingleton() {
 }
 
 template <typename Generator>
-Random<Generator>::Random(uint32_t seed) : seed_(seed), generator_(seed_) {
-  // Do nothing
-}
+Random<Generator>::Random(uint32_t seed) : seed_(seed), generator_(seed_) {}
 
 template <typename Generator>
 template <typename T>
@@ -261,6 +251,11 @@ Affine3<T> Random<Generator>::uniformAffine3(
     const Vector3<T>& min,
     const Vector3<T>& max) {
   Affine3<T> out = Affine3<T>::Identity();
+  // Linear part is rotation * isotropic_scale; this samples a single scale
+  // factor applied to all three axes, not a full anisotropic affine.
+  // TODO: the public name `uniformAffine3` is misleading — it does not
+  // sample uniformly over the space of affine transforms (which would need
+  // anisotropic scale and shear); consider renaming or extending.
   out.linear() = uniformRotationMatrix<T>() * uniform<T>(scaleMin, scaleMax);
   out.translation().noalias() = uniform<Vector3<T>>(min, max);
   return out;

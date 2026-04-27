@@ -12,12 +12,20 @@
 
 namespace momentum {
 
+/// Returns a quiet NaN value of type T.
 template <typename T = float>
 [[nodiscard]] constexpr T nan() noexcept {
   return std::numeric_limits<T>::quiet_NaN();
 }
 
-/// Returns the tolerance value based on the provided type T
+/// Returns a type-appropriate tolerance/epsilon value.
+///
+/// @param FloatEps Tolerance returned when T is `float` (default: 1e-7).
+/// @param DoubleEps Tolerance returned when T is `double` (default: 1e-16).
+/// @return The selected tolerance for T. Only `float` and `double` are supported;
+///         other types fall through and produce an undefined return value.
+// TODO: Add a static_assert or constexpr error path for unsupported T to avoid
+// silent undefined-return-value behavior for non-float/double types.
 template <typename T>
 [[nodiscard]] constexpr T Eps(T FloatEps = T(1e-7), T DoubleEps = T(1e-16)) {
   if constexpr (std::is_same_v<T, float>) {
@@ -27,16 +35,27 @@ template <typename T>
   }
 }
 
+/// Returns the natural logarithm of 2 (log_e 2).
 template <typename T = float>
 [[nodiscard]] constexpr T ln2() noexcept {
-  return 0.69314718055994530942; ///< log_e 2
+  return 0.69314718055994530942;
 }
 
+/// Returns the mathematical constant pi.
+///
+/// @note Use this instead of `M_PI`. Windows MSVC does not define `M_PI` by
+///       default (it requires `_USE_MATH_DEFINES` before `<cmath>`). This
+///       function is always available on all platforms.
 template <typename T = float>
 [[nodiscard]] constexpr T pi() noexcept {
   return 3.14159265358979323846;
 }
 
+/// Returns 2 * pi.
+///
+/// @note Use this instead of `2 * M_PI`. Windows MSVC does not define `M_PI`
+///       by default (it requires `_USE_MATH_DEFINES` before `<cmath>`). This
+///       function is always available on all platforms.
 template <typename T = float>
 [[nodiscard]] constexpr T twopi() noexcept {
   return T(2) * pi<T>();

@@ -24,40 +24,58 @@ constexpr T unitInMeters(LengthUnit u) {
     case LengthUnit::Millimeter:
       return T(0.001);
   }
-  return T(1); // unreachable
+  // Defensive fallback for ill-formed LengthUnit values (e.g. cast from int).
+  // All declared enumerators are handled above, so this path is unreachable for valid inputs.
+  return T(1);
 }
 
 // Computes the signed permutation matrix P that converts coordinates from
 // system 'from' to system 'to': v_to = P * v_from.
 //
-// Each coordinate system defines a canonical assignment of semantic axes
-// (right, forward, up) to world axes (x, y, z):
-//   Y-up right-hand: right=+X, forward=-Z, up=+Y
-//   Z-up right-hand: right=+X, forward=+Y, up=+Z
+// Convention: each coordinate system maps the semantic axes
+// (right, forward, up) to world axes (x, y, z) as follows:
+//   Y-up right-hand: right=+X, forward=-Z, up=+Y  (OpenGL-style)
+//   Z-up right-hand: right=+X, forward=+Y, up=+Z  (Blender / robotics-style)
 //   X-up right-hand: right=+Y, forward=+Z, up=+X
-// For left-handed systems, the forward axis is negated.
+// For left-handed systems, only the forward axis is negated; right and up
+// keep the same world directions. This is the minimal flip that preserves
+// up alignment while reversing chirality.
+//
+// Note: only handedness changes the sign of det(axes); axis permutation
+// alone is always a proper rotation. The forward-only flip means
+// det(axes) = -1 iff Handedness::Left, so P keeps right vectors right
+// and up vectors up — only forward-pointing components flip when the
+// handedness differs between 'from' and 'to'.
 //
 // The change-of-basis matrix is: P = toAxes * fromAxes^T
-// where each column of 'axes' maps a semantic axis to its world direction.
+// where each column of 'axes' is the world-space direction of a semantic
+// axis: col(0)=right, col(1)=forward, col(2)=up. So 'axes' maps a vector
+// expressed in (right, forward, up) coordinates into world (x, y, z),
+// and 'axes^T' is its inverse (the matrix is orthogonal by construction).
 template <typename T>
 Matrix3<T> permutationMatrix(const CoordinateSystem& from, const CoordinateSystem& to) {
+  // Returns the 3x3 matrix whose columns are the world-axis directions of
+  // the (right, forward, up) semantic axes for the given (up, handedness).
   auto getAxes = [](UpAxis up, Handedness hand) -> Matrix3<T> {
     Matrix3<T> m;
     switch (up) {
       case UpAxis::Y:
-        m.col(0) = Vector3<T>(1, 0, 0);
+        m.col(0) = Vector3<T>(1, 0, 0); // right = +X
+        // forward = -Z (right-handed) or +Z (left-handed)
         m.col(1) = (hand == Handedness::Right) ? Vector3<T>(0, 0, -1) : Vector3<T>(0, 0, 1);
-        m.col(2) = Vector3<T>(0, 1, 0);
+        m.col(2) = Vector3<T>(0, 1, 0); // up = +Y
         break;
       case UpAxis::Z:
-        m.col(0) = Vector3<T>(1, 0, 0);
+        m.col(0) = Vector3<T>(1, 0, 0); // right = +X
+        // forward = +Y (right-handed) or -Y (left-handed)
         m.col(1) = (hand == Handedness::Right) ? Vector3<T>(0, 1, 0) : Vector3<T>(0, -1, 0);
-        m.col(2) = Vector3<T>(0, 0, 1);
+        m.col(2) = Vector3<T>(0, 0, 1); // up = +Z
         break;
       case UpAxis::X:
-        m.col(0) = Vector3<T>(0, 1, 0);
+        m.col(0) = Vector3<T>(0, 1, 0); // right = +Y
+        // forward = +Z (right-handed) or -Z (left-handed)
         m.col(1) = (hand == Handedness::Right) ? Vector3<T>(0, 0, 1) : Vector3<T>(0, 0, -1);
-        m.col(2) = Vector3<T>(1, 0, 0);
+        m.col(2) = Vector3<T>(1, 0, 0); // up = +X
         break;
     }
     return m;
@@ -65,6 +83,8 @@ Matrix3<T> permutationMatrix(const CoordinateSystem& from, const CoordinateSyste
 
   const Matrix3<T> fromAxes = getAxes(from.up, from.hand);
   const Matrix3<T> toAxes = getAxes(to.up, to.hand);
+  // 'axes' is orthogonal (columns are unit basis vectors with at most a sign
+  // flip), so transpose() == inverse() — no need for a numeric inverse.
   return toAxes * fromAxes.transpose();
 }
 
@@ -86,6 +106,10 @@ changeVector(const Vector3<T>& v, const CoordinateSystem& from, const Coordinate
 template <typename T>
 Quaternion<T>
 changeQuaternion(const Quaternion<T>& q, const CoordinateSystem& from, const CoordinateSystem& to) {
+  // Round-trip via rotation matrix: this transparently handles handedness
+  // flips. P*R*P^T has det = det(P)^2 * det(R) = +1 regardless of whether
+  // 'from' and 'to' share handedness, so the result is always a proper
+  // rotation that Eigen's Quaternion(Matrix3) constructor can normalize.
   const Matrix3<T> R = q.toRotationMatrix();
   const Matrix3<T> newR = changeRotationMatrix(R, from, to);
   return Quaternion<T>(newR);
