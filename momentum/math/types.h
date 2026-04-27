@@ -10,10 +10,6 @@
 #include <bitset>
 #include <cstdint>
 
-//------------------------------------------------------------------------------
-// Momentum specific Eigen defines
-//------------------------------------------------------------------------------
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4456) // hidden local declaration
@@ -28,16 +24,15 @@
 
 #include "momentum/math/span_compat.h"
 
-//------------------------------------------------------------------------------
-// Define some additional Eigen types
-//------------------------------------------------------------------------------
-
 namespace Eigen {
+/// 3D vector of unsigned bytes; commonly used for RGB color storage in momentum (see ColorArray).
 using Vector3b = Vector3<uint8_t>;
-}
+} // namespace Eigen
 
 namespace momentum {
 
+/// Re-export of `Eigen::Dynamic` for use as a compile-time dimension token in momentum's type
+/// aliases (e.g., `MatrixX`, `VectorX`).
 inline constexpr int Dynamic = Eigen::Dynamic;
 
 template <class T>
@@ -78,6 +73,8 @@ using Box3d = Box3<double>;
 using Box2i = Box2<std::int32_t>;
 using Box3i = Box3<std::int32_t>;
 
+/// Dynamic-size, column-major dense matrix. Default Eigen storage order; suitable for general
+/// solver use where dimensions are not known at compile time.
 template <typename T>
 using MatrixX = Eigen::Matrix<T, Dynamic, Dynamic>;
 
@@ -151,6 +148,9 @@ using Matrix4i = Matrix4<std::int32_t>;
 using Matrix5i = Matrix5<std::int32_t>;
 using Matrix6i = Matrix6<std::int32_t>;
 
+/// 3-row, dynamic-column matrix. Each column represents a 3D point/vector; column-major storage
+/// makes per-point access contiguous in memory. Used by VertexArray, NormalArray, ColorArray,
+/// TriangleArray.
 template <typename T>
 using Matrix3X = Eigen::Matrix<T, 3, Dynamic>;
 using Matrix3Xf = Matrix3X<float>;
@@ -169,11 +169,15 @@ using MatrixX3s = MatrixX3<std::uint16_t>;
 using MatrixX3u = MatrixX3<std::uint32_t>;
 using MatrixX3i = MatrixX3<std::int32_t>;
 
+/// Row-major dense matrix alias. Use when interoperating with row-major external buffers (e.g.,
+/// numpy arrays via pymomentum) or when iterating row-by-row is the dominant access pattern.
 template <typename T, int N, int M = N>
 using RowMatrix = Eigen::Matrix<T, N, M, Eigen::RowMajor>;
 template <typename T>
 using RowMatrixX = RowMatrix<T, Dynamic>;
 
+/// Column-major sparse matrix. Used by solver paths that build Jacobians/JtJ in compressed sparse
+/// column form.
 template <typename T>
 using SparseMatrix = Eigen::SparseMatrix<T>;
 using SparseMatrixf = SparseMatrix<float>;
@@ -192,9 +196,12 @@ using SparseRowMatrixs = SparseRowMatrix<std::uint16_t>;
 using SparseRowMatrixu = SparseRowMatrix<std::uint32_t>;
 using SparseRowMatrixi = SparseRowMatrix<std::int32_t>;
 
+/// Column vector alias (an `Nx1` Eigen matrix). `Options` allows callers to opt into row-major or
+/// alignment flags when needed.
 template <typename T, int Dim, int Options = 0>
 using Vector = Eigen::Matrix<T, Dim, 1, Options>;
 
+/// Dynamic-size column vector. Common return type for solver residuals and parameter vectors.
 template <typename T>
 using VectorX = Vector<T, Dynamic>;
 
@@ -367,6 +374,12 @@ using AngleAxis = Eigen::AngleAxis<T>;
 using AngleAxisf = AngleAxis<float>;
 using AngleAxisd = AngleAxis<double>;
 
+/// Unit quaternion representing a 3D rotation.
+///
+/// @note Eigen's storage order is `[x, y, z, w]` (vector part first, scalar last) when accessed
+/// via `coeffs()`, but the constructor `Quaternion(w, x, y, z)` takes the scalar first. Be careful
+/// when serializing/deserializing or interoperating with libraries that use a different
+/// convention.
 template <typename T>
 using Quaternion = Eigen::Quaternion<T>;
 using Quaternionf = Quaternion<float>;
@@ -377,32 +390,45 @@ using Translation3 = Eigen::Translation<T, 3>;
 using Translation3f = Translation3<float>;
 using Translation3d = Translation3<double>;
 
+/// 3D rigid transform (rotation + translation, no scale or shear). Preferred for joint/world
+/// transforms that should preserve distances.
 template <typename T>
 using Isometry3 = Eigen::Transform<T, 3, Eigen::Isometry>;
 using Isometry3f = Isometry3<float>;
 using Isometry3d = Isometry3<double>;
 
+/// 3D affine transform (linear part + translation). Allows non-uniform scale and shear; used by
+/// momentum for joint/skinning transforms that include scale.
 template <typename T>
 using Affine3 = Eigen::Transform<T, 3, Eigen::Affine>;
 using Affine3f = Affine3<float>;
 using Affine3d = Affine3<double>;
 
-// Some aligned arrays
+/// One affine transform per joint, indexed by joint id. Typical use: joint-to-world transforms
+/// for a posed skeleton.
 using TransformationList = std::vector<Affine3f>;
+/// Scalar-templated counterpart of `TransformationList`.
 template <typename T>
 using TransformationListT = std::vector<Affine3<T>>;
 
+/// Mesh vertex positions; column `i` is the position of vertex `i` (size: 3 x numVertices).
 using VertexArray = Matrix3Xf;
+/// Per-vertex normals matching the layout of `VertexArray` (size: 3 x numVertices).
 using NormalArray = Matrix3Xf;
+/// Triangle index buffer; column `i` holds the three vertex indices of triangle `i`
+/// (size: 3 x numTriangles).
 using TriangleArray = Matrix3Xi;
+/// Per-vertex RGB color in `[0, 255]` bytes (size: 3 x numVertices).
 using ColorArray = Matrix3Xb;
 
-// define a parameter set
-constexpr size_t kMaxModelParams = 2048; // at most 2048 parameters per frame
+/// Maximum number of model parameters supported per frame across any character. This is a
+/// compile-time bound that sizes `ParameterSet`; raising it grows every `ParameterSet` instance.
+constexpr size_t kMaxModelParams = 2048;
+/// Bitset for model parameter enablement. Size is fixed at compile time (large enough for any
+/// character's parameter count). Used by the solver to select which parameters to optimize.
 using ParameterSet = std::bitset<kMaxModelParams>;
 
-/// @brief A utility struct that facilitates the deduction of a `momentum::span` type from a given
-/// type.
+/// A utility struct that facilitates the deduction of a `momentum::span` type from a given type.
 ///
 /// This utility is particularly useful when a function accepts a `momentum::span<Vector3<T>>` as an
 /// argument, where the template argument of `momentum::span` is also a template. In such cases,
@@ -437,7 +463,6 @@ struct DeduceSpanType {
 /// `OtherScalar` matches the original type, the original container is returned.
 template <typename OtherScalar, template <typename...> class ContainerType, typename ObjectType>
 [[nodiscard]] decltype(auto) cast(const ContainerType<ObjectType>& originalContainer) {
-  // Check for Scalar typedef
   using Scalar = typename ObjectType::Scalar;
 
   if constexpr (std::is_same_v<OtherScalar, Scalar>) {
@@ -447,7 +472,7 @@ template <typename OtherScalar, template <typename...> class ContainerType, type
         std::remove_reference_t<decltype(std::declval<ObjectType>().template cast<OtherScalar>())>>;
 
     ContainerType<CastedType> castedContainer;
-    castedContainer.reserve(originalContainer.size()); // Optional, for performance
+    castedContainer.reserve(originalContainer.size());
 
     std::transform(
         originalContainer.begin(),

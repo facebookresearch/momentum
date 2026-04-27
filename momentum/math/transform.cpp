@@ -58,11 +58,17 @@ template <typename T>
 TransformT<T> TransformT<T>::fromMatrix(const Matrix4<T>& other) {
   TransformT<T> result;
   result.translation = other.template topRightCorner<3, 1>();
-  // Calculate the scale by taking the norm of the first column, assuming uniform scaling
+  // Recover scale from the norm of column 0. This relies on the upper-left 3x3 being
+  // s*R where R is orthonormal (uniform scale, no shear, no reflection). For non-uniform
+  // scaling, shear, or negative determinant, the resulting rotation will be incorrect.
   const auto& scaledR = other.template topLeftCorner<3, 3>();
   result.scale = scaledR.col(0).norm();
+  // Guard against near-zero or near-infinite scale before dividing.
   MT_CHECK(result.scale >= Eps<T>(), "Scale is too small: {}", result.scale);
   MT_CHECK(result.scale < T(1) / Eps<T>(), "Inverse scale is too small: {}", result.scale);
+  // TODO: Detect non-uniform scale / shear / reflection (e.g. via SVD) and either error
+  // or project to the closest rigid+uniform-scale transform; current quaternion ctor
+  // silently ignores non-orthonormal input.
   result.rotation = scaledR / result.scale;
   return result;
 }
@@ -106,7 +112,8 @@ TransformT<T> blendTransforms(
   // http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf
   //
   // i.e. Stack quaternion coeffs in Q, compute M = Q^T x Q, and yield the eigenvector corresponding
-  // to the largest eigenvalue as the average rotation
+  // to the largest eigenvalue as the average rotation. This handles the q vs -q double-cover
+  // ambiguity correctly (since q*q^T == (-q)*(-q)^T) without needing manual sign alignment.
   Matrix4<T> QtQ = Matrix4<T>::Zero();
 
   const auto n = transforms.size();
@@ -132,6 +139,9 @@ TransformT<T> blendTransforms(
     weightSum += weights[i];
   }
 
+  // TODO: When weightSum is zero (e.g. all weights zero, or weights cancel), pos and scale
+  // are left at 0 which produces a degenerate transform; consider returning identity or
+  // the first input instead.
   if (weightSum != 0) {
     pos /= weightSum;
     scale /= weightSum;

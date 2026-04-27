@@ -15,20 +15,25 @@ namespace momentum {
 
 template <typename T>
 void MeshT<T>::updateNormals() {
-  // calculate normals
   normals.resize(vertices.size());
   std::fill(normals.begin(), normals.end(), Eigen::Vector3<T>::Zero());
   const auto verticesNum = static_cast<int>(vertices.size());
   for (const auto& face : faces) {
-    // Skip faces with out-of-boundaries indexes
+    // Skip faces with out-of-bounds vertex indices.
     if (std::any_of(face.begin(), face.end(), [verticesNum](int idx) {
           return idx < 0 || idx >= verticesNum;
         })) {
       continue;
     }
-    // calculate normal and add for each vertex
+    // The unnormalized cross product has magnitude equal to 2 * triangle area, so accumulating it
+    // across faces produces area-weighted vertex normals (larger faces contribute more). This is
+    // the standard Gouraud-style averaging and tends to produce better results than uniform
+    // averaging for meshes with mixed triangle sizes.
     const Eigen::Vector3<T> normal =
         (vertices[face[1]] - vertices[face[0]]).cross(vertices[face[2]] - vertices[face[0]]);
+    // Skip degenerate faces that produced NaN (e.g., from non-finite vertex coordinates).
+    // Collinear/zero-area triangles produce a zero vector, which contributes nothing and is safe.
+    // TODO: only checking normal[0] misses NaNs that appear only in y or z components.
     if (IsNanNoOpt(normal[0])) {
       continue;
     }
@@ -36,10 +41,9 @@ void MeshT<T>::updateNormals() {
       normals[faceIdx] += normal;
     }
   }
-  // re-normalize normals
   for (size_t i = 0; i < normals.size(); i++) {
     const T len = normals[i].norm();
-    // avoid divide-by-zero:
+    // Leave isolated/unreferenced vertices with a zero normal rather than dividing by zero.
     if (len != 0) {
       normals[i] /= len;
     }

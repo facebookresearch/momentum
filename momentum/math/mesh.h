@@ -46,6 +46,8 @@ struct MeshT {
   /// For GLTF, Momentum stores and saves the texture coordinates as they are represented by the
   /// underlying GLTF parser. When dealing with FBX, the Y-axis is flipped. This distinction is
   /// crucial to understand when working with different formats.
+  // TODO: texcoords are hardcoded to float regardless of the mesh scalar type T; consider
+  // templating on T2 (or T) for consistency with vertices/normals/confidence.
   std::vector<Eigen::Vector2f> texcoords;
 
   /// List of texture coordinate indices per face

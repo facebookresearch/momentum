@@ -13,44 +13,64 @@
 
 namespace momentum {
 
-/// A consolidated random number generator to provide convenient APIs wrapping around the random
-/// library of C++ standard library <random>.
+/// A consolidated random number generator providing convenient APIs wrapping the C++ standard
+/// library `<random>`.
 ///
-/// The default engine used in this class is std::mt19937, but it can be replaced, by specifying the
-/// template argument, with any preferable engines (see:
+/// The default engine is `std::mt19937`; any engine satisfying the C++ UniformRandomBitGenerator
+/// requirements can be substituted via the template parameter (see:
 /// https://en.cppreference.com/w/cpp/numeric/random).
+///
+/// @note Reproducibility: given the same seed and the same Generator type, the sequence of
+/// engine outputs is deterministic. However, the values produced by `uniform()` / `normal()` are
+/// **not** guaranteed to be portable across platforms or standard library implementations because
+/// `std::uniform_int_distribution`, `std::uniform_real_distribution`, and
+/// `std::normal_distribution` are implementation-defined.
+///
+/// @warning Thread safety: instances are **not** thread-safe. The internal generator holds mutable
+/// state that is mutated on every call. Concurrent use of the same instance (including the
+/// singleton returned by GetSingleton()) requires external synchronization.
 template <typename Generator_ = std::mt19937>
 class Random final {
  public:
   using Generator = Generator_;
 
-  /// Returns the singleton instance
+  /// Returns the process-wide singleton instance.
+  ///
+  /// @warning The returned instance is shared across all callers and is **not** thread-safe.
+  /// See class-level thread-safety note.
+  // TODO: Document or enforce the seeding policy of the singleton (currently seeded once via
+  // std::random_device on first call, which makes test reproducibility difficult without an
+  // explicit setSeed()).
   [[nodiscard]] static Random& GetSingleton();
 
-  /// Constructor
+  /// Constructs a generator seeded with the given value.
+  ///
+  /// @param seed Seed for the underlying engine. Defaults to a non-deterministic value drawn from
+  /// `std::random_device`, which makes default-constructed instances non-reproducible.
   explicit Random(uint32_t seed = std::random_device{}());
 
-  /// Generates a random scalar/vector/matrix from the uniform distribution
+  /// Generates a random scalar/vector/matrix from the uniform distribution.
   ///
-  /// The supported types are scalar, vector, or matrix where the elements can be either integer or
-  /// real. The supported integer types are whichever supported by std::uniform_int_distribution<T>
-  /// (see: https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution), and the
-  /// supported real types are whichever std::is_floating_point<T>::value is true (see:
-  /// https://en.cppreference.com/w/cpp/types/is_floating_point).
+  /// Supported element types are integer types accepted by `std::uniform_int_distribution<T>`
+  /// (see: https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution) and any type
+  /// for which `std::is_floating_point<T>::value` is true (see:
+  /// https://en.cppreference.com/w/cpp/types/is_floating_point). T may be a scalar, a fixed-size
+  /// Eigen vector/matrix, or a dynamic-size Eigen vector/matrix (in which case the result has the
+  /// same dimensions as `min`).
   ///
-  /// The generated random number is in the range of [min, max] for integer types or [min, max) for
-  /// real types. However, when built with the -ffast-math flag, the range for real types could be
-  /// [min, max] instead.
+  /// @pre `min <= max` element-wise.
+  /// @pre For dynamic-size types, `min` and `max` must have matching dimensions.
   ///
-  /// @warning While the upper bound is typically exclusive for real types according to
-  /// std::uniform_real_distribution, there may be instances where the sampled value equals the
-  /// upper bound, depending on the platform and compiler specifics.
+  /// The result lies in `[min, max]` for integer types and `[min, max)` for real types.
   ///
-  /// For vector/matrix types, the bounds can be specified in either scalar or (the same dimension
-  /// of) vector/matrix. Use this function to specify the bounds in vector/matrix to apply different
-  /// bounds for each element in the generated vector/matrix. Use other versions of uniform() that
-  /// specify the bounds in scalar to apply the same bounds to all the elements of the generated
-  /// vector/matrix.
+  /// @warning While the upper bound is mathematically exclusive for real types according to
+  /// `std::uniform_real_distribution`, there are instances where the sampled value can equal the
+  /// upper bound:
+  ///   - When built with `-ffast-math`, rounding can yield exactly `max`.
+  ///   - Some standard library implementations have known edge cases producing the upper bound.
+  ///
+  /// For vector/matrix types, supplying vector/matrix bounds applies a per-element range; use the
+  /// scalar-bounds overload to apply the same range to every element.
   ///
   /// @code
   /// Random rand;
@@ -60,34 +80,37 @@ class Random final {
   /// auto r4 = rand.uniform(Vector2f(0, 1), Vector2f(2, 3)); // random Vector2f in ([0, 2], [1, 3))
   /// @endcode
   ///
-  /// @tparam T The random number type to be generated
-  /// @param[in] min The lower bound of the random number
-  /// @param[in] max The upper bound of the random number
+  /// @tparam T Scalar, fixed-size, or dynamic-size Eigen type.
+  /// @param[in] min Inclusive lower bound (element-wise).
+  /// @param[in] max Upper bound (inclusive for integer types, exclusive for real types).
   template <typename T>
   [[nodiscard]] T uniform(const T& min, const T& max);
 
-  /// Generates a random vector/matrix from the uniform distribution, where the size is fixed
+  /// Generates a fixed-size vector/matrix from the uniform distribution with a single scalar
+  /// range applied to every element.
   ///
-  /// This is a special case of T uniform(const T&, const T&) where the random number type is fixed
-  /// size of vector/matrix and the bounds are specified by the scalar type.
+  /// Same range semantics as `uniform(const T&, const T&)`.
   ///
   /// @code
   /// Random rand;
-  /// auto r0 = rand.uniform<Vector2f>(0, 1); // random Vector2f in ([0, 1], [0, 1))
+  /// auto r0 = rand.uniform<Vector2f>(0, 1); // random Vector2f in ([0, 1), [0, 1))
   /// @endcode
   ///
-  /// @tparam FixedSizeT The random vector/matrix type to be generated
-  /// @param[in] min The lower bound in scalar.
-  /// @param[in] max The upper bound in scalar.
+  /// @tparam FixedSizeT Fixed-size Eigen vector/matrix type.
+  /// @param[in] min Inclusive lower bound applied to every element.
+  /// @param[in] max Upper bound applied to every element (inclusive for integer scalars,
+  /// exclusive for real scalars).
+  // TODO: The original example claimed `([0, 1], [0, 1))` which is inconsistent — both elements
+  // share the same distribution and same bounds.
   template <typename FixedSizeT>
   [[nodiscard]] FixedSizeT uniform(
       typename FixedSizeT::Scalar min,
       typename FixedSizeT::Scalar max);
 
-  /// Generates a random vector from the uniform distribution, where the size is dynamic
+  /// Generates a dynamic-size vector from the uniform distribution with a single scalar range
+  /// applied to every element.
   ///
-  /// This is a special case of T uniform(const T&, const T&) where the random number type is
-  /// dynamic size of vector and the bounds are specified by the scalar type.
+  /// Same range semantics as `uniform(const T&, const T&)`.
   ///
   /// @code
   /// Random rand;
@@ -95,20 +118,22 @@ class Random final {
   /// element is in [0, 1)
   /// @endcode
   ///
-  /// @tparam DynamicVector The random vector type to be generated
-  /// @param[in] size The size of the vector.
-  /// @param[in] min The lower bound in scalar.
-  /// @param[in] max The upper bound in scalar.
+  /// @tparam DynamicVector Dynamic-size Eigen vector type.
+  /// @param[in] size Number of elements in the result.
+  /// @param[in] min Inclusive lower bound applied to every element.
+  /// @param[in] max Upper bound applied to every element (inclusive for integer scalars,
+  /// exclusive for real scalars).
+  /// @pre `size >= 0`.
   template <typename DynamicVector>
   [[nodiscard]] DynamicVector uniform(
       Eigen::Index size,
       typename DynamicVector::Scalar min,
       typename DynamicVector::Scalar max);
 
-  /// Generates a random matrix from the uniform distribution, where the size is dynamic
+  /// Generates a dynamic-size matrix from the uniform distribution with a single scalar range
+  /// applied to every element.
   ///
-  /// This is a special case of T uniform(const T&, const T&) where the random number type is
-  /// dynamic size of matrix and the bounds are specified by the scalar type.
+  /// Same range semantics as `uniform(const T&, const T&)`.
   ///
   /// @code
   /// Random rand;
@@ -116,11 +141,13 @@ class Random final {
   /// element is in [0, 1)
   /// @endcode
   ///
-  /// @tparam DynamicMatrix The random matrix type to be generated
-  /// @param[in] rows The row size of the matrix.
-  /// @param[in] cols The column size of the matrix.
-  /// @param[in] min The lower bound in scalar.
-  /// @param[in] max The upper bound in scalar.
+  /// @tparam DynamicMatrix Dynamic-size Eigen matrix type.
+  /// @param[in] rows Number of rows in the result.
+  /// @param[in] cols Number of columns in the result.
+  /// @param[in] min Inclusive lower bound applied to every element.
+  /// @param[in] max Upper bound applied to every element (inclusive for integer scalars,
+  /// exclusive for real scalars).
+  /// @pre `rows >= 0` and `cols >= 0`.
   template <typename DynamicMatrix>
   [[nodiscard]] DynamicMatrix uniform(
       Eigen::Index rows,
@@ -128,40 +155,38 @@ class Random final {
       typename DynamicMatrix::Scalar min,
       typename DynamicMatrix::Scalar max);
 
-  /// Generates a random quaternion from a uniform distribution on SO(3)
+  /// Generates a random unit quaternion uniformly distributed on SO(3) (Haar measure).
   template <typename T>
   [[nodiscard]] Quaternion<T> uniformQuaternion();
 
-  /// Generates a random rotation matrix from a uniform distribution on SO(3)
+  /// Generates a random rotation matrix uniformly distributed on SO(3) (Haar measure).
   template <typename T>
   [[nodiscard]] Matrix3<T> uniformRotationMatrix();
 
-  /// Generates a random isometry (rigid transformation) from a uniform distribution on SE(3)
-  /// based on input minimum and maximum 3D vectors for the translation part.
+  /// Generates a random isometry (rigid transformation) on SE(3) with rotation drawn uniformly
+  /// from SO(3) and translation drawn uniformly from the box `[min, max]`.
   ///
-  /// @tparam Generator The type of random number generator.
-  /// @tparam T The type of isometry component, typically a float or double.
-  /// @param min The minimum 3D vector for the translation part.
-  /// @param max The maximum 3D vector for the translation part.
-  /// @return A random Isometry3 of type T.
+  /// @tparam T Scalar type of the isometry components, typically `float` or `double`.
+  /// @param min Inclusive lower bound on the translation component (per axis).
+  /// @param max Inclusive upper bound on the translation component (per axis).
+  /// @return A random Isometry3<T>.
   template <typename T>
   [[nodiscard]] Isometry3<T> uniformIsometry3(
       const Vector3<T>& min = Vector3<T>::Zero(),
       const Vector3<T>& max = Vector3<T>::Ones());
 
-  /// Generates a random affine transformation from a uniform distribution on the space of all
-  /// affine transformations.
+  /// Generates a random affine transformation with rotation drawn uniformly from SO(3), uniform
+  /// scale drawn from `[scaleMin, scaleMax]`, and translation drawn uniformly from the box
+  /// `[min, max]`.
   ///
-  /// The transformation is created based on input minimum and maximum 3D vectors for the
-  /// translation part, and minimum and maximum scale factors for the linear part.
-  ///
-  /// @tparam Generator The type of random number generator.
-  /// @tparam T The type of affine transformation component, typically a float or double.
-  /// @param scaleMin The minimum scale factor for the linear part.
-  /// @param scaleMax The maximum scale factor for the linear part.
-  /// @param min The minimum 3D vector for the translation part.
-  /// @param max The maximum 3D vector for the translation part.
-  /// @return A random Affine3 of type T.
+  /// @tparam T Scalar type of the affine components, typically `float` or `double`.
+  /// @param scaleMin Inclusive lower bound on the uniform scale factor.
+  /// @param scaleMax Inclusive upper bound on the uniform scale factor.
+  /// @param min Inclusive lower bound on the translation component (per axis).
+  /// @param max Inclusive upper bound on the translation component (per axis).
+  /// @return A random Affine3<T>.
+  // TODO: The default `scaleMin = 0.1` / `scaleMax = 10.0` only makes sense when T is a floating
+  // type; instantiation with an integer T would silently truncate the defaults.
   template <typename T>
   [[nodiscard]] Affine3<T> uniformAffine3(
       T scaleMin = 0.1,
@@ -169,43 +194,55 @@ class Random final {
       const Vector3<T>& min = Vector3<T>::Zero(),
       const Vector3<T>& max = Vector3<T>::Ones());
 
-  /// Generates a random value from the Gaussian distribution
+  /// Generates a value from a normal (Gaussian) distribution N(mean, sigma^2). Each element of a
+  /// vector/matrix result is drawn independently.
   ///
-  /// @tparam T The random number type to be generated
-  /// @param[in] mean The mean of the Gaussian distribution
-  /// @param[in] sigma The standard deviation of the Gaussian distribution
+  /// Backed by `std::normal_distribution`, which requires a real (floating-point) scalar type.
+  ///
+  /// @pre `sigma >= 0`.
+  ///
+  /// @tparam T Scalar, fixed-size, or dynamic-size Eigen type with floating-point scalar.
+  /// @param[in] mean Distribution mean (mu).
+  /// @param[in] sigma Distribution standard deviation (sigma).
   template <typename T>
   [[nodiscard]] T normal(const T& mean, const T& sigma);
 
-  /// Generates a random value from the Gaussian distribution
+  /// Generates a fixed-size vector/matrix with each element drawn independently from
+  /// N(mean, sigma^2).
   ///
-  /// @tparam FixedSizeT The random vector/matrix type to be generated
-  /// @param[in] mean The mean of the Gaussian distribution
-  /// @param[in] sigma The standard deviation of the Gaussian distribution
+  /// @pre `sigma >= 0`.
+  ///
+  /// @tparam FixedSizeT Fixed-size Eigen vector/matrix type with floating-point scalar.
+  /// @param[in] mean Distribution mean applied to every element.
+  /// @param[in] sigma Distribution standard deviation applied to every element.
   template <typename FixedSizeT>
   [[nodiscard]] FixedSizeT normal(
       typename FixedSizeT::Scalar mean,
       typename FixedSizeT::Scalar sigma);
 
-  /// Generates a random value from the Gaussian distribution
+  /// Generates a dynamic-size vector with each element drawn independently from N(mean, sigma^2).
   ///
-  /// @tparam DynamicVector The random vector type to be generated
-  /// @param[in] size The size of the vector.
-  /// @param[in] mean The mean of the Gaussian distribution
-  /// @param[in] sigma The standard deviation of the Gaussian distribution
+  /// @pre `sigma >= 0` and `size >= 0`.
+  ///
+  /// @tparam DynamicVector Dynamic-size Eigen vector type with floating-point scalar.
+  /// @param[in] size Number of elements in the result.
+  /// @param[in] mean Distribution mean applied to every element.
+  /// @param[in] sigma Distribution standard deviation applied to every element.
   template <typename DynamicVector>
   [[nodiscard]] DynamicVector normal(
       Eigen::Index size,
       typename DynamicVector::Scalar mean,
       typename DynamicVector::Scalar sigma);
 
-  /// Generates a random value from the Gaussian distribution
+  /// Generates a dynamic-size matrix with each element drawn independently from N(mean, sigma^2).
   ///
-  /// @tparam DynamicMatrix The random matrix type to be generated
-  /// @param[in] rows The row size of the matrix.
-  /// @param[in] cols The column size of the matrix.
-  /// @param[in] mean The mean of the Gaussian distribution
-  /// @param[in] sigma The standard deviation of the Gaussian distribution
+  /// @pre `sigma >= 0`, `rows >= 0`, and `cols >= 0`.
+  ///
+  /// @tparam DynamicMatrix Dynamic-size Eigen matrix type with floating-point scalar.
+  /// @param[in] rows Number of rows in the result.
+  /// @param[in] cols Number of columns in the result.
+  /// @param[in] mean Distribution mean applied to every element.
+  /// @param[in] sigma Distribution standard deviation applied to every element.
   template <typename DynamicMatrix>
   [[nodiscard]] DynamicMatrix normal(
       Eigen::Index rows,
@@ -213,38 +250,46 @@ class Random final {
       typename DynamicMatrix::Scalar mean,
       typename DynamicMatrix::Scalar sigma);
 
-  /// Returns the seed.
+  /// Returns the seed last used to initialize the engine.
+  ///
+  /// @note This reflects the value passed to the constructor or the most recent `setSeed()` call;
+  /// it does not encode the engine's current state, so it cannot be used alone to resume a
+  /// sequence after some samples have been drawn.
   [[nodiscard]] uint32_t getSeed() const;
 
-  /// Sets a new seed for the internal random number engine.
+  /// Re-seeds the internal engine, resetting its state to the deterministic sequence implied by
+  /// `seed`.
   void setSeed(uint32_t seed);
 
  private:
-  /// The seed used for the internal random number engine.
   uint32_t seed_;
 
-  /// The internal random number engine.
   Generator generator_;
 };
 
-/// Generates a random type T from the uniform distribution, using the global random number
-/// generator Random
+/// Convenience wrappers that forward to `Random<>::GetSingleton()`.
+///
+/// @warning These share the singleton's mutable engine state and inherit its non-thread-safe
+/// behavior; concurrent calls from different threads must be externally synchronized. Range and
+/// distribution semantics match the corresponding `Random` member functions.
+
+/// Uniformly distributed value via the global `Random` singleton. See `Random::uniform`.
 template <typename T>
 [[nodiscard]] T uniform(const T& min, const T& max);
 
-/// Generates a random fixed size vector/matrix from the uniform distribution, using the global
-/// random number generator Random
+/// Uniformly distributed fixed-size vector/matrix via the global `Random` singleton.
+/// See `Random::uniform`.
 template <typename FixedSizeT>
 [[nodiscard]] FixedSizeT uniform(typename FixedSizeT::Scalar min, typename FixedSizeT::Scalar max);
 
-/// Generates a random dynamic size vector from the uniform distribution, using the global random
-/// number generator Random
+/// Uniformly distributed dynamic-size vector via the global `Random` singleton.
+/// See `Random::uniform`. @pre `size >= 0`.
 template <typename DynamicVector>
 [[nodiscard]] DynamicVector
 uniform(Eigen::Index size, typename DynamicVector::Scalar min, typename DynamicVector::Scalar max);
 
-/// Generates a random type dynamic size matrix from the uniform distribution, using the global
-/// random number generator Random
+/// Uniformly distributed dynamic-size matrix via the global `Random` singleton.
+/// See `Random::uniform`. @pre `rows >= 0` and `cols >= 0`.
 template <typename DynamicMatrix>
 [[nodiscard]] DynamicMatrix uniform(
     Eigen::Index rows,
@@ -252,23 +297,23 @@ template <typename DynamicMatrix>
     typename DynamicMatrix::Scalar min,
     typename DynamicMatrix::Scalar max);
 
-/// Generates a random quaternion from a uniform distribution on SO(3)
+/// Uniformly distributed unit quaternion on SO(3) via the global `Random` singleton.
 template <typename T>
 [[nodiscard]] Quaternion<T> uniformQuaternion();
 
-/// Generates a random rotation matrix from a uniform distribution on SO(3)
+/// Uniformly distributed rotation matrix on SO(3) via the global `Random` singleton.
 template <typename T>
 [[nodiscard]] Matrix3<T> uniformRotationMatrix();
 
-/// Generates a random isometry (rigid transformation) from a uniform distribution on SE(3)
-/// based on input minimum and maximum 3D vectors for the translation part.
+/// Random isometry on SE(3) via the global `Random` singleton (uniform rotation, uniform
+/// translation in `[min, max]`).
 template <typename T>
 [[nodiscard]] Isometry3<T> uniformIsometry3(
     const Vector3<T>& min = Vector3<T>::Zero(),
     const Vector3<T>& max = Vector3<T>::Ones());
 
-/// Generates a random affine transformation from a uniform distribution on the space of all
-/// affine transformations.
+/// Random affine transformation via the global `Random` singleton (uniform rotation, uniform
+/// scale in `[scaleMin, scaleMax]`, uniform translation in `[min, max]`).
 template <typename T>
 [[nodiscard]] Affine3<T> uniformAffine3(
     T scaleMin = 0.1,
@@ -276,28 +321,28 @@ template <typename T>
     const Vector3<T>& min = Vector3<T>::Zero(),
     const Vector3<T>& max = Vector3<T>::Ones());
 
-/// Generates a random type T from the Gaussian distribution, using the global random number
-/// generator Random
+/// Normally distributed value via the global `Random` singleton. See `Random::normal`.
+/// @pre `sigma >= 0`.
 template <typename T>
 [[nodiscard]] T normal(const T& mean, const T& sigma);
 
-/// Generates a random fixed size vector/matrix from the Gaussian distribution, using the global
-/// random number generator Random
+/// Normally distributed fixed-size vector/matrix via the global `Random` singleton.
+/// See `Random::normal`. @pre `sigma >= 0`.
 template <typename FixedSizeT>
 [[nodiscard]] FixedSizeT normal(
     typename FixedSizeT::Scalar mean,
     typename FixedSizeT::Scalar sigma);
 
-/// Generates a random dynamic size vector from the Gaussian distribution, using the global random
-/// number generator Random
+/// Normally distributed dynamic-size vector via the global `Random` singleton.
+/// See `Random::normal`. @pre `sigma >= 0` and `size >= 0`.
 template <typename DynamicVector>
 [[nodiscard]] DynamicVector normal(
     Eigen::Index size,
     typename DynamicVector::Scalar mean,
     typename DynamicVector::Scalar sigma);
 
-/// Generates a random dynamic size matrix from the Gaussian distribution, using the global random
-/// number generator Random
+/// Normally distributed dynamic-size matrix via the global `Random` singleton.
+/// See `Random::normal`. @pre `sigma >= 0`, `rows >= 0`, and `cols >= 0`.
 template <typename DynamicMatrix>
 [[nodiscard]] DynamicMatrix normal(
     Eigen::Index rows,

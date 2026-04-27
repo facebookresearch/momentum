@@ -23,34 +23,52 @@ void MppcaT<T>::set(
   d = mmu.cols();
   p = sigma2.rows();
 
-  // set the data
+  // TODO: Validate input dimensions: inPi.rows() == p, mmu.rows() == p, W.size() == p,
+  //       and each W[c] has d columns. Currently mismatches will trigger out-of-bounds
+  //       access or silent corruption rather than a clear error.
   Rpre.setZero(p);
   Cinv.resize(p);
   L.resize(p);
 
   CovarianceMatrix covariance;
 
+  // For each mixture component c, PPCA models the data covariance as
+  //     C_c = sigma_c^2 * I + W_c * W_c^T,
+  // i.e. low-rank signal (W_c) plus isotropic noise (sigma_c^2). The log of the
+  // Gaussian normalizer used in the per-component log-density is
+  //     -0.5 * d * log(2*pi)   (the half_d_log_2pi term below).
   const T half_d_log_2pi = T(0.5) * static_cast<T>(d) * std::log(twopi<T>());
 
   for (size_t c = 0; c < p; c++) {
+    // LowRankCovarianceMatrix takes A such that C = sigma^2*I + A^T*A; here A = W_c^T,
+    // so A^T*A = W_c * W_c^T as required by the PPCA model. It produces the QR
+    // factorization R with R^T * R = sigma^2*I + W_c * W_c^T = C_c.
     covariance.reset(std::sqrt(sigma2(c)), W[c].transpose());
 
-    // Back-substitution of the identity matrix gives the inverse:
+    // R is upper-triangular, so back-substituting the identity yields R^{-1}.
+    // L_tmp = R^{-T} (the lower-triangular factor of C^{-1} = R^{-1} * R^{-T}).
     const Eigen::MatrixX<T> L_tmp = covariance.R()
                                         .template triangularView<Eigen::Upper>()
                                         .solve(Eigen::MatrixX<T>::Identity(d, d))
                                         .transpose();
+    // Cinv = R^{-1} * R^{-T} = (R^T * R)^{-1} = C^{-1}.
     Cinv[c] = covariance.R().template triangularView<Eigen::Upper>().solve(L_tmp);
     L[c] = L_tmp;
 
     const T C_logDeterminant = covariance.logDeterminant();
 
-    // Rpre is the constant part of R that does not depend on the parameters, so we can precalculate
-    // it
+    // Per-component log responsibility for input x is
+    //     log r_c(x) = log pi_c - 0.5*log|C_c| - 0.5*d*log(2*pi) - 0.5*(x-mu_c)^T C_c^{-1}
+    //     (x-mu_c).
+    // Rpre stores the data-independent prefactor (everything but the quadratic term),
+    // so callers can add the cached -0.5 * Mahalanobis distance at evaluation time
+    // and apply log-sum-exp across components for a numerically stable mixture log-likelihood.
     Rpre(c) = std::log(inPi(c)) - T(0.5) * C_logDeterminant - half_d_log_2pi;
   }
   mu = mmu;
 
+  // Reset names to the data-space dimension; caller is expected to populate them
+  // afterwards if needed. Note: this discards any names previously set on the model.
   names = std::vector<std::string>(d);
 }
 
