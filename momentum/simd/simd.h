@@ -30,18 +30,40 @@
     DRJIT_VERSION_PATCH >= (patch)))
 
 /// @file
-/// SIMD type aliases and mixed Eigen/DrJit arithmetic operators.
+/// Cross-platform SIMD foundation built on the DrJit library.
 ///
-/// Provides fixed-width SIMD packet types (via DrJit) and overloaded
-/// operators for interoperating between Eigen vectors/matrices/transforms
-/// and DrJit SIMD packets.
+/// Provides fixed-width SIMD packet types and overloaded operators for
+/// interoperating between Eigen vectors/matrices/transforms and DrJit SIMD
+/// packets.
+///
+/// Packet sizes by target instruction set:
+/// - x86_64 with AVX2: packets of 8 floats (256-bit)
+/// - x86_64 without AVX2 (SSE): packets of 4 floats (128-bit)
+/// - ARM (NEON): packets of 4 floats (128-bit)
+///
+/// Key types:
+/// - `FloatP`: a packet of `kSimdPacketSize` floats
+/// - `Vector3fP`: a 3-vector whose components are each a `FloatP` (i.e., N
+///   3-vectors processed in parallel as SoA)
+/// - `kSimdPacketSize`: 4 or 8, platform-dependent (chosen by DrJit)
+///
+/// Used by the SIMD error functions in `character_solver_simd/` and by the
+/// rasterizer.
 
 namespace momentum {
 
-/// Number of floats in the platform's default SIMD register (chosen by DrJit).
+/// Number of floats in the platform's default SIMD register, chosen at compile
+/// time by DrJit based on available instruction sets (4 on SSE/NEON, 8 on AVX).
+///
+/// Used as the inner-loop stride in SIMD error functions.
 inline constexpr size_t kSimdPacketSize = drjit::DefaultSize;
 
 /// Byte alignment required for the platform's default SIMD loads/stores.
+///
+/// `drjit::load<FloatP>(ptr)` requires `ptr` to be aligned to this many bytes;
+/// misaligned loads cause segfaults (not exceptions). Use
+/// `makeAlignedUnique<float, kSimdAlignment>()` from `common/aligned.h` for all
+/// SoA data arrays consumed by SIMD error functions.
 inline constexpr size_t kSimdAlignment = kSimdPacketSize * sizeof(float);
 
 /// A fixed-size SIMD packet of kSimdPacketSize elements of type T.
@@ -105,6 +127,10 @@ using Matrix4dP = Matrix4P<double>;
 
 /// Computes the offset required for the matrix data to meet the alignment requirement.
 ///
+/// Alignment is critical for SIMD correctness: misaligned packet loads segfault
+/// rather than throw. Returned value is the number of `float` elements to skip
+/// before the first aligned address.
+///
 /// @param mat The matrix whose alignment offset to compute.
 /// @return The number of elements to skip to achieve proper alignment.
 template <size_t Alignment>
@@ -125,6 +151,7 @@ template <size_t Alignment>
 ///
 /// @param mat The matrix to check for alignment.
 /// @param offset Offset into the matrix data in elements.
+/// @throws if `mat.data() + offset` is not aligned to `Alignment` bytes.
 template <size_t Alignment>
 void checkAlignment(const Eigen::Ref<Eigen::MatrixXf>& mat, size_t offset = 0) {
   MT_THROW_IF(
@@ -135,6 +162,23 @@ void checkAlignment(const Eigen::Ref<Eigen::MatrixXf>& mat, size_t offset = 0) {
       uintptr_t(mat.data()),
       Alignment);
 }
+
+/// @name Eigen / DrJit interop operators
+/// Mixed-type arithmetic between scalar Eigen types (`Vector3f`, `Matrix3f`,
+/// `Quaternionf`, `Transform`) and DrJit packet types (`Vector3fP`).
+///
+/// The core pattern for SIMD error function evaluation: a single joint
+/// transform (scalar Eigen) is applied to N constraint positions (DrJit
+/// packet) simultaneously. For example, computing N position residuals:
+///
+/// @code
+/// Vector3f jointPos = state.translation(); // scalar
+/// Vector3fP targets = {drjit::load<FloatP>(targetX),
+///                      drjit::load<FloatP>(targetY),
+///                      drjit::load<FloatP>(targetZ)}; // N packed targets
+/// Vector3fP residuals = targets - jointPos; // N residuals at once
+/// @endcode
+/// @{
 
 /// Computes dot product of Eigen::Vector3f and 3-vector of packets.
 ///
@@ -285,5 +329,6 @@ Vector3P<S> cross(const Vector3P<S>& v1, const Eigen::MatrixBase<Derived>& v2) {
       drjit::fmsub(v1.x(), v2.y(), v1.y() * v2.x()),
   };
 }
+/// @}
 
 } // namespace momentum
