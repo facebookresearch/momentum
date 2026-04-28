@@ -30,8 +30,6 @@ std::pair<Eigen::Matrix<T, 3, 4>, bool> projectionMatrixPixels(
   // At p = eyePoint itself, the residual is exactly zero.
   const auto [projected, jacobian, validJ] = camera.intrinsicsModel()->projectJacobian(eyePoint);
 
-  // Compose with the eye-from-world transform's upper 3x4 block:
-  // M = J * eyeFromWorld.topRows<3>()
   const Eigen::Matrix<T, 3, 4> eyeFromWorld34 =
       camera.eyeFromWorld().matrix().template topRows<3>();
   return {jacobian * eyeFromWorld34, true};
@@ -48,24 +46,20 @@ std::pair<Eigen::Matrix<T, 3, 4>, bool> projectionMatrixRadians(
     return {Eigen::Matrix<T, 3, 4>::Zero(), false};
   }
 
-  // Normalize to get the ray direction in eye-space.
   const Eigen::Vector3<T> rayDir = eyePoint.normalized();
 
-  // Compute a rotation that maps the target ray to the z-axis.
-  // After applying this rotation, any point on the target ray will have x=0, y=0,
-  // so (x/z, y/z) = (0, 0). For other rays, x/z and y/z give the tangent of the
-  // angle from the target ray.
+  // Compute a rotation that maps the target ray to the z-axis. After applying this
+  // rotation, any point on the target ray has x=0, y=0, so (x/z, y/z) = (0, 0). For
+  // other rays, x/z and y/z give the tangent of the angle from the target ray.
   const Eigen::Quaternion<T> rotation =
       Eigen::Quaternion<T>::FromTwoVectors(rayDir, Eigen::Vector3<T>::UnitZ());
   const Eigen::Matrix<T, 3, 3> R = rotation.toRotationMatrix();
 
-  // Compose with the eye-from-world transform's upper 3x4 block.
   const Eigen::Matrix<T, 3, 4> eyeFromWorld34 =
       camera.eyeFromWorld().matrix().template topRows<3>();
   return {R * eyeFromWorld34, true};
 }
 
-// Explicit template instantiations
 template std::pair<Eigen::Matrix<float, 3, 4>, bool> projectionMatrixPixels(
     const CameraT<float>& camera,
     const Eigen::Vector2<float>& targetPixel);
