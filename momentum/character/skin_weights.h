@@ -18,49 +18,40 @@ namespace momentum {
 /// Maximum number of joints that can influence a single vertex
 inline constexpr uint32_t kMaxSkinJoints = 8;
 
-/// Matrix type for storing joint indices that influence each vertex
-///
-/// Each row represents a vertex, and each column represents a joint influence.
-/// The matrix has a fixed number of columns (kMaxSkinJoints) and a dynamic number of rows.
+/// Joint indices that influence each vertex. Row = vertex, column = influence slot
+/// (fixed at kMaxSkinJoints). Row-major to keep per-vertex influences contiguous.
 using IndexMatrix =
     Eigen::Matrix<uint32_t, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign | Eigen::RowMajor>;
 
-/// Matrix type for storing weights of joint influences on each vertex
-///
-/// Each row represents a vertex, and each column represents the weight of a joint influence.
-/// The matrix has a fixed number of columns (kMaxSkinJoints) and a dynamic number of rows.
+/// Skinning weights for each joint influence. Row = vertex, column = influence slot
+/// (fixed at kMaxSkinJoints). Row-major to keep per-vertex influences contiguous.
 using WeightMatrix =
     Eigen::Matrix<float, Eigen::Dynamic, kMaxSkinJoints, Eigen::AutoAlign | Eigen::RowMajor>;
 
-/// Stores skinning weights and joint indices for character mesh deformation
+/// Linear blend skinning weights for a character mesh: per-vertex joint indices
+/// and influence weights. `index` and `weight` always have the same row count
+/// (one row per vertex) and matching unused-slot conventions.
 struct SkinWeights {
-  /// Joint indices that influence each vertex
-  ///
-  /// Each row corresponds to a vertex, and each column contains the index of a joint
-  /// that influences that vertex. Unused influences are set to 0.
+  /// Joint indices influencing each vertex. Unused slots are set to 0.
+  /// Read in conjunction with `weight` — index 0 only contributes when its
+  /// matching weight is non-zero.
   IndexMatrix index;
 
-  /// Weight of each joint's influence on each vertex
-  ///
-  /// Each row corresponds to a vertex, and each column contains the weight of a joint's
-  /// influence on that vertex. Weights for a vertex typically sum to 1.0. Unused influences
-  /// are set to 0.0.
+  /// Joint influence weights per vertex. Weights for a vertex are expected to
+  /// sum to 1.0; unused slots are set to 0.0. Loaders/setters do not enforce
+  /// normalization — callers are responsible for normalized input.
   WeightMatrix weight;
 
-  /// Sets the skin weights from vectors of joint indices and weights
+  /// Populates `index` and `weight` from ragged per-vertex influence lists.
+  /// Each entry of `ind`/`wgt` is one vertex's joints/weights; influences beyond
+  /// `kMaxSkinJoints` are silently dropped, and unused slots are zero-filled.
   ///
-  /// @param ind Vector of vectors containing joint indices for each vertex
-  /// @param wgt Vector of vectors containing weights for each vertex
-  /// @throws If ind.size() != wgt.size() (via MT_CHECK)
+  /// @pre `ind.size() == wgt.size()` (checked via MT_CHECK).
+  /// @pre For each vertex i, `wgt[i].size() >= min(ind[i].size(), kMaxSkinJoints)`;
+  ///   shorter weight rows produce out-of-bounds reads.
   void set(const std::vector<std::vector<size_t>>& ind, const std::vector<std::vector<float>>& wgt);
 
-  /// Compares two SkinWeights objects for equality
-  ///
-  /// Two SkinWeights objects are considered equal if their index and weight matrices
-  /// are approximately equal (using Eigen's isApprox method).
-  ///
-  /// @param skinWeights The SkinWeights object to compare with
-  /// @return True if the objects are equal, false otherwise
+  /// Approximate equality on `index` and `weight` using Eigen's `isApprox`.
   bool operator==(const SkinWeights& skinWeights) const;
 };
 

@@ -20,67 +20,50 @@ namespace momentum {
 /// The skeletal structure of a momentum Character.
 template <typename T>
 struct SkeletonT {
-  /// The list of joints in this skeleton.
+  /// The list of joints in this skeleton, ordered such that every joint's parent
+  /// appears earlier in the list (parent index < child index, or kInvalidIndex for roots).
   JointList joints;
 
-  /// Default constructor
   SkeletonT() = default;
 
-  /// Constructor that validates joint hierarchy.
-  /// Ensures parent indices are valid (parent < child index or kInvalidIndex).
+  /// @pre Every joint's parent index is either less than its own index or kInvalidIndex.
+  /// @throws if the hierarchy invariant is violated.
   explicit SkeletonT(JointList joints);
 
-  /// Copy constructor
   SkeletonT(const SkeletonT& other) = default;
-
-  /// Move constructor
   SkeletonT(SkeletonT&& other) noexcept = default;
-
-  /// Copy assignment operator
   SkeletonT& operator=(const SkeletonT& other) = default;
-
-  /// Move assignment operator
   SkeletonT& operator=(SkeletonT&& other) noexcept = default;
-
-  /// Destructor
   ~SkeletonT() = default;
 
   /// Returns the index of a joint with the given name, or kInvalidIndex if not found.
   [[nodiscard]] size_t getJointIdByName(std::string_view name) const;
 
-  /// Returns a vector containing all joint names in the skeleton.
   [[nodiscard]] std::vector<std::string> getJointNames() const;
 
-  /// Returns indices of child joints for the specified joint.
+  /// Returns indices of child joints of the specified joint.
   ///
   /// @param jointId Index of the joint to find children for
   /// @param recursive If true, returns all descendants; if false, only direct children
   /// @throws std::out_of_range if jointId is invalid
   [[nodiscard]] std::vector<size_t> getChildrenJoints(size_t jointId, bool recursive = true) const;
 
-  /// Determines if one joint is an ancestor of another in the hierarchy.
+  /// Returns true if `ancestorJointId` is an ancestor of `jointId`.
   ///
-  /// Returns true if ancestorJointId is an ancestor of jointId.
-  /// A joint is considered to be its own ancestor (isAncestor(id, id) returns true).
+  /// A joint is considered to be its own ancestor (`isAncestor(id, id)` returns true).
   [[nodiscard]] bool isAncestor(size_t jointId, size_t ancestorJointId) const;
 
-  /// Checks if two joints are the same joint or directly adjacent (one is the direct parent
-  /// of the other) in the skeleton hierarchy.
+  /// Returns true if the two joints are the same, or one is the direct parent of the other.
   ///
   /// Returns false if either joint is kInvalidIndex, since world-fixed entities have no
   /// joint ancestry and are never considered adjacent to skeleton joints.
   [[nodiscard]] bool isSameOrAdjacentJoints(size_t joint1, size_t joint2) const;
 
-  /// Finds the closest common ancestor of two joints in the hierarchy.
-  ///
-  /// Returns the index of the joint that is the lowest common ancestor
-  /// in the hierarchy for the two specified joints. Returns kInvalidIndex
+  /// Returns the lowest common ancestor of two joints in the hierarchy, or kInvalidIndex
   /// if either joint is kInvalidIndex.
   [[nodiscard]] size_t commonAncestor(size_t joint1, size_t joint2) const;
 
-  /// Converts the skeleton to use a different scalar type.
-  ///
-  /// Returns a copy of this skeleton with all numeric values converted to type U.
+  /// Returns a copy of this skeleton with all numeric values converted to scalar type `U`.
   template <typename U>
   [[nodiscard]] SkeletonT<U> cast() const {
     if constexpr (std::is_same_v<T, U>) {

@@ -22,7 +22,6 @@ struct LocatorState {
   std::vector<Vector3f> position;
 
  public:
-  /// Creates an empty locator state with no positions
   LocatorState() noexcept = default;
 
   /// Creates a locator state and immediately updates positions based on the given skeleton state

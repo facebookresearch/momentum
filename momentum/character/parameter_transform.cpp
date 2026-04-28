@@ -16,7 +16,8 @@
 namespace momentum {
 
 bool PoseConstraint::operator==(const PoseConstraint& poseConstraint) const {
-  // Compare the parameterIdValue as sets
+  // Compare parameterIdValue as sets — the vector ordering is not semantically
+  // meaningful (see header comment on `parameterIdValue`).
   std::map<size_t, float> paramIdToValue1;
   std::copy(
       parameterIdValue.begin(),
@@ -105,7 +106,6 @@ VectorX<bool> ParameterTransformT<T>::computeActiveJointParams(const ParameterSe
   return result;
 }
 
-// map model parameters to joint parameters using a linear transformation
 template <typename T>
 JointParametersT<T> ParameterTransformT<T>::apply(const ModelParametersT<T>& parameters) const {
   MT_PROFILE_FUNCTION();
@@ -122,7 +122,6 @@ JointParametersT<T> ParameterTransformT<T>::apply(const ModelParametersT<T>& par
   return transform * parameters.v + offsets;
 }
 
-// map model parameters to joint parameters using a linear transformation
 template <typename T>
 JointParametersT<T> ParameterTransformT<T>::apply(const CharacterParametersT<T>& parameters) const {
   MT_PROFILE_FUNCTION();
@@ -143,20 +142,17 @@ JointParametersT<T> ParameterTransformT<T>::apply(const CharacterParametersT<T>&
   return result;
 }
 
-// return rest pose parameters
 template <typename T>
 JointParametersT<T> ParameterTransformT<T>::zero() const {
   MT_CHECK(offsets.size() == transform.rows(), "{} is not {}", offsets.size(), transform.rows());
   return offsets;
 }
 
-// return rest pose parameters
 template <typename T>
 JointParametersT<T> ParameterTransformT<T>::bindPose() const {
   return JointParametersT<T>::Zero(transform.rows());
 }
 
-// get a list of scaling parameters
 template <typename T>
 ParameterSet ParameterTransformT<T>::getScalingParameters() const {
   ParameterSet result;
@@ -170,7 +166,9 @@ ParameterSet ParameterTransformT<T>::getScalingParameters() const {
   return result;
 }
 
-// get a list of root parameters
+// TODO: Header Doxygen and impl name disagree — getRigidParameters() also matches
+// any parameter name containing "hips", not just the "root_" prefix. Either tighten
+// the impl to root_-only or update the header doc to mention the hips fallback.
 template <typename T>
 ParameterSet ParameterTransformT<T>::getRigidParameters() const {
   ParameterSet result;
@@ -234,14 +232,13 @@ ParameterTransformT<T> mapParameterTransformJoints(
     const std::vector<size_t>& jointMapping) {
   ParameterTransformT<T> mappedTransform;
 
-  // No change in the parameters:
+  // Model parameter list is preserved verbatim; only the joint dimension is remapped.
   mappedTransform.name = parameterTransform.name;
 
-  // resize the offset matrix to the right size
   mappedTransform.offsets.setZero(numTargetJoints * kParametersPerJoint);
   mappedTransform.activeJointParams.setConstant(numTargetJoints * kParametersPerJoint, false);
 
-  // map the offset from the anim skel to the new one
+  // Re-index per-joint offsets from the source skeleton into the target skeleton.
   for (size_t i = 0; i < jointMapping.size(); i++) {
     if (jointMapping[i] != kInvalidIndex) {
       for (size_t d = 0; d < kParametersPerJoint; d++) {
@@ -251,11 +248,13 @@ ParameterTransformT<T> mapParameterTransformJoints(
     }
   }
 
-  // map the transform from the anim skel to the new one
+  // Re-index transform rows (joint parameters) from the source skeleton into the
+  // target skeleton; columns (model parameters) are unchanged.
   std::vector<Eigen::Triplet<float>> triplets;
   for (int k = 0; k < parameterTransform.transform.outerSize(); ++k) {
     for (typename SparseRowMatrix<T>::InnerIterator it(parameterTransform.transform, k); it; ++it) {
-      // row is joint + type index, col is parameter
+      // row encodes (joint index * kParametersPerJoint + parameter type); col is the model
+      // parameter.
       const int jIndex = static_cast<int>(it.row()) / kParametersPerJoint;
       const int jOffset = static_cast<int>(it.row()) % kParametersPerJoint;
 
@@ -270,20 +269,18 @@ ParameterTransformT<T> mapParameterTransformJoints(
               static_cast<int>(it.col()),
               it.value()));
 
-      // enable joint channels
+      // Mark this remapped joint parameter row as driven by some model parameter.
       mappedTransform.activeJointParams[mappedJoint * kParametersPerJoint + jOffset] = true;
     }
   }
 
-  // resize the Transform matrix to the correct size
   mappedTransform.transform.resize(
       static_cast<int>(numTargetJoints) * kParametersPerJoint,
       static_cast<int>(mappedTransform.name.size()));
 
-  // create sparse matrix from triplet
   mappedTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
-  // copy over the parameterSets
+  // Pass-through metadata: none of these depend on the joint remapping.
   mappedTransform.parameterSets = parameterTransform.parameterSets;
   mappedTransform.poseConstraints = parameterTransform.poseConstraints;
   mappedTransform.blendShapeParameters = parameterTransform.blendShapeParameters;

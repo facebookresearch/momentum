@@ -30,7 +30,7 @@ std::string_view toString(const LimitType type) {
     case HalfPlane:
       return "HalfPlane";
     case LimitTypeCount:
-      // This is not a real enum value, just a counter
+      // Sentinel value used to count enum entries; not a real limit type.
       return "LimitTypeCount";
     default:
       return "Unknown";
@@ -103,8 +103,8 @@ bool LimitData::operator==(const LimitData& limitData) const {
 }
 
 bool isInRange(const LimitLinear& limit, float value) {
-  // Default initialized limits have all zeros in their members due to the std::fill_n above
-  // but we want in this case to have the limit apply across the entire range of values:
+  // Treat a zero-zero range as "applies everywhere": LimitData's default constructor
+  // zero-fills rawData (see LimitData::LimitData above), so an unset range is (0, 0).
   if (limit.rangeMin == 0 && limit.rangeMax == 0) {
     return true;
   }
@@ -113,8 +113,8 @@ bool isInRange(const LimitLinear& limit, float value) {
 }
 
 bool isInRange(const LimitLinearJoint& limit, float value) {
-  // Default initialized limits have all zeros in their members due to the std::fill_n above
-  // but we want in this case to have the limit apply across the entire range of values:
+  // Treat a zero-zero range as "applies everywhere": LimitData's default constructor
+  // zero-fills rawData (see LimitData::LimitData above), so an unset range is (0, 0).
   if (limit.rangeMin == 0 && limit.rangeMax == 0) {
     return true;
   }

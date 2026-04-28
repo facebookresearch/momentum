@@ -72,12 +72,15 @@ struct LimitLinearJoint {
   float rangeMax; ///< Non-inclusive
 };
 
+/// Constrains a point (offset in `parent` joint's frame) to lie on the surface of an
+/// ellipsoid defined in `ellipsoidParent`'s frame.
 struct LimitEllipsoid {
-  alignas(32) Affine3f ellipsoid;
-  alignas(32) Affine3f ellipsoidInv;
-  alignas(32) Vector3f offset;
-  size_t ellipsoidParent;
-  size_t parent;
+  alignas(32) Affine3f
+      ellipsoid; ///< Maps the unit sphere to the constraint ellipsoid (in ellipsoidParent's frame)
+  alignas(32) Affine3f ellipsoidInv; ///< Cached inverse of `ellipsoid`
+  alignas(32) Vector3f offset; ///< Constrained point's offset in `parent` joint's local frame
+  size_t ellipsoidParent; ///< Joint whose frame the ellipsoid is defined in
+  size_t parent; ///< Joint whose frame the constrained point is defined in
 };
 
 /// Constraint: (p1, p2) · (normal) - offset >= 0

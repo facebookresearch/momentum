@@ -27,6 +27,7 @@ struct BarycentricCoord {
 };
 
 std::vector<BarycentricCoord> getSamplePoints(int32_t numSamples) {
+  // The three triangle corners.
   constexpr BarycentricCoord v0{1.0f, 0.0f, 0.0f};
   constexpr BarycentricCoord v1{0.0f, 1.0f, 0.0f};
   constexpr BarycentricCoord v2{0.0f, 0.0f, 1.0f};
@@ -34,10 +35,13 @@ std::vector<BarycentricCoord> getSamplePoints(int32_t numSamples) {
   constexpr float third = 1.0f / 3.0f;
   constexpr BarycentricCoord centroid{third, third, third};
 
+  // Edge midpoints.
   constexpr BarycentricCoord mid01{0.5f, 0.5f, 0.0f};
   constexpr BarycentricCoord mid12{0.0f, 0.5f, 0.5f};
   constexpr BarycentricCoord mid02{0.5f, 0.0f, 0.5f};
 
+  // Interior points biased 75% toward each corner (the other two coords each get 12.5%).
+  // Note: `quarter * 0.5f` = 0.125, so each interior point sums to 1.0 (0.75 + 0.125 + 0.125).
   constexpr float quarter = 0.25f;
   constexpr float threeQuarters = 0.75f;
   constexpr BarycentricCoord int0{threeQuarters, quarter * 0.5f, quarter * 0.5f};
@@ -61,6 +65,8 @@ std::vector<BarycentricCoord> getSamplePoints(int32_t numSamples) {
   MT_THROW("Invalid num_samples value {}. Must be one of: 1, 3, 4, 6, 7, 10.", numSamples);
 }
 
+// Packs an RGB triple into a single integer key (R in bits 0-7, G in 8-15, B in 16-23) so it
+// can be used as the key in unordered_map / unordered_set lookups against region colors.
 inline size_t packRgb(uint8_t r, uint8_t g, uint8_t b) {
   return static_cast<size_t>(r) | (static_cast<size_t>(g) << 8) | (static_cast<size_t>(b) << 16);
 }
@@ -104,6 +110,8 @@ std::vector<std::vector<int32_t>> classifyTrianglesByTexture(
   const auto nTriangles = static_cast<int64_t>(mesh.faces.size());
   const auto nRegions = regionColors.nRegions;
 
+  // threshold == 0 is treated as "any single sample is enough"; otherwise we ceil so a fractional
+  // threshold like 0.5 with 3 samples requires 2 (not 1) matching samples.
   const int32_t minSamplesNeeded = (threshold == 0.0f)
       ? 1
       : static_cast<int32_t>(std::ceil(threshold * static_cast<float>(nSamples)));
@@ -172,6 +180,9 @@ struct TextureSampler {
                packRgb(pixel[0 * tex.stride2], pixel[1 * tex.stride2], pixel[2 * tex.stride2])) > 0;
   }
 
+  // Binary search along the UV segment uvA->uvB for the parameter t at which the sample
+  // transitions from inside (lo) to outside (hi). Caller must pass a segment where uvA is
+  // inside and uvB is outside; otherwise the returned t is meaningless.
   float findCrossingT(const Eigen::Vector2f& uvA, const Eigen::Vector2f& uvB, int32_t numSteps)
       const {
     float lo = 0.0f, hi = 1.0f;
@@ -188,6 +199,7 @@ struct TextureSampler {
   }
 };
 
+// Undirected edge represented by (smaller, larger) vertex index so {a,b} and {b,a} hash equally.
 using Edge = std::pair<int, int>;
 
 Edge makeEdge(int v1, int v2) {
@@ -196,6 +208,7 @@ Edge makeEdge(int v1, int v2) {
 
 struct HashEdge {
   std::size_t operator()(const Edge& e) const {
+    // boost::hash_combine recipe: 0x9e3779b9 is the golden-ratio constant chosen to spread bits.
     std::size_t h1 = std::hash<int>{}(e.first);
     std::size_t h2 = std::hash<int>{}(e.second);
     return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
@@ -207,6 +220,11 @@ struct GeomCacheEntry {
   float t;
 };
 
+// Returns the crossing parameter t in [0, 1] along the edge (geomV0 -> geomV1) such that
+// uv0 + t*(uv1 - uv0) lies on the region boundary. The cached t is always stored with respect to
+// the canonical orientation (smaller-index -> larger-index); we flip to (1 - t) when the caller's
+// orientation is reversed. If the cache misses, we orient the binary search so it always runs
+// inside -> outside (the precondition findCrossingT requires).
 float findEdgeCrossingT(
     const TextureSampler& sampler,
     const Eigen::Vector2f& uv0,
@@ -242,6 +260,9 @@ void processMixedFace(
     GetOrCreateTexVertexFn& getOrCreateTexVertex,
     std::vector<Eigen::Vector3i>& newFaces,
     std::vector<Eigen::Vector3i>& newTexcoordFaces) {
+  // Find the "solo" corner -- the lone inside vertex when nInside==1, or the lone outside vertex
+  // when nInside==2. We then re-index the triangle so k0=solo, k1/k2=the other two corners,
+  // making the two edges to clip always (k0->k1) and (k0->k2).
   int solo = -1;
   for (int k = 0; k < 3; ++k) {
     if ((nInside == 1 && inside[k]) || (nInside == 2 && !inside[k])) {
@@ -254,6 +275,7 @@ void processMixedFace(
   const int gV0 = face[k0], gV1 = face[k1], gV2 = face[k2];
   const int tV0 = texFace[k0], tV1 = texFace[k1], tV2 = texFace[k2];
 
+  // After reindexing, V0 is inside iff there was exactly one inside vertex (the solo case).
   const bool v0IsInside = (nInside == 1);
   const float t01 = findEdgeCrossingT(
       sampler,
@@ -280,9 +302,12 @@ void processMixedFace(
   const int tM02 = getOrCreateTexVertex(tV0, tV2, t02);
 
   if (nInside == 1) {
+    // One inside corner: emit the single inside sub-triangle (V0, M01, M02).
     newFaces.emplace_back(gV0, gM01, gM02);
     newTexcoordFaces.emplace_back(tV0, tM01, tM02);
   } else {
+    // Two inside corners: emit the inside quadrilateral as two triangles. The diagonal goes
+    // from V2 to M01 to keep both sub-triangles consistently wound with the original face.
     newFaces.emplace_back(gV1, gV2, gM01);
     newTexcoordFaces.emplace_back(tV1, tV2, tM01);
     newFaces.emplace_back(gV2, gM02, gM01);
@@ -329,6 +354,10 @@ Mesh splitMeshByTextureRegion(
   const bool hasColors = !colors.empty();
   const bool hasConfidence = !confidence.empty();
 
+  // Lazily mints (or reuses) a vertex along edge (geomA, geomB) at parameter t. The cached
+  // tOriented is always relative to the canonical (smaller -> larger) edge direction so the same
+  // boundary vertex is shared between the two faces incident to the edge, preserving a watertight
+  // split mesh.
   auto getOrCreateGeomVertex = [&](int geomA, int geomB, float t) -> int {
     const auto edge = makeEdge(geomA, geomB);
     auto it = geomCache.find(edge);

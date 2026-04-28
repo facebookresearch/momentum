@@ -23,7 +23,6 @@ namespace momentum {
 /// SDF collision geometry for character collision detection.
 ///
 /// Defined by a transformation, parent joint, and a shared pointer to a SignedDistanceField.
-/// The SDF data is shared to avoid expensive copies of large SDF volumes.
 template <typename S>
 struct SDFColliderT {
   using Scalar = S;
@@ -37,24 +36,23 @@ struct SDFColliderT {
   /// fixed in world space.
   size_t parent = kInvalidIndex;
 
-  /// Shared pointer to the SignedDistanceField data.
-  /// Using shared_ptr to avoid expensive copies of potentially large SDF volumes.
+  /// Shared pointer to the SignedDistanceField data. Uses shared_ptr to avoid
+  /// expensive copies of potentially large SDF volumes.
   std::shared_ptr<const SDFType> sdf;
 
-  SDFColliderT() : transformation(TransformT<S>()), parent(kInvalidIndex), sdf(nullptr) {
-    // Empty
-  }
+  SDFColliderT() : transformation(TransformT<S>()), parent(kInvalidIndex), sdf(nullptr) {}
 
-  /// Constructor with SDF initialization.
   SDFColliderT(
       const TransformT<S>& transform,
       size_t parentJoint,
       std::shared_ptr<const SDFType> sdfPtr)
-      : transformation(transform), parent(parentJoint), sdf(std::move(sdfPtr)) {
-    // Empty
-  }
+      : transformation(transform), parent(parentJoint), sdf(std::move(sdfPtr)) {}
 
   /// Checks if the current SDF collider is approximately equal to another.
+  ///
+  /// SDF data is compared by pointer identity, not by value: two colliders sharing the
+  /// same `SignedDistanceField` instance are considered equal, but two colliders pointing
+  /// to distinct instances with identical contents are not.
   [[nodiscard]] bool isApprox(const SDFColliderT& other, const S& tol = Eps<S>(1e-4f, 1e-10))
       const {
     if (!transformation.isApprox(other.transformation, tol)) {
@@ -65,7 +63,6 @@ struct SDFColliderT {
       return false;
     }
 
-    // Compare SDF pointers - they should point to the same SDF instance
     if (sdf != other.sdf) {
       return false;
     }
@@ -73,7 +70,8 @@ struct SDFColliderT {
     return true;
   }
 
-  /// Checks if the SDF collider is valid (has a valid SDF pointer).
+  /// Returns true when the collider holds a non-null SDF and is therefore usable for
+  /// collision queries.
   [[nodiscard]] bool isValid() const {
     return sdf != nullptr;
   }

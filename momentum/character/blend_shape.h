@@ -53,33 +53,43 @@ struct BlendShape : public BlendShapeBase {
   [[nodiscard]] std::vector<Eigen::Vector3<T>> computeShape(
       const BlendWeightsT<T>& coefficients) const;
 
-  /// Output parameter version of computeShape
+  /// Output parameter version of computeShape, for callers that want to reuse a
+  /// preallocated buffer.
   ///
   /// @tparam T Scalar type (float or double)
   /// @param coefficients Weights for each shape vector
-  /// @param output [out] Resulting deformed shape
+  /// @param output [out] Resulting deformed shape; resized to the base shape's vertex count.
   template <typename T>
   void computeShape(const BlendWeightsT<T>& coefficients, std::vector<Eigen::Vector3<T>>& output)
       const;
 
-  /// Solves for blend weights that best approximate a target shape
+  /// Solves for blend weights that best approximate a target shape.
   ///
-  /// Uses SVD to find optimal coefficients with optional regularization
-  /// and per-vertex weighting
+  /// Uses a thin SVD of the shape vectors when no per-vertex weights are
+  /// supplied (the factorization is cached and reused across calls). When
+  /// weights are supplied, builds a weighted normal-equation system with
+  /// Tikhonov regularization on each call.
   ///
-  /// @param vertices Target shape to approximate
-  /// @param regularization Higher values produce smaller coefficients
-  /// @param weights Optional per-vertex importance weights
-  /// @return Estimated blend shape coefficients
+  /// @pre `vertices.size() == getBaseShape().size()`.
+  /// @param vertices Target shape to approximate, in the same vertex order as the base shape.
+  /// @param regularization Tikhonov regularization weight; higher values bias coefficients toward
+  /// zero.
+  ///   Only used when per-vertex `weights` are supplied.
+  /// @param weights Optional per-vertex importance weights. Ignored unless its size equals
+  ///   `vertices.size()`; when ignored, the cached unweighted SVD path is used.
+  /// @return Estimated blend shape coefficients (length = number of shape vectors).
   [[nodiscard]] VectorXf estimateCoefficients(
       momentum::span<const Vector3f> vertices,
       float regularization = 1.0f,
       const VectorXf& weights = VectorXf()) const;
 
-  /// Overrides base method to also invalidate factorization
+  /// Overrides base method to also invalidate the cached SVD factorization used by
+  /// `estimateCoefficients`.
   ///
   /// @param index Index of the shape vector to set
   /// @param shapeVector Vector of vertex offsets
+  /// @param name Optional name for the shape vector; if empty, the name is auto-generated
+  ///   as `"shape_<index>"`.
   void setShapeVector(
       size_t index,
       momentum::span<const Vector3f> shapeVector,

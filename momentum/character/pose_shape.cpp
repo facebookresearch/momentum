@@ -19,15 +19,16 @@ std::vector<Vector3f> PoseShape::compute(const SkeletonState& state) const {
       baseShape.size(),
       shapeVectors.rows());
 
-  // compute coefficients
   VectorXf coefficients(shapeVectors.cols());
 
-  // calculate base transform
+  // If baseJoint is out of range, fall back to baseRot directly (no relative rotation).
   const Quaternionf base = (baseJoint < state.jointState.size())
       ? baseRot * state.jointState.at(baseJoint).rotation().inverse()
       : baseRot;
 
-  // set up pose shape coefficients
+  // Pack each driving joint's rotation (relative to base) as a 4-vector of quaternion
+  // coefficients (x, y, z, w). Out-of-range joints leave their segment uninitialized.
+  // TODO: zero-initialize `coefficients` so out-of-range joint indices don't read garbage.
   for (size_t i = 0; i < jointMap.size(); i++) {
     const auto& jid = jointMap[i];
     if (jid < state.jointState.size()) {
@@ -35,7 +36,6 @@ std::vector<Vector3f> PoseShape::compute(const SkeletonState& state) const {
     }
   }
 
-  // use the coefficients to calculate the new base shape
   std::vector<Vector3f> output(baseShape.size() / 3);
   if (output.empty()) {
     return output;

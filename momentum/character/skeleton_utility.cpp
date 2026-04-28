@@ -16,12 +16,10 @@ ModelParameters extrapolateModelParameters(
     const float factor,
     const float maxDelta) {
   MT_PROFILE_FUNCTION();
-  // check if we have any reasonable data
   if (current.size() != previous.size()) {
     return current;
   }
 
-  // yes, perform extrapolation
   ModelParameters result =
       current.v + (current.v - previous.v).cwiseMin(maxDelta).cwiseMax(-maxDelta) * factor;
 
@@ -39,9 +37,8 @@ ModelParameters extrapolateModelParameters(
     return current;
   }
 
-  // yes, perform extrapolation
-  // Cap the maximum extrapolation angle to avoid issues where the extrapolation grows over time.
-
+  // Clamp the per-parameter delta to maxDelta so repeated extrapolation cannot
+  // accumulate unbounded growth across frames.
   const auto sz = current.size();
   ModelParameters result = current;
   for (Eigen::Index i = 0; i < sz; ++i) {

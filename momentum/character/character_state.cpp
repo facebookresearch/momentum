@@ -28,9 +28,7 @@ CharacterStateT<T>::CharacterStateT(const CharacterStateT& other)
       meshState{other.meshState ? std::make_unique<Mesh>(*other.meshState) : nullptr},
       collisionState{
           other.collisionState ? std::make_unique<CollisionGeometryState>(*other.collisionState)
-                               : nullptr} {
-  // Empty
-}
+                               : nullptr} {}
 
 template <typename T>
 CharacterStateT<T>::CharacterStateT(CharacterStateT&& c) noexcept = default;
@@ -89,37 +87,35 @@ void CharacterStateT<T>::set(
       parameters.offsets.size(),
       referenceCharacter.parameterTransform.numJointParameters());
 
-  // create skeleton state first
+  // Skeleton state must be computed first — locator, mesh, and collision updates below
+  // all read from it.
   JointParameters jointParams = referenceCharacter.parameterTransform.apply(parameters);
   if (applyLimits) {
     jointParams = applyPassiveJointParameterLimits(referenceCharacter.parameterLimits, jointParams);
   }
   skeletonState.set(jointParams, referenceCharacter.skeleton);
 
-  // create locator state
   locatorState.update(skeletonState, referenceCharacter.locators);
 
-  // create skinning if we have a mesh
   if (updateMesh && referenceCharacter.mesh && referenceCharacter.skinWeights) {
-    // check if we need to create a mesh
+    // (Re)allocate the cached mesh whenever vertex count diverges from the reference
+    // — covers both first call and switching to a different reference character.
     if (!meshState || meshState->vertices.size() != referenceCharacter.mesh->vertices.size()) {
       meshState = std::make_unique<Mesh>(*referenceCharacter.mesh);
     }
 
-    // check if we have pose blendshapes and use them before skinning if there
+    // Pose blendshapes take precedence: corrective vertex offsets driven by joint pose are
+    // applied before linear skinning so the SSD pass deforms the corrected bind-pose vertices.
     if (referenceCharacter.poseShapes) {
-      // calculate pose shapes
       const auto vs = referenceCharacter.poseShapes->compute(skeletonState);
 
-      // apply skinning
       meshState->vertices = applySSD(
           referenceCharacter.inverseBindPose, *referenceCharacter.skinWeights, vs, skeletonState);
 
-      // update normals
       meshState->updateNormals();
     } else if (referenceCharacter.blendShape) {
-      // For CharacterT<float>, we can cast directly to Character
-      // For CharacterT<double>, we need to cast to Character (CharacterT<float>) first
+      // skinWithBlendShapes() is only defined for `Character` (i.e., CharacterT<float>),
+      // so the double-precision instantiation has to materialize a float Character to call it.
       if constexpr (std::is_same_v<T, float>) {
         skinWithBlendShapes(
             static_cast<const Character&>(referenceCharacter),
@@ -127,8 +123,11 @@ void CharacterStateT<T>::set(
             parameters.pose,
             *meshState);
       } else {
-        // For double, create a temporary Character (CharacterT<float>) object
-        // This is a simplified conversion that may not preserve all properties
+        // TODO: This temporary Character is constructed by shallow-copying member pointers
+        // from a CharacterT<double>. Members that differ between float/double specializations
+        // (e.g., `inverseBindPose`) are passed across without conversion, which can produce
+        // subtly wrong skinning. Consider providing a proper float<->double conversion or
+        // a templated skinWithBlendShapes overload.
         Character tempCharacter(
             referenceCharacter.skeleton,
             referenceCharacter.parameterTransform,
@@ -139,14 +138,13 @@ void CharacterStateT<T>::set(
             referenceCharacter.collision.get(),
             referenceCharacter.poseShapes.get(),
             referenceCharacter.blendShape,
-            nullptr, // No face expression blend shape
+            nullptr, // no face expression blend shape
             referenceCharacter.name,
             referenceCharacter.inverseBindPose);
 
         skinWithBlendShapes(tempCharacter, skeletonState, parameters.pose, *meshState);
       }
     } else {
-      // apply simple skinning
       applySSD(
           referenceCharacter.inverseBindPose,
           *referenceCharacter.skinWeights,
@@ -156,7 +154,6 @@ void CharacterStateT<T>::set(
     }
   }
 
-  // update collision geometry if present
   if (updateCollision && referenceCharacter.collision) {
     if (!collisionState || collisionState->origin.size() != referenceCharacter.collision->size()) {
       collisionState = std::make_unique<CollisionGeometryState>();

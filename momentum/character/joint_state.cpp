@@ -12,10 +12,6 @@
 
 namespace momentum {
 
-// Joint transform is : WorldTransform = ParentWorldTransform * T * Rpre * R * S,
-// with R depending on rotation order.
-// Each joint thus has 7 parameters, 3 translation, 3 rotation, 1 scale.
-
 template <typename T>
 const std::array<Vector3<T>, 3> RotationAxis = {
     Vector3<T>::UnitX(),
@@ -35,7 +31,8 @@ void JointStateT<T>::set(
     parent = parentState->transform;
   }
 
-  // calculate state based on parameters and parent transform
+  // Translation acts in the parent's frame, so the per-axis translation derivative is
+  // the parent's rotated unit axis. Identity when there is no parent.
   if (computeDeriv) {
     if (parentState != nullptr) {
       translationAxis = parentState->transform.toLinear();
@@ -44,13 +41,13 @@ void JointStateT<T>::set(
     }
   }
 
-  // do the translations
   localTransform.translation.noalias() = joint.translationOffset + parameters.template head<3>();
 
-  // apply pre-rotation
   localTransform.rotation = joint.preRotation;
 
-  // do the rotations
+  // Apply rotations in reverse order (Z, Y, X) so the resulting product is Rpre * Rx * Ry * Rz.
+  // The rotation derivative axis for index i is the parent rotation composed with the
+  // partially-accumulated local rotation up to (but not including) axis i.
   for (int index = 2; index >= 0; --index) {
     if (computeDeriv) {
       rotationAxis.col(index).noalias() =
@@ -60,10 +57,10 @@ void JointStateT<T>::set(
         Quaternion<T>(AngleAxis<T>((T)parameters[3 + index], RotationAxis<T>[index]));
   }
 
-  // perform scale if necessary
+  // Scale parameter is stored as a log2 value: scale = exp2(parameters[6]).
+  // Keeps scale strictly positive and makes the parameter space uniform in log-ratio.
   localTransform.scale = std::exp2((T)parameters[6]);
 
-  // set global transformation
   transform = parent * localTransform;
 }
 

@@ -72,7 +72,6 @@ struct BlendShapeBase {
     return shapeVectors_.cols();
   }
 
-  /// Returns number of vertices (rows/3)
   [[nodiscard]] size_t modelSize() const {
     return shapeVectors_.rows() / 3;
   }
