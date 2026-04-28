@@ -68,8 +68,6 @@ LogLevel& spdlogLogLevel() {
 
 #else
 
-// Fallback: store the log level in a static variable when no logging backend
-// is available.
 LogLevel& fallbackLogLevel() {
   static LogLevel level = LogLevel::Info;
   return level;
@@ -130,10 +128,8 @@ void setLogLevel(const std::string& levelStr) {
 
 LogLevel getLogLevel() {
 #if defined(MOMENTUM_WITH_XR_LOGGER)
-  // Get the current log level from the XR logger
   int level = arvr::logging::getChannel(DEFAULT_LOG_CHANNEL).level();
 
-  // Convert from arvr::logging::Level to momentum::LogLevel
   switch (static_cast<arvr::logging::Level>(level)) {
     case arvr::logging::Level::Disabled:
       return LogLevel::Disabled;
@@ -148,7 +144,8 @@ LogLevel getLogLevel() {
     case arvr::logging::Level::Trace:
       return LogLevel::Trace;
     default:
-      // Default to Info level for unknown levels
+      // Unrecognized XR levels fall back to Info rather than throwing, since
+      // getLogLevel() must not fail.
       return LogLevel::Info;
   }
 #elif defined(MOMENTUM_WITH_SPDLOG)

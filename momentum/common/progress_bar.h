@@ -13,20 +13,33 @@
 
 namespace momentum {
 
-// A simple progress bar that prints hash marks (e.g., "Name [===>  ] 60%")
+/// A terminal progress bar rendered as `Name [===>   ] 60%`.
+///
+/// Wraps `indicators::ProgressBar` with a fixed visual style (bold, percentage
+/// shown). All mutating operations write to the terminal (stdout) as a side
+/// effect. Not thread-safe.
 class ProgressBar {
  public:
-  /// @param prefix Displayed prefix
-  /// @param numOperations Total operations (determines progress ratio)
+  /// Constructs the progress bar and renders its initial (zero-progress) state.
+  ///
+  /// @param prefix Text shown before the bar.
+  /// @param numOperations Total operation count corresponding to 100%.
+  /// @pre `prefix.size() + 9 < kMaxWidth`, otherwise the computed bar width
+  ///      underflows `size_t`.
+  // TODO: Validate that `prefix.size() + 9 < kMaxWidth` to avoid a size_t
+  // underflow when computing the bar width in the constructor.
   ProgressBar(const std::string& prefix, size_t numOperations);
 
-  /// Increments the progress by the given count (default 1)
+  /// Advances progress by `count` (default 1) and redraws the bar.
   void increment(size_t count = 1);
 
-  /// Sets the progress to the given count
+  /// Sets progress to the absolute value `count` and redraws the bar.
   void set(size_t count);
 
-  /// Returns the current progress in the range [0, 100]
+  /// Returns the current absolute progress count (not a percentage).
+  ///
+  /// The value is in the range [0, numOperations] as supplied to the
+  /// constructor.
   [[nodiscard]] size_t getCurrentProgress();
 
  private:

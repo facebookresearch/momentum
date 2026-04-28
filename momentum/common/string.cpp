@@ -44,14 +44,14 @@ tokenize(const std::string& inputString, const std::string& delimiters, const bo
     return {};
   }
 
-  // output vector
   std::vector<std::string> results;
 
-  // loop over the string
   size_t pos = 0;
   size_t lastPos = 0;
   while ((pos = inputString.find_first_of(delimiters, lastPos)) != std::string::npos) {
     const std::string res = inputString.substr(lastPos, pos - lastPos);
+    // When `trim` is true, drop empty tokens (collapsing runs of consecutive delimiters);
+    // otherwise preserve them so callers can distinguish empty fields.
     if (!res.empty() || !trim) {
       results.push_back(res);
     }
@@ -62,7 +62,6 @@ tokenize(const std::string& inputString, const std::string& delimiters, const bo
     results.push_back(res);
   }
 
-  // done
   return results;
 }
 
@@ -72,14 +71,13 @@ tokenize(std::string_view inputString, const std::string_view delimiters, const 
     return {};
   }
 
-  // output vector
   std::vector<std::string_view> results;
 
-  // loop over the string
   size_t pos = 0;
   size_t lastPos = 0;
   while ((pos = inputString.find_first_of(delimiters, lastPos)) != std::string::npos) {
     auto res = inputString.substr(lastPos, pos - lastPos);
+    // See `tokenize(std::string, ...)` above for the empty-token handling rationale.
     if (!res.empty() || !trim) {
       results.push_back(res);
     }
@@ -90,7 +88,6 @@ tokenize(std::string_view inputString, const std::string_view delimiters, const 
     results.push_back(res);
   }
 
-  // done
   return results;
 }
 

@@ -12,6 +12,8 @@ namespace momentum {
 ProgressBar::ProgressBar(const std::string& prefix, const size_t numOperations) {
   using namespace indicators;
 
+  // Reserve 9 columns for the brackets, leading space, and percentage suffix
+  // (e.g., " 100%") so the total rendered line stays within kMaxWidth.
   bar_.set_option(option::BarWidth(kMaxWidth - prefix.size() - 9));
   bar_.set_option(option::MaxProgress(numOperations));
   bar_.set_option(option::Start{"["});
