@@ -288,6 +288,27 @@ inline std::pair<::fbxsdk::FbxAnimStack*, ::fbxsdk::FbxAnimLayer*> getOrCreateAn
   return {animStack, animBaseLayer};
 }
 
+/// Convert a raw momentum joint parameter to the FBX-native value.
+///
+/// FBX curves use 9 channels per joint: tx,ty,tz (0-2), rx,ry,rz (3-5), sx,sy,sz (6-8).
+/// Momentum stores 7 params: translation, rotation (radians), uniform log2-scale.
+///   - Translation: adds the joint's rest-pose translationOffset.
+///   - Rotation: converts radians to degrees.
+///   - Scale: converts log2 to linear (exp2).
+///
+/// @param value Raw joint parameter value from the motion matrix.
+/// @param curveOffset FBX curve channel index (0-8).
+/// @param joint The joint providing the translation offset.
+inline float jointParamToFbx(float value, size_t curveOffset, const Joint& joint) {
+  if (curveOffset < 3) {
+    return value + joint.translationOffset[curveOffset];
+  } else if (curveOffset < 6) {
+    return toDeg(value);
+  } else {
+    return std::exp2(value);
+  }
+}
+
 struct JointCurveSetup {
   std::vector<::fbxsdk::FbxAnimCurve*> animCurves;
   std::vector<size_t> animCurvesIndex;
@@ -386,20 +407,11 @@ inline void createAnimationCurves(
     }
 
     // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
+    const auto& joint = character.skeleton.joints[jointIndex];
     animCurves[ai]->KeyModifyBegin();
     for (size_t f = 0; f < jointValues.cols(); f++) {
       time.SetSecondDouble(static_cast<double>(f) / framerate);
-
-      float jointVal = jointValues(parameterIndex, f);
-
-      if (jointOffset < 3 && jointIndex < character.skeleton.joints.size()) {
-        jointVal += character.skeleton.joints[jointIndex].translationOffset[jointOffset];
-      } else if (jointOffset >= 3 && jointOffset <= 5) {
-        jointVal = toDeg(jointVal);
-      } else {
-        jointVal = std::pow(2.0f, jointVal);
-      }
-
+      const float jointVal = jointParamToFbx(jointValues(parameterIndex, f), jointOffset, joint);
       const auto keyIndex = animCurves[ai]->KeyAdd(time);
       animCurves[ai]->KeySet(keyIndex, time, jointVal);
     }

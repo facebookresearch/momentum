@@ -97,6 +97,22 @@ class FbxBuilder final {
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
   void addMotionWithJointParams(const Character& character, float fps, const MatrixXf& jointParams);
 
+  /// Add an animated mesh (mesh node with per-frame transform, no skeleton).
+  ///
+  /// Creates a standalone mesh node and animates its transform directly from
+  /// the root joint parameters. This is for props/objects that should appear
+  /// as a simple animated mesh without any skeleton hierarchy.
+  ///
+  /// @param character The character providing the mesh geometry.
+  /// @param name Name for the mesh node.
+  /// @param fps Animation frame rate in frames per second.
+  /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  void addAnimatedMesh(
+      const Character& character,
+      const std::string& name,
+      float fps,
+      const MatrixXf& jointParams);
+
   /// Add a marker sequence to the scene.
   ///
   /// @param fps Frame rate for the marker animation.
