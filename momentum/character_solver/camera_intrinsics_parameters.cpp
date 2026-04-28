@@ -63,7 +63,7 @@ std::tuple<ParameterTransform, ParameterLimits> addCameraIntrinsicsParameters(
   for (const auto& paramName : paramNames) {
     if (tieFocalLength && (paramName == "fx" || paramName == "fy")) {
       if (!fAdded) {
-        addedNames.push_back(std::string(kTiedFocalLengthSuffix));
+        addedNames.emplace_back(kTiedFocalLengthSuffix);
         fAdded = true;
       }
       // skip fy (already covered by "f")
