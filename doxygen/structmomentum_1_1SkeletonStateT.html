@@ -227,7 +227,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <table class="params">
     <tr><td class="paramname">parameters</td><td>Joint parameters for all joints in the skeleton </td></tr>
     <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
-    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>If true, computes <code>translationAxis</code> and <code>rotationAxis</code> matrices needed for Jacobian computation in error functions. Set to false ONLY when the state is used for visualization, FK output inspection, or IO — never when the state will be passed to a solver or error function. Skipping derivatives saves ~30% of per-joint FK cost. When false, <code>derivDirty</code> is set to true and derivative accessors (<code>getRotationDerivative</code>, <code>getTranslationDerivative</code>, <code>getScaleDerivative</code>) return invalid results. </td></tr>
   </table>
   </dd>
 </dl>
@@ -277,7 +277,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <table class="params">
     <tr><td class="paramname">parameters</td><td>Joint parameters for all joints in the skeleton (moved from) </td></tr>
     <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
-    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>If true, computes <code>translationAxis</code> and <code>rotationAxis</code> matrices needed for Jacobian computation in error functions. Set to false ONLY when the state is used for visualization, FK output inspection, or IO — never when the state will be passed to a solver or error function. Skipping derivatives saves ~30% of per-joint FK cost. When false, <code>derivDirty</code> is set to true and derivative accessors (<code>getRotationDerivative</code>, <code>getTranslationDerivative</code>, <code>getScaleDerivative</code>) return invalid results. </td></tr>
   </table>
   </dd>
 </dl>
@@ -371,7 +371,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Skeleton state with the target scalar type </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="skeleton__state_8h_source.html#l00128">128</a> of file <a class="el" href="skeleton__state_8h_source.html">skeleton_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skeleton__state_8h_source.html#l00156">156</a> of file <a class="el" href="skeleton__state_8h_source.html">skeleton_state.h</a>.</p>
 
 <p class="reference">References <a class="el" href="skeleton__state_8cpp_source.html#l00065">momentum::SkeletonStateT&lt; T &gt;::set()</a>.</p>
 
@@ -423,9 +423,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Similarity metrics between the two states </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00141">141</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="simd_8h_source.html#l00191">momentum::dot()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="skeleton__state_8h_source.html#l00024">momentum::StateSimilarity::orientationError</a>, <a class="el" href="skeleton__state_8h_source.html#l00036">momentum::StateSimilarity::orientationMax</a>, <a class="el" href="skeleton__state_8h_source.html#l00030">momentum::StateSimilarity::orientationRMSE</a>, <a class="el" href="skeleton__state_8h_source.html#l00021">momentum::StateSimilarity::positionError</a>, <a class="el" href="skeleton__state_8h_source.html#l00033">momentum::StateSimilarity::positionMax</a>, and <a class="el" href="skeleton__state_8h_source.html#l00027">momentum::StateSimilarity::positionRMSE</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00134">134</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
 
 </div>
 </div>
@@ -468,16 +466,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <table class="params">
     <tr><td class="paramname">jointParameters</td><td>New joint parameters for all joints </td></tr>
     <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
-    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>If true, computes <code>translationAxis</code> and <code>rotationAxis</code> matrices needed for Jacobian computation in error functions. Set to false ONLY when the state is used for visualization, FK output inspection, or IO — never when the state will be passed to a solver or error function. Skipping derivatives saves ~30% of per-joint FK cost. When false, <code>derivDirty</code> is set to true and derivative accessors (<code>getRotationDerivative</code>, <code>getTranslationDerivative</code>, <code>getScaleDerivative</code>) return invalid results. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00065">65</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="skeleton__state_8h_source.html#l00128">momentum::SkeletonStateT&lt; T &gt;::cast()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01553">momentum::getLocatorError()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00075">momentum::sampleFrames()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00022">momentum::SkeletonStateT&lt; T &gt;::SkeletonStateT()</a>, and <a class="el" href="skeleton__state_8cpp_source.html#l00031">momentum::SkeletonStateT&lt; T &gt;::SkeletonStateT()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="skeleton__state_8h_source.html#l00156">momentum::SkeletonStateT&lt; T &gt;::cast()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01553">momentum::getLocatorError()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l00075">momentum::sampleFrames()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00022">momentum::SkeletonStateT&lt; T &gt;::SkeletonStateT()</a>, and <a class="el" href="skeleton__state_8cpp_source.html#l00031">momentum::SkeletonStateT&lt; T &gt;::SkeletonStateT()</a>.</p>
 
 </div>
 </div>
@@ -560,12 +556,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   <table class="params">
     <tr><td class="paramname">jointParameters</td><td>New joint parameters for all joints (moved from) </td></tr>
     <tr><td class="paramname">referenceSkeleton</td><td>The skeleton structure defining joint hierarchy </td></tr>
-    <tr><td class="paramname">computeDeriv</td><td>Whether to compute derivative information for the joints </td></tr>
+    <tr><td class="paramname">computeDeriv</td><td>If true, computes <code>translationAxis</code> and <code>rotationAxis</code> matrices needed for Jacobian computation in error functions. Set to false ONLY when the state is used for visualization, FK output inspection, or IO — never when the state will be passed to a solver or error function. Skipping derivatives saves ~30% of per-joint FK cost. When false, <code>derivDirty</code> is set to true and derivative accessors (<code>getRotationDerivative</code>, <code>getTranslationDerivative</code>, <code>getScaleDerivative</code>) return invalid results. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00076">76</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>.</p>
 
 </div>
 </div>
@@ -589,7 +587,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Extracts global transforms for all joints in the skeleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>List of global transforms for all joints </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00131">131</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skeleton__state_8cpp_source.html#l00124">124</a> of file <a class="el" href="skeleton__state_8cpp_source.html">skeleton_state.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="state__error__function_8cpp_source.html#l00156">momentum::StateErrorFunctionT&lt; T &gt;::setTargetState()</a>.</p>
 
@@ -649,7 +647,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

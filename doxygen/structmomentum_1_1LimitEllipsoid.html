@@ -97,24 +97,33 @@ $(document).ready(function(){initNavTree('structmomentum_1_1LimitEllipsoid.html'
 </div><!--header-->
 <div class="contents">
 
+<p>Constrains a point (offset in <code>parent</code> joint's frame) to lie on the surface of an ellipsoid defined in <code>ellipsoidParent</code>'s frame.  
+ <a href="structmomentum_1_1LimitEllipsoid.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ab4b523218fe2430fa66434c16df667aa" id="r_ab4b523218fe2430fa66434c16df667aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a8aaffffce9bbe1c055d3e8b58c95cca8">Affine3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LimitEllipsoid.html#ab4b523218fe2430fa66434c16df667aa">ellipsoid</a></td></tr>
+<tr class="memdesc:ab4b523218fe2430fa66434c16df667aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps the unit sphere to the constraint ellipsoid (in ellipsoidParent's frame)  <br /></td></tr>
 <tr class="separator:ab4b523218fe2430fa66434c16df667aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30452a9a654f50dc7f7d1b2fbb8ccfa2" id="r_a30452a9a654f50dc7f7d1b2fbb8ccfa2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a8aaffffce9bbe1c055d3e8b58c95cca8">Affine3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LimitEllipsoid.html#a30452a9a654f50dc7f7d1b2fbb8ccfa2">ellipsoidInv</a></td></tr>
+<tr class="memdesc:a30452a9a654f50dc7f7d1b2fbb8ccfa2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached inverse of <code>ellipsoid</code>  <br /></td></tr>
 <tr class="separator:a30452a9a654f50dc7f7d1b2fbb8ccfa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a596472ddd9eb627f6f99d43a494c1c01" id="r_a596472ddd9eb627f6f99d43a494c1c01"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LimitEllipsoid.html#a596472ddd9eb627f6f99d43a494c1c01">offset</a></td></tr>
+<tr class="memdesc:a596472ddd9eb627f6f99d43a494c1c01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constrained point's offset in <code>parent</code> joint's local frame.  <br /></td></tr>
 <tr class="separator:a596472ddd9eb627f6f99d43a494c1c01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc19a699aff20eff5c04db429262e35f" id="r_adc19a699aff20eff5c04db429262e35f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LimitEllipsoid.html#adc19a699aff20eff5c04db429262e35f">ellipsoidParent</a></td></tr>
+<tr class="memdesc:adc19a699aff20eff5c04db429262e35f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint whose frame the ellipsoid is defined in.  <br /></td></tr>
 <tr class="separator:adc19a699aff20eff5c04db429262e35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0adbc3104f82467490e14793310f88c4" id="r_a0adbc3104f82467490e14793310f88c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1LimitEllipsoid.html#a0adbc3104f82467490e14793310f88c4">parent</a></td></tr>
+<tr class="memdesc:a0adbc3104f82467490e14793310f88c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint whose frame the constrained point is defined in.  <br /></td></tr>
 <tr class="separator:a0adbc3104f82467490e14793310f88c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00075">75</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<div class="textblock"><p>Constrains a point (offset in <code>parent</code> joint's frame) to lie on the surface of an ellipsoid defined in <code>ellipsoidParent</code>'s frame. </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00077">77</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="ab4b523218fe2430fa66434c16df667aa" name="ab4b523218fe2430fa66434c16df667aa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab4b523218fe2430fa66434c16df667aa">&#9670;&#160;</a></span>ellipsoid</h2>
@@ -128,7 +137,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00076">76</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<p>Maps the unit sphere to the constraint ellipsoid (in ellipsoidParent's frame) </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00079">79</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 
 </div>
 </div>
@@ -144,7 +155,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00077">77</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<p>Cached inverse of <code>ellipsoid</code> </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00080">80</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 
 </div>
 </div>
@@ -160,7 +173,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00079">79</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<p>Joint whose frame the ellipsoid is defined in. </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00082">82</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 
 </div>
 </div>
@@ -176,7 +191,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00078">78</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<p>Constrained point's offset in <code>parent</code> joint's local frame. </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00081">81</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 
 </div>
 </div>
@@ -192,7 +209,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00080">80</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
+<p>Joint whose frame the constrained point is defined in. </p>
+
+<p class="definition">Definition at line <a class="el" href="parameter__limits_8h_source.html#l00083">83</a> of file <a class="el" href="parameter__limits_8h_source.html">parameter_limits.h</a>.</p>
 
 </div>
 </div>
@@ -205,7 +224,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1LimitEllipsoid.html">LimitEllipsoid</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

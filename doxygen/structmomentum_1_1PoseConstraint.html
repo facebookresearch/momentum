@@ -108,7 +108,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:abdf3242345277e052ad1ebeae4d4e1be" id="r_abdf3242345277e052ad1ebeae4d4e1be"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::pair&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseConstraint.html#abdf3242345277e052ad1ebeae4d4e1be">parameterIdValue</a></td></tr>
-<tr class="memdesc:abdf3242345277e052ad1ebeae4d4e1be"><td class="mdescLeft">&#160;</td><td class="mdescRight">A vector of tuple of type: (model parameter index, parameter value).  <br /></td></tr>
+<tr class="memdesc:abdf3242345277e052ad1ebeae4d4e1be"><td class="mdescLeft">&#160;</td><td class="mdescRight">A vector of tuples of type: (model parameter index, parameter value).  <br /></td></tr>
 <tr class="separator:abdf3242345277e052ad1ebeae4d4e1be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -150,12 +150,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>A vector of tuple of type: (model parameter index, parameter value). </p>
-<p>The model parameter index must be in [0, numModelParameters.size()). The value of the model parameters specified here are kept constant (= parameter value) during optimization. The ordering of elements in the vector doesn't matter (making it an unordered map would be more semantically correct) since it stores an index to the model parameters </p>
+<p>A vector of tuples of type: (model parameter index, parameter value). </p>
+<p>The model parameter index must be in [0, numAllModelParameters()). The value of the model parameters specified here are kept constant (= parameter value) during optimization. The ordering of elements in the vector doesn't matter (making it an unordered map would be more semantically correct) since it stores an index to the model parameters. </p>
 
 <p class="definition">Definition at line <a class="el" href="parameter__transform_8h_source.html#l00026">26</a> of file <a class="el" href="parameter__transform_8h_source.html">parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00018">operator==()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00297">momentum::subsetParameterTransform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="parameter__transform_8cpp_source.html#l00018">operator==()</a>, and <a class="el" href="parameter__transform_8cpp_source.html#l00294">momentum::subsetParameterTransform()</a>.</p>
 
 </div>
 </div>
@@ -169,7 +169,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1PoseConstraint.html">PoseConstraint</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

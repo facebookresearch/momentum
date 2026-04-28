@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('structmomentum_1_1SkinWeights.html',''
 </div><!--header-->
 <div class="contents">
 
-<p>Stores skinning weights and joint indices for character mesh deformation.  
+<p>Linear blend skinning weights for a character mesh: per-vertex joint indices and influence weights.  
  <a href="structmomentum_1_1SkinWeights.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>&gt;</code></p>
@@ -106,25 +106,26 @@ $(document).ready(function(){initNavTree('structmomentum_1_1SkinWeights.html',''
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac1a2078dd5e29bc7a3d8e7450e609d75" id="r_ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#ac1a2078dd5e29bc7a3d8e7450e609d75">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ind</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt; &gt; &amp;<a class="el" href="state__sequence__error__function_8cpp.html#a32490b19278952e097e1802560f22ef5">wgt</a>)</td></tr>
-<tr class="memdesc:ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the skin weights from vectors of joint indices and weights.  <br /></td></tr>
+<tr class="memdesc:ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Populates <code>index</code> and <code>weight</code> from ragged per-vertex influence lists.  <br /></td></tr>
 <tr class="separator:ac1a2078dd5e29bc7a3d8e7450e609d75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52e011da31571b4bda2c67af718f33ba" id="r_a52e011da31571b4bda2c67af718f33ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a52e011da31571b4bda2c67af718f33ba">operator==</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a> &amp;skinWeights) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a52e011da31571b4bda2c67af718f33ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects for equality.  <br /></td></tr>
+<tr class="memdesc:a52e011da31571b4bda2c67af718f33ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Approximate equality on <code>index</code> and <code>weight</code> using <a class="el" href="namespaceEigen.html">Eigen</a>'s <code>isApprox</code>.  <br /></td></tr>
 <tr class="separator:a52e011da31571b4bda2c67af718f33ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a4203cd8ddc42da97d1e7aa66cae60da8" id="r_a4203cd8ddc42da97d1e7aa66cae60da8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a97256a0d253dcab1a5368348ca462c90">IndexMatrix</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a4203cd8ddc42da97d1e7aa66cae60da8">index</a></td></tr>
-<tr class="memdesc:a4203cd8ddc42da97d1e7aa66cae60da8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint indices that influence each vertex.  <br /></td></tr>
+<tr class="memdesc:a4203cd8ddc42da97d1e7aa66cae60da8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint indices influencing each vertex.  <br /></td></tr>
 <tr class="separator:a4203cd8ddc42da97d1e7aa66cae60da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cf0ddf5cddae2665c4a66d5fd7a213a" id="r_a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a4ad4eae5ddde47975d87661b7ee5b769">WeightMatrix</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SkinWeights.html#a1cf0ddf5cddae2665c4a66d5fd7a213a">weight</a></td></tr>
-<tr class="memdesc:a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight of each joint's influence on each vertex.  <br /></td></tr>
+<tr class="memdesc:a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joint influence weights per vertex.  <br /></td></tr>
 <tr class="separator:a1cf0ddf5cddae2665c4a66d5fd7a213a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Stores skinning weights and joint indices for character mesh deformation. </p>
+<div class="textblock"><p>Linear blend skinning weights for a character mesh: per-vertex joint indices and influence weights. </p>
+<p><code>index</code> and <code>weight</code> always have the same row count (one row per vertex) and matching unused-slot conventions. </p>
 
-<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00036">36</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00034">34</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a52e011da31571b4bda2c67af718f33ba" name="a52e011da31571b4bda2c67af718f33ba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a52e011da31571b4bda2c67af718f33ba">&#9670;&#160;</a></span>operator==()</h2>
@@ -142,19 +143,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compares two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects for equality. </p>
-<p>Two <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> objects are considered equal if their index and weight matrices are approximately equal (using <a class="el" href="namespaceEigen.html">Eigen</a>'s isApprox method).</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">skinWeights</td><td>The <a class="el" href="structmomentum_1_1SkinWeights.html" title="Stores skinning weights and joint indices for character mesh deformation.">SkinWeights</a> object to compare with </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if the objects are equal, false otherwise </dd></dl>
+<p>Approximate equality on <code>index</code> and <code>weight</code> using <a class="el" href="namespaceEigen.html">Eigen</a>'s <code>isApprox</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="skin__weights_8cpp_source.html#l00031">31</a> of file <a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skin__weights_8cpp_source.html#l00033">33</a> of file <a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00041">index</a>, and <a class="el" href="skin__weights_8h_source.html#l00048">weight</a>.</p>
+<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00038">index</a>, and <a class="el" href="skin__weights_8h_source.html#l00043">weight</a>.</p>
 
 </div>
 </div>
@@ -184,24 +177,15 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets the skin weights from vectors of joint indices and weights. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ind</td><td>Vector of vectors containing joint indices for each vertex </td></tr>
-    <tr><td class="paramname">wgt</td><td>Vector of vectors containing weights for each vertex </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="exception"><dt>Exceptions</dt><dd>
-  <table class="exception">
-    <tr><td class="paramname">If</td><td>ind.size() != wgt.size() (via MT_CHECK) </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Populates <code>index</code> and <code>weight</code> from ragged per-vertex influence lists. </p>
+<p>Each entry of <code>ind</code>/<code>wgt</code> is one vertex's joints/weights; influences beyond <code>kMaxSkinJoints</code> are silently dropped, and unused slots are zero-filled.</p>
+<dl class="section pre"><dt>Precondition</dt><dd><code>ind.size() == wgt.size()</code> (checked via MT_CHECK). </dd>
+<dd>
+For each vertex i, <code>wgt[i].size() &gt;= min(ind[i].size(), kMaxSkinJoints)</code>; shorter weight rows produce out-of-bounds reads. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="skin__weights_8cpp_source.html#l00016">16</a> of file <a class="el" href="skin__weights_8cpp_source.html">skin_weights.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00041">index</a>, <a class="el" href="skin__weights_8h_source.html#l00019">momentum::kMaxSkinJoints</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="skin__weights_8h_source.html#l00048">weight</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
+<p class="reference">References <a class="el" href="skin__weights_8h_source.html#l00038">index</a>, <a class="el" href="skin__weights_8h_source.html#l00019">momentum::kMaxSkinJoints</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="skin__weights_8h_source.html#l00043">weight</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
@@ -218,12 +202,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Joint indices that influence each vertex. </p>
-<p>Each row corresponds to a vertex, and each column contains the index of a joint that influences that vertex. Unused influences are set to 0. </p>
+<p>Joint indices influencing each vertex. </p>
+<p>Unused slots are set to 0. Read in conjunction with <code>weight</code> — index 0 only contributes when its matching weight is non-zero. </p>
 
-<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00041">41</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00038">38</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="skin__weights_8cpp_source.html#l00031">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00418">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00332">momentum::saveSkinWeightsToUsd()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00016">set()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="skin__weights_8cpp_source.html#l00033">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00411">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00332">momentum::saveSkinWeightsToUsd()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00016">set()</a>.</p>
 
 </div>
 </div>
@@ -239,12 +223,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Weight of each joint's influence on each vertex. </p>
-<p>Each row corresponds to a vertex, and each column contains the weight of a joint's influence on that vertex. Weights for a vertex typically sum to 1.0. Unused influences are set to 0.0. </p>
+<p>Joint influence weights per vertex. </p>
+<p>Weights for a vertex are expected to sum to 1.0; unused slots are set to 0.0. Loaders/setters do not enforce normalization — callers are responsible for normalized input. </p>
 
-<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00048">48</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="skin__weights_8h_source.html#l00043">43</a> of file <a class="el" href="skin__weights_8h_source.html">skin_weights.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="skin__weights_8cpp_source.html#l00031">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00418">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00332">momentum::saveSkinWeightsToUsd()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00016">set()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="skin__weights_8cpp_source.html#l00033">operator==()</a>, <a class="el" href="character_8cpp_source.html#l00411">momentum::CharacterT&lt; T &gt;::remapSkinWeights()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00332">momentum::saveSkinWeightsToUsd()</a>, and <a class="el" href="skin__weights_8cpp_source.html#l00016">set()</a>.</p>
 
 </div>
 </div>
@@ -258,7 +242,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SkinWeights.html">SkinWeights</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

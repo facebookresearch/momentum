@@ -106,10 +106,10 @@ $(document).ready(function(){initNavTree('structmomentum_1_1PoseShape.html','');
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa8e741c23ae1e10b722aa291c37e4613" id="r_aa8e741c23ae1e10b722aa291c37e4613"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#aa8e741c23ae1e10b722aa291c37e4613">compute</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:aa8e741c23ae1e10b722aa291c37e4613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the deformed shape based on the current skeleton state.  <br /></td></tr>
+<tr class="memdesc:aa8e741c23ae1e10b722aa291c37e4613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the deformed shape vertices for the given skeleton pose.  <br /></td></tr>
 <tr class="separator:aa8e741c23ae1e10b722aa291c37e4613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af689d40828172b0eaabaa382e70a8b11" id="r_af689d40828172b0eaabaa382e70a8b11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PoseShape.html#af689d40828172b0eaabaa382e70a8b11">isApprox</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1PoseShape.html">PoseShape</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">poseShape</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:af689d40828172b0eaabaa382e70a8b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if this <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> is approximately equal to another.  <br /></td></tr>
+<tr class="memdesc:af689d40828172b0eaabaa382e70a8b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if all members are approximately equal (uses <code>Eigen::isApprox</code> for floating-point members and exact equality for <code>baseJoint</code>/<code>jointMap</code>).  <br /></td></tr>
 <tr class="separator:af689d40828172b0eaabaa382e70a8b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -152,17 +152,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Computes the deformed shape based on the current skeleton state. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">state</td><td>Current state of the skeleton containing joint rotations </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of 3D vertex positions representing the deformed shape </dd></dl>
+<p>Computes the deformed shape vertices for the given skeleton pose. </p>
+<dl class="section return"><dt>Returns</dt><dd>Flattened 3D vertex positions, length <code>baseShape.size() / 3</code>. </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">If</td><td>baseShape.size() != shapeVectors.rows() </td></tr>
+    <tr><td class="paramname">If</td><td><code>baseShape.size() != shapeVectors.rows()</code>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -197,17 +191,9 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Checks if this <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> is approximately equal to another. </p>
-<p>Two <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> objects are considered approximately equal if all their corresponding members are approximately equal.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">poseShape</td><td>The <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> to compare with </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if the <a class="el" href="structmomentum_1_1PoseShape.html" title="Computes shape deformations based on joint rotations.">PoseShape</a> objects are approximately equal </dd></dl>
+<p>Returns true if all members are approximately equal (uses <code>Eigen::isApprox</code> for floating-point members and exact equality for <code>baseJoint</code>/<code>jointMap</code>). </p>
 
-<p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00057">57</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00051">51</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
 <p class="reference">References <a class="el" href="pose__shape_8h_source.html#l00022">baseJoint</a>, <a class="el" href="pose__shape_8h_source.html#l00027">baseRot</a>, <a class="el" href="pose__shape_8h_source.html#l00035">baseShape</a>, <a class="el" href="pose__shape_8h_source.html#l00030">jointMap</a>, and <a class="el" href="pose__shape_8h_source.html#l00041">shapeVectors</a>.</p>
 
@@ -230,7 +216,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00022">22</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00057">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00051">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
 
 </div>
 </div>
@@ -251,7 +237,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00027">27</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00057">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00051">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
 
 </div>
 </div>
@@ -272,7 +258,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00035">35</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00057">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00051">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
 
 </div>
 </div>
@@ -292,7 +278,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00030">30</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00057">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00051">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
 
 </div>
 </div>
@@ -313,7 +299,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="pose__shape_8h_source.html#l00041">41</a> of file <a class="el" href="pose__shape_8h_source.html">pose_shape.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00057">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="pose__shape_8cpp_source.html#l00015">compute()</a>, <a class="el" href="pose__shape_8h_source.html#l00051">isApprox()</a>, and <a class="el" href="pose__shape__io_8cpp_source.html#l00020">momentum::loadPoseShape()</a>.</p>
 
 </div>
 </div>
@@ -327,7 +313,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1PoseShape.html">PoseShape</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

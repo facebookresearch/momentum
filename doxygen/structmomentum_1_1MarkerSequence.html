@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('structmomentum_1_1MarkerSequence.html'
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a> stores all the frames from a single capture sequence for one subject (motion capture actor).  
+<p>All frames from a single motion capture sequence for one subject (actor).  
  <a href="structmomentum_1_1MarkerSequence.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="marker_8h_source.html">marker.h</a>&gt;</code></p>
@@ -105,20 +105,20 @@ $(document).ready(function(){initNavTree('structmomentum_1_1MarkerSequence.html'
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a8623c855215dca5207c4fe2302a2d1ec" id="r_a8623c855215dca5207c4fe2302a2d1ec"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MarkerSequence.html#a8623c855215dca5207c4fe2302a2d1ec">name</a></td></tr>
-<tr class="memdesc:a8623c855215dca5207c4fe2302a2d1ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the actor sequence (typically a unique subject name or ID)  <br /></td></tr>
+<tr class="memdesc:a8623c855215dca5207c4fe2302a2d1ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifier for the actor or subject this sequence belongs to.  <br /></td></tr>
 <tr class="separator:a8623c855215dca5207c4fe2302a2d1ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7145d6a939d0655f129b1f8813516cc0" id="r_a7145d6a939d0655f129b1f8813516cc0"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MarkerSequence.html#a7145d6a939d0655f129b1f8813516cc0">frames</a></td></tr>
-<tr class="memdesc:a7145d6a939d0655f129b1f8813516cc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">A 2D vector that specifies the <a class="el" href="structmomentum_1_1Marker.html" title="Marker represents a motion capture marker that defines an active marker during motion capture.">Marker</a> (name/position/occlusion) for all markers throughout all captured frames.  <br /></td></tr>
+<tr class="memdesc:a7145d6a939d0655f129b1f8813516cc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">All marker observations across the sequence. Layout: <code>[numFrames][numMarkers]</code>.  <br /></td></tr>
 <tr class="separator:a7145d6a939d0655f129b1f8813516cc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d3b79c581965a7a13240d994214f89b" id="r_a2d3b79c581965a7a13240d994214f89b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MarkerSequence.html#a2d3b79c581965a7a13240d994214f89b">fps</a> = 30.0f</td></tr>
-<tr class="memdesc:a2d3b79c581965a7a13240d994214f89b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The frame rate of the motion capture sequence in frames per second (default is 30.0)  <br /></td></tr>
+<tr class="memdesc:a2d3b79c581965a7a13240d994214f89b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frame rate of the capture, in frames per second.  <br /></td></tr>
 <tr class="separator:a2d3b79c581965a7a13240d994214f89b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="structmomentum_1_1MarkerSequence.html" title="MarkerSequence stores all the frames from a single capture sequence for one subject (motion capture a...">MarkerSequence</a> stores all the frames from a single capture sequence for one subject (motion capture actor). </p>
-<p>Each frame is a std::vector&lt;Marker&gt; containing the position and occlusion status of all the markers placed on the subject. The size of the std::vector&lt;Marker&gt; must be consistent for all frames. </p>
+<div class="textblock"><p>All frames from a single motion capture sequence for one subject (actor). </p>
+<dl class="section invariant"><dt>Invariant</dt><dd>Every inner <code>frames[i]</code> vector must have the same size — markers are indexed positionally and the marker count is fixed across the sequence. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00040">40</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00037">37</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a2d3b79c581965a7a13240d994214f89b" name="a2d3b79c581965a7a13240d994214f89b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d3b79c581965a7a13240d994214f89b">&#9670;&#160;</a></span>fps</h2>
@@ -132,9 +132,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>The frame rate of the motion capture sequence in frames per second (default is 30.0) </p>
+<p>Frame rate of the capture, in frames per second. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00049">49</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00045">45</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="usd__animation__io_8cpp_source.html#l00450">momentum::loadMarkerSequenceFromUsd()</a>, and <a class="el" href="trc__io_8cpp_source.html#l00019">momentum::loadTrc()</a>.</p>
 
@@ -152,10 +152,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>A 2D vector that specifies the <a class="el" href="structmomentum_1_1Marker.html" title="Marker represents a motion capture marker that defines an active marker during motion capture.">Marker</a> (name/position/occlusion) for all markers throughout all captured frames. </p>
-<p>Size: [numFrames][numMarkers] </p>
+<p>All marker observations across the sequence. Layout: <code>[numFrames][numMarkers]</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00046">46</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00042">42</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="usd__animation__io_8cpp_source.html#l00450">momentum::loadMarkerSequenceFromUsd()</a>.</p>
 
@@ -173,9 +172,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Name of the actor sequence (typically a unique subject name or ID) </p>
+<p>Identifier for the actor or subject this sequence belongs to. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00042">42</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker_8h_source.html#l00039">39</a> of file <a class="el" href="marker_8h_source.html">marker.h</a>.</p>
 
 </div>
 </div>
@@ -188,7 +187,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

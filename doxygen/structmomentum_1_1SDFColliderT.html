@@ -116,13 +116,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9ba2b0e8ef4b657b4037ecebab7e516b" id="r_a9ba2b0e8ef4b657b4037ecebab7e516b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SDFColliderT.html#a9ba2b0e8ef4b657b4037ecebab7e516b">SDFColliderT</a> ()</td></tr>
 <tr class="separator:a9ba2b0e8ef4b657b4037ecebab7e516b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abda1b2fd03b44304c1f31cc94d80491f" id="r_abda1b2fd03b44304c1f31cc94d80491f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SDFColliderT.html#abda1b2fd03b44304c1f31cc94d80491f">SDFColliderT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1TransformT.html">TransformT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &gt; &amp;transform, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">parentJoint</a>, std::shared_ptr&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SDFColliderT.html#a672015b4ce9fbe4b5b759eda5bc426c6">SDFType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sdfPtr</a>)</td></tr>
-<tr class="memdesc:abda1b2fd03b44304c1f31cc94d80491f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with SDF initialization.  <br /></td></tr>
 <tr class="separator:abda1b2fd03b44304c1f31cc94d80491f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b6948529ccefe85e3d10ce991cf488c" id="r_a0b6948529ccefe85e3d10ce991cf488c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SDFColliderT.html#a0b6948529ccefe85e3d10ce991cf488c">isApprox</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SDFColliderT.html">SDFColliderT</a> &amp;other, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">tol</a>=<a class="el" href="namespacemomentum.html#a0a3afe859147839030e5b1ebf4bb021e">Eps</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &gt;(1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-4<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a>, 1<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-10)) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="memdesc:a0b6948529ccefe85e3d10ce991cf488c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the current SDF collider is approximately equal to another.  <br /></td></tr>
 <tr class="separator:a0b6948529ccefe85e3d10ce991cf488c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab83bbd51f31c78cae9956d3abafcb0b6" id="r_ab83bbd51f31c78cae9956d3abafcb0b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1SDFColliderT.html#ab83bbd51f31c78cae9956d3abafcb0b6">isValid</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:ab83bbd51f31c78cae9956d3abafcb0b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the SDF collider is valid (has a valid SDF pointer).  <br /></td></tr>
+<tr class="memdesc:ab83bbd51f31c78cae9956d3abafcb0b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true when the collider holds a non-null SDF and is therefore usable for collision queries.  <br /></td></tr>
 <tr class="separator:ab83bbd51f31c78cae9956d3abafcb0b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -140,9 +139,9 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a>&gt;<br />
 struct momentum::SDFColliderT&lt; S &gt;</div><p>SDF collision geometry for character collision detection. </p>
-<p>Defined by a transformation, parent joint, and a shared pointer to a SignedDistanceField. The SDF data is shared to avoid expensive copies of large SDF volumes. </p>
+<p>Defined by a transformation, parent joint, and a shared pointer to a SignedDistanceField. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00028">28</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00027">27</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="adc6ccf682273b624f60ba35527cbc13f" name="adc6ccf682273b624f60ba35527cbc13f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adc6ccf682273b624f60ba35527cbc13f">&#9670;&#160;</a></span>Scalar</h2>
@@ -158,7 +157,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00029">29</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00028">28</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
 </div>
 </div>
@@ -176,7 +175,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00030">30</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00029">29</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
 </div>
 </div>
@@ -206,7 +205,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00044">44</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00043">43</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
 </div>
 </div>
@@ -252,9 +251,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Constructor with SDF initialization. </p>
-
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00049">49</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00045">45</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
 </div>
 </div>
@@ -296,10 +293,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Checks if the current SDF collider is approximately equal to another. </p>
+<p>SDF data is compared by pointer identity, not by value: two colliders sharing the same <code>SignedDistanceField</code> instance are considered equal, but two colliders pointing to distinct instances with identical contents are not. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00058">58</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00056">56</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
-<p class="reference">References <a class="el" href="transform_8h_source.html#l00218">momentum::TransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00038">momentum::SDFColliderT&lt; S &gt;::parent</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00042">momentum::SDFColliderT&lt; S &gt;::sdf</a>, and <a class="el" href="sdf__collision__geometry_8h_source.html#l00034">momentum::SDFColliderT&lt; S &gt;::transformation</a>.</p>
+<p class="reference">References <a class="el" href="transform_8h_source.html#l00218">momentum::TransformT&lt; T &gt;::isApprox()</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00037">momentum::SDFColliderT&lt; S &gt;::parent</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00041">momentum::SDFColliderT&lt; S &gt;::sdf</a>, and <a class="el" href="sdf__collision__geometry_8h_source.html#l00033">momentum::SDFColliderT&lt; S &gt;::transformation</a>.</p>
 
 </div>
 </div>
@@ -328,11 +326,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Checks if the SDF collider is valid (has a valid SDF pointer). </p>
+<p>Returns true when the collider holds a non-null SDF and is therefore usable for collision queries. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00077">77</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00075">75</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
-<p class="reference">References <a class="el" href="sdf__collision__geometry_8h_source.html#l00042">momentum::SDFColliderT&lt; S &gt;::sdf</a>.</p>
+<p class="reference">References <a class="el" href="sdf__collision__geometry_8h_source.html#l00041">momentum::SDFColliderT&lt; S &gt;::sdf</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="vertex__sdf__error__function_8cpp_source.html#l00057">momentum::VertexSDFErrorFunctionT&lt; T &gt;::VertexSDFErrorFunctionT()</a>.</p>
 
@@ -356,9 +354,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Parent joint to which the geometry is attached. </p>
 <p>Use kInvalidIndex to indicate it is fixed in world space. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00038">38</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00037">37</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00058">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00056">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>.</p>
 
 </div>
 </div>
@@ -377,11 +375,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 
 <p>Shared pointer to the SignedDistanceField data. </p>
-<p>Using shared_ptr to avoid expensive copies of potentially large SDF volumes. </p>
+<p>Uses shared_ptr to avoid expensive copies of potentially large SDF volumes. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00042">42</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00041">41</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00058">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>, and <a class="el" href="sdf__collision__geometry_8h_source.html#l00077">momentum::SDFColliderT&lt; S &gt;::isValid()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00056">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>, and <a class="el" href="sdf__collision__geometry_8h_source.html#l00075">momentum::SDFColliderT&lt; S &gt;::isValid()</a>.</p>
 
 </div>
 </div>
@@ -401,9 +399,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Transformation defining the orientation and position relative to the parent coordinate system. </p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00034">34</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__geometry_8h_source.html#l00033">33</a> of file <a class="el" href="sdf__collision__geometry_8h_source.html">sdf_collision_geometry.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00058">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="sdf__collision__geometry_8h_source.html#l00056">momentum::SDFColliderT&lt; S &gt;::isApprox()</a>.</p>
 
 </div>
 </div>
@@ -417,7 +415,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1SDFColliderT.html">SDFColliderT</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

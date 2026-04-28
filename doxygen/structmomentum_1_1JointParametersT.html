@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('structmomentum_1_1JointParametersT.htm
 </div><!--header-->
 <div class="contents">
 
+<p>A vector describing joint parameters, of size <code>numSkeletonJoints * kParametersPerJoint</code>.  
+ <a href="structmomentum_1_1JointParametersT.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="character_2types_8h_source.html">types.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::JointParametersT&lt; T &gt;:</div>
@@ -162,8 +165,10 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-struct momentum::JointParametersT&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00133">133</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
+struct momentum::JointParametersT&lt; T &gt;</div><p>A vector describing joint parameters, of size <code>numSkeletonJoints * kParametersPerJoint</code>. </p>
+<p>E.g. for a character body model with 159 joints, the joint parameters vector has size 159 * 7 = 1113. The 7 parameters per joint are ordered [tx, ty, tz, rx, ry, rz, sc]. </p>
+
+<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00129">129</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="aac12b16e15d4051a55fb4cc7eefc82ac" name="aac12b16e15d4051a55fb4cc7eefc82ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aac12b16e15d4051a55fb4cc7eefc82ac">&#9670;&#160;</a></span>t</h2>
@@ -179,7 +184,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00134">134</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00130">130</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 
 </div>
 </div>
@@ -210,9 +215,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00145">145</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00141">141</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 
-<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00138">momentum::JointParametersT&lt; T &gt;::fromRotationMatrix()</a>.</p>
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00134">momentum::JointParametersT&lt; T &gt;::fromRotationMatrix()</a>.</p>
 
 </div>
 </div>
@@ -242,11 +247,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00138">138</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00134">134</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 
 <p class="reference">References <a class="el" href="math_2utility_8cpp_source.html#l00240">momentum::rotationMatrixToEulerZYX()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="character_2types_8h_source.html#l00145">momentum::JointParametersT&lt; T &gt;::fromQuaternion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="character_2types_8h_source.html#l00141">momentum::JointParametersT&lt; T &gt;::fromQuaternion()</a>.</p>
 
 </div>
 </div>
@@ -259,7 +264,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1JointParametersT.html">JointParametersT</a></li>
-    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 18:16:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
