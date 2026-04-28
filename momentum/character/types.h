@@ -7,10 +7,6 @@
 
 #pragma once
 
-//------------------------------------------------------------------------------
-// Momentum specific Eigen defines
-//------------------------------------------------------------------------------
-
 #include <momentum/character/fwd.h>
 
 #include <Eigen/Dense>
@@ -98,7 +94,7 @@ struct EigenStrongType {
   }
 };
 
-// a vector describing model parameters
+/// A vector of size numModelParams holding the values of all model parameters for a character.
 template <typename T>
 struct ModelParametersT : public EigenStrongType<ModelParametersT, ::Eigen::VectorX<T>> {
   using t = ::Eigen::VectorX<T>;
@@ -126,9 +122,9 @@ static_assert(
     sizeof(BlendWeightsd) == sizeof(Eigen::VectorXd),
     "Missing Empty Base Class Optimization");
 
-// A vector describing joint parameters, the vector has size numSkeletonJoints * kParametersPerJoint
-// e.g. in case of a character body model with 159 joints, the joint parameters vector will have the
-// size 159 * 7 = 1113
+/// A vector describing joint parameters, of size `numSkeletonJoints * kParametersPerJoint`.
+/// E.g. for a character body model with 159 joints, the joint parameters vector has size
+/// 159 * 7 = 1113. The 7 parameters per joint are ordered [tx, ty, tz, rx, ry, rz, sc].
 template <typename T>
 struct JointParametersT : public EigenStrongType<JointParametersT, ::Eigen::VectorX<T>> {
   using t = ::Eigen::VectorX<T>;
@@ -183,20 +179,17 @@ struct CharacterParametersT {
 using CharacterParameters = CharacterParametersT<float>;
 using CharacterParametersd = CharacterParametersT<double>;
 
-// The tuple of model parameter names and corresponding matrix representing the pose in a sequence
-// of frames The poses are ordered in columns and the expected shape of motion matrix is
-// (numModelParams, numFrames)
-
+/// A tuple of model parameter names and a matrix of poses across a sequence of frames.
+/// Poses are stored column-major: the matrix has shape (numModelParams, numFrames).
 using MotionParameters = std::tuple<std::vector<std::string>, Eigen::MatrixXf>;
 
-// The tuple containing the skeleton joint names and identity parameters. The identity parameters
-// represent bone offsets and bone scales that are added to the joint states (local transform for
-// each joint wrt parent joint) during FK step The identity parameters are expressed as a vector of
-// size (numSkeletonJoints * momentum::kParametersPerJoint)
-
+/// A tuple of skeleton joint names and identity parameters. The identity parameters represent
+/// bone offsets and bone scales that are added to the joint states (the local transform for each
+/// joint relative to its parent) during the FK step. The identity parameter vector has size
+/// `numSkeletonJoints * kParametersPerJoint`.
 using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>;
 
-// define static kInvalidIndex for size_t
+/// Sentinel value indicating an invalid or unset `size_t` index.
 inline constexpr size_t kInvalidIndex = std::numeric_limits<size_t>::max();
 
 } // namespace momentum

@@ -20,6 +20,8 @@ void SkinWeights::set(
   index = IndexMatrix::Zero(ind.size(), kMaxSkinJoints);
   weight = WeightMatrix::Zero(ind.size(), kMaxSkinJoints);
 
+  // TODO: silently truncates per-vertex influences beyond kMaxSkinJoints; consider
+  // warning or renormalizing the kept weights when ind[i].size() > kMaxSkinJoints.
   for (size_t i = 0; i < ind.size(); i++) {
     for (size_t j = 0; j < std::min(ind[i].size(), size_t(kMaxSkinJoints)); j++) {
       index(i, j) = gsl::narrow_cast<uint32_t>(ind[i][j]);

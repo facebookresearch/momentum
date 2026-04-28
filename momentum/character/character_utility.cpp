@@ -223,7 +223,9 @@ std::vector<size_t> addMappedParameters(
       continue;
     }
 
-    // Invalid joint index, so any model parameters are invalid too:
+    // TODO: Comment is inverted/stale — code marks params VALID for kept joints (the
+    // invalid-joint case is filtered above by the `continue`). Rewrite or remove.
+    // Mark every model parameter that drives this kept joint as valid.
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
       // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       validParamsOrig[it.col()] = true;
@@ -828,12 +830,8 @@ JointParameters mapIdentityToCharacter(
 
 namespace {
 
-/// Reduces base shape vertices based on active vertex selection
-///
-/// @param baseVertices Original base shape vertices
-/// @param activeVertices Boolean vector indicating which vertices to keep
-/// @param newVertexCount Number of vertices in the reduced mesh
-/// @return Reduced base shape vertices
+// Selects the entries of `baseVertices` flagged true in `activeVertices`,
+// reserving capacity for `newVertexCount` results.
 std::vector<Vector3f> reduceBaseShapeVertices(
     const std::vector<Vector3f>& baseVertices,
     const std::vector<bool>& activeVertices,
@@ -850,12 +848,8 @@ std::vector<Vector3f> reduceBaseShapeVertices(
   return newBaseVertices;
 }
 
-/// Reduces blend shape vectors based on active vertex selection
-///
-/// @param shapeVectors Original shape vectors matrix [vertexCount*3 x numShapes]
-/// @param activeVertices Boolean vector indicating which vertices to keep
-/// @param newVertexCount Number of vertices in the reduced mesh
-/// @return Reduced shape vectors matrix [newVertexCount*3 x numShapes]
+// Compacts a [vertexCount*3 x numShapes] shape-vector matrix down to
+// [newVertexCount*3 x numShapes] by keeping the rows for active vertices.
 MatrixXf reduceBlendShapeVectors(
     const MatrixXf& shapeVectors,
     const std::vector<bool>& activeVertices,
@@ -1155,18 +1149,14 @@ MeshT<T> reduceMeshInternal(
     newMesh.texcoord_lines = remapLines(mesh.texcoord_lines, reverseTextureVertexMapping);
   }
 
-  // Remap polygon face data
   remapPolyFaces(newMesh, mesh, activeVertices, reverseVertexMapping, reverseTextureVertexMapping);
 
   return newMesh;
 }
 
-/// Reduces mesh components based on active vertices and faces
-///
-/// @param character Character to be reduced
-/// @param activeVertices Boolean vector indicating which vertices to keep
-/// @param activeFaces Boolean vector indicating which faces to keep
-/// @return A new character with all components reduced accordingly
+// Builds a new character whose mesh, skin weights, pose shapes, and blend shapes
+// are restricted to the given active vertices/faces. Skeleton, parameter transform,
+// limits, locators, collision, and inverseBindPose are passed through unchanged.
 template <typename T>
 CharacterT<T> reduceMeshComponents(
     const CharacterT<T>& character,
@@ -1184,14 +1174,11 @@ CharacterT<T> reduceMeshComponents(
       activeFaces.size(),
       character.mesh->faces.size());
 
-  // Create a mapping from old vertex indices to new vertex indices using generic function
   const auto [forwardVertexMapping, reverseVertexMapping] = createIndexMapping(activeVertices);
 
-  // Reduce the mesh using the standalone mesh-level function
   auto newMesh = std::make_unique<Mesh>(
       reduceMeshInternal<float>(*character.mesh, activeVertices, activeFaces));
 
-  // Create new skin weights if they exist
   std::unique_ptr<SkinWeights> newSkinWeights;
   if (character.skinWeights) {
     newSkinWeights = std::make_unique<SkinWeights>();
@@ -1205,7 +1192,6 @@ CharacterT<T> reduceMeshComponents(
     }
   }
 
-  // Create new pose shapes if they exist
   std::unique_ptr<PoseShape> newPoseShapes;
   if (character.poseShapes) {
     newPoseShapes = std::make_unique<PoseShape>(*character.poseShapes);
@@ -1222,7 +1208,6 @@ CharacterT<T> reduceMeshComponents(
     }
     newPoseShapes->baseShape = std::move(newBaseShape);
 
-    // Reduce the shape vectors matrix
     MatrixXf newShapeVectors(
         forwardVertexMapping.size() * 3, character.poseShapes->shapeVectors.cols());
     newIdx = 0;
@@ -1237,17 +1222,14 @@ CharacterT<T> reduceMeshComponents(
     newPoseShapes->shapeVectors = std::move(newShapeVectors);
   }
 
-  // Create new blend shapes if they exist
   BlendShape_const_p newBlendShape;
   if (character.blendShape) {
     auto blendShape = std::make_shared<BlendShape>();
 
-    // Reduce base shape vertices
     std::vector<Vector3f> newBaseVertices = reduceBaseShapeVertices(
         character.blendShape->getBaseShape(), activeVertices, forwardVertexMapping.size());
     blendShape->setBaseShape(newBaseVertices);
 
-    // Reduce shape vectors using shared function
     MatrixXf newShapeVectors = reduceBlendShapeVectors(
         character.blendShape->getShapeVectors(), activeVertices, forwardVertexMapping.size());
     blendShape->setShapeVectors(newShapeVectors);
@@ -1255,13 +1237,11 @@ CharacterT<T> reduceMeshComponents(
     newBlendShape = blendShape;
   }
 
-  // Create new face expression blend shapes if they exist
   BlendShapeBase_const_p newFaceExpressionBlendShape;
   if (character.faceExpressionBlendShape) {
     auto faceBlendShape = std::make_shared<BlendShapeBase>(
         forwardVertexMapping.size(), character.faceExpressionBlendShape->shapeSize());
 
-    // Reduce shape vectors using shared function
     MatrixXf newShapeVectors = reduceBlendShapeVectors(
         character.faceExpressionBlendShape->getShapeVectors(),
         activeVertices,
@@ -1271,7 +1251,6 @@ CharacterT<T> reduceMeshComponents(
     newFaceExpressionBlendShape = faceBlendShape;
   }
 
-  // Construct and return the new character with all updated components
   return CharacterT<T>(
       character.skeleton,
       character.parameterTransform,
@@ -1300,7 +1279,6 @@ CharacterT<T> reduceMeshByVertices(
       activeVertices.size(),
       character.mesh->vertices.size());
 
-  // Convert vertex selection to face selection
   const auto activeFaces = verticesToFaces(*character.mesh, activeVertices);
 
   return reduceMeshComponents(character, activeVertices, activeFaces);
@@ -1317,7 +1295,6 @@ CharacterT<T> reduceMeshByFaces(
       activeFaces.size(),
       character.mesh->faces.size());
 
-  // Convert face selection to vertex selection
   const auto activeVertices = facesToVertices(*character.mesh, activeFaces);
 
   return reduceMeshComponents(character, activeVertices, activeFaces);
@@ -1331,7 +1308,6 @@ MeshT<T> reduceMeshByVertices(const MeshT<T>& mesh, const std::vector<bool>& act
       activeVertices.size(),
       mesh.vertices.size());
 
-  // Convert vertex selection to face selection
   const auto activeFaces = verticesToFaces(mesh, activeVertices);
 
   return reduceMeshInternal(mesh, activeVertices, activeFaces);
@@ -1345,7 +1321,6 @@ MeshT<T> reduceMeshByFaces(const MeshT<T>& mesh, const std::vector<bool>& active
       activeFaces.size(),
       mesh.faces.size());
 
-  // Convert face selection to vertex selection
   const auto activeVertices = facesToVertices(mesh, activeFaces);
 
   return reduceMeshInternal(mesh, activeVertices, activeFaces);
@@ -1403,7 +1378,6 @@ MeshT<T> reduceMeshByPolys(const MeshT<T>& mesh, const std::vector<bool>& active
       activePolys.size(),
       mesh.polyFaceSizes.size());
 
-  // Convert polygon selection to vertex selection, then to face selection
   const auto activeVertices = polysToVertices(mesh, activePolys);
   const auto activeFaces = verticesToFaces(mesh, activeVertices);
 
@@ -1421,14 +1395,12 @@ CharacterT<T> reduceMeshByPolys(
       activePolys.size(),
       character.mesh->polyFaceSizes.size());
 
-  // Convert polygon selection to vertex selection, then to face selection
   const auto activeVertices = polysToVertices(*character.mesh, activePolys);
   const auto activeFaces = verticesToFaces(*character.mesh, activeVertices);
 
   return reduceMeshComponents(character, activeVertices, activeFaces);
 }
 
-// Explicit instantiations for commonly used types
 template CharacterT<float> reduceMeshByVertices<float>(
     const CharacterT<float>& character,
     const std::vector<bool>& activeVertices);

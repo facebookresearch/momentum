@@ -22,14 +22,14 @@ namespace momentum {
 /// - posedMesh: Final mesh after skinning is applied
 template <typename T>
 struct MeshStateT {
-  std::unique_ptr<MeshT<T>>
-      neutralMesh_; // Rest mesh without facial expression basis,
-                    // used to restore the neutral shape after facial expressions are applied.
-                    // Not used with there is a shape basis.
-  std::unique_ptr<MeshT<T>> restMesh_; // The rest positions of the mesh after shape basis
-                                       // (and potentially facial expression) has been applied
-  std::unique_ptr<MeshT<T>>
-      posedMesh_; // The posed mesh after the skeleton transforms have been applied.
+  /// Rest mesh without the facial expression basis, used to restore the neutral shape
+  /// after facial expressions are applied. Not used when there is a shape basis.
+  std::unique_ptr<MeshT<T>> neutralMesh_;
+  /// Rest positions of the mesh after the shape basis (and potentially facial
+  /// expression basis) has been applied.
+  std::unique_ptr<MeshT<T>> restMesh_;
+  /// Posed mesh after the skeleton transforms have been applied.
+  std::unique_ptr<MeshT<T>> posedMesh_;
 
   /// Creates an empty mesh state
   MeshStateT() noexcept = default;
@@ -39,16 +39,12 @@ struct MeshStateT {
       const Character& character) noexcept;
   ~MeshStateT() noexcept;
 
-  /// Copy constructor
   MeshStateT(const MeshStateT& other);
 
-  /// Copy assignment operator
   MeshStateT& operator=(const MeshStateT& other);
 
-  /// Move constructor
   MeshStateT(MeshStateT&& other) noexcept = default;
 
-  /// Move assignment operator
   MeshStateT& operator=(MeshStateT&& other) noexcept = default;
 
   /// Updates the mesh state based on model parameters and skeleton state

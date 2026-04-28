@@ -56,7 +56,8 @@ void MeshStateT<T>::update(
     const Character& character) {
   MT_PROFILE_FUNCTION();
 
-  // Initialize mesh objects on first call if character has mesh data
+  // Lazily allocate the three mesh buffers on the first update; subsequent calls
+  // reuse them in place.
   if (!restMesh_ && character.mesh) {
     neutralMesh_ = std::make_unique<MeshT<T>>(character.mesh->template cast<T>());
     restMesh_ = std::make_unique<MeshT<T>>(character.mesh->template cast<T>());
@@ -64,13 +65,11 @@ void MeshStateT<T>::update(
   }
 
   if (!restMesh_ || !posedMesh_) {
-    return; // No mesh to update
+    return;
   }
 
-  // Update rest mesh with blend shapes and face expressions
   bool doUpdateNormals = false;
 
-  // Apply blend shapes if available
   if (character.blendShape) {
     const BlendWeightsT<T> blendWeights =
         extractBlendWeights(character.parameterTransform, parameters);
@@ -78,12 +77,11 @@ void MeshStateT<T>::update(
     doUpdateNormals = true;
   }
 
-  // Apply face expression blend shapes if available
   if (character.faceExpressionBlendShape) {
     if (!character.blendShape) {
-      // Set restMesh back to neutral, removing potential previous expressions.
-      // Note that if the character comes with (shape) blendShape, the previous if block already
-      // takes care of this step.
+      // Reset restMesh to neutral so previously applied face expressions don't accumulate.
+      // When a shape blendShape is present, the block above already overwrites restMesh
+      // and this reset is unnecessary.
       Eigen::Map<Eigen::VectorX<T>> outputVec(
           &restMesh_->vertices[0][0], restMesh_->vertices.size() * 3);
       const Eigen::Map<Eigen::VectorX<T>> baseVec(
@@ -97,12 +95,10 @@ void MeshStateT<T>::update(
     doUpdateNormals = true;
   }
 
-  // Update normals if blend shapes were applied
   if (doUpdateNormals) {
     restMesh_->updateNormals();
   }
 
-  // Apply skinning to get the posed mesh
   applySSD(
       cast<T>(character.inverseBindPose), *character.skinWeights, *restMesh_, state, *posedMesh_);
 }

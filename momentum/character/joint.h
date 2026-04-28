@@ -18,19 +18,21 @@ template <typename T>
 struct JointT {
   using Scalar = T;
 
-  /// Joint name
   std::string name{"uninitialized"};
 
-  /// Index of the parent joint in the skeleton hierarchy
+  /// Index of the parent joint in the skeleton hierarchy, or `kInvalidIndex` for the root.
   size_t parent{kInvalidIndex};
 
   // TODO: does it make sense to save its own index too?
 
-  /// Pre-rotation matrix from its parent's axes to its own axes.
-  /// @note: Braces initialization is avoided due to issues with CUDA 11.
+  /// Pre-rotation from the parent joint's axes to this joint's local axes.
+  /// Applied before the joint's own rotation parameters.
+  /// @note Default-initialized via `=` rather than braces due to a CUDA 11
+  /// compiler bug with brace-initialization of Eigen's Quaternion.
   Quaternion<T> preRotation = Quaternion<T>::Identity();
 
-  /// The constant translation offset from the parent joint to this joint's origin.
+  /// Constant translation offset from the parent joint's origin to this joint's
+  /// origin, expressed in the parent's local frame.
   Vector3<T> translationOffset = Vector3<T>::Zero();
 
   /// Checks if the current joint is approximately equal to the provided joint.

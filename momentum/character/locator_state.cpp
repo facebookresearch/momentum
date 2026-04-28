@@ -11,27 +11,21 @@
 
 namespace momentum {
 
-// functions
 void LocatorState::update(
     const SkeletonState& skeletonState,
     const LocatorList& referenceLocators) noexcept {
   const size_t numLocators = referenceLocators.size();
 
-  // resize output arrays
   position.resize(numLocators);
 
-  // get joint state
   const auto& jointState = skeletonState.jointState;
 
-  // go over all locators
   for (size_t locatorID = 0; locatorID < numLocators; locatorID++) {
-    // reference for quick access
     const Locator& locator = referenceLocators[locatorID];
 
-    // get parent id
     const size_t& parentId = locator.parent;
 
-    // transform each locator by its parents transformation and store it in the locator state
+    // Transform each locator by its parent joint's world transform.
     position[locatorID] = jointState[parentId].transform * locator.offset;
   }
 }

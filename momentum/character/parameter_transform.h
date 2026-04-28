@@ -18,11 +18,11 @@
 namespace momentum {
 
 struct PoseConstraint {
-  /// A vector of tuple of type: (model parameter index, parameter value).
-  /// The model parameter index must be in [0, numModelParameters.size()).
+  /// A vector of tuples of type: (model parameter index, parameter value).
+  /// The model parameter index must be in [0, numAllModelParameters()).
   /// The value of the model parameters specified here are kept constant (= parameter value) during
   /// optimization. The ordering of elements in the vector doesn't matter (making it an unordered
-  /// map would be more semantically correct) since it stores an index to the model parameters
+  /// map would be more semantically correct) since it stores an index to the model parameters.
   std::vector<std::pair<size_t, float>> parameterIdValue;
 
   bool operator==(const PoseConstraint& poseConstraint) const;
@@ -33,9 +33,31 @@ using PoseConstraints = std::unordered_map<std::string, PoseConstraint>;
 
 /// A parameter transform is an abstraction of the joint parameters that maps a model_parameter
 /// vector to a joint_parameter vector. It allows mapping a single model_parameter to multiple
-/// joints, and a single joint being influenced by multiple model_parameters joint parameters are
-/// calculated from parameters in the following way : <joint_parameters> = <transform> *
-/// <model_parameters> + <offsets>
+/// joints, and a single joint being influenced by multiple model_parameters. Joint parameters are
+/// calculated from model parameters in the following way:
+/// `<joint_parameters> = <transform> * <model_parameters> + <offsets>`
+///
+/// @par Parameter enablement hierarchy
+///
+/// Momentum has three levels of parameter enablement that interact:
+///
+/// 1. **Model parameters** (`ParameterSet`): A bitset over the ~200 model parameters.
+///    The solver's `setEnabledParameters()` operates at this level. A model parameter
+///    being disabled means it won't be optimized.
+///
+/// 2. **Joint parameters** (`activeJointParams`): A boolean vector over all
+///    `numJoints * 7` joint parameters. Computed from the `transform` sparse matrix —
+///    if any model parameter drives joint J's RX column, then `activeJointParams[J*7+3]`
+///    is true. Error functions check this to skip zero Jacobian columns.
+///    Recomputed via `computeActiveJointParams(enabledModelParams)`.
+///
+/// 3. **Solver active set** (`SolverT::activeParameters_`): The solver's internal
+///    copy of the enabled model parameters. Passed to `SolverFunctionT` which
+///    forwards to error functions.
+///
+/// When adding a new error function, you typically check `activeJointParams_` (level 2)
+/// to determine which joint parameter columns to compute Jacobians for. You do NOT
+/// need to check model-level enablement — the solver handles that mapping.
 template <typename T>
 struct ParameterTransformT {
   /// The list of model parameter names.
@@ -147,7 +169,7 @@ struct ParameterTransformT {
   /// Dimension of facial expression parameters.
   [[nodiscard]] Eigen::Index numFaceExpressionParameters() const;
 
-  /// Dimension of facial expression parameters.
+  /// Dimension of skinned locator parameters (3 per skinned locator: x, y, z).
   [[nodiscard]] Eigen::Index numSkinnedLocatorParameters() const;
 
   /// Dimension of skeletal model parameters, including pose parameters,

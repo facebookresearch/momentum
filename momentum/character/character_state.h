@@ -21,56 +21,54 @@ namespace momentum {
 /// character animation and rendering.
 template <typename T>
 struct CharacterStateT {
-  /// Model parameters and joint offsets
+  /// Model parameters (`pose`) and joint parameter offsets driving this state.
   CharacterParameters parameters;
 
-  /// Joint transformations
   SkeletonState skeletonState;
 
-  /// Locator positions and orientations
   LocatorState locatorState;
 
-  /// Skinned mesh (may be null if updateMesh=false)
+  /// Skinned mesh; null when constructed/updated with `updateMesh=false` or
+  /// when the reference character has no mesh or skin weights.
   Mesh_u meshState;
 
-  /// Collision geometry state (may be null if updateCollision=false)
+  /// Collision geometry state; null when constructed/updated with
+  /// `updateCollision=false` or when the reference character has no collision
+  /// geometry.
   CollisionGeometryState_u collisionState;
 
-  /// Creates an empty character state
   CharacterStateT();
 
-  /// Creates a deep copy of another character state
+  /// Creates a deep copy of another character state, including owned
+  /// `meshState` and `collisionState`.
   explicit CharacterStateT(const CharacterStateT& other);
 
-  /// Move constructor
   CharacterStateT(CharacterStateT&& c) noexcept;
 
-  /// Copy assignment is disabled
+  /// Copy assignment is deleted; use the explicit copy constructor instead.
   CharacterStateT& operator=(const CharacterStateT& rhs) = delete;
 
-  /// Move assignment operator
   CharacterStateT& operator=(CharacterStateT&& rhs) noexcept;
 
-  /// Destructor
   ~CharacterStateT();
 
-  /// Creates a character state in bind pose
+  /// Creates a character state in `referenceCharacter`'s bind pose.
   ///
-  /// @param referenceCharacter The character to use as reference
-  /// @param updateMesh Whether to compute the skinned mesh
-  /// @param updateCollision Whether to update collision geometry
+  /// @param updateMesh If true, allocate and populate `meshState` by skinning
+  ///   `referenceCharacter.mesh` (requires non-null mesh and skin weights).
+  /// @param updateCollision If true, allocate and populate `collisionState`
+  ///   from `referenceCharacter.collision` (requires non-null collision).
   explicit CharacterStateT(
       const CharacterT<T>& referenceCharacter,
       bool updateMesh = true,
       bool updateCollision = true);
 
-  /// Creates a character state with specific parameters
+  /// Creates a character state by applying `parameters` to `referenceCharacter`.
   ///
-  /// @param parameters The character parameters to use
-  /// @param referenceCharacter The character to use as reference
-  /// @param updateMesh Whether to compute the skinned mesh
-  /// @param updateCollision Whether to update collision geometry
-  /// @param applyLimits Whether to apply joint parameter limits
+  /// @param applyLimits If true, clamp passive joint parameters to the
+  ///   character's `parameterLimits` after applying the parameter transform.
+  /// @see set() for the meaning of `updateMesh` and `updateCollision` and
+  ///   for the requirements on `parameters.pose` and `parameters.offsets`.
   CharacterStateT(
       const CharacterParameters& parameters,
       const CharacterT<T>& referenceCharacter,
@@ -78,15 +76,21 @@ struct CharacterStateT {
       bool updateCollision = true,
       bool applyLimits = true);
 
-  /// Updates the character state with specific parameters
+  /// Updates the character state by applying `parameters` to `referenceCharacter`.
   ///
-  /// If parameters.offsets is empty, it will be initialized with zeros.
+  /// @pre `parameters.pose.size() == referenceCharacter.parameterTransform.numAllModelParameters()`
+  /// @pre `parameters.offsets` is either empty or has size
+  ///   `referenceCharacter.parameterTransform.numJointParameters()`. When
+  ///   empty, it is initialized to zeros.
   ///
-  /// @param parameters The character parameters to use
-  /// @param referenceCharacter The character to use as reference
-  /// @param updateMesh Whether to compute the skinned mesh
-  /// @param updateCollision Whether to update collision geometry
-  /// @param applyLimits Whether to apply joint parameter limits
+  /// @param updateMesh If true, allocate and populate `meshState` by skinning
+  ///   `referenceCharacter.mesh` (no-op if mesh or skin weights are null).
+  ///   When pose blend shapes or blend shapes are present on the character,
+  ///   they are applied before linear skinning.
+  /// @param updateCollision If true, allocate and populate `collisionState`
+  ///   from `referenceCharacter.collision` (no-op if collision is null).
+  /// @param applyLimits If true, clamp passive joint parameters to the
+  ///   character's `parameterLimits` after applying the parameter transform.
   void set(
       const CharacterParameters& parameters,
       const CharacterT<T>& referenceCharacter,
@@ -94,11 +98,9 @@ struct CharacterStateT {
       bool updateCollision = true,
       bool applyLimits = true);
 
-  /// Sets the character state to the bind pose
+  /// Sets the character state to `referenceCharacter`'s bind pose.
   ///
-  /// @param referenceCharacter The character to use as reference
-  /// @param updateMesh Whether to compute the skinned mesh
-  /// @param updateCollision Whether to update collision geometry
+  /// @see set() for the meaning of `updateMesh` and `updateCollision`.
   void setBindPose(
       const CharacterT<T>& referenceCharacter,
       bool updateMesh = true,

@@ -16,14 +16,13 @@ template <typename T>
 void CollisionGeometryStateT<T>::update(
     const SkeletonStateT<T>& skeletonState,
     const CollisionGeometry& collisionGeometry) {
-  // resize all elements
   const size_t numElements = collisionGeometry.size();
   origin.resize(numElements);
   direction.resize(numElements);
   radius.resize(numElements);
   delta.resize(numElements);
 
-  // calculate data from the geometry (can be parallelized)
+  // TODO: This per-capsule loop is independent across iterations and could be parallelized.
   for (size_t i = 0; i < numElements; ++i) {
     const auto& tc = collisionGeometry[i];
     const TransformT<T> parentTransform = (tc.parent == kInvalidIndex)

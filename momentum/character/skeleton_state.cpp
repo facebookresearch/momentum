@@ -86,13 +86,9 @@ void SkeletonStateT<T>::set(
 template <typename T>
 void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv) {
   MT_PROFILE_FUNCTION();
-  // get input joints
   const JointListT<T>& joints = ::momentum::cast<T>(referenceSkeleton.joints);
-
-  // initialize array size variables
   const size_t numJoints = joints.size();
 
-  // ensure that all variables are valid
   MT_CHECK(
       jointParameters.size() == static_cast<Eigen::Index>(numJoints * kParametersPerJoint),
       "Unexpected joint parameter size. Expected '{}' (# of joints '{}' X kParametersPerJoint '{}') but got '{}'.",
@@ -101,16 +97,14 @@ void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv
       kParametersPerJoint,
       jointParameters.size());
 
-  // go over all joint elements and calculate Transformation
+  // IMPORTANT: this single forward pass assumes parents always precede their children in the
+  // joint list (i.e. the skeleton is topologically sorted). Each child reads its parent's
+  // already-computed JointState, so violating that ordering will silently propagate stale
+  // parent transforms into children.
   for (size_t jointID = 0; jointID < numJoints; jointID++) {
     const Eigen::Index parameterOffset = jointID * kParametersPerJoint;
-
-    // some reference for quick access
     const JointT<T>& joint = joints[jointID];
 
-    // set joint-state based on parameters
-    // IMPORTANT: this all assumes that parent joints always appear before their children in the
-    // joint list, so their joint state will already be calculated when processing the children
     if (joint.parent == kInvalidIndex) {
       jointState[jointID].set(
           joint, jointParameters.v.template middleRows<7>(parameterOffset), nullptr, computeDeriv);
@@ -123,7 +117,6 @@ void SkeletonStateT<T>::set(const Skeleton& referenceSkeleton, bool computeDeriv
     }
   }
 
-  // ensure arrays are valid
   MT_CHECK(jointState.size() == numJoints, "{} is not {}", jointState.size(), numJoints);
 }
 
@@ -141,7 +134,6 @@ template <typename T>
 StateSimilarity SkeletonStateT<T>::compare(
     const SkeletonStateT<T>& state1,
     const SkeletonStateT<T>& state2) {
-  // check that we're actually good to compare the states
   MT_CHECK(
       state1.jointParameters.size() == state2.jointParameters.size(),
       "{} is not {}",
@@ -157,7 +149,10 @@ StateSimilarity SkeletonStateT<T>::compare(
   result.positionError.resize(state1.jointState.size());
   result.orientationError.resize(state1.jointState.size());
 
-  // calculate position error and orientation error in global coordinates per joint
+  // Per-joint position/orientation error in world space. Quaternion dot is clamped to [-1, 1]
+  // to guard acos against numerical drift just outside the valid domain, and the sign flip on
+  // negative dot picks the shorter of the two equivalent quaternion representations (q and -q
+  // encode the same rotation) so the angular error stays in [0, pi].
   for (size_t i = 0; i < state1.jointState.size(); i++) {
     result.positionError[i] =
         (state1.jointState[i].translation() - state2.jointState[i].translation()).norm();
@@ -171,9 +166,11 @@ StateSimilarity SkeletonStateT<T>::compare(
     result.orientationError[i] = gsl::narrow_cast<float>(T(2) * std::acos(sgn * dot));
   }
 
-  // derive RMSE/max values
   result.positionRMSE = std::sqrt(
       result.positionError.squaredNorm() / static_cast<float>(result.positionError.size()));
+  // TODO: orientationRMSE divides by positionError.size() instead of orientationError.size().
+  // The sizes are identical today (both resized to jointState.size() above), so this is harmless,
+  // but it's a latent bug if the two arrays ever diverge. Use orientationError.size() here.
   result.orientationRMSE = std::sqrt(
       result.orientationError.squaredNorm() / static_cast<float>(result.positionError.size()));
   result.positionMax = result.positionError.maxCoeff();
@@ -182,8 +179,11 @@ StateSimilarity SkeletonStateT<T>::compare(
   return result;
 }
 
-// It turns out because the body is topologically sorted, there is a pretty simple algorithm for
-// computing the common ancestor.
+// Because the skeleton is topologically sorted (parent index < child index), the lowest common
+// ancestor of A and B can be found by repeatedly walking the joint with the larger index up to
+// its parent until both pointers meet. We accumulate the local-transform chain on each side,
+// so the final result composes A->ancestor and ancestor->B without ever inverting world-space
+// transforms.
 template <typename T>
 TransformT<T> transformAtoB(
     size_t jointA,
@@ -197,11 +197,10 @@ TransformT<T> transformAtoB(
   TransformT<T> A_to_ancestorA;
 
   while (true) {
-    // Note that we treat kInvalidIndex as if it is the _lowest_ index, as the world is the
-    // topological ancestor of everything.
+    // kInvalidIndex represents "world" and is treated as the lowest index, since world is the
+    // topological ancestor of every joint.
     if (ancestorB != kInvalidIndex && (ancestorA == kInvalidIndex || ancestorA < ancestorB)) {
-      // parentB can't possible be a parent of parentA, so move parentB up one level in the
-      // hierarchy.
+      // ancestorB has the larger index, so it cannot be an ancestor of ancestorA -- walk B up.
       B_to_ancestorB = skelState.jointState[ancestorB].localTransform * B_to_ancestorB;
       if (ancestorB < referenceSkeleton.joints.size()) {
         ancestorB = referenceSkeleton.joints[ancestorB].parent;
@@ -217,12 +216,11 @@ TransformT<T> transformAtoB(
         break;
       }
     } else {
-      // Reached a common ancestor of A and B so we can stop.
+      // Indices are equal -- we've reached the common ancestor.
       break;
     }
   }
 
-  // At this point, ancestorA == ancestorB.
   MT_CHECK(ancestorA == ancestorB, "{} is not {}", ancestorA, ancestorB);
   return B_to_ancestorB.inverse() * A_to_ancestorA;
 }
@@ -253,13 +251,15 @@ JointParametersT<T> skeletonStateToJointParameters(
   JointParametersT<T> result =
       JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    // TODO: parentJoint and parentXF are computed but never used in this overload -- the local
+    // transform is read directly from jointState[i].localTransform. Remove the dead lookup, or
+    // assert it matches parentXF.inverse() * jointState[i].transform.
     const auto parentJoint = skeleton.joints[i].parent;
     TransformT<T> parentXF;
     if (parentJoint != kInvalidIndex) {
       parentXF = state.jointState[parentJoint].transform;
     }
 
-    // parentXF * localXF = jointXF
     const TransformT<T> localXF = state.jointState[i].localTransform;
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParameters(skeleton.joints[i], localXF);
@@ -281,7 +281,7 @@ JointParametersT<T> skeletonStateToJointParameters(
       parentXF = state[parentJoint];
     }
 
-    // parentXF * localXF = jointXF
+    // parentXF * localXF = jointXF, so localXF = parentXF^-1 * jointXF.
     const TransformT<T> localXF = parentXF.inverse() * state[i];
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParameters(skeleton.joints[i], localXF);
@@ -291,18 +291,10 @@ JointParametersT<T> skeletonStateToJointParameters(
 
 namespace {
 
-/// Helper function to convert a local transform to joint parameters respecting active joint params.
-///
-/// This function replaces the original `localTransformToJointParameters` to respect parameter
-/// constraints. It uses different rotation conversion methods based on how many rotation
-/// axes are active for the joint.
-///
-/// @tparam T The scalar type (float or double)
-/// @param[in] joint The joint definition
-/// @param[in] localTransform The local transform to convert
-/// @param[in] activeJointParams Boolean array indicating which joint parameters are active
-/// @param[in] jointIndex The index of this joint
-/// @return Joint parameter vector for this joint
+// Constrained inverse of localTransformToJointParameters: zero-fill any parameter slot whose
+// activeJointParams entry is false, and pick the rotation extraction that matches how many
+// rotation axes are active. This avoids the Euler-angle ambiguity that the unconstrained 3-axis
+// path suffers from when a joint really only has 1 or 2 free rotation DOFs.
 template <typename T>
 [[nodiscard]] Eigen::Vector<T, kParametersPerJoint>
 localTransformToJointParametersRespectingConstraints(
@@ -314,21 +306,17 @@ localTransformToJointParametersRespectingConstraints(
 
   Eigen::Vector<T, kParametersPerJoint> result = Eigen::Vector<T, kParametersPerJoint>::Zero();
 
-  // Handle translation (same as original)
   for (int k = 0; k < 3; ++k) {
     if (activeJointParams[paramOffset + k]) {
       result(k) = localTransform.translation(k) - static_cast<T>(joint.translationOffset(k));
     }
   }
 
-  // Handle rotation based on active parameters
+  // Strip the joint's pre-rotation so we work in the joint's own rotation frame.
   const Eigen::Quaternion<T> localRotation =
       joint.preRotation.template cast<T>().inverse() * localTransform.rotation;
 
-  // Convert to rotation matrix for the new rotation functions
   const Matrix3<T> rotationMatrix = localRotation.toRotationMatrix();
-
-  // Determine which rotation axes are active
 
   std::array<int, 3> activeAxes{};
   size_t numActiveAxes = 0;
@@ -339,25 +327,22 @@ localTransformToJointParametersRespectingConstraints(
   }
 
   if (numActiveAxes == 1) {
-    // Single axis rotation - use rotationMatrixToOneAxisEuler
     const auto axis = activeAxes[0];
     const T angle = rotationMatrixToOneAxisEuler(rotationMatrix, axis);
     result(3 + axis) = angle;
   } else if (numActiveAxes == 2) {
-    // Two axis rotation - use rotationMatrixToTwoAxisEuler
     const Vector2<T> angles =
         rotationMatrixToTwoAxisEuler(rotationMatrix, activeAxes[0], activeAxes[1]);
     result(3 + activeAxes[0]) = angles[0];
     result(3 + activeAxes[1]) = angles[1];
   } else if (numActiveAxes == 3) {
-    // Three axis rotation - use the existing quaternion to Euler conversion (equivalent to
-    // original)
+    // ZYX-then-reverse matches the (Rx * Ry * Rz) convention used elsewhere in momentum and
+    // produces the same parameters as the unconstrained quaternionToEuler path.
     result.template segment<3>(3) = rotationMatrixToEulerZYX(rotationMatrix).reverse();
   } else {
-    // No active rotation axes, don't convert rotation.
+    // numActiveAxes == 0: leave rotation parameters at zero.
   }
 
-  // Handle scale (same as original)
   if (activeJointParams[paramOffset + 6]) {
     result(6) = std::log2(localTransform.scale);
   }
@@ -384,13 +369,15 @@ JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
       JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
 
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+    // TODO: parentJoint and parentXF are computed but never used in this overload -- the local
+    // transform is read directly from jointState[i].localTransform. Remove the dead lookup, or
+    // assert it matches parentXF.inverse() * jointState[i].transform.
     const auto parentJoint = skeleton.joints[i].parent;
     TransformT<T> parentXF;
     if (parentJoint != kInvalidIndex) {
       parentXF = state.jointState[parentJoint].transform;
     }
 
-    // parentXF * localXF = jointXF
     const TransformT<T> localXF = state.jointState[i].localTransform;
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParametersRespectingConstraints(
@@ -423,7 +410,7 @@ JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
       parentXF = state[parentJoint];
     }
 
-    // parentXF * localXF = jointXF
+    // parentXF * localXF = jointXF, so localXF = parentXF^-1 * jointXF.
     const TransformT<T> localXF = parentXF.inverse() * state[i];
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParametersRespectingConstraints(

@@ -52,29 +52,25 @@ CharacterT<T>::CharacterT(
       metadata(metadataIn) {
   if (m) {
     mesh = std::make_unique<Mesh>(*m);
-    // create skinweights copy only if both mesh and skinweights exist
+    // Skin weights are only meaningful in the presence of a mesh; drop them otherwise.
     if (sw) {
       skinWeights = std::make_unique<SkinWeights>(*sw);
     }
   }
 
-  // copy pose blendshapes if present
   if (bs) {
     poseShapes = std::make_unique<PoseShape>(*bs);
   }
 
-  // initialize bindpose inverse list
   if (inverseBindPose.empty()) {
     initInverseBindPose();
   }
   MT_CHECK(this->inverseBindPose.size() == skeleton.joints.size());
 
-  // copy collision geometry if it exists
   if (cg) {
     collision = std::make_unique<CollisionGeometry>(*cg);
   }
 
-  // fill jointMap with identity
   resetJointMap();
 }
 
@@ -93,18 +89,16 @@ CharacterT<T>::CharacterT(const CharacterT& c)
       metadata(c.metadata) {
   if (c.mesh) {
     mesh = std::make_unique<Mesh>(*c.mesh);
-    // create skinweights copy only if both mesh and skinweights exist
+    // Skin weights are only meaningful in the presence of a mesh; drop them otherwise.
     if (c.skinWeights) {
       skinWeights = std::make_unique<SkinWeights>(*c.skinWeights);
     }
   }
 
-  // copy pose blendshapes if present
   if (c.poseShapes) {
     poseShapes = std::make_unique<PoseShape>(*c.poseShapes);
   }
 
-  // copy collision geometry if it exists
   if (c.collision) {
     collision = std::make_unique<CollisionGeometry>(*c.collision);
   }
@@ -121,10 +115,9 @@ CharacterT<T>::~CharacterT() = default;
 
 template <typename T>
 CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
-  // create copy
+  // Copy-and-swap: build a temporary copy, then swap members in for strong exception safety.
   CharacterT<T> tmp(rhs);
 
-  // now swap out
   std::swap(skeleton, tmp.skeleton);
   std::swap(parameterTransform, tmp.parameterTransform);
   std::swap(parameterLimits, tmp.parameterLimits);
@@ -149,21 +142,19 @@ CharacterT<T>& CharacterT<T>::operator=(CharacterT&& rhs) noexcept = default;
 
 template <typename T>
 std::vector<bool> CharacterT<T>::parametersToActiveJoints(const ParameterSet& parameterSet) const {
-  // create a list of joints that are currently enabled
   const auto nJoints = skeleton.joints.size();
   std::vector<bool> result(nJoints, false);
   for (int k = 0; k < parameterTransform.transform.outerSize(); ++k) {
     for (SparseRowMatrixf::InnerIterator it(parameterTransform.transform, k); it; ++it) {
-      // row is influenced joint, col is parameter
+      // Row index encodes (jointIndex * kParametersPerJoint + jointParamSlot); col is the model
+      // parameter that drives it.
       const auto& row = it.row();
       const auto& col = it.col();
 
-      // disable any joints that are not set
       if (!parameterSet.test(col)) {
         continue;
       }
 
-      // set joint as enabled
       const auto jointIndex = row / kParametersPerJoint;
       MT_CHECK(jointIndex < nJoints, "{} vs {}", jointIndex, nJoints);
       result[jointIndex] = true;
@@ -183,7 +174,6 @@ ParameterSet CharacterT<T>::activeJointsToParameters(const std::vector<bool>& ac
 
   ParameterSet result;
 
-  // iterate over all non-zero entries of the matrix
   for (int k = 0; k < parameterTransform.transform.outerSize(); ++k) {
     for (SparseRowMatrixf::InnerIterator it(parameterTransform.transform, k); it; ++it) {
       const auto globalParam = it.row();
@@ -204,7 +194,6 @@ ParameterSet CharacterT<T>::activeJointsToParameters(const std::vector<bool>& ac
   return result;
 }
 
-// create simplified skeleton for enabled parameters
 template <typename T>
 CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoints) const {
   MT_CHECK(
@@ -222,14 +211,16 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   //  start by remapping the skeleton and parameter transform
   // -------------------------------------------------------------------
 
-  // remember parameter mapping from skeleton to anim skeleton
+  // Running count of joints kept in the simplified skeleton.
   size_t jointCount = 0;
 
-  // create a parameter transform with the correct offsets
+  // Build a parameter transform whose offsets are zero for active joints but preserved for
+  // inactive ones, so the reference state below "bakes" the inactive offsets in.
   auto zeroTransform = parameterTransform;
 
   for (size_t jointIndex = 0; jointIndex < activeJoints.size(); ++jointIndex) {
-    // zero out all offsets related to joints that are enabled, keep the disabled ones set
+    // Zero the offsets for active joints; inactive joints keep their offsets so their effect is
+    // captured in the reference state's world transforms below.
     if (activeJoints[jointIndex]) {
       for (size_t o = 0; o < kParametersPerJoint; o++) {
         zeroTransform.offsets(jointIndex * kParametersPerJoint + o) = 0.0f;
@@ -237,29 +228,33 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
     }
   }
 
-  // some state for mapping joints to new joints
+  // Maps each original joint index to its position in `simplifiedSkeleton.joints` (or
+  // kInvalidIndex if the joint is dropped). Populated below as we iterate.
   std::vector<size_t> intermediateJointMap(skeleton.joints.size(), kInvalidIndex);
 
-  // create a reference state for the model where all disabled joints keep their offset influence
+  // Reference state where disabled joints contribute their offsets but enabled joints sit at
+  // their bind values. Used to bake inactive joint offsets into active children.
   const SkeletonState referenceState(
       zeroTransform.apply(ModelParameters::Zero(zeroTransform.numAllModelParameters())),
       skeleton,
       false);
 
-  // create map from anim skeleton to new joints
+  // For each original joint index, the last simplified-joint index seen at-or-above it in the
+  // hierarchy. Used to find the new parent for an active joint after intermediate parents are
+  // pruned.
   std::vector<size_t> lastJoint(skeleton.joints.size(), kInvalidIndex);
 
-  // go over the anim skeleton, check which joints are active and convert them
   std::vector<size_t> simplifiedJointMap(skeleton.joints.size(), kInvalidIndex);
   for (size_t aIndex = 0; aIndex < skeleton.joints.size(); aIndex++) {
     const Joint& j = skeleton.joints[aIndex];
 
-    // find the parent joint that belongs here
+    // Walk up the original hierarchy to find the nearest active ancestor; that becomes this
+    // joint's parent in the simplified skeleton, with the offset re-expressed in the new
+    // parent's local frame.
     Vector3f offset = j.translationOffset;
     size_t currentParent = kInvalidIndex;
     size_t sIndex = aIndex;
     if (j.parent != kInvalidIndex) {
-      // find the last not disabled parent joint
       while (currentParent == kInvalidIndex && sIndex != kInvalidIndex) {
         sIndex = skeleton.joints[sIndex].parent;
         if (sIndex == kInvalidIndex) {
@@ -267,7 +262,8 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
         }
         currentParent = lastJoint[sIndex];
       }
-      // calculate the new offset of the joint in the new parent space
+      // Re-express the joint's translation in the (new) parent's local frame; if no parent
+      // remains, the translation is in world space (root joint case).
       if (sIndex != kInvalidIndex) {
         offset = referenceState.jointState[sIndex].transform.inverse() *
             referenceState.jointState[aIndex].translation();
@@ -276,40 +272,36 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
       }
     }
 
-    // is joint enabled?
     if (activeJoints[aIndex]) {
-      // create copy
       Joint jt = j;
 
-      // set new parent
       jt.parent = currentParent;
 
-      // set updated offset
       jt.translationOffset = offset;
 
-      // update prerotation for the new parent joint by summing up
+      // Compose pre-rotations from every dropped intermediate ancestor into this joint, so the
+      // pruned hierarchy still produces the same orientation chain.
       size_t parent = j.parent;
       while (parent != sIndex && parent != kInvalidIndex) {
         jt.preRotation = skeleton.joints[parent].preRotation * jt.preRotation;
         parent = skeleton.joints[parent].parent;
       }
 
-      // add it
       simplifiedSkeleton.joints.push_back(jt);
 
-      // add jointmap entry
       intermediateJointMap[aIndex] = jointCount;
       jointCount++;
       lastJoint[aIndex] = simplifiedSkeleton.joints.size() - 1;
 
-      // add joint to joint mapping
       simplifiedJointMap[aIndex] = jointCount - 1;
     } else {
+      // Inactive joints are not added to the simplified skeleton; instead, point their entry in
+      // simplifiedJointMap at the nearest active ancestor so consumers (locators, skin weights,
+      // etc.) can still resolve them.
       size_t index = aIndex;
       while (index != kInvalidIndex && intermediateJointMap[index] == kInvalidIndex) {
         index = skeleton.joints[index].parent;
       }
-      // Find the valid joint above this one in the hierarchy:
       MT_THROW_IF(
           index == kInvalidIndex,
           "During skeleton simplification, inactive joint '{}' has no valid parent joint.  "
@@ -325,7 +317,6 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   const ParameterTransform simplifiedTransform = mapParameterTransformJoints(
       parameterTransform, simplifiedSkeleton.joints.size(), intermediateJointMap);
 
-  // create character result
   CharacterT<T> result(simplifiedSkeleton, simplifiedTransform);
   result.name = name;
   result.metadata = metadata;
@@ -347,7 +338,8 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   //  remap the mesh and skinning if present
   // -------------------------------------------------------------------
 
-  // create bind states for both source and target skeleton
+  // Bind states for source and target skeleton — used by the collision-remap block below to
+  // transport collision shapes between the two joint frames.
   const SkeletonState sourceBindState(parameterTransform.bindPose(), skeleton, false);
   const SkeletonState targetBindState(result.parameterTransform.bindPose(), result.skeleton, false);
 
@@ -365,13 +357,14 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
     for (auto&& c : *result.collision) {
       const auto oldParent = c.parent;
       c.parent = result.jointMap[c.parent];
+      // Re-express the collision shape's local transform in the new parent's frame:
+      //   newLocal = targetParentBind^-1 * sourceParentBind * oldLocal
       c.transformation =
           (targetBindState.jointState[c.parent].transform.inverse() *
            sourceBindState.jointState[oldParent].transform * c.transformation);
     }
   }
 
-  // return the map
   return result;
 }
 
@@ -432,18 +425,17 @@ SkinWeights CharacterT<T>::remapSkinWeights(
 
   SkinWeights result = inSkinWeights;
 
-  // go over all vertices
   for (int v = 0; v < result.index.rows(); v++) {
-    // remap the parent bones according to the map
+    // Translate each joint index from the original character to the simplified character.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       result.index(v, i) = static_cast<uint32_t>(jointMap[result.index(v, i)]);
     }
 
-    // join together all weights with the same parent
+    // Multiple original joints may collapse to the same simplified joint; merge their weights
+    // into the first slot and zero the duplicates.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       const auto& joint = result.index(v, i);
       for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
-        // if we have the same joint multiple times, add things up
         if (result.index(v, j) == joint) {
           result.weight(v, i) += result.weight(v, j);
           result.weight(v, j) = 0.0f;
@@ -451,7 +443,8 @@ SkinWeights CharacterT<T>::remapSkinWeights(
       }
     }
 
-    // do a clean up pass, sorting things by weight
+    // Sort influences by weight (descending) so callers that truncate to fewer slots keep the
+    // most significant ones.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
         if (result.weight(v, i) < result.weight(v, j)) {
@@ -542,23 +535,25 @@ SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
 
   SkinnedLocatorList result = locs;
 
-  // create bind states for both source and target skeleton
+  // TODO: sourceBindState and targetBindState are declared but never read in this function.
+  // remapLocators uses them to re-express the locator offset in the new parent frame; the
+  // skinned variant should likely do the equivalent transform on each weighted parent's
+  // contribution, or these declarations should be removed.
   const SkeletonState sourceBindState(
       originalCharacter.parameterTransform.bindPose(), originalCharacter.skeleton, false);
   const SkeletonState targetBindState(parameterTransform.bindPose(), skeleton, false);
 
-  // go over each skinned locator and remap its joint indices
   for (auto& sl : result) {
-    // remap the joint indices according to the map
+    // Translate each parent joint index from the original character to the simplified character.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       sl.parents(i) = static_cast<uint32_t>(jointMap[sl.parents(i)]);
     }
 
-    // join together all weights with the same joint
+    // Multiple original joints may collapse to the same simplified joint; merge their weights
+    // into the first slot and zero the duplicates.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       const auto& joint = sl.parents(i);
       for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
-        // if we have the same joint multiple times, add weights up
         if (sl.parents(j) == joint) {
           sl.skinWeights(i) += sl.skinWeights(j);
           sl.skinWeights(j) = 0.0f;
@@ -566,7 +561,8 @@ SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
       }
     }
 
-    // sort by weight, largest first
+    // Sort influences by weight (descending) so callers that truncate to fewer slots keep the
+    // most significant ones.
     for (int i = 0; i < gsl::narrow_cast<int>(kMaxSkinJoints); i++) {
       for (int j = i + 1; j < gsl::narrow_cast<int>(kMaxSkinJoints); j++) {
         if (sl.skinWeights(i) < sl.skinWeights(j)) {
@@ -598,16 +594,17 @@ LocatorList CharacterT<T>::remapLocators(
 
   LocatorList result;
 
-  // create bind states for both source and target skeleton
+  // Bind states for source and target skeletons; used below to re-express each locator's offset
+  // in the new parent joint's local frame.
   const SkeletonState sourceBindState(
       originalCharacter.parameterTransform.bindPose(), originalCharacter.skeleton, false);
   const SkeletonState targetBindState(parameterTransform.bindPose(), skeleton, false);
 
-  // go over each locator and remap it
   for (const auto& sourceLocator : locs) {
     result.emplace_back(sourceLocator);
     auto& loc = result.back();
     loc.parent = jointMap[loc.parent];
+    // newOffset = targetParentBind^-1 * sourceParentBind * oldOffset
     loc.offset = targetBindState.jointState[loc.parent].transform.inverse() *
         sourceBindState.jointState[sourceLocator.parent].transform * sourceLocator.offset;
   }
@@ -631,14 +628,13 @@ void CharacterT<T>::initParameterTransform() {
 
 template <typename T>
 void CharacterT<T>::resetJointMap() {
-  // fill jointMap with identity
+  // Identity map: jointMap[i] = i. Used when no skeleton simplification has been performed.
   jointMap.resize(skeleton.joints.size());
   std::iota(jointMap.begin(), jointMap.end(), 0);
 }
 
 template <typename T>
 void CharacterT<T>::initInverseBindPose() {
-  // initialize bindpose inverse list
   const SkeletonState bindState(parameterTransform.bindPose(), skeleton, false);
   if (!inverseBindPose.empty()) {
     inverseBindPose.clear();
@@ -774,15 +770,16 @@ CharacterT<T> CharacterT<T>::bake(
   CharacterT<T> result = *this;
   MT_CHECK(result.mesh);
 
-  // 2. Blend-shape baking (you already had this, just guarded).
+  // 2. Blend-shape baking: replace the rest-pose vertices with the blend-shape evaluation.
   if (bakeBlendShapes && this->blendShape) {
     const BlendWeights blendWeights = extractBlendWeights(result.parameterTransform, modelParams);
     result.mesh->vertices = this->blendShape->template computeShape<float>(blendWeights);
   }
 
-  // 3. Scale (or any joint transform) baking
+  // 3. Scale (or any joint transform) baking: skin the rest mesh through the posed skeleton so
+  // the resulting vertices already include the joint transforms; then strip those parameters
+  // below.
   if (bakeScales && this->skinWeights) {
-    // Evaluate the posed skeleton with modelParams.
     const SkeletonState posed(
         result.parameterTransform.apply(modelParams),
         result.skeleton,

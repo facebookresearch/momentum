@@ -38,10 +38,26 @@ namespace momentum {
 /// - Forward skinning: Applying joint transformations to deform the mesh
 /// - Inverse skinning: Reversing the deformation to return to bind pose
 
-/// Computes the skinning transforms from joint states and inverse bind poses
+// clang-format off
+/// @par Overload selection guide
 ///
-/// This is a helper function that computes the combined transformation matrices
-/// used for skinning. Each transform is computed as: jointState.transform * inverseBindPose.
+/// | I have...                        | I want...               | Use this overload                                         |
+/// |----------------------------------|-------------------------|-----------------------------------------------------------|
+/// | `SkeletonState` + `Mesh`         | Skinned mesh            | `applySSD(ibp, skin, mesh, state, outMesh)`               |
+/// | `SkeletonState` + points         | Skinned points          | `applySSD(ibp, skin, points, state)` -> returns vector    |
+/// | Precomputed skinning transforms  | Skinned mesh (batched)  | `computeSkinningTransforms()` once, then `applySSD(skin, mesh, transforms, outMesh)` |
+/// | World transforms (no skel state) | Skinned mesh            | `applySSD(ibp, skin, mesh, worldTransforms, outMesh)`     |
+/// | `SkeletonState` + vertex index   | Inverse skin transform  | `getInverseSSDTransformation(ibp, skin, state, index)`    |
+/// | `SkeletonState` + posed points   | Bind-pose points        | `applyInverseSSD(ibp, skin, points, state)`               |
+///
+/// For multi-frame animation with the same character, precompute skinning transforms
+/// once per frame with `computeSkinningTransforms()` and reuse across mesh/point calls.
+/// `ibp` = `inverseBindPose` throughout.
+// clang-format on
+
+/// Computes the skinning transforms from joint states and inverse bind poses.
+///
+/// Each transform is computed as: `jointState.transform * inverseBindPose`.
 ///
 /// @param jointState Span of joint states containing current transformations
 /// @param inverseBindPose Inverse bind pose transformations for each joint

@@ -40,20 +40,14 @@ struct PoseShape {
   /// Each column corresponds to a quaternion component (x,y,z,w) of a joint.
   MatrixXf shapeVectors;
 
-  /// Computes the deformed shape based on the current skeleton state.
+  /// Computes the deformed shape vertices for the given skeleton pose.
   ///
-  /// @param state Current state of the skeleton containing joint rotations
-  /// @return Vector of 3D vertex positions representing the deformed shape
-  /// @throws If baseShape.size() != shapeVectors.rows()
+  /// @return Flattened 3D vertex positions, length `baseShape.size() / 3`.
+  /// @throws If `baseShape.size() != shapeVectors.rows()`.
   [[nodiscard]] std::vector<Vector3f> compute(const SkeletonState& state) const;
 
-  /// Checks if this PoseShape is approximately equal to another.
-  ///
-  /// Two PoseShape objects are considered approximately equal if all their
-  /// corresponding members are approximately equal.
-  ///
-  /// @param poseShape The PoseShape to compare with
-  /// @return True if the PoseShape objects are approximately equal
+  /// Returns true if all members are approximately equal (uses `Eigen::isApprox`
+  /// for floating-point members and exact equality for `baseJoint`/`jointMap`).
   [[nodiscard]] inline bool isApprox(const PoseShape& poseShape) const {
     return (
         (baseJoint == poseShape.baseJoint) && baseRot.isApprox(poseShape.baseRot) &&

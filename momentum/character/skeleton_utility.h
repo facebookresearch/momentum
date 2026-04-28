@@ -27,7 +27,8 @@ inline constexpr float kDefaultExtrapolateMaxDelta = 0.4f; // ~23 degrees
 /// Extrapolates model parameters considering active parameters. The extrapolation is done by first
 /// clamping the difference between current and previous parameters to the range [-maxDelta,
 /// maxDelta] for each active parameter, and then scaling this clamped difference by `factor`.
-/// Returns the current parameters when sizes mismatch.
+/// Inactive parameters (those for which `activeParams.test(i)` is false) are passed through
+/// unchanged from `current`. Returns the current parameters when sizes mismatch.
 [[nodiscard]] ModelParameters extrapolateModelParameters(
     const ModelParameters& previous,
     const ModelParameters& current,

@@ -26,6 +26,26 @@ namespace momentum {
 /// - S is the uniform scale factor
 ///
 /// Each joint has 7 parameters: 3 translation, 3 rotation, and 1 scale.
+///
+/// The ordering has direct implications for derivative computation:
+///
+/// - **Translation Jacobian**: Because translation is applied in the parent's frame
+///   (before local rotation), the translation derivative for axis `i` is simply
+///   `translationAxis.col(i)` — the parent's rotated axis direction. It does NOT
+///   depend on the joint's own rotation.
+///
+/// - **Rotation Jacobian**: Because rotation is applied after translation and
+///   pre-rotation, the rotation derivative for a point `p` is
+///   `rotationAxis.col(i).cross(p - jointPosition)`. The pre-rotation (`Rpre`) is
+///   baked into `rotationAxis` and is not a free parameter.
+///
+/// - **Scale Jacobian**: Because scale is applied last (innermost), it scales the
+///   offset from the joint position: `(p - jointPosition) * ln(2)` (since scale
+///   is stored as `exp2(parameter[6])`).
+///
+/// Swapping the order (e.g., applying rotation before translation) would change
+/// which frame the translation operates in, producing incorrect Jacobians in all
+/// error functions.
 template <typename T>
 struct JointStateT {
   /// Local transformation relative to parent joint
@@ -61,7 +81,14 @@ struct JointStateT {
   /// @param joint The joint definition containing offset and pre-rotation
   /// @param parameters The 7 joint parameters [tx, ty, tz, rx, ry, rz, scale]
   /// @param parentState Optional parent joint state for hierarchical transformations
-  /// @param computeDeriv Whether to compute derivative information (translation/rotation axes)
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   void set(
       const JointT<T>& joint,
       const JointVectorT<T>& parameters,
@@ -117,6 +144,16 @@ struct JointStateT {
   /// Access the joint's local scale factor
   ///
   /// This scale propagates to all descendant joints
+  ///
+  /// The scale parameter is stored as a log2 value and applied as `exp2(parameter[6])`.
+  /// This means:
+  /// - Parameter value 0.0 → scale = 1.0 (no scaling)
+  /// - Parameter value 1.0 → scale = 2.0 (double size)
+  /// - Parameter value -1.0 → scale = 0.5 (half size)
+  /// - The Jacobian of scale involves `exp2(param) * ln(2)`, not 1.0
+  ///
+  /// This encoding keeps scale always positive and makes the parameter space
+  /// more linear for optimization (uniform steps in log-space = uniform ratios).
   [[nodiscard]] const T& localScale() const {
     return localTransform.scale;
   }

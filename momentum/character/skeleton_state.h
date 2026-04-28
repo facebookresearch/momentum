@@ -56,7 +56,14 @@ struct SkeletonStateT {
   ///
   /// @param parameters Joint parameters for all joints in the skeleton
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
-  /// @param computeDeriv Whether to compute derivative information for the joints
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   SkeletonStateT(
       const JointParametersT<T>& parameters,
       const Skeleton& referenceSkeleton,
@@ -66,7 +73,14 @@ struct SkeletonStateT {
   ///
   /// @param parameters Joint parameters for all joints in the skeleton (moved from)
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
-  /// @param computeDeriv Whether to compute derivative information for the joints
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   SkeletonStateT(
       JointParametersT<T>&& parameters,
       const Skeleton& referenceSkeleton,
@@ -83,7 +97,14 @@ struct SkeletonStateT {
   ///
   /// @param jointParameters New joint parameters for all joints
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
-  /// @param computeDeriv Whether to compute derivative information for the joints
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   void set(
       const JointParametersT<T>& jointParameters,
       const Skeleton& referenceSkeleton,
@@ -93,7 +114,14 @@ struct SkeletonStateT {
   ///
   /// @param jointParameters New joint parameters for all joints (moved from)
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
-  /// @param computeDeriv Whether to compute derivative information for the joints
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   void set(
       JointParametersT<T>&& jointParameters,
       const Skeleton& referenceSkeleton,
@@ -135,7 +163,14 @@ struct SkeletonStateT {
   /// Updates the joint states based on the current joint parameters
   ///
   /// @param referenceSkeleton The skeleton structure defining joint hierarchy
-  /// @param computeDeriv Whether to compute derivative information for the joints
+  /// @param computeDeriv If true, computes `translationAxis` and `rotationAxis`
+  ///   matrices needed for Jacobian computation in error functions. Set to false
+  ///   ONLY when the state is used for visualization, FK output inspection, or IO —
+  ///   never when the state will be passed to a solver or error function.
+  ///   Skipping derivatives saves ~30% of per-joint FK cost.
+  ///   When false, `derivDirty` is set to true and derivative accessors
+  ///   (`getRotationDerivative`, `getTranslationDerivative`, `getScaleDerivative`)
+  ///   return invalid results.
   void set(const Skeleton& referenceSkeleton, bool computeDeriv);
 
   /// Copies joint states from another skeleton state with a different scalar type
@@ -165,9 +200,37 @@ TransformT<T> transformAtoB(
     const Skeleton& referenceSkeleton,
     const SkeletonStateT<T>& skelState);
 
+/// @name Inverse FK: Skeleton State → Joint Parameters
+///
+/// Four variants exist for converting skeleton state back to joint parameters:
+///
+// clang-format off
+/// | Scenario                          | Function                                              |
+/// |-----------------------------------|-------------------------------------------------------|
+/// | General 3-axis joints             | `skeletonStateToJointParameters(state, skeleton)`     |
+/// | Joints with <3 rotation DOF       | `skeletonStateToJointParametersRespectingActiveParameters(state, skeleton, activeJointParams)` |
+/// | Starting from transforms          | `skeletonStateToJointParameters(transforms, skeleton)` |
+/// | Transforms + constrained DOF      | `skeletonStateToJointParametersRespectingActiveParameters(transforms, skeleton, activeJointParams)` |
+// clang-format on
+///
+/// The "RespectingActiveParameters" variants use `rotationMatrixToOneAxisEuler` or
+/// `rotationMatrixToTwoAxisEuler` for joints with restricted DOF, avoiding Euler
+/// angle ambiguity that the standard 3-axis extraction suffers from.
+/// @{
+
 /// Invert the skeleton state (global transforms in world space) back to joint parameters (Euler
 /// angles in local space).  Note that this conversion is not unique due to the non-uniqueness of
 /// Euler angle conversion.
+///
+/// @warning Euler angle extraction is numerically unstable near gimbal lock
+/// (±90° pitch / Y-axis rotation). Near these configurations:
+/// - Float precision: round-trip FK → inverse FK can shift angles by ~1e-3 radians
+/// - Double precision: ~1e-10 radians
+/// - The extracted angles may "flip" to an equivalent but numerically different representation
+///
+/// For joints with fewer than 3 rotation DOF, prefer
+/// `skeletonStateToJointParametersRespectingActiveParameters()` which uses
+/// constrained Euler extraction and avoids the ambiguity entirely.
 template <typename T>
 [[nodiscard]] JointParametersT<T> skeletonStateToJointParameters(
     const SkeletonStateT<T>& state,
@@ -223,5 +286,7 @@ template <typename T>
     const TransformListT<T>& state,
     const Skeleton& skeleton,
     const VectorX<bool>& activeJointParams);
+
+/// @}
 
 } // namespace momentum

@@ -13,46 +13,35 @@
 
 namespace momentum {
 
-/// A skinned locator is a locator which can be attached to multiple bones.
-/// The locator's position is defined relative to the rest pose of the character (and not
-/// local to a single parent bone as with a regular Locator) and its position at runtime is
-/// determined by blending the skinning transforms (using LBS).
+/// A locator attached to multiple joints, with its runtime position determined by
+/// blending the skinning transforms (LBS) of those joints.
 ///
-/// The purpose of the SkinnedLocator is to model mocap markers attached to the actor's skin:
-/// the location of points on e.g. the shoulder is more accurately modeled by blending
-/// multiple transforms.  In addition, the locator can be constrained to slide along the
-/// surface of the mesh using e.g. the SkinnedLocatorTriangleErrorFunction.
-///
-/// Locators can be used for various purposes such as tracking specific points
-/// on a character, defining constraints, or serving as targets for inverse kinematics.
+/// Unlike a regular `Locator` (which is local to a single parent joint), a
+/// `SkinnedLocator`'s position is defined relative to the character's rest pose.
+/// This is intended to model mocap markers attached to the actor's skin: points on
+/// e.g. the shoulder are more accurately modeled by blending multiple joint
+/// transforms. The locator can also be constrained to slide along the mesh surface
+/// using e.g. `SkinnedLocatorTriangleErrorFunction`.
 struct SkinnedLocator {
-  /// Name identifier for the locator
   std::string name;
 
-  /// Index of the parent joints in the skeleton.  The final position of the locator
-  /// is determined by blending the transforms from each (valid) parent.
+  /// Indices of the parent joints used for skinning. The final position is the
+  /// `skinWeights`-weighted blend of transforms from each (valid) parent.
   Eigen::Matrix<uint32_t, kMaxSkinJoints, 1> parents;
 
-  /// Skinning weight for each parent joint.
+  /// Skinning weight for each entry in `parents`. Typically sums to 1.0.
   Eigen::Matrix<float, kMaxSkinJoints, 1> skinWeights;
 
-  /// Position relative to rest pose of the character
+  /// Position in the character's rest-pose coordinate frame.
   Vector3f position = Vector3f::Zero();
 
-  /// Influence weight of this locator when used in constraints
+  /// Influence weight when used as a constraint in error functions.
   float weight = 1.0f;
 
   /// Offset from the skin surface in centimeters, used when solving for body shape.
   /// Accounts for physical marker thickness (e.g. half the marker diameter).
   float skinOffset = 0.0f;
 
-  /// Creates a locator with the specified properties
-  ///
-  /// @param name Identifier for the locator
-  /// @param parents Indices of the parent joints
-  /// @param weights Skinning weights for the parent joints
-  /// @param weight Influence weight in constraints
-  /// @param skinOffset Offset from the skin surface in centimeters
   SkinnedLocator(
       const std::string& name = "uninitialized",
       const Eigen::Matrix<uint32_t, kMaxSkinJoints, 1>& parents =
@@ -69,10 +58,7 @@ struct SkinnedLocator {
         weight(weight),
         skinOffset(skinOffset) {}
 
-  /// Compares two locators for equality, using approximate comparison for floating-point values
-  ///
-  /// @param locator The locator to compare with
-  /// @return True if all properties are equal (or approximately equal for floating-point values)
+  /// Equality comparison; uses approximate (`isApprox`) comparison for floating-point fields.
   inline bool operator==(const SkinnedLocator& locator) const {
     return (
         (name == locator.name) && (parents == locator.parents) &&

@@ -53,25 +53,30 @@ VectorXf BlendShape::estimateCoefficients(
   const Map<const VectorXf> baseVec(&baseShape_[0][0], baseShape_.size() * 3);
   const Map<const VectorXf> vertexVec(&vertices[0][0], vertices.size() * 3);
 
-  // if we're not using weights, use default pipeline
+  // Unweighted path: reuse the cached SVD of shapeVectors_ across calls. Note that
+  // `regularization` is ignored here — the SVD-based pseudoinverse already provides
+  // implicit regularization on near-zero singular values.
+  // TODO: regularization is silently ignored on this branch; either honor it (e.g.
+  // damped least squares) or document it on the header.
   if (weights.size() != static_cast<Eigen::Index>(vertices.size())) {
-    // check if factorization is valid
     if (!factorizationValid_) {
       factorization_.compute(shapeVectors_, Eigen::ComputeThinU | Eigen::ComputeThinV);
       factorizationValid_ = true;
     }
 
-    // estimate the shapeVectors for the given vertices
     return factorization_.solve(vertexVec - baseVec);
   } else {
-    // if we have weights, we definitely have to compute a new factorization that incorporates the
-    // weights
+    // Weighted path: solve the regularized weighted least-squares problem
+    //   min ||W (shapeVectors_ x - (vertexVec - baseVec))||^2 + regularization^2 ||x||^2
+    // by stacking the weighted system on top of an identity block (Tikhonov form)
+    // and solving the resulting normal equations with LDLT. Each per-vertex weight is
+    // replicated 3x to cover x/y/z components. The cached SVD is not used here and is
+    // not invalidated, since shapeVectors_ itself is unchanged.
     VectorXf wts(weights.size() * 3);
     Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(0), weights.size()) = weights;
     Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(1), weights.size()) = weights;
     Eigen::Map<VectorXf, 0, Eigen::Stride<1, 3>>(&wts(2), weights.size()) = weights;
 
-    // calculate weighted coefficient matrix and rhs
     const auto rows = shapeVectors_.rows();
     const auto cols = shapeVectors_.cols();
     MatrixXf A(rows + cols, cols);
@@ -83,7 +88,6 @@ VectorXf BlendShape::estimateCoefficients(
     VectorXf b = VectorXf::Zero(rows + cols);
     b.topRows(rows) = (vertexVec - baseVec).cwiseProduct(wts);
 
-    // solve normal equations to get results
     return (A.transpose() * A).ldlt().solve(A.transpose() * b);
   }
 }
@@ -102,7 +106,8 @@ void BlendShape::setShapeVector(
     std::string_view name) {
   BlendShapeBase::setShapeVector(index, shape, name);
 
-  // mark as not up to date
+  // shapeVectors_ has changed, so the cached SVD used by estimateCoefficients
+  // must be recomputed on next use.
   factorizationValid_ = false;
 }
 

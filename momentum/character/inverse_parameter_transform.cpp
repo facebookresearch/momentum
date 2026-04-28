@@ -95,7 +95,7 @@ ModelParameters applyModelParameterScales(
             scaleParametersSubset.size());
         modelIdentity[iParam] = scaleParametersSubset(subsetParamIdx);
 
-        // Add the identity parameters into the motion:
+        // Add the identity parameters into the motion.
         if (!hasScaleParametersInMotion) {
           for (Eigen::Index jFrame = 0; jFrame < motion.cols(); ++jFrame) {
             motion(iParam, jFrame) += scaleParametersSubset(subsetParamIdx);

@@ -14,7 +14,8 @@ namespace momentum {
 
 template <typename T>
 SkeletonT<T>::SkeletonT(JointList joints_in) : joints(std::move(joints_in)) {
-  // Ensure some invariants of the skeleton:
+  // Invariant: parents must precede children in the joint list. Many algorithms
+  // (e.g. forward kinematics, getChildrenJoints) rely on this topological order.
   for (size_t iJoint = 0; iJoint < joints.size(); ++iJoint) {
     MT_CHECK(joints[iJoint].parent == kInvalidIndex || joints[iJoint].parent < iJoint);
   }
@@ -54,7 +55,8 @@ std::vector<size_t> SkeletonT<T>::getChildrenJoints(const size_t jointId, const 
   std::vector<int> jointDistance(joints.size(), -1);
   jointDistance[jointId] = 0;
 
-  // traversal assuming parentJoint < childJoint
+  // Single forward pass works because the constructor guarantees parent index <
+  // child index, so every descendant of jointId has a higher index.
   for (size_t jointIter = jointId + 1; jointIter < joints.size(); ++jointIter) {
     const auto jointParent = joints[jointIter].parent;
     const int distParent = (jointParent == kInvalidIndex) ? -1 : jointDistance[jointParent];

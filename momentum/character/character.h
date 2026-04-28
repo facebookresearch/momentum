@@ -75,10 +75,8 @@ struct CharacterT {
 
   /// @}
 
-  /// Default constructor
   CharacterT();
 
-  /// Destructor
   ~CharacterT();
 
   /// Constructs a character with the specified components
@@ -113,16 +111,10 @@ struct CharacterT {
       const SkinnedLocatorList& skinnedLocators = {},
       std::string_view metadataIn = "");
 
-  /// Copy constructor
   CharacterT(const CharacterT& c);
-
-  /// Move constructor
   CharacterT(CharacterT&& c) noexcept;
 
-  /// Copy assignment operator
   CharacterT& operator=(const CharacterT& rhs);
-
-  /// Move assignment operator
   CharacterT& operator=(CharacterT&& rhs) noexcept;
 
   /// Creates a simplified character with only joints affected by the specified parameters

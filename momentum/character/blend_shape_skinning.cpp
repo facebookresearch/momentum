@@ -68,7 +68,6 @@ void skinWithBlendShapes(
   const auto& inverseBindPose = character.inverseBindPose;
   const auto& skin = *character.skinWeights;
 
-  // some sanity checks
   MT_CHECK(
       state.jointState.size() == inverseBindPose.size(),
       "{} is not {}",
@@ -85,7 +84,8 @@ void skinWithBlendShapes(
       skin.weight.rows(),
       character.mesh->vertices.size());
 
-  // first create a list of transformations from bindpose to final output pose
+  // Compose per-joint world transforms with the inverse bind pose, so each matrix
+  // maps a vertex from bind-pose space directly to the posed (skinned) space.
   std::vector<Eigen::Matrix4<T>> transformations(state.jointState.size());
   for (size_t i = 0; i < state.jointState.size(); i++) {
     transformations[i] = (state.jointState[i].transform * inverseBindPose[i].cast<T>()).matrix();
@@ -100,8 +100,6 @@ void skinWithBlendShapes(
 
   outputMesh.vertices.resize(character.mesh->vertices.size(), Eigen::Vector3<T>::Zero());
 
-  // go over all vertices and perform transformation
-  // SSE version for linux/windows
   dispenso::parallel_for(
       dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
       [&blendWeights, &character, &transformations, &outputMesh](

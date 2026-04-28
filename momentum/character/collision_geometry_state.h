@@ -53,17 +53,22 @@ struct CollisionGeometryStateT {
 /// Determines if two tapered capsules overlap.
 ///
 /// @param originA Origin of the first capsule
-/// @param directionA Direction vector of the first capsule
+/// @param directionA Direction vector of the first capsule (length encodes the segment length)
 /// @param radiiA Radii at the endpoints of the first capsule
-/// @param deltaA Difference between radii of the first capsule
+/// @param deltaA Signed difference between radii of the first capsule (radiiA[1] - radiiA[0])
 /// @param originB Origin of the second capsule
-/// @param directionB Direction vector of the second capsule
+/// @param directionB Direction vector of the second capsule (length encodes the segment length)
 /// @param radiiB Radii at the endpoints of the second capsule
-/// @param deltaB Difference between radii of the second capsule
-/// @param outDistance Output parameter for the distance between the closest points
-/// (normalized). No modification on return false.
-/// @param outOverlap Output parameter for the overlap amount (positive if overlapping)
-/// @return True if the capsules overlap, false otherwise
+/// @param deltaB Signed difference between radii of the second capsule (radiiB[1] - radiiB[0])
+/// @param outDistance Output: distance between the closest points on the two centerline
+///   segments. Only written when the closest-point computation succeeds; left unchanged
+///   when the function returns false due to an early exit from `closestPointsOnSegments`.
+/// @param outClosestPoints Output: parametric positions in [0, 1] along each segment of
+///   the closest points (outClosestPoints[0] for capsule A, outClosestPoints[1] for B).
+/// @param outOverlap Output: amount of overlap (positive if overlapping). Only written
+///   when the closest-point computation succeeds.
+/// @return True if the capsules overlap and the closest points are not coincident
+///   (separation >= ~1e-8 for float, ~1e-17 for double).
 template <typename T>
 bool overlaps(
     const Vector3<T>& originA,
@@ -77,10 +82,10 @@ bool overlaps(
     T& outDistance,
     Vector2<T>& outClosestPoints,
     T& outOverlap) {
-  // Sum of the maximum radii of the tapered capsules
+  // Use the sum of max radii as a proximity cutoff so closestPointsOnSegments can early-out
+  // when segments are guaranteed too far apart for the capsules to overlap.
   const T maxRadiiSum = radiiA.maxCoeff() + radiiB.maxCoeff();
 
-  // Determine the closest points on the segments of the tapered capsules
   auto [success, closestDist, closestPoints] =
       closestPointsOnSegments<T>(originA, directionA, originB, directionB, maxRadiiSum);
 
@@ -88,18 +93,18 @@ bool overlaps(
     return false;
   }
 
-  // Store the closest points to the output argument
   outClosestPoints = closestPoints;
 
-  // Calculate the radii at the closest points
+  // Linearly interpolate each tapered radius at the closest-point parameter along its segment,
+  // then sum to get the combined radius the gap must clear for the capsules to be disjoint.
   const T radiusAtClosestPoints =
       radiiA[0] + closestPoints[0] * deltaA + radiiB[0] + closestPoints[1] * deltaB;
 
-  // Determine the overlap and distance between the closest points
   outOverlap = radiusAtClosestPoints - closestDist;
   outDistance = closestDist;
 
-  // Check for overlap and sufficient proximity
+  // Reject coincident centerlines (closestDist below Eps) to avoid degenerate contact normals
+  // downstream when the two segments are effectively the same line.
   return (outOverlap > T(0)) && (closestDist >= Eps<T>(1e-8, 1e-17));
 }
 

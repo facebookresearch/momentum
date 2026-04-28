@@ -27,8 +27,7 @@ namespace momentum {
 ///
 /// 2. Weight extraction functions:
 ///    - extractBlendWeights(): Use to get blend shape weights from model parameters for
-///    identity/shape
-///      blend shapes (e.g., body shape variations).
+///      identity/shape blend shapes (e.g., body shape variations).
 ///    - extractFaceExpressionBlendWeights(): Use to get blend shape weights specifically for facial
 ///      expressions, which are stored separately from regular blend shapes.
 
@@ -36,12 +35,12 @@ namespace momentum {
 ///
 /// Computes the final vertex positions by applying blend shape offsets to the base mesh,
 /// then transforming the resulting vertices using linear blend skinning based on the
-/// skeleton state. Use this version when you already have pre-calculated blend weights.
+/// skeleton state. Use this overload when you already have pre-calculated blend weights.
 ///
 /// @param character Character containing mesh, blend shapes, and skinning data
 /// @param state Current pose of the skeleton
 /// @param blendWeights Weights for each blend shape
-/// @param outputMesh Mesh to store the resulting deformed vertices
+/// @param[out] outputMesh Resulting deformed mesh
 template <typename T>
 void skinWithBlendShapes(
     const Character& character,
@@ -51,14 +50,13 @@ void skinWithBlendShapes(
 
 /// Applies blend shape deformations and skeletal transformations to a mesh.
 ///
-/// Overload that extracts blend shape weights from model parameters before skinning.
-/// Use this version when working with high-level character animation where you have
-/// model parameters rather than direct blend weights.
+/// Overload that extracts blend shape weights from `modelParams` via the character's
+/// parameter transform before skinning.
 ///
 /// @param character Character containing mesh, blend shapes, and skinning data
 /// @param state Current pose of the skeleton
-/// @param modelParams Model parameters containing blend shape weights
-/// @param outputMesh Mesh to store the resulting deformed vertices
+/// @param modelParams Model parameters; blend shape weights are extracted from these
+/// @param[out] outputMesh Resulting deformed mesh
 template <typename T>
 void skinWithBlendShapes(
     const Character& character,
