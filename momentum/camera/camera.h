@@ -28,21 +28,15 @@ namespace momentum {
 template <typename T>
 class IntrinsicsModelT {
  public:
-  /// Constructor for intrinsics model.
-  ///
   /// @param imageWidth Width of the image in pixels
   /// @param imageHeight Height of the image in pixels
   IntrinsicsModelT(int32_t imageWidth, int32_t imageHeight)
       : imageWidth_(imageWidth), imageHeight_(imageHeight) {}
   virtual ~IntrinsicsModelT() = default;
 
-  /// Get the focal length in the x direction.
-  ///
   /// @return Focal length fx in pixels
   [[nodiscard]] virtual T fx() const = 0;
 
-  /// Get the focal length in the y direction.
-  ///
   /// @return Focal length fy in pixels
   [[nodiscard]] virtual T fy() const = 0;
 
@@ -62,13 +56,16 @@ class IntrinsicsModelT {
 
   /// Compute the Jacobian of the projection function with respect to 3D camera coordinates.
   ///
+  /// The returned point and Jacobian carry depth (z) through unchanged in their third
+  /// component so callers can chain projection with depth-aware operations.
+  ///
   /// @param point 3D point in camera coordinate space
-  /// @return Tuple of (projected point, Jacobian matrix, valid flag)
+  /// @return Tuple of (projected point [u, v, z], Jacobian matrix, valid flag)
   ///
   /// The Jacobian is a 3x3 matrix where:
   /// - Row 0: [du/dx, du/dy, du/dz]
   /// - Row 1: [dv/dx, dv/dy, dv/dz]
-  /// - Row 2: [0, 0, 1] (for homogeneous coordinates)
+  /// - Row 2: [0, 0, 1] (depth pass-through: dz/dx, dz/dy, dz/dz)
   [[nodiscard]] virtual std::tuple<Eigen::Vector3<T>, Eigen::Matrix<T, 3, 3>, bool> projectJacobian(
       const Eigen::Vector3<T>& point) const = 0;
 
@@ -120,59 +117,46 @@ class IntrinsicsModelT {
   [[nodiscard]] virtual std::shared_ptr<const IntrinsicsModelT<T>>
   crop(int32_t top, int32_t left, int32_t newWidth, int32_t newHeight) const = 0;
 
-  /// Get the image width.
-  ///
   /// @return Image width in pixels
   [[nodiscard]] int32_t imageWidth() const {
     return imageWidth_;
   }
 
-  /// Get the image height.
-  ///
   /// @return Image height in pixels
   [[nodiscard]] int32_t imageHeight() const {
     return imageHeight_;
   }
 
-  /// Get the number of intrinsic parameters for this model.
-  ///
   /// @return Number of parameters (e.g., 4 for pinhole, 14 for OpenCV)
   [[nodiscard]] virtual Eigen::Index numIntrinsicParameters() const = 0;
 
   /// Get all intrinsic parameters as a vector.
   ///
-  /// Parameter order is model-specific but consistent with setIntrinsicParameters().
-  ///
-  /// @return Vector of intrinsic parameters
+  /// Parameter order is model-specific but consistent with setIntrinsicParameters()
+  /// and getParameterNames().
   [[nodiscard]] virtual Eigen::VectorX<T> getIntrinsicParameters() const = 0;
 
   /// Set all intrinsic parameters from a vector.
   ///
-  /// @param params Vector of parameters (must match numIntrinsicParameters())
+  /// @param params Vector of parameters (must match numIntrinsicParameters() and the
+  ///   order returned by getParameterNames())
   virtual void setIntrinsicParameters(const Eigen::Ref<const Eigen::VectorX<T>>& params) = 0;
 
-  /// Create a deep copy of this intrinsics model.
-  ///
-  /// @return New shared pointer to a mutable copy of this model
+  /// @return New shared pointer to a mutable deep copy of this intrinsics model
   [[nodiscard]] virtual std::shared_ptr<IntrinsicsModelT<T>> clone() const = 0;
 
-  /// Get the name identifier for this camera.
-  ///
-  /// @return Name string (used for parameter transform naming)
+  /// @return Name identifier used for parameter transform naming (e.g., "cam0" yields
+  ///   parameter names like "intrinsics_cam0_fx")
   [[nodiscard]] const std::string& name() const {
     return name_;
   }
 
-  /// Set the name identifier for this camera.
-  ///
-  /// @param name Name string (e.g., "cam0" produces "intrinsics_cam0_fx")
   void setName(const std::string& name) {
     name_ = name;
   }
 
-  /// Get the names of intrinsic parameters for this model.
-  ///
-  /// @return Vector of parameter names (e.g., {"fx", "fy", "cx", "cy"})
+  /// @return Per-parameter names matching the order of getIntrinsicParameters()
+  ///   (e.g., {"fx", "fy", "cx", "cy"} for pinhole)
   [[nodiscard]] virtual std::vector<std::string> getParameterNames() const = 0;
 
   /// Compute the Jacobian of projection w.r.t. intrinsic parameters.
@@ -212,58 +196,40 @@ class CameraT {
       const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld =
           Eigen::Transform<T, 3, Eigen::Affine>::Identity());
 
-  /// Get the image width from the intrinsics model.
-  ///
   /// @return Image width in pixels
   [[nodiscard]] auto imageWidth() const {
     return intrinsicsModel_->imageWidth();
   }
 
-  /// Get the image height from the intrinsics model.
-  ///
   /// @return Image height in pixels
   [[nodiscard]] auto imageHeight() const {
     return intrinsicsModel_->imageHeight();
   }
 
-  /// Get the focal length in x direction from the intrinsics model.
-  ///
   /// @return Focal length fx in pixels
   [[nodiscard]] auto fx() const {
     return intrinsicsModel_->fx();
   }
 
-  /// Get the focal length in y direction from the intrinsics model.
-  ///
   /// @return Focal length fy in pixels
   [[nodiscard]] auto fy() const {
     return intrinsicsModel_->fy();
   }
 
-  /// Get the intrinsics model.
-  ///
-  /// @return Shared pointer to the intrinsics model
   [[nodiscard]] std::shared_ptr<const IntrinsicsModelT<T>> intrinsicsModel() const {
     return intrinsicsModel_;
   }
 
-  /// Get the eye-from-world transformation matrix.
-  ///
-  /// @return Reference to the transformation from world space to camera space
+  /// @return Transform from world space to camera/eye space
   [[nodiscard]] const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld() const {
     return eyeFromWorld_;
   }
 
-  /// Get the world-from-eye transformation matrix.
-  ///
-  /// @return Transformation from camera space to world space
+  /// @return Transform from camera/eye space to world space (inverse of eyeFromWorld())
   [[nodiscard]] Eigen::Transform<T, 3, Eigen::Affine> worldFromEye() const {
     return eyeFromWorld_.inverse();
   }
 
-  /// Set the eye-from-world transformation matrix.
-  ///
-  /// @param eyeFromWorld New transformation from world space to camera space
   void setEyeFromWorld(const Eigen::Transform<T, 3, Eigen::Affine>& eyeFromWorld) {
     eyeFromWorld_ = eyeFromWorld;
   }
@@ -359,9 +325,6 @@ class CameraT {
     return CameraT<T>(intrinsicsModel_->resize(imageWidth, imageHeight), eyeFromWorld_);
   }
 
-  /// Get a reference to the intrinsics model.
-  ///
-  /// @return Const reference to the intrinsics model
   [[nodiscard]] const IntrinsicsModelT<T>& getIntrinsicsModel() const {
     return *intrinsicsModel_;
   }
@@ -454,23 +417,16 @@ class OpenCVFisheyeIntrinsicsModelT : public IntrinsicsModelT<T> {
     return fy_;
   }
 
-  /// Get the principal point x-coordinate.
-  ///
   /// @return Principal point cx in pixels
   [[nodiscard]] T cx() const {
     return cx_;
   }
 
-  /// Get the principal point y-coordinate.
-  ///
   /// @return Principal point cy in pixels
   [[nodiscard]] T cy() const {
     return cy_;
   }
 
-  /// Get the distortion parameters.
-  ///
-  /// @return Reference to the OpenCV fisheye distortion parameters
   [[nodiscard]] const OpenCVFisheyeDistortionParametersT<T>& distortionParameters() const {
     return distortionParams_;
   }
@@ -596,15 +552,11 @@ class PinholeIntrinsicsModelT : public IntrinsicsModelT<T> {
     return fy_;
   }
 
-  /// Get the principal point x-coordinate.
-  ///
   /// @return Principal point cx in pixels
   [[nodiscard]] T cx() const {
     return cx_;
   }
 
-  /// Get the principal point y-coordinate.
-  ///
   /// @return Principal point cy in pixels
   [[nodiscard]] T cy() const {
     return cy_;
@@ -690,23 +642,16 @@ class OpenCVIntrinsicsModelT : public IntrinsicsModelT<T> {
     return fy_;
   }
 
-  /// Get the principal point x-coordinate.
-  ///
   /// @return Principal point cx in pixels
   [[nodiscard]] T cx() const {
     return cx_;
   }
 
-  /// Get the principal point y-coordinate.
-  ///
   /// @return Principal point cy in pixels
   [[nodiscard]] T cy() const {
     return cy_;
   }
 
-  /// Get the distortion parameters.
-  ///
-  /// @return Reference to the OpenCV distortion parameters
   [[nodiscard]] const OpenCVDistortionParametersT<T>& distortionParameters() const {
     return distortionParams_;
   }
