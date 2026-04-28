@@ -93,17 +93,27 @@ $(document).ready(function(){initNavTree('fmt__eigen_8h.html',''); initResizable
   <div class="headertitle"><div class="title">fmt_eigen.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>libfmt formatter support for <a class="el" href="namespaceEigen.html">Eigen</a> types.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;fmt/ostream.h&gt;</code><br />
 <code>#include &lt;Eigen/Core&gt;</code><br />
 </div>
 <p><a href="fmt__eigen_8h_source.html">Go to the source code of this file.</a></p>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>libfmt formatter support for <a class="el" href="namespaceEigen.html">Eigen</a> types. </p>
+<p>Provides an <code>fmt::formatter</code> specialization for any type derived from <code>Eigen::DenseBase</code> (matrices, vectors, and expression templates). This makes <a class="el" href="namespaceEigen.html">Eigen</a> objects directly usable with <code>fmt::format</code>, <code>fmt::print</code>, and related APIs by delegating to <a class="el" href="namespaceEigen.html">Eigen</a>'s <code>operator&lt;&lt;</code> via <code>ostream_formatter</code>.</p>
+<p>Usage: simply <code>#include "momentum/math/fmt_eigen.h"</code> and format <a class="el" href="namespaceEigen.html">Eigen</a> values normally, e.g. <code>fmt::format("{}", matrix)</code> or <code>fmt::print("v = {}\n", vector)</code>.</p>
+<p>Only enabled for libfmt &gt;= 10.0.0, which introduced <code>ostream_formatter</code>. Note: <code>Eigen::Quaternion</code> is not derived from <code>Eigen::DenseBase</code> and is therefore not covered by this formatter. </p>
+
+<p class="definition">Definition in file <a class="el" href="fmt__eigen_8h_source.html">fmt_eigen.h</a>.</p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="fmt__eigen_8h.html">fmt_eigen.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

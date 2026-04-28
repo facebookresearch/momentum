@@ -97,6 +97,9 @@ $(document).ready(function(){initNavTree('classmomentum_1_1LowRankCovarianceMatr
 </div><!--header-->
 <div class="contents">
 
+<p>Efficient and numerically stable representation of a low-rank-plus-diagonal Gaussian covariance matrix C = sigma^2 * I + A^T * A where C and I are [n x n] and the basis A is [m x n] (m may be larger or smaller than n).  
+ <a href="classmomentum_1_1LowRankCovarianceMatrixT.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="covariance__matrix_8h_source.html">covariance_matrix.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -104,32 +107,47 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaeef11621844a60ed6b13c249a684ec2" id="r_aaeef11621844a60ed6b13c249a684ec2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#aaeef11621844a60ed6b13c249a684ec2">LowRankCovarianceMatrixT</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
 <tr class="separator:aaeef11621844a60ed6b13c249a684ec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb6d634eb661d1612892c6e5b37069f0" id="r_acb6d634eb661d1612892c6e5b37069f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0">reset</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad4c7c1af9e70a055cef9e457cc3ace23">sigma</a>, Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>)</td></tr>
+<tr class="memdesc:acb6d634eb661d1612892c6e5b37069f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">(Re)build the covariance from a regularizer sigma and basis A.  <br /></td></tr>
 <tr class="separator:acb6d634eb661d1612892c6e5b37069f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96cd7f6fd8cd22bfa0f49fc9fafb4349" id="r_a96cd7f6fd8cd22bfa0f49fc9fafb4349"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#a96cd7f6fd8cd22bfa0f49fc9fafb4349">dimension</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a96cd7f6fd8cd22bfa0f49fc9fafb4349"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns n, the dimension of the covariance (number of columns of A).  <br /></td></tr>
 <tr class="separator:a96cd7f6fd8cd22bfa0f49fc9fafb4349"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1c9d723dc49c52748a751e523f9802e" id="r_ac1c9d723dc49c52748a751e523f9802e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#ac1c9d723dc49c52748a751e523f9802e">basis</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ac1c9d723dc49c52748a751e523f9802e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the stored basis A passed to <a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0" title="(Re)build the covariance from a regularizer sigma and basis A.">reset()</a>.  <br /></td></tr>
 <tr class="separator:ac1c9d723dc49c52748a751e523f9802e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4c7c1af9e70a055cef9e457cc3ace23" id="r_ad4c7c1af9e70a055cef9e457cc3ace23"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad4c7c1af9e70a055cef9e457cc3ace23">sigma</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ad4c7c1af9e70a055cef9e457cc3ace23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the diagonal regularizer sigma passed to <a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0" title="(Re)build the covariance from a regularizer sigma and basis A.">reset()</a>.  <br /></td></tr>
 <tr class="separator:ad4c7c1af9e70a055cef9e457cc3ace23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49afbcf07f83d71421d5316446ae7219" id="r_a49afbcf07f83d71421d5316446ae7219"><td class="memItemLeft" align="right" valign="top">Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#a49afbcf07f83d71421d5316446ae7219">inverse_times_vec</a> (Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a49afbcf07f83d71421d5316446ae7219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns C^{-1} * rhs, computed via two triangular solves on R.  <br /></td></tr>
 <tr class="separator:a49afbcf07f83d71421d5316446ae7219"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32eb3e615a2dd2cb5ee08205844aaeb3" id="r_a32eb3e615a2dd2cb5ee08205844aaeb3"><td class="memItemLeft" align="right" valign="top">Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#a32eb3e615a2dd2cb5ee08205844aaeb3">times_vec</a> (Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a32eb3e615a2dd2cb5ee08205844aaeb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns C * rhs = sigma^2 * rhs + A^T * (A * rhs).  <br /></td></tr>
 <tr class="separator:a32eb3e615a2dd2cb5ee08205844aaeb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3bfdfceece2c8c1e3c014beb8415bf0" id="r_ad3bfdfceece2c8c1e3c014beb8415bf0"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#ad3bfdfceece2c8c1e3c014beb8415bf0">inverse_times_mat</a> (Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ad3bfdfceece2c8c1e3c014beb8415bf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Column-wise application of C^{-1} to a matrix rhs.  <br /></td></tr>
 <tr class="separator:ad3bfdfceece2c8c1e3c014beb8415bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a325e1fa38dc129b89e70a17781d86f7b" id="r_a325e1fa38dc129b89e70a17781d86f7b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#a325e1fa38dc129b89e70a17781d86f7b">times_mat</a> (Eigen::Ref&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rhs</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a325e1fa38dc129b89e70a17781d86f7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Column-wise application of C to a matrix rhs.  <br /></td></tr>
 <tr class="separator:a325e1fa38dc129b89e70a17781d86f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa208ca50b0bb4d020de4a4c7e7142520" id="r_aa208ca50b0bb4d020de4a4c7e7142520"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#aa208ca50b0bb4d020de4a4c7e7142520">R</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:aa208ca50b0bb4d020de4a4c7e7142520"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the upper-triangular R factor of the QR factorization of [sigma*I; A], so that C = R^T * R.  <br /></td></tr>
 <tr class="separator:aa208ca50b0bb4d020de4a4c7e7142520"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae365a87718db846522238c5dcb66c760" id="r_ae365a87718db846522238c5dcb66c760"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#ae365a87718db846522238c5dcb66c760">logDeterminant</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:ae365a87718db846522238c5dcb66c760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(det(C))</a>, computed stably as 2 * sum(log|diag(R)|).  <br /></td></tr>
 <tr class="separator:ae365a87718db846522238c5dcb66c760"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac29aa5d0116a51664e8639fa12de7c0" id="r_aac29aa5d0116a51664e8639fa12de7c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#aac29aa5d0116a51664e8639fa12de7c0">inverse_logDeterminant</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:aac29aa5d0116a51664e8639fa12de7c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns log(det(C^{-1})) = -<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(det(C))</a>.  <br /></td></tr>
 <tr class="separator:aac29aa5d0116a51664e8639fa12de7c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::LowRankCovarianceMatrixT&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8h_source.html#l00025">25</a> of file <a class="el" href="covariance__matrix_8h_source.html">covariance_matrix.h</a>.</p>
+class momentum::LowRankCovarianceMatrixT&lt; T &gt;</div><p>Efficient and numerically stable representation of a low-rank-plus-diagonal Gaussian covariance matrix C = sigma^2 * I + A^T * A where C and I are [n x n] and the basis A is [m x n] (m may be larger or smaller than n). </p>
+<p>Access to C^{-1} is computed via the QR factorization of the augmented matrix [sigma*I; A], which keeps the construction numerically stable and avoids ever forming A^T * A explicitly.</p>
+<dl class="section pre"><dt>Precondition</dt><dd>sigma &gt; 0 (required for C to be strictly positive-definite and for the QR-based inverse to exist; the implementation does not check). </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>C is symmetric positive-definite by construction. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8h_source.html#l00027">27</a> of file <a class="el" href="covariance__matrix_8h_source.html">covariance_matrix.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aaeef11621844a60ed6b13c249a684ec2" name="aaeef11621844a60ed6b13c249a684ec2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaeef11621844a60ed6b13c249a684ec2">&#9670;&#160;</a></span>LowRankCovarianceMatrixT()</h2>
@@ -176,7 +194,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00033">33</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns the stored basis A passed to <a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0" title="(Re)build the covariance from a regularizer sigma and basis A.">reset()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00038">38</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -197,7 +217,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00028">28</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns n, the dimension of the covariance (number of columns of A). </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00033">33</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -218,7 +240,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00102">102</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns log(det(C^{-1})) = -<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(det(C))</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00114">114</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -240,9 +264,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00061">61</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Column-wise application of C^{-1} to a matrix rhs. </p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00071">71</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -264,9 +290,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00043">43</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns C^{-1} * rhs, computed via two triangular solves on R. </p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00048">48</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -287,9 +315,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00084">84</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(det(C))</a>, computed stably as 2 * sum(log|diag(R)|). </p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00095">95</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -310,7 +340,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00079">79</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns the upper-triangular R factor of the QR factorization of [sigma*I; A], so that C = R^T * R. </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00090">90</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -342,6 +374,15 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
+<p>(Re)build the covariance from a regularizer sigma and basis A. </p>
+<p>Computes the QR factorization of [sigma*I; A] from scratch (batch update; not an incremental/online refinement of any previous state). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sigma</td><td>Diagonal regularizer; must be &gt; 0. </td></tr>
+    <tr><td class="paramname">A</td><td>Low-rank basis with n columns and m rows. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00015">15</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
@@ -363,7 +404,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00038">38</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns the diagonal regularizer sigma passed to <a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html#acb6d634eb661d1612892c6e5b37069f0" title="(Re)build the covariance from a regularizer sigma and basis A.">reset()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00043">43</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -385,7 +428,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00071">71</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Column-wise application of C to a matrix rhs. </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00082">82</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -407,7 +452,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00053">53</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
+<p>Returns C * rhs = sigma^2 * rhs + A^T * (A * rhs). </p>
+
+<p class="definition">Definition at line <a class="el" href="covariance__matrix_8cpp_source.html#l00060">60</a> of file <a class="el" href="covariance__matrix_8cpp_source.html">covariance_matrix.cpp</a>.</p>
 
 </div>
 </div>
@@ -421,7 +468,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1LowRankCovarianceMatrixT.html">LowRankCovarianceMatrixT</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

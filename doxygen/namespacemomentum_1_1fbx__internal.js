@@ -14,6 +14,7 @@ var namespacemomentum_1_1fbx__internal =
     [ "extractBlendShapeWeights", "namespacemomentum_1_1fbx__internal.html#a06d36feab74e5cecdd46ee2d184a0d06", null ],
     [ "extractFaceExpressionWeights", "namespacemomentum_1_1fbx__internal.html#ab22669ec37641c5b7b05dcdb14eac48b", null ],
     [ "getOrCreateAnimStackAndLayer", "namespacemomentum_1_1fbx__internal.html#a2f5522199c98ffbe1fe355cbb3f12236", null ],
+    [ "jointParamToFbx", "namespacemomentum_1_1fbx__internal.html#ac77030afbe7e4e72ccdd952ff00c0af0", null ],
     [ "prependNamespaceToAllNodes", "namespacemomentum_1_1fbx__internal.html#a2d1b13c0bdfcff880333b6807915484b", null ],
     [ "saveBlendShapeGeometryToFbx", "namespacemomentum_1_1fbx__internal.html#aa1fdca44b663ad4ae289a7ec3d621bf5", null ],
     [ "saveSkinWeightsToFbx", "namespacemomentum_1_1fbx__internal.html#a78e1df973f85629b87a4ada9640e84e3", null ],

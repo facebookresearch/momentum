@@ -97,25 +97,31 @@ $(document).ready(function(){initNavTree('classmomentum_1_1ProgressBar.html','')
 </div><!--header-->
 <div class="contents">
 
+<p>A terminal progress bar rendered as <code>Name [===&gt; ] 60%</code>.  
+ <a href="classmomentum_1_1ProgressBar.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="progress__bar_8h_source.html">progress_bar.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa34174b4d3ee19b04ac846441bcc8035" id="r_aa34174b4d3ee19b04ac846441bcc8035"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035">ProgressBar</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">prefix</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">numOperations</a>)</td></tr>
+<tr class="memdesc:aa34174b4d3ee19b04ac846441bcc8035"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs the progress bar and renders its initial (zero-progress) state.  <br /></td></tr>
 <tr class="separator:aa34174b4d3ee19b04ac846441bcc8035"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a963bb090a7fdb9571e4f92f9e4057d3b" id="r_a963bb090a7fdb9571e4f92f9e4057d3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ProgressBar.html#a963bb090a7fdb9571e4f92f9e4057d3b">increment</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>=1)</td></tr>
-<tr class="memdesc:a963bb090a7fdb9571e4f92f9e4057d3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the progress by the given count (default 1)  <br /></td></tr>
+<tr class="memdesc:a963bb090a7fdb9571e4f92f9e4057d3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances progress by <code>count</code> (default 1) and redraws the bar.  <br /></td></tr>
 <tr class="separator:a963bb090a7fdb9571e4f92f9e4057d3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56de351b7edf4db3ba3e30ba009261a7" id="r_a56de351b7edf4db3ba3e30ba009261a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ProgressBar.html#a56de351b7edf4db3ba3e30ba009261a7">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>)</td></tr>
-<tr class="memdesc:a56de351b7edf4db3ba3e30ba009261a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the progress to the given count.  <br /></td></tr>
+<tr class="memdesc:a56de351b7edf4db3ba3e30ba009261a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets progress to the absolute value <code>count</code> and redraws the bar.  <br /></td></tr>
 <tr class="separator:a56de351b7edf4db3ba3e30ba009261a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98088b45ab749d9fc294ea9d82e6a122" id="r_a98088b45ab749d9fc294ea9d82e6a122"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ProgressBar.html#a98088b45ab749d9fc294ea9d82e6a122">getCurrentProgress</a> ()</td></tr>
-<tr class="memdesc:a98088b45ab749d9fc294ea9d82e6a122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current progress in the range [0, 100].  <br /></td></tr>
+<tr class="memdesc:a98088b45ab749d9fc294ea9d82e6a122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current absolute progress count (not a percentage).  <br /></td></tr>
 <tr class="separator:a98088b45ab749d9fc294ea9d82e6a122"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="progress__bar_8h_source.html#l00017">17</a> of file <a class="el" href="progress__bar_8h_source.html">progress_bar.h</a>.</p>
+<div class="textblock"><p>A terminal progress bar rendered as <code>Name [===&gt; ] 60%</code>. </p>
+<p>Wraps <code>indicators::ProgressBar</code> with a fixed visual style (bold, percentage shown). All mutating operations write to the terminal (stdout) as a side effect. Not thread-safe. </p>
+
+<p class="definition">Definition at line <a class="el" href="progress__bar_8h_source.html#l00021">21</a> of file <a class="el" href="progress__bar_8h_source.html">progress_bar.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa34174b4d3ee19b04ac846441bcc8035" name="aa34174b4d3ee19b04ac846441bcc8035"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa34174b4d3ee19b04ac846441bcc8035">&#9670;&#160;</a></span>ProgressBar()</h2>
@@ -142,13 +148,16 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Constructs the progress bar and renders its initial (zero-progress) state. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">prefix</td><td>Displayed prefix </td></tr>
-    <tr><td class="paramname">numOperations</td><td>Total operations (determines progress ratio) </td></tr>
+    <tr><td class="paramname">prefix</td><td>Text shown before the bar. </td></tr>
+    <tr><td class="paramname">numOperations</td><td>Total operation count corresponding to 100%. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section pre"><dt>Precondition</dt><dd><code>prefix.size() + 9 &lt; kMaxWidth</code>, otherwise the computed bar width underflows <code>size_t</code>. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00012">12</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
@@ -170,9 +179,10 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns the current progress in the range [0, 100]. </p>
+<p>Returns the current absolute progress count (not a percentage). </p>
+<p>The value is in the range [0, numOperations] as supplied to the constructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00035">35</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00037">37</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -192,9 +202,9 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Increments the progress by the given count (default 1) </p>
+<p>Advances progress by <code>count</code> (default 1) and redraws the bar. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00027">27</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00029">29</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -214,9 +224,9 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets the progress to the given count. </p>
+<p>Sets progress to the absolute value <code>count</code> and redraws the bar. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00031">31</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00033">33</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -230,7 +240,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ProgressBar.html">ProgressBar</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

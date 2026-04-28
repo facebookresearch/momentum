@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmomentum_1_1OnlineHouseholderQR.h
 </div><!--header-->
 <div class="contents">
 
+<p>Online (incremental) Householder QR solver for tall, column-sparse least-squares problems.  
+ <a href="classmomentum_1_1OnlineHouseholderQR.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -110,14 +113,19 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:afb47ca8a3f065cc59e8077c75707eec6" id="r_afb47ca8a3f065cc59e8077c75707eec6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#afb47ca8a3f065cc59e8077c75707eec6">OnlineHouseholderQR</a> (Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">lambda</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0))</td></tr>
+<tr class="memdesc:afb47ca8a3f065cc59e8077c75707eec6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a solver for problems with <code>n</code> unknowns.  <br /></td></tr>
 <tr class="separator:afb47ca8a3f065cc59e8077c75707eec6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff3115e3a4211d9c1dfb730852b7630b" id="r_aff3115e3a4211d9c1dfb730852b7630b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aff3115e3a4211d9c1dfb730852b7630b">addMutating</a> (Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ab81fcee8de36c69478506a14c3ff041a">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aa11ba26f1b8424c3f1c6aba9224d3853">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:aff3115e3a4211d9c1dfb730852b7630b"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-place overload: factorizes <code>A</code> and <code>b</code> directly, mutating both buffers.  <br /></td></tr>
 <tr class="separator:aff3115e3a4211d9c1dfb730852b7630b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a454d01a7df02d9594b6877a8e5355dd7" id="r_a454d01a7df02d9594b6877a8e5355dd7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a454d01a7df02d9594b6877a8e5355dd7">addMutating</a> (<a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ab81fcee8de36c69478506a14c3ff041a">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aa11ba26f1b8424c3f1c6aba9224d3853">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:a454d01a7df02d9594b6877a8e5355dd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-place addition of a Jacobian/residual block to the running QR factorization.  <br /></td></tr>
 <tr class="separator:a454d01a7df02d9594b6877a8e5355dd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade53484de15f393ce0e6e3a35a881b1c" id="r_ade53484de15f393ce0e6e3a35a881b1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ade53484de15f393ce0e6e3a35a881b1c">add</a> (<a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ab81fcee8de36c69478506a14c3ff041a">MatrixType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>, <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aa11ba26f1b8424c3f1c6aba9224d3853">VectorType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:ade53484de15f393ce0e6e3a35a881b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copying overload of <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aff3115e3a4211d9c1dfb730852b7630b" title="In-place overload: factorizes A and b directly, mutating both buffers.">addMutating()</a></code>.  <br /></td></tr>
 <tr class="separator:ade53484de15f393ce0e6e3a35a881b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc760992004856b422e558f92a91740d" id="r_afc760992004856b422e558f92a91740d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aa11ba26f1b8424c3f1c6aba9224d3853">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#afc760992004856b422e558f92a91740d">result</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:afc760992004856b422e558f92a91740d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves <code>R * x = y</code> by back-substitution using the currently accumulated state and returns <code>x</code>.  <br /></td></tr>
 <tr class="separator:afc760992004856b422e558f92a91740d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a028187bf86081591fa3634ab36fb59b9" id="r_a028187bf86081591fa3634ab36fb59b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ab81fcee8de36c69478506a14c3ff041a">MatrixType</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a028187bf86081591fa3634ab36fb59b9">R</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a028187bf86081591fa3634ab36fb59b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,14 +134,33 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:afe4fd3d18d9d25decc9e06eb6a7fe416" id="r_afe4fd3d18d9d25decc9e06eb6a7fe416"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aa11ba26f1b8424c3f1c6aba9224d3853">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#afe4fd3d18d9d25decc9e06eb6a7fe416">At_times_b</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:afe4fd3d18d9d25decc9e06eb6a7fe416"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b2ee71d9679334eeddeb9a47fb70557" id="r_a9b2ee71d9679334eeddeb9a47fb70557"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a9b2ee71d9679334eeddeb9a47fb70557">reset</a> ()</td></tr>
+<tr class="memdesc:a9b2ee71d9679334eeddeb9a47fb70557"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discards accumulated state, keeping the existing <code>n</code> and <code>lambda</code>.  <br /></td></tr>
 <tr class="separator:a9b2ee71d9679334eeddeb9a47fb70557"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e641d330c70504074d880ea5d274ade" id="r_a0e641d330c70504074d880ea5d274ade"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a0e641d330c70504074d880ea5d274ade">reset</a> (Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">lambda</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0))</td></tr>
+<tr class="memdesc:a0e641d330c70504074d880ea5d274ade"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discards accumulated state and reconfigures the solver with new <code>n</code> and <code>lambda</code>.  <br /></td></tr>
 <tr class="separator:a0e641d330c70504074d880ea5d274ade"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::OnlineHouseholderQR&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00130">130</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+class momentum::OnlineHouseholderQR&lt; T &gt;</div><p>Online (incremental) Householder QR solver for tall, column-sparse least-squares problems. </p>
+<p>Solves </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">min</a> || <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a> * x - <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a> ||<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">_2</a></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00235">types.h:235</a></div></div>
+</div><!-- fragment --><p> where a. n (the number of unknowns) is small-ish, b. A is tall and <em>sparse</em> (m &gt;&gt; n), BUT c. (A^T * A) is <em>dense</em>.</p>
+<p>This turns out to be the common case for hand-model IK, because: a. The hand has only ~22 DOF, b. Each constraint touches only a few DOFs (typically the 3-4 on a single finger), but c. Constraints that touch the global DOFs tend to densify A^T*A. From the perspective of a QR factorization: since the R matrix has the same sparsity pattern as the L matrix in the Cholesky factorization of A^T*A, there is no point trying to exploit sparsity in the computation of R (e.g. by reordering columns). So instead, we accept the <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">O(n^2)</a> cost of a dense R and try to exploit sparsity in A.</p>
+<p>It is possible to exploit sparsity in A if you do the factorization <em>row-wise</em> instead of column-wise as is generally done. One paper that uses Givens rotations to zero out one row at a time is: Solution of Sparse Linear Squares Problems using Givens Rotations (1980) by Alan George and Michael T. Heath</p>
+<p>However, Givens rotations aren't really ideal for our case because you have to compute a c/s pair for each entry of the matrix, and it involves a square root. Also, row-wise operations are slow in general due to poor cache locality on <a class="el" href="namespaceEigen.html">Eigen</a> matrices. What we do instead is apply Householder reflections to (k x n) blocks of the matrix; computing a Householder vector for a whole column only requires one square root, and it can be applied as a level-2 BLAS operation. Moreover, this maps perfectly to our problem; a Jacobian matrix from a single constraint has the sparsity pattern where entire columns are dropped, and these zero columns can just be skipped entirely by the Householder process provided we are careful about the order we process them in. And by processing the J submatrices one at a time, we never assemble the full A matrix, eliminating one major disadvantage of QR relative to the normal equations (hence the name "OnlineHouseholderQR").</p>
+<p>Even better, we can do the whole operation in-place: the caller passes in the J and r matrix, and the columns of the J matrix are rotated out one by one, revealing the R matrix. At the end, a simple back-substitution using R gives the x vector. (In fact, the answer for the current submatrix of A,b is always available, as a consequence of doing the factorization sort-of row-wise.)</p>
+<dl class="section note"><dt>Note</dt><dd>Because the transforms are applied as we go, this method is not currently suitable for multiple right-hand-sides.</dd></dl>
+<h3><a class="anchor" id="autotoc_md0"></a>
+Usage contract</h3>
+<ol type="1">
+<li>Construct with the number of unknowns <code>n</code> and (optionally) a Levenberg-Marquardt damping <code>lambda</code>.</li>
+<li>Call <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ade53484de15f393ce0e6e3a35a881b1c" title="Copying overload of addMutating().">add()</a></code>/<code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aff3115e3a4211d9c1dfb730852b7630b" title="In-place overload: factorizes A and b directly, mutating both buffers.">addMutating()</a></code> once per Jacobian/residual block. Internal state (<code>R_</code>, <code>y_</code>) is mutated incrementally on each call.</li>
+<li>Call <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#afc760992004856b422e558f92a91740d" title="Solves R * x = y by back-substitution using the currently accumulated state and returns x.">result()</a></code> to back-substitute and recover <code>x</code>. <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a028187bf86081591fa3634ab36fb59b9">R()</a></code>, <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a5f8f6a1e2cd653b35a6e6cff5b0f2a95">y()</a></code>, and <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#afe4fd3d18d9d25decc9e06eb6a7fe416">At_times_b()</a></code> are also valid at any point and reflect the data accumulated so far.</li>
+<li>Call <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#a9b2ee71d9679334eeddeb9a47fb70557" title="Discards accumulated state, keeping the existing n and lambda.">reset()</a></code> to discard accumulated state and reuse the solver. </li>
+</ol>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00157">157</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="ab81fcee8de36c69478506a14c3ff041a" name="ab81fcee8de36c69478506a14c3ff041a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab81fcee8de36c69478506a14c3ff041a">&#9670;&#160;</a></span>MatrixType</h2>
@@ -149,7 +176,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00132">132</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00159">159</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -167,7 +194,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00133">133</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00160">160</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -208,7 +235,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00105">105</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Constructs a solver for problems with <code>n</code> unknowns. </p>
+<p>The <code>lambda</code> parameter implements Gauss-Newton/Levenberg-Marquardt damping, emulating the augmented least-squares system </p><div class="fragment"><div class="line">| [ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">lambda</a> * <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">I</a> ] [ x ] - [ 0 ] |^2</div>
+<div class="line">| [     <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>      ]         [ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a> ] |</div>
+</div><!-- fragment --><p> without materializing the extra <code>lambda * I</code> rows. R is initialized with <code>lambda</code> on its diagonal so the first <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ade53484de15f393ce0e6e3a35a881b1c" title="Copying overload of addMutating().">add()</a></code> call sees the regularization. </p>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00125">125</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -241,7 +273,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00145">145</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Copying overload of <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aff3115e3a4211d9c1dfb730852b7630b" title="In-place overload: factorizes A and b directly, mutating both buffers.">addMutating()</a></code>. </p>
+<dl class="section note"><dt>Note</dt><dd>Pass the arguments via <code>std::move</code> to avoid the internal copy when the caller no longer needs them. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00168">168</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -273,9 +308,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00150">150</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>In-place addition of a Jacobian/residual block to the running QR factorization. </p>
+<p>Both <code>A</code> and <code>b</code> are required so we can apply Q to the right-hand side as R is being constructed. The factorization is computed inside the passed-in buffers, so callers who do not need the original data can avoid a copy.</p>
+<dl class="section pre"><dt>Precondition</dt><dd><code>A.cols()</code> equals the <code>n</code> passed to the constructor. </dd>
+<dd>
+<code>A.rows()</code> equals <code>b.size()</code>. </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>Internal <code>R_</code> and <code>y_</code> are updated to reflect the combined (prior + new) data. The contents of <code>A</code> and <code>b</code> are arbitrary on return. </dd></dl>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00065">MT_PROFILE_FUNCTION</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00173">173</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>.</p>
 
 </div>
 </div>
@@ -315,11 +357,14 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00142">142</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>In-place overload: factorizes <code>A</code> and <code>b</code> directly, mutating both buffers. </p>
+<p>Convenience wrapper that wraps <code>A</code> in a <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html" title="View over a matrix that exposes a (possibly reordered) subset of its columns.">ColumnIndexedMatrix</a></code>. </p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00142">momentum::OnlineHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00176">176</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00142">momentum::OnlineHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00176">momentum::OnlineHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00176">momentum::OnlineHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
 
 </div>
 </div>
@@ -339,8 +384,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>A^T * b</code> for the data accumulated so far, computed from <code>R^T * y</code> without needing the original A. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00194">194</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00226">226</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -368,8 +414,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Upper-triangular R factor of the current accumulated factorization. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00158">158</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00204">204</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -390,7 +437,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00110">110</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Discards accumulated state, keeping the existing <code>n</code> and <code>lambda</code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00130">130</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -422,7 +471,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00115">115</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Discards accumulated state and reconfigures the solver with new <code>n</code> and <code>lambda</code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00135">135</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -443,7 +494,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00205">205</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Solves <code>R * x = y</code> by back-substitution using the currently accumulated state and returns <code>x</code>. </p>
+<dl class="section return"><dt>Returns</dt><dd>Vector of length <code>n</code> containing the least-squares solution for the data added so far. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00237">237</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -471,8 +525,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>The transformed right-hand side <code>Q * b</code> (top <code>n</code> entries). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00161">161</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00208">208</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -486,7 +541,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html">OnlineHouseholderQR</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

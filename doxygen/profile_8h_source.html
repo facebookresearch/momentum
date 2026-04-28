@@ -107,83 +107,91 @@ $(document).ready(function(){initNavTree('profile_8h_source.html',''); initResiz
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#if defined(MOMENTUM_WITH_XR_PROFILER)</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;arvr/libraries/profile_redirect/annotate.hpp&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#define MT_PROFILE_FUNCTION() XR_PROFILE_FUNCTION()</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY) XR_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME) XR_PROFILE_EVENT(NAME)</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME) XR_PROFILE_EVENT_DYNAMIC(NAME)</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY) XR_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP() XR_PROFILE_PREPARE_PUSH_POP()</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME) XR_PROFILE_PUSH(NAME)</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define MT_PROFILE_POP() XR_PROFILE_POP()</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME) XR_PROFILE_THREAD(THREAD_NAME)</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define MT_PROFILE_UPDATE() XR_PROFILE_UPDATE()</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME() XR_PROFILE_BEGIN_FRAME()</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#define MT_PROFILE_END_FRAME() XR_PROFILE_END_FRAME()</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA) XR_PROFILE_METADATA(NAME, DATA)</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#elif defined(MOMENTUM_WITH_TRACY_PROFILER)</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;tracy/Tracy.hpp&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;tracy/TracyC.h&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;stack&gt;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#define _MT_PROFILE_CONCATENATE_DETAIL(x, y) x##y</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#define _MT_PROFILE_CONCATENATE(x, y) _MT_PROFILE_CONCATENATE_DETAIL(x, y)</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#define _MT_PROFILE_MAKE_UNIQUE(x) _MT_PROFILE_CONCATENATE(x, __LINE__)</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#define MT_PROFILE_FUNCTION() ZoneScoped</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME) ZoneNamedN(_MT_PROFILE_MAKE_UNIQUE(__tracy), NAME, true)</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME) ZoneTransientN(_MT_PROFILE_MAKE_UNIQUE(__tracy), NAME, true)</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP() std::stack&lt;TracyCZoneCtx&gt; ___tracy_xr_stack</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME)                                                                    \</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">  static const struct ___tracy_source_location_data TracyConcat(                                 \</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">      __tracy_source_location, TracyLine) = {NAME, __func__, TracyFile, (uint32_t)TracyLine, 0}; \</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">  ___tracy_xr_stack.push(                                                                        \</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">      ___tracy_emit_zone_begin(&amp;TracyConcat(__tracy_source_location, TracyLine), true));</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define MT_PROFILE_POP()                  \</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">  TracyCZoneEnd(___tracy_xr_stack.top()); \</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">  ___tracy_xr_stack.pop()</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME)           \</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">  {                                              \</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">    </span><span class="comment">/* support both std::string and c strings */</span><span class="preprocessor"> \</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">    std::string threadNameStr(THREAD_NAME);      \</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">    TracyCSetThreadName(threadNameStr.c_str());  \</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">  }</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#define MT_PROFILE_UPDATE()</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME() FrameMark</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#define MT_PROFILE_END_FRAME()</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA)</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">   65</a></span><span class="preprocessor">#define MT_PROFILE_FUNCTION()</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="profile_8h.html#a2fbcb0ddc3fb2423eae4184186dee5cf">   66</a></span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="profile_8h.html#a6edc78f1defd74999db6eb22373d24df">   67</a></span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME)</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="profile_8h.html#a82a8d7ee80ba8f807cccc095c42bd5fa">   68</a></span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME)</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="profile_8h.html#ac1a0dba5b1a5d91846563bf72902ba53">   69</a></span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="profile_8h.html#a49a643cb9d4144845b05fe7159a04485">   70</a></span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP()</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="profile_8h.html#a67e9aa589ab4e11981a72684f39f04d4">   71</a></span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME)</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="profile_8h.html#a4910c927ef9f64e11854ab1b0d7f9b6b">   72</a></span><span class="preprocessor">#define MT_PROFILE_POP()</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="profile_8h.html#a59b61422ee9c62529fec6aa2df29f414">   73</a></span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME)</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="profile_8h.html#a1380b4e855b85ef4d562e28dcb537cc7">   74</a></span><span class="preprocessor">#define MT_PROFILE_UPDATE()</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="profile_8h.html#a578199b791f5c7a31198e555a2ef0544">   75</a></span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME()</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="profile_8h.html#a701f53b55c8c18c960781b03a4267db2">   76</a></span><span class="preprocessor">#define MT_PROFILE_END_FRAME()</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="profile_8h.html#a3e80669bc2799e599a88adfba1b6cbe4">   77</a></span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA)</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#if defined(MOMENTUM_WITH_XR_PROFILER)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;arvr/libraries/profile_redirect/annotate.hpp&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#define MT_PROFILE_FUNCTION() XR_PROFILE_FUNCTION()</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY) XR_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME) XR_PROFILE_EVENT(NAME)</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME) XR_PROFILE_EVENT_DYNAMIC(NAME)</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY) XR_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP() XR_PROFILE_PREPARE_PUSH_POP()</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME) XR_PROFILE_PUSH(NAME)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define MT_PROFILE_POP() XR_PROFILE_POP()</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME) XR_PROFILE_THREAD(THREAD_NAME)</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#define MT_PROFILE_UPDATE() XR_PROFILE_UPDATE()</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME() XR_PROFILE_BEGIN_FRAME()</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#define MT_PROFILE_END_FRAME() XR_PROFILE_END_FRAME()</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA) XR_PROFILE_METADATA(NAME, DATA)</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#elif defined(MOMENTUM_WITH_TRACY_PROFILER)</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#include &lt;tracy/Tracy.hpp&gt;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &lt;tracy/TracyC.h&gt;</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#include &lt;stack&gt;</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#define _MT_PROFILE_CONCATENATE_DETAIL(x, y) x##y</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#define _MT_PROFILE_CONCATENATE(x, y) _MT_PROFILE_CONCATENATE_DETAIL(x, y)</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#define _MT_PROFILE_MAKE_UNIQUE(x) _MT_PROFILE_CONCATENATE(x, __LINE__)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#define MT_PROFILE_FUNCTION() ZoneScoped</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME) ZoneNamedN(_MT_PROFILE_MAKE_UNIQUE(__tracy), NAME, true)</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME) ZoneTransientN(_MT_PROFILE_MAKE_UNIQUE(__tracy), NAME, true)</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">// TODO: Rename `___tracy_xr_stack` — the `xr_` prefix is a leftover from the XR</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">// backend and is misleading inside the Tracy block. The variable is a per-scope</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">// stack of open zones; thread-safety is not required because each scope&#39;s</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">// push/pop pairs are local to one thread.</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP() std::stack&lt;TracyCZoneCtx&gt; ___tracy_xr_stack</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME)                                                                    \</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">  static const struct ___tracy_source_location_data TracyConcat(                                 \</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">      __tracy_source_location, TracyLine) = {NAME, __func__, TracyFile, (uint32_t)TracyLine, 0}; \</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">  ___tracy_xr_stack.push(                                                                        \</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">      ___tracy_emit_zone_begin(&amp;TracyConcat(__tracy_source_location, TracyLine), true));</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#define MT_PROFILE_POP()                  \</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">  TracyCZoneEnd(___tracy_xr_stack.top()); \</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">  ___tracy_xr_stack.pop()</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">// Wrap THREAD_NAME in a std::string so the macro accepts both std::string and</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">// C-string arguments; TracyCSetThreadName requires a C string.</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME)          \</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">  {                                             \</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">    std::string threadNameStr(THREAD_NAME);     \</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">    TracyCSetThreadName(threadNameStr.c_str()); \</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">  }</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#define MT_PROFILE_UPDATE()</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME() FrameMark</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#define MT_PROFILE_END_FRAME()</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA)</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">// No profiler backend selected: every macro expands to nothing, so</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">// instrumentation has zero runtime cost in production builds.</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="profile_8h.html#aea0496071d886333288ddd0e1aa047c3">  110</a></span><span class="preprocessor">#define MT_PROFILE_FUNCTION()</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="profile_8h.html#a2fbcb0ddc3fb2423eae4184186dee5cf">  111</a></span><span class="preprocessor">#define MT_PROFILE_FUNCTION_CATEGORY(CATEGORY)</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="profile_8h.html#a6edc78f1defd74999db6eb22373d24df">  112</a></span><span class="preprocessor">#define MT_PROFILE_EVENT(NAME)</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="profile_8h.html#a82a8d7ee80ba8f807cccc095c42bd5fa">  113</a></span><span class="preprocessor">#define MT_PROFILE_EVENT_DYNAMIC(NAME)</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="profile_8h.html#ac1a0dba5b1a5d91846563bf72902ba53">  114</a></span><span class="preprocessor">#define MT_PROFILE_CATEGORY(NAME, CATEGORY)</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="profile_8h.html#a49a643cb9d4144845b05fe7159a04485">  115</a></span><span class="preprocessor">#define MT_PROFILE_PREPARE_PUSH_POP()</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="profile_8h.html#a67e9aa589ab4e11981a72684f39f04d4">  116</a></span><span class="preprocessor">#define MT_PROFILE_PUSH(NAME)</span></div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="profile_8h.html#a4910c927ef9f64e11854ab1b0d7f9b6b">  117</a></span><span class="preprocessor">#define MT_PROFILE_POP()</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="profile_8h.html#a59b61422ee9c62529fec6aa2df29f414">  118</a></span><span class="preprocessor">#define MT_PROFILE_THREAD(THREAD_NAME)</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="profile_8h.html#a1380b4e855b85ef4d562e28dcb537cc7">  119</a></span><span class="preprocessor">#define MT_PROFILE_UPDATE()</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="profile_8h.html#a578199b791f5c7a31198e555a2ef0544">  120</a></span><span class="preprocessor">#define MT_PROFILE_BEGIN_FRAME()</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="profile_8h.html#a701f53b55c8c18c960781b03a4267db2">  121</a></span><span class="preprocessor">#define MT_PROFILE_END_FRAME()</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="profile_8h.html#a3e80669bc2799e599a88adfba1b6cbe4">  122</a></span><span class="preprocessor">#define MT_PROFILE_METADATA(NAME, DATA)</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="profile_8h.html">profile.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -134,6 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a05d24558e341f9b446d3add084b729ff" id="r_a05d24558e341f9b446d3add084b729ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FbxBuilder.html#a05d24558e341f9b446d3add084b729ff">addMotionWithJointParams</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="bvh__io_8cpp.html#a4f50e96f11c68d45dc109185efe011ad">fps</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointParams</a>)</td></tr>
 <tr class="memdesc:a05d24558e341f9b446d3add084b729ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add joint-parameter animation for a previously added character.  <br /></td></tr>
 <tr class="separator:a05d24558e341f9b446d3add084b729ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d04f1037d458b724ddddc029bcb6794" id="r_a4d04f1037d458b724ddddc029bcb6794"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FbxBuilder.html#a4d04f1037d458b724ddddc029bcb6794">addAnimatedMesh</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="bvh__io_8cpp.html#a4f50e96f11c68d45dc109185efe011ad">fps</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointParams</a>)</td></tr>
+<tr class="memdesc:a4d04f1037d458b724ddddc029bcb6794"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an animated mesh (mesh node with per-frame transform, no skeleton).  <br /></td></tr>
+<tr class="separator:a4d04f1037d458b724ddddc029bcb6794"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00199eda0fb8080cf305863932cecca6" id="r_a00199eda0fb8080cf305863932cecca6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1FbxBuilder.html#a00199eda0fb8080cf305863932cecca6">addMarkerSequence</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> <a class="el" href="bvh__io_8cpp.html#a4f50e96f11c68d45dc109185efe011ad">fps</a>, std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">markerSequence</a>)</td></tr>
 <tr class="memdesc:a00199eda0fb8080cf305863932cecca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a marker sequence to the scene.  <br /></td></tr>
 <tr class="separator:a00199eda0fb8080cf305863932cecca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,8 +155,8 @@ Public Member Functions</h2></td></tr>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">builder</a>.save(<span class="stringliteral">&quot;output.fbx&quot;</span>);</div>
 <div class="ttc" id="abvh__io_8cpp_html_a4f50e96f11c68d45dc109185efe011ad"><div class="ttname"><a href="bvh__io_8cpp.html#a4f50e96f11c68d45dc109185efe011ad">fps</a></div><div class="ttdeci">float fps</div><div class="ttdef"><b>Definition</b> <a href="bvh__io_8cpp_source.html#l00135">bvh_io.cpp:135</a></div></div>
 <div class="ttc" id="aclassmomentum_1_1FbxBuilder_html"><div class="ttname"><a href="classmomentum_1_1FbxBuilder.html">momentum::FbxBuilder</a></div><div class="ttdoc">Builder class for creating FBX files with multiple characters and animations.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8h_source.html#l00035">fbx_builder.h:35</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_ad1f887eb9927f779c207f912d2552c37"><div class="ttname"><a href="classmomentum_1_1FbxBuilder.html#ad1f887eb9927f779c207f912d2552c37">momentum::FbxBuilder::addCharacter</a></div><div class="ttdeci">void addCharacter(const Character &amp;character, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a skinned character (skeleton + mesh with skin weights) to the scene.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00315">fbx_builder.cpp:315</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00228">types.h:228</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_ad1f887eb9927f779c207f912d2552c37"><div class="ttname"><a href="classmomentum_1_1FbxBuilder.html#ad1f887eb9927f779c207f912d2552c37">momentum::FbxBuilder::addCharacter</a></div><div class="ttdeci">void addCharacter(const Character &amp;character, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a skinned character (skeleton + mesh with skin weights) to the scene.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00450">fbx_builder.cpp:450</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00235">types.h:235</a></div></div>
 </div><!-- fragment --> 
 <p class="definition">Definition at line <a class="el" href="fbx__builder_8h_source.html#l00035">35</a> of file <a class="el" href="fbx__builder_8h_source.html">fbx_builder.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -172,7 +175,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00304">304</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00439">439</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -256,6 +259,62 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4d04f1037d458b724ddddc029bcb6794" name="a4d04f1037d458b724ddddc029bcb6794"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d04f1037d458b724ddddc029bcb6794">&#9670;&#160;</a></span>addAnimatedMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a> momentum::FbxBuilder::addAnimatedMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a9f4c67a24d6c5afccf7ec31801df8e6e">Character</a> &amp;&#160;</td>
+          <td class="paramname"><em>character</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td>
+          <td class="paramname"><em>fps</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a> &amp;&#160;</td>
+          <td class="paramname"><em>jointParams</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add an animated mesh (mesh node with per-frame transform, no skeleton). </p>
+<p>Creates a standalone mesh node and animates its transform directly from the root joint parameters. This is for props/objects that should appear as a simple animated mesh without any skeleton hierarchy.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">character</td><td>The character providing the mesh geometry. </td></tr>
+    <tr><td class="paramname">name</td><td>Name for the mesh node. </td></tr>
+    <tr><td class="paramname">fps</td><td>Animation frame rate in frames per second. </td></tr>
+    <tr><td class="paramname">jointParams</td><td>Joint parameters matrix with shape (nFrames x nJointParams). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00470">470</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
+
+</div>
+</div>
 <a id="ad1f887eb9927f779c207f912d2552c37" name="ad1f887eb9927f779c207f912d2552c37"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad1f887eb9927f779c207f912d2552c37">&#9670;&#160;</a></span>addCharacter()</h2>
 
@@ -292,7 +351,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00315">315</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00450">450</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -333,7 +392,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00335">335</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00474">474</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -389,7 +448,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00327">327</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00462">462</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -438,7 +497,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00331">331</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00466">466</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -494,7 +553,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00319">319</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00454">454</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -577,7 +636,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00339">339</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00478">478</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -593,7 +652,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1FbxBuilder.html">FbxBuilder</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -99,7 +99,7 @@ $(document).ready(function(){initNavTree('classmomentum_1_1ResizeableMatrix.html
 </div><!--header-->
 <div class="contents">
 
-<p>A matrix class that can be resized without reallocating memory when shrinking.  
+<p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a></code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call.  
  <a href="classmomentum_1_1ResizeableMatrix.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>&gt;</code></p>
@@ -114,35 +114,43 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abb2c4e9cf042d214d9a9042625131672" id="r_abb2c4e9cf042d214d9a9042625131672"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#abb2c4e9cf042d214d9a9042625131672">ResizeableMatrix</a> ()=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
 <tr class="separator:abb2c4e9cf042d214d9a9042625131672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add6d39471f9c4d5bc8d8a29647faf0fb" id="r_add6d39471f9c4d5bc8d8a29647faf0fb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#add6d39471f9c4d5bc8d8a29647faf0fb">ResizeableMatrix</a> (Eigen::Index <a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows</a>, Eigen::Index <a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols</a>=1)</td></tr>
+<tr class="memdesc:add6d39471f9c4d5bc8d8a29647faf0fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a matrix of the given logical size and zero-initializes all entries.  <br /></td></tr>
 <tr class="separator:add6d39471f9c4d5bc8d8a29647faf0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fb0c1d54e0e78bd4c72b7dc3102123d" id="r_a6fb0c1d54e0e78bd4c72b7dc3102123d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d">resizeAndSetZero</a> (Eigen::Index <a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows</a>, Eigen::Index <a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols</a>=1)</td></tr>
+<tr class="memdesc:a6fb0c1d54e0e78bd4c72b7dc3102123d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the logical size to <code>rows x cols</code> and zeroes every element.  <br /></td></tr>
 <tr class="separator:a6fb0c1d54e0e78bd4c72b7dc3102123d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1afeb4b46ce6ee8acba07bdc8d567e0" id="r_ad1afeb4b46ce6ee8acba07bdc8d567e0"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:ad1afeb4b46ce6ee8acba07bdc8d567e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae049a055618eb21b47312f436e5b5c4" id="r_aae049a055618eb21b47312f436e5b5c4"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:aae049a055618eb21b47312f436e5b5c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3320671c1daf30f3319110cc1c6b286d" id="r_a3320671c1daf30f3319110cc1c6b286d"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a3320671c1daf30f3319110cc1c6b286d">mat</a> ()</td></tr>
+<tr class="memdesc:a3320671c1daf30f3319110cc1c6b286d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns an aligned, mutable <code>Eigen::Map</code> view of the logical <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a> x <a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a></code> matrix.  <br /></td></tr>
 <tr class="separator:a3320671c1daf30f3319110cc1c6b286d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81edd3d293a1a1886f38b81296dc2b37" id="r_a81edd3d293a1a1886f38b81296dc2b37"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1ResizeableMatrix.html#a9e48c22eaec41a470b6b6a439f796254">MatrixType</a>, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a81edd3d293a1a1886f38b81296dc2b37">mat</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a81edd3d293a1a1886f38b81296dc2b37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Const overload of <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a3320671c1daf30f3319110cc1c6b286d" title="Returns an aligned, mutable Eigen::Map view of the logical rows() x cols() matrix.">mat()</a></code>.  <br /></td></tr>
 <tr class="separator:a81edd3d293a1a1886f38b81296dc2b37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa917558dd8eff272e5d9dc15a8077c21" id="r_aa917558dd8eff272e5d9dc15a8077c21"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21">vec</a> ()</td></tr>
-<tr class="memdesc:aa917558dd8eff272e5d9dc15a8077c21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vector accessor for single-column matrices.  <br /></td></tr>
+<tr class="memdesc:aa917558dd8eff272e5d9dc15a8077c21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns an aligned, mutable <code>Eigen::Map</code> view interpreting the storage as a length-<code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a></code> column vector.  <br /></td></tr>
 <tr class="separator:aa917558dd8eff272e5d9dc15a8077c21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01eb4ee04d7ec36a4979242ac6272126" id="r_a01eb4ee04d7ec36a4979242ac6272126"><td class="memItemLeft" align="right" valign="top">Eigen::Map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Matrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, Eigen::Dynamic, 1 &gt;, Eigen::Aligned128 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a01eb4ee04d7ec36a4979242ac6272126">vec</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a01eb4ee04d7ec36a4979242ac6272126"><td class="mdescLeft">&#160;</td><td class="mdescRight">Const overload of <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21" title="Returns an aligned, mutable Eigen::Map view interpreting the storage as a length-rows() column vector...">vec()</a></code>.  <br /></td></tr>
 <tr class="separator:a01eb4ee04d7ec36a4979242ac6272126"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:ababf2c1c21f4f645f06e974b19d003cc" id="r_ababf2c1c21f4f645f06e974b19d003cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ababf2c1c21f4f645f06e974b19d003cc">kAlignment</a> = 128</td></tr>
-<tr class="memdesc:ababf2c1c21f4f645f06e974b19d003cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alignment in bytes for SIMD and cache efficiency.  <br /></td></tr>
+<tr class="memdesc:ababf2c1c21f4f645f06e974b19d003cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alignment in bytes for the underlying storage.  <br /></td></tr>
 <tr class="separator:ababf2c1c21f4f645f06e974b19d003cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::ResizeableMatrix&lt; T &gt;</div><p>A matrix class that can be resized without reallocating memory when shrinking. </p>
-<p>The native <a class="el" href="namespaceEigen.html">Eigen</a> matrix type reallocates the matrix every time you call either <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a> or <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a>, which means there is no way to have a matrix that reuses memory. This is inconvenient, because there are definitely cases where we want to be able to reuse the same memory over and over for slightly different matrix sizes (for example, if we are computing our Jacobian blockwise). </p>
+class momentum::ResizeableMatrix&lt; T &gt;</div><p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a></code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call. </p>
+<p>Motivation: solver inner loops repeatedly build matrices (e.g. blockwise Jacobians) whose logical dimensions vary slightly from iteration to iteration. Using a plain <a class="el" href="namespaceEigen.html">Eigen</a> matrix triggers a heap allocation each time the size changes; this class amortizes those costs by only growing the backing buffer when the requested element count exceeds the current capacity. Storage shrinks only when the object is destroyed.</p>
+<p>Capacity vs. logical size: <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a></code> / <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a></code> report the logical size requested by the last <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d" title="Sets the logical size to rows x cols and zeroes every element.">resizeAndSetZero()</a></code>. The backing <code>std::vector</code> capacity may be larger and is never returned to the allocator while the object lives.</p>
+<p>Layout: data is stored contiguously in column-major order (matching <a class="el" href="namespaceEigen.html">Eigen</a>'s default) and is aligned to <code>kAlignment</code> bytes so that the returned <code>Eigen::Map&lt;..., Eigen::Aligned128&gt;</code> can use aligned SIMD loads/stores.</p>
+<p>Thread safety: not thread-safe. Concurrent calls to any non-const method, or a non-const method concurrent with any other access, are data races. Multiple readers via <code>const</code> accessors are safe provided no writer is active. </p>
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00027">27</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00040">40</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a9e48c22eaec41a470b6b6a439f796254" name="a9e48c22eaec41a470b6b6a439f796254"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e48c22eaec41a470b6b6a439f796254">&#9670;&#160;</a></span>MatrixType</h2>
@@ -158,7 +166,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00032">32</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00046">46</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -226,9 +234,18 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00035">35</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p>Constructs a matrix of the given logical size and zero-initializes all entries. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rows</td><td>Number of rows in the logical matrix. </td></tr>
+    <tr><td class="paramname">cols</td><td>Number of columns in the logical matrix; defaults to 1 (column vector). </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00051">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00048">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00053">53</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+
+<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00083">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, <a class="el" href="resizeable__matrix_8h_source.html#l00067">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00080">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
 
 </div>
 </div>
@@ -258,9 +275,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00051">51</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00083">83</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00053">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00067">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
 
 </div>
 </div>
@@ -289,7 +306,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00055">55</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p>Returns an aligned, mutable <code>Eigen::Map</code> view of the logical <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a> x <a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a></code> matrix. </p>
+<p>The map is invalidated by any subsequent call to <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d" title="Sets the logical size to rows x cols and zeroes every element.">resizeAndSetZero()</a></code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00089">89</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -318,7 +338,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00058">58</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p>Const overload of <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a3320671c1daf30f3319110cc1c6b286d" title="Returns an aligned, mutable Eigen::Map view of the logical rows() x cols() matrix.">mat()</a></code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00094">94</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -358,11 +380,22 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00039">39</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p>Sets the logical size to <code>rows x cols</code> and zeroes every element. </p>
+<p>The backing buffer is reused if its current capacity is sufficient; otherwise it grows. Capacity never shrinks. Any <code>Eigen::Map</code> previously returned by <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a3320671c1daf30f3319110cc1c6b286d" title="Returns an aligned, mutable Eigen::Map view of the logical rows() x cols() matrix.">mat()</a></code> / <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21" title="Returns an aligned, mutable Eigen::Map view interpreting the storage as a length-rows() column vector...">vec()</a></code> is invalidated by this call (storage may have been reallocated, and existing contents are overwritten with zeros regardless).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rows</td><td>Number of rows in the new logical matrix. </td></tr>
+    <tr><td class="paramname">cols</td><td>Number of columns in the new logical matrix; defaults to 1. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section post"><dt>Postcondition</dt><dd><code>this-&gt;<a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a> == rows &amp;&amp; this-&gt;<a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a> == cols</code> and every entry is <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T(0)</a></code>. </dd></dl>
 
-<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00051">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00048">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00067">67</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>.</p>
+<p class="reference">References <a class="el" href="resizeable__matrix_8h_source.html#l00083">momentum::ResizeableMatrix&lt; T &gt;::cols()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00080">momentum::ResizeableMatrix&lt; T &gt;::rows()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00053">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>.</p>
 
 </div>
 </div>
@@ -391,9 +424,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00048">48</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00080">80</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00035">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00039">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="resizeable__matrix_8h_source.html#l00053">momentum::ResizeableMatrix&lt; T &gt;::ResizeableMatrix()</a>, and <a class="el" href="resizeable__matrix_8h_source.html#l00067">momentum::ResizeableMatrix&lt; T &gt;::resizeAndSetZero()</a>.</p>
 
 </div>
 </div>
@@ -422,9 +455,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Vector accessor for single-column matrices. </p>
+<p>Returns an aligned, mutable <code>Eigen::Map</code> view interpreting the storage as a length-<code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a></code> column vector. </p>
+<p>The <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a></code> value is ignored; intended for the single-column case. The map is invalidated by any subsequent call to <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d" title="Sets the logical size to rows x cols and zeroes every element.">resizeAndSetZero()</a></code>. TODO: <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21" title="Returns an aligned, mutable Eigen::Map view interpreting the storage as a length-rows() column vector...">vec()</a></code> ignores <code>cols_</code> and only exposes the first column when <code>cols_ &gt; 1</code>. Either document this contract loudly or assert <code>cols_ == 1</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00063">63</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00103">103</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -453,7 +487,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00066">66</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p>Const overload of <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aa917558dd8eff272e5d9dc15a8077c21" title="Returns an aligned, mutable Eigen::Map view interpreting the storage as a length-rows() column vector...">vec()</a></code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00108">108</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -480,9 +516,10 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Alignment in bytes for SIMD and cache efficiency. </p>
+<p>Alignment in bytes for the underlying storage. </p>
+<p>Chosen to satisfy <code>Eigen::Aligned128</code> so the <code>Eigen::Map</code> accessors below can perform aligned SIMD loads/stores. </p>
 
-<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00030">30</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="resizeable__matrix_8h_source.html#l00044">44</a> of file <a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>.</p>
 
 </div>
 </div>
@@ -495,7 +532,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ResizeableMatrix.html">ResizeableMatrix</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

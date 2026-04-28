@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmomentum_1_1OnlineBandedHousehold
 </div><!--header-->
 <div class="contents">
 
+<p>Online Householder QR solver for band-plus-arrowhead matrices.  
+ <a href="classmomentum_1_1OnlineBandedHouseholderQR.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -110,22 +113,31 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af24c1f642683ba61caac2a00c28bfa7b" id="r_af24c1f642683ba61caac2a00c28bfa7b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#af24c1f642683ba61caac2a00c28bfa7b">OnlineBandedHouseholderQR</a> (Eigen::Index <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab5a5ea866c654a274831ced5ffe5342a">n_band</a>, Eigen::Index <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a6377ce531478f9e6be356c211f60ddef">n_common</a>, Eigen::Index <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a28a4a830d4d1a5b8d0191d1a9de19928">bandwidth</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">lambda</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0))</td></tr>
+<tr class="memdesc:af24c1f642683ba61caac2a00c28bfa7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a banded solver.  <br /></td></tr>
 <tr class="separator:af24c1f642683ba61caac2a00c28bfa7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f4413655bcbde5ded33bf2c978476d3" id="r_a5f4413655bcbde5ded33bf2c978476d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a5f4413655bcbde5ded33bf2c978476d3">add</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCol_offset</a>, <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_band</a>, <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:a5f4413655bcbde5ded33bf2c978476d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copying overload of <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041" title="In-place addition; convenience wrapper that wraps the matrices in ColumnIndexedMatrix views without r...">addMutating()</a></code> that takes both banded and common contributions.  <br /></td></tr>
 <tr class="separator:a5f4413655bcbde5ded33bf2c978476d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8bfc3eea8022658e23ce4d9472f56166" id="r_a8bfc3eea8022658e23ce4d9472f56166"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a8bfc3eea8022658e23ce4d9472f56166">add</a> (<a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:a8bfc3eea8022658e23ce4d9472f56166"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copying overload for contributions that only touch the common columns.  <br /></td></tr>
 <tr class="separator:a8bfc3eea8022658e23ce4d9472f56166"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0f1d3e633c8194943b1ef196f05a041" id="r_ab0f1d3e633c8194943b1ef196f05a041"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041">addMutating</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCol_offset</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_band</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:ab0f1d3e633c8194943b1ef196f05a041"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-place addition; convenience wrapper that wraps the matrices in <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html" title="View over a matrix that exposes a (possibly reordered) subset of its columns.">ColumnIndexedMatrix</a></code> views without remapping.  <br /></td></tr>
 <tr class="separator:ab0f1d3e633c8194943b1ef196f05a041"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8e6f88872b8ea40f1de4374bc748cb6" id="r_ad8e6f88872b8ea40f1de4374bc748cb6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ad8e6f88872b8ea40f1de4374bc748cb6">addMutating</a> (Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:ad8e6f88872b8ea40f1de4374bc748cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-place addition for contributions that only touch the common columns.  <br /></td></tr>
 <tr class="separator:ad8e6f88872b8ea40f1de4374bc748cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9318c702099303af621e72fdd126bfa8" id="r_a9318c702099303af621e72fdd126bfa8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a9318c702099303af621e72fdd126bfa8">addMutating</a> (Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCol_offset</a>, <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_band</a>, <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:a9318c702099303af621e72fdd126bfa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-place addition that accepts column-remapped views, so callers can pass arbitrary subsets of the columns in <code>A_band</code> and <code>A_common</code>.  <br /></td></tr>
 <tr class="separator:a9318c702099303af621e72fdd126bfa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae93476b5e47e1ca3b1e8d2598173f839" id="r_ae93476b5e47e1ca3b1e8d2598173f839"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ae93476b5e47e1ca3b1e8d2598173f839">addMutating</a> (<a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:ae93476b5e47e1ca3b1e8d2598173f839"><td class="mdescLeft">&#160;</td><td class="mdescRight">Common-only addition overload. Use when a contribution touches no banded columns.  <br /></td></tr>
 <tr class="separator:ae93476b5e47e1ca3b1e8d2598173f839"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad39aace990ad73f1bdb7500426ebb46" id="r_aad39aace990ad73f1bdb7500426ebb46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#aad39aace990ad73f1bdb7500426ebb46">zeroBandedPart</a> (Eigen::Index <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">iCol_offset</a>, <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_band</a>, <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a>&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A_common</a>, Eigen::Ref&lt; <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>)</td></tr>
+<tr class="memdesc:aad39aace990ad73f1bdb7500426ebb46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zeros out just the banded part of <code>A_band</code> by applying Householder rotations.  <br /></td></tr>
 <tr class="separator:aad39aace990ad73f1bdb7500426ebb46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a377becc8dca7af608455a77e136710f5" id="r_a377becc8dca7af608455a77e136710f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a377becc8dca7af608455a77e136710f5">x_dense</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:a377becc8dca7af608455a77e136710f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the full dense result vector of length <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab5a5ea866c654a274831ced5ffe5342a">n_band()</a> + <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a6377ce531478f9e6be356c211f60ddef">n_common()</a></code>.  <br /></td></tr>
 <tr class="separator:a377becc8dca7af608455a77e136710f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd1dfe5feb066dda2db85e4b617b726c" id="r_abd1dfe5feb066dda2db85e4b617b726c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a866ac2b833b1982ff9711e51c90f612e">MatrixType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#abd1dfe5feb066dda2db85e4b617b726c">R_dense</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:abd1dfe5feb066dda2db85e4b617b726c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,6 +146,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6674e39e669387606f1643f87879eb6d" id="r_a6674e39e669387606f1643f87879eb6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a0275dc11bb9ed37eb851ce5908ed0fed">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a6674e39e669387606f1643f87879eb6d">At_times_b</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a6674e39e669387606f1643f87879eb6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2a49538d336824cb9a550f78644ddfc" id="r_ac2a49538d336824cb9a550f78644ddfc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ac2a49538d336824cb9a550f78644ddfc">reset</a> ()</td></tr>
+<tr class="memdesc:ac2a49538d336824cb9a550f78644ddfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discards accumulated state, keeping the existing dimensions and damping.  <br /></td></tr>
 <tr class="separator:ac2a49538d336824cb9a550f78644ddfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28a4a830d4d1a5b8d0191d1a9de19928" id="r_a28a4a830d4d1a5b8d0191d1a9de19928"><td class="memItemLeft" align="right" valign="top">Eigen::Index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a28a4a830d4d1a5b8d0191d1a9de19928">bandwidth</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a28a4a830d4d1a5b8d0191d1a9de19928"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,8 +157,31 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::OnlineBandedHouseholderQR&lt; T &gt;</div>
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00330">330</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+class momentum::OnlineBandedHouseholderQR&lt; T &gt;</div><p>Online Householder QR solver for band-plus-arrowhead matrices. </p>
+<p>The left-hand part of the matrix is required to have a limited column-bandwidth, and a "common" section is permitted on the right, like this: </p><div class="fragment"><div class="line">   ...b <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">n</a> d <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a> d...     <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">common</a></div>
+<div class="line">[ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_11</a>                   <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_15</a> ]</div>
+<div class="line">[ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_21</a>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_22</a>             <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_25</a> ]</div>
+<div class="line">[ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_31</a>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_32</a>             <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_35</a> ]</div>
+<div class="line">[       <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_42</a>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_43</a>       <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_45</a> ]</div>
+<div class="line">[             <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_53</a>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_54</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_55</a> ]</div>
+<div class="line">[                   <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_64</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">a_65</a> ]</div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00235">types.h:235</a></div></div>
+</div><!-- fragment --><p> Here "bandwidth" is in <em>columns</em>; the matrix above has a bandwidth of 2 because no row spans more than two columns (excluding the common section). The common section holds parameters shared by every row.</p>
+<p>While this seems specialized, it maps to a very common class of problems where the band structure represents a time dimension (smoothness constraints tend to connect adjacent timepoints) and the common parameters are shared across time. For example:</p><ul>
+<li>body tracking: band structure maps to smoothness constraints between adjacent frames, while common parameters control body scale.</li>
+<li>camera calibration: band structure maps to smoothness constraints between adjacent frames of the extrinsics, while common parameters refer to intrinsics.</li>
+</ul>
+<h3><a class="anchor" id="autotoc_md2"></a>
+Usage contract</h3>
+<ol type="1">
+<li>Construct with <code>n_band</code> (number of banded unknowns), <code>n_common</code> (shared unknowns), <code>bandwidth</code>, and optional <code>lambda</code> damping.</li>
+<li>Add contributions via <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a5f4413655bcbde5ded33bf2c978476d3" title="Copying overload of addMutating() that takes both banded and common contributions.">add()</a></code>/<code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041" title="In-place addition; convenience wrapper that wraps the matrices in ColumnIndexedMatrix views without r...">addMutating()</a></code>. Pass an <code>iCol_offset</code> indicating where the contribution's left-most banded column lives in the global numbering. Contributions touching only the common columns use the no-offset overload.</li>
+<li>Optionally use <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#aad39aace990ad73f1bdb7500426ebb46" title="Zeros out just the banded part of A_band by applying Householder rotations.">zeroBandedPart()</a></code> to parallelize the banded sweep over disjoint column ranges; the matching <code>addMutating(A_common, b)</code> call must be serialized.</li>
+<li>Retrieve results via <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a377becc8dca7af608455a77e136710f5" title="Retrieves the full dense result vector of length n_band() + n_common().">x_dense()</a></code> (and inspect via <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#abd1dfe5feb066dda2db85e4b617b726c">R_dense()</a></code>/<code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a7302e589ca80a4cfc591a093e6414740">y_dense()</a></code>).</li>
+<li>Call <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ac2a49538d336824cb9a550f78644ddfc" title="Discards accumulated state, keeping the existing dimensions and damping.">reset()</a></code> to discard accumulated state and reuse the solver. </li>
+</ol>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00409">409</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a866ac2b833b1982ff9711e51c90f612e" name="a866ac2b833b1982ff9711e51c90f612e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a866ac2b833b1982ff9711e51c90f612e">&#9670;&#160;</a></span>MatrixType</h2>
@@ -161,7 +197,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00332">332</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00411">411</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -179,7 +215,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00333">333</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00412">412</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -232,9 +268,20 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00470">470</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Constructs a banded solver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n_band</td><td>Number of banded (per-time) unknowns. </td></tr>
+    <tr><td class="paramname">n_common</td><td>Number of common unknowns (the right-hand "arrowhead"). </td></tr>
+    <tr><td class="paramname">bandwidth</td><td>Maximum number of banded columns any single row may touch. </td></tr>
+    <tr><td class="paramname">lambda</td><td>LM-style damping; emulates the augmented system <code>| [lambda*I; A] [x] - [0; b] |^2</code> without materializing the extra rows. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00419">momentum::OnlineBandedHouseholderQR&lt; T &gt;::bandwidth()</a>, <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00423">momentum::OnlineBandedHouseholderQR&lt; T &gt;::n_band()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00519">519</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00520">momentum::OnlineBandedHouseholderQR&lt; T &gt;::bandwidth()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00524">momentum::OnlineBandedHouseholderQR&lt; T &gt;::n_band()</a>.</p>
 
 </div>
 </div>
@@ -275,9 +322,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00350">350</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>Copying overload for contributions that only touch the common columns. </p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00359">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00432">432</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00438">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
 
 </div>
 </div>
@@ -329,9 +378,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00346">346</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>Copying overload of <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041" title="In-place addition; convenience wrapper that wraps the matrices in ColumnIndexedMatrix views without r...">addMutating()</a></code> that takes both banded and common contributions. </p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00359">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00427">427</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00438">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
 
 </div>
 </div>
@@ -363,9 +414,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00582">582</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Common-only addition overload. Use when a contribution touches no banded columns. </p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00643">643</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -417,11 +470,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00359">359</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>In-place addition; convenience wrapper that wraps the matrices in <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html" title="View over a matrix that exposes a (possibly reordered) subset of its columns.">ColumnIndexedMatrix</a></code> views without remapping. </p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00359">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00438">438</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00350">momentum::OnlineBandedHouseholderQR&lt; T &gt;::add()</a>, <a class="el" href="online__householder__qr_8h_source.html#l00346">momentum::OnlineBandedHouseholderQR&lt; T &gt;::add()</a>, <a class="el" href="online__householder__qr_8h_source.html#l00359">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00371">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00438">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="online__householder__qr_8h_source.html#l00432">momentum::OnlineBandedHouseholderQR&lt; T &gt;::add()</a>, <a class="el" href="online__householder__qr_8h_source.html#l00427">momentum::OnlineBandedHouseholderQR&lt; T &gt;::add()</a>, <a class="el" href="online__householder__qr_8h_source.html#l00438">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>, and <a class="el" href="online__householder__qr_8h_source.html#l00451">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
 
 </div>
 </div>
@@ -465,7 +520,19 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00510">510</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>In-place addition that accepts column-remapped views, so callers can pass arbitrary subsets of the columns in <code>A_band</code> and <code>A_common</code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iCol_offset</td><td>Global column index of <code>A_band</code>'s left-most column. Must satisfy <code>iCol_offset + A_band.cols() &lt;= <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab5a5ea866c654a274831ced5ffe5342a">n_band()</a></code>. </td></tr>
+    <tr><td class="paramname">A_band</td><td>Banded contribution. <code>A_band.cols()</code> must be at most <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a28a4a830d4d1a5b8d0191d1a9de19928">bandwidth()</a></code>. </td></tr>
+    <tr><td class="paramname">A_common</td><td>Common contribution. <code>A_common.cols()</code> must equal <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a6377ce531478f9e6be356c211f60ddef">n_common()</a></code>. </td></tr>
+    <tr><td class="paramname">b</td><td>Residual vector with <code>A_band.rows()</code> entries. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section post"><dt>Postcondition</dt><dd>Internal <code>R_band_</code>, <code>R_common_</code>, and <code>y_</code> are updated. The contents of <code>A_band</code>, <code>A_common</code>, and <code>b</code> are arbitrary on return. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00568">568</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -505,9 +572,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00371">371</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>In-place addition for contributions that only touch the common columns. </p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00359">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00451">451</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+
+<p class="reference">References <a class="el" href="online__householder__qr_8h_source.html#l00438">momentum::OnlineBandedHouseholderQR&lt; T &gt;::addMutating()</a>.</p>
 
 </div>
 </div>
@@ -527,8 +596,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd><code>A^T * b</code> for the data accumulated so far. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00666">666</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00746">746</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -557,9 +627,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00419">419</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00520">520</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8cpp_source.html#l00470">momentum::OnlineBandedHouseholderQR&lt; T &gt;::OnlineBandedHouseholderQR()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="online__householder__qr_8cpp_source.html#l00519">momentum::OnlineBandedHouseholderQR&lt; T &gt;::OnlineBandedHouseholderQR()</a>.</p>
 
 </div>
 </div>
@@ -588,9 +658,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00423">423</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00524">524</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="online__householder__qr_8cpp_source.html#l00470">momentum::OnlineBandedHouseholderQR&lt; T &gt;::OnlineBandedHouseholderQR()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="online__householder__qr_8cpp_source.html#l00519">momentum::OnlineBandedHouseholderQR&lt; T &gt;::OnlineBandedHouseholderQR()</a>.</p>
 
 </div>
 </div>
@@ -619,7 +689,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00427">427</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00528">528</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -639,8 +709,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>R as a dense matrix of size <code>(n_band+n_common) x (n_band+n_common)</code>, reconstructed from the banded and common storage. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00612">612</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00677">677</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -661,7 +732,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00501">501</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Discards accumulated state, keeping the existing dimensions and damping. </p>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00559">559</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -682,7 +755,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00637">637</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Retrieves the full dense result vector of length <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab5a5ea866c654a274831ced5ffe5342a">n_band()</a> + <a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#a6377ce531478f9e6be356c211f60ddef">n_common()</a></code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00708">708</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -710,8 +785,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>The transformed right-hand side <code>Q * b</code>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00411">411</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00510">510</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -755,9 +831,17 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00520">520</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p>Zeros out just the banded part of <code>A_band</code> by applying Householder rotations. </p>
+<p><code>A_common</code> is updated in place but will still have nonzero entries on return, so after calling this you should follow up with <code>addMutating(A_common, b)</code> to fold the remaining common contribution into the factorization.</p>
+<p>Why is this useful? If you are careful, you can call <code>zeroBandedPart</code> on multiple non-overlapping segments of the banded matrix in parallel; only the <code>A_common</code> processing must be serialized. Because the number of common variables is usually much smaller than the number of banded variables, this can provide a substantial speedup in practice.</p>
+<dl class="section pre"><dt>Precondition</dt><dd><code>iCol_offset</code>, <code>A_band</code>, <code>A_common</code>, <code>b</code> satisfy the same shape rules as <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041" title="In-place addition; convenience wrapper that wraps the matrices in ColumnIndexedMatrix views without r...">addMutating()</a></code>. </dd>
+<dd>
+The column range <code>[iCol_offset, iCol_offset + A_band.cols())</code> does not overlap any concurrently in-flight <code>zeroBandedPart</code> call on the same solver. </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd><code>R_band_</code> is updated; <code>A_band</code> is zeroed; <code>A_common</code> and <code>b</code> are mutated and must be passed to the common-only <code><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html#ab0f1d3e633c8194943b1ef196f05a041" title="In-place addition; convenience wrapper that wraps the matrices in ColumnIndexedMatrix views without r...">addMutating()</a></code> to finish the contribution. </dd></dl>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00022">MT_CHECK</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00578">578</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
 </div>
 </div>
@@ -771,7 +855,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1OnlineBandedHouseholderQR.html">OnlineBandedHouseholderQR</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

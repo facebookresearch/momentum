@@ -102,14 +102,19 @@ $(document).ready(function(){initNavTree('memory_8h.html',''); initResizable(); 
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a8a69f188536dac254c8d37e812a4c7bc" id="r_a8a69f188536dac254c8d37e812a4c7bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="memory_8h.html#a8a69f188536dac254c8d37e812a4c7bc">MOMENTUM_DEFINE_POINTERS</a>(x)</td></tr>
+<tr class="memdesc:a8a69f188536dac254c8d37e812a4c7bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the standard set of smart-pointer type aliases for type <code>x</code>.  <br /></td></tr>
 <tr class="separator:a8a69f188536dac254c8d37e812a4c7bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48185cbd87194be7a5b521492c6ec9f2" id="r_a48185cbd87194be7a5b521492c6ec9f2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="memory_8h.html#a48185cbd87194be7a5b521492c6ec9f2">MOMENTUM_FWD_DECLARE_STRUCT</a>(x)</td></tr>
+<tr class="memdesc:a48185cbd87194be7a5b521492c6ec9f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward-declare struct <code>x</code> and define its smart-pointer aliases.  <br /></td></tr>
 <tr class="separator:a48185cbd87194be7a5b521492c6ec9f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a251111b01214e693ca19b36ce0224277" id="r_a251111b01214e693ca19b36ce0224277"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="memory_8h.html#a251111b01214e693ca19b36ce0224277">MOMENTUM_FWD_DECLARE_CLASS</a>(x)</td></tr>
+<tr class="memdesc:a251111b01214e693ca19b36ce0224277"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward-declare class <code>x</code> and define its smart-pointer aliases.  <br /></td></tr>
 <tr class="separator:a251111b01214e693ca19b36ce0224277"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3f9e2dc3aeb6f32247010cd2f6709ac" id="r_ae3f9e2dc3aeb6f32247010cd2f6709ac"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="memory_8h.html#ae3f9e2dc3aeb6f32247010cd2f6709ac">MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS</a>(x)</td></tr>
+<tr class="memdesc:ae3f9e2dc3aeb6f32247010cd2f6709ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward-declare a single-template-parameter class <code>x##T</code> and define <code>float</code>/<code>double</code> instantiation aliases plus their smart-pointer aliases.  <br /></td></tr>
 <tr class="separator:ae3f9e2dc3aeb6f32247010cd2f6709ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65906d95164f7cf9b628279024c3a60f" id="r_a65906d95164f7cf9b628279024c3a60f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="memory_8h.html#a65906d95164f7cf9b628279024c3a60f">MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT</a>(x)</td></tr>
+<tr class="memdesc:a65906d95164f7cf9b628279024c3a60f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forward-declare a single-template-parameter struct <code>x##T</code> and define <code>float</code>/<code>double</code> instantiation aliases plus their smart-pointer aliases.  <br /></td></tr>
 <tr class="separator:a65906d95164f7cf9b628279024c3a60f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
@@ -135,7 +140,18 @@ Macros</h2></td></tr>
 <div class="line">  <span class="keyword">using </span>x##_const_u = ::std::unique_ptr&lt;const x&gt;; \</div>
 <div class="line">  <span class="keyword">using </span>x##_const_w = ::std::weak_ptr&lt;const x&gt;;</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00014">14</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
+<p>Define the standard set of smart-pointer type aliases for type <code>x</code>. </p>
+<p>Generates six aliases following the project naming convention:</p><ul>
+<li><code>x##_p</code> — <code>std::shared_ptr&lt;x&gt;</code></li>
+<li><code>x##_u</code> — <code>std::unique_ptr&lt;x&gt;</code></li>
+<li><code>x##_w</code> — <code>std::weak_ptr&lt;x&gt;</code></li>
+<li><code>x##_const_p</code> — <code>std::shared_ptr&lt;const x&gt;</code></li>
+<li><code>x##_const_u</code> — <code>std::unique_ptr&lt;const x&gt;</code></li>
+<li><code>x##_const_w</code> — <code>std::weak_ptr&lt;const x&gt;</code></li>
+</ul>
+<dl class="section pre"><dt>Precondition</dt><dd><code>x</code> must be a previously declared (or forward-declared) type name. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00024">24</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
 
 </div>
 </div>
@@ -157,7 +173,10 @@ Macros</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line">  <span class="keyword">class </span>x;                            \</div>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00033">33</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
+<p>Forward-declare class <code>x</code> and define its smart-pointer aliases. </p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="memory_8h.html#a8a69f188536dac254c8d37e812a4c7bc" title="Define the standard set of smart-pointer type aliases for type x.">MOMENTUM_DEFINE_POINTERS</a> for the generated alias names. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00047">47</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
 
 </div>
 </div>
@@ -179,7 +198,10 @@ Macros</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line">  <span class="keyword">struct </span>x;                            \</div>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x);</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00025">25</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
+<p>Forward-declare struct <code>x</code> and define its smart-pointer aliases. </p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="memory_8h.html#a8a69f188536dac254c8d37e812a4c7bc" title="Define the standard set of smart-pointer type aliases for type x.">MOMENTUM_DEFINE_POINTERS</a> for the generated alias names. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00037">37</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
 
 </div>
 </div>
@@ -205,7 +227,14 @@ Macros</h2></td></tr>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x)                  \</div>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x##d)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00046">46</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
+<p>Forward-declare a single-template-parameter class <code>x##T</code> and define <code>float</code>/<code>double</code> instantiation aliases plus their smart-pointer aliases. </p>
+<p>Uses the project's backward-compatible naming scheme: </p><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">class </span>BarT;</div>
+<div class="line"><span class="keyword">using </span>Bar = BarT&lt;float&gt;;</div>
+<div class="line"><span class="keyword">using </span>Bard = BarT&lt;double&gt;;</div>
+</div><!-- fragment --><p> Smart-pointer aliases are generated for both <code>Bar</code> and <code>Bard</code> (e.g. <code>Bar_p</code>, <code>Bard_p</code>, ...).</p>
+<dl class="section pre"><dt>Precondition</dt><dd><code>x##T</code> must be a class template with exactly one type parameter. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00068">68</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
 
 </div>
 </div>
@@ -231,7 +260,14 @@ Macros</h2></td></tr>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x)                   \</div>
 <div class="line">  MOMENTUM_DEFINE_POINTERS(x##d)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00063">63</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
+<p>Forward-declare a single-template-parameter struct <code>x##T</code> and define <code>float</code>/<code>double</code> instantiation aliases plus their smart-pointer aliases. </p>
+<p>Uses the project's backward-compatible naming scheme: </p><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span>BarT;</div>
+<div class="line"><span class="keyword">using </span>Bar = BarT&lt;float&gt;;</div>
+<div class="line"><span class="keyword">using </span>Bard = BarT&lt;double&gt;;</div>
+</div><!-- fragment --><p> Smart-pointer aliases are generated for both <code>Bar</code> and <code>Bard</code> (e.g. <code>Bar_p</code>, <code>Bard_p</code>, ...).</p>
+<dl class="section pre"><dt>Precondition</dt><dd><code>x##T</code> must be a struct template with exactly one type parameter. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="memory_8h_source.html#l00093">93</a> of file <a class="el" href="memory_8h_source.html">memory.h</a>.</p>
 
 </div>
 </div>
@@ -241,7 +277,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="memory_8h.html">memory.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

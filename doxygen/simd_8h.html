@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('simd_8h.html',''); initResizable(); })
 </div><!--header-->
 <div class="contents">
 
-<p>SIMD type aliases and mixed Eigen/DrJit arithmetic operators.  
+<p>Cross-platform SIMD foundation built on the DrJit library.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;<a class="el" href="exception_8h_source.html">momentum/common/exception.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="transform_8h_source.html">momentum/math/transform.h</a>&gt;</code><br />
@@ -205,6 +205,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a70eea525237da5fa78becb9af015ae71"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a70eea525237da5fa78becb9af015ae71">momentum::checkAlignment</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Ref&lt; Eigen::MatrixXf &gt; &amp;mat, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="bvh__io_8cpp.html#a8682ffa8d7135ad161ce7397b54cc16c">offset</a>=0)</td></tr>
 <tr class="memdesc:a70eea525237da5fa78becb9af015ae71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the data of the matrix is aligned correctly.  <br /></td></tr>
 <tr class="separator:a70eea525237da5fa78becb9af015ae71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Eigen / DrJit interop operators</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>Mixed-type arithmetic between scalar <a class="el" href="namespaceEigen.html">Eigen</a> types (<code>Vector3f</code>, <code>Matrix3f</code>, <code>Quaternionf</code>, <code>Transform</code>) and DrJit packet types (<code>Vector3fP</code>).</p>
+<p>The core pattern for SIMD error function evaluation: a single joint transform (scalar <a class="el" href="namespaceEigen.html">Eigen</a>) is applied to N constraint positions (DrJit packet) simultaneously. For example, computing N position residuals:</p>
+<div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">Vector3f</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointPos</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>.translation(); <span class="comment">// scalar</span></div>
+<div class="line"><a class="code hl_typedef" href="namespacemomentum.html#af8254a42d02b0638b91a4e40344b4eb8">Vector3fP</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targets</a> = {drjit::load&lt;FloatP&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetX</a>),</div>
+<div class="line">                     drjit::load&lt;FloatP&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetY</a>),</div>
+<div class="line">                     drjit::load&lt;FloatP&gt;(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targetZ</a>)}; <span class="comment">// N packed targets</span></div>
+<div class="line"><a class="code hl_typedef" href="namespacemomentum.html#af8254a42d02b0638b91a4e40344b4eb8">Vector3fP</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">residuals</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">targets</a> - <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointPos</a>; <span class="comment">// N residuals at once</span></div>
+<div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00235">types.h:235</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ae82b3ca4dc893c348bf22f3c7815f782"><div class="ttname"><a href="namespacemomentum.html#ae82b3ca4dc893c348bf22f3c7815f782">momentum::Vector3f</a></div><div class="ttdeci">Vector3&lt; float &gt; Vector3f</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00250">types.h:250</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_af8254a42d02b0638b91a4e40344b4eb8"><div class="ttname"><a href="namespacemomentum.html#af8254a42d02b0638b91a4e40344b4eb8">momentum::Vector3fP</a></div><div class="ttdeci">Vector3P&lt; float &gt; Vector3fP</div><div class="ttdef"><b>Definition</b> <a href="simd_8h_source.html#l00093">simd.h:93</a></div></div>
+</div><!-- fragment --> </div></td></tr>
 <tr class="memitem:a6e841fb80f1015d501cd5164213a1c05" id="r_a6e841fb80f1015d501cd5164213a1c05"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Derived</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &gt; </td></tr>
 <tr class="memitem:a6e841fb80f1015d501cd5164213a1c05"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a3c50b779f3e2b68a3ce7fbb094184549">FloatP</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a6e841fb80f1015d501cd5164213a1c05">momentum::dot</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::MatrixBase&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Derived</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">v1</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#af3a3b5f2df84c8acf8d37df7f2eb9ee6">Vector3P</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">S</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">v2</a>)</td></tr>
 <tr class="memdesc:a6e841fb80f1015d501cd5164213a1c05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes dot product of Eigen::Vector3f and 3-vector of packets.  <br /></td></tr>
@@ -257,15 +269,26 @@ Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a2f9ed099fa9b206312926f7d04f8ddd9" id="r_a2f9ed099fa9b206312926f7d04f8ddd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9">momentum::kSimdPacketSize</a> = drjit::DefaultSize</td></tr>
-<tr class="memdesc:a2f9ed099fa9b206312926f7d04f8ddd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of floats in the platform's default SIMD register (chosen by DrJit).  <br /></td></tr>
+<tr class="memdesc:a2f9ed099fa9b206312926f7d04f8ddd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of floats in the platform's default SIMD register, chosen at compile time by DrJit based on available instruction sets (4 on SSE/NEON, 8 on AVX).  <br /></td></tr>
 <tr class="separator:a2f9ed099fa9b206312926f7d04f8ddd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48aa47b7e646b6dc4ed28a60cc6a75a1" id="r_a48aa47b7e646b6dc4ed28a60cc6a75a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a48aa47b7e646b6dc4ed28a60cc6a75a1">momentum::kSimdAlignment</a> = <a class="el" href="namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9">kSimdPacketSize</a> * <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sizeof</a>(<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>)</td></tr>
 <tr class="memdesc:a48aa47b7e646b6dc4ed28a60cc6a75a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Byte alignment required for the platform's default SIMD loads/stores.  <br /></td></tr>
 <tr class="separator:a48aa47b7e646b6dc4ed28a60cc6a75a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>SIMD type aliases and mixed Eigen/DrJit arithmetic operators. </p>
-<p>Provides fixed-width SIMD packet types (via DrJit) and overloaded operators for interoperating between <a class="el" href="namespaceEigen.html">Eigen</a> vectors/matrices/transforms and DrJit SIMD packets. </p>
+<div class="textblock"><p>Cross-platform SIMD foundation built on the DrJit library. </p>
+<p>Provides fixed-width SIMD packet types and overloaded operators for interoperating between <a class="el" href="namespaceEigen.html">Eigen</a> vectors/matrices/transforms and DrJit SIMD packets.</p>
+<p>Packet sizes by target instruction set:</p><ul>
+<li>x86_64 with AVX2: packets of 8 floats (256-bit)</li>
+<li>x86_64 without AVX2 (SSE): packets of 4 floats (128-bit)</li>
+<li>ARM (NEON): packets of 4 floats (128-bit)</li>
+</ul>
+<p>Key types:</p><ul>
+<li><code>FloatP</code>: a packet of <code>kSimdPacketSize</code> floats</li>
+<li><code>Vector3fP</code>: a 3-vector whose components are each a <code>FloatP</code> (i.e., N 3-vectors processed in parallel as SoA)</li>
+<li><code>kSimdPacketSize</code>: 4 or 8, platform-dependent (chosen by DrJit)</li>
+</ul>
+<p>Used by the SIMD error functions in <code>character_solver_simd/</code> and by the rasterizer. </p>
 
 <p class="definition">Definition in file <a class="el" href="simd_8h_source.html">simd.h</a>.</p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
@@ -326,7 +349,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_438dd2bc29fc0ff4a3e7d65d3220f2b7.html">simd</a></li><li class="navelem"><a class="el" href="simd_8h.html">simd.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -109,83 +109,70 @@ $(document).ready(function(){initNavTree('memory_8h_source.html',''); initResiza
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// Define smart pointers for a type</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#ifndef MOMENTUM_DEFINE_POINTERS</span></div>
-<div class="foldopen" id="foldopen00014" data-start="" data-end="">
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="memory_8h.html#a8a69f188536dac254c8d37e812a4c7bc">   14</a></span><span class="preprocessor">#define MOMENTUM_DEFINE_POINTERS(x)               \</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">  using x##_p = ::std::shared_ptr&lt;x&gt;;             \</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">  using x##_u = ::std::unique_ptr&lt;x&gt;;             \</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">  using x##_w = ::std::weak_ptr&lt;x&gt;;               \</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">  using x##_const_p = ::std::shared_ptr&lt;const x&gt;; \</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">  using x##_const_u = ::std::unique_ptr&lt;const x&gt;; \</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">  using x##_const_w = ::std::weak_ptr&lt;const x&gt;;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifndef MOMENTUM_DEFINE_POINTERS</span></div>
+<div class="foldopen" id="foldopen00024" data-start="" data-end="">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="memory_8h.html#a8a69f188536dac254c8d37e812a4c7bc">   24</a></span><span class="preprocessor">#define MOMENTUM_DEFINE_POINTERS(x)               \</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">  using x##_p = ::std::shared_ptr&lt;x&gt;;             \</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">  using x##_u = ::std::unique_ptr&lt;x&gt;;             \</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">  using x##_w = ::std::weak_ptr&lt;x&gt;;               \</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">  using x##_const_p = ::std::shared_ptr&lt;const x&gt;; \</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">  using x##_const_u = ::std::unique_ptr&lt;const x&gt;; \</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">  using x##_const_w = ::std::weak_ptr&lt;const x&gt;;</span></div>
 </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_DEFINE_POINTERS</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// Forward-declare a struct, define smart pointers</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_STRUCT</span></div>
-<div class="foldopen" id="foldopen00025" data-start="" data-end="">
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="memory_8h.html#a48185cbd87194be7a5b521492c6ec9f2">   25</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_STRUCT(x) \</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">  struct x;                            \</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x);</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_DEFINE_POINTERS</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_STRUCT</span></div>
+<div class="foldopen" id="foldopen00037" data-start="" data-end="">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="memory_8h.html#a48185cbd87194be7a5b521492c6ec9f2">   37</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_STRUCT(x) \</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">  struct x;                            \</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x);</span></div>
 </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_STRUCT</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// Forward-declare a class, define smart pointers</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_CLASS</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
-<div class="foldopen" id="foldopen00033" data-start="" data-end="">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="memory_8h.html#a251111b01214e693ca19b36ce0224277">   33</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_CLASS(x) \</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">  class x;                            \</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_STRUCT</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_CLASS</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
+<div class="foldopen" id="foldopen00047" data-start="" data-end="">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="memory_8h.html#a251111b01214e693ca19b36ce0224277">   47</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_CLASS(x) \</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">  class x;                            \</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)</span></div>
 </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_CLASS</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// Forward-declare a templated class, define smart pointers for the class and its variants</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// Use the standard backward-compatible naming scheme:</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">//    template &lt;typename T&gt; class BarT;</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">//    using Bar = BarT&lt;float&gt;;</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">//    using Bard = BarT&lt;double&gt;;</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
-<div class="foldopen" id="foldopen00046" data-start="" data-end="">
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="memory_8h.html#ae3f9e2dc3aeb6f32247010cd2f6709ac">   46</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS(x) \</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">  template &lt;typename T&gt;                        \</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">  class x##T;                                  \</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">  using x = x##T&lt;float&gt;;                       \</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">  using x##d = x##T&lt;double&gt;;                   \</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)                  \</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x##d)</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_CLASS</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="memory_8h.html#ae3f9e2dc3aeb6f32247010cd2f6709ac">   68</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS(x) \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">  template &lt;typename T&gt;                        \</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">  class x##T;                                  \</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">  using x = x##T&lt;float&gt;;                       \</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">  using x##d = x##T&lt;double&gt;;                   \</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)                  \</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x##d)</span></div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// Forward-declare a templated struct, define smart pointers for the struct and its variants</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">// Use the standard backward-compatible naming scheme:</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">//    template &lt;typename T&gt; struct BarT;</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">//    using Bar = BarT&lt;float&gt;;</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">//    using Bard = BarT&lt;double&gt;;</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
-<div class="foldopen" id="foldopen00063" data-start="" data-end="">
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="memory_8h.html#a65906d95164f7cf9b628279024c3a60f">   63</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT(x) \</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">  template &lt;typename T&gt;                         \</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">  struct x##T;                                  \</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">  using x = x##T&lt;float&gt;;                        \</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">  using x##d = x##T&lt;double&gt;;                    \</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)                   \</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x##d)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_TEMPLATE_CLASS</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#ifndef MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">// NOLINTBEGIN(bugprone-macro-parentheses)</span></div>
+<div class="foldopen" id="foldopen00093" data-start="" data-end="">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="memory_8h.html#a65906d95164f7cf9b628279024c3a60f">   93</a></span><span class="preprocessor">#define MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT(x) \</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">  template &lt;typename T&gt;                         \</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">  struct x##T;                                  \</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">  using x = x##T&lt;float&gt;;                        \</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">  using x##d = x##T&lt;double&gt;;                    \</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x)                   \</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">  MOMENTUM_DEFINE_POINTERS(x##d)</span></div>
 </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="comment">// NOLINTEND(bugprone-macro-parentheses)</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#endif </span><span class="comment">// MOMENTUM_FWD_DECLARE_TEMPLATE_STRUCT</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="memory_8h.html">memory.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

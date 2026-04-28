@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('classmomentum_1_1ColumnIndexedMatrix.h
 </div><!--header-->
 <div class="contents">
 
+<p>View over a matrix that exposes a (possibly reordered) subset of its columns.  
+ <a href="classmomentum_1_1ColumnIndexedMatrix.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -120,12 +123,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a12e00200c94f506d188c1b41d4c595bf" id="r_a12e00200c94f506d188c1b41d4c595bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a44356f2bf0e5f6921b4815249e51d40b">momentum::span</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::Index &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a12e00200c94f506d188c1b41d4c595bf">columnIndices</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
 <tr class="separator:a12e00200c94f506d188c1b41d4c595bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac2dadc13abe4dbdcb4416ba62e87e78" id="r_aac2dadc13abe4dbdcb4416ba62e87e78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470">VectorType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#aac2dadc13abe4dbdcb4416ba62e87e78">transpose_times</a> (Eigen::Ref&lt; <a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#ace66ea271ffd3bf4552b99289f934470">VectorType</a> &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="memdesc:aac2dadc13abe4dbdcb4416ba62e87e78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes <code>this-&gt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">transpose()</a> * b</code>, returning a vector of length <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a82dd1455c29ca45f40cd467c8385716a">cols()</a></code>.  <br /></td></tr>
 <tr class="separator:aac2dadc13abe4dbdcb4416ba62e87e78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> MatrixType&gt;<br />
-class momentum::ColumnIndexedMatrix&lt; MatrixType &gt;</div>
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00027">27</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+class momentum::ColumnIndexedMatrix&lt; MatrixType &gt;</div><p>View over a matrix that exposes a (possibly reordered) subset of its columns. </p>
+<p>When constructed with a <code>colIndices</code> span, accessing column <code>i</code> of this view returns the underlying matrix's column <code>colIndices</code>[i]. This lets callers run QR on a column subset without copying the matrix. When constructed without indices, this is a thin pass-through to the wrapped <a class="el" href="namespaceEigen.html">Eigen</a> reference.</p>
+<dl class="section note"><dt>Note</dt><dd>Holds an <code>Eigen::Ref</code> and a non-owning <code>span</code> — the underlying matrix and index buffer must outlive this view. The view is mutable: mutations through <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a75d3829625352d35fb133daa6fad9844">col()</a></code> write back into the wrapped matrix. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00038">38</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="ace66ea271ffd3bf4552b99289f934470" name="ace66ea271ffd3bf4552b99289f934470"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace66ea271ffd3bf4552b99289f934470">&#9670;&#160;</a></span>VectorType</h2>
@@ -141,7 +148,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00029">29</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00040">40</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -172,7 +179,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00031">31</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00042">42</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -212,9 +219,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00033">33</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00044">44</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
-<p class="reference">References <a class="el" href="online__householder__qr_8cpp_source.html#l00126">momentum::validateColumnIndices()</a>.</p>
+<p class="reference">References <a class="el" href="online__householder__qr_8cpp_source.html#l00150">momentum::validateColumnIndices()</a>.</p>
 
 </div>
 </div>
@@ -245,7 +252,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00040">40</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00051">51</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -274,7 +281,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00052">52</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00063">63</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -303,7 +310,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00060">60</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00071">71</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -332,7 +339,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00048">48</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00059">59</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -362,7 +369,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00064">64</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
+<p>Computes <code>this-&gt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">transpose()</a> * b</code>, returning a vector of length <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a82dd1455c29ca45f40cd467c8385716a">cols()</a></code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>Vector with <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a8e1b9bc5f65449978ba283ac01deff4b">rows()</a></code> entries. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector with <code><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html#a82dd1455c29ca45f40cd467c8385716a">cols()</a></code> entries; entry <code>i</code> equals <code>view.col(i).dot(b)</code>. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8h_source.html#l00081">81</a> of file <a class="el" href="online__householder__qr_8h_source.html">online_householder_qr.h</a>.</p>
 
 </div>
 </div>
@@ -375,7 +391,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ColumnIndexedMatrix.html">ColumnIndexedMatrix</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

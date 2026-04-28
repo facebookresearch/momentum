@@ -98,7 +98,7 @@ $(document).ready(function(){initNavTree('structmomentum_1_1MppcaT.html',''); in
 </div><!--header-->
 <div class="contents">
 
-<p>Mixture of Probabilistic Principal Component Analysis (MPPCA) Based on: <a href="http://www.miketipping.com/papers/met-mppca.pdf">http://www.miketipping.com/papers/met-mppca.pdf</a>.  
+<p>Mixture of Probabilistic Principal Component Analyzers (MPPCA).  
  <a href="structmomentum_1_1MppcaT.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="mppca_8h_source.html">mppca.h</a>&gt;</code></p>
@@ -106,51 +106,54 @@ $(document).ready(function(){initNavTree('structmomentum_1_1MppcaT.html',''); in
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2deb4ee9af8a656ae0939d5b2ef80b99" id="r_a2deb4ee9af8a656ae0939d5b2ef80b99"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99">set</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#ae0b0b0844a4e1f62b9f8db2635cfa241">pi</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mmu</a>, <a class="el" href="namespacemomentum.html#a44356f2bf0e5f6921b4815249e51d40b">momentum::span</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">W</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a15524ec60f1a3e6d0ec96db0eaeac0b1">VectorX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sigma2</a>)</td></tr>
-<tr class="memdesc:a2deb4ee9af8a656ae0939d5b2ef80b99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets model parameters and precomputes matrices.  <br /></td></tr>
+<tr class="memdesc:a2deb4ee9af8a656ae0939d5b2ef80b99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the model from raw mixture parameters and precomputes <code>Cinv</code>, <code>L</code>, and <code>Rpre</code> for fast log-likelihood evaluation.  <br /></td></tr>
 <tr class="separator:a2deb4ee9af8a656ae0939d5b2ef80b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a883a8cd91a6ae5188d1c8af154a4e7b9" id="r_a883a8cd91a6ae5188d1c8af154a4e7b9"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt; </td></tr>
 <tr class="memitem:a883a8cd91a6ae5188d1c8af154a4e7b9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1MppcaT.html">MppcaT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T2</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a883a8cd91a6ae5188d1c8af154a4e7b9">cast</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a883a8cd91a6ae5188d1c8af154a4e7b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts to a different scalar type.  <br /></td></tr>
+<tr class="memdesc:a883a8cd91a6ae5188d1c8af154a4e7b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a copy of this model with all numeric data converted to scalar type <code>T2</code>.  <br /></td></tr>
 <tr class="separator:a883a8cd91a6ae5188d1c8af154a4e7b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a65ad2aab0f398e185b8a6fede31166" id="r_a7a65ad2aab0f398e185b8a6fede31166"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a7a65ad2aab0f398e185b8a6fede31166">isApprox</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MppcaT.html">MppcaT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mppcaT</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a7a65ad2aab0f398e185b8a6fede31166"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks approximate equality with another model.  <br /></td></tr>
+<tr class="memdesc:a7a65ad2aab0f398e185b8a6fede31166"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if every member matches <code>mppcaT</code> exactly (<code>d</code>, <code>p</code>, <code>names</code>) or approximately (<code>mu</code>, <code>Cinv</code>, <code>L</code>, <code>Rpre</code>) using <a class="el" href="namespaceEigen.html">Eigen</a>'s <code>isApprox</code> default tolerance.  <br /></td></tr>
 <tr class="separator:a7a65ad2aab0f398e185b8a6fede31166"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2d8ffca1131d31c8f4e37d0526d348a9" id="r_a2d8ffca1131d31c8f4e37d0526d348a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a2d8ffca1131d31c8f4e37d0526d348a9">d</a> = 0</td></tr>
-<tr class="memdesc:a2d8ffca1131d31c8f4e37d0526d348a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dimension of data space.  <br /></td></tr>
+<tr class="memdesc:a2d8ffca1131d31c8f4e37d0526d348a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dimensionality of the data space <code>x</code>.  <br /></td></tr>
 <tr class="separator:a2d8ffca1131d31c8f4e37d0526d348a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa71c76f298d31a94f8f00d7d398cccc" id="r_afa71c76f298d31a94f8f00d7d398cccc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#afa71c76f298d31a94f8f00d7d398cccc">p</a> = 0</td></tr>
 <tr class="memdesc:afa71c76f298d31a94f8f00d7d398cccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of mixture components.  <br /></td></tr>
 <tr class="separator:afa71c76f298d31a94f8f00d7d398cccc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9366b82bc8711904c17dce6dcbd8f4a7" id="r_a9366b82bc8711904c17dce6dcbd8f4a7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a9366b82bc8711904c17dce6dcbd8f4a7">names</a></td></tr>
-<tr class="memdesc:a9366b82bc8711904c17dce6dcbd8f4a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter names (should match dimension d)  <br /></td></tr>
+<tr class="memdesc:a9366b82bc8711904c17dce6dcbd8f4a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional human-readable names for each of the <code>d</code> data dimensions.  <br /></td></tr>
 <tr class="separator:a9366b82bc8711904c17dce6dcbd8f4a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d6ed4e3f8262d2b5ffb33faab07bcb1" id="r_a9d6ed4e3f8262d2b5ffb33faab07bcb1"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1">mu</a></td></tr>
-<tr class="memdesc:a9d6ed4e3f8262d2b5ffb33faab07bcb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mean vectors (p×d matrix)  <br /></td></tr>
+<tr class="memdesc:a9d6ed4e3f8262d2b5ffb33faab07bcb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-component mean vectors stored as a <code>p x d</code> matrix; row <code>c</code> is <code>mu_c</code>.  <br /></td></tr>
 <tr class="separator:a9d6ed4e3f8262d2b5ffb33faab07bcb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78291400313200b57c2efeaad4948eed" id="r_a78291400313200b57c2efeaad4948eed"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a78291400313200b57c2efeaad4948eed">Cinv</a></td></tr>
-<tr class="memdesc:a78291400313200b57c2efeaad4948eed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverse covariance matrices.  <br /></td></tr>
+<tr class="memdesc:a78291400313200b57c2efeaad4948eed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-component inverse covariance matrices <code>C_c^{-1}</code> of size <code>d x d</code>.  <br /></td></tr>
 <tr class="separator:a78291400313200b57c2efeaad4948eed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b9d25427b617d8e12db601f6f84d496" id="r_a3b9d25427b617d8e12db601f6f84d496"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a3b9d25427b617d8e12db601f6f84d496">L</a></td></tr>
-<tr class="memdesc:a3b9d25427b617d8e12db601f6f84d496"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matrices for efficient computation.  <br /></td></tr>
+<tr class="memdesc:a3b9d25427b617d8e12db601f6f84d496"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-component lower-triangular factors derived from the Cholesky-like decomposition of <code>C_c</code> (used as a whitening transform when sampling or evaluating the Mahalanobis term efficiently).  <br /></td></tr>
 <tr class="separator:a3b9d25427b617d8e12db601f6f84d496"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ee1332c8b619072dfeac359e872b7a6" id="r_a8ee1332c8b619072dfeac359e872b7a6"><td class="memItemLeft" align="right" valign="top">Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6">Rpre</a></td></tr>
-<tr class="memdesc:a8ee1332c8b619072dfeac359e872b7a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Precomputed responsibility terms.  <br /></td></tr>
+<tr class="memdesc:a8ee1332c8b619072dfeac359e872b7a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-component constant term of the log-likelihood: <code><a class="el" href="structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6" title="Per-component constant term of the log-likelihood: Rpre(c) = log(pi_c) - 0.5 * log|C_c| - (d/2) * log...">Rpre(c)</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(pi_c)</a> - 0.5 * log|C_c| - (d/2) * <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(2*pi)</a></code>.  <br /></td></tr>
 <tr class="separator:a8ee1332c8b619072dfeac359e872b7a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-struct momentum::MppcaT&lt; T &gt;</div><p>Mixture of Probabilistic Principal Component Analysis (MPPCA) Based on: <a href="http://www.miketipping.com/papers/met-mppca.pdf">http://www.miketipping.com/papers/met-mppca.pdf</a>. </p>
+struct momentum::MppcaT&lt; T &gt;</div><p>Mixture of Probabilistic Principal Component Analyzers (MPPCA). </p>
+<p>Each component models the data as <code>x = W_c z + mu_c + epsilon</code>, where <code>z</code> is a low-dimensional latent vector and <code>epsilon ~ <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">N(0, sigma_c^2 I)</a></code> is isotropic noise. The full mixture density is <code><a class="el" href="structmomentum_1_1MppcaT.html#afa71c76f298d31a94f8f00d7d398cccc" title="Number of mixture components.">p(x)</a> = sum_c pi_c N(x | mu_c, C_c)</code> with <code>C_c = W_c W_c^T + sigma_c^2 I</code>.</p>
+<p>After <code><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99" title="Initializes the model from raw mixture parameters and precomputes Cinv, L, and Rpre for fast log-like...">set()</a></code>, the model stores precomputed quantities so that the per-component log-likelihood of a sample <code>x</code> can be evaluated as <code><a class="el" href="structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6" title="Per-component constant term of the log-likelihood: Rpre(c) = log(pi_c) - 0.5 * log|C_c| - (d/2) * log...">Rpre(c)</a> - 0.5 * (x - mu.row(c))^T * Cinv[c] * (x - mu.row(c))</code>.</p>
+<p>Based on: <a href="http://www.miketipping.com/papers/met-mppca.pdf">http://www.miketipping.com/papers/met-mppca.pdf</a></p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td>Scalar type (float or double) </td></tr>
+    <tr><td class="paramname">T</td><td>Scalar type (float or double). </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00019">19</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00029">29</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a883a8cd91a6ae5188d1c8af154a4e7b9" name="a883a8cd91a6ae5188d1c8af154a4e7b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a883a8cd91a6ae5188d1c8af154a4e7b9">&#9670;&#160;</a></span>cast()</h2>
@@ -171,18 +174,19 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Converts to a different scalar type. </p>
+<p>Returns a copy of this model with all numeric data converted to scalar type <code>T2</code>. </p>
+<p>Names and dimensions are copied unchanged.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T2</td><td>Target scalar type </td></tr>
+    <tr><td class="paramname">T2</td><td>Target scalar type. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Converted MPPCA model </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Converted MPPCA model. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00069">69</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00087">87</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="mppca_8h_source.html#l00033">momentum::MppcaT&lt; T &gt;::Cinv</a>, <a class="el" href="mppca_8h_source.html#l00021">momentum::MppcaT&lt; T &gt;::d</a>, <a class="el" href="mppca_8h_source.html#l00036">momentum::MppcaT&lt; T &gt;::L</a>, <a class="el" href="mppca_8h_source.html#l00030">momentum::MppcaT&lt; T &gt;::mu</a>, <a class="el" href="mppca_8h_source.html#l00027">momentum::MppcaT&lt; T &gt;::names</a>, <a class="el" href="mppca_8h_source.html#l00024">momentum::MppcaT&lt; T &gt;::p</a>, and <a class="el" href="mppca_8h_source.html#l00039">momentum::MppcaT&lt; T &gt;::Rpre</a>.</p>
+<p class="reference">References <a class="el" href="mppca_8h_source.html#l00045">momentum::MppcaT&lt; T &gt;::Cinv</a>, <a class="el" href="mppca_8h_source.html#l00031">momentum::MppcaT&lt; T &gt;::d</a>, <a class="el" href="mppca_8h_source.html#l00051">momentum::MppcaT&lt; T &gt;::L</a>, <a class="el" href="mppca_8h_source.html#l00041">momentum::MppcaT&lt; T &gt;::mu</a>, <a class="el" href="mppca_8h_source.html#l00038">momentum::MppcaT&lt; T &gt;::names</a>, <a class="el" href="mppca_8h_source.html#l00034">momentum::MppcaT&lt; T &gt;::p</a>, and <a class="el" href="mppca_8h_source.html#l00057">momentum::MppcaT&lt; T &gt;::Rpre</a>.</p>
 
 </div>
 </div>
@@ -204,16 +208,16 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Checks approximate equality with another model. </p>
+<p>Returns true if every member matches <code>mppcaT</code> exactly (<code>d</code>, <code>p</code>, <code>names</code>) or approximately (<code>mu</code>, <code>Cinv</code>, <code>L</code>, <code>Rpre</code>) using <a class="el" href="namespaceEigen.html">Eigen</a>'s <code>isApprox</code> default tolerance. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">mppcaT</td><td>Model to compare with </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mppcaT</td><td>Model to compare with. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true if approximately equal </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if approximately equal. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00084">84</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00102">102</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="math_2utility_8h_source.html#l00053">momentum::isApprox()</a>.</p>
 
@@ -259,16 +263,18 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Sets model parameters and precomputes matrices. </p>
+<p>Initializes the model from raw mixture parameters and precomputes <code>Cinv</code>, <code>L</code>, and <code>Rpre</code> for fast log-likelihood evaluation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">pi</td><td>Mixture weights </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mmu</td><td>Mean vectors </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">W</td><td>Principal axes matrices </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sigma2</td><td>Noise variances </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pi</td><td>Mixture weights, length <code>p</code>. Must sum to 1 and be &gt; 0. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mmu</td><td>Per-component means as a <code>p x d</code> matrix (row <code>c</code> is <code>mu_c</code>). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">W</td><td>Per-component factor-loading matrices <code>W_c</code>; expected to be of size <code>d x q_c</code> where <code>q_c &lt; d</code> is the latent dimension. Length <code>p</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sigma2</td><td>Per-component isotropic noise variances <code>sigma_c^2</code>, length <code>p</code>. Must be strictly positive. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section pre"><dt>Precondition</dt><dd><code>pi.size() == p</code>, <code>mmu.rows() == p</code>, <code>W.size() == p</code>, <code>sigma2.size() == p</code>, and <code>W[c].rows() == mmu.cols()</code> for all <code>c</code>. </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd><code>d == mmu.cols()</code>, <code>p == sigma2.rows()</code>, and <code>Cinv</code>, <code>L</code>, <code>Rpre</code>, <code>mu</code>, <code>names</code> are sized consistently. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00016">16</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
 
@@ -289,11 +295,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Inverse covariance matrices. </p>
+<p>Per-component inverse covariance matrices <code>C_c^{-1}</code> of size <code>d x d</code>. </p>
+<p><code>Cinv.size() == p</code> after <code><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99" title="Initializes the model from raw mixture parameters and precomputes Cinv, L, and Rpre for fast log-like...">set()</a></code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00033">33</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00045">45</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -311,11 +318,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Dimension of data space. </p>
+<p>Dimensionality of the data space <code>x</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00021">21</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00031">31</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -333,11 +340,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Matrices for efficient computation. </p>
+<p>Per-component lower-triangular factors derived from the Cholesky-like decomposition of <code>C_c</code> (used as a whitening transform when sampling or evaluating the Mahalanobis term efficiently). </p>
+<p><code>L.size() == p</code> after <code><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99" title="Initializes the model from raw mixture parameters and precomputes Cinv, L, and Rpre for fast log-like...">set()</a></code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00036">36</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00051">51</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -355,11 +363,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Mean vectors (p×d matrix) </p>
+<p>Per-component mean vectors stored as a <code>p x d</code> matrix; row <code>c</code> is <code>mu_c</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00030">30</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00041">41</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -377,11 +385,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Parameter names (should match dimension d) </p>
+<p>Optional human-readable names for each of the <code>d</code> data dimensions. </p>
+<p><code><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99" title="Initializes the model from raw mixture parameters and precomputes Cinv, L, and Rpre for fast log-like...">set()</a></code> resizes this to <code>d</code> empty strings; callers may overwrite entries. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00027">27</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00038">38</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -401,9 +410,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Number of mixture components. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00024">24</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00034">34</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -421,11 +430,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Precomputed responsibility terms. </p>
+<p>Per-component constant term of the log-likelihood: <code><a class="el" href="structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6" title="Per-component constant term of the log-likelihood: Rpre(c) = log(pi_c) - 0.5 * log|C_c| - (d/2) * log...">Rpre(c)</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(pi_c)</a> - 0.5 * log|C_c| - (d/2) * <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">log(2*pi)</a></code>. </p>
+<p>Add the <code>-0.5 * Mahalanobis</code> term to obtain the log-density of <code>x</code> under component <code>c</code>. Length is <code>p</code> after <code><a class="el" href="structmomentum_1_1MppcaT.html#a2deb4ee9af8a656ae0939d5b2ef80b99" title="Initializes the model from raw mixture parameters and precomputes Cinv, L, and Rpre for fast log-like...">set()</a></code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00039">39</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00057">57</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00069">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -440,7 +450,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1MppcaT.html">MppcaT</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:05 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

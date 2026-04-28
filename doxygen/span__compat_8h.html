@@ -112,6 +112,7 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a2d1670f2492868e3e8824c46e6f9fb43" id="r_a2d1670f2492868e3e8824c46e6f9fb43"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="span__compat_8h.html#a2d1670f2492868e3e8824c46e6f9fb43">MOMENTUM_HAS_CPP20_SPAN</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memdesc:a2d1670f2492868e3e8824c46e6f9fb43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defined to <code>1</code> when the compiler advertises C++20 (via <code>__cplusplus</code> or MSVC's <code>_MSVC_LANG</code>), <code>0</code> otherwise.  <br /></td></tr>
 <tr class="separator:a2d1670f2492868e3e8824c46e6f9fb43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -123,7 +124,8 @@ Typedefs</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides a C++17-compatible span type alias. </p>
-<p>This header provides <code><a class="el" href="namespacemomentum.html#a44356f2bf0e5f6921b4815249e51d40b" title="Span type alias using gsl::span (C++17 fallback).">momentum::span</a>&lt;T&gt;</code> which aliases to <code>std::span&lt;T&gt;</code> when C++20 is available, and falls back to <code>gsl::span&lt;T&gt;</code> for C++17 compilers. This enables cross-platform compatibility for platforms that don't yet support C++20. </p>
+<p>This header provides <code><a class="el" href="namespacemomentum.html#a44356f2bf0e5f6921b4815249e51d40b" title="Span type alias using gsl::span (C++17 fallback).">momentum::span</a>&lt;T&gt;</code> which aliases to <code>std::span&lt;T&gt;</code> when C++20 is available, and falls back to <code>gsl::span&lt;T&gt;</code> for C++17 compilers / platforms whose standard library does not yet ship <code>&lt;span&gt;</code> (e.g. older Apple/Clang toolchains, certain Android NDK versions, and any build configured to target C++17).</p>
+<dl class="section note"><dt>Note</dt><dd>Use <code><a class="el" href="namespacemomentum.html#a44356f2bf0e5f6921b4815249e51d40b" title="Span type alias using gsl::span (C++17 fallback).">momentum::span</a>&lt;T&gt;</code> everywhere within momentum sources instead of <code>std::span&lt;T&gt;</code> directly, until the project drops C++17 support. Once all supported platforms provide <code>&lt;span&gt;</code>, this shim can be removed and call sites switched to <code>std::span&lt;T&gt;</code>. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="span__compat_8h_source.html">span_compat.h</a>.</p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
@@ -139,7 +141,10 @@ Typedefs</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="span__compat_8h_source.html#l00021">21</a> of file <a class="el" href="span__compat_8h_source.html">span_compat.h</a>.</p>
+<p>Defined to <code>1</code> when the compiler advertises C++20 (via <code>__cplusplus</code> or MSVC's <code>_MSVC_LANG</code>), <code>0</code> otherwise. </p>
+<p>Gates whether <code>&lt;span&gt;</code> or <code>&lt;gsl/span&gt;</code> is included. </p>
+
+<p class="definition">Definition at line <a class="el" href="span__compat_8h_source.html#l00033">33</a> of file <a class="el" href="span__compat_8h_source.html">span_compat.h</a>.</p>
 
 </div>
 </div>
@@ -149,7 +154,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li><li class="navelem"><a class="el" href="span__compat_8h.html">span_compat.h</a></li>
-    <li class="footer">Generated on Mon Apr 27 2026 20:47:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 28 2026 00:48:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

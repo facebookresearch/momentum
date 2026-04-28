@@ -5,6 +5,7 @@ var classmomentum_1_1FbxBuilder =
     [ "~FbxBuilder", "classmomentum_1_1FbxBuilder.html#a2274ef55ffb7514eef84bf0875a09a4d", null ],
     [ "FbxBuilder", "classmomentum_1_1FbxBuilder.html#af072114352b2f9d2012d33c318b05e58", null ],
     [ "FbxBuilder", "classmomentum_1_1FbxBuilder.html#a2367b365646b73a4802cba1be58f52b0", null ],
+    [ "addAnimatedMesh", "classmomentum_1_1FbxBuilder.html#a4d04f1037d458b724ddddc029bcb6794", null ],
     [ "addCharacter", "classmomentum_1_1FbxBuilder.html#ad1f887eb9927f779c207f912d2552c37", null ],
     [ "addMarkerSequence", "classmomentum_1_1FbxBuilder.html#a00199eda0fb8080cf305863932cecca6", null ],
     [ "addMotion", "classmomentum_1_1FbxBuilder.html#aa3eb23a3940e93f558b0ea04990ea91c", null ],
