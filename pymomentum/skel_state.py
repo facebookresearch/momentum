@@ -181,7 +181,6 @@ def to_matrix(skeleton_state: torch.Tensor) -> torch.Tensor:
     check(skeleton_state)
     t, q, s = split(skeleton_state)
 
-    # Assuming quaternionToRotationMatrix is implemented elsewhere
     rot_mat = quaternion.to_rotation_matrix(q)
     linear = rot_mat * s.unsqueeze(-2).expand_as(rot_mat)
     affine = torch.cat((linear, t.unsqueeze(-1)), -1)
@@ -365,8 +364,8 @@ def identity(
     """
     Returns a skeleton state representing the identity transform.
 
-    :parameter sizes: The size of each dimension in the output tensor. Defaults to None, which means the output will be a 1D tensor with 8 elements.
-    :type sizes: list[int], optional
+    :parameter size: The size of each dimension in the output tensor. Defaults to None, which means the output will be a 1D tensor with 8 elements.
+    :type size: list[int], optional
     :parameter device: The device on which to create the tensor. Defaults to None, which means the tensor will be created on the default device.
     :type device: torch.device, optional
     :return: The identity skeleton state.
