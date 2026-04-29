@@ -1371,7 +1371,42 @@ tangent space of the rotation group, which is invariant to the choice of coordin
             }
             return result;
           },
-          R"(Returns the pairs of colliding elements.)");
+          R"(Returns the pairs of colliding elements.)")
+      .def(
+          "get_collision_debug_info",
+          [](const mm::CollisionErrorFunction& self) {
+            const auto entries = self.getCollisionDebugInfo();
+            const auto n = static_cast<py::ssize_t>(entries.size());
+            py::array_t<int64_t> capsuleIndices({n, py::ssize_t{2}});
+            py::array_t<int64_t> parentJoints({n, py::ssize_t{2}});
+            py::array_t<float> overlaps(n);
+            py::array_t<float> distances(n);
+            auto capAcc = capsuleIndices.mutable_unchecked<2>();
+            auto jointAcc = parentJoints.mutable_unchecked<2>();
+            auto overlapAcc = overlaps.mutable_unchecked<1>();
+            auto distAcc = distances.mutable_unchecked<1>();
+            for (py::ssize_t i = 0; i < n; ++i) {
+              capAcc(i, 0) = static_cast<int64_t>(entries[i].capsuleIndexA);
+              capAcc(i, 1) = static_cast<int64_t>(entries[i].capsuleIndexB);
+              jointAcc(i, 0) = static_cast<int64_t>(entries[i].parentJointA);
+              jointAcc(i, 1) = static_cast<int64_t>(entries[i].parentJointB);
+              overlapAcc(i) = entries[i].overlap;
+              distAcc(i) = entries[i].distance;
+            }
+            py::dict result;
+            result["capsule_indices"] = capsuleIndices;
+            result["parent_joints"] = parentJoints;
+            result["overlaps"] = overlaps;
+            result["distances"] = distances;
+            return result;
+          },
+          R"(Returns detailed collision debug info for all currently-colliding pairs.
+
+        Returns a dict with keys:
+            capsule_indices: (N, 2) int64 array of capsule index pairs
+            parent_joints: (N, 2) int64 array of parent joint index pairs
+            overlaps: (N,) float array of penetration depths in meters
+            distances: (N,) float array of center-to-center distances in meters)");
 
   // Call sub-registration functions
   addAimAxisErrorFunctions(m);

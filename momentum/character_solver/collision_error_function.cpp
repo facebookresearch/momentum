@@ -432,6 +432,26 @@ double CollisionErrorFunctionT<T>::getJacobian(
 }
 
 template <typename T>
+std::vector<CollisionDebugEntryT<T>> CollisionErrorFunctionT<T>::getCollisionDebugInfo() const {
+  std::vector<CollisionDebugEntryT<T>> entries;
+  for (const auto& pair : validPairs_) {
+    T distance;
+    Vector2<T> cp;
+    T overlap;
+    if (checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+      entries.push_back(
+          {pair.indexA,
+           pair.indexB,
+           collisionGeometry_[pair.indexA].parent,
+           collisionGeometry_[pair.indexB].parent,
+           overlap,
+           distance});
+    }
+  }
+  return entries;
+}
+
+template <typename T>
 size_t CollisionErrorFunctionT<T>::getJacobianSize() const {
   return validPairs_.size();
 }
