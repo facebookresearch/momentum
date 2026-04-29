@@ -1,0 +1,563 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.solver &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.solver2" href="solver2.html" />
+    <link rel="prev" title="pymomentum.backend" href="backend.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.solver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Collision"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Collision</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Distance"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Distance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Limit"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Limit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Motion"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Motion</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Orientation"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Orientation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.PosePrior"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.PosePrior</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Position"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Position</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Projection"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Projection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.Vertex"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.Vertex</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.VertexProjection"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.VertexProjection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.__init__"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.name"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType.value"><code class="docutils literal notranslate"><span class="pre">ErrorFunctionType.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.LinearSolverType"><code class="docutils literal notranslate"><span class="pre">LinearSolverType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.Cholesky"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.Cholesky</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.QR"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.QR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.TrustRegionQR"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.TrustRegionQR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.__init__"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.name"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.LinearSolverType.value"><code class="docutils literal notranslate"><span class="pre">LinearSolverType.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.SolverOptions"><code class="docutils literal notranslate"><span class="pre">SolverOptions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.__init__"><code class="docutils literal notranslate"><span class="pre">SolverOptions.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.levmar_lambda"><code class="docutils literal notranslate"><span class="pre">SolverOptions.levmar_lambda</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.line_search"><code class="docutils literal notranslate"><span class="pre">SolverOptions.line_search</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.linear_solver"><code class="docutils literal notranslate"><span class="pre">SolverOptions.linear_solver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.max_iter"><code class="docutils literal notranslate"><span class="pre">SolverOptions.max_iter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.min_iter"><code class="docutils literal notranslate"><span class="pre">SolverOptions.min_iter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.threshold"><code class="docutils literal notranslate"><span class="pre">SolverOptions.threshold</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver.SolverOptions.verbose"><code class="docutils literal notranslate"><span class="pre">SolverOptions.verbose</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.get_gradient_statistics"><code class="docutils literal notranslate"><span class="pre">get_gradient_statistics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.get_solve_ik_statistics"><code class="docutils literal notranslate"><span class="pre">get_solve_ik_statistics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.gradient"><code class="docutils literal notranslate"><span class="pre">gradient()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.jacobian"><code class="docutils literal notranslate"><span class="pre">jacobian()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.reset_gradient_statistics"><code class="docutils literal notranslate"><span class="pre">reset_gradient_statistics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.reset_solve_ik_statistics"><code class="docutils literal notranslate"><span class="pre">reset_solve_ik_statistics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.residual"><code class="docutils literal notranslate"><span class="pre">residual()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.set_num_threads"><code class="docutils literal notranslate"><span class="pre">set_num_threads()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.solve_ik"><code class="docutils literal notranslate"><span class="pre">solve_ik()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.solve_sequence_ik"><code class="docutils literal notranslate"><span class="pre">solve_sequence_ik()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver.transform_pose"><code class="docutils literal notranslate"><span class="pre">transform_pose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.solver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/solver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.solver">
+<span id="pymomentum-solver"></span><h1>pymomentum.solver<a class="headerlink" href="#module-pymomentum.solver" title="Link to this heading"></a></h1>
+<p>Inverse kinematics and other optimizations for momentum models.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">ErrorFunctionType</span></span><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Types of error functions passed to solveBodyIKProblem().</p>
+<p>Members:</p>
+<blockquote>
+<div><p>Position</p>
+<p>Orientation</p>
+<p>Limit</p>
+<p>Collision</p>
+<p>PosePrior</p>
+<p>Motion</p>
+<p>Projection</p>
+<p>Distance</p>
+<p>Vertex</p>
+<p>VertexProjection</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Collision">
+<span class="sig-name descname"><span class="pre">Collision</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Collision:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Collision" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Distance">
+<span class="sig-name descname"><span class="pre">Distance</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Distance:</span> <span class="pre">7&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Limit">
+<span class="sig-name descname"><span class="pre">Limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Limit:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Limit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Motion">
+<span class="sig-name descname"><span class="pre">Motion</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Motion:</span> <span class="pre">5&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Motion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Orientation">
+<span class="sig-name descname"><span class="pre">Orientation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Orientation:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Orientation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.PosePrior">
+<span class="sig-name descname"><span class="pre">PosePrior</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.PosePrior:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.PosePrior" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Position">
+<span class="sig-name descname"><span class="pre">Position</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Position:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Position" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Projection">
+<span class="sig-name descname"><span class="pre">Projection</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Projection:</span> <span class="pre">6&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Projection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.Vertex">
+<span class="sig-name descname"><span class="pre">Vertex</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.Vertex:</span> <span class="pre">8&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.Vertex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.VertexProjection">
+<span class="sig-name descname"><span class="pre">VertexProjection</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ErrorFunctionType.VertexProjection:</span> <span class="pre">9&gt;</span></em><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.VertexProjection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver.ErrorFunctionType" title="pymomentum.solver.ErrorFunctionType"><span class="pre">pymomentum.solver.ErrorFunctionType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.ErrorFunctionType.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.solver.ErrorFunctionType.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">LinearSolverType</span></span><a class="headerlink" href="#pymomentum.solver.LinearSolverType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Types of linear solver supported by solveBodyIKProblem().</p>
+<p>Members:</p>
+<blockquote>
+<div><p>Cholesky</p>
+<p>QR</p>
+<p>TrustRegionQR</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.Cholesky">
+<span class="sig-name descname"><span class="pre">Cholesky</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LinearSolverType.Cholesky:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.solver.LinearSolverType.Cholesky" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.QR">
+<span class="sig-name descname"><span class="pre">QR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LinearSolverType.QR:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.solver.LinearSolverType.QR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.TrustRegionQR">
+<span class="sig-name descname"><span class="pre">TrustRegionQR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LinearSolverType.TrustRegionQR:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.solver.LinearSolverType.TrustRegionQR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver.LinearSolverType" title="pymomentum.solver.LinearSolverType"><span class="pre">pymomentum.solver.LinearSolverType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.LinearSolverType.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.solver.LinearSolverType.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.LinearSolverType.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.solver.LinearSolverType.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">SolverOptions</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Options to control the behavior of the Levenberg-Marquardt IK solver.  For advanced use cases only; most users should stick with the defaults.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self:</span> <span class="pre">pymomentum.solver.SolverOptions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_solver:</span> <span class="pre">pymomentum.solver.LinearSolverType</span> <span class="pre">=</span> <span class="pre">&lt;LinearSolverType.QR:</span> <span class="pre">1&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levmar_lambda:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_iter:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_search:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_smoothing_weight:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.levmar_lambda">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">levmar_lambda</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.levmar_lambda" title="Link to this definition"></a></dt>
+<dd><p>Lambda value used to regularize the Levenberg-Marquardt solver (default: 0.01f).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.line_search">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_search</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.line_search" title="Link to this definition"></a></dt>
+<dd><p>Whether or not to use a line search; note that only the QR solver actually uses this (default: true).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.linear_solver">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear_solver</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.linear_solver" title="Link to this definition"></a></dt>
+<dd><p>Specify the type of linear solver to use (default: QR)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.max_iter">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_iter</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.max_iter" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of nonlinear iterations (default: 50).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.min_iter">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_iter</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.min_iter" title="Link to this definition"></a></dt>
+<dd><p>Minimum number of nonlinear iterations (default 4).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.threshold">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">threshold</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.threshold" title="Link to this definition"></a></dt>
+<dd><p>The solver stops taking steps when the difference between iterations is less than threshold*FLT_EPS (default: 10.0f).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.solver.SolverOptions.verbose">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#pymomentum.solver.SolverOptions.verbose" title="Link to this definition"></a></dt>
+<dd><p>Flag to print out solver progress (default: false).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.get_gradient_statistics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">get_gradient_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver.get_gradient_statistics" title="Link to this definition"></a></dt>
+<dd><p>Return some basic statistics about how many IK gradients were nonzero in the backward pass of <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<p>This can be useful for verifying that the IK solver is converging properly; if the gradient is nonzero at the solution,
+the derivatives will not be computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a pair [nNonZeroGradients, nTotalGradients].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.get_solve_ik_statistics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">get_solve_ik_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver.get_solve_ik_statistics" title="Link to this definition"></a></dt>
+<dd><p>Return some basic statistics about ik solver in the forward pass of <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<p>This can be useful for detecting whether the input is appropriate; if the solve takes too many iterations,
+then the input is likely not in a good shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a pair [nTotalSolveIK, nTotalSolveIKIterations].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.gradient">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">character:</span> <span class="pre">object,</span> <span class="pre">model_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">active_error_functions:</span> <span class="pre">list[pymomentum.solver.ErrorFunctionType],</span> <span class="pre">error_function_weights:</span> <span class="pre">torch.Tensor,</span> <span class="pre">position_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">pose_prior_model:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_origins:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_normals:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;,</span> <span class="pre">vertex_proj_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.solver.gradient" title="Link to this definition"></a></dt>
+<dd><p>Compute the gradient of the IK energy.
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">frac</span><span class="p">{</span><span class="n">dE</span><span class="p">(</span>\<span class="n">theta</span><span class="p">)}{</span><span class="n">d</span>\<span class="n">theta</span><span class="p">}</span> <span class="o">=</span> <span class="mi">2</span> \<span class="n">sum_i</span> \<span class="n">frac</span><span class="p">{</span><span class="n">dr_i</span><span class="p">(</span>\<span class="n">theta</span><span class="p">)}{</span><span class="n">d</span>\<span class="n">theta</span><span class="p">}</span> <span class="n">r_i</span><span class="p">(</span>\<span class="n">theta</span><span class="p">)</span> <span class="o">=</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">J</span><span class="p">}</span><span class="o">^</span><span class="n">T</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">r</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>We can compute gradients of the <a class="reference internal" href="#pymomentum.solver.gradient" title="pymomentum.solver.gradient"><code class="xref py py-func docutils literal notranslate"><span class="pre">gradient()</span></code></a> function with respect to all of the inputs.</p>
+<p>For details on the arguments, see <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A (nBatch x m) torch.Tensor containing the residual.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.jacobian">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">character:</span> <span class="pre">object,</span> <span class="pre">model_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">active_error_functions:</span> <span class="pre">list[pymomentum.solver.ErrorFunctionType],</span> <span class="pre">error_function_weights:</span> <span class="pre">torch.Tensor,</span> <span class="pre">position_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">pose_prior_model:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_origins:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_normals:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;,</span> <span class="pre">vertex_proj_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver.jacobian" title="Link to this definition"></a></dt>
+<dd><p>Compute the residual and Jacobian of a body IK problem.  For details on the constraint arguments, see <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<p>Note that some momentum error functions may reorder the constraints in a nondeterministic manner
+so repeated calls to this function could in principle return different results.  This will not
+affect the gradient J^T * r, but you should avoid evaluating the residual and Jacobian in separate
+function calls (which is why both are returned together).</p>
+<p>For details on the arguments, see <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A pair [r, J] where r is the (nBatch x m) residual and J is the (nBatch x m x nParams) Jacobian.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.reset_gradient_statistics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">reset_gradient_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.reset_gradient_statistics" title="Link to this definition"></a></dt>
+<dd><p>Reset the counters used by <a class="reference internal" href="#pymomentum.solver.get_gradient_statistics" title="pymomentum.solver.get_gradient_statistics"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_gradient_statistics()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.reset_solve_ik_statistics">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">reset_solve_ik_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.reset_solve_ik_statistics" title="Link to this definition"></a></dt>
+<dd><p>Reset the counters used by <code class="xref py py-meth docutils literal notranslate"><span class="pre">getSolveIKStatistics()</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.residual">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">character:</span> <span class="pre">object,</span> <span class="pre">model_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">active_error_functions:</span> <span class="pre">list[pymomentum.solver.ErrorFunctionType],</span> <span class="pre">error_function_weights:</span> <span class="pre">torch.Tensor,</span> <span class="pre">position_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">pose_prior_model:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_origins:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_normals:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;,</span> <span class="pre">vertex_proj_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.solver.residual" title="Link to this definition"></a></dt>
+<dd><p>Compute the residual of an IK problem.  The IK energy minimized by <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve_ik()</span></code></a> is the squared norm of the residual.</p>
+<p>Note that we can only compute gradients of the residual with respect to the input model parameters.</p>
+<p>For details on the arguments, see <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A (nBatch x m) torch.Tensor containing the residual.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.set_num_threads">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">set_num_threads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.solver.set_num_threads" title="Link to this definition"></a></dt>
+<dd><p>Set the maximum number of threads used to solve IK problems.   This is particularly useful in limiting parallelism when you have multiple pytorch processes running on a single machine and want to limit how many threads each uses to avoid CPU contention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_threads</strong> – Number of threads to use.  Pass -1 to mean “number of processors”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.solve_ik">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">solve_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">character:</span> <span class="pre">object,</span> <span class="pre">active_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">model_parameters_init:</span> <span class="pre">torch.Tensor,</span> <span class="pre">active_error_functions:</span> <span class="pre">list[pymomentum.solver.ErrorFunctionType],</span> <span class="pre">error_function_weights:</span> <span class="pre">torch.Tensor,</span> <span class="pre">options:</span> <span class="pre">pymomentum.solver.SolverOptions</span> <span class="pre">=</span> <span class="pre">SolverOptions(linear_solver=LinearSolverType.QR,</span> <span class="pre">levmar_lambda=0.01,</span> <span class="pre">min_iter=4,</span> <span class="pre">max_iter=50,</span> <span class="pre">threshold=10,</span> <span class="pre">line_search=True,</span> <span class="pre">verbose=False),</span> <span class="pre">position_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">pose_prior_model:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_origins:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_normals:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;,</span> <span class="pre">vertex_proj_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.solver.solve_ik" title="Link to this definition"></a></dt>
+<dd><p>Batch solve a body IK problem.  The IK problem is posed as a least squares problem and minimized with respect to the model parameters <span class="math notranslate nohighlight">\(\theta\)</span> using Levenberg-Marquardt.  The result is differentiable with respect to most inputs.</p>
+<p>The IK energy function that is minimized is a sum of squared residual terms, <span class="math notranslate nohighlight">\(E(\theta) = \sum_i || r_i(\theta) ||_2^2\)</span>.</p>
+<p>We strongly recommend you use named parameters when calling this function as the parameter list is likely to grow over time.</p>
+<p>Most tensor arguments can be specified either batched (e.g. [nBatch x nConstraints]) or unbatched (e.g. [nConstraints]).  “Unbatched” tensors will be
+automatically expanded to match the batch dimension.  So, for example, you could pass a tensor of size [nConstraints] for the positionConstraints_parents parameter
+and a tensor of dimension [nBatch x nConstraints x 3] for the position_constraints_targets tensor, and the solver will understand that you mean to use
+the same parents across the batch.</p>
+<p>All quaternion parameters use the quaternion order [x, y, z, w], where <span class="math notranslate nohighlight">\(q = w + xi + yj + zk\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The model parameters that (locally) minimize the error function, as a (nBatch x nModelParams)-dimension torch.Tensor.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>character</strong> – Character or list of nBatch Characters to use in the solve.</p></li>
+<li><p><strong>active_parameters</strong> – boolean-valued torch.Tensor with dimension (k), which selects the parameters to be active during the solve.  For example, you might choose to exclude scaling parameters with ‘activeParameters=~character.getScalingParameters()’.  Limiting the parameters can also be helpful when dealing with underdetermined problems.</p></li>
+<li><p><strong>model_parameters_init</strong> – float-valued torch.Tensor which contain the (nBatch x nModelParameters)-dimensional model parameters used to initialize the solve.  This could be important as the solver always converges to a local minimum.</p></li>
+<li><p><strong>active_error_functions</strong> – list of pymomentum.ErrorFunctionType which gives the order of input error function types.</p></li>
+<li><p><strong>error_function_weights</strong> – float-valued torch.Tensor with dimension (nBatch x len(activeErrorFunctions)) which contains a global weight for each active error function. The order of the weights is specified by activeErrorFunctions.</p></li>
+<li><p><strong>options.linearSolverType</strong> – Linear solver used in the Levenberg-Marquardt solve (default: QR).</p></li>
+<li><p><strong>options.levmar_lambda</strong> – Lambda value used to regularize the Levenberg-Marquardt solver (default: 0.01).</p></li>
+<li><p><strong>options.min_iter</strong> – Minimum number of iterations used in the nonlinear Levenberg-Marquardt solve (default: 4).</p></li>
+<li><p><strong>options.max_iter</strong> – Maximum number of iterations used in the nonlinear Levenberg-Marquardt solve (default: 50).</p></li>
+<li><p><strong>options.threshold</strong> – The solver stops taking steps when the difference between iterations is less than threshold*FLT_EPS.</p></li>
+<li><p><strong>options.line_search</strong> – whether to use line search for the QR solver (default: true).</p></li>
+<li><p><strong>position_cons_parents</strong> – integer-valued torch.Tensor of dimension (nBatch x nConstraints); contains a single parent for each constraint.</p></li>
+<li><p><strong>position_cons_offsets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the local offset for each constraint in its parent frame.</p></li>
+<li><p><strong>position_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains a per-constraint weight.</p></li>
+<li><p><strong>position_cons_targets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the world-space target for each position constraint.</p></li>
+<li><p><strong>orientation_cons_parents</strong> – integer-valued tensor of dimension (nBatch x nConstraints); contains a single parents for each of the orientation constraints.</p></li>
+<li><p><strong>orientation_cons_offsets</strong> – Optional float-valued tensor of dimension (nBatch x nConstraints x 4); contains the quaternion orientation offset for each orientation constraint in its parent frame.</p></li>
+<li><p><strong>orientation_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints) which contains a per-constraint weight.</p></li>
+<li><p><strong>orientation_cons_targets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 4) (m x n x 4): Per-constraint world-space orientation targets as quaternions.</p></li>
+<li><p><strong>pose_prior_model</strong> – Mixture-PCA model used by the pose prior.
+It can either be a <code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mpcca</span></code>, or it can be a tuple of tensors [pi, mu, W, sigma, param_indices] as described in
+<span class="math notranslate nohighlight">\(pymomentum.geometry.Mppca.to_tensors\)</span>.  The former is a bit more efficient during the solve (because there is no need to re-calculate the inverse covariance matrix) but
+the latter case allows for differentiability.</p></li>
+<li><p><strong>motion_targets</strong> – float-valued torch.Tensor of dimension (nBatch x nModelParams) which contains the model parameter targets for the motionError.</p></li>
+<li><p><strong>motion_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nModelParams) which contain a per-model-parameter weight for the motionError.</p></li>
+<li><p><strong>projection_cons_projections</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 4 x 3) containing a 4x3 projection matrix for each constraint.  Note
+that while you can use a standard pinhole model matrix as the projection matrix, we actually recommend constructing a separate local projection matrix
+for each constraint centered around the camera ray, which is more robust for e.g. fisheye cameras.</p></li>
+<li><p><strong>projection_cons_parents</strong> – integer-valued torch.Tensor of dimension (nBatch x nConstraints); contains a single parent for each projection constraint.</p></li>
+<li><p><strong>projection_cons_offsets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the local offset for each projection constraint in its parent frame.</p></li>
+<li><p><strong>projection_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains a per-projection constraint weight.</p></li>
+<li><p><strong>projection_cons_targets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 2); contains the world-space target for each projection constraint.</p></li>
+<li><p><strong>distance_cons_origins</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the world-space origins to measure distance from.</p></li>
+<li><p><strong>distance_cons_parents</strong> – integer-valued torch.Tensor of dimension (nBatch x nConstraints); contains a single parent for each distance constraint.</p></li>
+<li><p><strong>distance_cons_offsets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the local offset for each distance constraint in its parent frame.</p></li>
+<li><p><strong>distance_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains a per-projection constraint weight.</p></li>
+<li><p><strong>distance_cons_targets</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains the distance target for each constraint.</p></li>
+<li><p><strong>vertex_cons_vertices</strong> – int-valued torch.Tensor of dimension (nBatch x nConstraints); contains the vertex index for each constraint.</p></li>
+<li><p><strong>vertex_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains the per-constraint weight for each constraint.</p></li>
+<li><p><strong>vertex_cons_target_positions</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the target position.</p></li>
+<li><p><strong>vertex_cons_target_normals</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 3); contains the target normal.  Not used if the vertex constraint type is POSITION.</p></li>
+<li><p><strong>vertex_cons_type</strong> – Type of vertex constraint.  POSITION is a position constraint, while PLANE, NORMAL, and SYMMETRIC_NORMAL are variants on point-to-plane (PLANE uses the target normal, NORMAL uses the source normal, and SYMMETRIC_NORMAL uses a blend of the two normals).</p></li>
+<li><p><strong>vertex_proj_cons_vertices</strong> – int-valued torch.Tensor of dimension (nBatch x nConstraints); contains the vertex index for each constraint.</p></li>
+<li><p><strong>vertex_proj_cons_weights</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints); contains the per-constraint weight for each constraint.</p></li>
+<li><p><strong>vertex_proj_cons_target_positions</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 2); contains the target position.</p></li>
+<li><p><strong>vertex_proj_cons_target_projections</strong> – float-valued torch.Tensor of dimension (nBatch x nConstraints x 4 x 3); containing a 4x3 projection matrix for each constraint.  Note
+that while you can use a standard pinhole model matrix as the projection matrix, we actually recommend constructing a separate local projection matrix
+for each constraint centered around the camera ray, which is more robust for e.g. fisheye cameras.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.solve_sequence_ik">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">solve_sequence_ik</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">character:</span> <span class="pre">object,</span> <span class="pre">active_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">shared_parameters:</span> <span class="pre">torch.Tensor,</span> <span class="pre">model_parameters_init:</span> <span class="pre">torch.Tensor,</span> <span class="pre">active_error_functions:</span> <span class="pre">list[pymomentum.solver.ErrorFunctionType],</span> <span class="pre">error_function_weights:</span> <span class="pre">torch.Tensor,</span> <span class="pre">options:</span> <span class="pre">pymomentum.solver.SolverOptions</span> <span class="pre">=</span> <span class="pre">SolverOptions(linear_solver=LinearSolverType.QR,</span> <span class="pre">levmar_lambda=0.01,</span> <span class="pre">min_iter=4,</span> <span class="pre">max_iter=50,</span> <span class="pre">threshold=10,</span> <span class="pre">line_search=True,</span> <span class="pre">verbose=False),</span> <span class="pre">position_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">position_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">orientation_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">pose_prior_model:</span> <span class="pre">object</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">motion_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">projection_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_origins:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_parents:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_offsets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">distance_cons_targets:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_target_normals:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_cons_type:</span> <span class="pre">pymomentum.solver2.VertexConstraintType</span> <span class="pre">=</span> <span class="pre">&lt;VertexConstraintType.Position:</span> <span class="pre">0&gt;,</span> <span class="pre">vertex_proj_cons_vertices:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_weights:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_target_positions:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">vertex_proj_cons_projections:</span> <span class="pre">Optional[torch.Tensor]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.solver.solve_sequence_ik" title="Link to this definition"></a></dt>
+<dd><p>Batch solve a body multi-frame, or sequence, IK problem, with some parameters unique to each frame and some parameters shared between frames.
+A typical use case is to solve for a single body scale plus a per-frame pose given per-frame constraints.</p>
+<p>The constraints are the same ones available in <a class="reference internal" href="#pymomentum.solver.solve_ik" title="pymomentum.solver.solve_ik"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve_ik()</span></code></a>, except that instead of having tensor dimensions [nBatch x …] they use tensor dimension
+[nBatch x nFrames x …].  For example: posConstraint_parents would be [nBatch x nFrames x nConstraints].  Note that you can choose to elide both the
+per-batch and per-frame dimension (if you want to share parents across all frames and the entire batch) but you cannot skip one or the other unless nBatch is 1.
+This is to prevent confusing ambiguities in whether you meant sharing across the batch dimension or the frame dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character or list of nBatch Characters to use in the solve.</p></li>
+<li><p><strong>activeParameters</strong> – boolean-valued torch.Tensor with dimension (k), which selects all the parameters (both shared and per-frame) to be active during the solve.</p></li>
+<li><p><strong>sharedParameters</strong> – boolean-valued torch.Tensor with dimension (k), which selects all the parameters to be shared across the frames (typically this would be scale or shape parameters).</p></li>
+<li><p><strong>modelParameters_init</strong> – float-valued torch.Tensor which contain the ([nBatch] x nFrames x nModelParameters)-dimensional model parameters used to initialize the solve.  This could be important as the solver always converges to a local minimum.</p></li>
+<li><p><strong>activeErrorFunctions</strong> – list of pymomentum.ErrorFunctionType which gives the order of input error function types.</p></li>
+<li><p><strong>errorFunctionWeights</strong> – float-valued torch.Tensor with dimension (nBatch x nFrames x len(activeErrorFunctions)) which contains a per-frame global weight for each active error function. The order of the weights is specified by activeErrorFunctions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver.transform_pose">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver.</span></span><span class="sig-name descname"><span class="pre">transform_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_continuous_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#pymomentum.solver.transform_pose" title="Link to this definition"></a></dt>
+<dd><p>Computes a new set of model parameters such that the character pose is a rigidly transformed version of the
+original pose.  While there is technically a closed form solution for any given skeleton, this is complicated
+in momentum because different characters attach the rigid parameters to different joints, so a fully general
+solution uses IK.  This function optimizes the IK to run on a minimal set of joints and be as fast as possible,
+while dealing with local minima problems due to Euler angles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new set of model parameters such that the skeleton’s root has been transformed.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>character</strong> – Character to use in the solve.</p></li>
+<li><p><strong>model_parameters</strong> – Model parameters for the posed character in its initial space.</p></li>
+<li><p><strong>transform</strong> – The rigid transform to apply to the character, specified as a skeleton state(tx, ty, tz, rx, ry, rz, rw, s).  Note that the scale is ignored.</p></li>
+<li><p><strong>ensure_continuous_output</strong> – If true, the solver will try to ensure that the output is continuous in time.  This helps to remove Euler flips in continuous data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="backend.html" class="btn btn-neutral float-left" title="pymomentum.backend" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solver2.html" class="btn btn-neutral float-right" title="pymomentum.solver2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
