@@ -288,7 +288,7 @@ def identity(
     """
     Create a quaternion identity tensor.
 
-    :parameter sizes: A tuple of integers representing the size of the quaternion tensor.
+    :parameter size: A tuple of integers representing the size of the quaternion tensor.
     :parameter device: The device on which to create the tensor.
     :return: A quaternion identity tensor with the specified sizes and device.
     """
