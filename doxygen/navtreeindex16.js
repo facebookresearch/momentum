@@ -1,5 +1,9 @@
 var NAVTREEINDEX16 =
 {
+"exception_8h.html#a7bfc6cd509e5a82687cf5f420b553aff":[3,0,3,2,6],
+"exception_8h.html#a9b406adb60f122613db3463c42c4d6ec":[3,0,3,2,1],
+"exception_8h_source.html":[3,0,3,2],
+"fbx__builder_8cpp.html":[3,0,6,2,0],
 "fbx__builder_8cpp_source.html":[3,0,6,2,0],
 "fbx__builder_8h.html":[3,0,6,2,1],
 "fbx__builder_8h_source.html":[3,0,6,2,1],
@@ -151,8 +155,8 @@ var NAVTREEINDEX16 =
 "fully__differentiable__state__error__function_8cpp_source.html":[3,0,4,17],
 "fully__differentiable__state__error__function_8h.html":[3,0,4,18],
 "fully__differentiable__state__error__function_8h_source.html":[3,0,4,18],
-"functions.html":[2,3,0],
 "functions.html":[2,3,0,0],
+"functions.html":[2,3,0],
 "functions_a.html":[2,3,0,1],
 "functions_b.html":[2,3,0,2],
 "functions_c.html":[2,3,0,3],
@@ -160,8 +164,8 @@ var NAVTREEINDEX16 =
 "functions_e.html":[2,3,0,5],
 "functions_enum.html":[2,3,4],
 "functions_f.html":[2,3,0,6],
-"functions_func.html":[2,3,1],
 "functions_func.html":[2,3,1,0],
+"functions_func.html":[2,3,1],
 "functions_func_b.html":[2,3,1,1],
 "functions_func_c.html":[2,3,1,2],
 "functions_func_d.html":[2,3,1,3],
@@ -205,8 +209,8 @@ var NAVTREEINDEX16 =
 "functions_type.html":[2,3,3],
 "functions_u.html":[2,3,0,21],
 "functions_v.html":[2,3,0,22],
-"functions_vars.html":[2,3,2],
 "functions_vars.html":[2,3,2,0],
+"functions_vars.html":[2,3,2],
 "functions_vars_a.html":[2,3,2,1],
 "functions_vars_b.html":[2,3,2,2],
 "functions_vars_c.html":[2,3,2,3],
@@ -245,9 +249,5 @@ var NAVTREEINDEX16 =
 "gauss__newton__solver__sparse_8cpp.html":[3,0,10,3],
 "gauss__newton__solver__sparse_8cpp_source.html":[3,0,10,3],
 "gauss__newton__solver__sparse_8h.html":[3,0,10,4],
-"gauss__newton__solver__sparse_8h_source.html":[3,0,10,4],
-"generalized__loss_8cpp.html":[3,0,8,7],
-"generalized__loss_8cpp_source.html":[3,0,8,7],
-"generalized__loss_8h.html":[3,0,8,8],
-"generalized__loss_8h_source.html":[3,0,8,8]
+"gauss__newton__solver__sparse_8h_source.html":[3,0,10,4]
 };

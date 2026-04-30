@@ -35,6 +35,7 @@ var annotated_dup =
       [ "CharacterParametersT", "structmomentum_1_1CharacterParametersT.html", "structmomentum_1_1CharacterParametersT" ],
       [ "CharacterStateT", "structmomentum_1_1CharacterStateT.html", "structmomentum_1_1CharacterStateT" ],
       [ "CharacterT", "structmomentum_1_1CharacterT.html", "structmomentum_1_1CharacterT" ],
+      [ "CollisionDebugEntryT", "structmomentum_1_1CollisionDebugEntryT.html", "structmomentum_1_1CollisionDebugEntryT" ],
       [ "CollisionErrorFunctionStatelessT", "classmomentum_1_1CollisionErrorFunctionStatelessT.html", "classmomentum_1_1CollisionErrorFunctionStatelessT" ],
       [ "CollisionErrorFunctionT", "classmomentum_1_1CollisionErrorFunctionT.html", "classmomentum_1_1CollisionErrorFunctionT" ],
       [ "CollisionGeometryStateT", "structmomentum_1_1CollisionGeometryStateT.html", "structmomentum_1_1CollisionGeometryStateT" ],

@@ -26,6 +26,7 @@ var hierarchy =
     [ "rerun::CollectionAdapter< Color, std::vector< Eigen::Vector3< uint8_t > > >", "structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html", null ],
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector3< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html", null ],
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector4< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html", null ],
+    [ "momentum::CollisionDebugEntryT< T >", "structmomentum_1_1CollisionDebugEntryT.html", null ],
     [ "momentum::CollisionGeometryStateT< T >", "structmomentum_1_1CollisionGeometryStateT.html", null ],
     [ "momentum::CollisionErrorFunctionStatelessT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html", null ],
     [ "momentum::CollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],

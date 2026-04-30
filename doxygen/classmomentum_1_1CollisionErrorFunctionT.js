@@ -7,6 +7,7 @@ var classmomentum_1_1CollisionErrorFunctionT =
     [ "accumulateJacobianAlongChain", "classmomentum_1_1CollisionErrorFunctionT.html#a12ff7b740efe4abc0f02314a4c9b8710", null ],
     [ "checkCollision", "classmomentum_1_1CollisionErrorFunctionT.html#ab82e070474c92de54d83fe63d78b8654", null ],
     [ "computeBroadPhase", "classmomentum_1_1CollisionErrorFunctionT.html#abdd20bd34d1c7ed8303851bf28e9c3d2", null ],
+    [ "getCollisionDebugInfo", "classmomentum_1_1CollisionErrorFunctionT.html#a0ea34b35c05d56c5badb8ca727e975cb", null ],
     [ "getCollisionPairs", "classmomentum_1_1CollisionErrorFunctionT.html#a4acc720254c844924dfdb41c1ecdcef0", null ],
     [ "getError", "classmomentum_1_1CollisionErrorFunctionT.html#a90c1b80e4272bfa88c9fdb29279e55cd", null ],
     [ "getGradient", "classmomentum_1_1CollisionErrorFunctionT.html#ab8d53cfa28141d9973706850d5dfa057", null ],

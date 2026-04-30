@@ -9,7 +9,7 @@ var searchData=
   ['diff_6',['diff',['../state__sequence__error__function_8cpp.html#ac3687ca3178cf492850179a3640e71a8',1,'state_sequence_error_function.cpp']]],
   ['direction_7',['direction',['../structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105',1,'momentum::CollisionGeometryStateT']]],
   ['directsparsejtj_8',['directSparseJtJ',['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48',1,'momentum::SparseGaussNewtonSolverOptions']]],
-  ['distance_9',['distance',['../tracker__utils_8cpp.html#a06f14a9abd47b91465f895d5259cdc1b',1,'tracker_utils.cpp']]],
+  ['distance_9',['distance',['../structmomentum_1_1CollisionDebugEntryT.html#ad0851a04fc81e290bb00c72574899d9d',1,'momentum::CollisionDebugEntryT::distance'],['../tracker__utils_8cpp.html#a06f14a9abd47b91465f895d5259cdc1b',1,'distance:&#160;tracker_utils.cpp']]],
   ['dlogdq_10',['dLogDq',['../state__sequence__error__function_8cpp.html#a3e9eb2201c06225a96dcb879861c17b3',1,'state_sequence_error_function.cpp']]],
   ['document_11',['document',['../structmomentum_1_1GltfBuilder_1_1Impl.html#a67fc8433ed83d3132bf1f9595db94aa2',1,'momentum::GltfBuilder::Impl']]],
   ['dolinesearch_12',['dolinesearch',['../structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3',1,'momentum::GaussNewtonSolverBaseOptions::doLineSearch'],['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c',1,'momentum::SparseGaussNewtonSolverOptions::doLineSearch'],['../structmomentum_1_1SequenceSolverOptions.html#ab9342fa9b981336378ad7aeb884a9749',1,'momentum::SequenceSolverOptions::doLineSearch']]],

@@ -105,6 +105,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.CollisionErrorFunction"><code class="docutils literal notranslate"><span class="pre">CollisionErrorFunction</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.CollisionErrorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">CollisionErrorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.CollisionErrorFunction.get_collision_debug_info"><code class="docutils literal notranslate"><span class="pre">CollisionErrorFunction.get_collision_debug_info()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.solver2.CollisionErrorFunction.get_collision_pairs"><code class="docutils literal notranslate"><span class="pre">CollisionErrorFunction.get_collision_pairs()</span></code></a></li>
 </ul>
 </li>
@@ -1088,6 +1089,21 @@ transform directly.</p>
 </dd>
 <dt class="field-even">param weight<span class="colon">:</span></dt>
 <dd class="field-even"><p>The weight applied to the error function.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.solver2.CollisionErrorFunction.get_collision_debug_info">
+<span class="sig-name descname"><span class="pre">get_collision_debug_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.solver2.CollisionErrorFunction" title="pymomentum.solver2.CollisionErrorFunction"><span class="pre">pymomentum.solver2.CollisionErrorFunction</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pymomentum.solver2.CollisionErrorFunction.get_collision_debug_info" title="Link to this definition"></a></dt>
+<dd><p>Returns detailed collision debug info for all currently-colliding pairs.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Returns a dict with keys:</dt><dd><p>capsule_indices: (N, 2) int64 array of capsule index pairs
+parent_joints: (N, 2) int64 array of parent joint index pairs
+overlaps: (N,) float array of penetration depths in meters
+distances: (N,) float array of center-to-center distances in meters</p>
 </dd>
 </dl>
 </div></blockquote>
