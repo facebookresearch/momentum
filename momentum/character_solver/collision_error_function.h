@@ -18,6 +18,20 @@
 
 namespace momentum {
 
+/// Per-pair collision debug information returned by getCollisionDebugInfo().
+template <typename T>
+struct CollisionDebugEntryT {
+  size_t capsuleIndexA;
+  size_t capsuleIndexB;
+  size_t parentJointA;
+  size_t parentJointB;
+  T overlap;
+  T distance;
+};
+
+using CollisionDebugEntry = CollisionDebugEntryT<float>;
+using CollisionDebugEntryd = CollisionDebugEntryT<double>;
+
 template <typename T>
 class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
@@ -55,6 +69,13 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   [[nodiscard]] size_t getJacobianSize() const final;
 
   [[nodiscard]] std::vector<Vector2i> getCollisionPairs() const;
+
+  /// Query detailed collision state for all currently-colliding pairs.
+  ///
+  /// Returns overlap, distance, capsule indices, and parent joint indices for
+  /// each colliding pair. Uses the collision state from the most recent solver
+  /// iteration (computed during getJacobian/getError/getGradient).
+  [[nodiscard]] std::vector<CollisionDebugEntryT<T>> getCollisionDebugInfo() const;
 
  protected:
   void updateCollisionPairs(bool filterRestPoseOverlaps = true);
