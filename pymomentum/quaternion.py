@@ -70,6 +70,53 @@ import torch
 # pyre-strict
 
 
+class _TopRightSingularVector(torch.autograd.Function):
+    """First right singular vector of A via SVD, with stable custom backward.
+
+    The backward only differentiates through the top singular triplet.
+    The 1/(sigma_1^2 - sigma_k^2) terms are well-conditioned when sigma_1 dominates.
+
+    The forward pass sign-stabilizes the result: the component with the
+    largest absolute value is forced positive so the output is continuous
+    under small input perturbations.
+    """
+
+    @staticmethod
+    # pyre-ignore[14]: Pyre doesn't model torch.autograd.Function signatures
+    def forward(
+        ctx: torch.autograd.function.FunctionCtx, A: torch.Tensor
+    ) -> torch.Tensor:
+        U, S, Vh = torch.linalg.svd(A, full_matrices=False)
+        v1 = Vh[..., 0, :]
+        idx = v1.abs().argmax(dim=-1, keepdim=True)
+        sign = v1.gather(-1, idx).sign()
+        ctx.save_for_backward(U, S, Vh, sign)
+        return v1 * sign
+
+    @staticmethod
+    # pyre-ignore[14]: Pyre doesn't model torch.autograd.Function signatures
+    def backward(
+        ctx: torch.autograd.function.FunctionCtx, grad_v: torch.Tensor
+    ) -> torch.Tensor:
+        U, S, Vh, sign = ctx.saved_tensors  # pyre-ignore[16]
+        grad_v = grad_v * sign
+        u1 = U[..., :, 0]
+        v1 = Vh[..., 0, :]
+        s1 = S[..., :1]
+        Uk = U[..., :, 1:]
+        Vk = Vh[..., 1:, :]
+        Sk = S[..., 1:]
+
+        proj = torch.einsum("...n,...kn->...k", grad_v, Vk)
+        coeffs = proj / (s1 * s1 - Sk * Sk)
+
+        wv = torch.einsum("...k,...kn->...n", coeffs, Vk)
+        wu = Uk @ (coeffs * Sk).unsqueeze(-1)
+        return s1[..., None] * u1.unsqueeze(-1) @ wv.unsqueeze(-2) + wu @ v1.unsqueeze(
+            -2
+        )
+
+
 def check(q: torch.Tensor) -> None:
     """
     Check if a tensor represents a quaternion.
@@ -510,21 +557,18 @@ def blend(
     https://stackoverflow.com/questions/12374087/average-of-multiple-quaternions
     and http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf.
 
+    Uses SVD with a custom backward pass that only differentiates through the
+    top singular triplet, providing stable gradients for training.
+
     :parameter quaternions: A tensor of shape (..., k, 4) representing the quaternions to blend.
     :parameter weights_in: An optional tensor of shape (..., k) representing the weights for each quaternion.
                        If not provided, all quaternions will be weighted equally.
     :return: A tensor of shape (..., 4) representing the blended quaternion.
     """
-    # If no weights, then assume evenly weighted:
     weights = check_and_normalize_weights(quaternions, weights_in)
-
-    # Find average rotation by means described in the references above
     check(quaternions)
-    outer_prod = torch.einsum("...i,...k->...ik", [quaternions, quaternions])
-    QtQ = (weights.unsqueeze(-1).unsqueeze(-1) * outer_prod).sum(dim=-3)
-    _, eigenvectors = torch.linalg.eigh(QtQ)
-    result = eigenvectors.select(dim=-1, index=3)
-    return result
+    wq = torch.sqrt(weights).unsqueeze(-1) * quaternions
+    return _TopRightSingularVector.apply(wq)
 
 
 def slerp(q0: torch.Tensor, q1: torch.Tensor, t: torch.Tensor) -> torch.Tensor:

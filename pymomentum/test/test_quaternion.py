@@ -787,6 +787,104 @@ class TestQuaternion(unittest.TestCase):
             raise_exception=True,
         )
 
+    def test_blend_gradient_check(self) -> None:
+        """Verify analytical SVD backward matches finite differences for blend."""
+        torch.manual_seed(42)
+        quats = generateRandomQuats(5)
+
+        def _blend_to_matrix(q: torch.Tensor) -> torch.Tensor:
+            return quaternion.to_rotation_matrix(quaternion.blend(q))
+
+        self.assertTrue(
+            torch.autograd.gradcheck(_blend_to_matrix, (quats.unsqueeze(0),), eps=1e-6),
+        )
+
+    def test_blend_weighted_gradient_check(self) -> None:
+        """Verify SVD backward with explicit weights matches finite differences."""
+        torch.manual_seed(42)
+        quats = generateRandomQuats(4).unsqueeze(0)
+        weights = torch.tensor(
+            [[0.6, 0.2, 0.1, 0.1]], dtype=torch.float64, requires_grad=True
+        )
+
+        def _blend_weighted_to_matrix(q: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
+            return quaternion.to_rotation_matrix(quaternion.blend(q, w))
+
+        self.assertTrue(
+            torch.autograd.gradcheck(
+                _blend_weighted_to_matrix, (quats, weights), eps=1e-6
+            ),
+        )
+
+    def test_blend_gradient_flows(self) -> None:
+        """Verify gradients flow through blend to both quaternions and weights."""
+        torch.manual_seed(42)
+        raw = torch.randn(1, 4, 4, dtype=torch.float64)
+        quats = quaternion.normalize(raw).detach().requires_grad_(True)
+        weights = torch.tensor(
+            [[0.7, 0.1, 0.1, 0.1]], dtype=torch.float64, requires_grad=True
+        )
+
+        result = quaternion.blend(quats, weights)
+        loss = result.sum()
+        loss.backward()
+
+        self.assertIsNotNone(quats.grad)
+        self.assertFalse(torch.all(quats.grad == 0))
+        self.assertIsNotNone(weights.grad)
+        self.assertFalse(torch.all(weights.grad == 0))
+
+    def test_blend_batch_gradient_check(self) -> None:
+        """Verify SVD backward is correct with batched inputs via rotation matrices.
+
+        Uses weights concentrated on one quaternion so the top singular value
+        of the weighted quaternion matrix dominates, keeping the custom backward
+        well-conditioned.
+        """
+        torch.manual_seed(7)
+        quats = (
+            quaternion.normalize(torch.randn(4, 5, 4, dtype=torch.float64))
+            .detach()
+            .requires_grad_(True)
+        )
+        weights = torch.tensor(
+            [[0.7, 0.1, 0.1, 0.05, 0.05]] * 4,
+            dtype=torch.float64,
+            requires_grad=True,
+        )
+
+        def _blend_to_matrix(q: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
+            return quaternion.to_rotation_matrix(quaternion.blend(q, w))
+
+        self.assertTrue(
+            torch.autograd.gradcheck(_blend_to_matrix, (quats, weights), eps=1e-6),
+        )
+
+    def test_blend_raw_quaternion_gradient_check(self) -> None:
+        """Verify sign-stabilized SVD backward works directly on quaternion output."""
+        torch.manual_seed(42)
+        quats = generateRandomQuats(5)
+
+        self.assertTrue(
+            torch.autograd.gradcheck(quaternion.blend, (quats.unsqueeze(0),), eps=1e-6),
+        )
+
+    def test_blend_dominant_weight(self) -> None:
+        """With one dominant weight, blended result should be close to that quaternion."""
+        torch.manual_seed(42)
+        quats = generateRandomQuats(4)
+        weights = torch.tensor([0.97, 0.01, 0.01, 0.01], dtype=torch.float64)
+
+        result = quaternion.blend(quats, weights)
+
+        diff_pos = torch.norm(result - quats[0])
+        diff_neg = torch.norm(result + quats[0])
+        self.assertLess(
+            min(diff_pos.item(), diff_neg.item()),
+            0.05,
+            "Dominant weight should produce result close to the dominant quaternion",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
