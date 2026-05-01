@@ -181,6 +181,8 @@ batched operations for efficient processing of multiple quaternions.</p>
 <dd><p>Blend multiple quaternions together using the method described in
 <a class="reference external" href="https://stackoverflow.com/questions/12374087/average-of-multiple-quaternions">https://stackoverflow.com/questions/12374087/average-of-multiple-quaternions</a>
 and <a class="reference external" href="http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf">http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf</a>.</p>
+<p>Uses SVD with a custom backward pass that only differentiates through the
+top singular triplet, providing stable gradients for training.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
