@@ -27,6 +27,8 @@ _AUTOGRAD_TESTS = frozenset(
         "test_skel_state_to_transforms",
         "test_bulk_multiplication_backward",
         "test_multiply_backprop",
+        "test_blend_gradient_check",
+        "test_blend_gradient_flows",
     }
 )
 
@@ -141,6 +143,48 @@ class TestSkelStateAutograd(unittest.TestCase):
         # Compare gradients - use appropriate tolerance for numerical differences
         self.assertTrue(torch.allclose(ds1_autograd, ds1_custom, atol=1e-4, rtol=1e-4))
         self.assertTrue(torch.allclose(ds2_autograd, ds2_custom, atol=1e-4, rtol=1e-4))
+
+    @staticmethod
+    def _make_random_skel_states(n: int) -> torch.Tensor:
+        states = []
+        for _ in range(n):
+            t = torch.randn(3, dtype=torch.float64)
+            q = pym_quaternion.normalize(torch.randn(4, dtype=torch.float64))
+            s = torch.rand(1, dtype=torch.float64) + 0.5
+            states.append(torch.cat([t, q, s]))
+        return torch.stack(states)
+
+    def test_blend_gradient_check(self) -> None:
+        """Verify gradcheck passes for skel_state.blend via the SVD backward."""
+        torch.manual_seed(42)
+        skel_states = self._make_random_skel_states(4).requires_grad_(True)
+        weights = torch.tensor(
+            [0.6, 0.2, 0.1, 0.1], dtype=torch.float64, requires_grad=True
+        )
+
+        def _blend_to_matrix(ss: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
+            return pym_skel_state.to_matrix(pym_skel_state.blend(ss, w))
+
+        self.assertTrue(
+            torch.autograd.gradcheck(
+                _blend_to_matrix, (skel_states, weights), eps=1e-6
+            ),
+        )
+
+    def test_blend_gradient_flows(self) -> None:
+        """Verify gradients flow through skel_state.blend to inputs."""
+        torch.manual_seed(42)
+        skel_states = self._make_random_skel_states(3).requires_grad_(True)
+        weights = torch.tensor([0.5, 0.3, 0.2], dtype=torch.float64, requires_grad=True)
+
+        result = pym_skel_state.blend(skel_states, weights)
+        loss = result.sum()
+        loss.backward()
+
+        self.assertIsNotNone(skel_states.grad)
+        self.assertFalse(torch.all(skel_states.grad == 0))
+        self.assertIsNotNone(weights.grad)
+        self.assertFalse(torch.all(weights.grad == 0))
 
 
 if __name__ == "__main__":
