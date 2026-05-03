@@ -850,9 +850,9 @@ rerun_test_sources = [
     "test/gui/rerun/rerun_compat_test.cpp",
 ]
 
-# ==========
+#==========
 # Examples
-# ==========
+#==========
 
 hello_world_sources = [
     "examples/hello_world/main.cpp",
@@ -946,9 +946,9 @@ rasterizer_test_sources = [
     "test/rasterizer/test_text_rasterizer.cpp",
 ]
 
-# ===========
+#===========
 # Tutorials
-# ===========
+#===========
 
 forward_kinematics_sources = [
     "tutorials/forward_kinematics/forward_kinematics.cpp",
