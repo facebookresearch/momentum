@@ -3079,3 +3079,73 @@ class TestSolver(unittest.TestCase):
                     places=4,
                     msg=f"Weight scaling incorrect for {constraint_type}",
                 )
+
+    def test_transform_pose(self) -> None:
+        """Test transform_pose with a known rigid transform."""
+        character = pym_test_utils.create_test_character()
+        np.random.seed(0)
+
+        n_batch = 5
+        n_params: int = character.parameter_transform.size
+        model_params = pym_geometry.uniform_random_to_model_parameters(
+            character, np.random.rand(n_batch, n_params).astype(np.float32)
+        )
+
+        skel_state_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params
+        )
+
+        # Build a transform that moves the last joint to the origin
+        last_joint = character.skeleton.size - 1
+        joint_skel = skel_state_init[:, last_joint].copy()
+        joint_skel[:, 7] = 1.0  # set scale to 1
+        inv_transform = pym_skel_state.inverse(joint_skel)
+
+        # Apply transform_pose (batch)
+        model_params_out = pym_solver2.transform_pose(
+            character, model_params, inv_transform
+        )
+        skel_state_out = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_out
+        )
+
+        # The last joint should now be near the origin with identity rotation
+        expected = pym_skel_state.multiply(inv_transform, joint_skel)
+        expected_mat = pym_skel_state.to_matrix(expected)
+        actual_skel = skel_state_out[:, last_joint].copy()
+        actual_skel[:, 7] = 1.0
+        actual_mat = pym_skel_state.to_matrix(actual_skel)
+        np.testing.assert_allclose(actual_mat, expected_mat, atol=1e-3)
+
+    def test_transform_pose_single(self) -> None:
+        """Test transform_pose with a single (non-batch) input."""
+        character = pym_test_utils.create_test_character()
+        np.random.seed(1)
+
+        n_params: int = character.parameter_transform.size
+        model_params = pym_geometry.uniform_random_to_model_parameters(
+            character, np.random.rand(n_params).astype(np.float32)
+        )
+
+        # Pure translation transform
+        transform = np.array(
+            [10.0, 20.0, 30.0, 0.0, 0.0, 0.0, 1.0, 1.0], dtype=np.float32
+        )
+
+        model_params_out = pym_solver2.transform_pose(
+            character, model_params, transform
+        )
+        self.assertEqual(model_params_out.ndim, 1)
+        self.assertEqual(model_params_out.shape[0], n_params)
+
+        skel_init = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params
+        )
+        skel_out = pym_geometry.model_parameters_to_skeleton_state(
+            character, model_params_out
+        )
+
+        # All joint positions should be shifted by (10, 20, 30)
+        np.testing.assert_allclose(
+            skel_out[:, :3], skel_init[:, :3] + transform[:3], atol=1e-2
+        )
