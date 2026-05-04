@@ -15,6 +15,7 @@
 #include <momentum/character_solver/gauss_newton_solver_qr.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/skeleton_solver_function.h>
+#include <momentum/character_solver/transform_pose.h>
 #include <momentum/solver/gauss_newton_solver.h>
 #include <momentum/solver/subset_gauss_newton_solver.h>
 
@@ -25,12 +26,14 @@
 #include <pybind11/stl.h>
 #include <Eigen/Core>
 
+#include <pymomentum/array_utility/array_utility.h>
+#include <pymomentum/array_utility/batch_accessor.h>
+#include <pymomentum/array_utility/geometry_accessors.h>
 #include <pymomentum/solver2/solver2_camera_intrinsics.h>
 #include <pymomentum/solver2/solver2_error_functions.h>
 #include <pymomentum/solver2/solver2_sequence_error_functions.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
-namespace py = pybind11;
 namespace mm = momentum;
 
 namespace pymomentum {
@@ -103,6 +106,90 @@ std::string formatErrorFunctionsList(
     }
   }
   return result;
+}
+
+void addTransformPoseBinding(py::module_& m) {
+  m.def(
+      "transform_pose",
+      [](const mm::Character& character,
+         const py::buffer& modelParameters,
+         const py::array_t<float>& transform,
+         bool ensureContinuousOutput) -> py::array_t<float> {
+        const auto nParams =
+            static_cast<py::ssize_t>(character.parameterTransform.numAllModelParameters());
+
+        // Validate model parameters using ArrayChecker
+        ArrayChecker checker("transform_pose");
+        checker.validateModelParameters(modelParameters, "model_parameters", character);
+        auto leadingDims = checker.getLeadingDimensions();
+        MT_THROW_IF(
+            leadingDims.ndim() > 1,
+            "transform_pose only supports 0D or 1D batch dimensions; got {}D leading dims",
+            leadingDims.ndim());
+        auto nBatch = leadingDims.totalBatchElements();
+
+        // Read input model parameters using accessor
+        ModelParametersAccessor<float> inputAcc(modelParameters, leadingDims, nParams);
+        BatchIndexer indexer(leadingDims);
+        std::vector<mm::ModelParameters> params(nBatch);
+        for (py::ssize_t i = 0; i < nBatch; ++i) {
+          params[i] = inputAcc.get(indexer.decompose(i));
+        }
+
+        // Parse transforms: (8,) or (nBatch, 8)
+        std::vector<mm::Transform> transforms;
+        if (transform.ndim() == 1) {
+          if (transform.shape(0) != 8) {
+            throw std::runtime_error(
+                fmt::format("transform must have 8 elements; got {}", transform.shape(0)));
+          }
+          auto acc = transform.unchecked<1>();
+          Eigen::Vector3f position(acc(0), acc(1), acc(2));
+          Eigen::Quaternionf rotation(acc(6), acc(3), acc(4), acc(5));
+          float scale = acc(7);
+          transforms.emplace_back(position, rotation.normalized(), scale);
+        } else if (transform.ndim() == 2) {
+          transforms = toTransformList(transform);
+        } else {
+          throw std::runtime_error(
+              fmt::format("transform must be 1D or 2D; got {}D", transform.ndim()));
+        }
+
+        // Call the C++ function
+        std::vector<mm::ModelParameters> result;
+        {
+          py::gil_scoped_release release;
+          result = mm::transformPose(character, params, transforms, ensureContinuousOutput);
+        }
+
+        // Write output using accessor
+        auto output = createOutputArray<float>(leadingDims, {nParams});
+        ModelParametersAccessor<float> outputAcc(output, leadingDims, nParams);
+        for (py::ssize_t i = 0; i < nBatch; ++i) {
+          outputAcc.set(indexer.decompose(i), result[i]);
+        }
+        return output;
+      },
+      R"(Computes new model parameters such that the character pose is a rigidly transformed
+version of the original pose.
+
+Uses IK internally because different characters attach rigid parameters to different
+joints, making a closed-form solution impractical. The solver uses random restarts
+to avoid Euler angle local minima.
+
+The transform is specified in skeleton state format: ``[tx, ty, tz, qx, qy, qz, qw, scale]``.
+Scale is currently ignored (only rigid transforms are supported).
+
+:param character: The character model.
+:param model_parameters: Model parameters, shape ``(n_params,)`` or ``(n_batch, n_params)``.
+:param transform: Rigid transform to apply, shape ``(8,)`` (broadcast to all frames) or ``(n_batch, 8)``.
+:param ensure_continuous_output: If True, seeds each frame's solve from the previous frame's result
+    to avoid discontinuities in Euler angle representations.
+:return: Transformed model parameters, same shape as ``model_parameters``.)",
+      py::arg("character"),
+      py::arg("model_parameters"),
+      py::arg("transform"),
+      py::arg("ensure_continuous_output") = true);
 }
 
 PYBIND11_MODULE(solver2, m) {
@@ -757,6 +844,8 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       py::arg("solver_function"),
       py::arg("model_params"),
       py::arg("options") = std::optional<mm::SequenceSolverOptions>{});
+
+  addTransformPoseBinding(m);
 
   addCameraIntrinsicsBindings(m);
 }
