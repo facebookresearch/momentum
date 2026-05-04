@@ -567,6 +567,12 @@ librerun-sdk = ">=0.23.3,<0.24"
 [feature.viser]
 platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 
+[feature.viser.dependencies]
+# viser (pypi) requires rich<15.0.0. Other conda deps in these envs (cibuildwheel,
+# twine) accept rich>=15, so without this pin the conda solver picks rich-15 and
+# the pypi solve for viser fails. Drop this pin once viser allows rich>=15.
+rich = ">=13.3.3,<15"
+
 [feature.viser.pypi-dependencies]
 viser = ">=1.0.24,<2"
 
