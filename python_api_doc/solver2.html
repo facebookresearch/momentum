@@ -581,6 +581,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.extract_camera_intrinsics"><code class="docutils literal notranslate"><span class="pre">extract_camera_intrinsics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.set_camera_intrinsics"><code class="docutils literal notranslate"><span class="pre">set_camera_intrinsics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.solve_sequence"><code class="docutils literal notranslate"><span class="pre">solve_sequence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.solver2.transform_pose"><code class="docutils literal notranslate"><span class="pre">transform_pose()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
@@ -4519,6 +4520,32 @@ present in the parameter transform are silently skipped.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The optimized model parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.solver2.transform_pose">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.solver2.</span></span><span class="sig-name descname"><span class="pre">transform_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_continuous_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.solver2.transform_pose" title="Link to this definition"></a></dt>
+<dd><p>Computes new model parameters such that the character pose is a rigidly transformed
+version of the original pose.</p>
+<p>Uses IK internally because different characters attach rigid parameters to different
+joints, making a closed-form solution impractical. The solver uses random restarts
+to avoid Euler angle local minima.</p>
+<p>The transform is specified in skeleton state format: <code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">qx,</span> <span class="pre">qy,</span> <span class="pre">qz,</span> <span class="pre">qw,</span> <span class="pre">scale]</span></code>.
+Scale is currently ignored (only rigid transforms are supported).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – The character model.</p></li>
+<li><p><strong>model_parameters</strong> – Model parameters, shape <code class="docutils literal notranslate"><span class="pre">(n_params,)</span></code> or <code class="docutils literal notranslate"><span class="pre">(n_batch,</span> <span class="pre">n_params)</span></code>.</p></li>
+<li><p><strong>transform</strong> – Rigid transform to apply, shape <code class="docutils literal notranslate"><span class="pre">(8,)</span></code> (broadcast to all frames) or <code class="docutils literal notranslate"><span class="pre">(n_batch,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>ensure_continuous_output</strong> – If True, seeds each frame’s solve from the previous frame’s result
+to avoid discontinuities in Euler angle representations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed model parameters, same shape as <code class="docutils literal notranslate"><span class="pre">model_parameters</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
