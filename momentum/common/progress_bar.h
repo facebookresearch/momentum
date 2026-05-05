@@ -24,10 +24,8 @@ class ProgressBar {
   ///
   /// @param prefix Text shown before the bar.
   /// @param numOperations Total operation count corresponding to 100%.
-  /// @pre `prefix.size() + 9 < kMaxWidth`, otherwise the computed bar width
-  ///      underflows `size_t`.
-  // TODO: Validate that `prefix.size() + 9 < kMaxWidth` to avoid a size_t
-  // underflow when computing the bar width in the constructor.
+  /// @throws std::invalid_argument if `prefix.size() + 9 >= kMaxWidth`, since
+  ///         the bar width would otherwise underflow `size_t`.
   ProgressBar(const std::string& prefix, size_t numOperations);
 
   /// Advances progress by `count` (default 1) and redraws the bar.
