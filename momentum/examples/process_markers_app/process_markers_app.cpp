@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
     CLI11_PARSE(app, argc, argv);
     if (calibConfig->debug || trackingConfig->debug) {
-      setLogLevel(LogLevel::Debug);
+      setLogLevel(momentum::LogLevel::Debug);
     }
     processMarkerFile(
         ioOpt->inputFile,

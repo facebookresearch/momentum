@@ -42,6 +42,32 @@ std::span<const GloveFrameData> validateAndSliceGloveData(
   return gloveData.subspan(firstFrame, lastFrame - firstFrame);
 }
 
+/// Slice camera keypoint data to match the [firstFrame, lastFrame) range.
+/// Each CameraKeypointData has per-frame observations, so we create sliced
+/// copies with frameData adjusted to the same range as the marker data.
+std::vector<CameraKeypointData> sliceCameraKeypointData(
+    std::span<const CameraKeypointData> data,
+    size_t firstFrame,
+    size_t lastFrame) {
+  std::vector<CameraKeypointData> result;
+  if (data.empty()) {
+    return result;
+  }
+  result.reserve(data.size());
+  for (const auto& camData : data) {
+    CameraKeypointData sliced;
+    sliced.camera = camData.camera;
+    if (camData.frameData.size() >= lastFrame) {
+      sliced.frameData.assign(
+          camData.frameData.begin() + firstFrame, camData.frameData.begin() + lastFrame);
+    } else if (camData.frameData.size() > firstFrame) {
+      sliced.frameData.assign(camData.frameData.begin() + firstFrame, camData.frameData.end());
+    }
+    result.push_back(std::move(sliced));
+  }
+  return result;
+}
+
 } // namespace
 
 void calibrateMarkers(
@@ -53,7 +79,8 @@ void calibrateMarkers(
     size_t maxFrames,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    std::span<const CameraKeypointData> cameraKeypointData) {
   MT_THROW_IF(
       firstFrame > markerData.size(),
       "First frame {} can't exceed total frames {}",
@@ -80,6 +107,9 @@ void calibrateMarkers(
       !(calibrationConfig.globalScaleOnly & calibrationConfig.locatorsOnly),
       "globalScaleOnly and locatorsOnly are exclusive; they cannot both be true.");
 
+  const auto slicedKeypointData =
+      sliceCameraKeypointData(cameraKeypointData, firstFrame, lastFrame);
+
   if (calibrationConfig.locatorsOnly) {
     // The output locators will be written to character.
     calibrateLocators(inputData, calibrationConfig, identity, character);
@@ -94,7 +124,8 @@ void calibrateMarkers(
         {0.0f, 0.0f, 0.0f},
         leftGloveSlice,
         rightGloveSlice,
-        gloveConfig);
+        gloveConfig,
+        slicedKeypointData);
   }
 }
 
@@ -109,7 +140,8 @@ Eigen::MatrixXf processMarkers(
     size_t maxFrames,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    std::span<const CameraKeypointData> cameraKeypointData) {
   MT_THROW_IF(
       firstFrame > markerData.size(),
       "First frame {} can't exceed total frames {}",
@@ -129,6 +161,9 @@ Eigen::MatrixXf processMarkers(
       validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
   const auto rightGloveSlice =
       validateAndSliceGloveData(rightGloveData, markerData.size(), firstFrame, lastFrame, "Right");
+
+  const auto slicedKeypointData =
+      sliceCameraKeypointData(cameraKeypointData, firstFrame, lastFrame);
 
   // calibrate model and locators
   if (calibrate) {
@@ -150,7 +185,8 @@ Eigen::MatrixXf processMarkers(
           {0.0f, 0.0f, 0.0f},
           leftGloveSlice,
           rightGloveSlice,
-          gloveConfig);
+          gloveConfig,
+          slicedKeypointData);
     }
   }
 

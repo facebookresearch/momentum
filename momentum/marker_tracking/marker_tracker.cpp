@@ -7,6 +7,7 @@
 
 #include "momentum/marker_tracking/marker_tracker.h"
 
+#include "momentum/camera/projection_utils.h"
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character.h"
 #include "momentum/character/linear_skinning.h"
@@ -24,6 +25,7 @@
 #include "momentum/character_solver/model_parameters_error_function.h"
 #include "momentum/character_solver/plane_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
+#include "momentum/character_solver/projection_error_function.h"
 #include "momentum/character_solver/skeleton_solver_function.h"
 #include "momentum/character_solver/skinned_locator_error_function.h"
 #include "momentum/character_solver/skinned_locator_triangle_error_function.h"
@@ -41,6 +43,19 @@ using namespace momentum;
 namespace momentum {
 
 namespace {
+
+void validateCameraKeypointFrameCount(
+    std::span<const CameraKeypointData> cameraKeypointData,
+    size_t numFrames) {
+  for (size_t cam = 0; cam < cameraKeypointData.size(); ++cam) {
+    MT_THROW_IF(
+        cameraKeypointData[cam].frameData.size() != numFrames,
+        "Camera keypoint data[{}] has {} frames but marker data has {} frames",
+        cam,
+        cameraKeypointData[cam].frameData.size(),
+        numFrames);
+  }
+}
 
 /// Compute a frame stride for sampling numFrames down to ~targetFrames.
 /// Always returns at least 1 to avoid division-by-zero or infinite loops.
@@ -221,11 +236,27 @@ Eigen::MatrixXf trackSequence(
     float targetHeightCm,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    std::span<const CameraKeypointData> cameraKeypointData) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input marker data is empty.");
   MT_CHECK(frameStride > 0, "frameStride must be > 0.");
+  validateCameraKeypointFrameCount(cameraKeypointData, numFrames);
+  if (!leftGloveData.empty()) {
+    MT_CHECK(
+        leftGloveData.size() == numFrames,
+        "trackSequence: left glove data has {} frames but marker data has {} frames",
+        leftGloveData.size(),
+        numFrames);
+  }
+  if (!rightGloveData.empty()) {
+    MT_CHECK(
+        rightGloveData.size() == numFrames,
+        "trackSequence: right glove data has {} frames but marker data has {} frames",
+        rightGloveData.size(),
+        numFrames);
+  }
   std::vector<size_t> frames;
   for (size_t fi = 0; fi < numFrames; fi += frameStride) {
     frames.emplace_back(fi);
@@ -244,7 +275,8 @@ Eigen::MatrixXf trackSequence(
       targetHeightCm,
       leftGloveData,
       rightGloveData,
-      gloveConfig);
+      gloveConfig,
+      cameraKeypointData);
 }
 
 /// Add a blend shape regularizer that penalizes deviations from zero for all
@@ -271,6 +303,66 @@ void addBlendShapeRegularizer(
   solverFunc.addErrorFunction(solverFrame, blendShapeConstrFunc);
 }
 
+/// Add 2D keypoint projection constraints from outside-in cameras for one solver frame.
+/// Uses ProjectionErrorFunctionT with projectionMatrixRadians() so the residual is in
+/// radians (tangent-of-angle), making the weight pixel-independent and naturally scaled
+/// relative to marker constraints (in cm).
+void addKeypointProjectionConstraints(
+    SequenceSolverFunctionT<float>& solverFunc,
+    size_t solverFrame,
+    size_t iFrame,
+    const Character& character,
+    float projectionWeight,
+    std::span<const CameraKeypointData> cameraKeypointData) {
+  if (projectionWeight <= 0.0f) {
+    return;
+  }
+  size_t totalProjectionConstraints = 0;
+  size_t totalInvalidProj = 0;
+  for (const auto& camData : cameraKeypointData) {
+    if (iFrame >= camData.frameData.size() || camData.frameData[iFrame].empty()) {
+      continue;
+    }
+    auto projFunc = std::make_shared<ProjectionErrorFunctionT<float>>(
+        character.skeleton, character.parameterTransform);
+    for (const auto& obs : camData.frameData[iFrame]) {
+      if (obs.confidence <= 0.0f || obs.locatorIndex >= character.locators.size()) {
+        continue;
+      }
+      const auto& locator = character.locators[obs.locatorIndex];
+      if (locator.parent >= character.skeleton.joints.size()) {
+        continue;
+      }
+      const auto [M, valid] = projectionMatrixRadians(camData.camera, obs.target);
+      if (!valid) {
+        totalInvalidProj++;
+        continue;
+      }
+      ProjectionConstraintDataT<float> constr;
+      constr.projection = M;
+      constr.target = Eigen::Vector2f::Zero();
+      constr.parent = locator.parent;
+      constr.offset = locator.offset;
+      constr.weight = obs.confidence;
+      projFunc->addConstraint(constr);
+    }
+    if (!projFunc->empty()) {
+      totalProjectionConstraints += projFunc->getNumConstraints();
+      projFunc->setWeight(projectionWeight);
+      solverFunc.addErrorFunction(solverFrame, projFunc);
+    }
+  }
+  if (iFrame == 0) {
+    MT_LOGI(
+        "Frame 0: added {} projection constraints (radians, weight={}), "
+        "{} cameras, {} invalid projections",
+        totalProjectionConstraints,
+        projectionWeight,
+        cameraKeypointData.size(),
+        totalInvalidProj);
+  }
+}
+
 /// Add per-frame marker, floor, and glove constraints for one frame of the
 /// sequence solver.  Extracted from trackSequence to reduce cyclomatic complexity.
 void addSequenceFrameConstraints(
@@ -291,7 +383,8 @@ void addSequenceFrameConstraints(
     const std::vector<std::vector<JointToJointPositionDataT<float>>>& leftGlovePosData,
     const std::vector<std::vector<JointToJointOrientationDataT<float>>>& leftGloveOriData,
     const std::vector<std::vector<JointToJointPositionDataT<float>>>& rightGlovePosData,
-    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& rightGloveOriData) {
+    const std::vector<std::vector<JointToJointOrientationDataT<float>>>& rightGloveOriData,
+    std::span<const CameraKeypointData> cameraKeypointData = {}) {
   auto posConstrWeight = PositionErrorFunction::kLegacyWeight * config.markerWeight;
   if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
     posConstrWeight *= solvedFrames;
@@ -376,6 +469,9 @@ void addSequenceFrameConstraints(
         gloveConfig->positionWeight,
         gloveConfig->orientationWeight);
   }
+
+  addKeypointProjectionConstraints(
+      solverFunc, solverFrame, iFrame, character, config.projectionWeight, cameraKeypointData);
 }
 
 /// Track motion across multiple frames simultaneously for specific frame indices.
@@ -408,7 +504,8 @@ Eigen::MatrixXf trackSequence(
     float targetHeightCm,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    std::span<const CameraKeypointData> cameraKeypointData) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input marker data is empty.");
@@ -432,6 +529,7 @@ Eigen::MatrixXf trackSequence(
       "Right glove data has {} frames but marker data has {} frames",
       rightGloveData.size(),
       numFrames);
+  validateCameraKeypointFrameCount(cameraKeypointData, numFrames);
 
   const ParameterTransform& pt = character.parameterTransform;
 
@@ -522,7 +620,8 @@ Eigen::MatrixXf trackSequence(
           leftGlovePosData,
           leftGloveOriData,
           rightGlovePosData,
-          rightGloveOriData);
+          rightGloveOriData,
+          cameraKeypointData);
     }
     // Set per-frame initial value
     solverFunc.setFrameParameters(solverFrame, initialMotion.col(iFrame));
@@ -1020,6 +1119,96 @@ void logSkinnedLocatorMeshDistances(const Character& character, const std::strin
   }
 }
 
+void logKeypointObservationSummary(
+    std::span<const CameraKeypointData> cameraKeypointData,
+    float projectionWeight) {
+  if (cameraKeypointData.empty() || projectionWeight <= 0.0f) {
+    return;
+  }
+  size_t totalObs = 0;
+  for (const auto& camData : cameraKeypointData) {
+    for (const auto& frame : camData.frameData) {
+      totalObs += frame.size();
+    }
+  }
+  MT_LOGI(
+      "2D keypoint constraints: {} cameras, {} total observations, "
+      "projectionWeight={}",
+      cameraKeypointData.size(),
+      totalObs,
+      projectionWeight);
+}
+
+void logKeypointReprojectionDiagnostic(
+    const Character& character,
+    std::span<const CameraKeypointData> cameraKeypointData,
+    const Eigen::MatrixXf& motion,
+    const ParameterTransform& transform,
+    const CalibrationConfig& config) {
+  if (!config.debug || cameraKeypointData.empty() || config.projectionWeight <= 0.0f) {
+    return;
+  }
+  const size_t diagFrame = 0;
+  SkeletonState skelState;
+  skelState.set(
+      character.parameterTransform.apply(
+          ModelParameters(motion.col(diagFrame).head(transform.numAllModelParameters()))),
+      character.skeleton);
+
+  MT_LOGI("=== Keypoint reprojection diagnostic (frame {}, after Stage 0) ===", diagFrame);
+  for (size_t iCam = 0; iCam < cameraKeypointData.size(); ++iCam) {
+    const auto& camData = cameraKeypointData[iCam];
+    if (diagFrame >= camData.frameData.size() || camData.frameData[diagFrame].empty()) {
+      continue;
+    }
+    size_t nObs = 0, nSkipped = 0;
+    float sumPxErr = 0, maxPxErr = 0;
+    float sumRadErr = 0, maxRadErr = 0;
+    for (const auto& obs : camData.frameData[diagFrame]) {
+      if (obs.confidence <= 0.0f || obs.locatorIndex >= character.locators.size()) {
+        nSkipped++;
+        continue;
+      }
+      const auto& locator = character.locators[obs.locatorIndex];
+      if (locator.parent >= skelState.jointState.size()) {
+        nSkipped++;
+        continue;
+      }
+      const Eigen::Vector3f p_world =
+          skelState.jointState[locator.parent].transform * locator.offset;
+      const auto [projected, valid] = camData.camera.project(p_world);
+      if (!valid) {
+        nSkipped++;
+        continue;
+      }
+      const float pxErr = (projected.head<2>() - obs.target).norm();
+      sumPxErr += pxErr;
+      maxPxErr = std::max(maxPxErr, pxErr);
+      const auto [M, mValid] = projectionMatrixRadians(camData.camera, obs.target);
+      float radErr = 0;
+      if (mValid) {
+        const Eigen::Vector4f ph(p_world[0], p_world[1], p_world[2], 1.0f);
+        const Eigen::Vector3f h = M * ph;
+        if (std::abs(h[2]) > 1e-6f) {
+          radErr = Eigen::Vector2f(h[0] / h[2], h[1] / h[2]).norm();
+        }
+      }
+      sumRadErr += radErr;
+      maxRadErr = std::max(maxRadErr, radErr);
+      nObs++;
+    }
+    MT_LOGI(
+        "cam[{}]: {} obs, {} skip, mean={:.1f}px/{:.4f}rad, max={:.1f}px/{:.4f}rad",
+        iCam,
+        nObs,
+        nSkipped,
+        nObs > 0 ? sumPxErr / nObs : 0.0f,
+        nObs > 0 ? sumRadErr / nObs : 0.0f,
+        maxPxErr,
+        maxRadErr);
+  }
+}
+
 } // namespace
 
 Character addSkinnedLocatorParametersToTransform(Character character) {
@@ -1045,7 +1234,8 @@ void calibrateModel(
     const std::array<float, 3>& regularizerWeights,
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
-    const std::optional<GloveConfig>& gloveConfig) {
+    const std::optional<GloveConfig>& gloveConfig,
+    std::span<const CameraKeypointData> cameraKeypointData) {
   const size_t numFrames = markerData.size();
   MT_THROW_IF(numFrames < 2, "Calibration requires at least 2 frames, got {}.", numFrames);
   MT_THROW_IF(
@@ -1063,6 +1253,7 @@ void calibrateModel(
       "Right glove data has {} frames but marker data has {} frames",
       rightGloveData.size(),
       numFrames);
+  validateCameraKeypointFrameCount(cameraKeypointData, numFrames);
 
   MT_THROW_IF(config.calibFrames == 0, "calibFrames must be > 0.");
   if (numFrames < config.calibFrames) {
@@ -1071,6 +1262,19 @@ void calibrateModel(
         numFrames,
         config.calibFrames);
   }
+
+  logKeypointObservationSummary(cameraKeypointData, config.projectionWeight);
+
+  MT_LOGI(
+      "calibrateModel: {} frames, {} locators, {} skinnedLocators, {} joints, "
+      "leftGlove={}, rightGlove={}, keypoints={} cameras",
+      numFrames,
+      character.locators.size(),
+      character.skinnedLocators.size(),
+      character.skeleton.joints.size(),
+      leftGloveData.size(),
+      rightGloveData.size(),
+      cameraKeypointData.size());
 
   // uniformly sample frames for calibration
   const size_t frameStride = computeSampleStride(numFrames, config.calibFrames);
@@ -1117,15 +1321,14 @@ void calibrateModel(
   }
 
   // special trackingConfig for initialization: zero out smoothness and collision
-  TrackingConfig trackingConfig{
-      {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
-      0.0,
-      0.0,
-      1.0f,
-      {},
-      std::nullopt,
-      config.meshConstraintWeight,
-      {}};
+  TrackingConfig trackingConfig;
+  trackingConfig.minVisPercent = config.minVisPercent;
+  trackingConfig.lossAlpha = config.lossAlpha;
+  trackingConfig.maxIter = config.maxIter;
+  trackingConfig.regularization = config.regularization;
+  trackingConfig.debug = config.debug;
+  trackingConfig.meshConstraintWeight = config.meshConstraintWeight;
+  trackingConfig.projectionWeight = config.projectionWeight;
 
   // only keep one motion; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the
@@ -1223,6 +1426,8 @@ void calibrateModel(
     }
   }
 
+  logKeypointReprojectionDiagnostic(character, cameraKeypointData, motion, transform, config);
+
   // Solve everything together for a few iterations
   for (size_t iIter = 0; iIter < config.majorIter; ++iIter) {
     MT_LOGI_IF(config.debug, "Iteration {} of calibration", iIter);
@@ -1242,7 +1447,8 @@ void calibrateModel(
           config.targetHeightCm,
           leftGloveData,
           rightGloveData,
-          gloveConfig); // still solving a subset
+          gloveConfig,
+          cameraKeypointData);
     } else {
       motion = trackSequence(
           markerData,
@@ -1258,7 +1464,8 @@ void calibrateModel(
           config.targetHeightCm,
           leftGloveData,
           rightGloveData,
-          gloveConfig); // still solving a subset
+          gloveConfig,
+          cameraKeypointData);
     }
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
@@ -1314,7 +1521,8 @@ void calibrateModel(
         config.targetHeightCm,
         leftGloveData,
         rightGloveData,
-        gloveConfig);
+        gloveConfig,
+        cameraKeypointData);
   } else {
     motion = trackSequence(
         markerData,
@@ -1330,7 +1538,8 @@ void calibrateModel(
         config.targetHeightCm,
         leftGloveData,
         rightGloveData,
-        gloveConfig);
+        gloveConfig,
+        cameraKeypointData);
   }
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
@@ -1394,15 +1603,13 @@ void calibrateLocators(
   ParameterSet locatorSet = transformExtended.parameterSets.find("locators")->second;
 
   // special trackingConfig for initialization: zero out smoothness and collision
-  TrackingConfig trackingConfig{
-      {config.minVisPercent, config.lossAlpha, config.maxIter, config.regularization, config.debug},
-      0.0,
-      0.0,
-      1.0f,
-      {},
-      std::nullopt,
-      config.meshConstraintWeight,
-      {}};
+  TrackingConfig trackingConfig;
+  trackingConfig.minVisPercent = config.minVisPercent;
+  trackingConfig.lossAlpha = config.lossAlpha;
+  trackingConfig.maxIter = config.maxIter;
+  trackingConfig.regularization = config.regularization;
+  trackingConfig.debug = config.debug;
+  trackingConfig.meshConstraintWeight = config.meshConstraintWeight;
 
   // only keep one motion for both character and solvingCharacter; no need to duplicate.
   // identity information will be initialized and updated in the motion matrix throughout all the

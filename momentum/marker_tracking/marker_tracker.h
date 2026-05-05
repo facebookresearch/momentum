@@ -7,12 +7,35 @@
 
 #pragma once
 
+#include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
 #include <momentum/marker_tracking/glove_utils.h>
 #include <momentum/marker_tracking/marker_gap_fill.h>
 
 namespace momentum {
+
+/// A single 2D keypoint observation from a camera view.
+///
+/// Each observation maps a detected 2D pixel location to a specific locator on the character
+/// skeleton (identified by index into the character's locator list). The confidence score
+/// from the keypoint detector is used as a weight multiplier.
+struct KeypointObservation {
+  size_t locatorIndex{}; ///< Index into the character's locator list
+  Eigen::Vector2f target = Eigen::Vector2f::Zero(); ///< Target 2D pixel coordinates
+  float confidence = 1.0f; ///< Detection confidence, used as weight multiplier
+};
+
+/// Per-camera 2D keypoint data for all frames.
+///
+/// Groups a camera (with intrinsics and extrinsics) together with the 2D keypoint
+/// observations detected in that camera's image stream. The outer vector is indexed
+/// by frame number (matching the marker data indexing), and the inner vector contains
+/// all keypoint observations visible in that frame for this camera.
+struct CameraKeypointData {
+  Camera camera; ///< Camera intrinsics and extrinsics (world-space)
+  std::vector<std::vector<KeypointObservation>> frameData; ///< Per-frame keypoint observations
+};
 
 /// Common configuration for a tracking problem
 struct BaseConfig {
@@ -54,6 +77,8 @@ struct CalibrationConfig : public BaseConfig {
   /// Multiplier for the mesh surface constraint weight on skinned locators during shape
   /// calibration. Higher values pull markers more tightly to the mesh surface. Default 1.0.
   float meshConstraintWeight = 1.0f;
+  /// Base weight for 2D keypoint projection constraints. Set to 0 to disable.
+  float projectionWeight = 0.0f;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -76,6 +101,8 @@ struct TrackingConfig : public BaseConfig {
   /// Multiplier for the mesh surface constraint weight on skinned locators. Higher values pull
   /// skinned locators closer to the mesh surface during the solve. Default 1.0.
   float meshConstraintWeight = 1.0f;
+  /// Base weight for 2D keypoint projection constraints. Default 0 (disabled).
+  float projectionWeight = 0.0f;
   /// Configuration for pre-processing marker gaps before constraint creation.
   /// Fills temporary gaps via cubic Hermite interpolation and blends off permanent
   /// dropouts via linear velocity extrapolation with cosine weight ramp.
@@ -125,7 +152,8 @@ Eigen::MatrixXf trackSequence(
     float targetHeightCm = 0.0f,
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
-    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt,
+    std::span<const CameraKeypointData> cameraKeypointData = {});
 
 /// Use multiple frames to solve for global parameters such as body proportions and/or marker
 /// offsets together with the motion.
@@ -157,7 +185,8 @@ Eigen::MatrixXf trackSequence(
     float targetHeightCm = 0.0f,
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
-    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt,
+    std::span<const CameraKeypointData> cameraKeypointData = {});
 
 /// Track poses per-frame given a calibrated character.
 ///
@@ -225,7 +254,8 @@ void calibrateModel(
     const std::array<float, 3>& regularizerWeights = {0.0f, 0.0f, 0.0f},
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
-    const std::optional<GloveConfig>& gloveConfig = std::nullopt);
+    const std::optional<GloveConfig>& gloveConfig = std::nullopt,
+    std::span<const CameraKeypointData> cameraKeypointData = {});
 
 /// Calibrate locator offsets of a character from input identity and marker data.
 ///
