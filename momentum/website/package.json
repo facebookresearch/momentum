@@ -52,7 +52,8 @@
     "**/svgo": "^3.3.3",
     "**/picomatch": "^2.3.2",
     "**/brace-expansion": ">=1.1.13",
-    "**/yaml": ">=2.8.3"
+    "**/yaml": ">=2.8.3",
+    "**/uuid": ">=14.0.0"
   },
   "browserslist": {
     "production": [
