@@ -467,27 +467,29 @@ double SkinnedLocatorTriangleErrorFunctionT<T>::calculatePositionJacobian(
   }
 
   // IN handle derivatives wrt blend shape parameters:
-  for (int iTriVert = 0; iTriVert < 3; ++iTriVert) {
-    const int vertexIndex = constr.tgtTriangleIndices[iTriVert];
-    const Eigen::Matrix3<T>& d_targetPos_d_vertexPos = d_targetPos_d_tgtTriVertexPos[iTriVert];
+  if (this->character_.blendShape) {
+    const auto& shapeVectors = this->character_.blendShape->getShapeVectors();
+    for (int iTriVert = 0; iTriVert < 3; ++iTriVert) {
+      const int vertexIndex = constr.tgtTriangleIndices[iTriVert];
+      const Eigen::Matrix3<T>& d_targetPos_d_vertexPos = d_targetPos_d_tgtTriVertexPos[iTriVert];
 
-    // loop over blend shape parameters:
-    for (Eigen::Index iBlendShape = 0;
-         iBlendShape < this->parameterTransform_.blendShapeParameters.size();
-         ++iBlendShape) {
-      const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
-      if (paramIdx < 0) {
-        continue;
+      // loop over blend shape parameters:
+      for (Eigen::Index iBlendShape = 0;
+           iBlendShape < this->parameterTransform_.blendShapeParameters.size();
+           ++iBlendShape) {
+        const auto paramIdx = this->parameterTransform_.blendShapeParameters[iBlendShape];
+        if (paramIdx < 0) {
+          continue;
+        }
+
+        const Eigen::Vector3<T> d_restPos =
+            shapeVectors.template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
+                .template cast<T>();
+
+        jac.col(paramIdx) -= wgt * d_targetPos_d_vertexPos * d_restPos;
       }
-
-      const Eigen::Vector3<T> d_restPos =
-          this->character_.blendShape->getShapeVectors()
-              .template block<3, 1>(3 * vertexIndex, iBlendShape, 3, 1)
-              .template cast<T>();
-
-      jac.col(paramIdx) -= wgt * d_targetPos_d_vertexPos * d_restPos;
     }
-  }
+  } // blendShape
   // OUT handle derivatives wrt blend shape parameters:
 
   return wgt * wgt * diff.squaredNorm();
