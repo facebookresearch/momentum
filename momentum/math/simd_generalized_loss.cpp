@@ -100,11 +100,12 @@ Packet<T> SimdGeneralizedLossT<T>::value(const Packet<T>& sqrError) const {
               T(1)) *
           (std::fabs(this->alpha_ - T(2)) / this->alpha_);
     default: {
-      // TODO: returning a default-constructed Packet here may yield uninitialized lanes; consider
-      // returning drjit::zeros<Packet<T>>() or asserting in debug builds so callers don't silently
-      // propagate garbage on a corrupted lossType_.
+      // Unreachable in practice — lossType_ is set in Base's ctor to one of the enumerators above.
+      // Return an explicitly zero-initialized packet (rather than a default-constructed one, which
+      // can leave lanes uninitialized in DrJit) so callers never propagate garbage if the enum is
+      // corrupted via memory damage or future churn.
       MT_LOGE("Invalid lossType_ ({})", static_cast<int>(this->lossType_));
-      return {};
+      return drjit::zeros<Packet<T>>();
     }
   }
 }
@@ -129,9 +130,9 @@ Packet<T> SimdGeneralizedLossT<T>::deriv(const Packet<T>& sqrError) const {
                  L2Loss(sqrError, this->invC2_) / std::fabs(this->alpha_ - T(2)) + T(1),
                  T(0.5) * this->alpha_ - T(1));
     default: {
-      // TODO: see value() — same uninitialized-lane concern on the default branch.
+      // See value() — same explicit zero-initialization to avoid uninitialized lanes.
       MT_LOGE("Invalid lossType_ ({})", static_cast<int>(this->lossType_));
-      return {};
+      return drjit::zeros<Packet<T>>();
     }
   }
 }
