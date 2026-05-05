@@ -72,7 +72,7 @@ PYBIND11_MODULE(marker_tracking, m) {
   auto baseConfig =
       py::class_<momentum::BaseConfig>(m, "BaseConfig", "Represents base config class");
 
-  baseConfig.def(py::init<>())
+  baseConfig
       .def(
           "__repr__",
           [](const momentum::BaseConfig& self) {
@@ -85,14 +85,28 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.debug));
           })
       .def(
-          py::init<float, float, size_t, float, bool>(),
+          py::init([](float minVisPercent,
+                      float lossAlpha,
+                      size_t maxIter,
+                      float regularization,
+                      bool debug) {
+            momentum::BaseConfig cfg;
+            cfg.minVisPercent = minVisPercent;
+            cfg.lossAlpha = lossAlpha;
+            cfg.maxIter = maxIter;
+            cfg.regularization = regularization;
+            cfg.debug = debug;
+            return cfg;
+          }),
           R"(Create a BaseConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
           :param loss_alpha: Parameter to control the loss function
           :param max_iter: Maximum number of iterations
+          :param regularization: Regularization parameter (lambda) for solver
           :param debug: Whether to output debugging info
           )",
+          py::kw_only(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -111,7 +125,7 @@ PYBIND11_MODULE(marker_tracking, m) {
       m, "CalibrationConfig", "Config for the body scale calibration step");
 
   // Default values are set from the configured values in marker_tracker.h
-  calibrationConfig.def(py::init<>())
+  calibrationConfig
       .def(
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
@@ -134,27 +148,47 @@ PYBIND11_MODULE(marker_tracking, m) {
                 self.meshConstraintWeight);
           })
       .def(
-          py::init<
-              float,
-              float,
-              size_t,
-              float,
-              bool,
-              size_t,
-              size_t,
-              bool,
-              bool,
-              size_t,
-              bool,
-              std::string,
-              bool,
-              float,
-              float>(),
+          py::init([](float minVisPercent,
+                      float lossAlpha,
+                      size_t maxIter,
+                      float regularization,
+                      bool debug,
+                      size_t calibFrames,
+                      size_t majorIter,
+                      bool globalScaleOnly,
+                      bool locatorsOnly,
+                      size_t greedySampling,
+                      bool enforceFloorInFirstFrame,
+                      std::string firstFramePoseConstraintSet,
+                      bool calibShape,
+                      float targetHeightCm,
+                      float meshConstraintWeight,
+                      float projectionWeight) {
+            momentum::CalibrationConfig cfg;
+            cfg.minVisPercent = minVisPercent;
+            cfg.lossAlpha = lossAlpha;
+            cfg.maxIter = maxIter;
+            cfg.regularization = regularization;
+            cfg.debug = debug;
+            cfg.calibFrames = calibFrames;
+            cfg.majorIter = majorIter;
+            cfg.globalScaleOnly = globalScaleOnly;
+            cfg.locatorsOnly = locatorsOnly;
+            cfg.greedySampling = greedySampling;
+            cfg.enforceFloorInFirstFrame = enforceFloorInFirstFrame;
+            cfg.firstFramePoseConstraintSet = std::move(firstFramePoseConstraintSet);
+            cfg.calibShape = calibShape;
+            cfg.targetHeightCm = targetHeightCm;
+            cfg.meshConstraintWeight = meshConstraintWeight;
+            cfg.projectionWeight = projectionWeight;
+            return cfg;
+          }),
           R"(Create a CalibrationConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
           :param loss_alpha: Parameter to control the loss function
           :param max_iter: Maximum number of iterations
+          :param regularization: Regularization parameter (lambda) for solver
           :param debug: Whether to output debugging info
           :param calib_frames: Number of frames used for model calibration
           :param major_iter: Number of calibration loops to run
@@ -163,9 +197,12 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param greedy_sampling: Enable greedy frame sampling with the given stride
           :param enforce_floor_in_first_frame: Force floor contact in first frame
           :param first_frame_pose_constraint_set: Name of pose constraint set to use in first frame
+          :param calib_shape: Calibrate shape parameters
           :param target_height_cm: Target height for character in cm.  Defaults to 0 (unspecified).
           :param mesh_constraint_weight: Weight multiplier for mesh surface constraints during calibration.
+          :param projection_weight: Base weight for 2D keypoint projection constraints. Set to 0 to disable.
           )",
+          py::kw_only(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -180,7 +217,8 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("first_frame_pose_constraint_set") = "",
           py::arg("calib_shape") = false,
           py::arg("target_height_cm") = 0.0,
-          py::arg("mesh_constraint_weight") = 1.0f)
+          py::arg("mesh_constraint_weight") = 1.0f,
+          py::arg("projection_weight") = 0.0f)
       .def_readwrite(
           "calib_frames",
           &momentum::CalibrationConfig::calibFrames,
@@ -275,7 +313,7 @@ PYBIND11_MODULE(marker_tracking, m) {
   auto trackingConfig = py::class_<momentum::TrackingConfig, momentum::BaseConfig>(
       m, "TrackingConfig", "Config for the tracking optimization step");
 
-  trackingConfig.def(py::init<>())
+  trackingConfig
       .def(
           "__repr__",
           [](const momentum::TrackingConfig& self) {
@@ -293,7 +331,31 @@ PYBIND11_MODULE(marker_tracking, m) {
                 self.activeParams ? "set" : "None");
           })
       .def(
-          py::init<float, float, size_t, float, bool, float, float, float, Eigen::VectorXf>(),
+          py::init([](float minVisPercent,
+                      float lossAlpha,
+                      size_t maxIter,
+                      float regularization,
+                      bool debug,
+                      float smoothing,
+                      float collisionErrorWeight,
+                      float markerWeight,
+                      Eigen::VectorXf smoothingWeights,
+                      float meshConstraintWeight,
+                      float projectionWeight) {
+            momentum::TrackingConfig cfg;
+            cfg.minVisPercent = minVisPercent;
+            cfg.lossAlpha = lossAlpha;
+            cfg.maxIter = maxIter;
+            cfg.regularization = regularization;
+            cfg.debug = debug;
+            cfg.smoothing = smoothing;
+            cfg.collisionErrorWeight = collisionErrorWeight;
+            cfg.markerWeight = markerWeight;
+            cfg.smoothingWeights = std::move(smoothingWeights);
+            cfg.meshConstraintWeight = meshConstraintWeight;
+            cfg.projectionWeight = projectionWeight;
+            return cfg;
+          }),
           R"(Create a TrackingConfig with specified parameters.
 
           :param min_vis_percent: Minimum percentage of visible markers to be used
@@ -305,7 +367,10 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param collision_error_weight: Collision error weight; 0 to disable
           :param marker_weight: Multiplier for marker position constraint weight; 0 to disable markers
           :param smoothing_weights: Smoothing weights per model parameter
+          :param mesh_constraint_weight: Weight multiplier for mesh surface constraints
+          :param projection_weight: Base weight for 2D keypoint projection constraints. Set to 0 to disable.
           )",
+          py::kw_only(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
@@ -314,7 +379,9 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("smoothing") = 0.0,
           py::arg("collision_error_weight") = 0.0,
           py::arg("marker_weight") = 1.0f,
-          py::arg("smoothing_weights") = Eigen::VectorXf())
+          py::arg("smoothing_weights") = Eigen::VectorXf(),
+          py::arg("mesh_constraint_weight") = 1.0f,
+          py::arg("projection_weight") = 0.0f)
       .def_readwrite(
           "smoothing", &momentum::TrackingConfig::smoothing, "Smoothing weight; 0 to disable")
       .def_readwrite(
@@ -383,7 +450,7 @@ Set to None (default) to use the solver's default parameter set.)")
   auto refineConfig = py::class_<momentum::RefineConfig, momentum::TrackingConfig>(
       m, "RefineConfig", "Config for refining a tracked motion.");
 
-  refineConfig.def(py::init<>())
+  refineConfig
       .def(
           "__repr__",
           [](const momentum::RefineConfig& self) {
@@ -444,6 +511,7 @@ Set to None (default) to use the solver's default parameter set.)")
           :param calib_id: Calibrate identity parameters
           :param calib_locators: Calibrate locator offsets
           )",
+          py::kw_only(),
           py::arg("min_vis_percent") = 0.0,
           py::arg("loss_alpha") = 2.0,
           py::arg("max_iter") = 30,
