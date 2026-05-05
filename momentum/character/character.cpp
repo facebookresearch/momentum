@@ -535,13 +535,12 @@ SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
 
   SkinnedLocatorList result = locs;
 
-  // TODO: sourceBindState and targetBindState are declared but never read in this function.
-  // remapLocators uses them to re-express the locator offset in the new parent frame; the
-  // skinned variant should likely do the equivalent transform on each weighted parent's
-  // contribution, or these declarations should be removed.
-  const SkeletonState sourceBindState(
-      originalCharacter.parameterTransform.bindPose(), originalCharacter.skeleton, false);
-  const SkeletonState targetBindState(parameterTransform.bindPose(), skeleton, false);
+  // Note: unlike remapLocators(), this function does not need the source/target bind states.
+  // A skinned locator stores a single bind-frame offset that is blended across its weighted
+  // parents at evaluation time; it has no per-influence offset to re-express. When collapsed
+  // joints share the same bind transform (the typical case for redundant intermediate joints),
+  // the merged-weight result is unchanged. If callers ever simplify across joints whose bind
+  // transforms differ, the locator offset will need explicit remapping.
 
   for (auto& sl : result) {
     // Translate each parent joint index from the original character to the simplified character.
