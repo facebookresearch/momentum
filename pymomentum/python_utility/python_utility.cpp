@@ -96,7 +96,7 @@ nlohmann::json from_msgpack(const pybind11::bytes& bytes) {
   const auto* data = reinterpret_cast<const uint8_t*>(info.ptr);
   const auto length = static_cast<size_t>(info.size);
 
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.")
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
   return nlohmann::json::from_msgpack(data, data + length);
 }
@@ -118,7 +118,7 @@ PyBytesStreamBuffer::PyBytesStreamBuffer(const pybind11::bytes& bytes) {
   char* data = const_cast<char*>(reinterpret_cast<const char*>(info.ptr));
   const auto length = static_cast<size_t>(info.size);
 
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.")
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
 
   this->setg(data, data, data + length);
 }

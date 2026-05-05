@@ -142,7 +142,7 @@ std::pair<std::vector<std::unique_ptr<TensorErrorFunction<T>>>, std::vector<int>
     // Check whether we have duplicated error function types here:
     MT_THROW_IF(
         errorFunctionMap[typeIndex] != -1,
-        "solveBodyIKProblem(): active_error_functions have duplicate types")
+        "solveBodyIKProblem(): active_error_functions have duplicate types");
     errorFunctionMap[typeIndex] = static_cast<int>(iErr);
   }
 
@@ -557,7 +557,7 @@ variable_list IKProblemAutogradFunction<T, IKFunction>::backward(
     variable_list dLoss_dResults) {
   MT_THROW_IF(
       dLoss_dResults.size() != IKFunction<T>::N_RESULTS,
-      "Invalid grad_outputs in IKProblemAutogradFunction::backward.")
+      "Invalid grad_outputs in IKProblemAutogradFunction::backward.");
 
   const momentum::Mppca* mppca = nullptr;
 #ifndef PYMOMENTUM_LIMITED_TORCH_API
@@ -846,7 +846,7 @@ std::tuple<at::Tensor, at::Tensor, std::vector<at::Tensor>> GradientFunction<T>:
     const std::vector<int>& weightsMap) {
   MT_THROW_IF(
       results.size() != 1 || dLoss_dResults.size() != 1,
-      "Mismatch in length of results list in IKSolveFunction::backward.")
+      "Mismatch in length of results list in IKSolveFunction::backward.");
 
   const at::Tensor& dLoss_dGradient = dLoss_dResults[0];
   return d_computeGradient<T>(

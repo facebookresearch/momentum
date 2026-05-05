@@ -47,7 +47,7 @@ mm::Character withBlendShapeImpl(
     return c.withBlendShape({}, 0);
   }
 
-  MT_THROW_IF(!c.mesh, "Character has no mesh, cannot apply blend shapes.")
+  MT_THROW_IF(!c.mesh, "Character has no mesh, cannot apply blend shapes.");
 
   auto blendShapePtr = blendShape.value();
   MT_THROW_IF(
