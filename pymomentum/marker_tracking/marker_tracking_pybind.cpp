@@ -218,7 +218,11 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "mesh_constraint_weight",
           &momentum::CalibrationConfig::meshConstraintWeight,
-          "Weight multiplier for mesh surface constraints during calibration");
+          "Weight multiplier for mesh surface constraints during calibration")
+      .def_readwrite(
+          "projection_weight",
+          &momentum::CalibrationConfig::projectionWeight,
+          "Base weight for 2D keypoint projection constraints. Set to 0 to disable.");
 
   auto gapFillConfig = py::class_<momentum::GapFillConfig>(
       m, "GapFillConfig", "Config for marker gap filling and dropout blending");
@@ -590,6 +594,68 @@ and orientation of a finger joint in the glove's local coordinate frame.)");
           &momentum::GloveSensorObservation::valid,
           "Whether this observation is valid (False if sensor data is missing/occluded).");
 
+  // Bindings for 2D keypoint projection constraint types
+  auto keypointObservation = py::class_<momentum::KeypointObservation>(
+      m,
+      "KeypointObservation",
+      R"(A single 2D keypoint observation from a camera view.
+
+Each observation maps a detected 2D pixel location to a specific locator on the
+character skeleton. The confidence score is used as a weight multiplier.)");
+
+  keypointObservation.def(py::init<>())
+      .def(
+          py::init([](size_t locatorIndex, const Eigen::Vector2f& target, float confidence) {
+            momentum::KeypointObservation obs;
+            obs.locatorIndex = locatorIndex;
+            obs.target = target;
+            obs.confidence = confidence;
+            return obs;
+          }),
+          py::arg("locator_index"),
+          py::arg("target"),
+          py::arg("confidence") = 1.0f)
+      .def_readwrite(
+          "locator_index",
+          &momentum::KeypointObservation::locatorIndex,
+          "Index into the character's locator list")
+      .def_readwrite(
+          "target", &momentum::KeypointObservation::target, "Target 2D pixel coordinates")
+      .def_readwrite(
+          "confidence",
+          &momentum::KeypointObservation::confidence,
+          "Detection confidence, used as weight multiplier");
+
+  pybind11::module_::import("pymomentum.camera"); // @dep=fbsource//arvr/libraries/pymomentum:camera
+
+  auto cameraKeypointData = py::class_<momentum::CameraKeypointData>(
+      m,
+      "CameraKeypointData",
+      R"(Per-camera 2D keypoint data for all frames.
+
+Groups a camera (with intrinsics and extrinsics) together with per-frame 2D keypoint
+observations detected in that camera's image stream.)");
+
+  cameraKeypointData.def(py::init<>())
+      .def(
+          py::init([](const momentum::Camera& camera,
+                      const std::vector<std::vector<momentum::KeypointObservation>>& frameData) {
+            momentum::CameraKeypointData data;
+            data.camera = camera;
+            data.frameData = frameData;
+            return data;
+          }),
+          py::arg("camera"),
+          py::arg("frame_data"))
+      .def_readwrite(
+          "camera",
+          &momentum::CameraKeypointData::camera,
+          "Camera intrinsics and extrinsics (world-space)")
+      .def_readwrite(
+          "frame_data",
+          &momentum::CameraKeypointData::frameData,
+          "Per-frame keypoint observations: list of list of KeypointObservation");
+
   m.def(
       "process_marker_file",
       &momentum::processMarkerFile,
@@ -612,7 +678,8 @@ and orientation of a finger joint in the glove's local coordinate frame.)");
          size_t maxFrames,
          const std::vector<momentum::GloveFrameData>& leftGloveData,
          const std::vector<momentum::GloveFrameData>& rightGloveData,
-         const std::optional<momentum::GloveConfig>& gloveConfig) {
+         const std::optional<momentum::GloveConfig>& gloveConfig,
+         const std::vector<momentum::CameraKeypointData>& cameraKeypointData) {
         momentum::ModelParameters params(identity);
 
         if (params.size() == 0) { // If no identity is passed in, use default
@@ -628,7 +695,8 @@ and orientation of a finger joint in the glove's local coordinate frame.)");
             maxFrames,
             leftGloveData,
             rightGloveData,
-            gloveConfig);
+            gloveConfig,
+            cameraKeypointData);
 
         // Return the identity parameters (scaling params only)
         // Use .v to get the underlying Eigen::VectorXf from ModelParameters
@@ -650,6 +718,11 @@ When glove data is provided via ``left_glove_data`` / ``right_glove_data`` and a
 This improves locator calibration by providing additional constraint information from the
 data glove sensors.
 
+When ``camera_keypoint_data`` is provided and ``calibration_config.projection_weight > 0``,
+the solver adds 2D reprojection constraints from outside-in cameras. These constraints
+project 3D skeleton locator positions through the camera model and penalize the error
+against detected 2D keypoints.
+
 :param character: Character to be calibrated. Will be modified in-place if locator
     calibration is enabled.
 :param identity: Identity parameters, pass in empty array for default identity.
@@ -662,6 +735,9 @@ data glove sensors.
 :param right_glove_data: Per-frame glove sensor observations for the right hand.
 :param glove_config: Optional :class:`GloveConfig` controlling constraint weights and
     wrist joint names. Must be provided if glove data is non-empty.
+:param camera_keypoint_data: Per-camera 2D keypoint observations for projection constraints.
+    Each element is a :class:`CameraKeypointData` with camera parameters and per-frame
+    keypoint detections.
 :return: Calibrated identity parameters (scaling parameters).)",
       py::arg("character"),
       py::arg("identity"),
@@ -671,7 +747,8 @@ data glove sensors.
       py::arg("max_frames") = 0,
       py::arg("left_glove_data") = std::vector<momentum::GloveFrameData>{},
       py::arg("right_glove_data") = std::vector<momentum::GloveFrameData>{},
-      py::arg("glove_config") = std::nullopt);
+      py::arg("glove_config") = std::nullopt,
+      py::arg("camera_keypoint_data") = std::vector<momentum::CameraKeypointData>{});
 
   m.def(
       "process_markers",
