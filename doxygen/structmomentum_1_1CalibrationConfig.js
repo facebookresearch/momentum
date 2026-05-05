@@ -9,5 +9,6 @@ var structmomentum_1_1CalibrationConfig =
     [ "locatorsOnly", "structmomentum_1_1CalibrationConfig.html#a068c1a609ef7706a7d0736eff65bbd04", null ],
     [ "majorIter", "structmomentum_1_1CalibrationConfig.html#a4458418ebc5673dae39aa10eb9be7151", null ],
     [ "meshConstraintWeight", "structmomentum_1_1CalibrationConfig.html#a1c757ce38e164648cc6c0df434d25247", null ],
+    [ "projectionWeight", "structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78", null ],
     [ "targetHeightCm", "structmomentum_1_1CalibrationConfig.html#a461f629b9c8a31e552d4449a6b1d47cb", null ]
 ];

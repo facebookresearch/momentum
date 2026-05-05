@@ -72,7 +72,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.locators_only"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.locators_only</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.major_iter"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.major_iter</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.mesh_constraint_weight"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.mesh_constraint_weight</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.projection_weight"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.projection_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm"><code class="docutils literal notranslate"><span class="pre">CalibrationConfig.target_height_cm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData"><code class="docutils literal notranslate"><span class="pre">CameraKeypointData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData.__init__"><code class="docutils literal notranslate"><span class="pre">CameraKeypointData.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData.camera"><code class="docutils literal notranslate"><span class="pre">CameraKeypointData.camera</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData.frame_data"><code class="docutils literal notranslate"><span class="pre">CameraKeypointData.frame_data</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.GapFillConfig"><code class="docutils literal notranslate"><span class="pre">GapFillConfig</span></code></a><ul>
@@ -99,6 +106,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.orientation"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.orientation</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.position"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.position</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation.valid"><code class="docutils literal notranslate"><span class="pre">GloveSensorObservation.valid</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.KeypointObservation"><code class="docutils literal notranslate"><span class="pre">KeypointObservation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.KeypointObservation.__init__"><code class="docutils literal notranslate"><span class="pre">KeypointObservation.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.KeypointObservation.confidence"><code class="docutils literal notranslate"><span class="pre">KeypointObservation.confidence</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.KeypointObservation.locator_index"><code class="docutils literal notranslate"><span class="pre">KeypointObservation.locator_index</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.marker_tracking.KeypointObservation.target"><code class="docutils literal notranslate"><span class="pre">KeypointObservation.target</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.marker_tracking.ModelOptions"><code class="docutils literal notranslate"><span class="pre">ModelOptions</span></code></a><ul>
@@ -339,9 +353,46 @@
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.projection_weight">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_weight</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.projection_weight" title="Link to this definition"></a></dt>
+<dd><p>Base weight for 2D keypoint projection constraints. Set to 0 to disable.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.CalibrationConfig.target_height_cm">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target_height_cm</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CalibrationConfig.target_height_cm" title="Link to this definition"></a></dt>
 <dd><p>Target height for the character in cm (0 means no target height specified)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CameraKeypointData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">CameraKeypointData</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CameraKeypointData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Per-camera 2D keypoint data for all frames.</p>
+<p>Groups a camera (with intrinsics and extrinsics) together with per-frame 2D keypoint
+observations detected in that camera’s image stream.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CameraKeypointData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.CameraKeypointData.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.CameraKeypointData) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.CameraKeypointData, camera: pymomentum.camera.Camera, frame_data: list[list[pymomentum.marker_tracking.KeypointObservation]]) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CameraKeypointData.camera">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">camera</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CameraKeypointData.camera" title="Link to this definition"></a></dt>
+<dd><p>Camera intrinsics and extrinsics (world-space)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.CameraKeypointData.frame_data">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_data</span></span><a class="headerlink" href="#pymomentum.marker_tracking.CameraKeypointData.frame_data" title="Link to this definition"></a></dt>
+<dd><p>Per-frame keypoint observations: list of list of KeypointObservation</p>
 </dd></dl>
 
 </dd></dl>
@@ -483,6 +534,43 @@ and orientation of a finger joint in the glove’s local coordinate frame.</p>
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.GloveSensorObservation.valid">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid</span></span><a class="headerlink" href="#pymomentum.marker_tracking.GloveSensorObservation.valid" title="Link to this definition"></a></dt>
 <dd><p>Whether this observation is valid (False if sensor data is missing/occluded).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.KeypointObservation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">KeypointObservation</span></span><a class="headerlink" href="#pymomentum.marker_tracking.KeypointObservation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A single 2D keypoint observation from a camera view.</p>
+<p>Each observation maps a detected 2D pixel location to a specific locator on the
+character skeleton. The confidence score is used as a weight multiplier.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.KeypointObservation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.marker_tracking.KeypointObservation.__init__" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: pymomentum.marker_tracking.KeypointObservation) -&gt; None</p></li>
+<li><p>__init__(self: pymomentum.marker_tracking.KeypointObservation, locator_index: int, target: numpy.ndarray[numpy.float32[2, 1]], confidence: float = 1.0) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.KeypointObservation.confidence">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">confidence</span></span><a class="headerlink" href="#pymomentum.marker_tracking.KeypointObservation.confidence" title="Link to this definition"></a></dt>
+<dd><p>Detection confidence, used as weight multiplier</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.KeypointObservation.locator_index">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">locator_index</span></span><a class="headerlink" href="#pymomentum.marker_tracking.KeypointObservation.locator_index" title="Link to this definition"></a></dt>
+<dd><p>Index into the character’s locator list</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.marker_tracking.KeypointObservation.target">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">target</span></span><a class="headerlink" href="#pymomentum.marker_tracking.KeypointObservation.target" title="Link to this definition"></a></dt>
+<dd><p>Target 2D pixel coordinates</p>
 </dd></dl>
 
 </dd></dl>
@@ -713,7 +801,7 @@ equal to number of model parameters and this overrides the value specific in smo
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.marker_tracking.calibrate_markers">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">calibrate_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glove_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><span class="pre">pymomentum.marker_tracking.GloveConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.calibrate_markers" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.marker_tracking.</span></span><span class="sig-name descname"><span class="pre">calibrate_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Marker" title="pymomentum.geometry.Marker"><span class="pre">pymomentum.geometry.Marker</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.CalibrationConfig" title="pymomentum.marker_tracking.CalibrationConfig"><span class="pre">pymomentum.marker_tracking.CalibrationConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_glove_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.GloveSensorObservation" title="pymomentum.marker_tracking.GloveSensorObservation"><span class="pre">pymomentum.marker_tracking.GloveSensorObservation</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glove_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><span class="pre">pymomentum.marker_tracking.GloveConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_keypoint_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData" title="pymomentum.marker_tracking.CameraKeypointData"><span class="pre">pymomentum.marker_tracking.CameraKeypointData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.marker_tracking.calibrate_markers" title="Link to this definition"></a></dt>
 <dd><p>Calibrate a character model using marker data without running full tracking.</p>
 <p>This function performs only the calibration step (scaling, locator offsets, and optionally
 shape parameters) without running per-frame tracking on all frames. This is useful when you
@@ -726,6 +814,10 @@ the calibrated identity parameters. These can then be used with <a class="refere
 <a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a>, the solver adds glove-to-finger constraints during calibration.
 This improves locator calibration by providing additional constraint information from the
 data glove sensors.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">camera_keypoint_data</span></code> is provided and <code class="docutils literal notranslate"><span class="pre">calibration_config.projection_weight</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>,
+the solver adds 2D reprojection constraints from outside-in cameras. These constraints
+project 3D skeleton locator positions through the camera model and penalize the error
+against detected 2D keypoints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -741,6 +833,9 @@ Each element is a list of <a class="reference internal" href="#pymomentum.marker
 <li><p><strong>right_glove_data</strong> – Per-frame glove sensor observations for the right hand.</p></li>
 <li><p><strong>glove_config</strong> – Optional <a class="reference internal" href="#pymomentum.marker_tracking.GloveConfig" title="pymomentum.marker_tracking.GloveConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">GloveConfig</span></code></a> controlling constraint weights and
 wrist joint names. Must be provided if glove data is non-empty.</p></li>
+<li><p><strong>camera_keypoint_data</strong> – Per-camera 2D keypoint observations for projection constraints.
+Each element is a <a class="reference internal" href="#pymomentum.marker_tracking.CameraKeypointData" title="pymomentum.marker_tracking.CameraKeypointData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraKeypointData</span></code></a> with camera parameters and per-frame
+keypoint detections.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

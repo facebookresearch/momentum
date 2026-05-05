@@ -92,6 +92,7 @@
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -205,11 +206,15 @@
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig.__init__">(pymomentum.marker_tracking.CalibrationConfig method)</a>
 </li>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.CameraKeypointData.__init__">(pymomentum.marker_tracking.CameraKeypointData method)</a>
+</li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.GapFillConfig.__init__">(pymomentum.marker_tracking.GapFillConfig method)</a>
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.__init__">(pymomentum.marker_tracking.GloveConfig method)</a>
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.__init__">(pymomentum.marker_tracking.GloveSensorObservation method)</a>
+</li>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.KeypointObservation.__init__">(pymomentum.marker_tracking.KeypointObservation method)</a>
 </li>
         <li><a href="marker_tracking.html#pymomentum.marker_tracking.ModelOptions.__init__">(pymomentum.marker_tracking.ModelOptions method)</a>
 </li>
@@ -662,6 +667,10 @@
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig">CalibrationConfig (class in pymomentum.marker_tracking)</a>
 </li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.CameraKeypointData.camera">camera (pymomentum.marker_tracking.CameraKeypointData property)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.CameraKeypointData">CameraKeypointData (class in pymomentum.marker_tracking)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.CameraProjectionConstraint">CameraProjectionConstraint (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.CameraProjectionErrorFunction">CameraProjectionErrorFunction (class in pymomentum.solver2)</a>
@@ -754,10 +763,10 @@
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Collision">Collision (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
-      <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.collision_error_weight">collision_error_weight (pymomentum.marker_tracking.TrackingConfig property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.collision_error_weight">collision_error_weight (pymomentum.marker_tracking.TrackingConfig property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Character.collision_geometry">collision_geometry (pymomentum.geometry.Character property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.CollisionErrorFunction">CollisionErrorFunction (class in pymomentum.solver2)</a>
@@ -776,6 +785,8 @@
 
       <ul>
         <li><a href="geometry.html#pymomentum.geometry.Mesh.confidence">(pymomentum.geometry.Mesh property)</a>
+</li>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.KeypointObservation.confidence">(pymomentum.marker_tracking.KeypointObservation property)</a>
 </li>
       </ul></li>
       <li><a href="quaternion.html#pymomentum.quaternion.conjugate">conjugate() (in module pymomentum.quaternion)</a>
@@ -1047,6 +1058,8 @@
 </li>
       </ul></li>
       <li><a href="axel.html#pymomentum.axel.MeshToSdfPadding.fractional">fractional (pymomentum.axel.MeshToSdfPadding property)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.CameraKeypointData.frame_data">frame_data (pymomentum.marker_tracking.CameraKeypointData property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence.frames">frames (pymomentum.geometry.MarkerSequence property)</a>
 </li>
@@ -1357,6 +1370,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.KeypointObservation">KeypointObservation (class in pymomentum.marker_tracking)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1511,6 +1532,8 @@
       <li><a href="torch.html#pymomentum.torch.character.Skeleton.local_trs_to_global_trs">local_trs_to_global_trs() (pymomentum.torch.character.Skeleton method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Locator">Locator (class in pymomentum.geometry)</a>
+</li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.KeypointObservation.locator_index">locator_index (pymomentum.marker_tracking.KeypointObservation property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.locators">locators (pymomentum.geometry.Character property)</a>
 
@@ -2077,6 +2100,8 @@
         <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.projection">(pymomentum.solver2.VertexProjectionConstraint property)</a>
 </li>
       </ul></li>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.CalibrationConfig.projection_weight">projection_weight (pymomentum.marker_tracking.CalibrationConfig property)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.ProjectionConstraint">ProjectionConstraint (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.ProjectionErrorFunction">ProjectionErrorFunction (class in pymomentum.solver2)</a>
@@ -2624,9 +2649,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.TaperedCapsule">TaperedCapsule (class in pymomentum.geometry)</a>
 </li>
-      <li><a href="solver2.html#pymomentum.solver2.CameraProjectionConstraint.target">target (pymomentum.solver2.CameraProjectionConstraint property)</a>
+      <li><a href="marker_tracking.html#pymomentum.marker_tracking.KeypointObservation.target">target (pymomentum.marker_tracking.KeypointObservation property)</a>
 
       <ul>
+        <li><a href="solver2.html#pymomentum.solver2.CameraProjectionConstraint.target">(pymomentum.solver2.CameraProjectionConstraint property)</a>
+</li>
         <li><a href="solver2.html#pymomentum.solver2.DistanceData.target">(pymomentum.solver2.DistanceData property)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.JointToJointOrientationData.target">(pymomentum.solver2.JointToJointOrientationData property)</a>
