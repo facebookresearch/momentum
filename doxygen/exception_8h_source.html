@@ -118,13 +118,13 @@ $(document).ready(function(){initNavTree('exception_8h_source.html',''); initRes
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">   31</a></span><span class="preprocessor">#define MT_THROW(...) MT_THROW_T(::momentum::detail::DefaultException, ##__VA_ARGS__)</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// TODO: Wrap macro body in `do { ... } while (0)` to avoid dangling-else bugs when used</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// inside an `if`/`else` without braces.</span></div>
-<div class="foldopen" id="foldopen00044" data-start="" data-end="">
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">   44</a></span><span class="preprocessor">#define MT_THROW_IF_T(Condition, Exception, ...) \</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">  if (Condition) {                               \</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">    MT_THROW_T(Exception, ##__VA_ARGS__);        \</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">  }</span></div>
+<div class="foldopen" id="foldopen00042" data-start="" data-end="">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="exception_8h.html#a60b753237325b6cc993ef71153931fa1">   42</a></span><span class="preprocessor">#define MT_THROW_IF_T(Condition, Exception, ...) \</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">  do {                                           \</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">    if (Condition) {                             \</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">      MT_THROW_T(Exception, ##__VA_ARGS__);      \</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">    }                                            \</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">  } while (0)</span></div>
 </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
 <div class="foldopen" id="foldopen00055" data-start="" data-end="">
@@ -186,7 +186,7 @@ $(document).ready(function(){initNavTree('exception_8h_source.html',''); initRes
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html">common</a></li><li class="navelem"><a class="el" href="exception_8h.html">exception.h</a></li>
-    <li class="footer">Generated on Wed May 6 2026 00:23:28 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed May 6 2026 19:49:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
