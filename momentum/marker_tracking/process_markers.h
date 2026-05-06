@@ -32,6 +32,8 @@ namespace momentum {
 /// of trimming markerData to avoid data copy.
 /// @param[in] maxFrames The maximum number of frames to use for calibration starting from
 /// firstFrame.
+/// @param[out] selectedFrameIndices If non-null, receives the frame indices selected by greedy
+/// sampling for calibration (relative to the firstFrame-trimmed input).
 void calibrateMarkers(
     momentum::Character& character,
     momentum::ModelParameters& identity,
@@ -42,7 +44,9 @@ void calibrateMarkers(
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
     const std::optional<GloveConfig>& gloveConfig = std::nullopt,
-    std::span<const CameraKeypointData> cameraKeypointData = {});
+    std::span<const CameraKeypointData> cameraKeypointData = {},
+    std::vector<size_t>* selectedFrameIndices = nullptr,
+    Eigen::MatrixXf* selectedFrameMotion = nullptr);
 
 /// Processes marker data for a character model.
 ///

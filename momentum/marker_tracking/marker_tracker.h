@@ -246,6 +246,10 @@ Eigen::MatrixXf trackPosesForFrames(
 /// stage 0, 0 or low regularization weight to allow a large change; in stage 1, a small
 /// regularization weight to prevent too large of a change; in stage 2, a higher regularization
 /// weight to prevent large changes.
+/// @param[out] selectedFrameIndices If non-null, receives the frame indices selected by greedy
+/// sampling for calibration.
+/// @param[out] selectedFrameMotion If non-null, receives the solved motion parameters for the
+/// selected calibration frames. Each column corresponds to an entry in selectedFrameIndices.
 void calibrateModel(
     std::span<const std::vector<momentum::Marker>> markerData,
     const CalibrationConfig& config,
@@ -255,7 +259,9 @@ void calibrateModel(
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
     const std::optional<GloveConfig>& gloveConfig = std::nullopt,
-    std::span<const CameraKeypointData> cameraKeypointData = {});
+    std::span<const CameraKeypointData> cameraKeypointData = {},
+    std::vector<size_t>* selectedFrameIndices = nullptr,
+    Eigen::MatrixXf* selectedFrameMotion = nullptr);
 
 /// Calibrate locator offsets of a character from input identity and marker data.
 ///

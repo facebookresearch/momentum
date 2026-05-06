@@ -190,7 +190,7 @@ class TestMarkerTracker(unittest.TestCase):
             marker_data.append(markers)
 
         # Run calibration only (no tracking)
-        calibrated_identity = calibrate_markers(
+        calibrated_identity, selected_frames, selected_motion = calibrate_markers(
             character, identity, marker_data, calibration_config
         )
 
@@ -198,6 +198,12 @@ class TestMarkerTracker(unittest.TestCase):
         self.assertEqual(
             calibrated_identity.shape[0], character.parameter_transform.size
         )
+
+        # Check that selected frame indices and motion are valid
+        self.assertGreater(len(selected_frames), 0)
+        self.assertTrue(all(f < num_frames for f in selected_frames))
+        self.assertEqual(selected_motion.shape[1], len(selected_frames))
+        self.assertEqual(selected_motion.shape[0], character.parameter_transform.size)
 
         # Verify we can use the calibrated identity with process_markers
         tracking_config = TrackingConfig()

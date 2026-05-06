@@ -747,13 +747,16 @@ observations detected in that camera's image stream.)");
          const std::vector<momentum::GloveFrameData>& leftGloveData,
          const std::vector<momentum::GloveFrameData>& rightGloveData,
          const std::optional<momentum::GloveConfig>& gloveConfig,
-         const std::vector<momentum::CameraKeypointData>& cameraKeypointData) {
+         const std::vector<momentum::CameraKeypointData>& cameraKeypointData)
+          -> std::tuple<Eigen::VectorXf, std::vector<size_t>, Eigen::MatrixXf> {
         momentum::ModelParameters params(identity);
 
         if (params.size() == 0) { // If no identity is passed in, use default
           params = momentum::ModelParameters::Zero(character.parameterTransform.name.size());
         }
 
+        std::vector<size_t> selectedFrames;
+        Eigen::MatrixXf selectedMotion;
         momentum::calibrateMarkers(
             character,
             params,
@@ -764,11 +767,11 @@ observations detected in that camera's image stream.)");
             leftGloveData,
             rightGloveData,
             gloveConfig,
-            cameraKeypointData);
+            cameraKeypointData,
+            &selectedFrames,
+            &selectedMotion);
 
-        // Return the identity parameters (scaling params only)
-        // Use .v to get the underlying Eigen::VectorXf from ModelParameters
-        return params.v;
+        return {params.v, selectedFrames, selectedMotion};
       },
       R"(Calibrate a character model using marker data without running full tracking.
 
@@ -806,7 +809,12 @@ against detected 2D keypoints.
 :param camera_keypoint_data: Per-camera 2D keypoint observations for projection constraints.
     Each element is a :class:`CameraKeypointData` with camera parameters and per-frame
     keypoint detections.
-:return: Calibrated identity parameters (scaling parameters).)",
+:return: A tuple of ``(identity_params, selected_frame_indices, selected_frame_motion)`` where
+    ``identity_params`` is the calibrated identity parameter vector,
+    ``selected_frame_indices`` is a list of frame indices that were selected
+    by greedy sampling for calibration, and ``selected_frame_motion`` is a
+    matrix of shape ``(num_params, num_selected_frames)`` with the solved
+    model parameters for each selected frame.)",
       py::arg("character"),
       py::arg("identity"),
       py::arg("marker_data"),
