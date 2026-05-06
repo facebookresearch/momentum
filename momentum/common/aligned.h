@@ -120,8 +120,11 @@ template <typename T, std::size_t Alignment = alignof(T)>
 [[nodiscard]] T* alignedAlloc(std::size_t n) {
   MT_THROW_IF_T(std::numeric_limits<std::size_t>::max() / sizeof(T) < n, std::bad_array_new_length);
 
-  const std::size_t size = roundUpToAlignment(n * sizeof(T), Alignment);
-  void* ptr = aligned_malloc(size, Alignment);
+  // C/POSIX aligned allocation APIs require at least pointer-sized alignment.
+  constexpr std::size_t kAllocationAlignment =
+      Alignment < alignof(void*) ? alignof(void*) : Alignment;
+  const std::size_t size = roundUpToAlignment(n * sizeof(T), kAllocationAlignment);
+  void* ptr = aligned_malloc(size, kAllocationAlignment);
 
   MT_THROW_IF_T(ptr == nullptr, std::bad_alloc);
 
