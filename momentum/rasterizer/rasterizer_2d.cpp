@@ -78,7 +78,7 @@ inline void rasterizeOneLine2D(
         drjit::scatter(rgbBufferOffset, rgbValuesFinal, scatterIndices);
       }
 
-      // Write zeros to z-buffer for alpha matting
+      // Write zeros to z-buffer to place 2D graphics in image plane (depth=0) for alpha matting
       if (zBufferPtr != nullptr) {
         const auto blockOffset = y * rowStride + xOffset;
         const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
@@ -141,7 +141,7 @@ inline void rasterizeOneCircle2D(
         drjit::scatter(rgbBufferOffset, rgbValuesFinal, scatterIndices);
       }
 
-      // Write zeros to z-buffer for alpha matting
+      // Write zeros to z-buffer to place 2D graphics in image plane (depth=0) for alpha matting
       if (zBufferPtr != nullptr) {
         const auto blockOffset = y * rowStride + xOffset;
         const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);

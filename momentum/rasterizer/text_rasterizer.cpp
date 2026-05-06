@@ -264,6 +264,7 @@ const struct {
 
 bool getPixelFromBitmap(uint32_t x, uint32_t y) {
   const size_t pixelIndex = y * kTextureWidth + x;
+  // Bitmap stores 8 pixels per byte; unpack bit at bitIndex from the appropriate byte
   const size_t byteIndex = pixelIndex / 8;
   const size_t bitIndex = pixelIndex - byteIndex * 8;
   return ((fontPixmap.pixelData[byteIndex] & (static_cast<uint8_t>(1) << bitIndex)) != 0);

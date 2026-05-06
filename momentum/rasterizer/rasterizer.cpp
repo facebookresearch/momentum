@@ -334,7 +334,8 @@ void rasterizeLinesImp(
     auto endBehindMask = lineEnd_eye.z() < nearClip;
     auto crossesNearPlaneMask = startBehindMask ^ endBehindMask; // XOR for "not equal"
 
-    // Only process if any lines cross the near plane
+    // Clip lines that cross near plane: interpolate intersection point
+    // Only update the endpoint that's behind the camera
     if (drjit::any(crossesNearPlaneMask)) {
       // Calculate intersection parameter (t) for all lines in batch
       auto t = (nearClip - lineStart_eye.z()) / (lineEnd_eye.z() - lineStart_eye.z());

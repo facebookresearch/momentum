@@ -78,8 +78,6 @@ Mesh mergeMeshes(const std::initializer_list<Mesh>& meshes) {
 }
 
 Mesh makeSphere(int subdivisionLevel) {
-  // Use subdivision level to determine resolution
-  // Higher subdivision level = more subdivisions
   const int numAzimuthSubdivisions = std::max(8, 4 * (1 << subdivisionLevel));
   const int numPolarSubdivisions = std::max(4, 2 * (1 << subdivisionLevel));
 
@@ -112,8 +110,8 @@ Mesh makeSphere(int subdivisionLevel) {
       const auto cosAzimuth = azimuthPoints.at(iAzimuth).x();
       const auto sinAzimuth = azimuthPoints.at(iAzimuth).y();
 
-      // Spherical coordinates: x = sin(polar) * cos(azimuth), y = sin(polar) * sin(azimuth), z =
-      // cos(polar)
+      // Spherical coordinates: x = sin(θ) * cos(φ), y = sin(θ) * sin(φ), z = cos(θ)
+      // where θ = polar angle, φ = azimuth angle
       Eigen::Vector3f pos(sinPolar * cosAzimuth, sinPolar * sinAzimuth, cosPolar);
       mesh.vertices.push_back(pos);
       mesh.normals.push_back(pos.normalized());

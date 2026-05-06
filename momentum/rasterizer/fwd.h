@@ -14,6 +14,10 @@
 
 namespace momentum::rasterizer {
 
+/// Re-exported camera types from momentum namespace
+/// @note Provided for backward compatibility with code that expects these types in the rasterizer
+/// namespace
+
 // Re-export camera types from momentum namespace for backward compatibility
 using momentum::Camera;
 using momentum::Camerad;
@@ -32,8 +36,8 @@ using momentum::FloatP;
 using momentum::IntP;
 using momentum::UintP;
 
-// DrJit-based scalar vector/matrix types used internally by rasterizer.
-// These are distinct from the Eigen-based types in momentum namespace.
+/// DrJit-based scalar vector/matrix types used internally by rasterizer
+/// @note DrJit types support SIMD operations, unlike Eigen-based momentum types
 using Vector2f = drjit::Array<float, 2>;
 using Vector2d = drjit::Array<double, 2>;
 using Vector3f = drjit::Array<float, 3>;
