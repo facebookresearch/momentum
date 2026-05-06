@@ -39,12 +39,12 @@
 ///   MT_THROW_IF_T(x > y, std::out_of_range, "x ({}) is greater than y ({})", x, y);
 ///   MT_THROW_IF_T(x > y, std::bad_array_new_length); // No message
 /// @endcode
-// TODO: Wrap macro body in `do { ... } while (0)` to avoid dangling-else bugs when used
-// inside an `if`/`else` without braces.
 #define MT_THROW_IF_T(Condition, Exception, ...) \
-  if (Condition) {                               \
-    MT_THROW_T(Exception, ##__VA_ARGS__);        \
-  }
+  do {                                           \
+    if (Condition) {                             \
+      MT_THROW_T(Exception, ##__VA_ARGS__);      \
+    }                                            \
+  } while (0)
 
 /// Conditionally throws a std::runtime_error with a formatted message if the condition is true.
 /// @param Condition The condition to evaluate.
