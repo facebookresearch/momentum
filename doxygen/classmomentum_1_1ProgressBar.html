@@ -157,9 +157,14 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section pre"><dt>Precondition</dt><dd><code>prefix.size() + 9 &lt; kMaxWidth</code>, otherwise the computed bar width underflows <code>size_t</code>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if <code>prefix.size() + 9 &gt;= kMaxWidth</code>, since the bar width would otherwise underflow <code>size_t</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00012">12</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00015">15</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -182,7 +187,7 @@ Public Member Functions</h2></td></tr>
 <p>Returns the current absolute progress count (not a percentage). </p>
 <p>The value is in the range [0, numOperations] as supplied to the constructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00037">37</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00050">50</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -204,7 +209,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Advances progress by <code>count</code> (default 1) and redraws the bar. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00029">29</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00042">42</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -226,7 +231,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Sets progress to the absolute value <code>count</code> and redraws the bar. </p>
 
-<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00033">33</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="progress__bar_8cpp_source.html#l00046">46</a> of file <a class="el" href="progress__bar_8cpp_source.html">progress_bar.cpp</a>.</p>
 
 </div>
 </div>
@@ -240,7 +245,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ProgressBar.html">ProgressBar</a></li>
-    <li class="footer">Generated on Wed May 6 2026 19:49:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed May 6 2026 22:40:14 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
