@@ -10,9 +10,9 @@
 import unittest
 
 import numpy as np
-import pymomentum.axel as axel
-import pymomentum.geometry as pym_geometry
-import pymomentum.geometry_test_utils as pym_test_utils
+import pymomentum.axel as axel  # @manual=:axel
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.torch.character as character
 import torch
