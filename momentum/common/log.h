@@ -63,10 +63,6 @@
 
 #include <atomic>
 
-// TODO: The MT_LOG*_IF macros below expand to a bare `if (condition) { ... }`. When used inside an
-// unbraced `if`/`else` chain at the call site, this can change control flow (dangling-else) or
-// silently swallow a following `else`. Wrap in `do { ... } while (0)` for hygienic expansion.
-
 /// @{
 /// Log a message at the corresponding severity (T=Trace, D=Debug, I=Info, W=Warning, E=Error).
 /// Forwards to spdlog with fmt-style formatting.
@@ -80,38 +76,44 @@
 /// @{
 /// Log only if `condition` evaluates to true at runtime.
 #define MT_LOGT_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGT(__VA_ARGS__);          \
-  }
+  do {                             \
+    if (condition) {               \
+      MT_LOGT(__VA_ARGS__);        \
+    }                              \
+  } while (0)
 #define MT_LOGD_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGD(__VA_ARGS__);          \
-  }
+  do {                             \
+    if (condition) {               \
+      MT_LOGD(__VA_ARGS__);        \
+    }                              \
+  } while (0)
 #define MT_LOGI_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGI(__VA_ARGS__);          \
-  }
+  do {                             \
+    if (condition) {               \
+      MT_LOGI(__VA_ARGS__);        \
+    }                              \
+  } while (0)
 #define MT_LOGW_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGW(__VA_ARGS__);          \
-  }
+  do {                             \
+    if (condition) {               \
+      MT_LOGW(__VA_ARGS__);        \
+    }                              \
+  } while (0)
 #define MT_LOGE_IF(condition, ...) \
-  if (condition) {                 \
-    MT_LOGE(__VA_ARGS__);          \
-  }
+  do {                             \
+    if (condition) {               \
+      MT_LOGE(__VA_ARGS__);        \
+    }                              \
+  } while (0)
 /// @}
-
-// TODO: The leading underscore in `_MT_RUN_ONCE` puts the identifier in a name reserved by the
-// C++ standard at file scope (any identifier with a leading underscore in the global namespace).
-// Rename to e.g. `MT_RUN_ONCE_DETAIL` or `MT_DETAIL_RUN_ONCE`.
 
 /// Execute `runcode` at most once per process lifetime.
 ///
 /// Implementation uses an atomic compare-exchange so concurrent first reaches are serialized;
 /// `runcode` runs exactly once even under contention. Subsequent calls become a single relaxed
 /// atomic load.
-#define _MT_RUN_ONCE(runcode)                                \
-  {                                                          \
+#define MT_DETAIL_RUN_ONCE(runcode)                          \
+  do {                                                       \
     static std::atomic<bool> codeRan(false);                 \
     if (!codeRan) {                                          \
       bool expected = false;                                 \
@@ -119,15 +121,15 @@
         runcode;                                             \
       }                                                      \
     }                                                        \
-  }
+  } while (0)
 
 /// @{
 /// Log at most once per process lifetime, regardless of how often the call site is reached.
-#define MT_LOGT_ONCE(...) _MT_RUN_ONCE(MT_LOGT(__VA_ARGS__))
-#define MT_LOGD_ONCE(...) _MT_RUN_ONCE(MT_LOGD(__VA_ARGS__))
-#define MT_LOGI_ONCE(...) _MT_RUN_ONCE(MT_LOGI(__VA_ARGS__))
-#define MT_LOGW_ONCE(...) _MT_RUN_ONCE(MT_LOGW(__VA_ARGS__))
-#define MT_LOGE_ONCE(...) _MT_RUN_ONCE(MT_LOGE(__VA_ARGS__))
+#define MT_LOGT_ONCE(...) MT_DETAIL_RUN_ONCE(MT_LOGT(__VA_ARGS__))
+#define MT_LOGD_ONCE(...) MT_DETAIL_RUN_ONCE(MT_LOGD(__VA_ARGS__))
+#define MT_LOGI_ONCE(...) MT_DETAIL_RUN_ONCE(MT_LOGI(__VA_ARGS__))
+#define MT_LOGW_ONCE(...) MT_DETAIL_RUN_ONCE(MT_LOGW(__VA_ARGS__))
+#define MT_LOGE_ONCE(...) MT_DETAIL_RUN_ONCE(MT_LOGE(__VA_ARGS__))
 /// @}
 
 /// @{
@@ -136,25 +138,35 @@
 /// @note The "once" latch is set on the first reach where `condition` is true; reaches where the
 /// condition is false do not consume the latch.
 #define MT_LOGT_ONCE_IF(condition, ...) \
-  if (condition) {                      \
-    MT_LOGT_ONCE(__VA_ARGS__);          \
-  }
+  do {                                  \
+    if (condition) {                    \
+      MT_LOGT_ONCE(__VA_ARGS__);        \
+    }                                   \
+  } while (0)
 #define MT_LOGD_ONCE_IF(condition, ...) \
-  if (condition) {                      \
-    MT_LOGD_ONCE(__VA_ARGS__);          \
-  }
+  do {                                  \
+    if (condition) {                    \
+      MT_LOGD_ONCE(__VA_ARGS__);        \
+    }                                   \
+  } while (0)
 #define MT_LOGI_ONCE_IF(condition, ...) \
-  if (condition) {                      \
-    MT_LOGI_ONCE(__VA_ARGS__);          \
-  }
+  do {                                  \
+    if (condition) {                    \
+      MT_LOGI_ONCE(__VA_ARGS__);        \
+    }                                   \
+  } while (0)
 #define MT_LOGW_ONCE_IF(condition, ...) \
-  if (condition) {                      \
-    MT_LOGW_ONCE(__VA_ARGS__);          \
-  }
+  do {                                  \
+    if (condition) {                    \
+      MT_LOGW_ONCE(__VA_ARGS__);        \
+    }                                   \
+  } while (0)
 #define MT_LOGE_ONCE_IF(condition, ...) \
-  if (condition) {                      \
-    MT_LOGE_ONCE(__VA_ARGS__);          \
-  }
+  do {                                  \
+    if (condition) {                    \
+      MT_LOGE_ONCE(__VA_ARGS__);        \
+    }                                   \
+  } while (0)
 /// @}
 
 #else
