@@ -299,18 +299,9 @@ mt_python_binding(
   MODULE_NAME axel
   PYMOMENTUM_HEADERS_VARS axel_public_headers
   PYMOMENTUM_SOURCES_VARS axel_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
     axel
     python_utility
-    tensor_utility
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
 )
 
 mt_python_binding(
@@ -323,20 +314,18 @@ mt_python_binding(
     fmt::fmt-header-only
 )
 
-if(MOMENTUM_BUILD_RENDERER)
-  mt_python_binding(
-    NAME renderer
-    PYMOMENTUM_HEADERS_VARS renderer_public_headers
-    PYMOMENTUM_SOURCES_VARS renderer_sources
-    LINK_LIBRARIES
-      array_utility
-      character
-      common
-      math
-      rasterizer
-      skeleton
-  )
-endif()
+mt_python_binding(
+  NAME renderer
+  PYMOMENTUM_HEADERS_VARS renderer_public_headers
+  PYMOMENTUM_SOURCES_VARS renderer_sources
+  LINK_LIBRARIES
+    array_utility
+    character
+    common
+    math
+    rasterizer
+    skeleton
+)
 
 mt_python_library(
   NAME quaternion

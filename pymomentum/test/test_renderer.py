@@ -9,7 +9,6 @@ import sys
 import unittest
 
 import numpy as np
-import torch  # isort: skip  # Must be imported before pymomentum C++ extensions
 import pymomentum.camera as pym_camera  # @manual=:camera
 import pymomentum.renderer as pym_renderer  # @manual=:renderer
 from numpy.typing import NDArray
@@ -264,8 +263,8 @@ class TestRendering(unittest.TestCase):
     def _rasterize_quad(
         self,
         camera: pym_camera.Camera,
-        texture_coordinates: torch.Tensor | None = None,
-        texture_triangles: torch.Tensor | None = None,
+        texture_coordinates: NDArray[np.float32] | None = None,
+        texture_triangles: NDArray[np.int32] | None = None,
     ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """Rasterize a large front-facing quad and return (z_buffer, rgb_buffer).
 
@@ -280,14 +279,6 @@ class TestRendering(unittest.TestCase):
         )
         triangles = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int32)
 
-        # Convert optional torch texture args to numpy if provided
-        tex_coords_np = (
-            texture_coordinates.numpy() if texture_coordinates is not None else None
-        )
-        tex_tris_np = (
-            texture_triangles.numpy() if texture_triangles is not None else None
-        )
-
         z_buffer = pym_renderer.create_z_buffer(camera)
         rgb_buffer = pym_renderer.create_rgb_buffer(camera)
         pym_renderer.rasterize_mesh(
@@ -297,8 +288,8 @@ class TestRendering(unittest.TestCase):
             camera,
             z_buffer,
             rgb_buffer,
-            texture_coordinates=tex_coords_np,
-            texture_triangles=tex_tris_np,
+            texture_coordinates=texture_coordinates,
+            texture_triangles=texture_triangles,
             back_face_culling=False,
         )
         return z_buffer, rgb_buffer
@@ -321,7 +312,7 @@ class TestRendering(unittest.TestCase):
         )
 
         # 4 texture coordinates — same count as 4 quad vertices.
-        tex_coords = torch.tensor([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=torch.float32)
+        tex_coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=np.float32)
 
         # Render WITHOUT texture coordinates as a baseline.
         z_no_tex, rgb_no_tex = self._rasterize_quad(camera)
@@ -378,8 +369,8 @@ class TestRendering(unittest.TestCase):
 
         # 3 texture coordinates — fewer than 4 quad vertices. Use
         # texture_triangles to index into these coordinates independently.
-        tex_coords = torch.tensor([[0, 0], [1, 0], [0.5, 1]], dtype=torch.float32)
-        tex_triangles = torch.tensor([[0, 1, 2], [0, 2, 1]], dtype=torch.int32)
+        tex_coords = np.array([[0, 0], [1, 0], [0.5, 1]], dtype=np.float32)
+        tex_triangles = np.array([[0, 1, 2], [0, 2, 1]], dtype=np.int32)
 
         # Render WITHOUT texture coordinates as a baseline.
         z_no_tex, rgb_no_tex = self._rasterize_quad(camera)
