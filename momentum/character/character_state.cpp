@@ -114,8 +114,14 @@ void CharacterStateT<T>::set(
 
       meshState->updateNormals();
     } else if (referenceCharacter.blendShape) {
-      // skinWithBlendShapes() is only defined for `Character` (i.e., CharacterT<float>),
-      // so the double-precision instantiation has to materialize a float Character to call it.
+      // skinWithBlendShapes() is only defined for `Character` (i.e., CharacterT<float>), so the
+      // double-precision instantiation must materialize a float Character to call it. Every
+      // CharacterT<T> member is itself non-templated (skeleton, parameterTransform, mesh,
+      // skinWeights, inverseBindPose are all stored as float types regardless of T), so the
+      // temporary built below is bit-equivalent to the source — no float<->double conversion is
+      // needed. The cost is the per-call deep copies the constructor performs for `mesh`,
+      // `skinWeights`, `collision`, and `poseShapes`; that overhead could be avoided by
+      // templating `skinWithBlendShapes` on the character type if it ever shows up in profiles.
       if constexpr (std::is_same_v<T, float>) {
         skinWithBlendShapes(
             static_cast<const Character&>(referenceCharacter),
@@ -123,11 +129,6 @@ void CharacterStateT<T>::set(
             parameters.pose,
             *meshState);
       } else {
-        // TODO: This temporary Character is constructed by shallow-copying member pointers
-        // from a CharacterT<double>. Members that differ between float/double specializations
-        // (e.g., `inverseBindPose`) are passed across without conversion, which can produce
-        // subtly wrong skinning. Consider providing a proper float<->double conversion or
-        // a templated skinWithBlendShapes overload.
         Character tempCharacter(
             referenceCharacter.skeleton,
             referenceCharacter.parameterTransform,
