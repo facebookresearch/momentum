@@ -80,7 +80,9 @@ void calibrateMarkers(
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
     const std::optional<GloveConfig>& gloveConfig,
-    std::span<const CameraKeypointData> cameraKeypointData) {
+    std::span<const CameraKeypointData> cameraKeypointData,
+    std::vector<size_t>* selectedFrameIndices,
+    Eigen::MatrixXf* selectedFrameMotion) {
   MT_THROW_IF(
       firstFrame > markerData.size(),
       "First frame {} can't exceed total frames {}",
@@ -125,7 +127,9 @@ void calibrateMarkers(
         leftGloveSlice,
         rightGloveSlice,
         gloveConfig,
-        slicedKeypointData);
+        slicedKeypointData,
+        selectedFrameIndices,
+        selectedFrameMotion);
   }
 }
 

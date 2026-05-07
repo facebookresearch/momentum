@@ -1139,15 +1139,34 @@ void logKeypointObservationSummary(
       projectionWeight);
 }
 
+} // namespace
+
+Character addSkinnedLocatorParametersToTransform(Character character) {
+  if (character.skinnedLocators.empty()) {
+    return character;
+  }
+
+  std::vector<bool> activeSkinnedLocators(character.skinnedLocators.size(), true);
+  std::vector<std::string> locatorNames;
+  for (const auto& sl : character.skinnedLocators) {
+    locatorNames.push_back(sl.name);
+  }
+  std::tie(character.parameterTransform, character.parameterLimits) = addSkinnedLocatorParameters(
+      character.parameterTransform, character.parameterLimits, activeSkinnedLocators, locatorNames);
+  return character;
+}
+
 void logKeypointReprojectionDiagnostic(
     const Character& character,
-    std::span<const CameraKeypointData> cameraKeypointData,
-    const Eigen::MatrixXf& motion,
     const ParameterTransform& transform,
-    const CalibrationConfig& config) {
+    const Eigen::MatrixXf& motion,
+    std::span<const CameraKeypointData> cameraKeypointData,
+    const CalibrationConfig& config,
+    const std::string& label) {
   if (!config.debug || cameraKeypointData.empty() || config.projectionWeight <= 0.0f) {
     return;
   }
+
   const size_t diagFrame = 0;
   SkeletonState skelState;
   skelState.set(
@@ -1155,7 +1174,7 @@ void logKeypointReprojectionDiagnostic(
           ModelParameters(motion.col(diagFrame).head(transform.numAllModelParameters()))),
       character.skeleton);
 
-  MT_LOGI("=== Keypoint reprojection diagnostic (frame {}, after Stage 0) ===", diagFrame);
+  MT_LOGI("=== Keypoint reprojection diagnostic (frame {}, {}) ===", diagFrame, label);
   for (size_t iCam = 0; iCam < cameraKeypointData.size(); ++iCam) {
     const auto& camData = cameraKeypointData[iCam];
     if (diagFrame >= camData.frameData.size() || camData.frameData[diagFrame].empty()) {
@@ -1209,23 +1228,6 @@ void logKeypointReprojectionDiagnostic(
   }
 }
 
-} // namespace
-
-Character addSkinnedLocatorParametersToTransform(Character character) {
-  if (character.skinnedLocators.empty()) {
-    return character;
-  }
-
-  std::vector<bool> activeSkinnedLocators(character.skinnedLocators.size(), true);
-  std::vector<std::string> locatorNames;
-  for (const auto& sl : character.skinnedLocators) {
-    locatorNames.push_back(sl.name);
-  }
-  std::tie(character.parameterTransform, character.parameterLimits) = addSkinnedLocatorParameters(
-      character.parameterTransform, character.parameterLimits, activeSkinnedLocators, locatorNames);
-  return character;
-}
-
 void calibrateModel(
     const std::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
@@ -1235,7 +1237,9 @@ void calibrateModel(
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
     const std::optional<GloveConfig>& gloveConfig,
-    std::span<const CameraKeypointData> cameraKeypointData) {
+    std::span<const CameraKeypointData> cameraKeypointData,
+    std::vector<size_t>* selectedFrameIndices,
+    Eigen::MatrixXf* selectedFrameMotion) {
   const size_t numFrames = markerData.size();
   MT_THROW_IF(numFrames < 2, "Calibration requires at least 2 frames, got {}.", numFrames);
   MT_THROW_IF(
@@ -1389,84 +1393,58 @@ void calibrateModel(
           sampleStride,
           config.calibFrames);
 
-      // then solve for identity and poses with fixed locators, initialized with solved poses
-      // this works using "character" because additional parameters for the locators are appended at
-      // the end, so the indices work out using topRows() without special treatment.
-      motion.topRows(transform.numAllModelParameters()) = trackSequence(
-          markerData,
-          character,
-          calibBodySet, // only solve for identity and not markers
-          motion.topRows(transform.numAllModelParameters()),
-          trackingConfig,
-          frameIndices,
-          regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
-                                    // or low regularization weight
-          config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet,
-          config.targetHeightCm);
     } else {
       motion.topRows(transform.numAllModelParameters()) =
           trackPosesPerframe(markerData, character, identity, trackingConfig, frameStride);
 
-      // then solve for identity and poses with fixed locators, initialized with solved poses
-      // this works using "character" because additional parameters for the locators are appended at
-      // the end, so the indices work out using topRows() without special treatment.
-      motion.topRows(transform.numAllModelParameters()) = trackSequence(
-          markerData,
-          character,
-          calibBodySet, // only solve for identity and not markers
-          motion.topRows(transform.numAllModelParameters()),
-          trackingConfig,
-          regularizerWeights.at(0), // note: ideally allow large change at initialization with 0
-                                    // or low regularization weight
-          frameStride,
-          config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet,
-          config.targetHeightCm);
+      // Build uniform-stride frame indices.
+      for (size_t i = 0; i < numFrames; i += frameStride) {
+        frameIndices.push_back(i);
+      }
     }
+
+    // Solve for identity and poses with fixed locators, initialized with solved poses.
+    // This works using "character" because additional parameters for the locators are appended at
+    // the end, so the indices work out using topRows() without special treatment.
+    motion.topRows(transform.numAllModelParameters()) = trackSequence(
+        markerData,
+        character,
+        calibBodySet,
+        motion.topRows(transform.numAllModelParameters()),
+        trackingConfig,
+        frameIndices,
+        regularizerWeights.at(0),
+        config.enforceFloorInFirstFrame,
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm);
   }
 
-  logKeypointReprojectionDiagnostic(character, cameraKeypointData, motion, transform, config);
+  if (selectedFrameIndices != nullptr) {
+    *selectedFrameIndices = frameIndices;
+  }
+
+  logKeypointReprojectionDiagnostic(
+      character, transform, motion, cameraKeypointData, config, "after Stage 0");
 
   // Solve everything together for a few iterations
   for (size_t iIter = 0; iIter < config.majorIter; ++iIter) {
     MT_LOGI_IF(config.debug, "Iteration {} of calibration", iIter);
 
-    if (config.greedySampling > 0) {
-      motion = trackSequence(
-          markerData,
-          solvingCharacter,
-          locatorSet | calibBodySetExtended | gloveSet,
-          motion,
-          trackingConfig,
-          frameIndices,
-          regularizerWeights.at(
-              1), // note: ideally use a small regularization to prevent too large a change
-          config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet,
-          config.targetHeightCm,
-          leftGloveData,
-          rightGloveData,
-          gloveConfig,
-          cameraKeypointData);
-    } else {
-      motion = trackSequence(
-          markerData,
-          solvingCharacter,
-          locatorSet | calibBodySetExtended | gloveSet,
-          motion,
-          trackingConfig,
-          regularizerWeights.at(
-              1), // note: ideally use a small regularization to prevent too large a change
-          frameStride,
-          config.enforceFloorInFirstFrame,
-          config.firstFramePoseConstraintSet,
-          config.targetHeightCm,
-          leftGloveData,
-          rightGloveData,
-          gloveConfig,
-          cameraKeypointData);
-    }
+    motion = trackSequence(
+        markerData,
+        solvingCharacter,
+        locatorSet | calibBodySetExtended | gloveSet,
+        motion,
+        trackingConfig,
+        frameIndices,
+        regularizerWeights.at(1),
+        config.enforceFloorInFirstFrame,
+        config.firstFramePoseConstraintSet,
+        config.targetHeightCm,
+        leftGloveData,
+        rightGloveData,
+        gloveConfig,
+        cameraKeypointData);
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
     std::tie(identity.v, character.locators, character.skinnedLocators) =
@@ -1484,63 +1462,37 @@ void calibrateModel(
     // The sequence solve above could get stuck with euler singularity but per-frame solve could get
     // it out. Pass in the first frame from previous solve as a better initial guess than the zero
     // pose.
-    if (config.greedySampling > 0) {
-      motion.topRows(transform.numAllModelParameters()) = trackPosesForFrames(
-          markerData,
-          character,
-          motion.topRows(transform.numAllModelParameters()),
-          trackingConfig,
-          frameIndices,
-          false, // Not continuous for calibration keyframes
-          {},
-          {},
-          std::nullopt,
-          "Calibrating per-frame");
-    } else {
-      const VectorXf initPose = motion.col(0).head(transform.numAllModelParameters());
-      motion.topRows(transform.numAllModelParameters()) =
-          trackPosesPerframe(markerData, character, initPose, trackingConfig, frameStride);
-    }
+    motion.topRows(transform.numAllModelParameters()) = trackPosesForFrames(
+        markerData,
+        character,
+        motion.topRows(transform.numAllModelParameters()),
+        trackingConfig,
+        frameIndices,
+        false, // Not continuous for calibration keyframes
+        {},
+        {},
+        std::nullopt,
+        "Calibrating per-frame");
   }
 
   // Finally, fine tune marker offsets with fix identity.
   MT_LOGI_IF(config.debug, "Fine-tune marker offsets");
 
-  if (config.greedySampling > 0) {
-    motion = trackSequence(
-        markerData,
-        solvingCharacter,
-        locatorSet | gloveSet,
-        motion,
-        trackingConfig,
-        frameIndices,
-        regularizerWeights.at(
-            2), // note: ideally use a higher regularizer weight to prevent too large a change
-        config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet,
-        config.targetHeightCm,
-        leftGloveData,
-        rightGloveData,
-        gloveConfig,
-        cameraKeypointData);
-  } else {
-    motion = trackSequence(
-        markerData,
-        solvingCharacter,
-        locatorSet | gloveSet,
-        motion,
-        trackingConfig,
-        regularizerWeights.at(
-            2), // note: ideally use a higher regularizer weight to prevent too large a change
-        frameStride,
-        config.enforceFloorInFirstFrame,
-        config.firstFramePoseConstraintSet,
-        config.targetHeightCm,
-        leftGloveData,
-        rightGloveData,
-        gloveConfig,
-        cameraKeypointData);
-  }
+  motion = trackSequence(
+      markerData,
+      solvingCharacter,
+      locatorSet | gloveSet,
+      motion,
+      trackingConfig,
+      frameIndices,
+      regularizerWeights.at(2),
+      config.enforceFloorInFirstFrame,
+      config.firstFramePoseConstraintSet,
+      config.targetHeightCm,
+      leftGloveData,
+      rightGloveData,
+      gloveConfig,
+      cameraKeypointData);
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
@@ -1551,6 +1503,15 @@ void calibrateModel(
 
   // TODO: A hack to return the solved first frame as initialization for tracking later.
   identity.v = motion.col(0).head(transform.numAllModelParameters());
+
+  // Extract solved motion for the selected calibration frames.
+  if (selectedFrameMotion != nullptr && !frameIndices.empty()) {
+    const auto nParams = transform.numAllModelParameters();
+    selectedFrameMotion->resize(nParams, frameIndices.size());
+    for (size_t i = 0; i < frameIndices.size(); ++i) {
+      selectedFrameMotion->col(i) = motion.col(frameIndices[i]).head(nParams);
+    }
+  }
 
   // Log final per-locator mesh distances
   logSkinnedLocatorMeshDistances(character, "Final");
