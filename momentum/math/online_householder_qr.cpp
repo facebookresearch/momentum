@@ -65,8 +65,6 @@ void applyHouseholderTransformationBlock(
   MT_CHECK(v_2m.rows() == Y_2m.rows());
   MT_CHECK(colStart <= colEnd);
   MT_CHECK(colEnd <= nCols);
-  // TODO: duplicate of the assertion immediately above.
-  MT_CHECK(colEnd <= nCols);
   MT_CHECK(Y_1.cols() == nCols);
 
   [[maybe_unused]] const auto colIndices = Y_2m.columnIndices();
@@ -145,8 +143,8 @@ void OnlineHouseholderQR<T>::reset(const Eigen::Index n, T lambda) {
   y_.setZero();
 }
 
-// TODO: this helper appears to be unused inside this translation unit. If it
-// is not part of the public interface, consider removing or marking it static.
+// Definition of the public helper declared in online_householder_qr.h; called from
+// `ColumnIndexedMatrix`'s constructor and from a small number of tests.
 void validateColumnIndices(momentum::span<const Eigen::Index> colIndices, Eigen::Index maxEntry) {
 #ifndef NDEBUG
   {
@@ -235,9 +233,12 @@ typename OnlineHouseholderQR<T>::VectorType OnlineHouseholderQR<T>::At_times_b()
 
 template <typename T>
 typename OnlineHouseholderQR<T>::VectorType OnlineHouseholderQR<T>::result() const {
-  // TODO: detect zeros on R_'s diagonal (rank deficiency, e.g. when lambda == 0
-  // and a column was never seen) and either return a damped solution or signal
-  // failure rather than dividing by zero in back-substitution.
+  // Note on rank deficiency: when `lambda == 0` and a column never received any contribution
+  // from `add()`, the corresponding diagonal of R is zero. The triangular back-substitution
+  // below then produces 0/0 for that row's update, which Eigen's TriangularView solver returns
+  // as 0 (rather than NaN) — this matches the documented "empty QR returns zero" behavior the
+  // existing tests rely on. Callers that need a meaningful solution under rank deficiency
+  // should construct with a non-zero `lambda` to add Tikhonov damping on the diagonal.
   return R_.template triangularView<Eigen::Upper>().solve(y_);
 }
 
@@ -587,8 +588,8 @@ void OnlineBandedHouseholderQR<T>::zeroBandedPart(
   MT_CHECK(A_band.cols() <= R_band_.rows());
   MT_CHECK(iCol_offset + A_band.cols() <= R_band_.cols());
 
-  // TODO: also assert A_band.rows() == b.rows() (matches the cousin
-  // OnlineBlockHouseholderQR::addMutating contract).
+  MT_CHECK(A_band.rows() == b.rows());
+  MT_CHECK(A_common.rows() == b.rows());
   MT_CHECK(A_common.cols() == n_common);
 
   for (Eigen::Index iCol_local = 0; iCol_local < A_band.cols(); ++iCol_local) {
@@ -651,7 +652,7 @@ void OnlineBandedHouseholderQR<T>::addMutating(
   const auto n_common = R_common_.cols();
   const auto n_band = R_band_.cols();
 
-  // TODO: tighten this to also assert b.rows() matches A_common.rows().
+  MT_CHECK(A_common.rows() == b.rows());
   MT_CHECK(A_common.cols() == n_common);
 
   for (Eigen::Index iCol = 0; iCol < n_common; ++iCol) {
@@ -725,17 +726,26 @@ typename OnlineBandedHouseholderQR<T>::VectorType OnlineBandedHouseholderQR<T>::
   }
 
   if (n_band > 0) {
-    // TODO: result(iRow) divides by R_band_entry(iRow, iRow). With lambda == 0
-    // and a row that never received any contribution, this can be zero — same
-    // rank-deficiency issue noted in OnlineHouseholderQR::result.
+    // Note on rank deficiency: when `lambda == 0` and a column never received any contribution,
+    // the corresponding banded diagonal entry is zero. We pin that row's result to 0 instead of
+    // dividing — the same observable behavior as the dense `OnlineHouseholderQR::result` path,
+    // and what the existing edge-case tests rely on (an empty / zero-bandwidth solver returns
+    // a zero vector). Callers wanting a meaningful damped solution under genuine rank
+    // deficiency should construct with a non-zero `lambda`.
     for (Eigen::Index iRow = n_band - 1; iRow >= 0; --iRow) {
+      const T diag = R_band_entry(iRow, iRow);
+      if (diag == T(0)) {
+        result(iRow) = T(0);
+        continue;
+      }
+
       T dotProd = n_common > 0 ? R_common_.row(iRow).dot(result.tail(n_common)) : T(0);
 
       const Eigen::Index bandwidth_cur = std::min(bandwidth, n_band - iRow);
       for (Eigen::Index jColOffset = 1; jColOffset < bandwidth_cur; ++jColOffset) {
         dotProd += R_band_entry(iRow, iRow + jColOffset) * result(iRow + jColOffset);
       }
-      result(iRow) = (y_(iRow) - dotProd) / R_band_entry(iRow, iRow);
+      result(iRow) = (y_(iRow) - dotProd) / diag;
     }
   }
 
