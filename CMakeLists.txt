@@ -83,7 +83,6 @@ mt_option(MOMENTUM_BUILD_IO_USD "Build USD I/O support" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
-mt_option(MOMENTUM_BUILD_RENDERER "Build renderer and rasterizer" ON)
 mt_option(MOMENTUM_ENABLE_PROFILING "Enable building with profiling annotations" OFF)
 mt_option(MOMENTUM_ENABLE_SIMD "Enable building with SIMD instructions" ON)
 mt_option(MOMENTUM_INSTALL_EXAMPLES "Install examples" OFF)
@@ -132,19 +131,17 @@ find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
 
-if(MOMENTUM_BUILD_RENDERER)
-  # Use standalone mdspan (header-only) instead of full Kokkos.
-  # Full Kokkos with CUDA sets CMAKE_CXX_COMPILER to nvcc_wrapper globally,
-  # which breaks pybind11 compilation. We only need mdspan headers.
-  include(FetchContent)
-  FetchContent_Declare(mdspan
-    URL https://github.com/kokkos/mdspan/archive/refs/heads/stable.tar.gz
-  )
-  set(MDSPAN_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
-  set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
-  set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(mdspan)
-endif()
+# Use standalone mdspan (header-only) instead of full Kokkos.
+# Full Kokkos with CUDA sets CMAKE_CXX_COMPILER to nvcc_wrapper globally,
+# which breaks pybind11 compilation. We only need mdspan headers.
+include(FetchContent)
+FetchContent_Declare(mdspan
+  URL https://github.com/kokkos/mdspan/archive/refs/heads/stable.tar.gz
+)
+set(MDSPAN_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
+set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(mdspan)
 
 if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
   find_package(rerun_sdk CONFIG REQUIRED)
@@ -662,22 +659,20 @@ mt_library(
     io_marker
 )
 
-if(MOMENTUM_BUILD_RENDERER)
-  mt_library(
-    NAME rasterizer
-    HEADERS_VARS
-      rasterizer_public_headers
-    SOURCES_VARS
-      rasterizer_sources
-    PUBLIC_LINK_LIBRARIES
-      camera
-      common
-      drjit
-      Eigen3::Eigen
-      mdspan::mdspan
-      Microsoft.GSL::GSL
-  )
-endif()
+mt_library(
+  NAME rasterizer
+  HEADERS_VARS
+    rasterizer_public_headers
+  SOURCES_VARS
+    rasterizer_sources
+  PUBLIC_LINK_LIBRARIES
+    camera
+    common
+    drjit
+    Eigen3::Eigen
+    mdspan::mdspan
+    Microsoft.GSL::GSL
+)
 
 mt_library(
   NAME rerun_eigen_adapters
