@@ -172,7 +172,7 @@ StateSimilarity SkeletonStateT<T>::compare(
   // The sizes are identical today (both resized to jointState.size() above), so this is harmless,
   // but it's a latent bug if the two arrays ever diverge. Use orientationError.size() here.
   result.orientationRMSE = std::sqrt(
-      result.orientationError.squaredNorm() / static_cast<float>(result.positionError.size()));
+      result.orientationError.squaredNorm() / static_cast<float>(result.orientationError.size()));
   result.positionMax = result.positionError.maxCoeff();
   result.orientationMax = result.orientationError.maxCoeff();
 

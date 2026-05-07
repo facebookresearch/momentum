@@ -239,7 +239,10 @@ void applySSD(
             // non-uniform scale the normal direction will be incorrect.
             outputn.noalias() += topLeft * nml * weight;
           }
-          outputn.normalize();
+          const T nmlNorm = outputn.norm();
+          if (nmlNorm > T(0)) {
+            outputn /= nmlNorm;
+          }
         }
       },
       options);
