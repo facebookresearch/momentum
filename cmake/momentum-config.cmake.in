@@ -27,10 +27,7 @@ find_dependency(openfbx CONFIG)
 find_dependency(re2 MODULE)
 find_dependency(spdlog CONFIG)
 find_dependency(urdfdom CONFIG)
-
-if(@MOMENTUM_BUILD_RENDERER@)
-  find_dependency(mdspan CONFIG)
-endif()
+find_dependency(mdspan CONFIG)
 
 if(@MOMENTUM_ENABLE_PROFILING@)
   find_dependency(Tracy CONFIG)

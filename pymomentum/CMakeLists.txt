@@ -323,20 +323,18 @@ mt_python_binding(
     fmt::fmt-header-only
 )
 
-if(MOMENTUM_BUILD_RENDERER)
-  mt_python_binding(
-    NAME renderer
-    PYMOMENTUM_HEADERS_VARS renderer_public_headers
-    PYMOMENTUM_SOURCES_VARS renderer_sources
-    LINK_LIBRARIES
-      array_utility
-      character
-      common
-      math
-      rasterizer
-      skeleton
-  )
-endif()
+mt_python_binding(
+  NAME renderer
+  PYMOMENTUM_HEADERS_VARS renderer_public_headers
+  PYMOMENTUM_SOURCES_VARS renderer_sources
+  LINK_LIBRARIES
+    array_utility
+    character
+    common
+    math
+    rasterizer
+    skeleton
+)
 
 mt_python_library(
   NAME quaternion
