@@ -299,18 +299,9 @@ mt_python_binding(
   MODULE_NAME axel
   PYMOMENTUM_HEADERS_VARS axel_public_headers
   PYMOMENTUM_SOURCES_VARS axel_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
   LINK_LIBRARIES
     axel
     python_utility
-    tensor_utility
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
 )
 
 mt_python_binding(
