@@ -7,6 +7,7 @@
 
 #include "momentum/math/mppca.h"
 
+#include "momentum/common/exception.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/covariance_matrix.h"
 
@@ -23,9 +24,34 @@ void MppcaT<T>::set(
   d = mmu.cols();
   p = sigma2.rows();
 
-  // TODO: Validate input dimensions: inPi.rows() == p, mmu.rows() == p, W.size() == p,
-  //       and each W[c] has d columns. Currently mismatches will trigger out-of-bounds
-  //       access or silent corruption rather than a clear error.
+  // Validate input dimensions up front so a mismatch surfaces as a clear error rather than an
+  // out-of-bounds access or silently corrupted output further down.
+  MT_THROW_IF(
+      inPi.rows() != static_cast<Eigen::Index>(p),
+      "MppcaT::set: inPi has {} rows, expected {} (p == sigma2.rows())",
+      inPi.rows(),
+      p);
+  MT_THROW_IF(
+      mmu.rows() != static_cast<Eigen::Index>(p),
+      "MppcaT::set: mmu has {} rows, expected {} (p == sigma2.rows())",
+      mmu.rows(),
+      p);
+  MT_THROW_IF(
+      W.size() != p,
+      "MppcaT::set: W has {} components, expected {} (p == sigma2.rows())",
+      W.size(),
+      p);
+  for (size_t c = 0; c < p; ++c) {
+    // Each W[c] is the (data x latent) PPCA loading matrix; W[c].transpose() is later passed to
+    // LowRankCovarianceMatrix as the factor A with A^T A = W W^T, so the row count must be d.
+    MT_THROW_IF(
+        W[c].rows() != static_cast<Eigen::Index>(d),
+        "MppcaT::set: W[{}] has {} rows, expected {} (d == mmu.cols())",
+        c,
+        W[c].rows(),
+        d);
+  }
+
   Rpre.setZero(p);
   Cinv.resize(p);
   L.resize(p);
