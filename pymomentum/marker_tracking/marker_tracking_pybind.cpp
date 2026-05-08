@@ -130,7 +130,7 @@ PYBIND11_MODULE(marker_tracking, m) {
           "__repr__",
           [](const momentum::CalibrationConfig& self) {
             return fmt::format(
-                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, first_frame_pose_constraint_set=\"{}\", calib_shape={}, target_height_cm={}, mesh_constraint_weight={})",
+                "CalibrationConfig(min_vis_percent={}, loss_alpha={}, max_iter={}, regularization={}, debug={}, calib_frames={}, major_iter={}, global_scale_only={}, locators_only={}, greedy_sampling={}, enforce_floor_in_first_frame={}, adaptive_floor_contact={}, first_frame_pose_constraint_set=\"{}\", calib_shape={}, target_height_cm={}, mesh_constraint_weight={}, floor_contact_percentile={})",
                 self.minVisPercent,
                 self.lossAlpha,
                 self.maxIter,
@@ -142,10 +142,12 @@ PYBIND11_MODULE(marker_tracking, m) {
                 boolToString(self.locatorsOnly),
                 self.greedySampling,
                 boolToString(self.enforceFloorInFirstFrame),
+                boolToString(self.adaptiveFloorContact),
                 self.firstFramePoseConstraintSet,
                 boolToString(self.calibShape),
                 self.targetHeightCm,
-                self.meshConstraintWeight);
+                self.meshConstraintWeight,
+                self.floorContactPercentile);
           })
       .def(
           py::init([](float minVisPercent,
@@ -159,11 +161,13 @@ PYBIND11_MODULE(marker_tracking, m) {
                       bool locatorsOnly,
                       size_t greedySampling,
                       bool enforceFloorInFirstFrame,
+                      bool adaptiveFloorContact,
                       std::string firstFramePoseConstraintSet,
                       bool calibShape,
                       float targetHeightCm,
                       float meshConstraintWeight,
-                      float projectionWeight) {
+                      float projectionWeight,
+                      float floorContactPercentile) {
             momentum::CalibrationConfig cfg;
             cfg.minVisPercent = minVisPercent;
             cfg.lossAlpha = lossAlpha;
@@ -176,11 +180,13 @@ PYBIND11_MODULE(marker_tracking, m) {
             cfg.locatorsOnly = locatorsOnly;
             cfg.greedySampling = greedySampling;
             cfg.enforceFloorInFirstFrame = enforceFloorInFirstFrame;
+            cfg.adaptiveFloorContact = adaptiveFloorContact;
             cfg.firstFramePoseConstraintSet = std::move(firstFramePoseConstraintSet);
             cfg.calibShape = calibShape;
             cfg.targetHeightCm = targetHeightCm;
             cfg.meshConstraintWeight = meshConstraintWeight;
             cfg.projectionWeight = projectionWeight;
+            cfg.floorContactPercentile = floorContactPercentile;
             return cfg;
           }),
           R"(Create a CalibrationConfig with specified parameters.
@@ -195,12 +201,14 @@ PYBIND11_MODULE(marker_tracking, m) {
           :param global_scale_only: Calibrate only the global scale and not all proportions
           :param locators_only: Calibrate only the locator offsets
           :param greedy_sampling: Enable greedy frame sampling with the given stride
-          :param enforce_floor_in_first_frame: Force floor contact in first frame
+          :param enforce_floor_in_first_frame: Force all floor locators to y=0 on frame 0
+          :param adaptive_floor_contact: Enable adaptive per-locator floor contact detection
           :param first_frame_pose_constraint_set: Name of pose constraint set to use in first frame
           :param calib_shape: Calibrate shape parameters
           :param target_height_cm: Target height for character in cm.  Defaults to 0 (unspecified).
           :param mesh_constraint_weight: Weight multiplier for mesh surface constraints during calibration.
           :param projection_weight: Base weight for 2D keypoint projection constraints. Set to 0 to disable.
+          :param floor_contact_percentile: Percentile threshold for adaptive floor contact detection (0-1).
           )",
           py::kw_only(),
           py::arg("min_vis_percent") = 0.0,
@@ -214,11 +222,13 @@ PYBIND11_MODULE(marker_tracking, m) {
           py::arg("locators_only") = false,
           py::arg("greedy_sampling") = 0,
           py::arg("enforce_floor_in_first_frame") = false,
+          py::arg("adaptive_floor_contact") = false,
           py::arg("first_frame_pose_constraint_set") = "",
           py::arg("calib_shape") = false,
           py::arg("target_height_cm") = 0.0,
           py::arg("mesh_constraint_weight") = 1.0f,
-          py::arg("projection_weight") = 0.0f)
+          py::arg("projection_weight") = 0.0f,
+          py::arg("floor_contact_percentile") = 1.0f / 3.0f)
       .def_readwrite(
           "calib_frames",
           &momentum::CalibrationConfig::calibFrames,
@@ -242,7 +252,11 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "enforce_floor_in_first_frame",
           &momentum::CalibrationConfig::enforceFloorInFirstFrame,
-          "Force floor contact in first frame")
+          "Force all floor locators to y=0 on frame 0 with high weight")
+      .def_readwrite(
+          "adaptive_floor_contact",
+          &momentum::CalibrationConfig::adaptiveFloorContact,
+          "Enable adaptive per-locator floor contact detection")
       .def_readwrite(
           "first_frame_pose_constraint_set",
           &momentum::CalibrationConfig::firstFramePoseConstraintSet,
@@ -260,7 +274,13 @@ PYBIND11_MODULE(marker_tracking, m) {
       .def_readwrite(
           "projection_weight",
           &momentum::CalibrationConfig::projectionWeight,
-          "Base weight for 2D keypoint projection constraints. Set to 0 to disable.");
+          "Base weight for 2D keypoint projection constraints. Set to 0 to disable.")
+      .def_readwrite(
+          "floor_contact_percentile",
+          &momentum::CalibrationConfig::floorContactPercentile,
+          "Percentile threshold for adaptive floor contact detection (0-1). "
+          "For each floor locator, frames at or below this percentile of Y heights "
+          "receive a soft equality floor constraint.");
 
   auto gapFillConfig = py::class_<momentum::GapFillConfig>(
       m, "GapFillConfig", "Config for marker gap filling and dropout blending");

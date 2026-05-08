@@ -941,4 +941,63 @@ std::vector<std::pair<std::string, float>> computeSkinnedLocatorMeshDistances(
   return result;
 }
 
+std::vector<std::vector<PlaneDataT<float>>> computeFloorContactConstraints(
+    const Character& character,
+    const MatrixXf& motion,
+    const std::vector<PlaneDataT<float>>& floorConstraints,
+    const std::vector<size_t>& frameIndices,
+    float percentile) {
+  const size_t nFrames = frameIndices.size();
+  std::vector<std::vector<PlaneDataT<float>>> result(nFrames);
+  if (floorConstraints.empty() || nFrames == 0) {
+    return result;
+  }
+
+  const auto& pt = character.parameterTransform;
+  const size_t nParams = pt.numAllModelParameters();
+  const size_t nLocators = floorConstraints.size();
+
+  // heights[locator][frame] = signed distance to floor plane
+  std::vector<std::vector<float>> heights(nLocators, std::vector<float>(nFrames));
+  for (size_t fi = 0; fi < nFrames; ++fi) {
+    const size_t iFrame = frameIndices[fi];
+    SkeletonState skelState;
+    skelState.set(
+        pt.apply(ModelParameters(motion.col(iFrame).head(nParams))), character.skeleton, false);
+    for (size_t li = 0; li < nLocators; ++li) {
+      const auto& constr = floorConstraints[li];
+      const auto worldPos = skelState.jointState[constr.parent].transform * constr.offset;
+      heights[li][fi] = worldPos.dot(constr.normal) - constr.d;
+    }
+  }
+
+  // For each locator independently, find the percentile threshold and mark
+  // frames where that locator is in contact
+  size_t totalContactPairs = 0;
+  for (size_t li = 0; li < nLocators; ++li) {
+    auto sorted = heights[li];
+    std::sort(sorted.begin(), sorted.end());
+    const size_t pIdx = std::min(static_cast<size_t>(percentile * nFrames), nFrames - 1);
+    const float threshold = sorted[pIdx];
+    for (size_t fi = 0; fi < nFrames; ++fi) {
+      if (heights[li][fi] <= threshold) {
+        result[fi].push_back(floorConstraints[li]);
+        ++totalContactPairs;
+      }
+    }
+  }
+
+  const size_t framesWithContact =
+      std::count_if(result.begin(), result.end(), [](const auto& v) { return !v.empty(); });
+  MT_LOGI(
+      "Floor contact: {}/{} frames have contact ({} locator-frame pairs, {} locators, percentile={})",
+      framesWithContact,
+      nFrames,
+      totalContactPairs,
+      nLocators,
+      percentile);
+
+  return result;
+}
+
 } // namespace momentum

@@ -10,6 +10,7 @@
 #include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
+#include <momentum/character_solver/plane_error_function.h>
 #include <momentum/marker_tracking/glove_utils.h>
 #include <momentum/marker_tracking/marker_gap_fill.h>
 
@@ -66,8 +67,13 @@ struct CalibrationConfig : public BaseConfig {
   bool locatorsOnly = false;
   /// Sample uniformly or do a greedy importance sampling
   size_t greedySampling = 0;
-  /// True to lock the floor constraints to the floor in the first frame
+  /// Force all floor locators to y=0 on frame 0 with high weight.
+  /// Mutually exclusive with adaptiveFloorContact.
   bool enforceFloorInFirstFrame = false;
+  /// Enable adaptive floor contact detection during calibration. When true, the
+  /// solver detects per-locator contact frames using floorContactPercentile and
+  /// applies soft equality floor constraints on those frames.
+  bool adaptiveFloorContact = false;
   /// Name of a pose constraint set to use for the first frame
   std::string firstFramePoseConstraintSet;
   /// Calibrate the character's shape
@@ -79,6 +85,10 @@ struct CalibrationConfig : public BaseConfig {
   float meshConstraintWeight = 1.0f;
   /// Base weight for 2D keypoint projection constraints. Set to 0 to disable.
   float projectionWeight = 0.0f;
+  /// Percentile threshold for adaptive floor contact detection (0-1).
+  /// For each floor locator, frames at or below this percentile of Y heights
+  /// receive a soft equality floor constraint. Higher values = more frames constrained.
+  float floorContactPercentile = 1.0f / 3.0f;
 };
 
 /// Configuration for pose tracking given a calibrated body and locators
@@ -134,7 +144,6 @@ struct RefineConfig : public TrackingConfig {
 /// Number of parameters should be the same as defined in character.
 /// @param[in] config Solving options.
 /// @param[in] frameStride Frame stride to select solver frames (ie. uniform sample).
-/// @param[in] enforceFloorInFirstFrame Flag to enforce the floor contact constraints in first frame
 /// @param[in] firstFramePoseConstraintSet Name of a pose constraint set to use for the first frame
 ///
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
@@ -167,7 +176,6 @@ Eigen::MatrixXf trackSequence(
 /// Number of parameters should be the same as defined in character.
 /// @param[in] config Solving options.
 /// @param[in] frames List of frames to solve for.
-/// @param[in] enforceFloorInFirstFrame Flag to enforce the floor contact constraints in first frame
 /// @param[in] firstFramePoseConstraintSet Name of a pose constraint set to use for the first frame
 ///
 /// @return The solved motion. It has the same length as markerData. It repeats the same solved pose
@@ -186,7 +194,8 @@ Eigen::MatrixXf trackSequence(
     std::span<const GloveFrameData> leftGloveData = {},
     std::span<const GloveFrameData> rightGloveData = {},
     const std::optional<GloveConfig>& gloveConfig = std::nullopt,
-    std::span<const CameraKeypointData> cameraKeypointData = {});
+    std::span<const CameraKeypointData> cameraKeypointData = {},
+    std::span<const std::vector<PlaneDataT<float>>> perFrameFloorContacts = {});
 
 /// Track poses per-frame given a calibrated character.
 ///
