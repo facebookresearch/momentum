@@ -257,12 +257,13 @@ Affine3<T> Random<Generator>::uniformAffine3(
     T scaleMax,
     const Vector3<T>& min,
     const Vector3<T>& max) {
+  static_assert(
+      std::is_floating_point_v<T>,
+      "uniformAffine3 requires a floating-point T; integer T would silently truncate the "
+      "default scale range and the rotation factor.");
   Affine3<T> out = Affine3<T>::Identity();
   // Linear part is rotation * isotropic_scale; this samples a single scale
   // factor applied to all three axes, not a full anisotropic affine.
-  // TODO: the public name `uniformAffine3` is misleading — it does not
-  // sample uniformly over the space of affine transforms (which would need
-  // anisotropic scale and shear); consider renaming or extending.
   out.linear() = uniformRotationMatrix<T>() * uniform<T>(scaleMin, scaleMax);
   out.translation().noalias() = uniform<Vector3<T>>(min, max);
   return out;
@@ -368,6 +369,10 @@ Isometry3<T> uniformIsometry3(const Vector3<T>& min, const Vector3<T>& max) {
 
 template <typename T>
 Affine3<T> uniformAffine3(T scaleMin, T scaleMax, const Vector3<T>& min, const Vector3<T>& max) {
+  static_assert(
+      std::is_floating_point_v<T>,
+      "uniformAffine3 requires a floating-point T; integer T would silently truncate the "
+      "default scale range and the rotation factor.");
   auto& rand = Random<>::GetSingleton();
   return rand.uniformAffine3<T>(scaleMin, scaleMax, min, max);
 }
