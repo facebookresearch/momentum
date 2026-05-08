@@ -33,8 +33,8 @@ void MeshT<T>::updateNormals() {
         (vertices[face[1]] - vertices[face[0]]).cross(vertices[face[2]] - vertices[face[0]]);
     // Skip degenerate faces that produced NaN (e.g., from non-finite vertex coordinates).
     // Collinear/zero-area triangles produce a zero vector, which contributes nothing and is safe.
-    // TODO: only checking normal[0] misses NaNs that appear only in y or z components.
-    if (IsNanNoOpt(normal[0])) {
+    // Inspect all components so a NaN limited to y or z is also caught.
+    if (IsNanNoOpt(normal[0]) || IsNanNoOpt(normal[1]) || IsNanNoOpt(normal[2])) {
       continue;
     }
     for (const auto& faceIdx : face) {
