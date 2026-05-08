@@ -24,7 +24,7 @@ var searchData=
   ['blend_5fshape_5fskinning_2ecpp_21',['blend_shape_skinning.cpp',['../blend__shape__skinning_8cpp.html',1,'']]],
   ['blend_5fshape_5fskinning_2eh_22',['blend_shape_skinning.h',['../blend__shape__skinning_8h.html',1,'']]],
   ['blendoffframes_23',['blendOffFrames',['../structmomentum_1_1GapFillConfig.html#abd5e8c09ce9ed7d6417e96d4b13c5f8f',1,'momentum::GapFillConfig']]],
-  ['blendshape_24',['blendshape',['../structmomentum_1_1BlendShape.html#a84e852dc51f2e880342313b575c7a0ad',1,'momentum::BlendShape::BlendShape()'],['../structmomentum_1_1CharacterT.html#afb8b1d6bdcd0515337eb14d84dc7c9a7',1,'momentum::CharacterT::blendShape'],['../structmomentum_1_1BlendShape.html',1,'momentum::BlendShape'],['../structmomentum_1_1BlendShape.html#a39c2759a3dcb4fec666b27357bc44964',1,'momentum::BlendShape::BlendShape()']]],
+  ['blendshape_24',['blendshape',['../structmomentum_1_1BlendShape.html#a39c2759a3dcb4fec666b27357bc44964',1,'momentum::BlendShape::BlendShape()'],['../structmomentum_1_1BlendShape.html#a84e852dc51f2e880342313b575c7a0ad',1,'momentum::BlendShape::BlendShape(momentum::span&lt; const Vector3f &gt; baseShape, size_t numShapes, momentum::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShape.html',1,'momentum::BlendShape'],['../structmomentum_1_1CharacterT.html#afb8b1d6bdcd0515337eb14d84dc7c9a7',1,'momentum::CharacterT::blendShape']]],
   ['blendshape_5fconst_5fp_25',['BlendShape_const_p',['../namespacemomentum.html#a6472912b236f6061a827e78eb44659c4',1,'momentum']]],
   ['blendshape_5fconst_5fu_26',['BlendShape_const_u',['../namespacemomentum.html#a4df6fbd49e38c79801190865c68ab35c',1,'momentum']]],
   ['blendshape_5fconst_5fw_27',['BlendShape_const_w',['../namespacemomentum.html#ac254ff96a2d8b506de8b52a62e8f94e3',1,'momentum']]],
@@ -62,11 +62,12 @@ var searchData=
   ['boxd_59',['Boxd',['../namespacemomentum.html#ac663ef2546517545b890722904ea461a',1,'momentum']]],
   ['boxf_60',['Boxf',['../namespacemomentum.html#a266da068330768b8534d3f05d81b4bef',1,'momentum']]],
   ['boxi_61',['Boxi',['../namespacemomentum.html#a8cbfb977160fc29e87bb5f47a75b7d41',1,'momentum']]],
-  ['buildhierarchicalpaths_62',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
-  ['buildjetmat_63',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
-  ['buildjetvec_64',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['buildtriangleadjacency_65',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]],
-  ['bvh_5fio_2ecpp_66',['bvh_io.cpp',['../bvh__io_8cpp.html',1,'']]],
-  ['bvh_5fio_2eh_67',['bvh_io.h',['../bvh__io_8h.html',1,'']]],
-  ['bytep_68',['ByteP',['../namespacemomentum.html#afefbc11a7ab8bce20f82b3e22cd0df91',1,'momentum']]]
+  ['buildcalibbodysets_62',['buildCalibBodySets',['../namespacemomentum.html#a2ab7822fb4190a2c69eed640332f0f87',1,'momentum']]],
+  ['buildhierarchicalpaths_63',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
+  ['buildjetmat_64',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
+  ['buildjetvec_65',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
+  ['buildtriangleadjacency_66',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]],
+  ['bvh_5fio_2ecpp_67',['bvh_io.cpp',['../bvh__io_8cpp.html',1,'']]],
+  ['bvh_5fio_2eh_68',['bvh_io.h',['../bvh__io_8h.html',1,'']]],
+  ['bytep_69',['ByteP',['../namespacemomentum.html#afefbc11a7ab8bce20f82b3e22cd0df91',1,'momentum']]]
 ];

@@ -184,7 +184,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Converted MPPCA model. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00087">87</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00113">113</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="mppca_8h_source.html#l00045">momentum::MppcaT&lt; T &gt;::Cinv</a>, <a class="el" href="mppca_8h_source.html#l00031">momentum::MppcaT&lt; T &gt;::d</a>, <a class="el" href="mppca_8h_source.html#l00051">momentum::MppcaT&lt; T &gt;::L</a>, <a class="el" href="mppca_8h_source.html#l00041">momentum::MppcaT&lt; T &gt;::mu</a>, <a class="el" href="mppca_8h_source.html#l00038">momentum::MppcaT&lt; T &gt;::names</a>, <a class="el" href="mppca_8h_source.html#l00034">momentum::MppcaT&lt; T &gt;::p</a>, and <a class="el" href="mppca_8h_source.html#l00057">momentum::MppcaT&lt; T &gt;::Rpre</a>.</p>
 
@@ -217,7 +217,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if approximately equal. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00102">102</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00128">128</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="math_2utility_8h_source.html#l00053">momentum::isApprox()</a>.</p>
 
@@ -276,7 +276,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <dl class="section pre"><dt>Precondition</dt><dd><code>pi.size() == p</code>, <code>mmu.rows() == p</code>, <code>W.size() == p</code>, <code>sigma2.size() == p</code>, and <code>W[c].rows() == mmu.cols()</code> for all <code>c</code>. </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd><code>d == mmu.cols()</code>, <code>p == sigma2.rows()</code>, and <code>Cinv</code>, <code>L</code>, <code>Rpre</code>, <code>mu</code>, <code>names</code> are sized consistently. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00016">16</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="mppca_8cpp_source.html#l00017">17</a> of file <a class="el" href="mppca_8cpp_source.html">mppca.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
 
 </div>
 </div>
@@ -300,7 +302,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00045">45</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -322,7 +324,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00031">31</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -345,7 +347,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00051">51</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -367,7 +369,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00041">41</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -390,7 +392,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00038">38</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -412,7 +414,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00034">34</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -435,7 +437,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="mppca_8h_source.html#l00057">57</a> of file <a class="el" href="mppca_8h_source.html">mppca.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00087">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="mppca_8cpp_source.html#l00113">momentum::MppcaT&lt; T &gt;::cast()</a>.</p>
 
 </div>
 </div>
@@ -450,7 +452,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1MppcaT.html">MppcaT</a></li>
-    <li class="footer">Generated on Fri May 8 2026 17:23:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 8 2026 22:58:40 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

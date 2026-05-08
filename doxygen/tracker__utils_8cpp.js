@@ -3,6 +3,7 @@ var tracker__utils_8cpp =
     [ "averageTriangleSkinWeights", "tracker__utils_8cpp.html#af85295e4d6c4b77e997d914cc4d510bf", null ],
     [ "buildTriangleAdjacency", "tracker__utils_8cpp.html#a710cca2a3e8ff5130375f03d9f8b9887", null ],
     [ "closestPointOnMeshMatchingParent", "tracker__utils_8cpp.html#aad3c3744faf3dc4012b91cefd337fb07", null ],
+    [ "computeFloorContactConstraints", "tracker__utils_8cpp.html#adc200343692febf23eb5278bd007b692", null ],
     [ "computeSkinnedLocatorMeshDistances", "tracker__utils_8cpp.html#a735e67bbdfd8a8005fe352a224680679", null ],
     [ "createConstraintData", "tracker__utils_8cpp.html#aa8153829bea96beb9011e5024d47f5da", null ],
     [ "createLocatorCharacter", "tracker__utils_8cpp.html#a8672dec18fb662d392c5f2f6f749cf04", null ],

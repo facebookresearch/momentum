@@ -2,8 +2,9 @@ var marker__tracker_8cpp =
 [
     [ "addBlendShapeRegularizer", "marker__tracker_8cpp.html#a165499bc5b4afdd9db5d1ee6d9439a07", null ],
     [ "addKeypointProjectionConstraints", "marker__tracker_8cpp.html#a11991bd72e9cdf94324c2b2cbb6a7307", null ],
-    [ "addSequenceFrameConstraints", "marker__tracker_8cpp.html#ab743e0af44d3e4543b5b80dd31dd9055", null ],
+    [ "addSequenceFrameConstraints", "marker__tracker_8cpp.html#abf240be17a187cbc06a330ebfb6448de", null ],
     [ "addSkinnedLocatorParametersToTransform", "marker__tracker_8cpp.html#a99124f3cdd59c5e30148742288f44114", null ],
+    [ "buildCalibBodySets", "marker__tracker_8cpp.html#a2ab7822fb4190a2c69eed640332f0f87", null ],
     [ "calibrateLocators", "marker__tracker_8cpp.html#aa0a5d5718796020e2be1b70c3f07d550", null ],
     [ "calibrateModel", "marker__tracker_8cpp.html#ab2aa903ca1a55103e1a850cc36e1edea", null ],
     [ "getLocatorError", "marker__tracker_8cpp.html#a350e89790e69638c6f53d8709da65fee", null ],
@@ -14,7 +15,7 @@ var marker__tracker_8cpp =
     [ "solveRigidInitialization", "marker__tracker_8cpp.html#a62bb101323f977de78275caa6c41b026", null ],
     [ "trackPosesForFrames", "marker__tracker_8cpp.html#a2fbeda9f809a06d2f2b3d533fe590328", null ],
     [ "trackPosesPerframe", "marker__tracker_8cpp.html#a70be7f0735bfdc9d790f984d09116e80", null ],
-    [ "trackSequence", "marker__tracker_8cpp.html#a241f7c741bb3daf0e8e11d05ad1d9a33", null ],
+    [ "trackSequence", "marker__tracker_8cpp.html#ac3b7e9c5e26fcf1d1cb538707c9bd248", null ],
     [ "trackSequence", "marker__tracker_8cpp.html#a228f202c4ee94bc13fc86a4b7fc5fe28", null ],
     [ "updateGloveConstraintsForBothHands", "marker__tracker_8cpp.html#addd79a52c21c55dedd99fcf887eea37c", null ]
 ];

@@ -12,6 +12,6 @@ var marker__tracker_8h =
     [ "refineMotion", "marker__tracker_8h.html#a04399958e06447bd1d21106c80429e1c", null ],
     [ "trackPosesForFrames", "marker__tracker_8h.html#ace07637db426530a90ee333925bbc519", null ],
     [ "trackPosesPerframe", "marker__tracker_8h.html#a42f3838b29fc915838163e8b1021b1f3", null ],
-    [ "trackSequence", "marker__tracker_8h.html#a51039a9fcb6a411bf85f43e3149a347d", null ],
+    [ "trackSequence", "marker__tracker_8h.html#a166871a53448e0a1058927fde15f228b", null ],
     [ "trackSequence", "marker__tracker_8h.html#ab9b37dfbb52bd472321bb6a9db6648ca", null ]
 ];

@@ -1,13 +1,17 @@
 var NAVTREEINDEX32 =
 {
+"namespacemomentum.html#afeec224af8599a111f4d3d807ce8674c":[1,0,2,2715],
+"namespacemomentum.html#afefbc11a7ab8bce20f82b3e22cd0df91":[1,0,2,286],
+"namespacemomentum.html#aff05669e8ad2257083d6bef213738a94":[1,0,2,1032],
+"namespacemomentum.html#aff0d6eeca953989fcc2c5ffdacd42ec4":[1,0,2,1063],
 "namespacemomentum.html#aff22cd232b6d77f7308647eea237daff":[1,0,2,198],
-"namespacemomentum.html#aff65874a0db0e0aa74a5c38a3b661844":[1,0,2,2214],
+"namespacemomentum.html#aff65874a0db0e0aa74a5c38a3b661844":[1,0,2,2215],
 "namespacemomentum.html#aff73dfb76921e07f112d4ebe8f831d9e":[1,0,2,987],
-"namespacemomentum.html#aff997e0d661bcb969f96f3375f5df612":[1,0,2,2449],
+"namespacemomentum.html#aff997e0d661bcb969f96f3375f5df612":[1,0,2,2452],
 "namespacemomentum.html#aff9bae09081ac758b3db8ef03961cc3b":[1,0,2,848],
-"namespacemomentum.html#affa8840e5acad7610c2d4bb6b59d938a":[1,0,2,2245],
+"namespacemomentum.html#affa8840e5acad7610c2d4bb6b59d938a":[1,0,2,2248],
 "namespacemomentum.html#affbe291197fa38b3529f66c7867680c6":[1,0,2,666],
-"namespacemomentum.html#affdae75b999d900680a64738c12ac87e":[1,0,2,2597],
+"namespacemomentum.html#affdae75b999d900680a64738c12ac87e":[1,0,2,2600],
 "namespacemomentum.html#affeb9cb3eed14cf0194496fe7d9d29e1":[1,0,2,790],
 "namespacemomentum_1_1detail.html":[1,0,2,0],
 "namespacemomentum_1_1detail.html#a00c056f5c0aaa3a107413897bfcfc8d8":[1,0,2,0,18],
@@ -245,9 +249,5 @@ var NAVTREEINDEX32 =
 "profile_8h.html#a2fbcb0ddc3fb2423eae4184186dee5cf":[3,0,3,9,6],
 "profile_8h.html#a3e80669bc2799e599a88adfba1b6cbe4":[3,0,3,9,7],
 "profile_8h.html#a4910c927ef9f64e11854ab1b0d7f9b6b":[3,0,3,9,8],
-"profile_8h.html#a49a643cb9d4144845b05fe7159a04485":[3,0,3,9,9],
-"profile_8h.html#a578199b791f5c7a31198e555a2ef0544":[3,0,3,9,0],
-"profile_8h.html#a59b61422ee9c62529fec6aa2df29f414":[3,0,3,9,11],
-"profile_8h.html#a67e9aa589ab4e11981a72684f39f04d4":[3,0,3,9,10],
-"profile_8h.html#a6edc78f1defd74999db6eb22373d24df":[3,0,3,9,3]
+"profile_8h.html#a49a643cb9d4144845b05fe7159a04485":[3,0,3,9,9]
 };

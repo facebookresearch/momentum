@@ -1,6 +1,7 @@
 var tracker__utils_8h =
 [
     [ "buildTriangleAdjacency", "tracker__utils_8h.html#a710cca2a3e8ff5130375f03d9f8b9887", null ],
+    [ "computeFloorContactConstraints", "tracker__utils_8h.html#a87ce3b7971dd998700f3890e983a43bb", null ],
     [ "computeSkinnedLocatorMeshDistances", "tracker__utils_8h.html#a735e67bbdfd8a8005fe352a224680679", null ],
     [ "createConstraintData", "tracker__utils_8h.html#a0dbeea2379779d383cd6200d6ca61066", null ],
     [ "createLocatorCharacter", "tracker__utils_8h.html#a8672dec18fb662d392c5f2f6f749cf04", null ],

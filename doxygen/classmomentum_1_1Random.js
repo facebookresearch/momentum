@@ -12,7 +12,7 @@ var classmomentum_1_1Random =
     [ "uniform", "classmomentum_1_1Random.html#ace6d1835f47b68a332dc29417da9cc69", null ],
     [ "uniform", "classmomentum_1_1Random.html#a63f62dd0831a0d7ddaf8a179b4a7a28d", null ],
     [ "uniform", "classmomentum_1_1Random.html#acadbc603e8da6c5fc1ee05d745db56a2", null ],
-    [ "uniformAffine3", "classmomentum_1_1Random.html#a1d9305ea68cefcbf164b2d7310634fe8", null ],
+    [ "uniformAffine3", "classmomentum_1_1Random.html#a720960a0a06d3d208b1add4f6e74ecd9", null ],
     [ "uniformIsometry3", "classmomentum_1_1Random.html#ad5ba8e41091108c78882f60272ef5be7", null ],
     [ "uniformQuaternion", "classmomentum_1_1Random.html#a7e278411ba85f6ac742c39ec5169b6f3", null ],
     [ "uniformRotationMatrix", "classmomentum_1_1Random.html#a82b34cfb092373e4f48a50f893cada98", null ]

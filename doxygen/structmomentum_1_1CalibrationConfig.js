@@ -1,9 +1,11 @@
 var structmomentum_1_1CalibrationConfig =
 [
+    [ "adaptiveFloorContact", "structmomentum_1_1CalibrationConfig.html#ad02d5cdc1e77c5fe0e8e8ecb1159bf13", null ],
     [ "calibFrames", "structmomentum_1_1CalibrationConfig.html#ae70d6163d97996333cad8c41e9cb2883", null ],
     [ "calibShape", "structmomentum_1_1CalibrationConfig.html#ad40270f7333bcd5671f8981e02092a41", null ],
     [ "enforceFloorInFirstFrame", "structmomentum_1_1CalibrationConfig.html#a11e7eb7cbb3939b836025488fa891d22", null ],
     [ "firstFramePoseConstraintSet", "structmomentum_1_1CalibrationConfig.html#a38bc2c5facf330b4c6155ff59bb40d22", null ],
+    [ "floorContactPercentile", "structmomentum_1_1CalibrationConfig.html#a025f98316408a064737bfd9ca8114252", null ],
     [ "globalScaleOnly", "structmomentum_1_1CalibrationConfig.html#aedcf855e2bb8320f43defaf25d01847d", null ],
     [ "greedySampling", "structmomentum_1_1CalibrationConfig.html#aa25ed2d4c69619b70b81bb614fb16fc1", null ],
     [ "locatorsOnly", "structmomentum_1_1CalibrationConfig.html#a068c1a609ef7706a7d0736eff65bbd04", null ],

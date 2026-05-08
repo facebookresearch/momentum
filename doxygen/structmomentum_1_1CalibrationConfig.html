@@ -131,8 +131,11 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:aa25ed2d4c69619b70b81bb614fb16fc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample uniformly or do a greedy importance sampling.  <br /></td></tr>
 <tr class="separator:aa25ed2d4c69619b70b81bb614fb16fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11e7eb7cbb3939b836025488fa891d22" id="r_a11e7eb7cbb3939b836025488fa891d22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CalibrationConfig.html#a11e7eb7cbb3939b836025488fa891d22">enforceFloorInFirstFrame</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
-<tr class="memdesc:a11e7eb7cbb3939b836025488fa891d22"><td class="mdescLeft">&#160;</td><td class="mdescRight">True to lock the floor constraints to the floor in the first frame.  <br /></td></tr>
+<tr class="memdesc:a11e7eb7cbb3939b836025488fa891d22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force all floor locators to y=0 on frame 0 with high weight.  <br /></td></tr>
 <tr class="separator:a11e7eb7cbb3939b836025488fa891d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad02d5cdc1e77c5fe0e8e8ecb1159bf13" id="r_ad02d5cdc1e77c5fe0e8e8ecb1159bf13"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CalibrationConfig.html#ad02d5cdc1e77c5fe0e8e8ecb1159bf13">adaptiveFloorContact</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
+<tr class="memdesc:ad02d5cdc1e77c5fe0e8e8ecb1159bf13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable adaptive floor contact detection during calibration.  <br /></td></tr>
+<tr class="separator:ad02d5cdc1e77c5fe0e8e8ecb1159bf13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38bc2c5facf330b4c6155ff59bb40d22" id="r_a38bc2c5facf330b4c6155ff59bb40d22"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CalibrationConfig.html#a38bc2c5facf330b4c6155ff59bb40d22">firstFramePoseConstraintSet</a></td></tr>
 <tr class="memdesc:a38bc2c5facf330b4c6155ff59bb40d22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of a pose constraint set to use for the first frame.  <br /></td></tr>
 <tr class="separator:a38bc2c5facf330b4c6155ff59bb40d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,6 +151,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a37b9c1e5e51f2956421177f4e767eb78" id="r_a37b9c1e5e51f2956421177f4e767eb78"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78">projectionWeight</a> = 0.0f</td></tr>
 <tr class="memdesc:a37b9c1e5e51f2956421177f4e767eb78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base weight for 2D keypoint projection constraints. Set to 0 to disable.  <br /></td></tr>
 <tr class="separator:a37b9c1e5e51f2956421177f4e767eb78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a025f98316408a064737bfd9ca8114252" id="r_a025f98316408a064737bfd9ca8114252"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CalibrationConfig.html#a025f98316408a064737bfd9ca8114252">floorContactPercentile</a> = 1.0f / 3.0f</td></tr>
+<tr class="memdesc:a025f98316408a064737bfd9ca8114252"><td class="mdescLeft">&#160;</td><td class="mdescRight">Percentile threshold for adaptive floor contact detection (0-1).  <br /></td></tr>
+<tr class="separator:a025f98316408a064737bfd9ca8114252"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structmomentum_1_1BaseConfig"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structmomentum_1_1BaseConfig')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structmomentum_1_1BaseConfig.html">momentum::BaseConfig</a></td></tr>
 <tr class="memitem:a68fc30982e603214cb49277909bcacc4 inherit pub_attribs_structmomentum_1_1BaseConfig" id="r_a68fc30982e603214cb49277909bcacc4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BaseConfig.html#a68fc30982e603214cb49277909bcacc4">minVisPercent</a> = 0.<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">f</a></td></tr>
 <tr class="memdesc:a68fc30982e603214cb49277909bcacc4 inherit pub_attribs_structmomentum_1_1BaseConfig"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum percentage of visible markers in a frame to consider for tracking.  <br /></td></tr>
@@ -168,8 +174,27 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration for running body and/or locator calibration. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00057">57</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00058">58</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad02d5cdc1e77c5fe0e8e8ecb1159bf13" name="ad02d5cdc1e77c5fe0e8e8ecb1159bf13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad02d5cdc1e77c5fe0e8e8ecb1159bf13">&#9670;&#160;</a></span>adaptiveFloorContact</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> momentum::CalibrationConfig::adaptiveFloorContact = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enable adaptive floor contact detection during calibration. </p>
+<p>When true, the solver detects per-locator contact frames using floorContactPercentile and applies soft equality floor constraints on those frames. </p>
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00076">76</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+
+</div>
+</div>
 <a id="ae70d6163d97996333cad8c41e9cb2883" name="ae70d6163d97996333cad8c41e9cb2883"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae70d6163d97996333cad8c41e9cb2883">&#9670;&#160;</a></span>calibFrames</h2>
 
@@ -184,7 +209,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of frames used in calibration. It will be a uniform sample from the input. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00059">59</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00060">60</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -202,7 +227,7 @@ Public Attributes</h2></td></tr>
 
 <p>Calibrate the character's shape. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00074">74</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00080">80</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -218,9 +243,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>True to lock the floor constraints to the floor in the first frame. </p>
+<p>Force all floor locators to y=0 on frame 0 with high weight. </p>
+<p>Mutually exclusive with adaptiveFloorContact. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00070">70</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00072">72</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -238,7 +264,26 @@ Public Attributes</h2></td></tr>
 
 <p>Name of a pose constraint set to use for the first frame. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00072">72</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00078">78</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+
+</div>
+</div>
+<a id="a025f98316408a064737bfd9ca8114252" name="a025f98316408a064737bfd9ca8114252"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a025f98316408a064737bfd9ca8114252">&#9670;&#160;</a></span>floorContactPercentile</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> momentum::CalibrationConfig::floorContactPercentile = 1.0f / 3.0f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Percentile threshold for adaptive floor contact detection (0-1). </p>
+<p>For each floor locator, frames at or below this percentile of Y heights receive a soft equality floor constraint. Higher values = more frames constrained. </p>
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00091">91</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -256,7 +301,7 @@ Public Attributes</h2></td></tr>
 
 <p>True to only solve for a global body scale without changing individual bone length. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00064">64</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00065">65</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -274,7 +319,7 @@ Public Attributes</h2></td></tr>
 
 <p>Sample uniformly or do a greedy importance sampling. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00068">68</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00069">69</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -292,7 +337,7 @@ Public Attributes</h2></td></tr>
 
 <p>True to calibrate only the locators and not the body. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00066">66</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00067">67</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -311,7 +356,7 @@ Public Attributes</h2></td></tr>
 <p>Number of iterations to run the main calibration loop. </p>
 <p>It could be larger if calibrating for locators only. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00062">62</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00063">63</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -330,7 +375,7 @@ Public Attributes</h2></td></tr>
 <p>Multiplier for the mesh surface constraint weight on skinned locators during shape calibration. </p>
 <p>Higher values pull markers more tightly to the mesh surface. Default 1.0. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00079">79</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00085">85</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -348,7 +393,7 @@ Public Attributes</h2></td></tr>
 
 <p>Base weight for 2D keypoint projection constraints. Set to 0 to disable. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00081">81</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00087">87</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -366,7 +411,7 @@ Public Attributes</h2></td></tr>
 
 <p>Target height in cm for the character, if set to 0, no height constraint is applied. </p>
 
-<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00076">76</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8h_source.html#l00082">82</a> of file <a class="el" href="marker__tracker_8h_source.html">marker_tracker.h</a>.</p>
 
 </div>
 </div>
@@ -379,7 +424,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CalibrationConfig.html">CalibrationConfig</a></li>
-    <li class="footer">Generated on Fri May 8 2026 17:23:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 8 2026 22:58:40 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
