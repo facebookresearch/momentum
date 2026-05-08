@@ -771,7 +771,8 @@ observations detected in that camera's image stream.)");
             &selectedFrames,
             &selectedMotion);
 
-        return {params.v, selectedFrames, selectedMotion};
+        // python (#frames, #params) vs. cpp (#params, #frames)
+        return {params.v, selectedFrames, selectedMotion.transpose().eval()};
       },
       R"(Calibrate a character model using marker data without running full tracking.
 
@@ -813,7 +814,7 @@ against detected 2D keypoints.
     ``identity_params`` is the calibrated identity parameter vector,
     ``selected_frame_indices`` is a list of frame indices that were selected
     by greedy sampling for calibration, and ``selected_frame_motion`` is a
-    matrix of shape ``(num_params, num_selected_frames)`` with the solved
+    matrix of shape ``(num_selected_frames, num_params)`` with the solved
     model parameters for each selected frame.)",
       py::arg("character"),
       py::arg("identity"),
