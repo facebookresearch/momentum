@@ -179,18 +179,18 @@ class Random final {
   /// scale drawn from `[scaleMin, scaleMax]`, and translation drawn uniformly from the box
   /// `[min, max]`.
   ///
-  /// @tparam T Scalar type of the affine components, typically `float` or `double`.
+  /// @tparam T Floating-point scalar type of the affine components (`float` or `double`). The
+  ///   defaults below are floating-point literals, so instantiation with an integer T is rejected
+  ///   by a `static_assert` in the implementation rather than silently truncating the defaults.
   /// @param scaleMin Inclusive lower bound on the uniform scale factor.
   /// @param scaleMax Inclusive upper bound on the uniform scale factor.
   /// @param min Inclusive lower bound on the translation component (per axis).
   /// @param max Inclusive upper bound on the translation component (per axis).
   /// @return A random Affine3<T>.
-  // TODO: The default `scaleMin = 0.1` / `scaleMax = 10.0` only makes sense when T is a floating
-  // type; instantiation with an integer T would silently truncate the defaults.
   template <typename T>
   [[nodiscard]] Affine3<T> uniformAffine3(
-      T scaleMin = 0.1,
-      T scaleMax = 10.0,
+      T scaleMin = T(0.1),
+      T scaleMax = T(10.0),
       const Vector3<T>& min = Vector3<T>::Zero(),
       const Vector3<T>& max = Vector3<T>::Ones());
 
@@ -313,11 +313,12 @@ template <typename T>
     const Vector3<T>& max = Vector3<T>::Ones());
 
 /// Random affine transformation via the global `Random` singleton (uniform rotation, uniform
-/// scale in `[scaleMin, scaleMax]`, uniform translation in `[min, max]`).
+/// scale in `[scaleMin, scaleMax]`, uniform translation in `[min, max]`). Requires a
+/// floating-point T; integer T is rejected by `static_assert` in the implementation.
 template <typename T>
 [[nodiscard]] Affine3<T> uniformAffine3(
-    T scaleMin = 0.1,
-    T scaleMax = 10.0,
+    T scaleMin = T(0.1),
+    T scaleMax = T(10.0),
     const Vector3<T>& min = Vector3<T>::Zero(),
     const Vector3<T>& max = Vector3<T>::Ones());
 
