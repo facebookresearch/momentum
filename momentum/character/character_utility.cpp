@@ -223,8 +223,6 @@ std::vector<size_t> addMappedParameters(
       continue;
     }
 
-    // TODO: Comment is inverted/stale — code marks params VALID for kept joints (the
-    // invalid-joint case is filtered above by the `continue`). Rewrite or remove.
     // Mark every model parameter that drives this kept joint as valid.
     for (SparseRowMatrixf::InnerIterator it(paramTransformOrig.transform, kJointParam); it; ++it) {
       // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
