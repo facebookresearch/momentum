@@ -18,7 +18,7 @@
 using namespace momentum;
 
 TEST(FbxBuilderTest, AddCharacter_RoundTripsNameAndMetadata) {
-  Character character = createTestCharacter<float>(5);
+  Character character = createTestCharacter(5);
 
   const auto outFile = temporaryFile("builder_char", "fbx");
   {
@@ -60,7 +60,7 @@ TEST(FbxBuilderTest, AddCharacter_MatchesSaveFbxModel) {
 }
 
 TEST(FbxBuilderTest, AddCharacterWithMotion) {
-  Character character = createTestCharacter<float>(5);
+  Character character = createTestCharacter(5);
 
   const auto nModelParams = character.parameterTransform.numAllModelParameters();
   const Eigen::Index nFrames = 10;
@@ -83,7 +83,7 @@ TEST(FbxBuilderTest, AddCharacterWithMotion) {
 }
 
 TEST(FbxBuilderTest, AddRigidBody_HasCorrectJointCount) {
-  Character character = createTestCharacter<float>(3);
+  Character character = createTestCharacter(3);
 
   const auto outFile = temporaryFile("builder_rigid", "fbx");
   {
@@ -98,7 +98,7 @@ TEST(FbxBuilderTest, AddRigidBody_HasCorrectJointCount) {
 }
 
 TEST(FbxBuilderTest, AddRigidBody_NonRootParentJoint) {
-  Character character = createTestCharacter<float>(3);
+  Character character = createTestCharacter(3);
 
   const auto outFile = temporaryFile("builder_rigid_joint1", "fbx");
   {
@@ -113,7 +113,7 @@ TEST(FbxBuilderTest, AddRigidBody_NonRootParentJoint) {
 }
 
 TEST(FbxBuilderTest, AddRigidBodyWithMotion) {
-  Character character = createTestCharacter<float>(3);
+  Character character = createTestCharacter(3);
 
   const auto nJointParams =
       static_cast<Eigen::Index>(character.parameterTransform.numJointParameters());
@@ -142,9 +142,9 @@ TEST(FbxBuilderTest, AddRigidBodyWithMotion) {
 }
 
 TEST(FbxBuilderTest, MultipleCharacters) {
-  Character body = createTestCharacter<float>(5);
+  Character body = createTestCharacter(5);
   body.name = "body";
-  Character prop = createTestCharacter<float>(3);
+  Character prop = createTestCharacter(3);
   prop.name = "prop";
 
   const auto outFile = temporaryFile("builder_multi", "fbx");
@@ -161,7 +161,7 @@ TEST(FbxBuilderTest, MultipleCharacters) {
 }
 
 TEST(FbxBuilderTest, MarkerSequence) {
-  Character character = createTestCharacter<float>(3);
+  Character character = createTestCharacter(3);
 
   std::vector<std::vector<Marker>> markerSeq(5);
   for (size_t f = 0; f < markerSeq.size(); f++) {
@@ -185,7 +185,7 @@ TEST(FbxBuilderTest, MarkerSequence) {
 }
 
 TEST(FbxBuilderTest, SaveConsumesBuilder) {
-  Character character = createTestCharacter<float>(3);
+  Character character = createTestCharacter(3);
 
   FbxBuilder builder;
   builder.addCharacter(character);

@@ -19,10 +19,10 @@ using namespace momentum;
 template <typename T>
 class MeshReductionTest : public testing::Test {
  protected:
-  using CharacterType = CharacterT<T>;
+  using CharacterType = Character;
 
   void SetUp() override {
-    character = createTestCharacter<T>(5);
+    character = createTestCharacter(5);
   }
 
   CharacterType character;

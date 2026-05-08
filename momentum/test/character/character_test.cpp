@@ -27,13 +27,13 @@ using namespace momentum;
 template <typename T>
 class CharacterTest : public testing::Test {
  protected:
-  using CharacterType = CharacterT<T>;
+  using CharacterType = Character;
   using Vector3Type = Vector3<T>;
   using QuaternionType = Quaternion<T>;
 
   void SetUp() override {
     // Create a test character with 5 joints
-    character = createTestCharacter<T>(5);
+    character = createTestCharacter(5);
 
     // Create a character with blend shapes
     characterWithBlendShapes = withTestBlendShapes(character);
@@ -273,7 +273,7 @@ TYPED_TEST(CharacterTest, MoveAssignment) {
 
   // Create two characters
   CharacterType originalCharacter = this->character;
-  CharacterType targetCharacter = createTestCharacter<TypeParam>(3); // Different size
+  CharacterType targetCharacter = createTestCharacter(3); // Different size
 
   // Store original data for comparison
   const size_t originalJointCount = originalCharacter.skeleton.joints.size();

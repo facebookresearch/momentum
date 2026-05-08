@@ -219,13 +219,12 @@ ParameterLimits createDefaultParameterLimits() {
 
 } // namespace
 
-template <typename T>
-CharacterT<T> createTestCharacter(size_t numJoints) {
+Character createTestCharacter(size_t numJoints) {
   MT_CHECK(numJoints >= 3, "The number of joints '{}' should be equal to 3 or greater.", numJoints);
   auto [mesh, skin] = createDefaultMesh(static_cast<int>(numJoints));
   auto collisionGeometry = createDefaultCollisionGeometry(numJoints);
   const auto skeleton = createDefaultSkeleton(numJoints);
-  return CharacterT<T>(
+  return {
       skeleton,
       createDefaultParameterTransform(numJoints),
       createDefaultParameterLimits(),
@@ -239,14 +238,10 @@ CharacterT<T> createTestCharacter(size_t numJoints) {
       std::string("test character"),
       momentum::TransformationList{},
       createDefaultSkinnedLocatorList(skeleton),
-      std::string(R"({"name":"testCharacterV1","version":1})"));
+      std::string(R"({"name":"testCharacterV1","version":1})")};
 }
 
-template CharacterT<float> createTestCharacter(size_t numJoints);
-template CharacterT<double> createTestCharacter(size_t numJoints);
-
-template <typename T>
-CharacterT<T> withTestBlendShapes(const CharacterT<T>& character) {
+Character withTestBlendShapes(const Character& character) {
   MT_CHECK(character.mesh);
 
   const int nShapes = 5;
@@ -255,11 +250,7 @@ CharacterT<T> withTestBlendShapes(const CharacterT<T>& character) {
   return character.withBlendShape(blendShapes, nShapes);
 }
 
-template CharacterT<float> withTestBlendShapes(const CharacterT<float>& character);
-template CharacterT<double> withTestBlendShapes(const CharacterT<double>& character);
-
-template <typename T>
-CharacterT<T> withTestFaceExpressionBlendShapes(const CharacterT<T>& character) {
+Character withTestFaceExpressionBlendShapes(const Character& character) {
   MT_CHECK(character.mesh);
 
   const int nShapes = 5;
@@ -268,9 +259,6 @@ CharacterT<T> withTestFaceExpressionBlendShapes(const CharacterT<T>& character) 
 
   return character.withFaceExpressionBlendShape(blendShapes, nShapes);
 }
-
-template CharacterT<float> withTestFaceExpressionBlendShapes(const CharacterT<float>& character);
-template CharacterT<double> withTestFaceExpressionBlendShapes(const CharacterT<double>& character);
 
 template <typename T>
 std::shared_ptr<const MppcaT<T>> createDefaultPosePrior() {

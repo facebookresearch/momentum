@@ -29,13 +29,13 @@ using namespace momentum;
 template <typename T>
 class CharacterBlendShapeTest : public testing::Test {
  protected:
-  using CharacterType = CharacterT<T>;
+  using CharacterType = Character;
   using Vector3Type = Vector3<T>;
   using QuaternionType = Quaternion<T>;
 
   void SetUp() override {
     // Create a test character with 5 joints
-    character = createTestCharacter<T>(5);
+    character = createTestCharacter(5);
 
     // Create a character with blend shapes
     characterWithBlendShapes = withTestBlendShapes(character);

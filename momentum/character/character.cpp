@@ -24,8 +24,7 @@
 
 namespace momentum {
 
-template <typename T>
-CharacterT<T>::CharacterT(
+Character::Character(
     const Skeleton& s,
     const ParameterTransform& pt,
     const ParameterLimits& pl,
@@ -74,8 +73,7 @@ CharacterT<T>::CharacterT(
   resetJointMap();
 }
 
-template <typename T>
-CharacterT<T>::CharacterT(const CharacterT& c)
+Character::Character(const Character& c)
     : skeleton(c.skeleton),
       parameterTransform(c.parameterTransform),
       parameterLimits(c.parameterLimits),
@@ -104,19 +102,15 @@ CharacterT<T>::CharacterT(const CharacterT& c)
   }
 }
 
-template <typename T>
-CharacterT<T>::CharacterT(CharacterT&& c) noexcept = default;
+Character::Character(Character&& c) noexcept = default;
 
-template <typename T>
-CharacterT<T>::CharacterT() = default;
+Character::Character() = default;
 
-template <typename T>
-CharacterT<T>::~CharacterT() = default;
+Character::~Character() = default;
 
-template <typename T>
-CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
+Character& Character::operator=(const Character& rhs) {
   // Copy-and-swap: build a temporary copy, then swap members in for strong exception safety.
-  CharacterT<T> tmp(rhs);
+  Character tmp(rhs);
 
   std::swap(skeleton, tmp.skeleton);
   std::swap(parameterTransform, tmp.parameterTransform);
@@ -137,11 +131,9 @@ CharacterT<T>& CharacterT<T>::operator=(const CharacterT& rhs) {
   return *this;
 }
 
-template <typename T>
-CharacterT<T>& CharacterT<T>::operator=(CharacterT&& rhs) noexcept = default;
+Character& Character::operator=(Character&& rhs) noexcept = default;
 
-template <typename T>
-std::vector<bool> CharacterT<T>::parametersToActiveJoints(const ParameterSet& parameterSet) const {
+std::vector<bool> Character::parametersToActiveJoints(const ParameterSet& parameterSet) const {
   const auto nJoints = skeleton.joints.size();
   std::vector<bool> result(nJoints, false);
   for (int k = 0; k < parameterTransform.transform.outerSize(); ++k) {
@@ -164,8 +156,7 @@ std::vector<bool> CharacterT<T>::parametersToActiveJoints(const ParameterSet& pa
   return result;
 }
 
-template <typename T>
-ParameterSet CharacterT<T>::activeJointsToParameters(const std::vector<bool>& activeJoints) const {
+ParameterSet Character::activeJointsToParameters(const std::vector<bool>& activeJoints) const {
   MT_CHECK(
       activeJoints.size() == skeleton.joints.size(),
       "{} is not {}",
@@ -194,8 +185,7 @@ ParameterSet CharacterT<T>::activeJointsToParameters(const std::vector<bool>& ac
   return result;
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoints) const {
+Character Character::simplifySkeleton(const std::vector<bool>& activeJoints) const {
   MT_CHECK(
       activeJoints.size() == skeleton.joints.size(),
       "{} is not {}",
@@ -260,7 +250,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
         if (sIndex == kInvalidIndex) {
           break;
         }
-        currentParent = lastJoint[sIndex];
+        currentParent = lastJoint.at(sIndex);
       }
       // Re-express the joint's translation in the (new) parent's local frame; if no parent
       // remains, the translation is in world space (root joint case).
@@ -289,17 +279,17 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
 
       simplifiedSkeleton.joints.push_back(jt);
 
-      intermediateJointMap[aIndex] = jointCount;
+      intermediateJointMap.at(aIndex) = jointCount;
       jointCount++;
-      lastJoint[aIndex] = simplifiedSkeleton.joints.size() - 1;
+      lastJoint.at(aIndex) = simplifiedSkeleton.joints.size() - 1;
 
-      simplifiedJointMap[aIndex] = jointCount - 1;
+      simplifiedJointMap.at(aIndex) = jointCount - 1;
     } else {
       // Inactive joints are not added to the simplified skeleton; instead, point their entry in
       // simplifiedJointMap at the nearest active ancestor so consumers (locators, skin weights,
       // etc.) can still resolve them.
       size_t index = aIndex;
-      while (index != kInvalidIndex && intermediateJointMap[index] == kInvalidIndex) {
+      while (index != kInvalidIndex && intermediateJointMap.at(index) == kInvalidIndex) {
         index = skeleton.joints[index].parent;
       }
       MT_THROW_IF(
@@ -307,7 +297,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
           "During skeleton simplification, inactive joint '{}' has no valid parent joint.  "
           "Every joint in the simplified skeleton must have at least one parent joint that is not disabled.",
           skeleton.joints.at(aIndex).name);
-      simplifiedJointMap[aIndex] = intermediateJointMap[index];
+      simplifiedJointMap.at(aIndex) = intermediateJointMap.at(index);
     }
   }
   MT_THROW_IF(
@@ -317,7 +307,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   const ParameterTransform simplifiedTransform = mapParameterTransformJoints(
       parameterTransform, simplifiedSkeleton.joints.size(), intermediateJointMap);
 
-  CharacterT<T> result(simplifiedSkeleton, simplifiedTransform);
+  Character result(simplifiedSkeleton, simplifiedTransform);
   result.name = name;
   result.metadata = metadata;
 
@@ -356,7 +346,7 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
     result.collision = std::make_unique<CollisionGeometry>(*collision);
     for (auto&& c : *result.collision) {
       const auto oldParent = c.parent;
-      c.parent = result.jointMap[c.parent];
+      c.parent = result.jointMap.at(c.parent);
       // Re-express the collision shape's local transform in the new parent's frame:
       //   newLocal = targetParentBind^-1 * sourceParentBind * oldLocal
       c.transformation =
@@ -368,15 +358,14 @@ CharacterT<T> CharacterT<T>::simplifySkeleton(const std::vector<bool>& activeJoi
   return result;
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::simplifyParameterTransform(const ParameterSet& parameterSet) const {
+Character Character::simplifyParameterTransform(const ParameterSet& parameterSet) const {
   MT_CHECK(
       parameterSet.count() > 0, "No active parameters in the input to simplifyParameterTransform.");
 
   auto [subsetParamTransform, subsetParamLimits] =
       subsetParameterTransform(parameterTransform, parameterLimits, parameterSet);
 
-  return CharacterT(
+  return {
       skeleton,
       subsetParamTransform,
       subsetParamLimits,
@@ -390,11 +379,10 @@ CharacterT<T> CharacterT<T>::simplifyParameterTransform(const ParameterSet& para
       name,
       inverseBindPose,
       skinnedLocators,
-      metadata);
+      metadata};
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::simplify(const ParameterSet& activeParams) const {
+Character Character::simplify(const ParameterSet& activeParams) const {
   auto activeJoints = parametersToActiveJoints(activeParams);
   // always keep the root joint to ensure valid simplification.
   // This is needed because while previously we generally parametrized the root joint with
@@ -407,10 +395,9 @@ CharacterT<T> CharacterT<T>::simplify(const ParameterSet& activeParams) const {
   return simplifySkeleton(activeJoints);
 }
 
-template <typename T>
-SkinWeights CharacterT<T>::remapSkinWeights(
+SkinWeights Character::remapSkinWeights(
     const SkinWeights& inSkinWeights,
-    const CharacterT& originalCharacter) const {
+    const Character& originalCharacter) const {
   MT_CHECK(
       originalCharacter.parameterTransform.numAllModelParameters() ==
           parameterTransform.numAllModelParameters(),
@@ -458,10 +445,9 @@ SkinWeights CharacterT<T>::remapSkinWeights(
   return result;
 }
 
-template <typename T>
-ParameterLimits CharacterT<T>::remapParameterLimits(
+ParameterLimits Character::remapParameterLimits(
     const ParameterLimits& limits,
-    const CharacterT& originalCharacter) const {
+    const Character& originalCharacter) const {
   MT_CHECK(
       originalCharacter.parameterTransform.numAllModelParameters() ==
           parameterTransform.numAllModelParameters(),
@@ -517,10 +503,9 @@ ParameterLimits CharacterT<T>::remapParameterLimits(
   return result;
 }
 
-template <typename T>
-SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
+SkinnedLocatorList Character::remapSkinnedLocators(
     const SkinnedLocatorList& locs,
-    const CharacterT& originalCharacter) const {
+    const Character& originalCharacter) const {
   MT_CHECK(
       originalCharacter.parameterTransform.numAllModelParameters() ==
           parameterTransform.numAllModelParameters(),
@@ -575,10 +560,8 @@ SkinnedLocatorList CharacterT<T>::remapSkinnedLocators(
   return result;
 }
 
-template <typename T>
-LocatorList CharacterT<T>::remapLocators(
-    const LocatorList& locs,
-    const CharacterT& originalCharacter) const {
+LocatorList Character::remapLocators(const LocatorList& locs, const Character& originalCharacter)
+    const {
   MT_CHECK(
       originalCharacter.parameterTransform.numAllModelParameters() ==
           parameterTransform.numAllModelParameters(),
@@ -611,29 +594,25 @@ LocatorList CharacterT<T>::remapLocators(
   return result;
 }
 
-template <typename T>
-CharacterParameters CharacterT<T>::bindPose() const {
+CharacterParameters Character::bindPose() const {
   CharacterParameters result;
   result.pose = VectorXf::Zero(parameterTransform.numAllModelParameters());
   result.offsets = VectorXf::Zero(skeleton.joints.size() * kParametersPerJoint);
   return result;
 }
 
-template <typename T>
-void CharacterT<T>::initParameterTransform() {
+void Character::initParameterTransform() {
   size_t nParams = skeleton.joints.size() * kParametersPerJoint;
   parameterTransform = ParameterTransform::empty(nParams);
 }
 
-template <typename T>
-void CharacterT<T>::resetJointMap() {
+void Character::resetJointMap() {
   // Identity map: jointMap[i] = i. Used when no skeleton simplification has been performed.
   jointMap.resize(skeleton.joints.size());
   std::iota(jointMap.begin(), jointMap.end(), 0);
 }
 
-template <typename T>
-void CharacterT<T>::initInverseBindPose() {
+void Character::initInverseBindPose() {
   const SkeletonState bindState(parameterTransform.bindPose(), skeleton, false);
   if (!inverseBindPose.empty()) {
     inverseBindPose.clear();
@@ -644,9 +623,8 @@ void CharacterT<T>::initInverseBindPose() {
   }
 }
 
-template <typename T>
-CharacterParameters CharacterT<T>::splitParameters(
-    const CharacterT& character,
+CharacterParameters Character::splitParameters(
+    const Character& character,
     const CharacterParameters& parameters,
     const ParameterSet& parameterSet) {
   auto parameterSplit = parameters;
@@ -662,17 +640,15 @@ CharacterParameters CharacterT<T>::splitParameters(
   return parameterSplit;
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::withBlendShape(
-    BlendShape_const_p blendShape_in,
+Character Character::withBlendShape(
+    const BlendShape_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) const {
-  CharacterT<T> result = *this;
+  Character result = *this;
   result.addBlendShape(blendShape_in, maxBlendShapes);
   return result;
 }
 
-template <typename T>
-void CharacterT<T>::addBlendShape(
+void Character::addBlendShape(
     const BlendShape_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) {
   MT_CHECK(this->mesh);
@@ -698,17 +674,15 @@ void CharacterT<T>::addBlendShape(
       parameterTransform, parameterLimits, std::min(maxBlendShapes, blendShape_in->shapeSize()));
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::withFaceExpressionBlendShape(
-    BlendShapeBase_const_p blendShape_in,
+Character Character::withFaceExpressionBlendShape(
+    const BlendShapeBase_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) const {
-  CharacterT<T> res = *this;
+  Character res = *this;
   res.addFaceExpressionBlendShape(blendShape_in, maxBlendShapes);
   return res;
 }
 
-template <typename T>
-void CharacterT<T>::addFaceExpressionBlendShape(
+void Character::addFaceExpressionBlendShape(
     const BlendShapeBase_const_p& blendShape_in,
     Eigen::Index maxBlendShapes) {
   MT_CHECK(mesh);
@@ -738,9 +712,8 @@ void CharacterT<T>::addFaceExpressionBlendShape(
       addFaceExpressionParameters(parameterTransform, parameterLimits, nBlendShapes);
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::bakeBlendShape(const BlendWeights& blendWeights) const {
-  CharacterT<T> result = *this;
+Character Character::bakeBlendShape(const BlendWeights& blendWeights) const {
+  Character result = *this;
   MT_CHECK(result.mesh);
   if (this->blendShape) {
     result.mesh->vertices = this->blendShape->template computeShape<float>(blendWeights);
@@ -755,18 +728,14 @@ CharacterT<T> CharacterT<T>::bakeBlendShape(const BlendWeights& blendWeights) co
   return result;
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::bakeBlendShape(const ModelParameters& modelParams) const {
+Character Character::bakeBlendShape(const ModelParameters& modelParams) const {
   return bakeBlendShape(extractBlendWeights(this->parameterTransform, modelParams));
 }
 
-template <typename T>
-CharacterT<T> CharacterT<T>::bake(
-    const ModelParameters& modelParams,
-    bool bakeBlendShapes,
-    bool bakeScales) const {
+Character Character::bake(const ModelParameters& modelParams, bool bakeBlendShapes, bool bakeScales)
+    const {
   // 1. Clone the character so we don't mutate the original.
-  CharacterT<T> result = *this;
+  Character result = *this;
   MT_CHECK(result.mesh);
 
   // 2. Blend-shape baking: replace the rest-pose vertices with the blend-shape evaluation.
@@ -805,8 +774,5 @@ CharacterT<T> CharacterT<T>::bake(
 
   return result;
 }
-
-template struct CharacterT<float>;
-template struct CharacterT<double>;
 
 } // namespace momentum

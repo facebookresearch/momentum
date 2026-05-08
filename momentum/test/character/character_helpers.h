@@ -16,18 +16,15 @@ namespace momentum {
 ///
 /// @param numJoints The number of joints in the resulting character.
 /// @note: The `numJoints` parameter should be equal to 3 or greater.
-template <typename T = float>
-[[nodiscard]] CharacterT<T> createTestCharacter(size_t numJoints = 3);
+[[nodiscard]] Character createTestCharacter(size_t numJoints = 3);
 // TODO: Currently, the number of parameters is fixed to 10, affecting only the first 3 joints.
 // Additional work is needed to scale the number of parameters with the number of joints.
 
 template <typename T>
 [[nodiscard]] std::shared_ptr<const MppcaT<T>> createDefaultPosePrior();
 
-template <typename T>
-[[nodiscard]] CharacterT<T> withTestBlendShapes(const CharacterT<T>& character);
+[[nodiscard]] Character withTestBlendShapes(const Character& character);
 
-template <typename T>
-[[nodiscard]] CharacterT<T> withTestFaceExpressionBlendShapes(const CharacterT<T>& character);
+[[nodiscard]] Character withTestFaceExpressionBlendShapes(const Character& character);
 
 } // namespace momentum

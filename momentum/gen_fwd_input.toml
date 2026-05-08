@@ -22,13 +22,13 @@ subdirectory = "character"
 structs = [
     "BlendShape",
     "BlendShapeBase",
+    "Character",
     "Locator",
     "PoseShape",
     "SkinWeights",
     "SkinnedLocator"
 ]
 template_structs = [
-    "Character",
     "CharacterState",
     "CollisionGeometryState",
     "Joint",
