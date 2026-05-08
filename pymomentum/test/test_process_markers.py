@@ -202,8 +202,8 @@ class TestMarkerTracker(unittest.TestCase):
         # Check that selected frame indices and motion are valid
         self.assertGreater(len(selected_frames), 0)
         self.assertTrue(all(f < num_frames for f in selected_frames))
-        self.assertEqual(selected_motion.shape[1], len(selected_frames))
-        self.assertEqual(selected_motion.shape[0], character.parameter_transform.size)
+        self.assertEqual(selected_motion.shape[0], len(selected_frames))
+        self.assertEqual(selected_motion.shape[1], character.parameter_transform.size)
 
         # Verify we can use the calibrated identity with process_markers
         tracking_config = TrackingConfig()
