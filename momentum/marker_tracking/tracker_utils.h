@@ -11,6 +11,7 @@
 #include <momentum/character/locator.h>
 #include <momentum/character/marker.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/character_solver/plane_error_function.h>
 #include <momentum/character_solver/skinned_locator_triangle_error_function.h>
 
 namespace momentum {
@@ -106,6 +107,27 @@ std::vector<momentum::CandidateTriangle> findCandidateTrianglesDfs(
 momentum::LocatorList extractLocatorsFromCharacter(
     const momentum::Character& locatorCharacter,
     const momentum::CharacterParameters& calibParams);
+
+/// Compute per-frame floor contact constraints based on solved locator heights.
+///
+/// For each floor locator independently, computes the Nth percentile of its Y
+/// position across all solved frames. Locators at or below their threshold on a
+/// given frame are included in that frame's equality constraint set. This allows
+/// different feet/regions to be in contact on different frames.
+///
+/// @param character Character with skeleton and floor locators
+/// @param motion Solved motion matrix (numAllModelParams x numFrames)
+/// @param floorConstraints Floor constraint data (from createFloorConstraints)
+/// @param frameIndices Which frames in the motion matrix to evaluate
+/// @param percentile Percentile threshold for contact detection (0-1, e.g. 0.25)
+/// @return Per-frame constraint lists (same length as frameIndices, each entry is
+///         the subset of floorConstraints that are in contact for that frame)
+std::vector<std::vector<momentum::PlaneDataT<float>>> computeFloorContactConstraints(
+    const momentum::Character& character,
+    const Eigen::MatrixXf& motion,
+    const std::vector<momentum::PlaneDataT<float>>& floorConstraints,
+    const std::vector<size_t>& frameIndices,
+    float percentile);
 
 // TODO: move to momentum proper
 momentum::ModelParameters extractParameters(

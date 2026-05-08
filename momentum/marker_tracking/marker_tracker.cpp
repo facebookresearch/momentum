@@ -220,7 +220,6 @@ std::vector<size_t> sampleFrames(
 /// @param config Tracking configuration settings
 /// @param regularizer Weight for regularizing changes to global parameters
 /// @param frameStride Process every frameStride-th frame (1 = all frames)
-/// @param enforceFloorInFirstFrame Force floor contact constraints in first frame
 /// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
 /// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
@@ -384,7 +383,8 @@ void addSequenceFrameConstraints(
     const std::vector<std::vector<JointToJointOrientationDataT<float>>>& leftGloveOriData,
     const std::vector<std::vector<JointToJointPositionDataT<float>>>& rightGlovePosData,
     const std::vector<std::vector<JointToJointOrientationDataT<float>>>& rightGloveOriData,
-    std::span<const CameraKeypointData> cameraKeypointData = {}) {
+    std::span<const CameraKeypointData> cameraKeypointData = {},
+    std::span<const std::vector<PlaneDataT<float>>> perFrameFloorContacts = {}) {
   auto posConstrWeight = PositionErrorFunction::kLegacyWeight * config.markerWeight;
   if (solverFrame == 0 && (enforceFloorInFirstFrame || !firstFramePoseConstraintSet.empty())) {
     posConstrWeight *= solvedFrames;
@@ -423,19 +423,29 @@ void addSequenceFrameConstraints(
     solverFunc.addErrorFunction(solverFrame, heightConstrFunc);
   }
 
-  // prepare floor constraints
+  // Floor constraints
   if (!floorConstraints.empty()) {
-    bool halfPlane = true;
-    float weightMultiplier = 1.0f;
     if (enforceFloorInFirstFrame && solverFrame == 0) {
-      halfPlane = false;
-      weightMultiplier = solvedFrames;
+      // Legacy: full equality constraint on frame 0 with high weight
+      auto eqConstrFunc = std::make_shared<PlaneErrorFunction>(character, /*half plane*/ false);
+      eqConstrFunc->setConstraints(floorConstraints);
+      eqConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight * solvedFrames);
+      solverFunc.addErrorFunction(solverFrame, eqConstrFunc);
+    } else {
+      // Half-plane floor constraint (non-penetration) on all frames
+      auto halfPlaneConstrFunc =
+          std::make_shared<PlaneErrorFunction>(character, /*half plane*/ true);
+      halfPlaneConstrFunc->setConstraints(floorConstraints);
+      halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight);
+      solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
     }
-    auto halfPlaneConstrFunc =
-        std::make_shared<PlaneErrorFunction>(character, /*half plane*/ halfPlane);
-    halfPlaneConstrFunc->setConstraints(floorConstraints);
-    halfPlaneConstrFunc->setWeight(PlaneErrorFunction::kLegacyWeight * weightMultiplier);
-    solverFunc.addErrorFunction(solverFrame, halfPlaneConstrFunc);
+  }
+  // Soft equality floor constraint on detected contact frames (per-locator)
+  if (solverFrame < perFrameFloorContacts.size() && !perFrameFloorContacts[solverFrame].empty()) {
+    auto eqFunc = std::make_shared<PlaneErrorFunction>(character, /*half plane*/ false);
+    eqFunc->setConstraints(perFrameFloorContacts[solverFrame]);
+    eqFunc->setWeight(PlaneErrorFunction::kLegacyWeight * 3.0f);
+    solverFunc.addErrorFunction(solverFrame, eqFunc);
   }
 
   if (!firstFramePoseConstraintSet.empty() && solverFrame == 0) {
@@ -488,7 +498,6 @@ void addSequenceFrameConstraints(
 /// @param config Tracking configuration settings
 /// @param frames Vector of specific frame indices to solve
 /// @param regularizer Weight for regularizing changes to global parameters
-/// @param enforceFloorInFirstFrame Force floor contact constraints in first frame
 /// @param firstFramePoseConstraintSet Name of pose constraint set for first frame
 /// @return Solved motion parameters matrix (parameters x frames)
 Eigen::MatrixXf trackSequence(
@@ -505,7 +514,8 @@ Eigen::MatrixXf trackSequence(
     std::span<const GloveFrameData> leftGloveData,
     std::span<const GloveFrameData> rightGloveData,
     const std::optional<GloveConfig>& gloveConfig,
-    std::span<const CameraKeypointData> cameraKeypointData) {
+    std::span<const CameraKeypointData> cameraKeypointData,
+    std::span<const std::vector<PlaneDataT<float>>> perFrameFloorContacts) {
   // sanity checks
   const size_t numFrames = markerData.size();
   MT_CHECK(numFrames > 0, "Input marker data is empty.");
@@ -621,7 +631,8 @@ Eigen::MatrixXf trackSequence(
           leftGloveOriData,
           rightGlovePosData,
           rightGloveOriData,
-          cameraKeypointData);
+          cameraKeypointData,
+          perFrameFloorContacts);
     }
     // Set per-frame initial value
     solverFunc.setFrameParameters(solverFrame, initialMotion.col(iFrame));
@@ -1228,6 +1239,33 @@ void logKeypointReprojectionDiagnostic(
   }
 }
 
+// Build the parameter sets controlling which body parameters are calibrated.
+std::pair<ParameterSet, ParameterSet> buildCalibBodySets(
+    const CalibrationConfig& config,
+    const ParameterTransform& transform,
+    const ParameterTransform& transformExtended) {
+  if (config.globalScaleOnly) {
+    const size_t paramIndex = transform.getParameterIdByName("scale_global");
+    const size_t paramIndexExt = transformExtended.getParameterIdByName("scale_global");
+    MT_THROW_IF(
+        paramIndex == kInvalidIndex || paramIndexExt == kInvalidIndex,
+        "Can't calibrate global scale since it is not defined in the parameter list!");
+    ParameterSet calibBodySet;
+    ParameterSet calibBodySetExtended;
+    calibBodySet.set(paramIndex);
+    calibBodySetExtended.set(paramIndexExt);
+    return {calibBodySet, calibBodySetExtended};
+  }
+
+  ParameterSet calibBodySet = transform.getScalingParameters();
+  ParameterSet calibBodySetExtended = transformExtended.getScalingParameters();
+  if (config.calibShape) {
+    calibBodySet |= transform.getBlendShapeParameters();
+    calibBodySetExtended |= transformExtended.getBlendShapeParameters();
+  }
+  return {calibBodySet, calibBodySetExtended};
+}
+
 void calibrateModel(
     const std::span<const std::vector<Marker>> markerData,
     const CalibrationConfig& config,
@@ -1259,6 +1297,9 @@ void calibrateModel(
       numFrames);
   validateCameraKeypointFrameCount(cameraKeypointData, numFrames);
 
+  MT_THROW_IF(
+      config.enforceFloorInFirstFrame && config.adaptiveFloorContact,
+      "enforceFloorInFirstFrame and adaptiveFloorContact are mutually exclusive.");
   MT_THROW_IF(config.calibFrames == 0, "calibFrames must be > 0.");
   if (numFrames < config.calibFrames) {
     MT_LOGW(
@@ -1303,26 +1344,8 @@ void calibrateModel(
   ParameterSet locatorSet = transformExtended.getParameterSet("locators", true) |
       transformExtended.getParameterSet("skinnedLocators", true);
   ParameterSet gloveSet = transformExtended.getParameterSet("gloves", true);
-  ParameterSet calibBodySetExtended;
-  ParameterSet calibBodySet;
-  if (config.globalScaleOnly) {
-    const size_t paramIndex = transform.getParameterIdByName("scale_global");
-    const size_t paramIndexExt = transformExtended.getParameterIdByName("scale_global");
-    MT_THROW_IF(
-        paramIndex == kInvalidIndex || paramIndexExt == kInvalidIndex,
-        "Can't calibrate global scale since it is not defined in the parameter list!");
-
-    calibBodySetExtended.set(paramIndexExt);
-    calibBodySet.set(paramIndex);
-  } else {
-    calibBodySetExtended = transformExtended.getScalingParameters();
-    calibBodySet = transform.getScalingParameters();
-
-    if (config.calibShape) {
-      calibBodySetExtended |= transformExtended.getBlendShapeParameters();
-      calibBodySet |= transform.getBlendShapeParameters();
-    }
-  }
+  const auto [calibBodySet, calibBodySetExtended] =
+      buildCalibBodySets(config, transform, transformExtended);
 
   // special trackingConfig for initialization: zero out smoothness and collision
   TrackingConfig trackingConfig;
@@ -1427,6 +1450,10 @@ void calibrateModel(
       character, transform, motion, cameraKeypointData, config, "after Stage 0");
 
   // Solve everything together for a few iterations
+  const auto calibFloorConstraints =
+      createFloorConstraints<float>("Floor_", character.locators, Vector3f::UnitY(), 0.0f, 5.0f);
+  std::vector<std::vector<PlaneDataT<float>>> perFrameFloorContacts;
+
   for (size_t iIter = 0; iIter < config.majorIter; ++iIter) {
     MT_LOGI_IF(config.debug, "Iteration {} of calibration", iIter);
 
@@ -1444,11 +1471,22 @@ void calibrateModel(
         leftGloveData,
         rightGloveData,
         gloveConfig,
-        cameraKeypointData);
+        cameraKeypointData,
+        perFrameFloorContacts);
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
     std::tie(identity.v, character.locators, character.skinnedLocators) =
         extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
+
+    // Update per-locator floor contact constraints for the next iteration
+    if (config.adaptiveFloorContact && !calibFloorConstraints.empty()) {
+      perFrameFloorContacts = computeFloorContactConstraints(
+          solvingCharacter,
+          motion,
+          calibFloorConstraints,
+          frameIndices,
+          config.floorContactPercentile);
+    }
     if (config.calibShape && solvingCharacter.blendShape) {
       auto blendShapeParams =
           extractBlendWeights(solvingCharacter.parameterTransform, ModelParameters(motion.col(0)));
@@ -1545,6 +1583,9 @@ void calibrateLocators(
       identity.v.size(),
       character.parameterTransform.numAllModelParameters());
 
+  MT_THROW_IF(
+      config.enforceFloorInFirstFrame && config.adaptiveFloorContact,
+      "enforceFloorInFirstFrame and adaptiveFloorContact are mutually exclusive.");
   MT_THROW_IF(config.calibFrames == 0, "calibFrames must be > 0.");
   if (numFrames < config.calibFrames) {
     MT_LOGW(

@@ -84,11 +84,17 @@ void addCalibrationOptions(CLI::App& app, std::shared_ptr<CalibrationConfig> con
       "Use greedy sampling to select calibration frames");
   greedySamplingOption->default_val(config->greedySampling)->check(CLI::NonNegativeNumber);
 
-  auto* firstFrameFloorContactOption = app.add_flag(
-      "--init-floor-contact",
+  auto* enforceFloorOption = app.add_flag(
+      "--enforce-floor-in-first-frame",
       config->enforceFloorInFirstFrame,
-      "Enforce floor contact constraints in first frame");
-  firstFrameFloorContactOption->default_val(config->enforceFloorInFirstFrame);
+      "Force all floor locators to y=0 on frame 0 with high weight");
+  enforceFloorOption->default_val(config->enforceFloorInFirstFrame);
+
+  auto* adaptiveFloorContactOption = app.add_flag(
+      "--adaptive-floor-contact",
+      config->adaptiveFloorContact,
+      "Enable adaptive per-locator floor contact detection during calibration");
+  adaptiveFloorContactOption->default_val(config->adaptiveFloorContact);
 
   auto* poseOption = app.add_option(
       "--init-pose",
