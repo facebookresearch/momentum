@@ -240,7 +240,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div class="line">| [     <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">A</a>      ]         [ <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">b</a> ] |</div>
 </div><!-- fragment --><p> without materializing the extra <code>lambda * I</code> rows. R is initialized with <code>lambda</code> on its diagonal so the first <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#ade53484de15f393ce0e6e3a35a881b1c" title="Copying overload of addMutating().">add()</a></code> call sees the regularization. </p>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00125">125</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00123">123</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -276,7 +276,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Copying overload of <code><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html#aff3115e3a4211d9c1dfb730852b7630b" title="In-place overload: factorizes A and b directly, mutating both buffers.">addMutating()</a></code>. </p>
 <dl class="section note"><dt>Note</dt><dd>Pass the arguments via <code>std::move</code> to avoid the internal copy when the caller no longer needs them. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00168">168</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00166">166</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -315,7 +315,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <code>A.rows()</code> equals <code>b.size()</code>. </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>Internal <code>R_</code> and <code>y_</code> are updated to reflect the combined (prior + new) data. The contents of <code>A</code> and <code>b</code> are arbitrary on return. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00173">173</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00171">171</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, and <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>.</p>
 
@@ -386,7 +386,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd><code>A^T * b</code> for the data accumulated so far, computed from <code>R^T * y</code> without needing the original A. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00226">226</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00224">224</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -439,7 +439,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Discards accumulated state, keeping the existing <code>n</code> and <code>lambda</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00130">130</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00128">128</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -473,7 +473,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Discards accumulated state and reconfigures the solver with new <code>n</code> and <code>lambda</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00135">135</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00133">133</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -497,7 +497,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Solves <code>R * x = y</code> by back-substitution using the currently accumulated state and returns <code>x</code>. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of length <code>n</code> containing the least-squares solution for the data added so far. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00237">237</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="online__householder__qr_8cpp_source.html#l00235">235</a> of file <a class="el" href="online__householder__qr_8cpp_source.html">online_householder_qr.cpp</a>.</p>
 
 </div>
 </div>
@@ -541,7 +541,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1OnlineHouseholderQR.html">OnlineHouseholderQR</a></li>
-    <li class="footer">Generated on Thu May 7 2026 18:17:17 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 8 2026 17:23:35 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
