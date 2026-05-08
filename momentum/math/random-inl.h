@@ -10,6 +10,9 @@
 #include <momentum/math/random.h>
 #include <momentum/math/types.h>
 
+#include <algorithm>
+#include <limits>
+
 namespace momentum {
 
 namespace detail {
@@ -123,13 +126,17 @@ template <typename T, typename Generator>
     NormalRealDist<T> dist(mean, sigma);
     return dist(generator);
   } else if constexpr (is_compatible_to_uniform_int_distribution_v<T>) {
-    // No discrete normal distribution exists in <random>; sample from a float
-    // normal then round to the nearest integer. TODO: this can overflow T for
-    // tail samples — `std::round` returns a float that is then implicitly
-    // narrowed without bounds checking. Also, using float (not double) limits
-    // precision for 64-bit integer T.
-    const float realNumber = NormalRealDist<float>(mean, sigma)(generator);
-    return std::round(realNumber);
+    // No discrete normal distribution exists in <random>; sample from a double normal then round
+    // to the nearest integer. Use `double` (not `float`) so the precision is sufficient for
+    // 64-bit integer T, and clamp the rounded result to T's representable range so a tail sample
+    // does not invoke undefined behavior in the narrowing cast.
+    const double realNumber = NormalRealDist<double>(mean, sigma)(generator);
+    const double rounded = std::round(realNumber);
+    const double clamped = std::clamp(
+        rounded,
+        static_cast<double>(std::numeric_limits<T>::lowest()),
+        static_cast<double>(std::numeric_limits<T>::max()));
+    return static_cast<T>(clamped);
   }
 }
 
