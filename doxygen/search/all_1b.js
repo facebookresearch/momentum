@@ -2,8 +2,8 @@ var searchData=
 [
   ['_7eblendshapebase_0',['~BlendShapeBase',['../structmomentum_1_1BlendShapeBase.html#a24453080253e718ab71fb45c32033f69',1,'momentum::BlendShapeBase']]],
   ['_7ecenterofmasserrorfunctiont_1',['~CenterOfMassErrorFunctionT',['../classmomentum_1_1CenterOfMassErrorFunctionT.html#aea7d8b47ceed351d2dd6506d02595a42',1,'momentum::CenterOfMassErrorFunctionT']]],
-  ['_7echaracterstatet_2',['~CharacterStateT',['../structmomentum_1_1CharacterStateT.html#a991820abfdd54a22615afd28a9a84d9c',1,'momentum::CharacterStateT']]],
-  ['_7echaractert_3',['~CharacterT',['../structmomentum_1_1CharacterT.html#a38123d0ec98148d5f4f525e28b046ee3',1,'momentum::CharacterT']]],
+  ['_7echaracter_2',['~Character',['../structmomentum_1_1Character.html#a87a640040c227b2b8d7702a7ad1290f2',1,'momentum::Character']]],
+  ['_7echaracterstatet_3',['~CharacterStateT',['../structmomentum_1_1CharacterStateT.html#a991820abfdd54a22615afd28a9a84d9c',1,'momentum::CharacterStateT']]],
   ['_7efbxbuilder_4',['~FbxBuilder',['../classmomentum_1_1FbxBuilder.html#a2274ef55ffb7514eef84bf0875a09a4d',1,'momentum::FbxBuilder']]],
   ['_7efloorerrorfunctiont_5',['~FloorErrorFunctionT',['../classmomentum_1_1FloorErrorFunctionT.html#ac5f54da88e3d20fa3134fea7c9f039e0',1,'momentum::FloorErrorFunctionT']]],
   ['_7efullydifferentiablemotionerrorfunctiont_6',['~FullyDifferentiableMotionErrorFunctionT',['../classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a4cb2e309230a1fdfedf1ef62da904a20',1,'momentum::FullyDifferentiableMotionErrorFunctionT']]],

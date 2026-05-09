@@ -124,13 +124,13 @@ $(document).ready(function(){initNavTree('skeleton__solver__function_8cpp_source
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="foldopen" id="foldopen00025" data-start="{" data-end="}">
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classmomentum_1_1SkeletonSolverFunctionT.html#a65c2eec2b5406f92c081456d3a80d126">   25</a></span><a class="code hl_function" href="classmomentum_1_1SkeletonSolverFunctionT.html#a65c2eec2b5406f92c081456d3a80d126">SkeletonSolverFunctionT&lt;T&gt;::SkeletonSolverFunctionT</a>(</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character,</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a>&amp; character,</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ParameterTransformT&lt;T&gt;</a>&amp; <a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>,</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    std::span&lt;<span class="keyword">const</span> std::shared_ptr&lt;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SkeletonErrorFunctionT&lt;T&gt;</a>&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">errorFunctions</a>)</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    : character_(character), parameterTransform_(<a class="code hl_variable" href="parameter__limits__io_8cpp.html#a2365fd804ac418addca1f58612d72e02">parameterTransform</a>), needsMeshState_(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a>) {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  this-&gt;<a class="code hl_variable" href="classmomentum_1_1SolverFunctionT.html#a94714d7b39cd57846cfe7f9cc19c7625">numParameters_</a> = parameterTransform_.numAllModelParameters();</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  this-&gt;<a class="code hl_variable" href="classmomentum_1_1SolverFunctionT.html#a6dce4ef63d088f4eabd17b11d57d01be">actualParameters_</a> = this-&gt;<a class="code hl_variable" href="classmomentum_1_1SolverFunctionT.html#a94714d7b39cd57846cfe7f9cc19c7625">numParameters_</a>;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  state_ = std::make_unique&lt;SkeletonStateT&lt;T&gt;&gt;(parameterTransform_.zero(), character_.<a class="code hl_variable" href="structmomentum_1_1CharacterT.html#a6899cded4f8074538f1055a66c9b0f27">skeleton</a>);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  state_ = std::make_unique&lt;SkeletonStateT&lt;T&gt;&gt;(parameterTransform_.zero(), character_.<a class="code hl_variable" href="structmomentum_1_1Character.html#a69a49cbec2972605ba7185b60fe3c9ca">skeleton</a>);</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  activeJointParams_ = parameterTransform_.activeJointParams;</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  meshState_ = std::make_unique&lt;MeshStateT&lt;T&gt;&gt;();</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
@@ -439,15 +439,15 @@ $(document).ready(function(){initNavTree('skeleton__solver__function_8cpp_source
 <div class="ttc" id="askeleton__error__function_8h_html"><div class="ttname"><a href="skeleton__error__function_8h.html">skeleton_error_function.h</a></div></div>
 <div class="ttc" id="askeleton__solver__function_8h_html"><div class="ttname"><a href="skeleton__solver__function_8h.html">skeleton_solver_function.h</a></div></div>
 <div class="ttc" id="askeleton__state_8h_html"><div class="ttname"><a href="skeleton__state_8h.html">skeleton_state.h</a></div></div>
-<div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
-<div class="ttc" id="astructmomentum_1_1CharacterT_html_a6899cded4f8074538f1055a66c9b0f27"><div class="ttname"><a href="structmomentum_1_1CharacterT.html#a6899cded4f8074538f1055a66c9b0f27">momentum::CharacterT::skeleton</a></div><div class="ttdeci">Skeleton skeleton</div><div class="ttdoc">Skeletal structure defining the character's joints and hierarchy.</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00028">character.h:28</a></div></div>
+<div class="ttc" id="astructmomentum_1_1Character_html"><div class="ttname"><a href="structmomentum_1_1Character.html">momentum::Character</a></div><div class="ttdoc">A character model with skeletal structure, mesh, and optional components.</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00030">character.h:30</a></div></div>
+<div class="ttc" id="astructmomentum_1_1Character_html_a69a49cbec2972605ba7185b60fe3c9ca"><div class="ttname"><a href="structmomentum_1_1Character.html#a69a49cbec2972605ba7185b60fe3c9ca">momentum::Character::skeleton</a></div><div class="ttdeci">Skeleton skeleton</div><div class="ttdoc">Skeletal structure defining the character's joints and hierarchy.</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00034">character.h:34</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="skeleton__solver__function_8cpp.html">skeleton_solver_function.cpp</a></li>
-    <li class="footer">Generated on Fri May 8 2026 22:58:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat May 9 2026 00:57:10 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['bake_0',['bake',['../structmomentum_1_1CharacterT.html#a667ccb9fbfff7d287b44f48fee26d391',1,'momentum::CharacterT']]],
-  ['bakeblendshape_1',['bakeblendshape',['../structmomentum_1_1CharacterT.html#a2e4f02c62ce45b489a0ac69df4d4dbdb',1,'momentum::CharacterT::bakeBlendShape(const BlendWeights &amp;blendWeights) const'],['../structmomentum_1_1CharacterT.html#a16af7771edbf0fb004154393de449cfb',1,'momentum::CharacterT::bakeBlendShape(const ModelParameters &amp;modelParams) const']]],
+  ['bake_0',['bake',['../structmomentum_1_1Character.html#a2bd9c97762addd52f79c866aeded5950',1,'momentum::Character']]],
+  ['bakeblendshape_1',['bakeblendshape',['../structmomentum_1_1Character.html#a20e44d61ba38f46d4bcb49efa0ccfe94',1,'momentum::Character::bakeBlendShape(const BlendWeights &amp;blendWeights) const'],['../structmomentum_1_1Character.html#addf363eb8e660c177c727e9410a6f6eb',1,'momentum::Character::bakeBlendShape(const ModelParameters &amp;modelParams) const']]],
   ['bakegloveoffsetsfromparams_2',['bakeGloveOffsetsFromParams',['../namespacemomentum.html#a264cefb9d00e4935f617b8e1b20ff362',1,'momentum']]],
   ['bandwidth_3',['bandwidth',['../classmomentum_1_1OnlineBandedHouseholderQR.html#a28a4a830d4d1a5b8d0191d1a9de19928',1,'momentum::OnlineBandedHouseholderQR']]],
   ['barycoords_4',['barycoords',['../tracker__utils_8cpp.html#ad6718811a032e54fe9a4d1f133f0329b',1,'baryCoords:&#160;tracker_utils.cpp'],['../skinned__locator__triangle__error__function_8cpp.html#ab01cb39171c69eca744a3ed11ad9a3ad',1,'baryCoords:&#160;skinned_locator_triangle_error_function.cpp']]],
@@ -14,7 +14,7 @@ var searchData=
   ['begin_11',['begin',['../classmomentum_1_1io__detail_1_1SectionContent.html#aa08408c2d07a33e285502ff3e8e9bda6',1,'momentum::io_detail::SectionContent']]],
   ['binary_12',['Binary',['../namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a6ce976e8f061b2b5cfe4d0c50c3405dd',1,'momentum']]],
   ['bindmeshtojoint_13',['bindMeshToJoint',['../namespacemomentum.html#a480103abc1663ae84136031c0e524fbe',1,'momentum']]],
-  ['bindpose_14',['bindpose',['../structmomentum_1_1CharacterT.html#a6d67d09dac93bd96c44b4e3f2a0d09e8',1,'momentum::CharacterT::bindPose()'],['../structmomentum_1_1ParameterTransformT.html#a48fd2214f2330425a853aee1bc6981b6',1,'momentum::ParameterTransformT::bindPose()']]],
+  ['bindpose_14',['bindpose',['../structmomentum_1_1Character.html#a354fcc30df73c6ca4971b8c098f63cfd',1,'momentum::Character::bindPose()'],['../structmomentum_1_1ParameterTransformT.html#a48fd2214f2330425a853aee1bc6981b6',1,'momentum::ParameterTransformT::bindPose()']]],
   ['blend_5fshape_2ecpp_15',['blend_shape.cpp',['../blend__shape_8cpp.html',1,'']]],
   ['blend_5fshape_2eh_16',['blend_shape.h',['../blend__shape_8h.html',1,'']]],
   ['blend_5fshape_5fbase_2ecpp_17',['blend_shape_base.cpp',['../blend__shape__base_8cpp.html',1,'']]],
@@ -24,7 +24,7 @@ var searchData=
   ['blend_5fshape_5fskinning_2ecpp_21',['blend_shape_skinning.cpp',['../blend__shape__skinning_8cpp.html',1,'']]],
   ['blend_5fshape_5fskinning_2eh_22',['blend_shape_skinning.h',['../blend__shape__skinning_8h.html',1,'']]],
   ['blendoffframes_23',['blendOffFrames',['../structmomentum_1_1GapFillConfig.html#abd5e8c09ce9ed7d6417e96d4b13c5f8f',1,'momentum::GapFillConfig']]],
-  ['blendshape_24',['blendshape',['../structmomentum_1_1BlendShape.html#a39c2759a3dcb4fec666b27357bc44964',1,'momentum::BlendShape::BlendShape()'],['../structmomentum_1_1BlendShape.html#a84e852dc51f2e880342313b575c7a0ad',1,'momentum::BlendShape::BlendShape(momentum::span&lt; const Vector3f &gt; baseShape, size_t numShapes, momentum::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShape.html',1,'momentum::BlendShape'],['../structmomentum_1_1CharacterT.html#afb8b1d6bdcd0515337eb14d84dc7c9a7',1,'momentum::CharacterT::blendShape']]],
+  ['blendshape_24',['blendshape',['../structmomentum_1_1BlendShape.html#a39c2759a3dcb4fec666b27357bc44964',1,'momentum::BlendShape::BlendShape()'],['../structmomentum_1_1BlendShape.html#a84e852dc51f2e880342313b575c7a0ad',1,'momentum::BlendShape::BlendShape(momentum::span&lt; const Vector3f &gt; baseShape, size_t numShapes, momentum::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShape.html',1,'momentum::BlendShape'],['../structmomentum_1_1Character.html#add3587b170ce215b99828b82a35fe69d',1,'momentum::Character::blendShape']]],
   ['blendshape_5fconst_5fp_25',['BlendShape_const_p',['../namespacemomentum.html#a6472912b236f6061a827e78eb44659c4',1,'momentum']]],
   ['blendshape_5fconst_5fu_26',['BlendShape_const_u',['../namespacemomentum.html#a4df6fbd49e38c79801190865c68ab35c',1,'momentum']]],
   ['blendshape_5fconst_5fw_27',['BlendShape_const_w',['../namespacemomentum.html#ac254ff96a2d8b506de8b52a62e8f94e3',1,'momentum']]],

@@ -151,7 +151,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8h_sou
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">   58</a></span><span class="keyword">class </span><a class="code hl_class" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a> : <span class="keyword">public</span> <a class="code hl_class" href="classmomentum_1_1SkeletonErrorFunctionT.html">SkeletonErrorFunctionT</a>&lt;T&gt; {</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keyword">explicit</span> <a class="code hl_class" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a>(</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>      <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>      <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a>&amp; character,</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>      <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#af0e46fb9bdc1cabaca7f59df6d624de9">SDFCollisionGeometry</a>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sdfColliders</a>,</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      <span class="keyword">const</span> std::vector&lt;int&gt;&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a> = {},</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>      <span class="keyword">const</span> std::vector&lt;T&gt;&amp; vertexWeights = {},</div>
@@ -274,7 +274,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8h_sou
 <div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>      <span class="keyword">const</span> Eigen::Vector3&lt;T&gt;&amp; direction,</div>
 <div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>      Eigen::Ref&lt;Eigen::MatrixX&lt;T&gt;&gt; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jacobianRow</a>) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>  <span class="keyword">const</span> <a class="code hl_class" href="structmomentum_1_1CharacterT.html">Character</a>&amp; character_; </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>  <span class="keyword">const</span> <a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a>&amp; character_; </div>
 <div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>  <a class="code hl_typedef" href="namespacemomentum.html#af0e46fb9bdc1cabaca7f59df6d624de9">SDFCollisionGeometry</a> sdfColliders_; </div>
 <div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
 <div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>  <span class="comment">// Contiguous vertex organization for efficient processing</span></div>
@@ -328,7 +328,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8h_sou
 <div class="ttc" id="astructmomentum_1_1BoneVertexRange_html_a64e35f214b97910596e696cd54b7d2ce"><div class="ttname"><a href="structmomentum_1_1BoneVertexRange.html#a64e35f214b97910596e696cd54b7d2ce">momentum::BoneVertexRange::end</a></div><div class="ttdeci">size_t end</div><div class="ttdoc">End index in activeVertexIndices_ (exclusive)</div><div class="ttdef"><b>Definition</b> <a href="sdf__collision__error__function_8h_source.html#l00026">sdf_collision_error_function.h:26</a></div></div>
 <div class="ttc" id="astructmomentum_1_1BoneVertexRange_html_ad2e4c61883e73dcb81de6a601109ecb5"><div class="ttname"><a href="structmomentum_1_1BoneVertexRange.html#ad2e4c61883e73dcb81de6a601109ecb5">momentum::BoneVertexRange::empty</a></div><div class="ttdeci">bool empty() const</div><div class="ttdoc">Returns true if this bone has no vertices.</div><div class="ttdef"><b>Definition</b> <a href="sdf__collision__error__function_8h_source.html#l00034">sdf_collision_error_function.h:34</a></div></div>
 <div class="ttc" id="astructmomentum_1_1BoneVertexRange_html_ae7236e726c9f31a32e49feb2d49662ba"><div class="ttname"><a href="structmomentum_1_1BoneVertexRange.html#ae7236e726c9f31a32e49feb2d49662ba">momentum::BoneVertexRange::start</a></div><div class="ttdeci">size_t start</div><div class="ttdoc">Start index in activeVertexIndices_.</div><div class="ttdef"><b>Definition</b> <a href="sdf__collision__error__function_8h_source.html#l00025">sdf_collision_error_function.h:25</a></div></div>
-<div class="ttc" id="astructmomentum_1_1CharacterT_html"><div class="ttname"><a href="structmomentum_1_1CharacterT.html">momentum::CharacterT&lt; float &gt;</a></div></div>
+<div class="ttc" id="astructmomentum_1_1Character_html"><div class="ttname"><a href="structmomentum_1_1Character.html">momentum::Character</a></div><div class="ttdoc">A character model with skeletal structure, mesh, and optional components.</div><div class="ttdef"><b>Definition</b> <a href="character_8h_source.html#l00030">character.h:30</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SDFColliderT_html"><div class="ttname"><a href="structmomentum_1_1SDFColliderT.html">momentum::SDFColliderT&lt; float &gt;</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -336,7 +336,7 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8h_sou
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="sdf__collision__error__function_8h.html">sdf_collision_error_function.h</a></li>
-    <li class="footer">Generated on Fri May 8 2026 22:58:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sat May 9 2026 00:57:10 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

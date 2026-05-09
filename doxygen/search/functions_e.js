@@ -5,7 +5,7 @@ var searchData=
   ['parameterlimitstojson_2',['parameterLimitsToJson',['../namespacemomentum.html#ae26c3dc6f93d764f27b701b6ba8e6fc1',1,'momentum']]],
   ['parametersetsfromjson_3',['parameterSetsFromJson',['../namespacemomentum.html#acb8cef1c4ffba9a25bf0261f3d6c96c5',1,'momentum']]],
   ['parametersetstojson_4',['parameterSetsToJson',['../namespacemomentum.html#a97b6bb172f3e7ba756fea77891f4a65e',1,'momentum']]],
-  ['parameterstoactivejoints_5',['parametersToActiveJoints',['../structmomentum_1_1CharacterT.html#ab711b7f92412b6226a7986c1ee2358e7',1,'momentum::CharacterT']]],
+  ['parameterstoactivejoints_5',['parametersToActiveJoints',['../structmomentum_1_1Character.html#a1bbc6991949a534ff664116ca18738cc',1,'momentum::Character']]],
   ['parametertransformfromjson_6',['parameterTransformFromJson',['../namespacemomentum.html#aaa1a7fbd414924422797c20e5a5241c2',1,'momentum']]],
   ['parametertransformtojson_7',['parameterTransformToJson',['../namespacemomentum.html#ab96431ab5c9c4024c15c77a84a7bb191',1,'momentum']]],
   ['parseparameterlimits_8',['parseparameterlimits',['../namespacemomentum.html#a84b1d02dc3763d4ea0f4975a157346f7',1,'momentum::parseParameterLimits(const std::string &amp;data, const Skeleton &amp;skeleton, const ParameterTransform &amp;parameterTransform, size_t lineOffset)'],['../namespacemomentum.html#a23592d0d4569122abf43deaae4645269',1,'momentum::parseParameterLimits(const io_detail::SectionContent &amp;content, const Skeleton &amp;skeleton, const ParameterTransform &amp;parameterTransform)']]],

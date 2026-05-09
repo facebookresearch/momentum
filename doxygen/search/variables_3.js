@@ -17,7 +17,7 @@ var searchData=
   ['characterdata_14',['characterData',['../structmomentum_1_1GltfBuilder_1_1Impl.html#a626a377129ba187b86de5fe918ccf1f7',1,'momentum::GltfBuilder::Impl']]],
   ['cinv_15',['Cinv',['../structmomentum_1_1MppcaT.html#a78291400313200b57c2efeaad4948eed',1,'momentum::MppcaT']]],
   ['closestpoint_16',['closestPoint',['../skinned__locator__triangle__error__function_8cpp.html#a683192909b33b65580d9951b5c28abd8',1,'skinned_locator_triangle_error_function.cpp']]],
-  ['collision_17',['collision',['../structmomentum_1_1CharacterT.html#ac76728e3ec06055ea295ba450c2f92e9',1,'momentum::CharacterT']]],
+  ['collision_17',['collision',['../structmomentum_1_1Character.html#afd17f6740018f63dc014b8e1b89ebb2e',1,'momentum::Character']]],
   ['collisionerrorweight_18',['collisionErrorWeight',['../structmomentum_1_1TrackingConfig.html#aa0fe508eb35366f7bf7cfcabde44e1e4',1,'momentum::TrackingConfig']]],
   ['collisiongeometry_19',['collisionGeometry',['../classmomentum_1_1CollisionErrorFunctionStatelessT.html#afd8c57248b2684f4a1e08eabbdbd4982',1,'momentum::CollisionErrorFunctionStatelessT']]],
   ['collisiongeometry_5f_20',['collisionGeometry_',['../classmomentum_1_1CollisionErrorFunctionT.html#a255e1b8926798df2abcc420c578d2606',1,'momentum::CollisionErrorFunctionT']]],

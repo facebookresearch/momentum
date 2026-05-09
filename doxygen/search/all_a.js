@@ -61,7 +61,7 @@ var searchData=
   ['jointlist_58',['JointList',['../namespacemomentum.html#ae7e9f4cd3def0c1d889f92f0035926e7',1,'momentum']]],
   ['jointlistd_59',['JointListd',['../namespacemomentum.html#a46892f5a31fc02156697335f5633d28b',1,'momentum']]],
   ['jointlistt_60',['JointListT',['../namespacemomentum.html#adaf005040797d7c530a599c720582dee',1,'momentum']]],
-  ['jointmap_61',['jointmap',['../structmomentum_1_1CharacterT.html#a01de8e80724eb13efc8cb399b616b151',1,'momentum::CharacterT::jointMap'],['../structmomentum_1_1PoseShape.html#ad77da1f82b96f09c530ef56e4a59a581',1,'momentum::PoseShape::jointMap']]],
+  ['jointmap_61',['jointmap',['../structmomentum_1_1Character.html#adf07339ad064d25b95247c032df061b9',1,'momentum::Character::jointMap'],['../structmomentum_1_1PoseShape.html#ad77da1f82b96f09c530ef56e4a59a581',1,'momentum::PoseShape::jointMap']]],
   ['jointname_62',['jointName',['../structmomentum_1_1GloveSensorObservation.html#a314822341f651ca89156b229548075ab',1,'momentum::GloveSensorObservation']]],
   ['jointparameter_63',['jointParameter',['../structmomentum_1_1LimitMinMaxJoint.html#a69ba015f06d60b5aeeb5d266c876d458',1,'momentum::LimitMinMaxJoint']]],
   ['jointparameternames_64',['JointParameterNames',['../namespacemomentum.html#a5733f0ce387026e1c9afe56fc7ba3066',1,'momentum']]],

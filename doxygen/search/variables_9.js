@@ -9,7 +9,7 @@ var searchData=
   ['intrinsicsmapping_5f_6',['intrinsicsMapping_',['../classmomentum_1_1CameraProjectionErrorFunctionT.html#ad36c6bbbd445a5263ee6cd2b95276115',1,'momentum::CameraProjectionErrorFunctionT']]],
   ['intrinsicsmodel_5f_7',['intrinsicsModel_',['../classmomentum_1_1CameraProjectionErrorFunctionT.html#abbb6fca9d3dbd63ad858cab2d532782c',1,'momentum::CameraProjectionErrorFunctionT']]],
   ['invc2_5f_8',['invC2_',['../classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002',1,'momentum::GeneralizedLossT']]],
-  ['inversebindpose_9',['inverseBindPose',['../structmomentum_1_1CharacterT.html#a091594fb949f1e0c84a1beb07e8de2d4',1,'momentum::CharacterT']]],
+  ['inversebindpose_9',['inverseBindPose',['../structmomentum_1_1Character.html#a2056cd64ca586b1cfee7eaef57be4bd4',1,'momentum::Character']]],
   ['inversetransform_10',['inverseTransform',['../structmomentum_1_1InverseParameterTransformT.html#a0d5904f7a0a7714c18958c7478d21d8a',1,'momentum::InverseParameterTransformT']]],
   ['invmap_5f_11',['invMap_',['../classmomentum_1_1PosePriorErrorFunctionT.html#adbc15a29693b3c74e7154b509ab8745e',1,'momentum::PosePriorErrorFunctionT']]],
   ['is_5fbase_5fof_5fmatrix_5fv_12',['is_base_of_matrix_v',['../namespacemomentum_1_1detail.html#a9763013f6c3661770f83e7a1ed7e523e',1,'momentum::detail']]],
