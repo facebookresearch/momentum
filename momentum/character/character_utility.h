@@ -66,17 +66,15 @@ JointParameters mapIdentityToCharacter(
 /// Reduces the character's mesh to only include the specified vertices and associated faces.
 ///
 /// @pre `activeVertices.size() == character.mesh->vertices.size()`
-template <typename T>
-[[nodiscard]] CharacterT<T> reduceMeshByVertices(
-    const CharacterT<T>& character,
+[[nodiscard]] Character reduceMeshByVertices(
+    const Character& character,
     const std::vector<bool>& activeVertices);
 
 /// Reduces the character's mesh to only include the specified faces and associated vertices.
 ///
 /// @pre `activeFaces.size() == character.mesh->faces.size()`
-template <typename T>
-[[nodiscard]] CharacterT<T> reduceMeshByFaces(
-    const CharacterT<T>& character,
+[[nodiscard]] Character reduceMeshByFaces(
+    const Character& character,
     const std::vector<bool>& activeFaces);
 
 /// Reduces a standalone mesh to only include the specified vertices and associated faces.
@@ -148,9 +146,8 @@ template <typename T>
 /// Both triangulated faces and polygon data are filtered and remapped.
 ///
 /// @pre `activePolys.size() == character.mesh->polygons.size()`
-template <typename T>
-[[nodiscard]] CharacterT<T> reduceMeshByPolys(
-    const CharacterT<T>& character,
+[[nodiscard]] Character reduceMeshByPolys(
+    const Character& character,
     const std::vector<bool>& activePolys);
 
 /// Result of addRigidTransformNode containing the new character and indices of the added joint

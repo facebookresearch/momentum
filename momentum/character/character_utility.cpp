@@ -1155,9 +1155,8 @@ MeshT<T> reduceMeshInternal(
 // Builds a new character whose mesh, skin weights, pose shapes, and blend shapes
 // are restricted to the given active vertices/faces. Skeleton, parameter transform,
 // limits, locators, collision, and inverseBindPose are passed through unchanged.
-template <typename T>
-CharacterT<T> reduceMeshComponents(
-    const CharacterT<T>& character,
+Character reduceMeshComponents(
+    const Character& character,
     const std::vector<bool>& activeVertices,
     const std::vector<bool>& activeFaces) {
   MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
@@ -1249,7 +1248,7 @@ CharacterT<T> reduceMeshComponents(
     newFaceExpressionBlendShape = faceBlendShape;
   }
 
-  return CharacterT<T>(
+  return {
       character.skeleton,
       character.parameterTransform,
       character.parameterLimits,
@@ -1261,14 +1260,13 @@ CharacterT<T> reduceMeshComponents(
       std::move(newBlendShape),
       std::move(newFaceExpressionBlendShape),
       character.name,
-      character.inverseBindPose);
+      character.inverseBindPose};
 }
 
 } // namespace
 
-template <typename T>
-CharacterT<T> reduceMeshByVertices(
-    const CharacterT<T>& character,
+Character reduceMeshByVertices(
+    const Character& character,
     const std::vector<bool>& activeVertices) {
   MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
   MT_CHECK(
@@ -1282,10 +1280,7 @@ CharacterT<T> reduceMeshByVertices(
   return reduceMeshComponents(character, activeVertices, activeFaces);
 }
 
-template <typename T>
-CharacterT<T> reduceMeshByFaces(
-    const CharacterT<T>& character,
-    const std::vector<bool>& activeFaces) {
+Character reduceMeshByFaces(const Character& character, const std::vector<bool>& activeFaces) {
   MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
   MT_CHECK(
       activeFaces.size() == character.mesh->faces.size(),
@@ -1382,10 +1377,7 @@ MeshT<T> reduceMeshByPolys(const MeshT<T>& mesh, const std::vector<bool>& active
   return reduceMeshInternal(mesh, activeVertices, activeFaces);
 }
 
-template <typename T>
-CharacterT<T> reduceMeshByPolys(
-    const CharacterT<T>& character,
-    const std::vector<bool>& activePolys) {
+Character reduceMeshByPolys(const Character& character, const std::vector<bool>& activePolys) {
   MT_CHECK(character.mesh, "Cannot reduce mesh: character has no mesh");
   MT_CHECK(
       activePolys.size() == character.mesh->polyFaceSizes.size(),
@@ -1398,22 +1390,6 @@ CharacterT<T> reduceMeshByPolys(
 
   return reduceMeshComponents(character, activeVertices, activeFaces);
 }
-
-template CharacterT<float> reduceMeshByVertices<float>(
-    const CharacterT<float>& character,
-    const std::vector<bool>& activeVertices);
-
-template CharacterT<double> reduceMeshByVertices<double>(
-    const CharacterT<double>& character,
-    const std::vector<bool>& activeVertices);
-
-template CharacterT<float> reduceMeshByFaces<float>(
-    const CharacterT<float>& character,
-    const std::vector<bool>& activeFaces);
-
-template CharacterT<double> reduceMeshByFaces<double>(
-    const CharacterT<double>& character,
-    const std::vector<bool>& activeFaces);
 
 template MeshT<float> reduceMeshByVertices<float>(
     const MeshT<float>& mesh,
@@ -1469,14 +1445,6 @@ template MeshT<float> reduceMeshByPolys<float>(
 
 template MeshT<double> reduceMeshByPolys<double>(
     const MeshT<double>& mesh,
-    const std::vector<bool>& activePolys);
-
-template CharacterT<float> reduceMeshByPolys<float>(
-    const CharacterT<float>& character,
-    const std::vector<bool>& activePolys);
-
-template CharacterT<double> reduceMeshByPolys<double>(
-    const CharacterT<double>& character,
     const std::vector<bool>& activePolys);
 
 } // namespace momentum

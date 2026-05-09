@@ -33,6 +33,15 @@ using BlendShapeBase_const_p = ::std::shared_ptr<const BlendShapeBase>;
 using BlendShapeBase_const_u = ::std::unique_ptr<const BlendShapeBase>;
 using BlendShapeBase_const_w = ::std::weak_ptr<const BlendShapeBase>;
 
+struct Character;
+
+using Character_p = ::std::shared_ptr<Character>;
+using Character_u = ::std::unique_ptr<Character>;
+using Character_w = ::std::weak_ptr<Character>;
+using Character_const_p = ::std::shared_ptr<const Character>;
+using Character_const_u = ::std::unique_ptr<const Character>;
+using Character_const_w = ::std::weak_ptr<const Character>;
+
 struct Locator;
 
 using Locator_p = ::std::shared_ptr<Locator>;
@@ -68,25 +77,6 @@ using SkinnedLocator_w = ::std::weak_ptr<SkinnedLocator>;
 using SkinnedLocator_const_p = ::std::shared_ptr<const SkinnedLocator>;
 using SkinnedLocator_const_u = ::std::unique_ptr<const SkinnedLocator>;
 using SkinnedLocator_const_w = ::std::weak_ptr<const SkinnedLocator>;
-
-template <typename T>
-struct CharacterT;
-using Character = CharacterT<float>;
-using Characterd = CharacterT<double>;
-
-using Character_p = ::std::shared_ptr<Character>;
-using Character_u = ::std::unique_ptr<Character>;
-using Character_w = ::std::weak_ptr<Character>;
-using Character_const_p = ::std::shared_ptr<const Character>;
-using Character_const_u = ::std::unique_ptr<const Character>;
-using Character_const_w = ::std::weak_ptr<const Character>;
-
-using Characterd_p = ::std::shared_ptr<Characterd>;
-using Characterd_u = ::std::unique_ptr<Characterd>;
-using Characterd_w = ::std::weak_ptr<Characterd>;
-using Characterd_const_p = ::std::shared_ptr<const Characterd>;
-using Characterd_const_u = ::std::unique_ptr<const Characterd>;
-using Characterd_const_w = ::std::weak_ptr<const Characterd>;
 
 template <typename T>
 struct CharacterStateT;

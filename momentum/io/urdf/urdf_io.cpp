@@ -40,7 +40,6 @@ struct MimicData {
   bool isRotation{}; // true for revolute/continuous, false for prismatic
 };
 
-template <typename T>
 struct ParsingData {
   Skeleton skeleton;
   ParameterTransform parameterTransform;
@@ -201,9 +200,8 @@ std::optional<Mesh> loadVisualMesh(
 constexpr std::array<const char*, 3> kTranslationNames = {"tx", "ty", "tz"};
 constexpr std::array<const char*, 3> kRotationNames = {"rx", "ry", "rz"};
 
-template <typename T>
 bool loadUrdfSkeletonRecursive(
-    ParsingData<T>& data,
+    ParsingData& data,
     size_t parentJointId,
     const urdf::ModelInterface* urdfModel,
     const urdf::Link* urdfLink) {
@@ -421,8 +419,7 @@ bool loadUrdfSkeletonRecursive(
 
 /// Resolves mimic joints by mapping each mimic joint's DOF to the mimicked joint's model
 /// parameter via the parameter transform.
-template <typename T>
-void resolveMimicJoints(ParsingData<T>& data) {
+void resolveMimicJoints(ParsingData& data) {
   for (const auto& mimic : data.mimicJoints) {
     auto it = data.urdfJointNameToModelParamIdx.find(mimic.mimickedJointName);
     if (it == data.urdfJointNameToModelParamIdx.end()) {
@@ -464,9 +461,8 @@ Eigen::Vector3b extractVertexColor(const urdf::Visual& visual, bool& hasColor) {
 
 /// Builds a combined mesh and skin weights from per-link visual data.
 /// Returns nullopt if no visual meshes were loaded.
-template <typename T>
 std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
-    const ParsingData<T>& data,
+    const ParsingData& data,
     const filesystem::path& urdfDir) {
   if (data.linkVisuals.empty()) {
     return std::nullopt;
@@ -512,8 +508,8 @@ std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
       combinedMesh.vertices.insert(
           combinedMesh.vertices.end(), meshOpt->vertices.begin(), meshOpt->vertices.end());
       for (const auto& face : meshOpt->faces) {
-        combinedMesh.faces.push_back(
-            {face[0] + vertexOffset, face[1] + vertexOffset, face[2] + vertexOffset});
+        combinedMesh.faces.emplace_back(
+            face[0] + vertexOffset, face[1] + vertexOffset, face[2] + vertexOffset);
       }
       combinedMesh.colors.resize(combinedMesh.vertices.size(), vertexColor);
 
@@ -544,14 +540,13 @@ std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
   return std::make_pair(std::move(combinedMesh), std::move(skinWeights));
 }
 
-template <typename T>
-CharacterT<T> loadUrdfCharacterFromUrdfModel(
+Character loadUrdfCharacterFromUrdfModel(
     urdf::ModelInterfaceSharedPtr urdfModel,
     const filesystem::path& urdfDir) {
   const urdf::Link* root = urdfModel->getRoot().get();
   MT_THROW_IF(!root, "Failed to parse URDF file from. No root link found.");
 
-  ParsingData<T> data;
+  ParsingData data;
 
   // Special Case: If the root link is named "world", it is treated as a world link. In this case,
   // the actual root link is the first child link. Otherwise, the root link itself is considered the
@@ -589,7 +584,7 @@ CharacterT<T> loadUrdfCharacterFromUrdfModel(
   auto meshResult = buildCombinedMesh(data, urdfDir);
   if (meshResult) {
     auto& [mesh, skinWeights] = *meshResult;
-    return CharacterT<T>(
+    return {
         data.skeleton,
         data.parameterTransform,
         data.limits,
@@ -600,10 +595,10 @@ CharacterT<T> loadUrdfCharacterFromUrdfModel(
         nullptr, // poseShapes
         {}, // blendShapes
         {}, // faceExpressionBlendShapes
-        robotName);
+        robotName};
   }
 
-  return CharacterT<T>(
+  return {
       data.skeleton,
       data.parameterTransform,
       data.limits,
@@ -614,13 +609,12 @@ CharacterT<T> loadUrdfCharacterFromUrdfModel(
       nullptr, // poseShapes
       {}, // blendShapes
       {}, // faceExpressionBlendShapes
-      robotName);
+      robotName};
 }
 
 } // namespace
 
-template <typename T>
-CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath) {
+Character loadUrdfCharacter(const filesystem::path& filepath) {
   urdf::ModelInterfaceSharedPtr urdfModel;
 
   try {
@@ -632,7 +626,7 @@ CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath) {
   }
 
   try {
-    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, filepath.parent_path());
+    return loadUrdfCharacterFromUrdfModel(urdfModel, filepath.parent_path());
   } catch (const std::exception& e) {
     MT_THROW(
         "Failed to create Character from URDF file: {}. Error: {}", filepath.string(), e.what());
@@ -641,11 +635,7 @@ CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath) {
   }
 }
 
-template CharacterT<float> loadUrdfCharacter(const filesystem::path& filepath);
-template CharacterT<double> loadUrdfCharacter(const filesystem::path& filepath);
-
-template <typename T>
-CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
+Character loadUrdfCharacter(std::span<const std::byte> bytes) {
   urdf::ModelInterfaceSharedPtr urdfModel;
 
   try {
@@ -660,7 +650,7 @@ CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
   }
 
   try {
-    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, {});
+    return loadUrdfCharacterFromUrdfModel(urdfModel, {});
   } catch (const std::exception& e) {
     MT_THROW("Failed to create Character from URDF bytes. Error: {}", e.what());
   } catch (...) {
@@ -668,11 +658,7 @@ CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes) {
   }
 }
 
-template CharacterT<float> loadUrdfCharacter(std::span<const std::byte> bytes);
-template CharacterT<double> loadUrdfCharacter(std::span<const std::byte> bytes);
-
-template <typename T>
-CharacterT<T> loadUrdfCharacter(
+Character loadUrdfCharacter(
     std::span<const std::byte> bytes,
     const filesystem::path& meshBasePath) {
   urdf::ModelInterfaceSharedPtr urdfModel;
@@ -687,19 +673,12 @@ CharacterT<T> loadUrdfCharacter(
   }
 
   try {
-    return loadUrdfCharacterFromUrdfModel<T>(urdfModel, meshBasePath);
+    return loadUrdfCharacterFromUrdfModel(urdfModel, meshBasePath);
   } catch (const std::exception& e) {
     MT_THROW("Failed to create Character from URDF bytes. Error: {}", e.what());
   } catch (...) {
     MT_THROW("Failed to create Character from URDF bytes");
   }
 }
-
-template CharacterT<float> loadUrdfCharacter(
-    std::span<const std::byte> bytes,
-    const filesystem::path& meshBasePath);
-template CharacterT<double> loadUrdfCharacter(
-    std::span<const std::byte> bytes,
-    const filesystem::path& meshBasePath);
 
 } // namespace momentum

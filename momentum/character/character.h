@@ -20,8 +20,14 @@
 namespace momentum {
 
 /// A character model with skeletal structure, mesh, and optional components.
-template <typename T>
-struct CharacterT {
+///
+/// `Character` is intentionally **not** templated on a scalar type: every member
+/// (skeleton, parameter transform, mesh, inverse bind pose, etc.) is stored as
+/// float. Double-precision callers convert to/from float at API boundaries via
+/// `cast<T>()` on the inner types (e.g. `MeshT<T>`, `SkeletonStateT<T>`). This
+/// reflects the reality that the previous `CharacterT<T>` template parameter was
+/// never wired through to any member; see T270138855 for the audit.
+struct Character {
   /// @{ @name Required components
 
   /// Skeletal structure defining the character's joints and hierarchy
@@ -75,9 +81,9 @@ struct CharacterT {
 
   /// @}
 
-  CharacterT();
+  Character();
 
-  ~CharacterT();
+  ~Character();
 
   /// Constructs a character with the specified components
   ///
@@ -95,7 +101,7 @@ struct CharacterT {
   /// @param inverseBindPose Optional inverse bind pose transformations
   /// @param skinnedLocators Optional points of interest attached to joints, with skinning weights
   /// @param metadataIn Optional metadata
-  CharacterT(
+  Character(
       const Skeleton& s,
       const ParameterTransform& pt,
       const ParameterLimits& pl = ParameterLimits(),
@@ -111,29 +117,29 @@ struct CharacterT {
       const SkinnedLocatorList& skinnedLocators = {},
       std::string_view metadataIn = "");
 
-  CharacterT(const CharacterT& c);
-  CharacterT(CharacterT&& c) noexcept;
+  Character(const Character& c);
+  Character(Character&& c) noexcept;
 
-  CharacterT& operator=(const CharacterT& rhs);
-  CharacterT& operator=(CharacterT&& rhs) noexcept;
+  Character& operator=(const Character& rhs);
+  Character& operator=(Character&& rhs) noexcept;
 
   /// Creates a simplified character with only joints affected by the specified parameters
   ///
   /// @param activeParams Parameters to keep (defaults to all parameters)
   /// @return A new character with simplified skeleton and parameter transform
-  [[nodiscard]] CharacterT simplify(const ParameterSet& activeParams = ParameterSet().flip()) const;
+  [[nodiscard]] Character simplify(const ParameterSet& activeParams = ParameterSet().flip()) const;
 
   /// Creates a simplified character with only the specified joints
   ///
   /// @param activeJoints Boolean vector indicating which joints to keep
   /// @return A new character with only the requested joints
-  [[nodiscard]] CharacterT simplifySkeleton(const std::vector<bool>& activeJoints) const;
+  [[nodiscard]] Character simplifySkeleton(const std::vector<bool>& activeJoints) const;
 
   /// Creates a simplified character with only the specified parameters
   ///
   /// @param parameterSet Set of parameters to keep
   /// @return A new character with only the requested parameters
-  [[nodiscard]] CharacterT simplifyParameterTransform(const ParameterSet& parameterSet) const;
+  [[nodiscard]] Character simplifyParameterTransform(const ParameterSet& parameterSet) const;
 
   /// Remaps skin weights from original character to simplified version
   ///
@@ -142,7 +148,7 @@ struct CharacterT {
   /// @return Remapped skin weights for the simplified character
   [[nodiscard]] SkinWeights remapSkinWeights(
       const SkinWeights& skinWeights,
-      const CharacterT& originalCharacter) const;
+      const Character& originalCharacter) const;
 
   /// Remaps parameter limits from original character to simplified version
   ///
@@ -151,7 +157,7 @@ struct CharacterT {
   /// @return Remapped parameter limits for the simplified character
   [[nodiscard]] ParameterLimits remapParameterLimits(
       const ParameterLimits& limits,
-      const CharacterT& originalCharacter) const;
+      const Character& originalCharacter) const;
 
   /// Remaps locators from original character to simplified version
   ///
@@ -160,11 +166,11 @@ struct CharacterT {
   /// @return Remapped locators for the simplified character
   [[nodiscard]] LocatorList remapLocators(
       const LocatorList& locs,
-      const CharacterT& originalCharacter) const;
+      const Character& originalCharacter) const;
 
   [[nodiscard]] SkinnedLocatorList remapSkinnedLocators(
       const SkinnedLocatorList& locs,
-      const CharacterT& originalCharacter) const;
+      const Character& originalCharacter) const;
 
   /// Determines which joints are affected by the specified parameters
   ///
@@ -203,7 +209,7 @@ struct CharacterT {
   /// @param parameterSet Set indicating which parameters are active
   /// @return Parameters with active parameters zeroed in pose and applied to offsets
   [[nodiscard]] static CharacterParameters splitParameters(
-      const CharacterT& character,
+      const Character& character,
       const CharacterParameters& parameters,
       const ParameterSet& parameterSet);
 
@@ -212,8 +218,8 @@ struct CharacterT {
   /// @param blendShape_in Blend shapes to add to the character
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
   /// @return A new character with the specified blend shapes
-  [[nodiscard]] CharacterT withBlendShape(
-      BlendShape_const_p blendShape_in,
+  [[nodiscard]] Character withBlendShape(
+      const BlendShape_const_p& blendShape_in,
       Eigen::Index maxBlendShapes) const;
 
   /// Creates a new character with the specified face expression blend shapes
@@ -221,8 +227,8 @@ struct CharacterT {
   /// @param blendShape_in Face expression blend shapes to add to the character
   /// @param maxBlendShapes Maximum number of blend shape parameters to add (use all if <= 0)
   /// @return A new character with the specified face expression blend shapes
-  [[nodiscard]] CharacterT withFaceExpressionBlendShape(
-      BlendShapeBase_const_p blendShape_in,
+  [[nodiscard]] Character withFaceExpressionBlendShape(
+      const BlendShapeBase_const_p& blendShape_in,
       Eigen::Index maxBlendShapes = -1) const;
 
   /// Adds blend shapes to this character
@@ -243,13 +249,13 @@ struct CharacterT {
   ///
   /// @param modelParams Model parameters containing blend shape weights
   /// @return A new character with blend shapes baked into the mesh
-  [[nodiscard]] CharacterT bakeBlendShape(const ModelParameters& modelParams) const;
+  [[nodiscard]] Character bakeBlendShape(const ModelParameters& modelParams) const;
 
   /// Creates a new character with blend shapes baked into the mesh
   ///
   /// @param blendWeights Blend shape weights to apply
   /// @return A new character with blend shapes baked into the mesh
-  [[nodiscard]] CharacterT bakeBlendShape(const BlendWeights& blendWeights) const;
+  [[nodiscard]] Character bakeBlendShape(const BlendWeights& blendWeights) const;
 
   /// Generic "bake-out" for turning a character into self-contained geometry.
   ///
@@ -261,7 +267,7 @@ struct CharacterT {
   ///
   /// The returned character contains a static mesh with all requested deformations baked in, while
   /// still supporting any parameters you elected to keep.
-  [[nodiscard]] CharacterT bake(
+  [[nodiscard]] Character bake(
       const ModelParameters& modelParams,
       bool bakeBlendShapes = true,
       bool bakeScales = true) const;

@@ -33,8 +33,8 @@ class CharacterUtilityTest : public ::testing::Test {
     Random<>::GetSingleton().setSeed(42);
 
     // Create test characters with different numbers of joints
-    character = createTestCharacter<float>(5);
-    smallCharacter = createTestCharacter<float>(3);
+    character = createTestCharacter(5);
+    smallCharacter = createTestCharacter(3);
     characterWithBlendShapes = withTestBlendShapes(character);
   }
 
@@ -380,10 +380,10 @@ TEST_F(CharacterUtilityTest, MapIdentityToCharacter) {
 // Test replaceSkeletonHierarchy error cases
 TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyErrors) {
   // Create a simple source character
-  Character sourceCharacter = createTestCharacter<float>(3);
+  Character sourceCharacter = createTestCharacter(3);
 
   // Create a simple target character
-  Character targetCharacter = createTestCharacter<float>(3);
+  Character targetCharacter = createTestCharacter(3);
 
   // Test with non-existent source root joint
   EXPECT_THROW(
@@ -423,8 +423,8 @@ TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyErrors) {
 // Test replaceSkeletonHierarchy basic functionality
 TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyBasic) {
   // Create source and target characters with unique parameter names
-  Character sourceCharacter = createTestCharacter<float>(3);
-  Character targetCharacter = createTestCharacter<float>(3);
+  Character sourceCharacter = createTestCharacter(3);
+  Character targetCharacter = createTestCharacter(3);
 
   // Ensure parameter names don't conflict by renaming source parameters
   for (auto& name : sourceCharacter.parameterTransform.name) {
@@ -803,8 +803,8 @@ TEST_F(CharacterUtilityTest, ParentMappingInReplaceSkeletonHierarchy) {
 // Test parameter sets and other remaining code paths
 TEST_F(CharacterUtilityTest, ParameterSetsAndRemainingCodePaths) {
   // Create source and target characters for replaceSkeletonHierarchy
-  Character sourceCharacter = createTestCharacter<float>(3);
-  Character targetCharacter = createTestCharacter<float>(3);
+  Character sourceCharacter = createTestCharacter(3);
+  Character targetCharacter = createTestCharacter(3);
 
   // Ensure parameter names don't conflict
   for (auto& name : sourceCharacter.parameterTransform.name) {
@@ -1106,7 +1106,7 @@ TYPED_TEST(
   using JointParametersType = typename TestFixture::JointParametersType;
 
   // Create a test character where all joints have all rotations active (3D joints)
-  auto testCharacter = createTestCharacter<T>();
+  auto testCharacter = createTestCharacter();
 
   // Create joint parameters
   Random<> rng(98765);

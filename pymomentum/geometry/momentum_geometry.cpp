@@ -211,11 +211,11 @@ void saveLocatorsToFile(
 }
 
 momentum::Character loadURDFCharacterFromFile(const std::string& urdfPath) {
-  return momentum::loadUrdfCharacter<float>(urdfPath);
+  return momentum::loadUrdfCharacter(urdfPath);
 }
 
 momentum::Character loadURDFCharacterFromBytes(const pybind11::bytes& urdfBytes) {
-  return momentum::loadUrdfCharacter<float>(toSpan<std::byte>(urdfBytes));
+  return momentum::loadUrdfCharacter(toSpan<std::byte>(urdfBytes));
 }
 
 std::shared_ptr<const momentum::Mppca> loadPosePriorFromFile(const std::string& path) {

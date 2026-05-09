@@ -73,24 +73,21 @@ namespace momentum {
 /// @param filepath Path to the URDF file.
 /// @return The loaded character with skeleton, parameter transform, limits, and optionally
 ///   mesh with skin weights.
-template <typename T = float>
-CharacterT<T> loadUrdfCharacter(const filesystem::path& filepath);
+Character loadUrdfCharacter(const filesystem::path& filepath);
 
 /// Loads a character from a URDF file using the provided byte data.
 ///
 /// Mesh loading is not supported when loading from bytes because there is no
 /// file path to resolve relative mesh references. Use the overload with
 /// meshBasePath to enable mesh loading.
-template <typename T = float>
-[[nodiscard]] CharacterT<T> loadUrdfCharacter(std::span<const std::byte> bytes);
+[[nodiscard]] Character loadUrdfCharacter(std::span<const std::byte> bytes);
 
 /// Loads a character from a URDF file using the provided byte data, with a base
 /// path for resolving mesh file references.
 ///
 /// @param bytes The raw URDF file contents.
 /// @param meshBasePath The directory to use for resolving relative mesh file paths.
-template <typename T = float>
-[[nodiscard]] CharacterT<T> loadUrdfCharacter(
+[[nodiscard]] Character loadUrdfCharacter(
     std::span<const std::byte> bytes,
     const filesystem::path& meshBasePath);
 

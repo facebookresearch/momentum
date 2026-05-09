@@ -32,14 +32,14 @@ template <typename T>
 class CharacterStateTest : public testing::Test {
  protected:
   using Type = T;
-  using CharacterType = CharacterT<T>;
+  using CharacterType = Character;
   using CharacterStateType = CharacterStateT<T>;
   using Vector3Type = Vector3<T>;
   using QuaternionType = Quaternion<T>;
 
   void SetUp() override {
     // Create a test character with 5 joints
-    character = createTestCharacter<T>(5);
+    character = createTestCharacter(5);
 
     // Create a character with blend shapes
     characterWithBlendShapes = withTestBlendShapes(character);
@@ -56,7 +56,7 @@ TYPED_TEST_SUITE(CharacterStateTest, Types);
 template <typename T>
 void expectStateHasCorrectComponents(
     const CharacterStateT<T>& state,
-    const CharacterT<T>& character,
+    const Character& character,
     bool expectMesh = true,
     bool expectCollision = true) {
   EXPECT_EQ(state.parameters.pose.size(), character.parameterTransform.numAllModelParameters());

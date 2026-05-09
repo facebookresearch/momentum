@@ -41,7 +41,7 @@ CharacterStateT<T>::~CharacterStateT() = default;
 
 template <typename T>
 CharacterStateT<T>::CharacterStateT(
-    const CharacterT<T>& referenceCharacter,
+    const Character& referenceCharacter,
     bool updateMesh,
     bool updateCollision) {
   setBindPose(referenceCharacter, updateMesh, updateCollision);
@@ -50,7 +50,7 @@ CharacterStateT<T>::CharacterStateT(
 template <typename T>
 CharacterStateT<T>::CharacterStateT(
     const CharacterParameters& parameters,
-    const CharacterT<T>& referenceCharacter,
+    const Character& referenceCharacter,
     bool updateMesh,
     bool updateCollision,
     bool applyLimits) {
@@ -59,7 +59,7 @@ CharacterStateT<T>::CharacterStateT(
 
 template <typename T>
 void CharacterStateT<T>::setBindPose(
-    const CharacterT<T>& referenceCharacter,
+    const Character& referenceCharacter,
     bool updateMesh,
     bool updateCollision) {
   set(referenceCharacter.bindPose(), referenceCharacter, updateMesh, updateCollision);
@@ -68,7 +68,7 @@ void CharacterStateT<T>::setBindPose(
 template <typename T>
 void CharacterStateT<T>::set(
     const CharacterParameters& inParameters,
-    const CharacterT<T>& referenceCharacter,
+    const Character& referenceCharacter,
     bool updateMesh,
     bool updateCollision,
     bool applyLimits) {
@@ -114,36 +114,9 @@ void CharacterStateT<T>::set(
 
       meshState->updateNormals();
     } else if (referenceCharacter.blendShape) {
-      // skinWithBlendShapes() is only defined for `Character` (i.e., CharacterT<float>),
-      // so the double-precision instantiation has to materialize a float Character to call it.
-      if constexpr (std::is_same_v<T, float>) {
-        skinWithBlendShapes(
-            static_cast<const Character&>(referenceCharacter),
-            skeletonState,
-            parameters.pose,
-            *meshState);
-      } else {
-        // TODO: This temporary Character is constructed by shallow-copying member pointers
-        // from a CharacterT<double>. Members that differ between float/double specializations
-        // (e.g., `inverseBindPose`) are passed across without conversion, which can produce
-        // subtly wrong skinning. Consider providing a proper float<->double conversion or
-        // a templated skinWithBlendShapes overload.
-        Character tempCharacter(
-            referenceCharacter.skeleton,
-            referenceCharacter.parameterTransform,
-            referenceCharacter.parameterLimits,
-            referenceCharacter.locators,
-            referenceCharacter.mesh.get(),
-            referenceCharacter.skinWeights.get(),
-            referenceCharacter.collision.get(),
-            referenceCharacter.poseShapes.get(),
-            referenceCharacter.blendShape,
-            nullptr, // no face expression blend shape
-            referenceCharacter.name,
-            referenceCharacter.inverseBindPose);
-
-        skinWithBlendShapes(tempCharacter, skeletonState, parameters.pose, *meshState);
-      }
+      // `Character` is now non-templated (T270138855), so this branch no longer needs the
+      // float-vs-double specialization workaround.
+      skinWithBlendShapes(referenceCharacter, skeletonState, parameters.pose, *meshState);
     } else {
       applySSD(
           referenceCharacter.inverseBindPose,

@@ -59,7 +59,7 @@ struct CharacterStateT {
   /// @param updateCollision If true, allocate and populate `collisionState`
   ///   from `referenceCharacter.collision` (requires non-null collision).
   explicit CharacterStateT(
-      const CharacterT<T>& referenceCharacter,
+      const Character& referenceCharacter,
       bool updateMesh = true,
       bool updateCollision = true);
 
@@ -71,7 +71,7 @@ struct CharacterStateT {
   ///   for the requirements on `parameters.pose` and `parameters.offsets`.
   CharacterStateT(
       const CharacterParameters& parameters,
-      const CharacterT<T>& referenceCharacter,
+      const Character& referenceCharacter,
       bool updateMesh = true,
       bool updateCollision = true,
       bool applyLimits = true);
@@ -93,7 +93,7 @@ struct CharacterStateT {
   ///   character's `parameterLimits` after applying the parameter transform.
   void set(
       const CharacterParameters& parameters,
-      const CharacterT<T>& referenceCharacter,
+      const Character& referenceCharacter,
       bool updateMesh = true,
       bool updateCollision = true,
       bool applyLimits = true);
@@ -102,7 +102,7 @@ struct CharacterStateT {
   ///
   /// @see set() for the meaning of `updateMesh` and `updateCollision`.
   void setBindPose(
-      const CharacterT<T>& referenceCharacter,
+      const Character& referenceCharacter,
       bool updateMesh = true,
       bool updateCollision = true);
 };

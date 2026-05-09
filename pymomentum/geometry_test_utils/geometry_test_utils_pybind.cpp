@@ -16,7 +16,7 @@ namespace mm = momentum;
 
 namespace {
 mm::Character createTestCharacter(int num_joints, bool with_blendshapes) {
-  auto character = momentum::createTestCharacter<float>(num_joints);
+  auto character = momentum::createTestCharacter(num_joints);
   if (with_blendshapes) {
     character = momentum::withTestBlendShapes(character);
   }
