@@ -57,6 +57,7 @@ structs = [
 ]
 template_structs = [
     "AimData",
+    "CameraVertexProjectionData",
     "FixedAxisData",
     "JointToJointOrientationData",
     "NormalData",
@@ -78,6 +79,7 @@ template_classes = [
     "AimDirErrorFunction",
     "AimDistErrorFunction",
     "CameraProjectionErrorFunction",
+    "CameraVertexProjectionErrorFunction",
     "CenterOfMassErrorFunction",
     "CollisionErrorFunction",
     "CollisionErrorFunctionStateless",

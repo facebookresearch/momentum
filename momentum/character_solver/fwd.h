@@ -89,6 +89,25 @@ using AimDatad_const_u = ::std::unique_ptr<const AimDatad>;
 using AimDatad_const_w = ::std::weak_ptr<const AimDatad>;
 
 template <typename T>
+struct CameraVertexProjectionDataT;
+using CameraVertexProjectionData = CameraVertexProjectionDataT<float>;
+using CameraVertexProjectionDatad = CameraVertexProjectionDataT<double>;
+
+using CameraVertexProjectionData_p = ::std::shared_ptr<CameraVertexProjectionData>;
+using CameraVertexProjectionData_u = ::std::unique_ptr<CameraVertexProjectionData>;
+using CameraVertexProjectionData_w = ::std::weak_ptr<CameraVertexProjectionData>;
+using CameraVertexProjectionData_const_p = ::std::shared_ptr<const CameraVertexProjectionData>;
+using CameraVertexProjectionData_const_u = ::std::unique_ptr<const CameraVertexProjectionData>;
+using CameraVertexProjectionData_const_w = ::std::weak_ptr<const CameraVertexProjectionData>;
+
+using CameraVertexProjectionDatad_p = ::std::shared_ptr<CameraVertexProjectionDatad>;
+using CameraVertexProjectionDatad_u = ::std::unique_ptr<CameraVertexProjectionDatad>;
+using CameraVertexProjectionDatad_w = ::std::weak_ptr<CameraVertexProjectionDatad>;
+using CameraVertexProjectionDatad_const_p = ::std::shared_ptr<const CameraVertexProjectionDatad>;
+using CameraVertexProjectionDatad_const_u = ::std::unique_ptr<const CameraVertexProjectionDatad>;
+using CameraVertexProjectionDatad_const_w = ::std::weak_ptr<const CameraVertexProjectionDatad>;
+
+template <typename T>
 struct FixedAxisDataT;
 using FixedAxisData = FixedAxisDataT<float>;
 using FixedAxisDatad = FixedAxisDataT<double>;
@@ -396,6 +415,36 @@ using CameraProjectionErrorFunctiond_const_u =
     ::std::unique_ptr<const CameraProjectionErrorFunctiond>;
 using CameraProjectionErrorFunctiond_const_w =
     ::std::weak_ptr<const CameraProjectionErrorFunctiond>;
+
+template <typename T>
+class CameraVertexProjectionErrorFunctionT;
+using CameraVertexProjectionErrorFunction = CameraVertexProjectionErrorFunctionT<float>;
+using CameraVertexProjectionErrorFunctiond = CameraVertexProjectionErrorFunctionT<double>;
+
+using CameraVertexProjectionErrorFunction_p =
+    ::std::shared_ptr<CameraVertexProjectionErrorFunction>;
+using CameraVertexProjectionErrorFunction_u =
+    ::std::unique_ptr<CameraVertexProjectionErrorFunction>;
+using CameraVertexProjectionErrorFunction_w = ::std::weak_ptr<CameraVertexProjectionErrorFunction>;
+using CameraVertexProjectionErrorFunction_const_p =
+    ::std::shared_ptr<const CameraVertexProjectionErrorFunction>;
+using CameraVertexProjectionErrorFunction_const_u =
+    ::std::unique_ptr<const CameraVertexProjectionErrorFunction>;
+using CameraVertexProjectionErrorFunction_const_w =
+    ::std::weak_ptr<const CameraVertexProjectionErrorFunction>;
+
+using CameraVertexProjectionErrorFunctiond_p =
+    ::std::shared_ptr<CameraVertexProjectionErrorFunctiond>;
+using CameraVertexProjectionErrorFunctiond_u =
+    ::std::unique_ptr<CameraVertexProjectionErrorFunctiond>;
+using CameraVertexProjectionErrorFunctiond_w =
+    ::std::weak_ptr<CameraVertexProjectionErrorFunctiond>;
+using CameraVertexProjectionErrorFunctiond_const_p =
+    ::std::shared_ptr<const CameraVertexProjectionErrorFunctiond>;
+using CameraVertexProjectionErrorFunctiond_const_u =
+    ::std::unique_ptr<const CameraVertexProjectionErrorFunctiond>;
+using CameraVertexProjectionErrorFunctiond_const_w =
+    ::std::weak_ptr<const CameraVertexProjectionErrorFunctiond>;
 
 template <typename T>
 class CenterOfMassErrorFunctionT;
