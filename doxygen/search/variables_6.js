@@ -3,7 +3,7 @@ var searchData=
   ['faceexprchannels_0',['faceExprChannels',['../structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html#a2d88cf1b4a49180065316cee34d20d4d',1,'momentum::fbx_internal::MeshBlendShapeResult']]],
   ['faceexpressionblendshape_1',['faceExpressionBlendShape',['../structmomentum_1_1Character.html#a62a3453bc83d3846a350379f1b116da3',1,'momentum::Character']]],
   ['faceexpressionparameters_2',['faceExpressionParameters',['../structmomentum_1_1ParameterTransformT.html#a69e4e3e4d62d5867709ef93becdd2136',1,'momentum::ParameterTransformT']]],
-  ['faces_3',['faces',['../structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524',1,'momentum::MeshT']]],
+  ['faces_3',['faces',['../structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524',1,'momentum::MeshT::faces'],['../gltf__mesh__io_8cpp.html#a1296f0d2ee462928612450622f7c1509',1,'faces:&#160;gltf_mesh_io.cpp']]],
   ['fbxnamespace_4',['fbxNamespace',['../structmomentum_1_1FileSaveOptions.html#ac8880de9cf264be9a957935e8eb931b5',1,'momentum::FileSaveOptions']]],
   ['firstframeposeconstraintset_5',['firstFramePoseConstraintSet',['../structmomentum_1_1CalibrationConfig.html#a38bc2c5facf330b4c6155ff59bb40d22',1,'momentum::CalibrationConfig']]],
   ['floorcontactpercentile_6',['floorContactPercentile',['../structmomentum_1_1CalibrationConfig.html#a025f98316408a064737bfd9ca8114252',1,'momentum::CalibrationConfig']]],

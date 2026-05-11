@@ -131,9 +131,9 @@ $(document).ready(function(){initNavTree('eigen__adapters_8h_source.html',''); i
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="comment">// destroyed).</span></div>
 <div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html#a1080675358c78258dc1794b546195127">   29</a></span>  Collection&lt;TElement&gt; <a class="code hl_function" href="structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html#a1080675358c78258dc1794b546195127">operator()</a>(std::vector&lt;Eigen::Vector3&lt;T&gt;&gt;&amp;&amp; container) {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    std::vector&lt;TElement&gt; positions(container.size());</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    std::memcpy(positions.data(), container.data(), container.size() * <span class="keyword">sizeof</span>(Eigen::Vector3&lt;T&gt;));</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">return</span> Collection&lt;TElement&gt;::take_ownership(std::move(positions));</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    std::vector&lt;TElement&gt; <a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>(container.size());</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    std::memcpy(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>.data(), container.data(), container.size() * <span class="keyword">sizeof</span>(Eigen::Vector3&lt;T&gt;));</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">return</span> Collection&lt;TElement&gt;::take_ownership(std::move(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>));</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  }</div>
 </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>};</div>
@@ -153,9 +153,9 @@ $(document).ready(function(){initNavTree('eigen__adapters_8h_source.html',''); i
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// destroyed).</span></div>
 <div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html#a993915e7a2b0a903c886969664f0f8f9">   46</a></span>  Collection&lt;TElement&gt; <a class="code hl_function" href="structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html#a993915e7a2b0a903c886969664f0f8f9">operator()</a>(std::vector&lt;Eigen::Vector4&lt;T&gt;&gt;&amp;&amp; container) {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    std::vector&lt;TElement&gt; positions(container.size());</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    std::memcpy(positions.data(), container.data(), container.size() * <span class="keyword">sizeof</span>(Eigen::Vector4&lt;T&gt;));</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> Collection&lt;TElement&gt;::take_ownership(std::move(positions));</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    std::vector&lt;TElement&gt; <a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>(container.size());</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    std::memcpy(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>.data(), container.data(), container.size() * <span class="keyword">sizeof</span>(Eigen::Vector4&lt;T&gt;));</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> Collection&lt;TElement&gt;::take_ownership(std::move(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a>));</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  }</div>
 </div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>};</div>
@@ -167,16 +167,16 @@ $(document).ready(function(){initNavTree('eigen__adapters_8h_source.html',''); i
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html">   55</a></span><span class="keyword">struct </span>CollectionAdapter&lt;Color, std::vector&lt;Eigen::Vector3&lt;uint8_t&gt;&gt;&gt; {</div>
 <div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html#a15538c0a42444e80777bb1074044c095">   56</a></span>  Collection&lt;Color&gt; <a class="code hl_function" href="structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html#a15538c0a42444e80777bb1074044c095">operator()</a>(<span class="keyword">const</span> std::vector&lt;Eigen::Vector3&lt;uint8_t&gt;&gt;&amp; container) {</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    std::vector&lt;rerun::Color&gt; colors;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    colors.reserve(container.size());</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    std::vector&lt;rerun::Color&gt; <a class="code hl_variable" href="gltf__mesh__io_8cpp.html#ac45dd4a8f72178ec68e62b2ff8a3f7ec">colors</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <a class="code hl_variable" href="gltf__mesh__io_8cpp.html#ac45dd4a8f72178ec68e62b2ff8a3f7ec">colors</a>.reserve(container.size());</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    std::transform(</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        container.cbegin(),</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        container.cend(),</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        std::back_inserter(colors),</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        std::back_inserter(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#ac45dd4a8f72178ec68e62b2ff8a3f7ec">colors</a>),</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        [](<span class="keyword">const</span> Eigen::Vector3&lt;uint8_t&gt;&amp; vertexColor) {</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>          return rerun::Color(vertexColor[0], vertexColor[1], vertexColor[2]);</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        });</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> Collection&lt;Color&gt;::take_ownership(std::move(colors));</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> Collection&lt;Color&gt;::take_ownership(std::move(<a class="code hl_variable" href="gltf__mesh__io_8cpp.html#ac45dd4a8f72178ec68e62b2ff8a3f7ec">colors</a>));</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  }</div>
 </div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>};</div>
@@ -184,6 +184,8 @@ $(document).ready(function(){initNavTree('eigen__adapters_8h_source.html',''); i
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>} <span class="comment">// namespace rerun</span></div>
 </div>
+<div class="ttc" id="agltf__mesh__io_8cpp_html_a1577b7b0f440a706e635b760d69e81bd"><div class="ttname"><a href="gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd">positions</a></div><div class="ttdeci">std::vector&lt; Vector3f &gt; positions</div><div class="ttdef"><b>Definition</b> <a href="gltf__mesh__io_8cpp_source.html#l00029">gltf_mesh_io.cpp:29</a></div></div>
+<div class="ttc" id="agltf__mesh__io_8cpp_html_ac45dd4a8f72178ec68e62b2ff8a3f7ec"><div class="ttname"><a href="gltf__mesh__io_8cpp.html#ac45dd4a8f72178ec68e62b2ff8a3f7ec">colors</a></div><div class="ttdeci">std::vector&lt; Vector3b &gt; colors</div><div class="ttdef"><b>Definition</b> <a href="gltf__mesh__io_8cpp_source.html#l00031">gltf_mesh_io.cpp:31</a></div></div>
 <div class="ttc" id="anamespacererun_html"><div class="ttname"><a href="namespacererun.html">rerun</a></div><div class="ttdef"><b>Definition</b> <a href="eigen__adapters_8h_source.html#l00017">eigen_adapters.h:17</a></div></div>
 <div class="ttc" id="astructrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4_html_a15538c0a42444e80777bb1074044c095"><div class="ttname"><a href="structrerun_1_1CollectionAdapter_3_01Color_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01uint8__t_01_4_01_4_01_4.html#a15538c0a42444e80777bb1074044c095">rerun::CollectionAdapter&lt; Color, std::vector&lt; Eigen::Vector3&lt; uint8_t &gt; &gt; &gt;::operator()</a></div><div class="ttdeci">Collection&lt; Color &gt; operator()(const std::vector&lt; Eigen::Vector3&lt; uint8_t &gt; &gt; &amp;container)</div><div class="ttdef"><b>Definition</b> <a href="eigen__adapters_8h_source.html#l00056">eigen_adapters.h:56</a></div></div>
 <div class="ttc" id="astructrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4_html_a1080675358c78258dc1794b546195127"><div class="ttname"><a href="structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html#a1080675358c78258dc1794b546195127">rerun::CollectionAdapter&lt; TElement, std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; &gt;::operator()</a></div><div class="ttdeci">Collection&lt; TElement &gt; operator()(std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; &amp;&amp;container)</div><div class="ttdef"><b>Definition</b> <a href="eigen__adapters_8h_source.html#l00029">eigen_adapters.h:29</a></div></div>
@@ -196,7 +198,7 @@ $(document).ready(function(){initNavTree('eigen__adapters_8h_source.html',''); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a class="el" href="dir_48d37d9357baadef9a0e1c1d75190b6d.html">rerun</a></li><li class="navelem"><a class="el" href="eigen__adapters_8h.html">eigen_adapters.h</a></li>
-    <li class="footer">Generated on Mon May 11 2026 15:45:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon May 11 2026 20:58:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

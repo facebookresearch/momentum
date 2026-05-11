@@ -102,6 +102,7 @@ $(document).ready(function(){initNavTree('gltf__mesh__io_8cpp.html',''); initRes
 <code>#include &quot;<a class="el" href="json__utils_8h_source.html">momentum/io/common/json_utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="accessor__utils_8h_source.html">momentum/io/gltf/utils/accessor_utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="coordinate__utils_8h_source.html">momentum/io/gltf/utils/coordinate_utils.h</a>&quot;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
 </div>
 <p><a href="gltf__mesh__io_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -131,13 +132,120 @@ Functions</h2></td></tr>
 <tr class="memdesc:a480103abc1663ae84136031c0e524fbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bind a mesh to a single joint.  <br /></td></tr>
 <tr class="separator:a480103abc1663ae84136031c0e524fbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="ac45dd4a8f72178ec68e62b2ff8a3f7ec" name="ac45dd4a8f72178ec68e62b2ff8a3f7ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac45dd4a8f72178ec68e62b2ff8a3f7ec">&#9670;&#160;</a></span>colors</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Vector3b&gt; colors</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00031">31</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="mesh_8cpp_source.html#l00065">momentum::MeshT&lt; T &gt;::cast()</a>, <a class="el" href="logger_8cpp_source.html#l00134">momentum::logLocators()</a>, <a class="el" href="logger_8cpp_source.html#l00175">momentum::logMarkerLocatorCorrespondence()</a>, <a class="el" href="eigen__adapters_8h_source.html#l00056">rerun::CollectionAdapter&lt; Color, std::vector&lt; Eigen::Vector3&lt; uint8_t &gt; &gt; &gt;::operator()()</a>, <a class="el" href="mesh_8cpp_source.html#l00083">momentum::MeshT&lt; T &gt;::reset()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00272">momentum::saveMeshToUsd()</a>, and <a class="el" href="texture__classification_8cpp_source.html#l00320">momentum::splitMeshByTextureRegion()</a>.</p>
+
+</div>
+</div>
+<a id="af42ffe0f18629826eb39e6505dbf891e" name="af42ffe0f18629826eb39e6505dbf891e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af42ffe0f18629826eb39e6505dbf891e">&#9670;&#160;</a></span>coords</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Vector2f&gt; coords</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00023">23</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1296f0d2ee462928612450622f7c1509" name="a1296f0d2ee462928612450622f7c1509"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1296f0d2ee462928612450622f7c1509">&#9670;&#160;</a></span>faces</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Vector3i&gt; faces</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00024">24</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="skeleton__derivative_8cpp_source.html#l01343">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateVertexNormalBlendShapeGradient()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l01376">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateVertexNormalBlendShapeGradient()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l01529">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateVertexNormalBlendShapeJacobian()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l01571">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateVertexNormalBlendShapeJacobian()</a>, <a class="el" href="mesh_8cpp_source.html#l00065">momentum::MeshT&lt; T &gt;::cast()</a>, <a class="el" href="mesh_8cpp_source.html#l00083">momentum::MeshT&lt; T &gt;::reset()</a>, and <a class="el" href="mesh_8cpp_source.html#l00017">momentum::MeshT&lt; T &gt;::updateNormals()</a>.</p>
+
+</div>
+</div>
+<a id="a971102cb4b7f6757ff8bd52b60afa5f0" name="a971102cb4b7f6757ff8bd52b60afa5f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a971102cb4b7f6757ff8bd52b60afa5f0">&#9670;&#160;</a></span>normals</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Vector3f&gt; normals</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00030">30</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="mesh_8cpp_source.html#l00065">momentum::MeshT&lt; T &gt;::cast()</a>, <a class="el" href="mesh_8cpp_source.html#l00083">momentum::MeshT&lt; T &gt;::reset()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00272">momentum::saveMeshToUsd()</a>, <a class="el" href="texture__classification_8cpp_source.html#l00320">momentum::splitMeshByTextureRegion()</a>, and <a class="el" href="mesh_8cpp_source.html#l00017">momentum::MeshT&lt; T &gt;::updateNormals()</a>.</p>
+
+</div>
+</div>
+<a id="a1577b7b0f440a706e635b760d69e81bd" name="a1577b7b0f440a706e635b760d69e81bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1577b7b0f440a706e635b760d69e81bd">&#9670;&#160;</a></span>positions</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Vector3f&gt; positions</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00029">29</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="eigen__adapters_8h_source.html#l00029">rerun::CollectionAdapter&lt; TElement, std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; &gt;::operator()()</a>, and <a class="el" href="eigen__adapters_8h_source.html#l00046">rerun::CollectionAdapter&lt; TElement, std::vector&lt; Eigen::Vector4&lt; T &gt; &gt; &gt;::operator()()</a>.</p>
+
+</div>
+</div>
+<a id="a2c721433dc1670dc6063f5471545b328" name="a2c721433dc1670dc6063f5471545b328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c721433dc1670dc6063f5471545b328">&#9670;&#160;</a></span>texture</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">TextureBuffers texture</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00032">32</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="texture__classification_8cpp_source.html#l00097">momentum::classifyTrianglesByTexture()</a>, and <a class="el" href="texture__classification_8cpp_source.html#l00320">momentum::splitMeshByTextureRegion()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c2f13be7e03d9233fc5bd49f0a0b157c.html">gltf</a></li><li class="navelem"><a class="el" href="gltf__mesh__io_8cpp.html">gltf_mesh_io.cpp</a></li>
-    <li class="footer">Generated on Mon May 11 2026 15:45:39 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon May 11 2026 20:58:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

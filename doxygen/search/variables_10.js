@@ -37,13 +37,14 @@ var searchData=
   ['positionerror_34',['positionError',['../structmomentum_1_1StateSimilarity.html#af4f9de50f62b7698e6eceaaf66c2d957',1,'momentum::StateSimilarity']]],
   ['positionmax_35',['positionMax',['../structmomentum_1_1StateSimilarity.html#ac7d1707c59b51cc67fea1c2aaf624169',1,'momentum::StateSimilarity']]],
   ['positionrmse_36',['positionRMSE',['../structmomentum_1_1StateSimilarity.html#a9ad0192dfdeb9e11fbfffc1573a503ef',1,'momentum::StateSimilarity']]],
-  ['positionweight_37',['positionWeight',['../structmomentum_1_1GloveConfig.html#abcd934c94b72f3c4bbfb27d47c4cc6cf',1,'momentum::GloveConfig']]],
-  ['ppmap_5f_38',['ppMap_',['../classmomentum_1_1PosePriorErrorFunctionT.html#ac1cdd7c88e2a41d8098bad40d250074c',1,'momentum::PosePriorErrorFunctionT']]],
-  ['prerotation_39',['preRotation',['../structmomentum_1_1JointT.html#ab6ae2960643c6f7d5d9cd865e79e5031',1,'momentum::JointT']]],
-  ['prevrot_40',['prevRot',['../state__sequence__error__function_8cpp.html#abfde9d9083e2dba37746338dbfa01a54',1,'state_sequence_error_function.cpp']]],
-  ['progressbar_41',['progressBar',['../structmomentum_1_1SequenceSolverOptions.html#a685decc627e5c7dfde260510641fb0fc',1,'momentum::SequenceSolverOptions']]],
-  ['projection_42',['projection',['../structmomentum_1_1ProjectionConstraintDataT.html#a6c8315a71cc44847bb6670c3d52fde23',1,'momentum::ProjectionConstraintDataT']]],
-  ['projectionmatrix_43',['projectionMatrix',['../structmomentum_1_1VertexProjectionDataT.html#ae1df8f70705c7b388dc37904d889a897',1,'momentum::VertexProjectionDataT']]],
-  ['projectionweight_44',['projectionweight',['../structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78',1,'momentum::CalibrationConfig::projectionWeight'],['../structmomentum_1_1TrackingConfig.html#a73b756066f8c5337ee9dc4ff2f9ea855',1,'momentum::TrackingConfig::projectionWeight']]],
-  ['pwgt_45',['pwgt',['../state__sequence__error__function_8cpp.html#a251dd2a0d439a8394afe009dcbe6b493',1,'state_sequence_error_function.cpp']]]
+  ['positions_37',['positions',['../gltf__mesh__io_8cpp.html#a1577b7b0f440a706e635b760d69e81bd',1,'gltf_mesh_io.cpp']]],
+  ['positionweight_38',['positionWeight',['../structmomentum_1_1GloveConfig.html#abcd934c94b72f3c4bbfb27d47c4cc6cf',1,'momentum::GloveConfig']]],
+  ['ppmap_5f_39',['ppMap_',['../classmomentum_1_1PosePriorErrorFunctionT.html#ac1cdd7c88e2a41d8098bad40d250074c',1,'momentum::PosePriorErrorFunctionT']]],
+  ['prerotation_40',['preRotation',['../structmomentum_1_1JointT.html#ab6ae2960643c6f7d5d9cd865e79e5031',1,'momentum::JointT']]],
+  ['prevrot_41',['prevRot',['../state__sequence__error__function_8cpp.html#abfde9d9083e2dba37746338dbfa01a54',1,'state_sequence_error_function.cpp']]],
+  ['progressbar_42',['progressBar',['../structmomentum_1_1SequenceSolverOptions.html#a685decc627e5c7dfde260510641fb0fc',1,'momentum::SequenceSolverOptions']]],
+  ['projection_43',['projection',['../structmomentum_1_1ProjectionConstraintDataT.html#a6c8315a71cc44847bb6670c3d52fde23',1,'momentum::ProjectionConstraintDataT']]],
+  ['projectionmatrix_44',['projectionMatrix',['../structmomentum_1_1VertexProjectionDataT.html#ae1df8f70705c7b388dc37904d889a897',1,'momentum::VertexProjectionDataT']]],
+  ['projectionweight_45',['projectionweight',['../structmomentum_1_1TrackingConfig.html#a73b756066f8c5337ee9dc4ff2f9ea855',1,'momentum::TrackingConfig::projectionWeight'],['../structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78',1,'momentum::CalibrationConfig::projectionWeight']]],
+  ['pwgt_46',['pwgt',['../state__sequence__error__function_8cpp.html#a251dd2a0d439a8394afe009dcbe6b493',1,'state_sequence_error_function.cpp']]]
 ];
