@@ -6,6 +6,7 @@
 # pyre-strict
 
 import unittest
+from typing import Any
 
 import numpy as np
 import pymomentum.geometry as geo  # @manual=:geometry
@@ -76,6 +77,58 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             joint_params = np.zeros(character.skeleton.size * 7, dtype=np.float32)
             return character.pose_mesh(joint_params)
 
+        def _solid_mesh_visibilities(self, mesh_handle: Any) -> list[bool]:
+            if isinstance(mesh_handle, list):
+                return [bool(part.handle.visible) for part in mesh_handle]
+            return [bool(mesh_handle.visible)]
+
+        def _make_uncolored_character(self, character: geo.Character) -> geo.Character:
+            mesh = geo.Mesh(
+                vertices=character.mesh.vertices,
+                faces=character.mesh.faces,
+                normals=character.mesh.normals,
+            )
+            return character.with_mesh_and_skin_weights(mesh, character.skin_weights)
+
+        def _make_colored_skinned_character_and_skel_state(
+            self,
+        ) -> tuple[geo.Character, np.ndarray]:
+            character, _ = self._make_character_and_skel_state()
+            vertices = np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                    [1.0, 0.0, 1.0],
+                    [0.0, 1.0, 1.0],
+                ],
+                dtype=np.float32,
+            )
+            faces = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
+            colors = np.array(
+                [
+                    [255, 0, 0],
+                    [255, 0, 0],
+                    [255, 0, 0],
+                    [0, 0, 255],
+                    [0, 0, 255],
+                    [0, 0, 255],
+                ],
+                dtype=np.uint8,
+            )
+            mesh = geo.Mesh(vertices=vertices, faces=faces, colors=colors)
+            skin_weights = geo.SkinWeights(
+                index=np.zeros((vertices.shape[0], 1), dtype=np.int32),
+                weights=np.ones((vertices.shape[0], 1), dtype=np.float32),
+            )
+            character = character.with_mesh_and_skin_weights(mesh, skin_weights)
+            model_params = np.zeros(
+                character.parameter_transform.size, dtype=np.float32
+            )
+            skel_state = geo.model_parameters_to_skeleton_state(character, model_params)
+            return character, skel_state
+
         def test_add_and_update_joints(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
             handles, bones_handle = add_joints(
@@ -104,6 +157,11 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             character, _ = self._make_character_and_skel_state()
             posed_mesh = self._posed_mesh(character)
             self.assertGreater(len(posed_mesh.vertices), 0)
+            posed_mesh = geo.Mesh(
+                vertices=posed_mesh.vertices,
+                faces=posed_mesh.faces,
+                normals=posed_mesh.normals,
+            )
             solid_handle, wireframe_handle = add_mesh(
                 self.server, "test_mesh", posed_mesh
             )
@@ -120,6 +178,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
 
         def test_add_and_update_skinned_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
+            character = self._make_uncolored_character(character)
             skinned_handle = add_skinned_mesh(
                 self.server, "test_skinned_mesh", character, skel_state
             )
@@ -137,6 +196,92 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                 )
 
             skinned_handle.remove()
+
+        def test_add_and_update_skinned_mesh_with_vertex_colors(self) -> None:
+            character, skel_state = (
+                self._make_colored_skinned_character_and_skel_state()
+            )
+            skinned_handle = add_skinned_mesh(
+                self.server, "test_color_skinned_mesh", character, skel_state
+            )
+            self.assertIsInstance(skinned_handle, list)
+            self.assertEqual(len(skinned_handle), 2)
+            self.assertEqual(
+                {tuple(part.handle.color) for part in skinned_handle},
+                {(255, 0, 0), (0, 0, 255)},
+            )
+
+            moved = skel_state.copy()
+            moved[:, 0] += 1.0
+            scale = 2.0
+            update_skinned_mesh(skinned_handle, moved, scale=scale)
+            for part in skinned_handle:
+                self.assertGreaterEqual(len(part.handle.bones), character.skeleton.size)
+                for i, bone in enumerate(part.handle.bones[: character.skeleton.size]):
+                    np.testing.assert_allclose(
+                        np.asarray(bone.position),
+                        moved[i, :3] * scale,
+                        atol=1e-5,
+                    )
+
+            for part in skinned_handle:
+                part.handle.remove()
+
+        def test_add_and_update_mesh_with_vertex_colors(self) -> None:
+            vertices = np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                    [1.0, 0.0, 1.0],
+                    [0.0, 1.0, 1.0],
+                ],
+                dtype=np.float32,
+            )
+            faces = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
+            colors = np.array(
+                [
+                    [255, 0, 0],
+                    [255, 0, 0],
+                    [255, 0, 0],
+                    [0, 0, 255],
+                    [0, 0, 255],
+                    [0, 0, 255],
+                ],
+                dtype=np.uint8,
+            )
+            mesh = geo.Mesh(vertices=vertices, faces=faces, colors=colors)
+
+            solid_handle, wireframe_handle = add_mesh(
+                self.server, "test_color_mesh", mesh
+            )
+            self.assertIsInstance(solid_handle, list)
+            self.assertEqual(len(solid_handle), 2)
+            self.assertEqual(
+                {tuple(part.handle.color) for part in solid_handle},
+                {(255, 0, 0), (0, 0, 255)},
+            )
+
+            moved_mesh = geo.Mesh(
+                vertices=vertices + np.array([1.0, 2.0, 3.0], dtype=np.float32),
+                faces=faces,
+                colors=colors,
+            )
+            update_mesh(solid_handle, wireframe_handle, moved_mesh, scale=1.0)
+            moved_vertices = np.asarray(moved_mesh.vertices, dtype=np.float32)
+            for part in solid_handle:
+                np.testing.assert_allclose(
+                    np.asarray(part.handle.vertices),
+                    moved_vertices[part.vertex_indices],
+                )
+            np.testing.assert_allclose(
+                np.asarray(wireframe_handle.vertices), moved_vertices
+            )
+
+            for part in solid_handle:
+                part.handle.remove()
+            wireframe_handle.remove()
 
         def test_add_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
@@ -178,22 +323,23 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
 
             # Skinned mesh: no secondary wireframe handle is needed because the
             # skinned mesh handle exposes a wireframe property directly.
+            uncolored_character = self._make_uncolored_character(character)
             skinned = add_character(
                 self.server,
                 "test_char_skinned",
-                character,
+                uncolored_character,
                 skel_state,
                 use_skinned_mesh=True,
             )
             self.assertIsNotNone(skinned.mesh_handle)
             self.assertIsNone(skinned.wireframe_handle)
             self.assertGreaterEqual(
-                len(skinned.mesh_handle.bones), character.skeleton.size
+                len(skinned.mesh_handle.bones), uncolored_character.skeleton.size
             )
             moved[:, 1] += 0.25
-            update_character(self.server, skinned, character, moved)
+            update_character(self.server, skinned, uncolored_character, moved)
             for i, bone in enumerate(
-                skinned.mesh_handle.bones[: character.skeleton.size]
+                skinned.mesh_handle.bones[: uncolored_character.skeleton.size]
             ):
                 np.testing.assert_allclose(
                     np.asarray(bone.position),
@@ -266,21 +412,29 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
 
             # Default initial_value=False: solid visible, wireframe hidden.
             cb = add_wireframe_toggle(self.server, handles)
-            self.assertTrue(handles.mesh_handle.visible)
+            self.assertEqual(
+                self._solid_mesh_visibilities(handles.mesh_handle),
+                [True] * len(self._solid_mesh_visibilities(handles.mesh_handle)),
+            )
             self.assertFalse(handles.wireframe_handle.visible)
 
             # Flip the checkbox; visibility should swap.
             cb.value = True
-            self.assertFalse(handles.mesh_handle.visible)
+            solid_visibilities = self._solid_mesh_visibilities(handles.mesh_handle)
+            self.assertEqual(
+                solid_visibilities,
+                [False] * len(solid_visibilities),
+            )
             self.assertTrue(handles.wireframe_handle.visible)
 
             cb.remove()
             remove_character(handles)
 
+            uncolored_character = self._make_uncolored_character(character)
             skinned = add_character(
                 self.server,
                 "test_wf_skinned",
-                character,
+                uncolored_character,
                 skel_state,
                 use_skinned_mesh=True,
             )
@@ -297,6 +451,45 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
 
             skinned_cb.remove()
             remove_character(skinned)
+
+            colored_character, colored_skel_state = (
+                self._make_colored_skinned_character_and_skel_state()
+            )
+            colored_skinned = add_character(
+                self.server,
+                "test_wf_color_skinned",
+                colored_character,
+                colored_skel_state,
+                use_skinned_mesh=True,
+            )
+            self.assertIsInstance(colored_skinned.mesh_handle, list)
+            self.assertIsNone(colored_skinned.wireframe_handle)
+
+            colored_skinned_cb = add_wireframe_toggle(self.server, colored_skinned)
+            for part in colored_skinned.mesh_handle:
+                self.assertTrue(part.handle.visible)
+                self.assertFalse(part.handle.wireframe)
+
+            colored_skinned_cb.value = True
+            for part in colored_skinned.mesh_handle:
+                self.assertTrue(part.handle.visible)
+                self.assertTrue(part.handle.wireframe)
+
+            moved = colored_skel_state.copy()
+            moved[:, 2] += 0.5
+            update_character(self.server, colored_skinned, colored_character, moved)
+            for part in colored_skinned.mesh_handle:
+                for i, bone in enumerate(
+                    part.handle.bones[: colored_character.skeleton.size]
+                ):
+                    np.testing.assert_allclose(
+                        np.asarray(bone.position),
+                        moved[i, :3] * 0.01,
+                        atol=1e-5,
+                    )
+
+            colored_skinned_cb.remove()
+            remove_character(colored_skinned)
 
         def test_add_log_panel(self) -> None:
             panel = add_log_panel(self.server, echo_to_stdout=False)
