@@ -52,7 +52,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING, TypeAlias
 
 import numpy as np
 from pymomentum.quaternion_np import from_rotation_matrix
@@ -76,6 +76,19 @@ class CharacterHandles:
     wireframe_handle: Any | None = None
 
 
+@dataclass
+class _ColoredMeshPart:
+    """A uniformly colored submesh derived from a per-vertex colored mesh."""
+
+    handle: Any
+    vertex_indices: np.ndarray
+
+
+_ColoredMeshGroups: TypeAlias = list[
+    tuple[tuple[int, int, int], np.ndarray, np.ndarray]
+]
+
+
 #: Default scale factor to convert momentum units (cm) to meters for viser.
 CM_TO_M: float = 0.01
 
@@ -84,6 +97,91 @@ def _xyzw_to_wxyz(q: np.ndarray) -> np.ndarray:
     """Convert quaternion from ``[x, y, z, w]`` (pymomentum) to ``[w, x, y, z]`` (viser)."""
     q_arr = np.asarray(q, dtype=np.float64)
     return np.concatenate((q_arr[..., 3:4], q_arr[..., :3]), axis=-1)
+
+
+def _get_vertex_colors(mesh: Mesh, n_vertices: int) -> np.ndarray | None:
+    colors = np.asarray(mesh.colors, dtype=np.uint8)
+    if colors.size == 0:
+        return None
+    if colors.ndim != 2 or colors.shape != (n_vertices, 3):
+        return None
+    return colors
+
+
+def _color_for_face(face_colors: np.ndarray) -> tuple[int, int, int]:
+    if np.all(face_colors == face_colors[0]):
+        color = face_colors[0]
+    else:
+        color = np.rint(np.mean(face_colors, axis=0)).astype(np.uint8)
+    return (int(color[0]), int(color[1]), int(color[2]))
+
+
+def _add_colored_mesh_parts(
+    server: viser.ViserServer,
+    entity_path: str,
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    colors: np.ndarray,
+) -> list[_ColoredMeshPart]:
+    parts: list[_ColoredMeshPart] = []
+    for color_index, (color, vertex_indices, part_faces) in enumerate(
+        _colored_mesh_groups(faces, colors)
+    ):
+        handle = server.scene.add_mesh_simple(
+            f"{entity_path}/color_{color_index}",
+            vertices=vertices[vertex_indices],
+            faces=part_faces,
+            color=color,
+        )
+        parts.append(_ColoredMeshPart(handle=handle, vertex_indices=vertex_indices))
+    return parts
+
+
+def _colored_mesh_groups(faces: np.ndarray, colors: np.ndarray) -> _ColoredMeshGroups:
+    face_indices_by_color: dict[tuple[int, int, int], list[int]] = {}
+    for face_index, face in enumerate(faces):
+        color = _color_for_face(colors[face])
+        face_indices_by_color.setdefault(color, []).append(face_index)
+
+    groups: _ColoredMeshGroups = []
+    for color, face_indices in face_indices_by_color.items():
+        part_faces_original = faces[np.asarray(face_indices, dtype=np.int64)]
+        vertex_indices, inverse_faces = np.unique(
+            part_faces_original.reshape(-1), return_inverse=True
+        )
+        part_faces = inverse_faces.reshape((-1, 3)).astype(np.int32)
+        groups.append((color, vertex_indices, part_faces))
+    return groups
+
+
+def _solid_mesh_handles(mesh_handle: Any | None) -> list[Any]:
+    if mesh_handle is None:
+        return []
+    if isinstance(mesh_handle, list):
+        return [part.handle for part in mesh_handle]
+    return [mesh_handle]
+
+
+def _set_solid_mesh_visible(mesh_handle: Any | None, visible: bool) -> None:
+    for handle in _solid_mesh_handles(mesh_handle):
+        handle.visible = visible
+
+
+def _remove_solid_mesh(mesh_handle: Any | None) -> None:
+    for handle in _solid_mesh_handles(mesh_handle):
+        handle.remove()
+
+
+def _skinned_mesh_handles(mesh_handle: Any | None) -> list[Any]:
+    if mesh_handle is None:
+        return []
+    if hasattr(mesh_handle, "bones"):
+        return [mesh_handle]
+    if isinstance(mesh_handle, list):
+        handles = [part.handle for part in mesh_handle]
+        if all(hasattr(handle, "bones") for handle in handles):
+            return handles
+    return []
 
 
 def add_mesh(
@@ -105,16 +203,24 @@ def add_mesh(
     :param color: RGB color tuple ``(r, g, b)`` in 0–255.
     :param scale: Unit conversion factor applied to vertex positions.
         Defaults to :data:`CM_TO_M` (0.01) to convert momentum's cm to meters.
-    :return: A tuple of (solid_handle, wireframe_handle).
+    :return: A tuple of (solid_handle, wireframe_handle). The solid handle is a list
+        of uniformly colored submesh handles when per-vertex colors are present.
     """
     vertices = np.asarray(mesh.vertices, dtype=np.float32) * scale
     faces = np.asarray(mesh.faces, dtype=np.int32)
-    solid = server.scene.add_mesh_simple(
-        entity_path,
-        vertices=vertices,
-        faces=faces,
-        color=color,
-    )
+    vertex_colors = _get_vertex_colors(mesh, vertices.shape[0])
+    solid: Any
+    if vertex_colors is None:
+        solid = server.scene.add_mesh_simple(
+            entity_path,
+            vertices=vertices,
+            faces=faces,
+            color=color,
+        )
+    else:
+        solid = _add_colored_mesh_parts(
+            server, entity_path, vertices, faces, vertex_colors
+        )
     wireframe = server.scene.add_mesh_simple(
         f"{entity_path}_wireframe",
         vertices=vertices,
@@ -186,7 +292,11 @@ def update_mesh(
     :param scale: Unit conversion factor.  Defaults to :data:`CM_TO_M`.
     """
     vertices = np.asarray(mesh.vertices, dtype=np.float32) * scale
-    mesh_handle.vertices = vertices
+    if isinstance(mesh_handle, list):
+        for part in mesh_handle:
+            part.handle.vertices = vertices[part.vertex_indices]
+    else:
+        mesh_handle.vertices = vertices
     if wireframe_handle is not None:
         wireframe_handle.vertices = vertices
 
@@ -268,7 +378,8 @@ def add_skinned_mesh(
     :param color: RGB color tuple ``(r, g, b)`` in 0–255.
     :param scale: Unit conversion factor applied to vertices and bone
         translations. Defaults to :data:`CM_TO_M`.
-    :return: The viser skinned mesh handle.
+    :return: The viser skinned mesh handle. When per-vertex colors are present,
+        returns a list of uniformly colored skinned submesh handles.
     """
     if not character.has_mesh:
         raise ValueError("add_skinned_mesh() requires a character with mesh skinning")
@@ -322,18 +433,60 @@ def add_skinned_mesh(
             ),
             axis=0,
         )
-    skinned_mesh_handle = server.scene.add_mesh_skinned(
-        entity_path,
-        vertices=vertices,
-        faces=faces,
-        bone_wxyzs=bone_wxyzs,
-        bone_positions=bone_positions,
-        skin_weights=skin_weights,
-        color=color,
-        scale=1.0,
-    )
+    vertex_colors = _get_vertex_colors(mesh, vertices.shape[0])
+    skinned_mesh_handle: Any
+    if vertex_colors is None:
+        skinned_mesh_handle = server.scene.add_mesh_skinned(
+            entity_path,
+            vertices=vertices,
+            faces=faces,
+            bone_wxyzs=bone_wxyzs,
+            bone_positions=bone_positions,
+            skin_weights=skin_weights,
+            color=color,
+            scale=1.0,
+        )
+    else:
+        skinned_mesh_handle = _add_colored_skinned_mesh_parts(
+            server,
+            entity_path,
+            vertices,
+            faces,
+            skin_weights,
+            bone_wxyzs,
+            bone_positions,
+            vertex_colors,
+        )
     update_skinned_mesh(skinned_mesh_handle, skel_state, scale=scale)
     return skinned_mesh_handle
+
+
+def _add_colored_skinned_mesh_parts(
+    server: viser.ViserServer,
+    entity_path: str,
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    skin_weights: np.ndarray,
+    bone_wxyzs: np.ndarray,
+    bone_positions: np.ndarray,
+    colors: np.ndarray,
+) -> list[_ColoredMeshPart]:
+    parts: list[_ColoredMeshPart] = []
+    for color_index, (color, vertex_indices, part_faces) in enumerate(
+        _colored_mesh_groups(faces, colors)
+    ):
+        handle = server.scene.add_mesh_skinned(
+            f"{entity_path}/color_{color_index}",
+            vertices=vertices[vertex_indices],
+            faces=part_faces,
+            bone_wxyzs=bone_wxyzs,
+            bone_positions=bone_positions,
+            skin_weights=skin_weights[vertex_indices],
+            color=color,
+            scale=1.0,
+        )
+        parts.append(_ColoredMeshPart(handle=handle, vertex_indices=vertex_indices))
+    return parts
 
 
 def update_skinned_mesh(
@@ -345,18 +498,33 @@ def update_skinned_mesh(
     """Update a skinned mesh by sending only bone transforms.
 
     :param skinned_mesh_handle: The handle returned by :func:`add_skinned_mesh`.
+        This may be a list of uniformly colored skinned submesh handles.
     :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
     :param scale: Unit conversion factor for bone translations.
     """
-    bones = skinned_mesh_handle.bones
-    if len(bones) < skel_state.shape[0]:
-        raise ValueError(
-            f"Skinned mesh has {len(bones)} bones but got {skel_state.shape[0]} joints"
-        )
+    handles = _skinned_mesh_handles(skinned_mesh_handle)
+    if not handles:
+        raise ValueError("update_skinned_mesh() requires skinned mesh handle(s)")
 
     positions = skel_state[:, :3].astype(np.float64) * scale
     wxyzs = _xyzw_to_wxyz(skel_state[:, 3:7])
-    for bone, position, wxyz in zip(bones[: skel_state.shape[0]], positions, wxyzs):
+    for handle in handles:
+        _update_skinned_mesh_handle(handle, positions, wxyzs, skel_state.shape[0])
+
+
+def _update_skinned_mesh_handle(
+    skinned_mesh_handle: Any,
+    positions: np.ndarray,
+    wxyzs: np.ndarray,
+    n_joints: int,
+) -> None:
+    bones = skinned_mesh_handle.bones
+    if len(bones) < n_joints:
+        raise ValueError(
+            f"Skinned mesh has {len(bones)} bones but got {n_joints} joints"
+        )
+
+    for bone, position, wxyz in zip(bones[:n_joints], positions, wxyzs):
         bone.position = position
         bone.wxyz = wxyz
 
@@ -563,7 +731,7 @@ def update_character(
             scale=scale,
         )
 
-        if handles.mesh_handle is not None and hasattr(handles.mesh_handle, "bones"):
+        if _skinned_mesh_handles(handles.mesh_handle):
             update_skinned_mesh(handles.mesh_handle, skel_state, scale=scale)
         elif posed_mesh is not None and handles.mesh_handle is not None:
             update_mesh(
@@ -590,8 +758,7 @@ def remove_character(
             handle.remove()
         if handles.bones_handle is not None:
             handles.bones_handle.remove()
-        if handles.mesh_handle is not None:
-            handles.mesh_handle.remove()
+        _remove_solid_mesh(handles.mesh_handle)
         if handles.wireframe_handle is not None:
             handles.wireframe_handle.remove()
 
@@ -688,27 +855,28 @@ def add_wireframe_toggle(
     :return: The viser checkbox handle.
     """
     cb = server.gui.add_checkbox(label, initial_value=initial_value)
-    if handles.mesh_handle is not None:
-        if handles.wireframe_handle is None and hasattr(
-            handles.mesh_handle, "wireframe"
-        ):
-            handles.mesh_handle.visible = True
-            handles.mesh_handle.wireframe = initial_value
-        else:
-            handles.mesh_handle.visible = not initial_value
+    skinned_handles = (
+        _skinned_mesh_handles(handles.mesh_handle)
+        if handles.wireframe_handle is None
+        else []
+    )
+    if skinned_handles:
+        for handle in skinned_handles:
+            handle.visible = True
+            handle.wireframe = initial_value
+    else:
+        _set_solid_mesh_visible(handles.mesh_handle, not initial_value)
     if handles.wireframe_handle is not None:
         handles.wireframe_handle.visible = initial_value
 
     @cb.on_update
     def _(_: object) -> None:
-        if handles.mesh_handle is not None:
-            if handles.wireframe_handle is None and hasattr(
-                handles.mesh_handle, "wireframe"
-            ):
-                handles.mesh_handle.visible = True
-                handles.mesh_handle.wireframe = cb.value
-            else:
-                handles.mesh_handle.visible = not cb.value
+        if skinned_handles:
+            for handle in skinned_handles:
+                handle.visible = True
+                handle.wireframe = cb.value
+        else:
+            _set_solid_mesh_visible(handles.mesh_handle, not cb.value)
         if handles.wireframe_handle is not None:
             handles.wireframe_handle.visible = cb.value
 
