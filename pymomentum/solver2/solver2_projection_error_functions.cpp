@@ -9,6 +9,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character_solver/camera_projection_error_function.h>
+#include <momentum/character_solver/camera_vertex_projection_error_function.h>
 #include <momentum/character_solver/projection_error_function.h>
 #include <momentum/character_solver/vertex_projection_error_function.h>
 #include <pymomentum/solver2/solver2_utility.h>
@@ -564,6 +565,212 @@ camera_offset is used directly as the eye-from-world transform.)")
           "constraints",
           &mm::CameraProjectionErrorFunctionT<float>::getConstraints,
           "Returns the list of camera projection constraints.");
+
+  // Camera vertex projection error function
+  py::class_<mm::CameraVertexProjectionDataT<float>>(
+      m,
+      "CameraVertexProjectionConstraint",
+      "Read-only access to a camera vertex projection constraint.")
+      .def(
+          "__repr__",
+          [](const mm::CameraVertexProjectionDataT<float>& self) {
+            return fmt::format(
+                "CameraVertexProjectionConstraint(vertex_index={}, weight={}, target=[{:.3f}, {:.3f}])",
+                self.vertexIndex,
+                self.weight,
+                self.target.x(),
+                self.target.y());
+          })
+      .def_readonly(
+          "vertex_index",
+          &mm::CameraVertexProjectionDataT<float>::vertexIndex,
+          "The mesh vertex index.")
+      .def_readonly(
+          "weight",
+          &mm::CameraVertexProjectionDataT<float>::weight,
+          "The weight of the constraint.")
+      .def_readonly(
+          "target",
+          &mm::CameraVertexProjectionDataT<float>::target,
+          "The target 2D pixel position.");
+
+  py::class_<
+      mm::CameraVertexProjectionErrorFunctionT<float>,
+      mm::SkeletonErrorFunction,
+      std::shared_ptr<mm::CameraVertexProjectionErrorFunctionT<float>>>(
+      m,
+      "CameraVertexProjectionErrorFunction",
+      R"(Projects skinned mesh vertices through a bone-parented camera using an IntrinsicsModel
+and penalizes reprojection error in pixel space.
+
+Combines vertex-based skinning derivatives (with blend shape support) and camera bone
+extrinsics optimization with optional intrinsics optimization. This enables dense mesh
+keypoints to contribute to camera parameter optimization, unlike
+:class:`VertexProjectionErrorFunction` which uses a fixed pre-baked projection matrix.
+
+The camera is rigidly attached to a skeleton joint (camera_parent) with a fixed offset
+(camera_offset). If camera_parent is None, the camera is static in world space.)")
+      .def(
+          "__repr__",
+          [](const mm::CameraVertexProjectionErrorFunctionT<float>& self) {
+            return fmt::format(
+                "CameraVertexProjectionErrorFunction(weight={}, num_constraints={})",
+                self.getWeight(),
+                self.getNumConstraints());
+          })
+      .def(
+          py::init<>(
+              [](const mm::Character& character,
+                 std::variant<mm::Camera, std::shared_ptr<const mm::IntrinsicsModel>>
+                     cameraOrIntrinsics,
+                 std::optional<int> cameraParent,
+                 std::optional<Eigen::Matrix4f> cameraOffset,
+                 size_t maxThreads,
+                 float weight) -> std::shared_ptr<mm::CameraVertexProjectionErrorFunctionT<float>> {
+                validateWeight(weight, "weight");
+                size_t parent = mm::kInvalidIndex;
+                if (cameraParent.has_value()) {
+                  validateJointIndex(*cameraParent, "camera_parent", character.skeleton);
+                  parent = static_cast<size_t>(*cameraParent);
+                }
+                std::shared_ptr<const mm::IntrinsicsModel> intrinsicsModel;
+                Eigen::Affine3f offset;
+                if (auto* camera = std::get_if<mm::Camera>(&cameraOrIntrinsics)) {
+                  intrinsicsModel = camera->intrinsicsModel();
+                  if (cameraOffset.has_value()) {
+                    Eigen::Affine3f additionalOffset;
+                    additionalOffset.matrix() = *cameraOffset;
+                    offset = additionalOffset * camera->eyeFromWorld();
+                  } else {
+                    offset = camera->eyeFromWorld();
+                  }
+                } else {
+                  intrinsicsModel =
+                      std::get<std::shared_ptr<const mm::IntrinsicsModel>>(cameraOrIntrinsics);
+                  if (!intrinsicsModel) {
+                    throw std::invalid_argument("intrinsics_model must not be None.");
+                  }
+                  offset.matrix() = cameraOffset.value_or(Eigen::Matrix4f::Identity());
+                }
+                auto result = std::make_shared<mm::CameraVertexProjectionErrorFunctionT<float>>(
+                    character,
+                    character.parameterTransform,
+                    std::move(intrinsicsModel),
+                    parent,
+                    offset);
+                result->setMaxThreads(maxThreads);
+                result->setWeight(weight);
+                return result;
+              }),
+          R"(Initialize a CameraVertexProjectionErrorFunction.
+
+            The second argument can be either a :class:`pymomentum.camera.Camera` or a
+            :class:`pymomentum.camera.IntrinsicsModel` (e.g.
+            :class:`pymomentum.camera.PinholeIntrinsicsModel`).
+
+            When a :class:`pymomentum.camera.Camera` is provided, its intrinsics and
+            eye-from-world transform are used. If ``camera_offset`` is also provided, it
+            is composed as an additional transform: ``camera_offset @ camera.eye_from_world``.
+
+            When a :class:`pymomentum.camera.IntrinsicsModel` is provided, the
+            ``camera_offset`` parameter specifies the eye-from-world transform (defaults
+            to identity if not provided).
+
+            :param character: The character to use.
+            :param camera: A :class:`pymomentum.camera.Camera` or
+                :class:`pymomentum.camera.IntrinsicsModel` (e.g.
+                :class:`pymomentum.camera.PinholeIntrinsicsModel`).
+            :param camera_parent: The joint index that the camera is attached to, or
+                None for a static camera in world space.
+            :param camera_offset: A 4x4 transformation matrix. When used with a
+                :class:`pymomentum.camera.Camera`, this is composed as an additional
+                transform on top of the camera's eye-from-world. When used with a
+                :class:`pymomentum.camera.IntrinsicsModel`, this is the eye-from-world
+                transform directly.
+            :param max_threads: The maximum number of threads to use for computation.
+            :param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::keep_alive<1, 3>(),
+          py::arg("character"),
+          py::arg("camera"),
+          py::kw_only(),
+          py::arg("camera_parent") = py::none(),
+          py::arg("camera_offset") = py::none(),
+          py::arg("max_threads") = 0,
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::CameraVertexProjectionErrorFunctionT<float>& self,
+             int vertexIndex,
+             const Eigen::Vector2f& target,
+             float weight) {
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
+            validateWeight(weight, "weight");
+            mm::CameraVertexProjectionDataT<float> constraint;
+            constraint.vertexIndex = static_cast<size_t>(vertexIndex);
+            constraint.target = target;
+            constraint.weight = weight;
+            self.addConstraint(constraint);
+          },
+          R"(Adds a camera vertex projection constraint.
+
+        :param vertex_index: The index of the mesh vertex to project.
+        :param target: The 2D target pixel position.
+        :param weight: The weight of the constraint.)",
+          py::arg("vertex_index"),
+          py::arg("target"),
+          py::arg("weight") = 1.0f)
+      .def(
+          "add_constraints",
+          [](mm::CameraVertexProjectionErrorFunctionT<float>& self,
+             const py::array_t<int>& vertexIndex,
+             const py::array_t<float>& target,
+             const std::optional<py::array_t<float>>& weight) {
+            ArrayShapeValidator validator;
+            const int nConsIdx = -1;
+            validator.validate(vertexIndex, "vertex_index", {nConsIdx}, {"n_cons"});
+            validateVertexIndex(vertexIndex, "vertex_index", self.getCharacter());
+            validator.validate(target, "target", {nConsIdx, 2}, {"n_cons", "xy"});
+            validator.validate(weight, "weight", {nConsIdx}, {"n_cons"});
+
+            auto vertexIndexAcc = vertexIndex.unchecked<1>();
+            auto targetAcc = target.unchecked<2>();
+            auto weightAcc =
+                weight.has_value() ? std::make_optional(weight->unchecked<1>()) : std::nullopt;
+
+            py::gil_scoped_release release;
+
+            std::vector<mm::CameraVertexProjectionDataT<float>> constraints;
+            constraints.reserve(vertexIndex.shape(0));
+            for (py::ssize_t i = 0; i < vertexIndex.shape(0); ++i) {
+              mm::CameraVertexProjectionDataT<float> constraint;
+              constraint.vertexIndex = static_cast<size_t>(vertexIndexAcc(i));
+              constraint.target = Eigen::Vector2f(targetAcc(i, 0), targetAcc(i, 1));
+              constraint.weight = weightAcc.has_value() ? (*weightAcc)(i) : 1.0f;
+              constraints.push_back(constraint);
+            }
+            self.setConstraints(std::move(constraints));
+          },
+          R"(Adds multiple camera vertex projection constraints.
+
+        :param vertex_index: A numpy array of size n for the indices of the mesh vertices to project.
+        :param target: A numpy array of shape (n, 2) for the 2D target pixel positions.
+        :param weight: A numpy array of size n for the weights of the constraints.)",
+          py::arg("vertex_index"),
+          py::arg("target"),
+          py::arg("weight") = std::nullopt)
+      .def(
+          "clear_constraints",
+          &mm::CameraVertexProjectionErrorFunctionT<float>::clearConstraints,
+          "Clears all camera vertex projection constraints.")
+      .def(
+          "num_constraints",
+          &mm::CameraVertexProjectionErrorFunctionT<float>::getNumConstraints,
+          "Returns the number of constraints.")
+      .def_property_readonly(
+          "constraints",
+          &mm::CameraVertexProjectionErrorFunctionT<float>::getConstraints,
+          "Returns the list of camera vertex projection constraints.");
 }
 
 } // namespace pymomentum
