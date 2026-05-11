@@ -28,6 +28,12 @@ std::optional<filesystem::path> getTestFilePath(const std::string& filename) {
   return filesystem::path(envVar.value()) / filename;
 }
 
+void expectColorEq(const Eigen::Vector3b& actual, const Eigen::Vector3b& expected) {
+  EXPECT_EQ(static_cast<int>(actual.x()), static_cast<int>(expected.x()));
+  EXPECT_EQ(static_cast<int>(actual.y()), static_cast<int>(expected.y()));
+  EXPECT_EQ(static_cast<int>(actual.z()), static_cast<int>(expected.z()));
+}
+
 TEST(IoUrdfTest, LoadCharacter) {
   auto urdfPath = getTestFilePath("character.urdf");
   if (!urdfPath.has_value()) {
@@ -111,7 +117,7 @@ TEST(IoUrdfTest, GenerateSphereMesh) {
 }
 
 TEST(IoUrdfTest, LoadUrdfWithPrimitiveVisuals) {
-  // Create a simple URDF with primitive visual geometries
+  // Create a simple URDF with primitive visual geometries and material colors.
   const std::string urdfContent = R"(
     <?xml version="1.0"?>
     <robot name="test_robot">
@@ -121,6 +127,9 @@ TEST(IoUrdfTest, LoadUrdfWithPrimitiveVisuals) {
           <geometry>
             <box size="0.1 0.2 0.3"/>
           </geometry>
+          <material name="base_red">
+            <color rgba="1 0 0 1"/>
+          </material>
         </visual>
       </link>
       <link name="child_link">
@@ -129,6 +138,9 @@ TEST(IoUrdfTest, LoadUrdfWithPrimitiveVisuals) {
           <geometry>
             <cylinder radius="0.05" length="0.2"/>
           </geometry>
+          <material name="child_black">
+            <color rgba="0 0 0 1"/>
+          </material>
         </visual>
       </link>
       <joint name="joint1" type="revolute">
@@ -162,6 +174,9 @@ TEST(IoUrdfTest, LoadUrdfWithPrimitiveVisuals) {
   const size_t boxVertices = 8;
   const size_t cylinderVertices = 2 + 2 * 32; // 2 centers + 2 rings of 32
   EXPECT_EQ(character.mesh->vertices.size(), boxVertices + cylinderVertices);
+  ASSERT_EQ(character.mesh->colors.size(), character.mesh->vertices.size());
+  expectColorEq(character.mesh->colors.at(0), Eigen::Vector3b(255, 0, 0));
+  expectColorEq(character.mesh->colors.at(boxVertices), Eigen::Vector3b(0, 0, 0));
 
   // Verify skin weights: first 8 vertices should be bound to joint 0 (base_link),
   // remaining to joint 1 (child_link)

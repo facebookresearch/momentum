@@ -84,6 +84,16 @@ void compareMeshesCrossFormat(const Mesh_u& a, const Mesh_u& b) {
   // NOTE: polyFaces/polyFaceSizes/polyTexcoordFaces are skipped — GLTF doesn't populate them.
 }
 
+void expectMeshColorsEq(const Mesh& mesh, const std::vector<Vector3b>& expectedColors) {
+  ASSERT_EQ(mesh.colors.size(), expectedColors.size());
+  for (size_t i = 0; i < expectedColors.size(); ++i) {
+    for (int c = 0; c < 3; ++c) {
+      EXPECT_EQ(static_cast<int>(mesh.colors[i][c]), static_cast<int>(expectedColors[i][c]))
+          << "Color mismatch at vertex " << i << ", channel " << c;
+    }
+  }
+}
+
 /// Compares skin weights using order-independent per-vertex comparison of nonzero influences.
 void compareSkinWeightsData(const SkinWeights& a, const SkinWeights& b) {
   ASSERT_EQ(a.index.rows(), b.index.rows());
@@ -177,6 +187,32 @@ TEST_F(IoUsdGltfRoundtripTest, BasicCharacter_IndependentSave) {
   ASSERT_TRUE(gltfChar.skinWeights);
   ASSERT_TRUE(usdChar.skinWeights);
   compareSkinWeightsData(*gltfChar.skinWeights, *usdChar.skinWeights);
+}
+
+TEST_F(IoUsdGltfRoundtripTest, MixedVertexColors_GltfAndUsdRoundTrip) {
+  ASSERT_TRUE(testCharacter.mesh);
+  ASSERT_GE(testCharacter.mesh->vertices.size(), 3);
+
+  std::vector<Vector3b> expectedColors(
+      testCharacter.mesh->vertices.size(), Vector3b::Constant(255));
+  expectedColors.front() = Vector3b(255, 0, 0);
+  expectedColors[expectedColors.size() / 2] = Vector3b(0, 0, 0);
+  expectedColors.back() = Vector3b(0, 0, 255);
+  testCharacter.mesh->colors = expectedColors;
+
+  auto gltfFile = temporaryFile("roundtrip_mixed_colors", "glb");
+  saveGltfCharacter(gltfFile.path(), testCharacter);
+  auto gltfChar = loadGltfCharacter(gltfFile.path());
+
+  auto usdFile = temporaryFile("roundtrip_mixed_colors", "usda");
+  saveUsd(usdFile.path(), testCharacter);
+  auto usdChar = loadUsdCharacter(usdFile.path());
+
+  ASSERT_TRUE(gltfChar.mesh);
+  ASSERT_TRUE(usdChar.mesh);
+  expectMeshColorsEq(*gltfChar.mesh, expectedColors);
+  expectMeshColorsEq(*usdChar.mesh, expectedColors);
+  compareMeshesCrossFormat(gltfChar.mesh, usdChar.mesh);
 }
 
 TEST_F(IoUsdGltfRoundtripTest, CharacterWithSkeletonStates) {
