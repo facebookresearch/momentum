@@ -30,6 +30,8 @@ var annotated_dup =
       [ "CameraIntrinsicsMapping", "structmomentum_1_1CameraIntrinsicsMapping.html", "structmomentum_1_1CameraIntrinsicsMapping" ],
       [ "CameraKeypointData", "structmomentum_1_1CameraKeypointData.html", "structmomentum_1_1CameraKeypointData" ],
       [ "CameraProjectionErrorFunctionT", "classmomentum_1_1CameraProjectionErrorFunctionT.html", "classmomentum_1_1CameraProjectionErrorFunctionT" ],
+      [ "CameraVertexProjectionDataT", "structmomentum_1_1CameraVertexProjectionDataT.html", "structmomentum_1_1CameraVertexProjectionDataT" ],
+      [ "CameraVertexProjectionErrorFunctionT", "classmomentum_1_1CameraVertexProjectionErrorFunctionT.html", "classmomentum_1_1CameraVertexProjectionErrorFunctionT" ],
       [ "CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", "structmomentum_1_1CandidateTriangle" ],
       [ "CenterOfMassConstraintT", "structmomentum_1_1CenterOfMassConstraintT.html", "structmomentum_1_1CenterOfMassConstraintT" ],
       [ "CenterOfMassErrorFunctionT", "classmomentum_1_1CenterOfMassErrorFunctionT.html", "classmomentum_1_1CenterOfMassErrorFunctionT" ],

@@ -16,6 +16,7 @@ var hierarchy =
     [ "momentum::BoneWeightT< T >", "structmomentum_1_1BoneWeightT.html", null ],
     [ "momentum::CameraIntrinsicsMapping< T >", "structmomentum_1_1CameraIntrinsicsMapping.html", null ],
     [ "momentum::CameraKeypointData", "structmomentum_1_1CameraKeypointData.html", null ],
+    [ "momentum::CameraVertexProjectionDataT< T >", "structmomentum_1_1CameraVertexProjectionDataT.html", null ],
     [ "momentum::CandidateTriangle", "structmomentum_1_1CandidateTriangle.html", null ],
     [ "momentum::CenterOfMassConstraintT< T >", "structmomentum_1_1CenterOfMassConstraintT.html", null ],
     [ "momentum::Character", "structmomentum_1_1Character.html", null ],
@@ -193,6 +194,7 @@ var hierarchy =
         [ "momentum::VertexProjectionErrorFunctionT< T >", "classmomentum_1_1VertexProjectionErrorFunctionT.html", null ]
       ] ],
       [ "momentum::CameraProjectionErrorFunctionT< T >", "classmomentum_1_1CameraProjectionErrorFunctionT.html", null ],
+      [ "momentum::CameraVertexProjectionErrorFunctionT< T >", "classmomentum_1_1CameraVertexProjectionErrorFunctionT.html", null ],
       [ "momentum::CenterOfMassErrorFunctionT< T >", "classmomentum_1_1CenterOfMassErrorFunctionT.html", null ],
       [ "momentum::CollisionErrorFunctionStatelessT< T >", "classmomentum_1_1CollisionErrorFunctionStatelessT.html", null ],
       [ "momentum::CollisionErrorFunctionT< T >", "classmomentum_1_1CollisionErrorFunctionT.html", null ],

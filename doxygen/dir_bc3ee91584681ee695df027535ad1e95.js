@@ -6,6 +6,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "camera_intrinsics_parameters.h", "camera__intrinsics__parameters_8h.html", "camera__intrinsics__parameters_8h" ],
     [ "camera_projection_error_function.cpp", "camera__projection__error__function_8cpp.html", null ],
     [ "camera_projection_error_function.h", "camera__projection__error__function_8h.html", "camera__projection__error__function_8h" ],
+    [ "camera_vertex_projection_error_function.cpp", "camera__vertex__projection__error__function_8cpp.html", null ],
+    [ "camera_vertex_projection_error_function.h", "camera__vertex__projection__error__function_8h.html", "camera__vertex__projection__error__function_8h" ],
     [ "center_of_mass_error_function.cpp", "center__of__mass__error__function_8cpp.html", null ],
     [ "center_of_mass_error_function.h", "center__of__mass__error__function_8h.html", "center__of__mass__error__function_8h" ],
     [ "collision_error_function.cpp", "collision__error__function_8cpp.html", null ],
