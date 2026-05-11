@@ -144,6 +144,12 @@ size_t addMeshToModel(fx::gltf::Document& model, const Mesh& mesh, const bool ad
     setBufferView(model, def["texfaces"], fx::gltf::BufferView::TargetType::ArrayBuffer);
   }
 
+  if (addColor && !mesh.colors.empty() && mesh.colors.size() != mesh.vertices.size()) {
+    MT_LOGW(
+        "Skipping vertex colors because color count ({}) does not match vertex count ({})",
+        mesh.colors.size(),
+        mesh.vertices.size());
+  }
   if (mesh.colors.size() == mesh.vertices.size() && addColor) {
     prim.attributes["COLOR_0"] =
         createAccessorBuffer<const Vector3b>(model, mesh.colors, true, true);
@@ -433,7 +439,7 @@ size_t addMeshToModel(
 
     // create model mesh
     const auto& mesh = *character.mesh;
-    auto newMeshIdx = addMeshToModel(model, mesh);
+    auto newMeshIdx = addMeshToModel(model, mesh, !mesh.colors.empty());
     if (newMeshIdx >= model.meshes.size()) {
       // Mesh not valid, skip
       return kInvalidIndex;

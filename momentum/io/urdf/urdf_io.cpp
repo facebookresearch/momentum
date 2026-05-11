@@ -17,6 +17,8 @@
 #include <urdf_model/pose.h>
 #include <urdf_parser/urdf_parser.h>
 
+#include <algorithm>
+#include <optional>
 #include <unordered_map>
 
 namespace momentum {
@@ -443,20 +445,28 @@ void resolveMimicJoints(ParsingData& data) {
   }
 }
 
-/// Extracts per-vertex color from a URDF visual's material, returning white if no color is set.
-/// Sets hasColor to true if the material has a non-black color.
-Eigen::Vector3b extractVertexColor(const urdf::Visual& visual, bool& hasColor) {
-  if (visual.material &&
-      (visual.material->color.r > 0 || visual.material->color.g > 0 ||
-       visual.material->color.b > 0)) {
-    const auto& c = visual.material->color;
-    hasColor = true;
-    return {
-        static_cast<uint8_t>(std::clamp(c.r, 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(std::clamp(c.g, 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(std::clamp(c.b, 0.0f, 1.0f) * 255.0f)};
+[[nodiscard]] Eigen::Vector3b toVertexColor(const urdf::Color& color) {
+  return {
+      static_cast<uint8_t>(std::clamp(color.r, 0.0f, 1.0f) * 255.0f),
+      static_cast<uint8_t>(std::clamp(color.g, 0.0f, 1.0f) * 255.0f),
+      static_cast<uint8_t>(std::clamp(color.b, 0.0f, 1.0f) * 255.0f)};
+}
+
+/// Extracts per-vertex color from a URDF visual's material.
+std::optional<Eigen::Vector3b> extractVertexColor(const urdf::Visual& visual) {
+  if (!visual.material) {
+    return std::nullopt;
   }
-  return {255, 255, 255};
+
+  const auto& material = *visual.material;
+  const bool looksLikeTextureOnlyMaterial = !material.texture_filename.empty() &&
+      material.color.r == 0.0f && material.color.g == 0.0f && material.color.b == 0.0f &&
+      material.color.a == 1.0f;
+  if (looksLikeTextureOnlyMaterial) {
+    return std::nullopt;
+  }
+
+  return toVertexColor(material.color);
 }
 
 /// Builds a combined mesh and skin weights from per-link visual data.
@@ -501,7 +511,8 @@ std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
         v = jointWorldTransform.rotation * v + jointWorldTransform.translation;
       }
 
-      const Eigen::Vector3b vertexColor = extractVertexColor(*visual, hasAnyColor);
+      const auto vertexColor = extractVertexColor(*visual);
+      hasAnyColor = hasAnyColor || vertexColor.has_value();
 
       // Merge into the combined mesh
       const auto vertexOffset = static_cast<int32_t>(combinedMesh.vertices.size());
@@ -511,7 +522,8 @@ std::optional<std::pair<Mesh, SkinWeights>> buildCombinedMesh(
         combinedMesh.faces.emplace_back(
             face[0] + vertexOffset, face[1] + vertexOffset, face[2] + vertexOffset);
       }
-      combinedMesh.colors.resize(combinedMesh.vertices.size(), vertexColor);
+      combinedMesh.colors.resize(
+          combinedMesh.vertices.size(), vertexColor.value_or(Eigen::Vector3b{255, 255, 255}));
 
       // Extend skin weights: all new vertices are rigidly bound to this joint
       const auto prevVertexCount = skinWeights.index.rows();

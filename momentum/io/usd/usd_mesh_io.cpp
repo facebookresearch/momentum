@@ -306,7 +306,12 @@ void saveMeshToUsd(const Mesh& mesh, UsdGeomMesh& meshPrim) {
   }
 
   // Write vertex colors
-  if (!mesh.colors.empty()) {
+  if (!mesh.colors.empty() && mesh.colors.size() != mesh.vertices.size()) {
+    MT_LOGW(
+        "Skipping vertex colors because color count ({}) does not match vertex count ({})",
+        mesh.colors.size(),
+        mesh.vertices.size());
+  } else if (!mesh.colors.empty()) {
     UsdGeomPrimvarsAPI primvarsAPI(meshPrim);
     auto colorPrimvar = primvarsAPI.CreatePrimvar(
         _tokens->displayColor, SdfValueTypeNames->Color3fArray, UsdGeomTokens->vertex);

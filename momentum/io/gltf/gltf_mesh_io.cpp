@@ -119,17 +119,27 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   }
   MT_LOGT_IF(texcoord.empty(), "no texture coords found");
 
+  const bool hadColors = !mesh->colors.empty();
+  const bool hasColors = !col.empty();
+  const size_t vertexOffset = mesh->vertices.size();
+
   // append new faces
   mesh->faces.insert(mesh->faces.end(), idx.begin(), idx.end());
   mesh->vertices.insert(mesh->vertices.end(), pos.begin(), pos.end());
   mesh->normals.insert(mesh->normals.end(), nml.begin(), nml.end());
-  mesh->colors.insert(mesh->colors.end(), col.begin(), col.end());
+  if (hasColors) {
+    if (!hadColors && vertexOffset > 0) {
+      mesh->colors.resize(vertexOffset, Vector3b::Constant(255));
+    }
+    mesh->colors.insert(mesh->colors.end(), col.begin(), col.end());
+  } else if (hadColors) {
+    mesh->colors.resize(mesh->vertices.size(), Vector3b::Constant(255));
+  }
   mesh->texcoords.insert(mesh->texcoords.end(), texcoord.begin(), texcoord.end());
   mesh->texcoord_faces.insert(mesh->texcoord_faces.end(), texfaces.begin(), texfaces.end());
 
-  // make sure we have enough normals and colors
+  // make sure we have enough normals
   mesh->normals.resize(mesh->vertices.size(), Vector3f::Zero());
-  mesh->colors.resize(mesh->vertices.size(), Vector3b::Zero());
   mesh->confidence.resize(mesh->vertices.size(), 1.0f);
   return pos.size();
 }
