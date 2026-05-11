@@ -35,6 +35,8 @@ frame.  The typical usage pattern is::
 Individual functions are also available:
 
 - :func:`add_mesh` / :func:`update_mesh` — manage a :class:`~pymomentum.geometry.Mesh`
+- :func:`add_skinned_mesh` / :func:`update_skinned_mesh` — upload mesh data once
+  and update only bone transforms
 - :func:`add_joints` / :func:`update_joints` — manage skeleton joint frames
 - :func:`add_character` / :func:`update_character` / :func:`remove_character` —
   manage a complete character
@@ -53,6 +55,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, TYPE_CHECKING
 
 import numpy as np
+from pymomentum.quaternion_np import from_rotation_matrix
 
 if TYPE_CHECKING:
     import viser
@@ -79,7 +82,8 @@ CM_TO_M: float = 0.01
 
 def _xyzw_to_wxyz(q: np.ndarray) -> np.ndarray:
     """Convert quaternion from ``[x, y, z, w]`` (pymomentum) to ``[w, x, y, z]`` (viser)."""
-    return np.array([q[3], q[0], q[1], q[2]], dtype=np.float64)
+    q_arr = np.asarray(q, dtype=np.float64)
+    return np.concatenate((q_arr[..., 3:4], q_arr[..., :3]), axis=-1)
 
 
 def add_mesh(
@@ -185,6 +189,176 @@ def update_mesh(
     mesh_handle.vertices = vertices
     if wireframe_handle is not None:
         wireframe_handle.vertices = vertices
+
+
+def _max_nonzero_skin_influences(
+    skin_weights: np.ndarray,
+    *,
+    weight_threshold: float = 1e-8,
+) -> int:
+    """Return the maximum number of nonzero skinning influences on any vertex."""
+    if skin_weights.shape[0] == 0:
+        return 0
+    return int(
+        np.max(np.count_nonzero(np.abs(skin_weights) > weight_threshold, axis=1))
+    )
+
+
+def _normalize_skin_weights(skin_weights: np.ndarray) -> np.ndarray:
+    """Renormalize skin weights without dropping any nonzero influences."""
+    result = skin_weights.copy()
+    row_sums = np.sum(result, axis=1, keepdims=True)
+    return np.divide(
+        result,
+        row_sums,
+        out=np.zeros_like(result),
+        where=row_sums > 0.0,
+    )
+
+
+def max_skin_influences(character: Character) -> int:
+    """Return the maximum nonzero skinning influences per vertex for *character*.
+
+    :param character: Character to inspect.
+    :return: The largest number of nonzero skin weights on any mesh vertex, or
+        zero if the character has no skinned mesh.
+    """
+    if not character.has_mesh:
+        return 0
+    skin_weights = np.asarray(
+        character.skin_weights.to_dense(character.skeleton.size), dtype=np.float32
+    )
+    return _max_nonzero_skin_influences(skin_weights)
+
+
+def can_use_skinned_mesh(character: Character) -> bool:
+    """Return whether Viser client-side skinning can represent *character*.
+
+    Viser uses at most four skinning influences per vertex. Characters with
+    more influences should use the posed-vertex mesh path to preserve the
+    original deformation.
+
+    :param character: Character to inspect.
+    :return: ``True`` if the character has a mesh and no vertex has more than
+        four nonzero skin weights.
+    """
+    return character.has_mesh and max_skin_influences(character) <= 4
+
+
+def add_skinned_mesh(
+    server: viser.ViserServer,
+    entity_path: str,
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    color: tuple[int, int, int] = (200, 200, 200),
+    scale: float = CM_TO_M,
+) -> Any:
+    """Add a client-side skinned mesh to the viser scene.
+
+    Unlike :func:`add_mesh`, this sends rest vertices, faces, skin weights, and
+    bind-pose bones once. Subsequent animation only needs
+    :func:`update_skinned_mesh`, which updates per-joint bone transforms rather
+    than re-uploading all posed vertex positions.
+
+    :param server: The viser server instance.
+    :param entity_path: Scene-graph path for the mesh node.
+    :param character: Character with a mesh, skin weights, and bind pose.
+    :param skel_state: Initial skeleton state array of shape ``(n_joints, 8)``.
+    :param color: RGB color tuple ``(r, g, b)`` in 0–255.
+    :param scale: Unit conversion factor applied to vertices and bone
+        translations. Defaults to :data:`CM_TO_M`.
+    :return: The viser skinned mesh handle.
+    """
+    if not character.has_mesh:
+        raise ValueError("add_skinned_mesh() requires a character with mesh skinning")
+
+    skeleton_size = character.skeleton.size
+    mesh = character.mesh
+    vertices = np.asarray(mesh.vertices, dtype=np.float32) * scale
+    faces = np.asarray(mesh.faces, dtype=np.int32)
+    skin_weights = np.asarray(
+        character.skin_weights.to_dense(skeleton_size), dtype=np.float32
+    )
+    if skin_weights.shape != (vertices.shape[0], skeleton_size):
+        raise ValueError(
+            "Expected dense skin weights with shape "
+            f"({vertices.shape[0]}, {skeleton_size}); got {skin_weights.shape}"
+        )
+    max_influences = _max_nonzero_skin_influences(skin_weights)
+    if max_influences > 4:
+        raise ValueError(
+            "Viser skinned meshes support at most 4 skinning influences per "
+            f"vertex; this character has {max_influences}"
+        )
+    skin_weights = _normalize_skin_weights(skin_weights)
+
+    bind_pose = np.asarray(character.bind_pose, dtype=np.float32)
+    expected_bind_pose_shape = (skeleton_size, 4, 4)
+    if bind_pose.shape != expected_bind_pose_shape:
+        raise ValueError(
+            f"Expected bind pose shape {expected_bind_pose_shape}; got {bind_pose.shape}"
+        )
+
+    bone_positions = bind_pose[:, :3, 3].astype(np.float32) * scale
+    bone_wxyzs = _xyzw_to_wxyz(from_rotation_matrix(bind_pose[:, :3, :3])).astype(
+        np.float32
+    )
+    if skeleton_size < 4:
+        # Viser's skinned mesh path always extracts four influences per vertex,
+        # so characters with fewer than four joints need zero-weight padding.
+        pad_count = 4 - skeleton_size
+        skin_weights = np.pad(skin_weights, ((0, 0), (0, pad_count)))
+        bone_positions = np.concatenate(
+            (bone_positions, np.zeros((pad_count, 3), dtype=np.float32)), axis=0
+        )
+        bone_wxyzs = np.concatenate(
+            (
+                bone_wxyzs,
+                np.tile(
+                    np.array([[1.0, 0.0, 0.0, 0.0]], dtype=np.float32),
+                    (pad_count, 1),
+                ),
+            ),
+            axis=0,
+        )
+    skinned_mesh_handle = server.scene.add_mesh_skinned(
+        entity_path,
+        vertices=vertices,
+        faces=faces,
+        bone_wxyzs=bone_wxyzs,
+        bone_positions=bone_positions,
+        skin_weights=skin_weights,
+        color=color,
+        scale=1.0,
+    )
+    update_skinned_mesh(skinned_mesh_handle, skel_state, scale=scale)
+    return skinned_mesh_handle
+
+
+def update_skinned_mesh(
+    skinned_mesh_handle: Any,
+    skel_state: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+) -> None:
+    """Update a skinned mesh by sending only bone transforms.
+
+    :param skinned_mesh_handle: The handle returned by :func:`add_skinned_mesh`.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    :param scale: Unit conversion factor for bone translations.
+    """
+    bones = skinned_mesh_handle.bones
+    if len(bones) < skel_state.shape[0]:
+        raise ValueError(
+            f"Skinned mesh has {len(bones)} bones but got {skel_state.shape[0]} joints"
+        )
+
+    positions = skel_state[:, :3].astype(np.float64) * scale
+    wxyzs = _xyzw_to_wxyz(skel_state[:, 3:7])
+    for bone, position, wxyz in zip(bones[: skel_state.shape[0]], positions, wxyzs):
+        bone.position = position
+        bone.wxyz = wxyz
 
 
 def _build_bone_segments(
@@ -303,6 +477,7 @@ def add_character(
     skel_state: np.ndarray,
     *,
     posed_mesh: Mesh | None = None,
+    use_skinned_mesh: bool = False,
     color: tuple[int, int, int] = (200, 200, 200),
     scale: float = CM_TO_M,
     axes_length: float = 0.05,
@@ -314,14 +489,16 @@ def add_character(
     subsequent updates via :func:`update_character`.
 
     - ``{entity_path}/joints/{name}`` — per-joint coordinate frames
-    - ``{entity_path}/mesh`` — posed mesh (if *posed_mesh* is provided)
+    - ``{entity_path}/mesh`` — posed or skinned mesh
 
     :param server: The viser server instance.
     :param entity_path: Root scene-graph path for the character.
     :param character: The character to visualize.
     :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
-    :param posed_mesh: An optional pre-posed mesh.  If *None*, no mesh
-        is added.
+    :param posed_mesh: An optional pre-posed mesh for the legacy mesh path.  If
+        *None* and *use_skinned_mesh* is false, no mesh is added.
+    :param use_skinned_mesh: If true and the character has a skinned mesh, add
+        a client-side skinned mesh instead of uploading posed vertices.
     :param color: RGB color tuple for the mesh.
     :param axes_length: Length of joint axis indicators.
     :param axes_radius: Radius of joint axis indicators.
@@ -339,7 +516,16 @@ def add_character(
         axes_radius=axes_radius,
     )
 
-    if posed_mesh is not None:
+    if use_skinned_mesh and character.has_mesh:
+        handles.mesh_handle = add_skinned_mesh(
+            server,
+            f"{entity_path}/mesh",
+            character,
+            skel_state,
+            color=color,
+            scale=scale,
+        )
+    elif posed_mesh is not None:
         handles.mesh_handle, handles.wireframe_handle = add_mesh(
             server, f"{entity_path}/mesh", posed_mesh, color=color, scale=scale
         )
@@ -377,7 +563,9 @@ def update_character(
             scale=scale,
         )
 
-        if posed_mesh is not None and handles.mesh_handle is not None:
+        if handles.mesh_handle is not None and hasattr(handles.mesh_handle, "bones"):
+            update_skinned_mesh(handles.mesh_handle, skel_state, scale=scale)
+        elif posed_mesh is not None and handles.mesh_handle is not None:
             update_mesh(
                 handles.mesh_handle, handles.wireframe_handle, posed_mesh, scale=scale
             )
@@ -488,8 +676,9 @@ def add_wireframe_toggle(
 
     :func:`add_mesh` (and therefore :func:`add_character`) creates both a solid
     and a wireframe handle; this widget flips their ``.visible`` flags so only
-    one is shown at a time. Sets initial visibility on both handles to match
-    *initial_value*.
+    one is shown at a time. Skinned mesh handles expose ``.wireframe`` directly,
+    so the widget toggles that property instead of requiring a duplicate mesh.
+    Sets initial visibility/state to match *initial_value*.
 
     :param server: The viser server instance.
     :param handles: The character handles whose mesh/wireframe to toggle.
@@ -500,14 +689,26 @@ def add_wireframe_toggle(
     """
     cb = server.gui.add_checkbox(label, initial_value=initial_value)
     if handles.mesh_handle is not None:
-        handles.mesh_handle.visible = not initial_value
+        if handles.wireframe_handle is None and hasattr(
+            handles.mesh_handle, "wireframe"
+        ):
+            handles.mesh_handle.visible = True
+            handles.mesh_handle.wireframe = initial_value
+        else:
+            handles.mesh_handle.visible = not initial_value
     if handles.wireframe_handle is not None:
         handles.wireframe_handle.visible = initial_value
 
     @cb.on_update
     def _(_: object) -> None:
         if handles.mesh_handle is not None:
-            handles.mesh_handle.visible = not cb.value
+            if handles.wireframe_handle is None and hasattr(
+                handles.mesh_handle, "wireframe"
+            ):
+                handles.mesh_handle.visible = True
+                handles.mesh_handle.wireframe = cb.value
+            else:
+                handles.mesh_handle.visible = not cb.value
         if handles.wireframe_handle is not None:
             handles.wireframe_handle.visible = cb.value
 

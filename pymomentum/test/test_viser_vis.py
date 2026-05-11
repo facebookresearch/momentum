@@ -27,19 +27,23 @@ except ImportError:
 # still letting BUCK exercise the suite normally (viser is a hard dep there).
 if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suite
     from pymomentum.viser_vis import (
+        _max_nonzero_skin_influences,
         _normalize_param_limit,
+        _normalize_skin_weights,
         _xyzw_to_wxyz,
         add_character,
         add_character_param_sliders,
         add_joints,
         add_log_panel,
         add_mesh,
+        add_skinned_mesh,
         add_wireframe_toggle,
         CharacterHandles,
         remove_character,
         update_character,
         update_joints,
         update_mesh,
+        update_skinned_mesh,
     )
 
     class TestViserVis(unittest.TestCase):
@@ -114,6 +118,26 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             solid_handle.remove()
             wireframe_handle.remove()
 
+        def test_add_and_update_skinned_mesh(self) -> None:
+            character, skel_state = self._make_character_and_skel_state()
+            skinned_handle = add_skinned_mesh(
+                self.server, "test_skinned_mesh", character, skel_state
+            )
+            self.assertGreaterEqual(len(skinned_handle.bones), character.skeleton.size)
+
+            moved = skel_state.copy()
+            moved[:, 0] += 1.0
+            scale = 2.0
+            update_skinned_mesh(skinned_handle, moved, scale=scale)
+            for i, bone in enumerate(skinned_handle.bones[: character.skeleton.size]):
+                np.testing.assert_allclose(
+                    np.asarray(bone.position),
+                    moved[i, :3] * scale,
+                    atol=1e-5,
+                )
+
+            skinned_handle.remove()
+
         def test_add_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
             posed_mesh = self._posed_mesh(character)
@@ -152,6 +176,32 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             self.assertGreater(len(no_mesh.joint_frames), 0)
             remove_character(no_mesh)
 
+            # Skinned mesh: no secondary wireframe handle is needed because the
+            # skinned mesh handle exposes a wireframe property directly.
+            skinned = add_character(
+                self.server,
+                "test_char_skinned",
+                character,
+                skel_state,
+                use_skinned_mesh=True,
+            )
+            self.assertIsNotNone(skinned.mesh_handle)
+            self.assertIsNone(skinned.wireframe_handle)
+            self.assertGreaterEqual(
+                len(skinned.mesh_handle.bones), character.skeleton.size
+            )
+            moved[:, 1] += 0.25
+            update_character(self.server, skinned, character, moved)
+            for i, bone in enumerate(
+                skinned.mesh_handle.bones[: character.skeleton.size]
+            ):
+                np.testing.assert_allclose(
+                    np.asarray(bone.position),
+                    moved[i, :3] * 0.01,
+                    atol=1e-5,
+                )
+            remove_character(skinned)
+
         def test_xyzw_to_wxyz(self) -> None:
             # xyzw [0.1, 0.2, 0.3, 0.9] -> wxyz [0.9, 0.1, 0.2, 0.3]
             q_xyzw = np.array([0.1, 0.2, 0.3, 0.9])
@@ -172,6 +222,21 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             lo, hi = _normalize_param_limit("hip_rx", -1e35, 1e35)
             self.assertAlmostEqual(lo, -math.pi)
             self.assertAlmostEqual(hi, math.pi)
+
+        def test_skin_weight_influence_helpers(self) -> None:
+            weights = np.array(
+                [
+                    [0.40, 0.30, 0.20, 0.05, 0.05],
+                    [0.00, 0.00, 0.00, 0.00, 0.00],
+                ],
+                dtype=np.float32,
+            )
+            result = _normalize_skin_weights(weights)
+
+            self.assertEqual(_max_nonzero_skin_influences(weights), 5)
+            np.testing.assert_allclose(result[0], weights[0], atol=1e-6)
+            np.testing.assert_allclose(result[0].sum(), 1.0, atol=1e-6)
+            np.testing.assert_allclose(result[1], np.zeros(5, dtype=np.float32))
 
         def test_add_character_param_sliders(self) -> None:
             character, _ = self._make_character_and_skel_state()
@@ -211,6 +276,27 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
 
             cb.remove()
             remove_character(handles)
+
+            skinned = add_character(
+                self.server,
+                "test_wf_skinned",
+                character,
+                skel_state,
+                use_skinned_mesh=True,
+            )
+            self.assertIsNotNone(skinned.mesh_handle)
+            self.assertIsNone(skinned.wireframe_handle)
+
+            skinned_cb = add_wireframe_toggle(self.server, skinned)
+            self.assertTrue(skinned.mesh_handle.visible)
+            self.assertFalse(skinned.mesh_handle.wireframe)
+
+            skinned_cb.value = True
+            self.assertTrue(skinned.mesh_handle.visible)
+            self.assertTrue(skinned.mesh_handle.wireframe)
+
+            skinned_cb.remove()
+            remove_character(skinned)
 
         def test_add_log_panel(self) -> None:
             panel = add_log_panel(self.server, echo_to_stdout=False)
