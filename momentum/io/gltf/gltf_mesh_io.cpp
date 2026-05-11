@@ -13,9 +13,24 @@
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
 
+#include <algorithm>
+
 namespace momentum {
 
 namespace {
+
+struct TextureBuffers {
+  std::vector<Vector2f> coords;
+  std::vector<Vector3i> faces;
+};
+
+struct MeshBuffers {
+  std::vector<Vector3i> faces;
+  std::vector<Vector3f> positions;
+  std::vector<Vector3f> normals;
+  std::vector<Vector3b> colors;
+  TextureBuffers texture;
+};
 
 nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
   if (extensionsAndExtras.count("extensions") != 0 &&
@@ -24,6 +39,183 @@ nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
   } else {
     return nlohmann::json::object();
   }
+}
+
+std::vector<uint32_t> loadIndexBuffer(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive) {
+  auto indices = copyAccessorBuffer<uint32_t>(model, primitive.indices);
+  if (!indices.empty()) {
+    return indices;
+  }
+
+  const auto shortIndices = copyAccessorBuffer<uint16_t>(model, primitive.indices);
+  indices.reserve(shortIndices.size());
+  for (const auto index : shortIndices) {
+    indices.push_back(index);
+  }
+  return indices;
+}
+
+std::vector<Vector3i> makeTriangleFaces(const std::vector<uint32_t>& indices) {
+  MT_CHECK(indices.size() % 3 == 0, "{} % 3 = {}", indices.size(), indices.size() % 3);
+
+  std::vector<Vector3i> faces(indices.size() / 3);
+  if (!faces.empty()) {
+    std::copy_n(indices.data(), indices.size(), &faces[0][0]);
+  }
+  return faces;
+}
+
+std::vector<Vector3i> loadTriangleFaces(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive) {
+  return makeTriangleFaces(loadIndexBuffer(model, primitive));
+}
+
+template <typename T>
+std::vector<T> loadOptionalAttribute(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    const char* attributeName) {
+  const auto attribute = primitive.attributes.find(attributeName);
+  if (attribute == primitive.attributes.end()) {
+    return {};
+  }
+  return copyAccessorBuffer<T>(model, attribute->second);
+}
+
+std::vector<Vector3f> loadPositions(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive) {
+  auto positions = copyAccessorBuffer<Vector3f>(model, primitive.attributes.at("POSITION"));
+  toMomentumVec3f(positions);
+  return positions;
+}
+
+void offsetFaces(std::vector<Vector3i>& faces, const size_t vertexOffset) {
+  if (vertexOffset == 0) {
+    return;
+  }
+
+  for (auto& face : faces) {
+    face[0] += vertexOffset;
+    face[1] += vertexOffset;
+    face[2] += vertexOffset;
+  }
+}
+
+TextureBuffers loadMomentumTextureBuffers(
+    const fx::gltf::Document& model,
+    const nlohmann::json& extension) {
+  TextureBuffers texture;
+  texture.coords = copyAccessorBuffer<Vector2f>(model, extension.at("texcoords"));
+  texture.faces = makeTriangleFaces(copyAccessorBuffer<uint32_t>(model, extension.at("texfaces")));
+  return texture;
+}
+
+TextureBuffers loadStandardTextureBuffers(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    const size_t numPositions,
+    const size_t vertexOffset,
+    std::vector<Vector3i>& faces) {
+  TextureBuffers texture;
+  texture.coords = loadOptionalAttribute<Vector2f>(model, primitive, "TEXCOORD_0");
+
+  offsetFaces(faces, vertexOffset);
+  if (texture.coords.size() == numPositions) {
+    texture.faces = faces;
+  }
+
+  MT_CHECK(
+      texture.coords.empty() || texture.coords.size() == numPositions,
+      "texcoord: {}, pos: {}",
+      texture.coords.size(),
+      numPositions);
+
+  return texture;
+}
+
+TextureBuffers loadTextureBuffers(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    const size_t numPositions,
+    const size_t vertexOffset,
+    std::vector<Vector3i>& faces) {
+  const auto extension = getMomentumExtension(primitive);
+  if (extension.count("texcoords") > 0 && extension.count("texfaces") > 0) {
+    return loadMomentumTextureBuffers(model, extension);
+  }
+
+  return loadStandardTextureBuffers(model, primitive, numPositions, vertexOffset, faces);
+}
+
+MeshBuffers loadMeshBuffers(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    const size_t vertexOffset) {
+  MeshBuffers buffers;
+  buffers.faces = loadTriangleFaces(model, primitive);
+  buffers.positions = loadPositions(model, primitive);
+
+  if (buffers.faces.empty() || buffers.positions.empty()) {
+    return buffers;
+  }
+
+  buffers.normals = loadOptionalAttribute<Vector3f>(model, primitive, "NORMAL");
+  MT_CHECK(
+      buffers.normals.empty() || buffers.normals.size() == buffers.positions.size(),
+      "nml: {}, pos: {}",
+      buffers.normals.size(),
+      buffers.positions.size());
+  MT_LOGT_IF(buffers.normals.empty(), "no vertex normal found");
+
+  buffers.colors = loadOptionalAttribute<Vector3b>(model, primitive, "COLOR_0");
+  MT_CHECK(
+      buffers.colors.empty() || buffers.colors.size() == buffers.positions.size(),
+      "col: {}, pos: {}",
+      buffers.colors.size(),
+      buffers.positions.size());
+  MT_LOGT_IF(buffers.colors.empty(), "no vertex color found");
+
+  // NOTE: gltf does not support multiple texcoords per vertex, so we only load the GLTF texcoords
+  //       if we don't have our own custom extension
+  buffers.texture =
+      loadTextureBuffers(model, primitive, buffers.positions.size(), vertexOffset, buffers.faces);
+  MT_LOGT_IF(buffers.texture.coords.empty(), "no texture coords found");
+
+  return buffers;
+}
+
+void appendColors(Mesh& mesh, const std::vector<Vector3b>& colors, const size_t vertexOffset) {
+  const bool hadColors = !mesh.colors.empty();
+  if (!colors.empty()) {
+    if (!hadColors && vertexOffset > 0) {
+      mesh.colors.resize(vertexOffset, Vector3b::Constant(255));
+    }
+    mesh.colors.insert(mesh.colors.end(), colors.begin(), colors.end());
+    return;
+  }
+
+  if (hadColors) {
+    mesh.colors.resize(mesh.vertices.size(), Vector3b::Constant(255));
+  }
+}
+
+void appendMeshBuffers(Mesh& mesh, const MeshBuffers& buffers, const size_t vertexOffset) {
+  mesh.faces.insert(mesh.faces.end(), buffers.faces.begin(), buffers.faces.end());
+  mesh.vertices.insert(mesh.vertices.end(), buffers.positions.begin(), buffers.positions.end());
+  mesh.normals.insert(mesh.normals.end(), buffers.normals.begin(), buffers.normals.end());
+  appendColors(mesh, buffers.colors, vertexOffset);
+  mesh.texcoords.insert(
+      mesh.texcoords.end(), buffers.texture.coords.begin(), buffers.texture.coords.end());
+  mesh.texcoord_faces.insert(
+      mesh.texcoord_faces.end(), buffers.texture.faces.begin(), buffers.texture.faces.end());
+
+  // make sure we have enough normals
+  mesh.normals.resize(mesh.vertices.size(), Vector3f::Zero());
+  mesh.confidence.resize(mesh.vertices.size(), 1.0f);
 }
 
 } // namespace
@@ -35,113 +227,16 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
     return 0;
   }
 
-  // load index buffer
-  auto idxDense = copyAccessorBuffer<uint32_t>(model, primitive.indices);
-  if (idxDense.empty()) {
-    // Try fallback with short indices.
-    auto a = copyAccessorBuffer<uint16_t>(model, primitive.indices);
-    for (const auto& ae : a) {
-      idxDense.push_back(ae);
-    }
-  }
-  MT_CHECK(idxDense.size() % 3 == 0, "{} % 3 = {}", idxDense.size(), idxDense.size() % 3);
-  std::vector<Vector3i> idx(idxDense.size() / 3);
-  if (!idx.empty()) {
-    std::copy_n(idxDense.data(), idxDense.size(), &idx[0][0]);
-  }
-
-  // load vertex position buffer
-  auto pos = copyAccessorBuffer<Vector3f>(model, primitive.attributes.at("POSITION"));
-  toMomentumVec3f(pos);
+  const size_t vertexOffset = mesh->vertices.size();
+  const auto buffers = loadMeshBuffers(model, primitive, vertexOffset);
 
   // if we have no points or indices, skip loading
-  if (idx.empty() || pos.empty()) {
+  if (buffers.faces.empty() || buffers.positions.empty()) {
     return 0;
   }
 
-  // load optional normal buffer
-  std::vector<Vector3f> nml;
-  const auto normId = primitive.attributes.find("NORMAL");
-  if (normId != primitive.attributes.end()) {
-    nml = copyAccessorBuffer<Vector3f>(model, normId->second);
-  }
-  MT_CHECK(nml.empty() || nml.size() == pos.size(), "nml: {}, pos: {}", nml.size(), pos.size());
-  MT_LOGT_IF(nml.empty(), "no vertex normal found");
-
-  // load optional color buffer
-  std::vector<Vector3b> col;
-  const auto colorId = primitive.attributes.find("COLOR_0");
-  if (colorId != primitive.attributes.end()) {
-    col = copyAccessorBuffer<Vector3b>(model, colorId->second);
-  }
-  MT_CHECK(col.empty() || col.size() == pos.size(), "col: {}, pos: {}", col.size(), pos.size());
-  MT_LOGT_IF(col.empty(), "no vertex color found");
-
-  // NOTE: gltf does not support multiple texcoords per vertex, so we only load the GLTF texcoords
-  //       if we don't have our own custom extension
-  const auto& extension = getMomentumExtension(primitive);
-  std::vector<Vector2f> texcoord;
-  std::vector<Vector3i> texfaces;
-  if (extension.count("texcoords") > 0 && extension.count("texfaces") > 0) {
-    texcoord = copyAccessorBuffer<Vector2f>(model, extension.at("texcoords"));
-
-    // load "face index buffer
-    auto fidxDense = copyAccessorBuffer<uint32_t>(model, extension.at("texfaces"));
-    MT_CHECK(fidxDense.size() % 3 == 0, "{} % 3 = {}", fidxDense.size(), fidxDense.size() % 3);
-    texfaces.resize(fidxDense.size() / 3);
-    if (!fidxDense.empty()) {
-      MT_THROW_IF(texfaces.empty(), "texfaces is empty but fidxDense is not empty");
-      std::copy_n(fidxDense.data(), fidxDense.size(), &texfaces[0][0]);
-    }
-  } else {
-    // load optional standard GLTF texcoord buffer
-    auto texcoordId = primitive.attributes.find("TEXCOORD_0");
-    if (texcoordId != primitive.attributes.end()) {
-      texcoord = copyAccessorBuffer<Vector2f>(model, texcoordId->second);
-    }
-    const auto kVertexOffset = mesh->vertices.size();
-    // Update vertex indices of the faces!!!
-    if (kVertexOffset > 0) {
-      for (auto&& iFace : idx) {
-        iFace[0] += kVertexOffset;
-        iFace[1] += kVertexOffset;
-        iFace[2] += kVertexOffset;
-      }
-    }
-    if (texcoord.size() == pos.size()) {
-      texfaces = idx;
-    }
-    MT_CHECK(
-        texcoord.empty() || texcoord.size() == pos.size(),
-        "texcoord: {}, pos: {}",
-        texcoord.size(),
-        pos.size());
-  }
-  MT_LOGT_IF(texcoord.empty(), "no texture coords found");
-
-  const bool hadColors = !mesh->colors.empty();
-  const bool hasColors = !col.empty();
-  const size_t vertexOffset = mesh->vertices.size();
-
-  // append new faces
-  mesh->faces.insert(mesh->faces.end(), idx.begin(), idx.end());
-  mesh->vertices.insert(mesh->vertices.end(), pos.begin(), pos.end());
-  mesh->normals.insert(mesh->normals.end(), nml.begin(), nml.end());
-  if (hasColors) {
-    if (!hadColors && vertexOffset > 0) {
-      mesh->colors.resize(vertexOffset, Vector3b::Constant(255));
-    }
-    mesh->colors.insert(mesh->colors.end(), col.begin(), col.end());
-  } else if (hadColors) {
-    mesh->colors.resize(mesh->vertices.size(), Vector3b::Constant(255));
-  }
-  mesh->texcoords.insert(mesh->texcoords.end(), texcoord.begin(), texcoord.end());
-  mesh->texcoord_faces.insert(mesh->texcoord_faces.end(), texfaces.begin(), texfaces.end());
-
-  // make sure we have enough normals
-  mesh->normals.resize(mesh->vertices.size(), Vector3f::Zero());
-  mesh->confidence.resize(mesh->vertices.size(), 1.0f);
-  return pos.size();
+  appendMeshBuffers(*mesh, buffers, vertexOffset);
+  return buffers.positions.size();
 }
 
 size_t addBlendShapes(
