@@ -17,6 +17,7 @@
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -194,12 +195,19 @@ int run(const Options& options) {
   const bool hasMotion = nFrames > 0;
   auto fps = cFps;
 
+  CharacterState charState;
+  CharacterParameters charParams;
+  charParams.offsets = offsets;
+
   // Log the static template when there is no motion
   if (!hasMotion) {
-    CharacterParameters param;
-    param.pose = Eigen::VectorXf::Zero(character.parameterTransform.numAllModelParameters());
-    CharacterState charState(
-        param, character, true /*updateMesh*/, true /*updateCollision*/, false /*applyLimits*/);
+    charParams.pose = Eigen::VectorXf::Zero(character.parameterTransform.numAllModelParameters());
+    charState.set(
+        charParams,
+        character,
+        true /*updateMesh*/,
+        true /*updateCollision*/,
+        false /*applyLimits*/);
     logCharacter(rec, "world/character", character, charState);
   }
 
@@ -237,9 +245,6 @@ int run(const Options& options) {
   }
 
   // Frame loop: log character and marker data per frame, collect joint params
-  CharacterState charState;
-  CharacterParameters charParams;
-  charParams.offsets = offsets;
   Eigen::MatrixXf allJointParams;
   size_t jointParamFrameIdx = 0;
 
