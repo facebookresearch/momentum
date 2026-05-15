@@ -448,16 +448,50 @@ TEST_F(MeshToSdfTest, Step3_SignDetermination_InsideOutsideAccuracy) {
   EXPECT_GT(clearlyOutsideVoxels, 0) << "Should have some clearly outside voxels";
 }
 
-TEST_F(MeshToSdfTest, Step3_SignDetermination_WindingNumbers) {
-  // Test sign determination using winding numbers
+TEST_F(MeshToSdfTest, Step3_WindingNumber_OutwardNormals) {
+  // Test WindingNumber (signed, wn > 0.5) with a cube that has outward-facing normals.
+  // Flip the test cube's winding order so normals point outward.
+  std::vector<Eigen::Vector3i> outwardFaces;
+  outwardFaces.reserve(cubeFaces.size());
+  for (const auto& f : cubeFaces) {
+    outwardFaces.emplace_back(f.x(), f.z(), f.y());
+  }
+
   const BoundingBoxf bounds(
       Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
   const Eigen::Vector3<Index> resolution(10, 10, 10);
 
   MeshToSdfConfigf config;
   config.narrowBandWidth = 2.0f;
+  config.signMethod = SignMethod::WindingNumber;
 
-  // Generate complete SDF
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(outwardFaces),
+      bounds,
+      resolution,
+      config);
+
+  const float centerValue = sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f));
+  EXPECT_LT(centerValue, 0.0f) << "Center should be inside with outward normals";
+
+  const float outsideValue = sdf.sample(Eigen::Vector3f(0.9f, 0.9f, 0.9f));
+  EXPECT_GT(outsideValue, 0.0f) << "Outside point should be positive";
+}
+
+TEST_F(MeshToSdfTest, Step3_WindingNumber_RejectsFlippedNormals) {
+  // WindingNumber (signed) should classify inside as outside when normals point inward,
+  // since winding number will be -1 (not > 0.5). This is the desired behavior —
+  // it catches orientation errors rather than silently accepting them.
+  const BoundingBoxf bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(10, 10, 10);
+
+  MeshToSdfConfigf config;
+  config.narrowBandWidth = 2.0f;
+  config.signMethod = SignMethod::WindingNumber;
+
+  // The test cube has inward-pointing normals
   const auto sdf = meshToSdf<float>(
       std::span<const Eigen::Vector3f>(cubeVertices),
       std::span<const Eigen::Vector3i>(cubeFaces),
@@ -465,20 +499,46 @@ TEST_F(MeshToSdfTest, Step3_SignDetermination_WindingNumbers) {
       resolution,
       config);
 
+  // Center should be classified as OUTSIDE (positive) because normals are flipped
+  const float centerValue = sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f));
+  EXPECT_GT(centerValue, 0.0f) << "Signed winding number should reject inward normals";
+}
+
+TEST_F(MeshToSdfTest, Step3_WindingNumberPermissive_AcceptsBothOrientations) {
+  // WindingNumberPermissive should work regardless of normal orientation.
+  const BoundingBoxf bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(10, 10, 10);
+
+  MeshToSdfConfigf config;
+  config.narrowBandWidth = 2.0f;
+  config.signMethod = SignMethod::WindingNumberPermissive;
+
+  const float boundaryThreshold = 0.05f;
   int correctSigns = 0;
   int totalVoxels = 0;
+
+  // Test with the inward-normal cube — Permissive should handle it
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      bounds,
+      resolution,
+      config);
 
   for (Index i = 0; i < resolution.x(); ++i) {
     for (Index j = 0; j < resolution.y(); ++j) {
       for (Index k = 0; k < resolution.z(); ++k) {
-        const float sdfValue = sdf.at(i, j, k);
-
         const Eigen::Vector3f gridPos(
             static_cast<float>(i), static_cast<float>(j), static_cast<float>(k));
         const Eigen::Vector3f worldPos = sdf.gridToWorld(gridPos);
 
+        if (exactDistanceToUnitCube(worldPos) < boundaryThreshold) {
+          continue;
+        }
+
         const bool shouldBeInside = isInsideUnitCube(worldPos);
-        const bool sdfSaysInside = sdfValue < 0.0f;
+        const bool sdfSaysInside = sdf.at(i, j, k) < 0.0f;
 
         if (shouldBeInside == sdfSaysInside) {
           correctSigns++;
@@ -489,10 +549,91 @@ TEST_F(MeshToSdfTest, Step3_SignDetermination_WindingNumbers) {
   }
 
   const float accuracy = static_cast<float>(correctSigns) / totalVoxels;
-  std::cout << "Step 3 (Winding): Sign accuracy: " << accuracy * 100.0f << "% (" << correctSigns
-            << "/" << totalVoxels << ")" << std::endl;
+  EXPECT_GT(accuracy, 0.95f) << "Permissive winding number should handle either orientation";
+}
 
-  EXPECT_GT(accuracy, 0.95f) << "Winding number sign determination should be very accurate";
+TEST_F(MeshToSdfTest, Step3_WindingNumberPermissive_NonWatertightMesh) {
+  // Test that permissive winding numbers handle a non-watertight mesh.
+  std::vector<Eigen::Vector3i> openCubeFaces(cubeFaces.begin(), cubeFaces.end());
+  openCubeFaces.erase(openCubeFaces.begin() + 2, openCubeFaces.begin() + 4);
+
+  const BoundingBoxf bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(10, 10, 10);
+
+  MeshToSdfConfigf config;
+  config.narrowBandWidth = 2.0f;
+  config.signMethod = SignMethod::WindingNumberPermissive;
+
+  const auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(openCubeFaces),
+      bounds,
+      resolution,
+      config);
+
+  const float centerValue = sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f));
+  EXPECT_LT(centerValue, 0.0f) << "Center should be inside even with missing face";
+
+  const float outsideValue = sdf.sample(Eigen::Vector3f(0.9f, 0.9f, 0.9f));
+  EXPECT_GT(outsideValue, 0.0f) << "Clearly outside point should be positive";
+}
+
+TEST_F(MeshToSdfTest, Step3_WindingNumberPermissive_MatchesRayCastingOnWatertight) {
+  // On a watertight mesh, both methods should produce the same sign classification.
+  const BoundingBoxf bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(10, 10, 10);
+
+  MeshToSdfConfigf configRay;
+  configRay.narrowBandWidth = 2.0f;
+  configRay.signMethod = SignMethod::RayCasting;
+
+  MeshToSdfConfigf configWind;
+  configWind.narrowBandWidth = 2.0f;
+  configWind.signMethod = SignMethod::WindingNumberPermissive;
+
+  const auto sdfRay = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      bounds,
+      resolution,
+      configRay);
+
+  const auto sdfWind = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      bounds,
+      resolution,
+      configWind);
+
+  const float boundaryThreshold = 0.05f;
+  int agreements = 0;
+  int total = 0;
+
+  for (Index i = 0; i < resolution.x(); ++i) {
+    for (Index j = 0; j < resolution.y(); ++j) {
+      for (Index k = 0; k < resolution.z(); ++k) {
+        const Eigen::Vector3f gridPos(
+            static_cast<float>(i), static_cast<float>(j), static_cast<float>(k));
+        const Eigen::Vector3f worldPos = sdfRay.gridToWorld(gridPos);
+
+        if (exactDistanceToUnitCube(worldPos) < boundaryThreshold) {
+          continue;
+        }
+
+        const bool rayInside = sdfRay.at(i, j, k) < 0.0f;
+        const bool windInside = sdfWind.at(i, j, k) < 0.0f;
+        if (rayInside == windInside) {
+          agreements++;
+        }
+        total++;
+      }
+    }
+  }
+
+  const float agreement = static_cast<float>(agreements) / total;
+  EXPECT_GT(agreement, 0.99f) << "Both methods should agree on watertight mesh";
 }
 
 TEST_F(MeshToSdfTest, IntegratedTest_CubeSDFProperties) {

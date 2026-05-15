@@ -13,6 +13,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <numbers>
 #include <random>
 #include <unordered_map>
 
@@ -49,11 +50,8 @@ struct VoxelCandidate {
 };
 
 // ================================================================================================
-// STEP 2: FAST MARCHING PROPAGATION
-// UTILITY FUNCTIONS
-// UTILITY FUNCTIONS
-// UTILITY FUNCTIONS
-// =========================================================================================
+// UTILITY TYPES
+// ================================================================================================
 
 /**
  * Voxel states for fast marching algorithm.
@@ -137,7 +135,7 @@ void meshToSdfImpl(
   if (config.verbose) {
     std::cout << "Step 3: Applying signs..." << std::endl;
   }
-  applySignsToDistanceField(sdf, vertices, triangles);
+  applySignsToDistanceField(sdf, vertices, triangles, config.signMethod);
   if (config.verbose) {
     std::cout << "Signs applied" << std::endl;
   }
@@ -674,26 +672,83 @@ bool isPointInsideByRayCasting(
   return insideCount > (directions.size() / 2);
 }
 
+/**
+ * Compute the solid angle subtended by a triangle as seen from a point.
+ * Uses the Van Oosterom-Strackee formula.
+ */
+template <typename ScalarType>
+ScalarType triangleSolidAngle(
+    const Eigen::Vector3<ScalarType>& point,
+    const Eigen::Vector3<ScalarType>& v0,
+    const Eigen::Vector3<ScalarType>& v1,
+    const Eigen::Vector3<ScalarType>& v2) {
+  const Eigen::Vector3<ScalarType> a = v0 - point;
+  const Eigen::Vector3<ScalarType> b = v1 - point;
+  const Eigen::Vector3<ScalarType> c = v2 - point;
+
+  const ScalarType la = a.norm();
+  const ScalarType lb = b.norm();
+  const ScalarType lc = c.norm();
+
+  // Degenerate case: point is on a vertex
+  constexpr ScalarType kEps = std::numeric_limits<ScalarType>::epsilon() * ScalarType{100};
+  if (la < kEps || lb < kEps || lc < kEps) {
+    return ScalarType{0};
+  }
+
+  const ScalarType numerator = a.dot(b.cross(c));
+  const ScalarType denominator = la * lb * lc + a.dot(b) * lc + b.dot(c) * la + c.dot(a) * lb;
+
+  return ScalarType{2} * std::atan2(numerator, denominator);
+}
+
+/**
+ * Compute the generalized winding number at a point.
+ * Sums the solid angle of each triangle as seen from the query point,
+ * normalized by 4pi. Returns +1 for inside (outward normals), -1 for
+ * inside (inward normals), ~0 for outside.
+ *
+ * O(T) per query — brute-force over all triangles.
+ */
+template <typename ScalarType>
+ScalarType computeWindingNumber(
+    const Eigen::Vector3<ScalarType>& point,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles) {
+  ScalarType totalSolidAngle{0};
+  const ScalarType kFourPi = ScalarType{4} * std::numbers::pi_v<ScalarType>;
+
+  for (const auto& tri : triangles) {
+    totalSolidAngle +=
+        triangleSolidAngle(point, vertices[tri.x()], vertices[tri.y()], vertices[tri.z()]);
+  }
+
+  return totalSolidAngle / kFourPi;
+}
+
 template <typename ScalarType>
 void applySignsToDistanceField(
     SignedDistanceField<ScalarType>& sdf,
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles) {
+    std::span<const Eigen::Vector3i> triangles,
+    SignMethod signMethod) {
   const auto& resolution = sdf.resolution();
 
-  // BUILD BVH ONCE for efficient ray casting
-  // Convert spans to matrices for TriBvh constructor
-  Eigen::MatrixX3<ScalarType> vertexMatrix(vertices.size(), 3);
-  for (size_t i = 0; i < vertices.size(); ++i) {
-    vertexMatrix.row(i) = vertices[i];
-  }
+  // Build BVH (only needed for RayCasting)
+  std::unique_ptr<TriBvh<ScalarType>> bvh;
+  if (signMethod == SignMethod::RayCasting) {
+    Eigen::MatrixX3<ScalarType> vertexMatrix(vertices.size(), 3);
+    for (size_t i = 0; i < vertices.size(); ++i) {
+      vertexMatrix.row(i) = vertices[i];
+    }
 
-  Eigen::MatrixX3i triangleMatrix(triangles.size(), 3);
-  for (size_t i = 0; i < triangles.size(); ++i) {
-    triangleMatrix.row(i) = triangles[i];
-  }
+    Eigen::MatrixX3i triangleMatrix(triangles.size(), 3);
+    for (size_t i = 0; i < triangles.size(); ++i) {
+      triangleMatrix.row(i) = triangles[i];
+    }
 
-  const TriBvh<ScalarType> bvh(std::move(vertexMatrix), std::move(triangleMatrix));
+    bvh = std::make_unique<TriBvh<ScalarType>>(std::move(vertexMatrix), std::move(triangleMatrix));
+  }
 
   // Process each voxel
   const auto processVoxel = [&](Index i, Index j, Index k) {
@@ -701,7 +756,18 @@ void applySignsToDistanceField(
         static_cast<ScalarType>(i), static_cast<ScalarType>(j), static_cast<ScalarType>(k));
     const auto worldPos = sdf.gridToWorld(gridPos);
 
-    bool isInside = isPointInsideByRayCasting(worldPos, bvh);
+    bool isInside = false;
+    switch (signMethod) {
+      case SignMethod::RayCasting:
+        isInside = isPointInsideByRayCasting(worldPos, *bvh);
+        break;
+      case SignMethod::WindingNumber:
+        isInside = computeWindingNumber(worldPos, vertices, triangles) > ScalarType{0.5};
+        break;
+      case SignMethod::WindingNumberPermissive:
+        isInside = std::abs(computeWindingNumber(worldPos, vertices, triangles)) > ScalarType{0.5};
+        break;
+    }
 
     // Apply sign: negative inside, positive outside
     if (isInside) {
@@ -836,12 +902,14 @@ template void fastMarchingPropagate<double>(SignedDistanceField<double>&);
 template void applySignsToDistanceField<float>(
     SignedDistanceField<float>&,
     std::span<const Eigen::Vector3<float>>,
-    std::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3i>,
+    SignMethod);
 
 template void applySignsToDistanceField<double>(
     SignedDistanceField<double>&,
     std::span<const Eigen::Vector3<double>>,
-    std::span<const Eigen::Vector3i>);
+    std::span<const Eigen::Vector3i>,
+    SignMethod);
 
 template BoundingBox<float> computeMeshBounds<float>(std::span<const Eigen::Vector3<float>>);
 
