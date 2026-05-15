@@ -9,6 +9,7 @@
 #include <momentum/character/mesh_state.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/character_sequence_solver/sequence_cholesky_solver.h>
 #include <momentum/character_sequence_solver/sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/sequence_solver_function.h>
@@ -37,6 +38,8 @@
 namespace mm = momentum;
 
 namespace pymomentum {
+
+enum class SequenceSolverType { QR, Cholesky };
 
 // Utility function to convert bool to Python-style string representation
 std::string boolToString(bool value) {
@@ -69,6 +72,63 @@ void copyOutputFrameParameters(
     for (py::ssize_t k = 0; k < nParams; ++k) {
       result_acc(iFrame, k) = modelParams_frame(k);
     }
+  }
+}
+
+template <typename SolverType, typename OptionsType>
+py::array_t<float> solveSequence(
+    mm::SequenceSolverFunction& solverFunction,
+    const py::array_t<float>& modelParams,
+    const OptionsType& options) {
+  SolverType solver(options, &solverFunction);
+
+  if (modelParams.ndim() != 2) {
+    throw std::runtime_error(
+        "Expected model parameters to be a 2D array of shape (n_frames, n_params)");
+  }
+
+  if (modelParams.shape(1) != solverFunction.getParameterTransform()->numAllModelParameters()) {
+    throw std::runtime_error(
+        "Expected model parameters to have n_params == " +
+        std::to_string(solverFunction.getNumParameters()));
+  }
+
+  const auto nFrames = modelParams.shape(0);
+  const auto nParams = modelParams.shape(1);
+
+  {
+    auto modelParams_acc = modelParams.unchecked<2>();
+    py::gil_scoped_release release;
+    copyInputFrameParameters(modelParams_acc, solverFunction, nFrames, nParams);
+  }
+
+  {
+    py::gil_scoped_release release;
+    Eigen::VectorXf parameters = solverFunction.getJoinedParameterVector();
+    solver.solve(parameters);
+    solverFunction.setJoinedParameterVector(parameters);
+  }
+
+  py::array_t<float> result = py::array_t<float>({nFrames, nParams});
+  {
+    auto result_acc = result.mutable_unchecked<2>();
+    py::gil_scoped_release release;
+    copyOutputFrameParameters(result_acc, solverFunction, nFrames, nParams);
+  }
+
+  return result;
+}
+
+template <typename OptionsType>
+OptionsType getSequenceOptions(const py::handle& options, std::string_view optionsName) {
+  if (options.is_none()) {
+    return OptionsType{};
+  }
+  try {
+    return options.cast<OptionsType>();
+  } catch (const py::cast_error& ex) {
+    throw std::invalid_argument(
+        fmt::format("Expected options to be {}: {}", optionsName, ex.what()));
   }
 }
 
@@ -200,6 +260,16 @@ PYBIND11_MODULE(solver2, m) {
   pybind11::module_::import(
       "pymomentum.geometry"); // @dep=fbsource//arvr/libraries/pymomentum:geometry
   pybind11::module_::import("pymomentum.camera"); // @dep=fbsource//arvr/libraries/pymomentum:camera
+
+  py::enum_<SequenceSolverType>(
+      m,
+      "SequenceSolverType",
+      R"(Available implementations for :func:`solve_sequence`.
+
+``QR`` uses the original banded QR sequence solver. ``Cholesky`` uses compact normal-equation
+accumulation followed by a banded direct solve.)")
+      .value("QR", SequenceSolverType::QR)
+      .value("Cholesky", SequenceSolverType::Cholesky);
 
   // Error functions:
   py::class_<mm::SkeletonErrorFunction, std::shared_ptr<mm::SkeletonErrorFunction>>(
@@ -347,7 +417,8 @@ If you want to compute the jacobian of multiple error functions, consider wrappi
   addSequenceErrorFunctions(m);
 
   // Solver functions:
-  py::class_<mm::SolverFunction, std::shared_ptr<mm::SolverFunction>>(m, "SolverFunction");
+  py::class_<mm::SolverFunction, std::shared_ptr<mm::SolverFunction>> solverFunctionClass(
+      m, "SolverFunction");
 
   py::class_<
       mm::SkeletonSolverFunction,
@@ -690,16 +761,76 @@ Note that if you're trying to actually solve a problem using SGD, you should con
       });
 
   py::class_<
-      mm::SequenceSolverOptions,
+      mm::SequenceSolverOptionsBase,
       mm::SolverOptions,
+      std::shared_ptr<mm::SequenceSolverOptionsBase>>(
+      m,
+      "SequenceSolverOptionsBase",
+      R"(Shared options for sequence solvers.
+
+:ivar regularization: Regularization parameter used by the linearized sequence solve.
+:ivar do_line_search: Whether to use backtracking line search during optimization.
+:ivar multithreaded: Whether to enable multithreaded sequence processing.
+:ivar progress_bar: Whether to show a progress bar during optimization.)")
+      .def(py::init<>())
+      .def_readwrite(
+          "regularization",
+          &mm::SequenceSolverOptionsBase::regularization,
+          "Regularization parameter used by the linearized sequence solve.")
+      .def_readwrite(
+          "do_line_search",
+          &mm::SequenceSolverOptionsBase::doLineSearch,
+          "Enables backtracking line search during optimization.")
+      .def_readwrite(
+          "multithreaded",
+          &mm::SequenceSolverOptionsBase::multithreaded,
+          "Enables multithreaded sequence processing.")
+      .def_readwrite(
+          "progress_bar",
+          &mm::SequenceSolverOptionsBase::progressBar,
+          "Enables a progress bar during optimization.");
+
+  py::class_<
+      mm::SequenceSolverOptions,
+      mm::SequenceSolverOptionsBase,
       std::shared_ptr<mm::SequenceSolverOptions>>(
       m, "SequenceSolverOptions", "Options specific to the sequence solver")
       .def(py::init<>())
+      .def("__repr__", [](const mm::SequenceSolverOptions& self) {
+        return fmt::format(
+            "SequenceSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, multithreaded={}, progress_bar={})",
+            self.minIterations,
+            self.maxIterations,
+            self.threshold,
+            boolToString(self.verbose),
+            self.regularization,
+            boolToString(self.doLineSearch),
+            boolToString(self.multithreaded),
+            boolToString(self.progressBar));
+      });
+
+  py::class_<
+      mm::SequenceCholeskySolverOptions,
+      mm::SequenceSolverOptionsBase,
+      std::shared_ptr<mm::SequenceCholeskySolverOptions>>(
+      m,
+      "SequenceCholeskySolverOptions",
+      R"(Options specific to :class:`SequenceCholeskySolver`.
+
+:ivar regularization: Levenberg-Marquardt damping added to the normal-equation diagonal.
+:ivar do_line_search: Whether to use backtracking line search during optimization.
+:ivar multithreaded: Whether to accumulate normal equations in parallel over frame chunks.
+:ivar progress_bar: Whether to show a progress bar during optimization.
+:ivar chunk_size: Number of frames to process in each independent accumulation chunk.
+:ivar target_rows_per_jtj_chunk: Target number of Jacobian rows for each local ``J.T @ J`` multiply.
+:ivar use_block_ldlt: Whether to use block LDLT instead of scalar banded LDLT for the linear solve.
+:ivar use_double_precision_normal_equations: Whether to accumulate compact normal equations in double precision.)")
+      .def(py::init<>())
       .def(
           "__repr__",
-          [](const mm::SequenceSolverOptions& self) {
+          [](const mm::SequenceCholeskySolverOptions& self) {
             return fmt::format(
-                "SequenceSolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, multithreaded={}, progress_bar={})",
+                "SequenceCholeskySolverOptions(min_iterations={}, max_iterations={}, threshold={}, verbose={}, regularization={}, do_line_search={}, multithreaded={}, progress_bar={}, chunk_size={}, target_rows_per_jtj_chunk={}, use_block_ldlt={}, use_double_precision_normal_equations={})",
                 self.minIterations,
                 self.maxIterations,
                 self.threshold,
@@ -707,24 +838,28 @@ Note that if you're trying to actually solve a problem using SGD, you should con
                 self.regularization,
                 boolToString(self.doLineSearch),
                 boolToString(self.multithreaded),
-                boolToString(self.progressBar));
+                boolToString(self.progressBar),
+                self.chunkSize,
+                self.targetRowsPerJtJChunk,
+                boolToString(self.useBlockLdlt),
+                boolToString(self.useDoublePrecisionNormalEquations));
           })
       .def_readwrite(
-          "regularization",
-          &mm::SequenceSolverOptions::regularization,
-          "Regularization parameter for QR decomposition.")
+          "chunk_size",
+          &mm::SequenceCholeskySolverOptions::chunkSize,
+          "Number of frames to process in each independent accumulation chunk.")
       .def_readwrite(
-          "do_line_search",
-          &mm::SequenceSolverOptions::doLineSearch,
-          "Flag to enable line search during optimization.")
+          "target_rows_per_jtj_chunk",
+          &mm::SequenceCholeskySolverOptions::targetRowsPerJtJChunk,
+          "Target number of Jacobian rows for each local J.T @ J multiply.")
       .def_readwrite(
-          "multithreaded",
-          &mm::SequenceSolverOptions::multithreaded,
-          "Flag to enable multithreading for the Sequence solver.")
+          "use_block_ldlt",
+          &mm::SequenceCholeskySolverOptions::useBlockLdlt,
+          "Use block LDLT instead of scalar banded LDLT for the linear solve.")
       .def_readwrite(
-          "progress_bar",
-          &mm::SequenceSolverOptions::progressBar,
-          "Flag to enable a progress bar during optimization.");
+          "use_double_precision_normal_equations",
+          &mm::SequenceCholeskySolverOptions::useDoublePrecisionNormalEquations,
+          "Accumulate compact normal equations in double precision.");
 
   py::class_<mm::Solver, std::shared_ptr<mm::Solver>>(m, "Solver")
       .def(
@@ -752,6 +887,9 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           "per_iteration_errors",
           [](mm::Solver& self) { return self.getErrorHistory(); },
           "The error after each iteration of the solver.");
+
+  py::class_<mm::SequenceSolverBase, mm::Solver, std::shared_ptr<mm::SequenceSolverBase>>
+      sequenceSolverBaseClass(m, "SequenceSolverBase", "Shared base class for sequence solvers.");
 
   py::class_<mm::GaussNewtonSolver, mm::Solver, std::shared_ptr<mm::GaussNewtonSolver>>(
       m, "GaussNewtonSolver", "Basic 2nd-order Gauss-Newton solver")
@@ -791,59 +929,81 @@ Note that if you're trying to actually solve a problem using SGD, you should con
           py::arg("solver_function"),
           py::arg("options") = std::optional<mm::SubsetGaussNewtonSolverOptions>{});
 
+  py::class_<mm::SequenceSolver, mm::SequenceSolverBase, std::shared_ptr<mm::SequenceSolver>>(
+      m, "SequenceSolver", "Original banded QR sequence solver.")
+      .def(
+          py::init<>([](mm::SequenceSolverFunction* solverFunction,
+                        const std::optional<mm::SequenceSolverOptions>& options) {
+            return std::make_shared<mm::SequenceSolver>(
+                options.value_or(mm::SequenceSolverOptions{}), solverFunction);
+          }),
+          py::keep_alive<1, 2>(),
+          py::arg("solver_function"),
+          py::arg("options") = std::optional<mm::SequenceSolverOptions>{});
+
+  py::class_<
+      mm::SequenceCholeskySolver,
+      mm::SequenceSolverBase,
+      std::shared_ptr<mm::SequenceCholeskySolver>>(
+      m,
+      "SequenceCholeskySolver",
+      R"(Sequence solver based on banded normal equations and direct factorization.
+
+Use :func:`solve_sequence` for the usual array-oriented API. This class exposes the
+underlying solver object when callers need solver history or timing counters.)")
+      .def(
+          py::init<>([](mm::SequenceSolverFunction* solverFunction,
+                        const std::optional<mm::SequenceCholeskySolverOptions>& options) {
+            return std::make_shared<mm::SequenceCholeskySolver>(
+                options.value_or(mm::SequenceCholeskySolverOptions{}), solverFunction);
+          }),
+          py::keep_alive<1, 2>(),
+          py::arg("solver_function"),
+          py::arg("options") = std::optional<mm::SequenceCholeskySolverOptions>{})
+      .def_property_readonly(
+          "last_normal_equation_time_ms",
+          &mm::SequenceCholeskySolver::getLastNormalEquationTimeMs,
+          "Time in milliseconds spent accumulating normal equations in the last solve.")
+      .def_property_readonly(
+          "last_linear_solve_time_ms",
+          &mm::SequenceCholeskySolver::getLastLinearSolveTimeMs,
+          "Time in milliseconds spent in the linear solve during the last solve.");
+
   m.def(
       "solve_sequence",
       [](mm::SequenceSolverFunction& solverFunction,
          const py::array_t<float>& modelParams,
-         const std::optional<mm::SequenceSolverOptions>& options) -> py::array_t<float> {
-        mm::SequenceSolver solver(options.value_or(mm::SequenceSolverOptions{}), &solverFunction);
-
-        if (modelParams.ndim() != 2) {
-          throw std::runtime_error(
-              "Expected model parameters to be a 2D array of shape (n_frames, n_params)");
+         const py::object& options,
+         SequenceSolverType solverType) -> py::array_t<float> {
+        switch (solverType) {
+          case SequenceSolverType::QR:
+            return solveSequence<mm::SequenceSolver, mm::SequenceSolverOptions>(
+                solverFunction,
+                modelParams,
+                getSequenceOptions<mm::SequenceSolverOptions>(options, "SequenceSolverOptions"));
+          case SequenceSolverType::Cholesky:
+            return solveSequence<mm::SequenceCholeskySolver, mm::SequenceCholeskySolverOptions>(
+                solverFunction,
+                modelParams,
+                getSequenceOptions<mm::SequenceCholeskySolverOptions>(
+                    options, "SequenceCholeskySolverOptions"));
         }
-
-        if (modelParams.shape(1) !=
-            solverFunction.getParameterTransform()->numAllModelParameters()) {
-          throw std::runtime_error(
-              "Expected model parameters to have n_params == " +
-              std::to_string(solverFunction.getNumParameters()));
-        }
-
-        const auto nFrames = modelParams.shape(0);
-        const auto nParams = modelParams.shape(1);
-
-        {
-          auto modelParams_acc = modelParams.unchecked<2>();
-          py::gil_scoped_release release;
-          copyInputFrameParameters(modelParams_acc, solverFunction, nFrames, nParams);
-        }
-
-        {
-          py::gil_scoped_release release;
-          Eigen::VectorXf parameters = solverFunction.getJoinedParameterVector();
-          solver.solve(parameters);
-          solverFunction.setJoinedParameterVector(parameters);
-        }
-
-        py::array_t<float> result = py::array_t<float>({nFrames, nParams});
-        {
-          auto result_acc = result.mutable_unchecked<2>();
-          py::gil_scoped_release release;
-          copyOutputFrameParameters(result_acc, solverFunction, nFrames, nParams);
-        }
-
-        return result;
+        MT_THROW("Unhandled sequence solver type");
       },
-      R"(Solves a sequence of poses using the sequence solver.
+      R"(Solves a sequence of poses using the selected sequence solver.
 
 :param solver_function: The solver function to use.
 :param model_params: The initial model parameters.  This is an n_frames x n_params array.
-:param options: The solver options to use.
+:param options: The solver options to use. Pass :class:`SequenceSolverOptions` for
+    :attr:`SequenceSolverType.QR` and :class:`SequenceCholeskySolverOptions` for
+    :attr:`SequenceSolverType.Cholesky`.
+:param solver_type: Which sequence solver implementation to use.
 :returns: The optimized model parameters.)",
       py::arg("solver_function"),
       py::arg("model_params"),
-      py::arg("options") = std::optional<mm::SequenceSolverOptions>{});
+      py::arg("options") = py::none(),
+      py::kw_only(),
+      py::arg("solver_type") = SequenceSolverType::QR);
 
   addTransformPoseBinding(m);
 

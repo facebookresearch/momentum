@@ -279,6 +279,94 @@ class TestSolver(unittest.TestCase):
                 )
             )
 
+    def test_solver_sequence_cholesky_matches_qr(self) -> None:
+        """Test normal-equation solve_sequence() against the existing QR sequence solver."""
+
+        character = pym_test_utils.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+        n_frames = 6
+
+        np.random.seed(1)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
+        model_params_target = (0.2 * np.random.rand(n_frames, n_params)).astype(
+            np.float32
+        )
+
+        def create_solver_function() -> pym_solver2.SequenceSolverFunction:
+            solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
+            for i_frame in range(n_frames):
+                model_params_error = pym_solver2.ModelParametersErrorFunction(character)
+                model_params_error.set_target_parameters(
+                    model_params_target[i_frame], np.ones(n_params, dtype=np.float32)
+                )
+                solver_function.add_error_function(i_frame, model_params_error)
+            for i_frame in range(n_frames - 1):
+                solver_function.add_sequence_error_function(
+                    i_frame, pym_solver2.ModelParametersSequenceErrorFunction(character)
+                )
+            return solver_function
+
+        qr_options = pym_solver2.SequenceSolverOptions()
+        qr_options.max_iterations = 5
+        qr_options.regularization = 0.05
+
+        cholesky_options = pym_solver2.SequenceCholeskySolverOptions()
+        cholesky_options.max_iterations = qr_options.max_iterations
+        cholesky_options.regularization = qr_options.regularization
+        cholesky_options.chunk_size = 2
+        cholesky_options.target_rows_per_jtj_chunk = 512
+        cholesky_options.use_double_precision_normal_equations = True
+
+        self.assertIn("chunk_size=2", repr(cholesky_options))
+        self.assertIn("use_block_ldlt=True", repr(cholesky_options))
+        self.assertIn(
+            "use_double_precision_normal_equations=True", repr(cholesky_options)
+        )
+
+        solver = pym_solver2.SequenceCholeskySolver(
+            create_solver_function(), cholesky_options
+        )
+        self.assertEqual(solver.last_normal_equation_time_ms, 0.0)
+        self.assertEqual(solver.last_linear_solve_time_ms, 0.0)
+
+        qr_result = pym_solver2.solve_sequence(
+            create_solver_function(), model_params_init, qr_options
+        )
+        cholesky_result = pym_solver2.solve_sequence(
+            create_solver_function(),
+            model_params_init,
+            cholesky_options,
+            solver_type=pym_solver2.SequenceSolverType.Cholesky,
+        )
+
+        cholesky_options.multithreaded = True
+        cholesky_multithreaded_result = pym_solver2.solve_sequence(
+            create_solver_function(),
+            model_params_init,
+            cholesky_options,
+            solver_type=pym_solver2.SequenceSolverType.Cholesky,
+        )
+
+        cholesky_options.use_block_ldlt = False
+        cholesky_scalar_ldlt_result = pym_solver2.solve_sequence(
+            create_solver_function(),
+            model_params_init,
+            cholesky_options,
+            solver_type=pym_solver2.SequenceSolverType.Cholesky,
+        )
+
+        self.assertTrue(np.allclose(cholesky_result, qr_result, rtol=1e-4, atol=1e-4))
+        self.assertTrue(
+            np.allclose(
+                cholesky_multithreaded_result, cholesky_result, rtol=1e-5, atol=1e-5
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                cholesky_scalar_ldlt_result, cholesky_result, rtol=1e-5, atol=1e-5
+            )
+        )
+
     def test_solver_sequence_smoothness(self) -> None:
         """Test solve_sequence() with a smoothness constraint to ensure
         that the result matches the target on the first frame and is smooth across frames."""
