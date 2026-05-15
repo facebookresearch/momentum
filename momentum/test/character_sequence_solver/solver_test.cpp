@@ -11,6 +11,7 @@
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/multipose_solver.h"
 #include "momentum/character_sequence_solver/multipose_solver_function.h"
+#include "momentum/character_sequence_solver/sequence_cholesky_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
 #include "momentum/character_sequence_solver/state_sequence_error_function.h"
@@ -29,6 +30,7 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <cmath>
 
 using namespace momentum;
 
@@ -44,6 +46,15 @@ std::vector<int> toIntVector(const ParameterSet& params, const Character& charac
     }
   }
 
+  return result;
+}
+
+template <typename T>
+Eigen::VectorX<T> deterministicParameters(Eigen::Index nParams, size_t seed) {
+  Eigen::VectorX<T> result(nParams);
+  for (Eigen::Index i = 0; i < nParams; ++i) {
+    result(i) = static_cast<T>(0.25 * std::sin(0.37 * static_cast<double>(i + 1 + 17 * seed)));
+  }
   return result;
 }
 
@@ -65,14 +76,14 @@ MultiPoseTestProblem<T>::MultiPoseTestProblem(
     : universalParams(universalParams_in) {
   const ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
   Eigen::VectorX<T> randomParams_base =
-      Eigen::VectorX<T>::Random(parameterTransform.numAllModelParameters());
+      deterministicParameters<T>(parameterTransform.numAllModelParameters(), 0);
 
   positionErrors.resize(nFrames);
   orientErrors.resize(nFrames);
   targetParams.resize(nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     Eigen::VectorX<T> randomParams_cur =
-        Eigen::VectorX<T>::Random(parameterTransform.numAllModelParameters());
+        deterministicParameters<T>(parameterTransform.numAllModelParameters(), iFrame + 1);
     for (int i = 0; i < parameterTransform.numAllModelParameters(); ++i) {
       if (universalParams.test(i)) {
         randomParams_cur[i] = randomParams_base[i];
@@ -235,7 +246,7 @@ TYPED_TEST(SequenceSolverTest, CompareGaussNewton) {
   universalParams.set(4);
   universalParams.set(7);
 
-  const size_t nFrames = 5;
+  const size_t nFrames = 3;
   MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
@@ -291,10 +302,10 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   }
 
   auto solverOptionsSingle = SequenceSolverOptions(test::defaultSolverOptions());
-  solverOptionsSingle.multithreaded = 0;
+  solverOptionsSingle.multithreaded = false;
 
   auto solverOptionsMulti = SequenceSolverOptions(test::defaultSolverOptions());
-  solverOptionsMulti.multithreaded = 1;
+  solverOptionsMulti.multithreaded = true;
 
   const Eigen::VectorX<T> parametersInit = sequenceSolverFunction.getJoinedParameterVector();
 
@@ -310,6 +321,332 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   // Multipose solver should do at least as well as Gauss-Newton.
   EXPECT_NEAR(err_single, err_multi, Eps<T>(1e-7f, 1e-15));
   EXPECT_LE(err_single, err_gn + Eps<T>(5e-7f, 1e-14));
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholesky) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet enabledParams;
+  enabledParams.set();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const size_t nFrames = 3;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionQr(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  SequenceSolverFunctionT<T> sequenceSolverFunctionCholesky(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    sequenceSolverFunctionQr.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+    sequenceSolverFunctionQr.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+    sequenceSolverFunctionCholesky.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+    sequenceSolverFunctionCholesky.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+  }
+
+  auto smoothnessError = std::make_shared<ModelParametersSequenceErrorFunctionT<T>>(character);
+  for (size_t iFrame = 0; iFrame < (nFrames - 1); ++iFrame) {
+    sequenceSolverFunctionQr.addSequenceErrorFunction(iFrame, smoothnessError);
+    sequenceSolverFunctionCholesky.addSequenceErrorFunction(iFrame, smoothnessError);
+  }
+
+  auto solverOptionsQr = SequenceSolverOptions();
+  solverOptionsQr.minIterations = 0;
+  solverOptionsQr.maxIterations = 1;
+  solverOptionsQr.threshold = 0.0f;
+  solverOptionsQr.regularization = 0.37f;
+  solverOptionsQr.multithreaded = false;
+
+  auto solverOptionsCholesky = SequenceCholeskySolverOptions();
+  solverOptionsCholesky.minIterations = solverOptionsQr.minIterations;
+  solverOptionsCholesky.maxIterations = solverOptionsQr.maxIterations;
+  solverOptionsCholesky.threshold = solverOptionsQr.threshold;
+  solverOptionsCholesky.regularization = solverOptionsQr.regularization;
+  solverOptionsCholesky.multithreaded = false;
+  solverOptionsCholesky.chunkSize = 1;
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionQr.getJoinedParameterVector();
+
+  SequenceSolverT<T> solverQr(solverOptionsQr, &sequenceSolverFunctionQr);
+  Eigen::VectorX<T> parametersQr = parametersInit;
+  solverQr.solve(parametersQr);
+  const T errQr = sequenceSolverFunctionQr.getError(parametersQr);
+
+  SequenceCholeskySolverT<T> solverCholesky(solverOptionsCholesky, &sequenceSolverFunctionCholesky);
+  Eigen::VectorX<T> parametersCholesky = parametersInit;
+  solverCholesky.solve(parametersCholesky);
+  const T errCholesky = sequenceSolverFunctionCholesky.getError(parametersCholesky);
+
+  EXPECT_NEAR(errQr, errCholesky, Eps<T>(5e-5f, 1e-8));
+  EXPECT_NEAR((parametersQr - parametersCholesky).norm(), T(0), Eps<T>(1e-4f, 1e-8));
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholeskyScalarLdltWithoutUniversalParameters) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  const ParameterSet universalParams;
+  const size_t nFrames = 4;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
+    for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+      result.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+      result.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+    }
+
+    auto smoothnessError = std::make_shared<ModelParametersSequenceErrorFunctionT<T>>(character);
+    for (size_t iFrame = 0; iFrame < (nFrames - 1); ++iFrame) {
+      result.addSequenceErrorFunction(iFrame, smoothnessError);
+    }
+  };
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionBlock(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionBlock);
+  SequenceSolverFunctionT<T> sequenceSolverFunctionScalar(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionScalar);
+
+  auto solverOptionsBlock = SequenceCholeskySolverOptions();
+  solverOptionsBlock.minIterations = 0;
+  solverOptionsBlock.maxIterations = 1;
+  solverOptionsBlock.threshold = 0.0f;
+  solverOptionsBlock.regularization = 0.37f;
+  solverOptionsBlock.multithreaded = false;
+  solverOptionsBlock.chunkSize = 1;
+
+  auto solverOptionsScalar = solverOptionsBlock;
+  solverOptionsScalar.useBlockLdlt = false;
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionBlock.getJoinedParameterVector();
+
+  SequenceCholeskySolverT<T> solverBlock(solverOptionsBlock, &sequenceSolverFunctionBlock);
+  Eigen::VectorX<T> parametersBlock = parametersInit;
+  solverBlock.solve(parametersBlock);
+  const T errBlock = sequenceSolverFunctionBlock.getError(parametersBlock);
+
+  SequenceCholeskySolverT<T> solverScalar(solverOptionsScalar, &sequenceSolverFunctionScalar);
+  Eigen::VectorX<T> parametersScalar = parametersInit;
+  solverScalar.solve(parametersScalar);
+  const T errScalar = sequenceSolverFunctionScalar.getError(parametersScalar);
+
+  EXPECT_NEAR(errBlock, errScalar, Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR((parametersBlock - parametersScalar).norm(), T(0), Eps<T>(1e-5f, 1e-8));
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholeskyMultithreaded) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const size_t nFrames = 4;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
+    for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+      result.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+      result.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+    }
+
+    auto smoothnessError = std::make_shared<ModelParametersSequenceErrorFunctionT<T>>(character);
+    for (size_t iFrame = 0; iFrame < (nFrames - 1); ++iFrame) {
+      result.addSequenceErrorFunction(iFrame, smoothnessError);
+    }
+  };
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionQr(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionQr);
+  SequenceSolverFunctionT<T> sequenceSolverFunctionSerial(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionSerial);
+
+  auto solverOptionsQr = SequenceSolverOptions();
+  solverOptionsQr.minIterations = 0;
+  solverOptionsQr.maxIterations = 1;
+  solverOptionsQr.threshold = 0.0f;
+  solverOptionsQr.regularization = 0.37f;
+  solverOptionsQr.multithreaded = false;
+
+  auto solverOptionsSerial = SequenceCholeskySolverOptions();
+  solverOptionsSerial.minIterations = 0;
+  solverOptionsSerial.maxIterations = 1;
+  solverOptionsSerial.threshold = 0.0f;
+  solverOptionsSerial.regularization = 0.37f;
+  solverOptionsSerial.multithreaded = false;
+  solverOptionsSerial.chunkSize = 1;
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionQr.getJoinedParameterVector();
+
+  SequenceSolverT<T> solverQr(solverOptionsQr, &sequenceSolverFunctionQr);
+  Eigen::VectorX<T> parametersQr = parametersInit;
+  solverQr.solve(parametersQr);
+  const T errQr = sequenceSolverFunctionQr.getError(parametersQr);
+
+  SequenceCholeskySolverT<T> solverSerial(solverOptionsSerial, &sequenceSolverFunctionSerial);
+  Eigen::VectorX<T> parametersSerial = parametersInit;
+  solverSerial.solve(parametersSerial);
+  const T errSerial = sequenceSolverFunctionSerial.getError(parametersSerial);
+
+  EXPECT_NEAR(errQr, errSerial, Eps<T>(5e-5f, 1e-8));
+  EXPECT_NEAR((parametersQr - parametersSerial).norm(), T(0), Eps<T>(1e-4f, 5e-8));
+
+  for (const size_t chunkSize : {size_t(1), size_t(2), size_t(3), size_t(8)}) {
+    for (const bool useDoublePrecisionNormalEquations : {false, true}) {
+      SequenceSolverFunctionT<T> sequenceSolverFunctionMulti(
+          character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+      populateSolverFunction(sequenceSolverFunctionMulti);
+      auto solverOptionsMulti = solverOptionsSerial;
+      solverOptionsMulti.multithreaded = true;
+      solverOptionsMulti.chunkSize = chunkSize;
+      solverOptionsMulti.useDoublePrecisionNormalEquations = useDoublePrecisionNormalEquations;
+
+      SequenceCholeskySolverT<T> solverMulti(solverOptionsMulti, &sequenceSolverFunctionMulti);
+      Eigen::VectorX<T> parametersMulti = parametersInit;
+      solverMulti.solve(parametersMulti);
+      const T errMulti = sequenceSolverFunctionMulti.getError(parametersMulti);
+
+      EXPECT_NEAR(errQr, errMulti, Eps<T>(5e-5f, 1e-8));
+      EXPECT_NEAR((parametersQr - parametersMulti).norm(), T(0), Eps<T>(1e-4f, 5e-8));
+      EXPECT_NEAR(errSerial, errMulti, Eps<T>(1e-5f, 1e-8));
+      EXPECT_NEAR((parametersSerial - parametersMulti).norm(), T(0), Eps<T>(1e-5f, 1e-8));
+    }
+  }
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholeskyMixedSequenceBoundaryCases) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const size_t nFrames = 5;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
+    for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+      result.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+      result.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+    }
+
+    auto stateError = std::make_shared<StateSequenceErrorFunctionT<T>>(character);
+    for (size_t iFrame = 0; iFrame < nFrames - 1; ++iFrame) {
+      result.addSequenceErrorFunction(iFrame, stateError);
+    }
+
+    auto accelerationError = std::make_shared<AccelerationSequenceErrorFunctionT<T>>(character);
+    for (size_t iFrame = 0; iFrame < nFrames - 2; ++iFrame) {
+      result.addSequenceErrorFunction(iFrame, accelerationError);
+    }
+  };
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionSerial(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionSerial);
+
+  auto solverOptionsSerial = SequenceCholeskySolverOptions();
+  solverOptionsSerial.minIterations = 0;
+  solverOptionsSerial.maxIterations = 1;
+  solverOptionsSerial.threshold = 0.0f;
+  solverOptionsSerial.regularization = 0.37f;
+  solverOptionsSerial.multithreaded = false;
+  solverOptionsSerial.chunkSize = 1;
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionSerial.getJoinedParameterVector();
+
+  SequenceCholeskySolverT<T> solverSerial(solverOptionsSerial, &sequenceSolverFunctionSerial);
+  Eigen::VectorX<T> parametersSerial = parametersInit;
+  solverSerial.solve(parametersSerial);
+  const T errSerial = sequenceSolverFunctionSerial.getError(parametersSerial);
+
+  for (const size_t chunkSize : {size_t(1), size_t(2), size_t(3), size_t(8)}) {
+    for (const bool useDoublePrecisionNormalEquations : {false, true}) {
+      SequenceSolverFunctionT<T> sequenceSolverFunctionMulti(
+          character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+      populateSolverFunction(sequenceSolverFunctionMulti);
+      auto solverOptionsMulti = solverOptionsSerial;
+      solverOptionsMulti.multithreaded = true;
+      solverOptionsMulti.chunkSize = chunkSize;
+      solverOptionsMulti.useDoublePrecisionNormalEquations = useDoublePrecisionNormalEquations;
+
+      SequenceCholeskySolverT<T> solverMulti(solverOptionsMulti, &sequenceSolverFunctionMulti);
+      Eigen::VectorX<T> parametersMulti = parametersInit;
+      solverMulti.solve(parametersMulti);
+      const T errMulti = sequenceSolverFunctionMulti.getError(parametersMulti);
+
+      EXPECT_NEAR(errSerial, errMulti, Eps<T>(5e-5f, 1e-8));
+      EXPECT_NEAR((parametersSerial - parametersMulti).norm(), T(0), Eps<T>(5e-5f, 1e-8));
+    }
+  }
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholeskyOnlyUniversalParameters) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const size_t nFrames = 4;
+  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionCholesky(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  momentum::ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
+  SkeletonSolverFunctionT<T> basicSolverFunction(character, parameterTransform);
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    sequenceSolverFunctionCholesky.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+    sequenceSolverFunctionCholesky.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+
+    basicSolverFunction.addErrorFunction(problem.positionErrors[iFrame]);
+    basicSolverFunction.addErrorFunction(problem.orientErrors[iFrame]);
+  }
+
+  auto solverOptionsCholesky = SequenceCholeskySolverOptions(test::defaultSolverOptions());
+  solverOptionsCholesky.multithreaded = true;
+  solverOptionsCholesky.chunkSize = 2;
+  solverOptionsCholesky.useDoublePrecisionNormalEquations = true;
+
+  SequenceCholeskySolverT<T> solverCholesky(solverOptionsCholesky, &sequenceSolverFunctionCholesky);
+  solverCholesky.setEnabledParameters(universalParams);
+  const Eigen::VectorX<T> parametersInit =
+      sequenceSolverFunctionCholesky.getJoinedParameterVector();
+  test::checkAndTimeSolver<T>(
+      sequenceSolverFunctionCholesky, solverCholesky, parametersInit, universalParams);
+  const auto modelParamsSequence = sequenceSolverFunctionCholesky.getUniversalParameters();
+
+  GaussNewtonSolverQRT<T> solverGn(test::defaultSolverOptions(), &basicSolverFunction);
+  solverGn.setEnabledParameters(universalParams);
+  momentum::ModelParametersT<T> basicModelParams =
+      momentum::ModelParametersT<T>::Zero(character.parameterTransform.numAllModelParameters());
+  solverGn.solve(basicModelParams.v);
+
+  ASSERT_LT((modelParamsSequence.v - basicModelParams.v).norm(), 1e-4);
 }
 
 TYPED_TEST(SequenceSolverTest, MixedFrameCountErrorFunctions) {

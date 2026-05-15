@@ -24,6 +24,26 @@ using MultiposeSolverOptions_const_p = ::std::shared_ptr<const MultiposeSolverOp
 using MultiposeSolverOptions_const_u = ::std::unique_ptr<const MultiposeSolverOptions>;
 using MultiposeSolverOptions_const_w = ::std::weak_ptr<const MultiposeSolverOptions>;
 
+struct SequenceCholeskySolverOptions;
+
+using SequenceCholeskySolverOptions_p = ::std::shared_ptr<SequenceCholeskySolverOptions>;
+using SequenceCholeskySolverOptions_u = ::std::unique_ptr<SequenceCholeskySolverOptions>;
+using SequenceCholeskySolverOptions_w = ::std::weak_ptr<SequenceCholeskySolverOptions>;
+using SequenceCholeskySolverOptions_const_p =
+    ::std::shared_ptr<const SequenceCholeskySolverOptions>;
+using SequenceCholeskySolverOptions_const_u =
+    ::std::unique_ptr<const SequenceCholeskySolverOptions>;
+using SequenceCholeskySolverOptions_const_w = ::std::weak_ptr<const SequenceCholeskySolverOptions>;
+
+struct SequenceSolverOptionsBase;
+
+using SequenceSolverOptionsBase_p = ::std::shared_ptr<SequenceSolverOptionsBase>;
+using SequenceSolverOptionsBase_u = ::std::unique_ptr<SequenceSolverOptionsBase>;
+using SequenceSolverOptionsBase_w = ::std::weak_ptr<SequenceSolverOptionsBase>;
+using SequenceSolverOptionsBase_const_p = ::std::shared_ptr<const SequenceSolverOptionsBase>;
+using SequenceSolverOptionsBase_const_u = ::std::unique_ptr<const SequenceSolverOptionsBase>;
+using SequenceSolverOptionsBase_const_w = ::std::weak_ptr<const SequenceSolverOptionsBase>;
+
 struct SequenceSolverOptions;
 
 using SequenceSolverOptions_p = ::std::shared_ptr<SequenceSolverOptions>;
@@ -195,6 +215,44 @@ using MultiposeSolverFunctiond_w = ::std::weak_ptr<MultiposeSolverFunctiond>;
 using MultiposeSolverFunctiond_const_p = ::std::shared_ptr<const MultiposeSolverFunctiond>;
 using MultiposeSolverFunctiond_const_u = ::std::unique_ptr<const MultiposeSolverFunctiond>;
 using MultiposeSolverFunctiond_const_w = ::std::weak_ptr<const MultiposeSolverFunctiond>;
+
+template <typename T>
+class SequenceCholeskySolverT;
+using SequenceCholeskySolver = SequenceCholeskySolverT<float>;
+using SequenceCholeskySolverd = SequenceCholeskySolverT<double>;
+
+using SequenceCholeskySolver_p = ::std::shared_ptr<SequenceCholeskySolver>;
+using SequenceCholeskySolver_u = ::std::unique_ptr<SequenceCholeskySolver>;
+using SequenceCholeskySolver_w = ::std::weak_ptr<SequenceCholeskySolver>;
+using SequenceCholeskySolver_const_p = ::std::shared_ptr<const SequenceCholeskySolver>;
+using SequenceCholeskySolver_const_u = ::std::unique_ptr<const SequenceCholeskySolver>;
+using SequenceCholeskySolver_const_w = ::std::weak_ptr<const SequenceCholeskySolver>;
+
+using SequenceCholeskySolverd_p = ::std::shared_ptr<SequenceCholeskySolverd>;
+using SequenceCholeskySolverd_u = ::std::unique_ptr<SequenceCholeskySolverd>;
+using SequenceCholeskySolverd_w = ::std::weak_ptr<SequenceCholeskySolverd>;
+using SequenceCholeskySolverd_const_p = ::std::shared_ptr<const SequenceCholeskySolverd>;
+using SequenceCholeskySolverd_const_u = ::std::unique_ptr<const SequenceCholeskySolverd>;
+using SequenceCholeskySolverd_const_w = ::std::weak_ptr<const SequenceCholeskySolverd>;
+
+template <typename T>
+class SequenceSolverBaseT;
+using SequenceSolverBase = SequenceSolverBaseT<float>;
+using SequenceSolverBased = SequenceSolverBaseT<double>;
+
+using SequenceSolverBase_p = ::std::shared_ptr<SequenceSolverBase>;
+using SequenceSolverBase_u = ::std::unique_ptr<SequenceSolverBase>;
+using SequenceSolverBase_w = ::std::weak_ptr<SequenceSolverBase>;
+using SequenceSolverBase_const_p = ::std::shared_ptr<const SequenceSolverBase>;
+using SequenceSolverBase_const_u = ::std::unique_ptr<const SequenceSolverBase>;
+using SequenceSolverBase_const_w = ::std::weak_ptr<const SequenceSolverBase>;
+
+using SequenceSolverBased_p = ::std::shared_ptr<SequenceSolverBased>;
+using SequenceSolverBased_u = ::std::unique_ptr<SequenceSolverBased>;
+using SequenceSolverBased_w = ::std::weak_ptr<SequenceSolverBased>;
+using SequenceSolverBased_const_p = ::std::shared_ptr<const SequenceSolverBased>;
+using SequenceSolverBased_const_u = ::std::unique_ptr<const SequenceSolverBased>;
+using SequenceSolverBased_const_w = ::std::weak_ptr<const SequenceSolverBased>;
 
 template <typename T>
 class SequenceSolverT;

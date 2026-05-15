@@ -154,6 +154,8 @@ template_classes = [
 subdirectory = "character_sequence_solver"
 structs = [
     "MultiposeSolverOptions",
+    "SequenceCholeskySolverOptions",
+    "SequenceSolverOptionsBase",
     "SequenceSolverOptions",
 ]
 template_classes = [
@@ -164,6 +166,8 @@ template_classes = [
     "ModelParametersSequenceErrorFunction",
     "MultiposeSolver",
     "MultiposeSolverFunction",
+    "SequenceCholeskySolver",
+    "SequenceSolverBase",
     "SequenceSolver",
     "SequenceSolverFunction",
     "StateSequenceErrorFunction",
