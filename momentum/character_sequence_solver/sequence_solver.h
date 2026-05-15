@@ -9,10 +9,10 @@
 
 #include <momentum/character/fwd.h>
 #include <momentum/character_sequence_solver/fwd.h>
+#include <momentum/character_sequence_solver/sequence_solver_base.h>
 #include <momentum/common/fwd.h>
 #include <momentum/math/fwd.h>
 #include <momentum/math/online_householder_qr.h>
-#include <momentum/solver/solver.h>
 
 #include <functional>
 #include <span>
@@ -20,45 +20,23 @@
 namespace momentum {
 
 /// Sequence solver specific options
-struct SequenceSolverOptions : SolverOptions {
-  /// Regularization parameter for QR decomposition.
-  float regularization = 0.05f;
-
-  /// Flag to enable line search during optimization.
-  bool doLineSearch = false;
-
-  /// Flag to enable multithreading for the Sequence solver.
-  bool multithreaded = false;
-
-  /// Flag to enable a progress bar during optimization.
-  bool progressBar = false;
-
+struct SequenceSolverOptions : SequenceSolverOptionsBase {
   SequenceSolverOptions() = default;
 
   /* implicit */ SequenceSolverOptions(const SolverOptions& baseOptions)
-      : SolverOptions(baseOptions) {
+      : SequenceSolverOptionsBase(baseOptions) {
     // Empty
   }
 };
 
 template <typename T>
-class SequenceSolverT : public SolverT<T> {
+class SequenceSolverT : public SequenceSolverBaseT<T> {
  public:
   SequenceSolverT(const SolverOptions& options, SequenceSolverFunctionT<T>* function);
 
   [[nodiscard]] std::string_view getName() const override;
 
   void setOptions(const SolverOptions& options) final;
-
-  // "numParameters" has a different meaning here than in Solver.
-  // For Solver class, numParameters = ParameterTransform.numAllModelParameters() * numFrames; but
-  // it means #variables here. To hack around this discrepancy, we update numParameters when a new
-  // set of variables are defined.
-  // XXX To be fixed as part of T118191244
-  void setEnabledParameters(const ParameterSet& parameters) final {
-    SolverT<T>::setEnabledParameters(parameters);
-    this->numParameters_ = this->solverFunction_->getNumParameters();
-  }
 
   void iter() {
     doIteration();
@@ -138,18 +116,6 @@ class SequenceSolverT : public SolverT<T> {
       size_t bandwidth,
       std::span<const SkeletonStateT<T>> skelStates,
       std::span<const MeshStateT<T>> meshStates);
-
-  static std::vector<Eigen::Index> buildSequenceColumnIndices(
-      const SequenceSolverFunctionT<T>* fn,
-      size_t bandwidth);
-
-  float regularization_ = 0.05f;
-  bool doLineSearch_ = false;
-  bool multithreaded_ = false;
-  bool progressBar_ = false;
-
-  // bandwidth in frames:
-  size_t bandwidth_ = 0;
 };
 
 } // namespace momentum

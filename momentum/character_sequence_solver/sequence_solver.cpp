@@ -30,14 +30,7 @@ template <typename T>
 SequenceSolverT<T>::SequenceSolverT(
     const SolverOptions& options,
     SequenceSolverFunctionT<T>* function)
-    : SolverT<T>(options, function) {
-  // Set default values from SequenceSolverOptions
-  regularization_ = SequenceSolverOptions().regularization;
-  doLineSearch_ = SequenceSolverOptions().doLineSearch;
-  multithreaded_ = SequenceSolverOptions().multithreaded;
-  progressBar_ = SequenceSolverOptions().progressBar;
-
-  // Update values based on provided options
+    : SequenceSolverBaseT<T>(options, function) {
   setOptions(options);
 }
 
@@ -48,14 +41,7 @@ std::string_view SequenceSolverT<T>::getName() const {
 
 template <typename T>
 void SequenceSolverT<T>::setOptions(const SolverOptions& options) {
-  SolverT<T>::setOptions(options);
-
-  if (const auto* derivedOptions = dynamic_cast<const SequenceSolverOptions*>(&options)) {
-    this->regularization_ = derivedOptions->regularization;
-    this->doLineSearch_ = derivedOptions->doLineSearch;
-    this->multithreaded_ = derivedOptions->multithreaded;
-    this->progressBar_ = derivedOptions->progressBar;
-  }
+  SequenceSolverBaseT<T>::setOptions(options);
 }
 
 template <typename T>
@@ -72,22 +58,6 @@ void SequenceSolverT<T>::initializeSolver() {
     }
   }
 }
-
-namespace {
-
-template <typename ErrorFunctionType>
-size_t computeJacobianSize(std::vector<std::shared_ptr<ErrorFunctionType>>& functions) {
-  size_t result = 0;
-  for (const auto& f : functions) {
-    if (f->getWeight() <= 0) {
-      continue;
-    }
-    result += f->getJacobianSize();
-  }
-  return result;
-}
-
-} // namespace
 
 // Compute the full per-frame Jacobian and update the skeleton state:
 template <typename T>
@@ -108,7 +78,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computePerFram
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
   const auto jacobianSize =
-      padToSimdAlignment(computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
+      padToSimdAlignment(detail::computeJacobianSize(fn->perFrameErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian = Eigen::MatrixX<T>::Zero(jacobianSize, nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
 
@@ -157,7 +127,7 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
 
   const auto nFullParameters = fn->parameterTransform_.numAllModelParameters();
   const size_t jacobianSize =
-      padToSimdAlignment(computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
+      padToSimdAlignment(detail::computeJacobianSize(fn->sequenceErrorFunctions_[iFrame]));
   Eigen::MatrixX<T> jacobian =
       Eigen::MatrixX<T>::Zero(jacobianSize, bandwidth_cur * nFullParameters);
   Eigen::VectorX<T> residual = Eigen::VectorX<T>::Zero(jacobianSize);
@@ -201,25 +171,6 @@ typename SequenceSolverT<T>::JacobianResidual SequenceSolverT<T>::computeSequenc
       .error = errorCur,
       .nFunctions = fn->sequenceErrorFunctions_[iFrame].size(),
       .usedRows = offset};
-}
-
-// Indices into the multi-frame, all-parameters Jacobian that correspond to the submatrix which is
-// just the per-frame parameters across multiple frames:
-template <typename T>
-std::vector<Eigen::Index> SequenceSolverT<T>::buildSequenceColumnIndices(
-    const SequenceSolverFunctionT<T>* fn,
-    size_t bandwidth) {
-  std::vector<Eigen::Index> result;
-  for (size_t iSubFrame = 0; iSubFrame < bandwidth; ++iSubFrame) {
-    std::transform(
-        fn->perFrameParameterIndices_.begin(),
-        fn->perFrameParameterIndices_.end(),
-        std::back_inserter(result),
-        [offset = iSubFrame * fn->parameterTransform_.numAllModelParameters()](
-            Eigen::Index kParam) -> Eigen::Index { return kParam + offset; });
-  }
-
-  return result;
 }
 
 template <typename T>
@@ -483,7 +434,7 @@ double SequenceSolverT<T>::processSequenceErrors_serial(
 
   // Our per-frame matrices our now (bandwidth) frames wide, so we need (bandwidth)
   // copies of the perFrameParameterIndices_:
-  const auto sequenceColumnIndices = buildSequenceColumnIndices(fn, bandwidth);
+  const auto sequenceColumnIndices = detail::buildSequenceColumnIndices(fn, bandwidth);
 
   std::vector<SkeletonStateT<T>> skelStates(bandwidth);
   std::vector<MeshStateT<T>> meshStates(bandwidth);
@@ -549,12 +500,12 @@ void SequenceSolverT<T>::doIteration() {
       fn->getNumFrames() * fn->perFrameParameterIndices_.size(),
       fn->universalParameterIndices_.size(),
       this->bandwidth_ * fn->perFrameParameterIndices_.size(),
-      std::sqrt(regularization_));
+      std::sqrt(this->regularization_));
 
   fn->setFrameParametersFromJoinedParameterVector(this->parameters_);
 
   std::unique_ptr<ProgressBar> progress;
-  if (progressBar_) {
+  if (this->progressBar_) {
     progress = std::make_unique<ProgressBar>(
         "Solving sequence",
         fn->numTotalPerFrameErrorFunctions_ + fn->numTotalSequenceErrorFunctions_);
@@ -575,7 +526,7 @@ void SequenceSolverT<T>::doIteration() {
   const Eigen::VectorX<T> searchDir = qrSolver.x_dense();
 
   const double error_orig = this->error_;
-  if (doLineSearch_) {
+  if (this->doLineSearch_) {
     const double innerProd = -qrSolver.At_times_b().dot(searchDir);
 
     // Line search:

@@ -91,6 +91,18 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
     return frameParameters_[frame];
   }
 
+  [[nodiscard]] const std::vector<ModelParametersT<T>>& getFrameParameters() const {
+    return frameParameters_;
+  }
+
+  [[nodiscard]] const std::vector<Eigen::Index>& getPerFrameParameterIndices() const {
+    return perFrameParameterIndices_;
+  }
+
+  [[nodiscard]] const std::vector<Eigen::Index>& getUniversalParameterIndices() const {
+    return universalParameterIndices_;
+  }
+
   void setFrameParameters(size_t frame, const ModelParametersT<T>& parameters);
   [[nodiscard]] ModelParametersT<T> getUniversalParameters() const;
   [[nodiscard]] Eigen::VectorX<T> getJoinedParameterVector() const;
@@ -117,8 +129,16 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
     return perFrameErrorFunctions_.at(iFrame);
   }
 
+  [[nodiscard]] const auto& getErrorFunctions() const {
+    return perFrameErrorFunctions_;
+  }
+
   [[nodiscard]] const auto& getSequenceErrorFunctions(size_t iFrame) const {
     return sequenceErrorFunctions_.at(iFrame);
+  }
+
+  [[nodiscard]] const auto& getSequenceErrorFunctions() const {
+    return sequenceErrorFunctions_;
   }
 
  private:
@@ -166,6 +186,7 @@ class SequenceSolverFunctionT : public SolverFunctionT<T> {
   // Whether sequence error functions need the mesh
   std::atomic<bool> needsMeshSequence_{false};
 
+  friend class SequenceCholeskySolverT<T>;
   friend class SequenceSolverT<T>;
 };
 
