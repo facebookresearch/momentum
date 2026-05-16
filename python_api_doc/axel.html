@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.__init__"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.max_distance"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.max_distance</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.narrow_band_width"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.narrow_band_width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.sign_method"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.sign_method</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfConfig.tolerance"><code class="docutils literal notranslate"><span class="pre">MeshToSdfConfig.tolerance</span></code></a></li>
 </ul>
 </li>
@@ -75,6 +76,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.__init__"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.absolute"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.absolute</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.MeshToSdfPadding.fractional"><code class="docutils literal notranslate"><span class="pre">MeshToSdfPadding.fractional</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.SignMethod"><code class="docutils literal notranslate"><span class="pre">SignMethod</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.RayCasting"><code class="docutils literal notranslate"><span class="pre">SignMethod.RayCasting</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.WindingNumber"><code class="docutils literal notranslate"><span class="pre">SignMethod.WindingNumber</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.WindingNumberPermissive"><code class="docutils literal notranslate"><span class="pre">SignMethod.WindingNumberPermissive</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.__init__"><code class="docutils literal notranslate"><span class="pre">SignMethod.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.name"><code class="docutils literal notranslate"><span class="pre">SignMethod.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignMethod.value"><code class="docutils literal notranslate"><span class="pre">SignMethod.value</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField</span></code></a><ul>
@@ -312,6 +322,12 @@
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfConfig.sign_method">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sign_method</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfConfig.sign_method" title="Link to this definition"></a></dt>
+<dd><p>Method for inside/outside classification. Default: <a class="reference internal" href="#pymomentum.axel.SignMethod.RayCasting" title="pymomentum.axel.SignMethod.RayCasting"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SignMethod.RayCasting</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.axel.MeshToSdfConfig.tolerance">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tolerance</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfConfig.tolerance" title="Link to this definition"></a></dt>
 <dd><p>Numerical tolerance for computations. Default: machine epsilon * 1000</p>
@@ -369,6 +385,53 @@ ensuring adequate padding even for very thin mesh regions.</p>
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fractional</span></span><a class="headerlink" href="#pymomentum.axel.MeshToSdfPadding.fractional" title="Link to this definition"></a></dt>
 <dd><p>Fractional padding as a fraction of bounding box extent per axis. Default: 0.1</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">SignMethod</span></span><a class="headerlink" href="#pymomentum.axel.SignMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Method for inside/outside classification during SDF sign determination.</p>
+<p>Available methods:
+- RayCasting: Ray casting with 6-direction majority vote (default, fast but can fail on non-watertight meshes)
+- WindingNumber: Winding number assuming consistent outward-facing normals (wn &gt; 0.5)
+- WindingNumberPermissive: Winding number tolerant of either winding convention (abs(wn) &gt; 0.5)</p>
+<p>Members:</p>
+<blockquote>
+<div><p>RayCasting : Ray casting with 6-direction majority vote. Fast but can fail on non-watertight meshes where rays pass through gaps.</p>
+<p>WindingNumber : Winding number assuming consistent outward-facing normals (wn &gt; 0.5). Will reject meshes with accidentally flipped normals rather than silently accepting them.</p>
+<p>WindingNumberPermissive : Winding number tolerant of either winding convention (abs(wn) &gt; 0.5). Handles mesh soups, mixed orientations, and geometry from multiple sources.</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.RayCasting">
+<span class="sig-name descname"><span class="pre">RayCasting</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SignMethod.RayCasting:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pymomentum.axel.SignMethod.RayCasting" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.WindingNumber">
+<span class="sig-name descname"><span class="pre">WindingNumber</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SignMethod.WindingNumber:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pymomentum.axel.SignMethod.WindingNumber" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.WindingNumberPermissive">
+<span class="sig-name descname"><span class="pre">WindingNumberPermissive</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SignMethod.WindingNumberPermissive:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pymomentum.axel.SignMethod.WindingNumberPermissive" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignMethod" title="pymomentum.axel.SignMethod"><span class="pre">pymomentum.axel.SignMethod</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.SignMethod.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.axel.SignMethod.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.axel.SignMethod.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#pymomentum.axel.SignMethod.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -921,7 +984,7 @@ Only float32 precision is supported from Python.</p>
 <span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">mesh_to_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.axel.mesh_to_sdf" title="Link to this definition"></a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], bounds: pymomentum.axel.BoundingBox, resolution: numpy.ndarray[numpy.int32], config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
+<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], bounds: pymomentum.axel.BoundingBox, resolution: numpy.ndarray[numpy.int32], config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04, sign_method=SignMethod.RayCasting)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
 </ol>
 <p>Convert a triangle mesh to a signed distance field using modern 3-step approach.</p>
 <p>This function creates a high-quality signed distance field from a triangle mesh using:
@@ -975,7 +1038,7 @@ Indices must be valid within the vertices array.</p></li>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], voxel_size: float, padding: pymomentum.axel.MeshToSdfPadding = MeshToSdfPadding(fractional=0.100, absolute=0.000), config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
+<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], voxel_size: float, padding: pymomentum.axel.MeshToSdfPadding = MeshToSdfPadding(fractional=0.100, absolute=0.000), config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04, sign_method=SignMethod.RayCasting)) -&gt; pymomentum.axel.SignedDistanceField</p></li>
 </ol>
 <p>Convert a triangle mesh to a signed distance field with uniform voxel size.</p>
 <p>This convenience function automatically computes the bounding box from the mesh vertices,
@@ -1028,7 +1091,7 @@ Grid dimensions adapt to mesh shape automatically.</p>
 </pre></div>
 </div>
 <ol class="arabic simple" start="3">
-<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], sdf: pymomentum.axel.SignedDistanceField, config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04)) -&gt; None</p></li>
+<li><p>mesh_to_sdf(vertices: numpy.ndarray[numpy.float32], triangles: numpy.ndarray[numpy.int32], sdf: pymomentum.axel.SignedDistanceField, config: pymomentum.axel.MeshToSdfConfig = MeshToSdfConfig(narrow_band_width=1.500, max_distance=0.000, tolerance=1.192093e-04, sign_method=SignMethod.RayCasting)) -&gt; None</p></li>
 </ol>
 <p>Write mesh-to-SDF conversion into a pre-existing signed distance field.</p>
 <p>This in-place overload reuses the existing SDF’s bounds and resolution,
