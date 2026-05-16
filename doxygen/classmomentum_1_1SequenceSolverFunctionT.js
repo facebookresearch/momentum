@@ -10,7 +10,9 @@ var classmomentum_1_1SequenceSolverFunctionT =
     [ "finalizeJacobianComputation", "classmomentum_1_1SequenceSolverFunctionT.html#a54f79b9b4f8d6ed8529f1b1f761ef59d", null ],
     [ "getCharacter", "classmomentum_1_1SequenceSolverFunctionT.html#ac6294f450dea2c3e7a2a7fa52ed4899a", null ],
     [ "getError", "classmomentum_1_1SequenceSolverFunctionT.html#afb27eaba2c667bc772c3846e686ee1ca", null ],
+    [ "getErrorFunctions", "classmomentum_1_1SequenceSolverFunctionT.html#a72abf5773ed07b8fb07fdb0a9b35f2ac", null ],
     [ "getErrorFunctions", "classmomentum_1_1SequenceSolverFunctionT.html#a57a684bc860fc5634126b90652d4fee3", null ],
+    [ "getFrameParameters", "classmomentum_1_1SequenceSolverFunctionT.html#a4dfe42af80c18aa57bc8738571c73ac7", null ],
     [ "getFrameParameters", "classmomentum_1_1SequenceSolverFunctionT.html#a2826cddd269ff2d4dfe7b4b969f05ddc", null ],
     [ "getGradient", "classmomentum_1_1SequenceSolverFunctionT.html#a1d9dbf51d53638b1d8fb5f7dea174770", null ],
     [ "getJacobianBlockCount", "classmomentum_1_1SequenceSolverFunctionT.html#a60676fb7b1bcd3d6b936025f26df4047", null ],
@@ -19,8 +21,11 @@ var classmomentum_1_1SequenceSolverFunctionT =
     [ "getJoinedParameterVectorFromFrameParameters", "classmomentum_1_1SequenceSolverFunctionT.html#a66ca3b5a2a8528206a8e0db0adde2a6a", null ],
     [ "getNumFrames", "classmomentum_1_1SequenceSolverFunctionT.html#a8102fa80527b2600cd81d1a753b69ade", null ],
     [ "getParameterTransform", "classmomentum_1_1SequenceSolverFunctionT.html#ab0744a51812b12559ea49bc4571164f4", null ],
+    [ "getPerFrameParameterIndices", "classmomentum_1_1SequenceSolverFunctionT.html#a33aefc28ce0246431539d22a8b3a89f9", null ],
+    [ "getSequenceErrorFunctions", "classmomentum_1_1SequenceSolverFunctionT.html#ab719f8b856bb5148f31b95f1ff9e716d", null ],
     [ "getSequenceErrorFunctions", "classmomentum_1_1SequenceSolverFunctionT.html#af960cb979953563de4c5d0d5e8f76d41", null ],
     [ "getSkeleton", "classmomentum_1_1SequenceSolverFunctionT.html#a8e6bee7a7e158c6957473c2ae34d2a73", null ],
+    [ "getUniversalParameterIndices", "classmomentum_1_1SequenceSolverFunctionT.html#a01b755e5a8e3e976baa846a9c8cbb1e2", null ],
     [ "getUniversalParameters", "classmomentum_1_1SequenceSolverFunctionT.html#ab79a2f79db44367c9836545a090da916", null ],
     [ "getUniversalParameterSet", "classmomentum_1_1SequenceSolverFunctionT.html#acaed5c805424c2e51e65ff1fe4adda01", null ],
     [ "initializeJacobianComputation", "classmomentum_1_1SequenceSolverFunctionT.html#aeb30acd3561017a1c4001ee9f4fe25db", null ],
@@ -32,5 +37,6 @@ var classmomentum_1_1SequenceSolverFunctionT =
     [ "setFrameParameters", "classmomentum_1_1SequenceSolverFunctionT.html#abc8561afa6a15b2bac839fd59b40033d", null ],
     [ "setJoinedParameterVector", "classmomentum_1_1SequenceSolverFunctionT.html#a5c3560897a67a20305975404698ff366", null ],
     [ "updateParameters", "classmomentum_1_1SequenceSolverFunctionT.html#af3e65cf4a1cf3d756c0888c40ebf8e06", null ],
+    [ "SequenceCholeskySolverT< T >", "classmomentum_1_1SequenceSolverFunctionT.html#a989a4c487ea4bda99f4e686bbd4f32a4", null ],
     [ "SequenceSolverT< T >", "classmomentum_1_1SequenceSolverFunctionT.html#a31ce6fc57d607020d1002d6df1b1fedb", null ]
 ];

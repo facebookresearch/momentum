@@ -15,5 +15,6 @@ var searchData=
   ['buildhierarchicalpaths_12',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
   ['buildjetmat_13',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
   ['buildjetvec_14',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['buildtriangleadjacency_15',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
+  ['buildsequencecolumnindices_15',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
+  ['buildtriangleadjacency_16',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
 ];

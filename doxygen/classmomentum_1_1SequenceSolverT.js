@@ -7,6 +7,5 @@ var classmomentum_1_1SequenceSolverT =
     [ "init", "classmomentum_1_1SequenceSolverT.html#a7334fabb50aa17da3e7b8cc830bff84b", null ],
     [ "initializeSolver", "classmomentum_1_1SequenceSolverT.html#a5673644679b7328685450f77d2d28f63", null ],
     [ "iter", "classmomentum_1_1SequenceSolverT.html#a55c0c9124e91da138bd405a10ec9f3b0", null ],
-    [ "setEnabledParameters", "classmomentum_1_1SequenceSolverT.html#af92cb872ee0f894c95f05cd4ceee2440", null ],
     [ "setOptions", "classmomentum_1_1SequenceSolverT.html#adef5075edc63b6f681cc7792a7b8ee6e", null ]
 ];

@@ -254,7 +254,10 @@ var hierarchy =
       ] ],
       [ "momentum::GradientDescentSolverOptions", "structmomentum_1_1GradientDescentSolverOptions.html", null ],
       [ "momentum::MultiposeSolverOptions", "structmomentum_1_1MultiposeSolverOptions.html", null ],
-      [ "momentum::SequenceSolverOptions", "structmomentum_1_1SequenceSolverOptions.html", null ],
+      [ "momentum::SequenceSolverOptionsBase", "structmomentum_1_1SequenceSolverOptionsBase.html", [
+        [ "momentum::SequenceCholeskySolverOptions", "structmomentum_1_1SequenceCholeskySolverOptions.html", null ],
+        [ "momentum::SequenceSolverOptions", "structmomentum_1_1SequenceSolverOptions.html", null ]
+      ] ],
       [ "momentum::SparseGaussNewtonSolverOptions", "structmomentum_1_1SparseGaussNewtonSolverOptions.html", null ],
       [ "momentum::TrustRegionQROptions", "structmomentum_1_1TrustRegionQROptions.html", null ]
     ] ],
@@ -263,7 +266,10 @@ var hierarchy =
       [ "momentum::GaussNewtonSolverT< T >", "classmomentum_1_1GaussNewtonSolverT.html", null ],
       [ "momentum::GradientDescentSolverT< T >", "classmomentum_1_1GradientDescentSolverT.html", null ],
       [ "momentum::MultiposeSolverT< T >", "classmomentum_1_1MultiposeSolverT.html", null ],
-      [ "momentum::SequenceSolverT< T >", "classmomentum_1_1SequenceSolverT.html", null ],
+      [ "momentum::SequenceSolverBaseT< T >", "classmomentum_1_1SequenceSolverBaseT.html", [
+        [ "momentum::SequenceCholeskySolverT< T >", "classmomentum_1_1SequenceCholeskySolverT.html", null ],
+        [ "momentum::SequenceSolverT< T >", "classmomentum_1_1SequenceSolverT.html", null ]
+      ] ],
       [ "momentum::SparseGaussNewtonSolverT< T >", "classmomentum_1_1SparseGaussNewtonSolverT.html", null ],
       [ "momentum::SubsetGaussNewtonSolverT< T >", "classmomentum_1_1SubsetGaussNewtonSolverT.html", null ],
       [ "momentum::TrustRegionQRT< T >", "classmomentum_1_1TrustRegionQRT.html", null ]

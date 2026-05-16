@@ -157,6 +157,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a34e8d0b886d19a599e6436575d90a500" id="r_a34e8d0b886d19a599e6436575d90a500"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> Generator &gt; </td></tr>
 <tr class="memitem:a34e8d0b886d19a599e6436575d90a500"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html#a34e8d0b886d19a599e6436575d90a500">generateNormal</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">mean</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &amp;sigma, Generator &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">generator</a>)</td></tr>
 <tr class="separator:a34e8d0b886d19a599e6436575d90a500"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6cd5fae2e3400ce7a7ddb13b2c83717" id="r_aa6cd5fae2e3400ce7a7ddb13b2c83717"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ErrorFunctionType</a> &gt; </td></tr>
+<tr class="memitem:aa6cd5fae2e3400ce7a7ddb13b2c83717"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html#aa6cd5fae2e3400ce7a7ddb13b2c83717">computeJacobianSize</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::shared_ptr&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ErrorFunctionType</a> &gt; &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">functions</a>)</td></tr>
+<tr class="separator:aa6cd5fae2e3400ce7a7ddb13b2c83717"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7650c2c01f359691644123a093519eb" id="r_ae7650c2c01f359691644123a093519eb"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </td></tr>
+<tr class="memitem:ae7650c2c01f359691644123a093519eb"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Eigen::Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb">buildSequenceColumnIndices</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">fn</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> bandwidth)</td></tr>
+<tr class="separator:ae7650c2c01f359691644123a093519eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -275,6 +281,62 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ae7650c2c01f359691644123a093519eb" name="ae7650c2c01f359691644123a093519eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7650c2c01f359691644123a093519eb">&#9670;&#160;</a></span>buildSequenceColumnIndices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; Eigen::Index &gt; momentum::detail::buildSequenceColumnIndices </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="classmomentum_1_1SequenceSolverFunctionT.html">SequenceSolverFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; *&#160;</td>
+          <td class="paramname"><em>fn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td>
+          <td class="paramname"><em>bandwidth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__base_8h_source.html#l00035">35</a> of file <a class="el" href="sequence__solver__base_8h_source.html">sequence_solver_base.h</a>.</p>
+
+<p class="reference">References <a class="el" href="bvh__io_8cpp_source.html#l00039">offset</a>.</p>
+
+</div>
+</div>
+<a id="aa6cd5fae2e3400ce7a7ddb13b2c83717" name="aa6cd5fae2e3400ce7a7ddb13b2c83717"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6cd5fae2e3400ce7a7ddb13b2c83717">&#9670;&#160;</a></span>computeJacobianSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ErrorFunctionType</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> momentum::detail::computeJacobianSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; std::shared_ptr&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">ErrorFunctionType</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>functions</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="sequence__solver__base_8h_source.html#l00023">23</a> of file <a class="el" href="sequence__solver__base_8h_source.html">sequence_solver_base.h</a>.</p>
+
+</div>
+</div>
 <a id="a5162b7ceb2183a56cfe8b729e9d8fd9c" name="a5162b7ceb2183a56cfe8b729e9d8fd9c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5162b7ceb2183a56cfe8b729e9d8fd9c">&#9670;&#160;</a></span>generateMatrixNormal()</h2>
 
@@ -675,7 +737,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="namespacemomentum_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue May 12 2026 14:34:51 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 15 2026 23:51:43 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

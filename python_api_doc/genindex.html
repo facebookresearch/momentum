@@ -336,11 +336,23 @@
 </li>
         <li><a href="solver2.html#pymomentum.solver2.SDFCollisionErrorFunction.__init__">(pymomentum.solver2.SDFCollisionErrorFunction method)</a>
 </li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolver.__init__">(pymomentum.solver2.SequenceCholeskySolver method)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions.__init__">(pymomentum.solver2.SequenceCholeskySolverOptions method)</a>
+</li>
         <li><a href="solver2.html#pymomentum.solver2.SequenceErrorFunction.__init__">(pymomentum.solver2.SequenceErrorFunction method)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolver.__init__">(pymomentum.solver2.SequenceSolver method)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverBase.__init__">(pymomentum.solver2.SequenceSolverBase method)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.SequenceSolverFunction.__init__">(pymomentum.solver2.SequenceSolverFunction method)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.__init__">(pymomentum.solver2.SequenceSolverOptions method)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase.__init__">(pymomentum.solver2.SequenceSolverOptionsBase method)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType.__init__">(pymomentum.solver2.SequenceSolverType method)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.SkeletonErrorFunction.__init__">(pymomentum.solver2.SkeletonErrorFunction method)</a>
 </li>
@@ -718,6 +730,12 @@
       <li><a href="torch.html#pymomentum.torch.character.AdvancedInverseParameterTransform.check_if_pose_scale_are_mutually_exclusive">check_if_pose_scale_are_mutually_exclusive() (pymomentum.torch.character.AdvancedInverseParameterTransform method)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.LinearSolverType.Cholesky">Cholesky (pymomentum.solver.LinearSolverType attribute)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType.Cholesky">(pymomentum.solver2.SequenceSolverType attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions.chunk_size">chunk_size (pymomentum.solver2.SequenceCholeskySolverOptions property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.classify_triangles_by_texture">classify_triangles_by_texture() (in module pymomentum.geometry)</a>
 </li>
@@ -775,10 +793,10 @@
 </li>
       <li><a href="axel.html#pymomentum.axel.TriBvh.closest_hit">closest_hit() (pymomentum.axel.TriBvh method)</a>
 </li>
-      <li><a href="axel.html#pymomentum.axel.TriBvh.closest_surface_point">closest_surface_point() (pymomentum.axel.TriBvh method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="axel.html#pymomentum.axel.TriBvh.closest_surface_point">closest_surface_point() (pymomentum.axel.TriBvh method)</a>
+</li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Collision">Collision (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.TrackingConfig.collision_error_weight">collision_error_weight (pymomentum.marker_tracking.TrackingConfig property)</a>
@@ -928,7 +946,7 @@
       <ul>
         <li><a href="solver2.html#pymomentum.solver2.GaussNewtonSolverOptions.do_line_search">(pymomentum.solver2.GaussNewtonSolverOptions property)</a>
 </li>
-        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.do_line_search">(pymomentum.solver2.SequenceSolverOptions property)</a>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase.do_line_search">(pymomentum.solver2.SequenceSolverOptionsBase property)</a>
 </li>
       </ul></li>
       <li><a href="axel.html#pymomentum.axel.dual_contouring">dual_contouring() (in module pymomentum.axel)</a>
@@ -1401,6 +1419,10 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolver.last_linear_solve_time_ms">last_linear_solve_time_ms (pymomentum.solver2.SequenceCholeskySolver property)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolver.last_normal_equation_time_ms">last_normal_equation_time_ms (pymomentum.solver2.SequenceCholeskySolver property)</a>
+</li>
       <li><a href="backend.html#pymomentum.backend.utils.LBSAdapter">LBSAdapter (class in pymomentum.backend.utils)</a>
 </li>
       <li><a href="renderer.html#pymomentum.renderer.HorizontalAlignment.Left">Left (pymomentum.renderer.HorizontalAlignment attribute)</a>
@@ -1481,10 +1503,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.load_gltf_with_motion">load_gltf_with_motion() (pymomentum.geometry.Character static method)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.Character.load_gltf_with_motion_from_bytes">load_gltf_with_motion_from_bytes() (pymomentum.geometry.Character static method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.Character.load_gltf_with_motion_from_bytes">load_gltf_with_motion_from_bytes() (pymomentum.geometry.Character static method)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales">load_gltf_with_motion_model_parameter_scales() (pymomentum.geometry.Character static method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.load_gltf_with_motion_model_parameter_scales_from_bytes">load_gltf_with_motion_model_parameter_scales_from_bytes() (pymomentum.geometry.Character static method)</a>
@@ -1770,7 +1792,7 @@
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.multiply_backprop_assume_normalized">multiply_backprop_assume_normalized() (in module pymomentum.quaternion)</a>
 </li>
-      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.multithreaded">multithreaded (pymomentum.solver2.SequenceSolverOptions property)</a>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase.multithreaded">multithreaded (pymomentum.solver2.SequenceSolverOptionsBase property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1844,6 +1866,8 @@
         <li><a href="solver2.html#pymomentum.solver2.JointToJointPositionData.name">(pymomentum.solver2.JointToJointPositionData property)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.RotationErrorType.name">(pymomentum.solver2.RotationErrorType property)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType.name">(pymomentum.solver2.SequenceSolverType property)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.name">(pymomentum.solver2.VertexConstraintType property)</a>
 </li>
@@ -2112,7 +2136,7 @@
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.process_markers">process_markers() (in module pymomentum.marker_tracking)</a>
 </li>
-      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.progress_bar">progress_bar (pymomentum.solver2.SequenceSolverOptions property)</a>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase.progress_bar">progress_bar (pymomentum.solver2.SequenceSolverOptionsBase property)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Projection">Projection (pymomentum.solver.ErrorFunctionType attribute)</a>
 </li>
@@ -2254,7 +2278,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.LinearSolverType.QR">QR (pymomentum.solver.LinearSolverType attribute)</a>
+
+      <ul>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType.QR">(pymomentum.solver2.SequenceSolverType attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="quaternion.html#pymomentum.quaternion.quaternion_to_xyz_euler">quaternion_to_xyz_euler() (in module pymomentum.quaternion)</a>
@@ -2350,7 +2378,7 @@
       <ul>
         <li><a href="solver2.html#pymomentum.solver2.GaussNewtonSolverOptions.regularization">(pymomentum.solver2.GaussNewtonSolverOptions property)</a>
 </li>
-        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions.regularization">(pymomentum.solver2.SequenceSolverOptions property)</a>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase.regularization">(pymomentum.solver2.SequenceSolverOptionsBase property)</a>
 </li>
       </ul></li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.RefineConfig.regularizer">regularizer (pymomentum.marker_tracking.RefineConfig property)</a>
@@ -2465,11 +2493,23 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mesh.self_intersections">self_intersections() (pymomentum.geometry.Mesh method)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolver">SequenceCholeskySolver (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions">SequenceCholeskySolverOptions (class in pymomentum.solver2)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.SequenceErrorFunction">SequenceErrorFunction (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolver">SequenceSolver (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverBase">SequenceSolverBase (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.SequenceSolverFunction">SequenceSolverFunction (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptions">SequenceSolverOptions (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverOptionsBase">SequenceSolverOptionsBase (class in pymomentum.solver2)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType">SequenceSolverType (class in pymomentum.solver2)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.set_camera_intrinsics">set_camera_intrinsics() (in module pymomentum.solver2)</a>
 </li>
@@ -2525,14 +2565,14 @@
 </li>
       <li><a href="axel.html#pymomentum.axel.SignedDistanceField">SignedDistanceField (class in pymomentum.axel)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.Character.simplify">simplify() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.simplify_parameter_transform">simplify_parameter_transform() (pymomentum.geometry.Character method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.simplify_skeleton">simplify_skeleton() (pymomentum.geometry.Character method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.ParameterTransform.size">size (pymomentum.geometry.ParameterTransform property)</a>
 
       <ul>
@@ -2713,6 +2753,8 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexProjectionConstraint.target_position">target_position (pymomentum.solver2.VertexProjectionConstraint property)</a>
 </li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions.target_rows_per_jtj_chunk">target_rows_per_jtj_chunk (pymomentum.solver2.SequenceCholeskySolverOptions property)</a>
+</li>
       <li><a href="solver2.html#pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction.target_speeds">target_speeds (pymomentum.solver2.VelocityMagnitudeSequenceErrorFunction property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexVelocityConstraint.target_velocity">target_velocity (pymomentum.solver2.VertexVelocityConstraint property)</a>
@@ -2739,6 +2781,8 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Mppca.to_arrays">to_arrays() (pymomentum.geometry.Mppca method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.BlendShape.to_bytes">to_bytes() (pymomentum.geometry.BlendShape method)</a>
 
       <ul>
@@ -2747,8 +2791,6 @@
         <li><a href="geometry.html#pymomentum.geometry.GltfBuilder.to_bytes">(pymomentum.geometry.GltfBuilder method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.SkinWeights.to_dense">to_dense() (pymomentum.geometry.SkinWeights method)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.to_gltf">to_gltf() (pymomentum.geometry.Character static method)</a>
@@ -2837,14 +2879,14 @@
 </li>
       <li><a href="backend.html#pymomentum.backend.skel_state_backend.unpose_from_momentum_global_joint_state">unpose_from_momentum_global_joint_state() (in module pymomentum.backend.skel_state_backend)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver2.html#pymomentum.solver2.FloorErrorFunction.up_direction">up_direction (pymomentum.solver2.FloorErrorFunction property)</a>
 
       <ul>
         <li><a href="solver2.html#pymomentum.solver2.HeightErrorFunction.up_direction">(pymomentum.solver2.HeightErrorFunction property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="geometry.html#pymomentum.geometry.FbxCoordSystemInfo.up_vector">up_vector (pymomentum.geometry.FbxCoordSystemInfo property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.upper_body_joints">upper_body_joints (pymomentum.geometry.Skeleton property)</a>
@@ -2852,6 +2894,10 @@
       <li><a href="geometry.html#pymomentum.geometry.UpVector">UpVector (class in pymomentum.geometry)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.GaussNewtonSolverOptions.use_block_jtj">use_block_jtj (pymomentum.solver2.GaussNewtonSolverOptions property)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions.use_block_ldlt">use_block_ldlt (pymomentum.solver2.SequenceCholeskySolverOptions property)</a>
+</li>
+      <li><a href="solver2.html#pymomentum.solver2.SequenceCholeskySolverOptions.use_double_precision_normal_equations">use_double_precision_normal_equations (pymomentum.solver2.SequenceCholeskySolverOptions property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2895,6 +2941,8 @@
         <li><a href="solver.html#pymomentum.solver.LinearSolverType.value">(pymomentum.solver.LinearSolverType property)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.RotationErrorType.value">(pymomentum.solver2.RotationErrorType property)</a>
+</li>
+        <li><a href="solver2.html#pymomentum.solver2.SequenceSolverType.value">(pymomentum.solver2.SequenceSolverType property)</a>
 </li>
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.value">(pymomentum.solver2.VertexConstraintType property)</a>
 </li>

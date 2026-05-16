@@ -7,6 +7,8 @@ var namespacemomentum_1_1detail =
     [ "NormalRealDist", "namespacemomentum_1_1detail.html#af9bd563f394dfe6016dabb951216fa5c", null ],
     [ "UniformIntDist", "namespacemomentum_1_1detail.html#a4f1c4a608df6f9aedf0e8a6f30ae6232", null ],
     [ "UniformRealDist", "namespacemomentum_1_1detail.html#a12ad533d024ac999b0aa5db48090d5f3", null ],
+    [ "buildSequenceColumnIndices", "namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb", null ],
+    [ "computeJacobianSize", "namespacemomentum_1_1detail.html#aa6cd5fae2e3400ce7a7ddb13b2c83717", null ],
     [ "generateMatrixNormal", "namespacemomentum_1_1detail.html#a5162b7ceb2183a56cfe8b729e9d8fd9c", null ],
     [ "generateMatrixUniform", "namespacemomentum_1_1detail.html#a2edce8395e097d1f477a274968094d6d", null ],
     [ "generateNormal", "namespacemomentum_1_1detail.html#a34e8d0b886d19a599e6436575d90a500", null ],
