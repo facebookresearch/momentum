@@ -14,6 +14,7 @@
 #include <momentum/math/transform.h>
 #include <momentum/math/utility.h>
 
+#include <axel/BoundingBox.h>
 #include <axel/SignedDistanceField.h>
 
 #include <memory>
@@ -75,6 +76,48 @@ struct SDFColliderT {
   [[nodiscard]] bool isValid() const {
     return sdf != nullptr;
   }
+
+  /// @name Duck-typed collider interface
+  ///
+  /// These methods adapt SDFColliderT to the generic collider interface used by
+  /// SDFCollisionErrorFunctionT, enabling it to be used interchangeably with other
+  /// collider types (e.g., learned SDF runtimes).
+  /// @{
+
+  /// Evaluate the SDF distance at a local-frame position.
+  template <typename T>
+  [[nodiscard]] T evaluate(const Eigen::Vector3<T>& localPos) const {
+    return static_cast<T>(sdf->sample(localPos));
+  }
+
+  /// Evaluate the SDF distance and gradient at a local-frame position.
+  template <typename T>
+  [[nodiscard]] std::pair<T, Eigen::Vector3<T>> evaluateWithGradient(
+      const Eigen::Vector3<T>& localPos) const {
+    const auto [d, g] = sdf->sampleWithGradient(localPos);
+    return {static_cast<T>(d), g.template cast<T>()};
+  }
+
+  /// Bounding box of the SDF in local frame.
+  [[nodiscard]] axel::BoundingBox<S> bounds() const {
+    return sdf->bounds();
+  }
+
+  /// Parent joint index in the skeleton.
+  [[nodiscard]] size_t parentJoint() const {
+    return parent;
+  }
+
+  /// Transform from SDF local frame to parent joint frame.
+  [[nodiscard]] TransformT<S> localToParentTransform() const {
+    return transformation;
+  }
+
+  /// Per-iteration update (no-op for voxel SDFs).
+  template <typename T>
+  void update(const Eigen::VectorX<T>&) {}
+
+  /// @}
 };
 
 /// Collection of SDF colliders representing a character's collision geometry.

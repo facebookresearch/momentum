@@ -7,14 +7,28 @@
 
 #pragma once
 
+#include <momentum/character/character.h>
+#include <momentum/character/mesh_state.h>
 #include <momentum/character/sdf_collision_geometry.h>
+#include <momentum/character/skeleton.h>
+#include <momentum/character/skeleton_state.h>
+#include <momentum/character/skin_weights.h>
+#include <momentum/character_solver/error_function_utils.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
+#include <momentum/character_solver/skinning_weight_iterator.h>
+#include <momentum/common/checks.h>
+#include <momentum/common/profile.h>
 #include <momentum/math/fwd.h>
+#include <momentum/math/mesh.h>
+#include <momentum/math/utility.h>
 
 #include <axel/BoundingBox.h>
 
+#include <algorithm>
+#include <map>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 namespace momentum {
@@ -50,11 +64,15 @@ struct BoneCollisionPairT {
 /// vertices are grouped by their primary bone index to improve cache locality and
 /// reduce memory usage.
 ///
-/// Key features:
-/// - Configurable vertex selection for performance with high-resolution meshes
-/// - Bone-based collision filtering to exclude rest pose intersections
-/// - Efficient contiguous memory organization for cache-friendly processing
-template <typename T>
+/// The SdfColliderType must provide the following duck-typed interface:
+/// - `T evaluate(const Vector3<T>& localPos) const` — signed distance
+/// - `pair<T, Vector3<T>> evaluateWithGradient(const Vector3<T>& localPos) const`
+/// - `BoundingBox<S> bounds() const` — local-frame AABB
+/// - `size_t parentJoint() const` — parent joint index
+/// - `TransformT<S> localToParentTransform() const` — local-to-parent transform
+/// - `void update(const VectorX<T>& modelParams)` — per-iteration update
+/// - `bool isValid() const` — whether the collider is usable
+template <typename T, typename SdfColliderType = SDFColliderT<float>>
 class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
  public:
   /// Constructor with vertex index list and uniform weights.
@@ -65,48 +83,25 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// @param vertexWeights Per-vertex collision weights (empty means uniform weight of 1.0)
   explicit SDFCollisionErrorFunctionT(
       const Character& character,
-      const SDFCollisionGeometry& sdfColliders,
+      const std::vector<SdfColliderType>& sdfColliders,
       const std::vector<int>& participatingVertices = {},
       const std::vector<T>& vertexWeights = {},
       bool filterRestPoseIntersections = true,
       uint8_t maxCollisionsPerVertex = 1);
 
-  /// Destructor
   ~SDFCollisionErrorFunctionT() override = default;
 
-  /// Computes the collision error for the given model parameters and skeleton state.
-  ///
-  /// @param params The model parameters
-  /// @param state The skeleton state
-  /// @param meshState The mesh state containing posed mesh for collision testing
-  /// @return The collision error value
   [[nodiscard]] double getError(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState) override;
 
-  /// Computes the collision error and its gradient.
-  ///
-  /// @param params The model parameters
-  /// @param state The skeleton state
-  /// @param meshState The mesh state containing posed mesh for collision testing
-  /// @param gradient Output gradient vector
-  /// @return The collision error value
   double getGradient(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
       const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) override;
 
-  /// Computes the collision error Jacobian and residual.
-  ///
-  /// @param params The model parameters
-  /// @param state The skeleton state
-  /// @param meshState The mesh state containing posed mesh for collision testing
-  /// @param jacobian Output Jacobian matrix
-  /// @param residual Output residual vector
-  /// @param usedRows Number of rows actually used in jacobian and residual
-  /// @return The collision error value
   double getJacobian(
       const ModelParametersT<T>& params,
       const SkeletonStateT<T>& state,
@@ -115,131 +110,52 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       Eigen::Ref<Eigen::VectorX<T>> residual,
       int& usedRows) override;
 
-  /// Returns the maximum number of Jacobian rows needed.
   [[nodiscard]] size_t getJacobianSize() const override;
 
-  /// Returns true because this error function requires mesh state.
   [[nodiscard]] bool needsMesh() const override {
     return true;
   }
 
-  /// Returns the number of active vertices participating in collisions.
   [[nodiscard]] size_t getNumActiveVertices() const {
     return activeVertexIndices_.size();
   }
 
-  /// Returns the number of bone-collider pairs being tested.
   [[nodiscard]] size_t getNumCollisionPairs() const {
     return boneCollisionPairs_.size();
   }
 
-  /// Weight constant for SDF collision penalties.
   static constexpr T kSDFCollisionWeight = T(5e-3);
 
  private:
-  /// Organizes vertices by bone in contiguous arrays for efficient processing.
-  ///
-  /// @param participatingVertices Vertex indices to include
-  /// @param weights Per-vertex weights
   void organizeVerticesByBone(
       const std::vector<int>& participatingVertices,
       const std::vector<T>& weights);
 
-  /// Organizes vertices by bone from vertex-weight pairs.
-  ///
-  /// @param vertexWeightPairs Vector of (vertex_index, weight) pairs
   void organizeVerticesByBone(const std::vector<std::pair<int, T>>& vertexWeightPairs);
 
-  /// Initializes bone-collider pairs and tests rest pose intersections.
   void initializeBoneCollisionPairs(bool filterRestPoseIntersections);
 
-  /// Tests if any vertex for a bone intersects the SDF in rest pose.
-  ///
-  /// @param boneIndex The bone index to test
-  /// @param sdfColliderIndex The SDF collider index to test
-  /// @param restState The rest pose skeleton state
-  /// @return True if any vertex penetrates the SDF in rest pose
   [[nodiscard]] bool testRestPoseIntersection(
       size_t boneIndex,
       size_t sdfColliderIndex,
       const SkeletonStateT<T>& restState) const;
 
-  /// Updates which collision pairs are currently active.
-  ///
-  /// @param meshState The mesh state for bounding box computation
-  /// @param state The current skeleton state
   void computeActivePairs(const MeshStateT<T>& meshState, const SkeletonStateT<T>& state);
 
-  /// Samples the SDF distance at a world position.
-  ///
-  /// @param worldPos The world position to sample
-  /// @param sdfColliderIndex The SDF collider index
-  /// @param state The skeleton state
-  /// @return The signed distance (negative = inside)
-  [[nodiscard]] T sampleSDFDistance(
-      const Eigen::Vector3<T>& worldPos,
+  void updateColliders(const ModelParametersT<T>& params);
+
+  [[nodiscard]] TransformT<T> computeWorldToColliderTransform(
       size_t sdfColliderIndex,
       const SkeletonStateT<T>& state) const;
 
-  /// Samples the SDF distance using a pre-computed world-to-SDF transform.
-  /// This is more efficient when sampling multiple points against the same SDF.
-  ///
-  /// @param worldPos The world position to sample
-  /// @param sdfCollider The SDF collider reference
-  /// @param worldToSdfTransform Pre-computed inverse of the SDF world transform
-  /// @return The signed distance (negative = inside)
-  [[nodiscard]] T sampleSDFDistanceWithTransform(
-      const Eigen::Vector3<T>& worldPos,
-      const SDFCollider& sdfCollider,
-      const TransformT<T>& worldToSdfTransform) const;
-
-  /// Computes the world-to-SDF transform for efficient multiple sampling.
-  ///
-  /// @param sdfColliderIndex The SDF collider index
-  /// @param state The skeleton state
-  /// @return Transform from world space to SDF local space
-  [[nodiscard]] TransformT<T> computeWorldToSDFTransform(
-      size_t sdfColliderIndex,
-      const SkeletonStateT<T>& state) const;
-
-  /// Computes both SDF distance and gradient using a pre-computed transform.
-  /// Most efficient method for collision gradient computation.
-  ///
-  /// @param worldPos The world position to sample
-  /// @param sdfCollider The SDF collider reference
-  /// @param worldToSdfTransform Pre-computed inverse of the SDF world transform
-  /// @return Pair of (distance, gradient) in world space
-  [[nodiscard]] std::pair<T, Eigen::Vector3<T>> sampleSDFDistanceAndGradientWithTransform(
-      const Eigen::Vector3<T>& worldPos,
-      const SDFCollider& sdfCollider,
-      const TransformT<T>& worldToSdfTransform) const;
-
-  /// Computes the axis-aligned bounding box for all vertices associated with a bone.
-  ///
-  /// @param boneIndex The bone index
-  /// @param posedMesh The posed mesh for vertex positions
-  /// @return Bounding box containing all vertices for the bone
   [[nodiscard]] axel::BoundingBox<T> computeBoneBoundingBox(
       size_t boneIndex,
       const MeshT<T>& posedMesh) const;
 
-  /// Computes the world-space bounding box for an SDF collider.
-  ///
-  /// @param sdfColliderIndex The SDF collider index
-  /// @param state The skeleton state for transformation
-  /// @return World-space bounding box of the SDF collider
-  [[nodiscard]] axel::BoundingBox<T> computeSDFWorldBoundingBox(
+  [[nodiscard]] axel::BoundingBox<T> computeColliderWorldBoundingBox(
       size_t sdfColliderIndex,
       const SkeletonStateT<T>& state) const;
 
-  /// Accumulates gradient contributions for a single joint's 7 parameters
-  /// (3 translation + 3 rotation + 1 scale).
-  ///
-  /// @param jointState The joint state for the current joint
-  /// @param paramIndex The parameter index (jointIndex * kParametersPerJoint)
-  /// @param posd The lever arm (displacement from joint to the relevant point)
-  /// @param direction The weighted direction vector (includes sign and weight)
-  /// @param gradient Output gradient vector to accumulate into
   void accumulateJointGradient(
       const JointStateT<T>& jointState,
       size_t paramIndex,
@@ -247,14 +163,6 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& direction,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
-  /// Accumulates jacobian contributions for a single joint's 7 parameters
-  /// (3 translation + 3 rotation + 1 scale).
-  ///
-  /// @param jointState The joint state for the current joint
-  /// @param paramIndex The parameter index (jointIndex * kParametersPerJoint)
-  /// @param posd The lever arm (displacement from joint to the relevant point)
-  /// @param direction The weighted direction vector (includes sign and weight)
-  /// @param jacobianRow Output jacobian row to accumulate into
   void accumulateJointJacobian(
       const JointStateT<T>& jointState,
       size_t paramIndex,
@@ -262,15 +170,6 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& direction,
       Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const;
 
-  /// Walks up the collider hierarchy from colliderParent to commonAncestor,
-  /// accumulating gradient contributions at each joint.
-  ///
-  /// @param state The skeleton state
-  /// @param colliderParent The starting joint (SDF collider's parent)
-  /// @param commonAncestor The joint to stop at (exclusive)
-  /// @param sdfSurfacePoint The closest point on the SDF surface (lever arm)
-  /// @param direction The weighted direction vector (includes sign and weight)
-  /// @param gradient Output gradient vector to accumulate into
   void accumulateColliderHierarchyGradient(
       const SkeletonStateT<T>& state,
       size_t colliderParent,
@@ -279,15 +178,6 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& direction,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
-  /// Walks up the collider hierarchy from colliderParent to commonAncestor,
-  /// accumulating jacobian contributions at each joint.
-  ///
-  /// @param state The skeleton state
-  /// @param colliderParent The starting joint (SDF collider's parent)
-  /// @param commonAncestor The joint to stop at (exclusive)
-  /// @param sdfSurfacePoint The closest point on the SDF surface (lever arm)
-  /// @param direction The weighted direction vector (includes sign and weight)
-  /// @param jacobianRow Output jacobian row to accumulate into
   void accumulateColliderHierarchyJacobian(
       const SkeletonStateT<T>& state,
       size_t colliderParent,
@@ -296,28 +186,696 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Eigen::Vector3<T>& direction,
       Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const;
 
-  const Character& character_; ///< Reference to the character
-  SDFCollisionGeometry sdfColliders_; ///< Owned copy of SDF colliders
+  const Character& character_;
+  std::vector<SdfColliderType> sdfColliders_;
 
-  // Contiguous vertex organization for efficient processing
-  std::vector<size_t> activeVertexIndices_; ///< All active vertex indices
-  std::vector<BoneVertexRange> boneVertexRanges_; ///< [start, end) ranges per bone
-  std::vector<T> vertexWeights_; ///< Collision weights per vertex
+  std::vector<size_t> activeVertexIndices_;
+  std::vector<BoneVertexRange> boneVertexRanges_;
+  std::vector<T> vertexWeights_;
 
-  // Bone-collider pair filtering
-  std::vector<BoneCollisionPairT<T>> boneCollisionPairs_; ///< All bone-collider pairs
+  std::vector<BoneCollisionPairT<T>> boneCollisionPairs_;
 
-  uint8_t maxCollisionsPerVertex_ = 1; ///< Maximum number of collisions per vertex
+  uint8_t maxCollisionsPerVertex_ = 1;
 
-  // Reusable buffers to avoid repeated heap allocations during optimization
-  std::vector<bool> activePairs_; ///< Active collision pairs from broad-phase
-  std::vector<uint8_t> collisionCounts_; ///< Per-vertex collision counts
-  std::vector<axel::BoundingBox<T>> boneBBoxCache_; ///< Cached bone bounding boxes
-  std::vector<bool> boneBBoxValid_; ///< Whether each bone bbox is valid
-  std::vector<axel::BoundingBox<T>> sdfBBoxCache_; ///< Cached SDF bounding boxes
+  std::vector<bool> activePairs_;
+  std::vector<uint8_t> collisionCounts_;
+  std::vector<axel::BoundingBox<T>> boneBBoxCache_;
+  std::vector<bool> boneBBoxValid_;
+  std::vector<axel::BoundingBox<T>> sdfBBoxCache_;
 };
 
 using SDFCollisionErrorFunction = SDFCollisionErrorFunctionT<float>;
 using SDFCollisionErrorFunctiond = SDFCollisionErrorFunctionT<double>;
+
+// ============================================================================
+// Template implementation
+// ============================================================================
+
+namespace detail_sdf_collision {
+
+inline size_t findCommonAncestorForVertex(
+    const SkinWeights& skinWeights,
+    const Skeleton& skeleton,
+    size_t vertexIndex,
+    size_t sdfParent) {
+  if (sdfParent == kInvalidIndex) {
+    return kInvalidIndex;
+  }
+  size_t minSkinnedJoint = kInvalidIndex;
+  for (uint32_t k = 0; k < kMaxSkinJoints; ++k) {
+    const auto w = skinWeights.weight(vertexIndex, k);
+    if (w > 0) {
+      const auto joint = skinWeights.index(vertexIndex, k);
+      if (minSkinnedJoint == kInvalidIndex || joint < minSkinnedJoint) {
+        minSkinnedJoint = joint;
+      }
+    }
+  }
+  if (minSkinnedJoint == kInvalidIndex) {
+    return kInvalidIndex;
+  }
+  return skeleton.commonAncestor(minSkinnedJoint, sdfParent);
+}
+
+} // namespace detail_sdf_collision
+
+template <typename T, typename SdfColliderType>
+SDFCollisionErrorFunctionT<T, SdfColliderType>::SDFCollisionErrorFunctionT(
+    const Character& character,
+    const std::vector<SdfColliderType>& sdfColliders,
+    const std::vector<int>& participatingVertices,
+    const std::vector<T>& vertexWeights,
+    bool filterRestPoseIntersections,
+    uint8_t maxCollisionsPerVertex)
+    : SkeletonErrorFunctionT<T>(character.skeleton, character.parameterTransform),
+      character_(character),
+      sdfColliders_(sdfColliders),
+      maxCollisionsPerVertex_(maxCollisionsPerVertex) {
+  MT_CHECK_NOTNULL(character_.mesh, "Character must have a mesh for SDF collision detection");
+  MT_CHECK_NOTNULL(
+      character_.skinWeights, "Character must have skin weights for SDF collision detection");
+  MT_CHECK(!sdfColliders_.empty(), "Must provide at least one SDF collider");
+  MT_CHECK(maxCollisionsPerVertex_ > 0, "maxCollisionsPerVertex must be positive");
+  MT_CHECK(maxCollisionsPerVertex_ <= 255, "maxCollisionsPerVertex must be <= 255");
+  organizeVerticesByBone(participatingVertices, vertexWeights);
+  initializeBoneCollisionPairs(filterRestPoseIntersections);
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::organizeVerticesByBone(
+    const std::vector<int>& participatingVertices,
+    const std::vector<T>& weights) {
+  std::vector<int> vertices;
+  if (participatingVertices.empty()) {
+    vertices.reserve(character_.mesh->vertices.size());
+    for (int i = 0; i < static_cast<int>(character_.mesh->vertices.size()); ++i) {
+      vertices.push_back(i);
+    }
+  } else {
+    vertices = participatingVertices;
+  }
+
+  for (int vertexIndex : vertices) {
+    MT_CHECK(
+        vertexIndex >= 0 && vertexIndex < static_cast<int>(character_.mesh->vertices.size()),
+        "Invalid vertex index: {} (mesh has {} vertices)",
+        vertexIndex,
+        character_.mesh->vertices.size());
+  }
+
+  std::vector<T> vertexWeights;
+  if (weights.empty()) {
+    vertexWeights.assign(vertices.size(), T(1));
+  } else {
+    MT_CHECK(
+        weights.size() == vertices.size(),
+        "Weight count ({}) must match vertex count ({})",
+        weights.size(),
+        vertices.size());
+    vertexWeights = weights;
+  }
+
+  struct VertexInfo {
+    size_t vertexIndex;
+    T weight;
+    size_t primaryBone;
+  };
+
+  std::vector<VertexInfo> vertexInfos;
+  vertexInfos.reserve(vertices.size());
+
+  MT_CHECK_NOTNULL(character_.skinWeights);
+  const auto& skinWeights = *character_.skinWeights;
+
+  for (size_t i = 0; i < vertices.size(); ++i) {
+    const int vertexIndex = vertices[i];
+    const T weight = vertexWeights[i];
+    const size_t primaryBone = skinWeights.index(vertexIndex, 0);
+    MT_CHECK(primaryBone < character_.skeleton.joints.size());
+    vertexInfos.push_back({static_cast<size_t>(vertexIndex), weight, primaryBone});
+  }
+
+  std::sort(vertexInfos.begin(), vertexInfos.end(), [](const VertexInfo& a, const VertexInfo& b) {
+    return a.primaryBone < b.primaryBone;
+  });
+
+  boneVertexRanges_.resize(character_.skeleton.joints.size());
+  activeVertexIndices_.reserve(vertices.size());
+  vertexWeights_.reserve(vertices.size());
+
+  size_t currentBone = 0;
+  for (size_t i = 0; i < vertexInfos.size(); ++i) {
+    const auto& info = vertexInfos[i];
+    while (currentBone < info.primaryBone) {
+      boneVertexRanges_[currentBone].end = i;
+      ++currentBone;
+      boneVertexRanges_[currentBone].start = i;
+    }
+    activeVertexIndices_.push_back(info.vertexIndex);
+    vertexWeights_.push_back(info.weight);
+  }
+
+  boneVertexRanges_[currentBone].end = activeVertexIndices_.size();
+  ++currentBone;
+  while (currentBone < boneVertexRanges_.size()) {
+    boneVertexRanges_[currentBone++] =
+        BoneVertexRange{activeVertexIndices_.size(), activeVertexIndices_.size()};
+  }
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::initializeBoneCollisionPairs(
+    bool filterRestPoseIntersections) {
+  std::unordered_set<size_t> activeBones;
+  for (size_t boneIndex = 0; boneIndex < boneVertexRanges_.size(); ++boneIndex) {
+    if (!boneVertexRanges_[boneIndex].empty()) {
+      activeBones.insert(boneIndex);
+    }
+  }
+
+  const SkeletonStateT<T> restState(
+      this->parameterTransform_.zero().template cast<T>(), this->skeleton_);
+  const ModelParametersT<T> restParams =
+      ModelParametersT<T>::Zero(this->parameterTransform_.numAllModelParameters());
+  updateColliders(restParams);
+
+  boneCollisionPairs_.clear();
+  boneCollisionPairs_.reserve(activeBones.size() * sdfColliders_.size());
+
+  for (size_t boneIndex : activeBones) {
+    if (boneVertexRanges_[boneIndex].empty()) {
+      continue;
+    }
+    for (size_t sdfIndex = 0; sdfIndex < sdfColliders_.size(); ++sdfIndex) {
+      const auto& collider = sdfColliders_[sdfIndex];
+      if (collider.parentJoint() != kInvalidIndex && filterRestPoseIntersections &&
+          testRestPoseIntersection(boneIndex, sdfIndex, restState)) {
+        continue;
+      }
+      boneCollisionPairs_.emplace_back(BoneCollisionPairT<T>{boneIndex, sdfIndex});
+    }
+  }
+}
+
+template <typename T, typename SdfColliderType>
+bool SDFCollisionErrorFunctionT<T, SdfColliderType>::testRestPoseIntersection(
+    size_t boneIndex,
+    size_t sdfColliderIndex,
+    const SkeletonStateT<T>& restState) const {
+  const auto& range = boneVertexRanges_[boneIndex];
+  if (range.empty()) {
+    return false;
+  }
+
+  const auto& collider = sdfColliders_[sdfColliderIndex];
+  if (!collider.isValid()) {
+    return false;
+  }
+
+  const auto worldToCollider = computeWorldToColliderTransform(sdfColliderIndex, restState);
+
+  for (size_t i = range.start; i < range.end; ++i) {
+    const size_t vertexIndex = activeVertexIndices_[i];
+    const auto& restPos = character_.mesh->vertices[vertexIndex].template cast<T>();
+    const Vector3<T> localPos = worldToCollider * restPos;
+    const T distance = collider.evaluate(localPos);
+    if (distance < T(0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::updateColliders(
+    const ModelParametersT<T>& params) {
+  for (auto& collider : sdfColliders_) {
+    collider.update(params.v);
+  }
+}
+
+template <typename T, typename SdfColliderType>
+TransformT<T> SDFCollisionErrorFunctionT<T, SdfColliderType>::computeWorldToColliderTransform(
+    size_t sdfColliderIndex,
+    const SkeletonStateT<T>& state) const {
+  const auto& collider = sdfColliders_[sdfColliderIndex];
+  TransformT<T> parentTransform;
+  const auto parentJoint = collider.parentJoint();
+  if (parentJoint != kInvalidIndex) {
+    MT_CHECK(parentJoint < state.jointState.size(), "Invalid parent joint index: {}", parentJoint);
+    parentTransform = state.jointState[parentJoint].transform;
+  }
+  auto colliderWorldTransform =
+      parentTransform * collider.localToParentTransform().template cast<T>();
+  return colliderWorldTransform.inverse();
+}
+
+template <typename T, typename SdfColliderType>
+double SDFCollisionErrorFunctionT<T, SdfColliderType>::getError(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState) {
+  MT_PROFILE_FUNCTION();
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+  updateColliders(params);
+  computeActivePairs(meshState, state);
+
+  double totalError = 0.0;
+  collisionCounts_.assign(activeVertexIndices_.size(), 0);
+
+  for (size_t pairIndex = 0; pairIndex < boneCollisionPairs_.size(); ++pairIndex) {
+    if (!activePairs_[pairIndex]) {
+      continue;
+    }
+    const auto& pair = boneCollisionPairs_[pairIndex];
+    const auto& range = boneVertexRanges_[pair.boneIndex];
+    if (range.empty()) {
+      continue;
+    }
+    const auto& collider = sdfColliders_[pair.sdfColliderIndex];
+    if (!collider.isValid()) {
+      continue;
+    }
+    const auto worldToCollider = computeWorldToColliderTransform(pair.sdfColliderIndex, state);
+
+    for (size_t i = range.start; i < range.end; ++i) {
+      if (collisionCounts_[i] >= maxCollisionsPerVertex_) {
+        continue;
+      }
+      const size_t vertexIndex = activeVertexIndices_[i];
+      const T vertexWeight = vertexWeights_[i];
+      const auto& worldPos = meshState.posedMesh_->vertices[vertexIndex];
+      const Vector3<T> localPos = worldToCollider * worldPos;
+      const T distance = collider.evaluate(localPos);
+
+      if (distance < T(0)) {
+        collisionCounts_[i]++;
+        const T penetrationDepth = -distance;
+        totalError += static_cast<double>(
+            vertexWeight * penetrationDepth * penetrationDepth * kSDFCollisionWeight *
+            this->weight_);
+      }
+    }
+  }
+  return totalError;
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateJointGradient(
+    const JointStateT<T>& jointState,
+    size_t paramIndex,
+    const Eigen::Vector3<T>& posd,
+    const Eigen::Vector3<T>& direction,
+    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
+  for (size_t d = 0; d < 3; d++) {
+    if (this->activeJointParams_[paramIndex + d]) {
+      gradient_jointParams_to_modelParams(
+          direction.dot(jointState.getTranslationDerivative(d)),
+          paramIndex + d,
+          this->parameterTransform_,
+          gradient);
+    }
+    if (this->activeJointParams_[paramIndex + 3 + d]) {
+      gradient_jointParams_to_modelParams(
+          direction.dot(jointState.getRotationDerivative(d, posd)),
+          paramIndex + 3 + d,
+          this->parameterTransform_,
+          gradient);
+    }
+  }
+  if (this->activeJointParams_[paramIndex + 6]) {
+    gradient_jointParams_to_modelParams(
+        direction.dot(jointState.getScaleDerivative(posd)),
+        paramIndex + 6,
+        this->parameterTransform_,
+        gradient);
+  }
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateJointJacobian(
+    const JointStateT<T>& jointState,
+    size_t paramIndex,
+    const Eigen::Vector3<T>& posd,
+    const Eigen::Vector3<T>& direction,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const {
+  for (size_t d = 0; d < 3; d++) {
+    if (this->activeJointParams_[paramIndex + d]) {
+      jacobian_jointParams_to_modelParams<T>(
+          direction.dot(jointState.getTranslationDerivative(d)),
+          paramIndex + d,
+          this->parameterTransform_,
+          jacobianRow);
+    }
+    if (this->activeJointParams_[paramIndex + 3 + d]) {
+      jacobian_jointParams_to_modelParams<T>(
+          direction.dot(jointState.getRotationDerivative(d, posd)),
+          paramIndex + 3 + d,
+          this->parameterTransform_,
+          jacobianRow);
+    }
+  }
+  if (this->activeJointParams_[paramIndex + 6]) {
+    jacobian_jointParams_to_modelParams<T>(
+        direction.dot(jointState.getScaleDerivative(posd)),
+        paramIndex + 6,
+        this->parameterTransform_,
+        jacobianRow);
+  }
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateColliderHierarchyGradient(
+    const SkeletonStateT<T>& state,
+    size_t colliderParent,
+    size_t commonAncestor,
+    const Eigen::Vector3<T>& sdfSurfacePoint,
+    const Eigen::Vector3<T>& direction,
+    Eigen::Ref<Eigen::VectorX<T>> gradient) const {
+  size_t jointIndex = colliderParent;
+  while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd = sdfSurfacePoint - jointState.translation();
+    accumulateJointGradient(jointState, paramIndex, posd, direction, gradient);
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateColliderHierarchyJacobian(
+    const SkeletonStateT<T>& state,
+    size_t colliderParent,
+    size_t commonAncestor,
+    const Eigen::Vector3<T>& sdfSurfacePoint,
+    const Eigen::Vector3<T>& direction,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const {
+  size_t jointIndex = colliderParent;
+  while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Eigen::Vector3<T> posd = sdfSurfacePoint - jointState.translation();
+    accumulateJointJacobian(jointState, paramIndex, posd, direction, jacobianRow);
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
+}
+
+template <typename T, typename SdfColliderType>
+double SDFCollisionErrorFunctionT<T, SdfColliderType>::getGradient(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
+    Eigen::Ref<Eigen::VectorX<T>> gradient) {
+  MT_PROFILE_FUNCTION();
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
+  updateColliders(params);
+  computeActivePairs(meshState, state);
+
+  double totalError = 0.0;
+  collisionCounts_.assign(activeVertexIndices_.size(), 0);
+
+  for (size_t pairIndex = 0; pairIndex < boneCollisionPairs_.size(); ++pairIndex) {
+    if (!activePairs_[pairIndex]) {
+      continue;
+    }
+    const auto& pair = boneCollisionPairs_[pairIndex];
+    const auto& range = boneVertexRanges_[pair.boneIndex];
+    if (range.empty()) {
+      continue;
+    }
+    const auto& collider = sdfColliders_[pair.sdfColliderIndex];
+    if (!collider.isValid()) {
+      continue;
+    }
+    const auto worldToCollider = computeWorldToColliderTransform(pair.sdfColliderIndex, state);
+    const auto colliderToWorld = worldToCollider.inverse();
+
+    for (size_t i = range.start; i < range.end; ++i) {
+      if (collisionCounts_[i] >= maxCollisionsPerVertex_) {
+        continue;
+      }
+      const size_t vertexIndex = activeVertexIndices_[i];
+      const T vertexWeight = vertexWeights_[i];
+      const auto& worldPos = meshState.posedMesh_->vertices[vertexIndex];
+      const Vector3<T> localPos = worldToCollider * worldPos;
+      const auto [distance, localGradient] = collider.evaluateWithGradient(localPos);
+
+      if (distance < T(0)) {
+        const T penetrationDepth = -distance;
+        totalError += static_cast<double>(
+            vertexWeight * penetrationDepth * penetrationDepth * kSDFCollisionWeight *
+            this->weight_);
+        collisionCounts_[i]++;
+
+        // Transform gradient from collider local space to world space
+        const Eigen::Vector3<T> sdfGradient = colliderToWorld.rotation * localGradient;
+
+        const T wgt = vertexWeight * 2.0f * kSDFCollisionWeight * this->weight_;
+        const Eigen::Vector3<T> diff = -penetrationDepth * sdfGradient;
+        const Eigen::Vector3<T> sdfSurfacePoint = worldPos + penetrationDepth * sdfGradient;
+
+        const size_t commonAncestor = detail_sdf_collision::findCommonAncestorForVertex(
+            *character_.skinWeights, this->skeleton_, vertexIndex, collider.parentJoint());
+
+        SkinningWeightIteratorT<T> skinningIter(
+            character_, *meshState.restMesh_, state, vertexIndex);
+        while (!skinningIter.finished()) {
+          const auto [jointIndex, boneWeight, transformedVertex] = skinningIter.next();
+          if (jointIndex == commonAncestor) {
+            break;
+          }
+          if (std::abs(boneWeight) < std::numeric_limits<T>::epsilon()) {
+            continue;
+          }
+          MT_CHECK(jointIndex < this->skeleton_.joints.size());
+          const auto& jointState = state.jointState[jointIndex];
+          const size_t paramIndex = jointIndex * kParametersPerJoint;
+          const Eigen::Vector3<T> posd = transformedVertex - jointState.translation();
+          accumulateJointGradient(jointState, paramIndex, posd, boneWeight * wgt * diff, gradient);
+        }
+
+        if (collider.parentJoint() != kInvalidIndex) {
+          accumulateColliderHierarchyGradient(
+              state,
+              collider.parentJoint(),
+              commonAncestor,
+              sdfSurfacePoint,
+              -wgt * diff,
+              gradient);
+        }
+      }
+    }
+  }
+  return totalError;
+}
+
+template <typename T, typename SdfColliderType>
+double SDFCollisionErrorFunctionT<T, SdfColliderType>::getJacobian(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    const MeshStateT<T>& meshState,
+    Eigen::Ref<Eigen::MatrixX<T>> jacobian,
+    Eigen::Ref<Eigen::VectorX<T>> residual,
+    int& usedRows) {
+  MT_PROFILE_FUNCTION();
+  MT_CHECK(
+      jacobian.cols() == static_cast<Eigen::Index>(this->parameterTransform_.transform.cols()),
+      "Jacobian column count mismatch");
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+  MT_CHECK_NOTNULL(meshState.restMesh_);
+  updateColliders(params);
+  computeActivePairs(meshState, state);
+
+  double totalError = 0.0;
+  int currentRow = 0;
+  collisionCounts_.assign(activeVertexIndices_.size(), 0);
+
+  for (size_t pairIndex = 0; pairIndex < boneCollisionPairs_.size(); ++pairIndex) {
+    if (!activePairs_[pairIndex]) {
+      continue;
+    }
+    const auto& pair = boneCollisionPairs_[pairIndex];
+    const auto& range = boneVertexRanges_[pair.boneIndex];
+    if (range.empty()) {
+      continue;
+    }
+    const auto& collider = sdfColliders_[pair.sdfColliderIndex];
+    if (!collider.isValid()) {
+      continue;
+    }
+    const auto worldToCollider = computeWorldToColliderTransform(pair.sdfColliderIndex, state);
+    const auto colliderToWorld = worldToCollider.inverse();
+
+    for (size_t i = range.start; i < range.end; ++i) {
+      if (collisionCounts_[i] >= maxCollisionsPerVertex_) {
+        continue;
+      }
+      const size_t vertexIndex = activeVertexIndices_[i];
+      const T vertexWeight = vertexWeights_[i];
+      const auto& worldPos = meshState.posedMesh_->vertices[vertexIndex];
+      const Vector3<T> localPos = worldToCollider * worldPos;
+      const auto [distance, localGradient] = collider.evaluateWithGradient(localPos);
+
+      if (distance < T(0)) {
+        const T penetrationDepth = -distance;
+        MT_CHECK(
+            currentRow < jacobian.rows() && currentRow < residual.rows(),
+            "Insufficient Jacobian/residual rows");
+
+        const T wgt = std::sqrt(vertexWeight * kSDFCollisionWeight * this->weight_);
+        residual[currentRow] = wgt * penetrationDepth;
+        totalError += static_cast<double>(
+            vertexWeight * penetrationDepth * penetrationDepth * kSDFCollisionWeight *
+            this->weight_);
+        ++collisionCounts_[i];
+
+        jacobian.row(currentRow).setZero();
+
+        // Transform gradient from collider local space to world space
+        const Eigen::Vector3<T> sdfGradient = colliderToWorld.rotation * localGradient;
+
+        const T jacobianMagnitude = -wgt;
+        const Eigen::Vector3<T> worldJacobianContribution = jacobianMagnitude * sdfGradient;
+        const Eigen::Vector3<T> sdfSurfacePoint = worldPos + penetrationDepth * sdfGradient;
+
+        const size_t commonAncestor = detail_sdf_collision::findCommonAncestorForVertex(
+            *character_.skinWeights, this->skeleton_, vertexIndex, collider.parentJoint());
+
+        SkinningWeightIteratorT<T> skinningIter(
+            character_, *meshState.restMesh_, state, vertexIndex);
+        while (!skinningIter.finished()) {
+          const auto [jointIndex, boneWeight, transformedVertex] = skinningIter.next();
+          if (jointIndex == commonAncestor) {
+            break;
+          }
+          if (std::abs(boneWeight) < std::numeric_limits<T>::epsilon()) {
+            continue;
+          }
+          MT_CHECK(jointIndex < this->skeleton_.joints.size());
+          const auto& jointState = state.jointState[jointIndex];
+          const size_t paramIndex = jointIndex * kParametersPerJoint;
+          const Eigen::Vector3<T> posd = transformedVertex - jointState.translation();
+          accumulateJointJacobian(
+              jointState,
+              paramIndex,
+              posd,
+              boneWeight * worldJacobianContribution,
+              jacobian.middleRows(currentRow, 1));
+        }
+
+        if (collider.parentJoint() != kInvalidIndex) {
+          accumulateColliderHierarchyJacobian(
+              state,
+              collider.parentJoint(),
+              commonAncestor,
+              sdfSurfacePoint,
+              -worldJacobianContribution,
+              jacobian.middleRows(currentRow, 1));
+        }
+        currentRow++;
+      }
+    }
+  }
+
+  usedRows = currentRow;
+  return totalError;
+}
+
+template <typename T, typename SdfColliderType>
+size_t SDFCollisionErrorFunctionT<T, SdfColliderType>::getJacobianSize() const {
+  return static_cast<size_t>(maxCollisionsPerVertex_) * activeVertexIndices_.size();
+}
+
+template <typename T, typename SdfColliderType>
+void SDFCollisionErrorFunctionT<T, SdfColliderType>::computeActivePairs(
+    const MeshStateT<T>& meshState,
+    const SkeletonStateT<T>& state) {
+  MT_PROFILE_FUNCTION();
+  activePairs_.assign(boneCollisionPairs_.size(), false);
+
+  boneBBoxCache_.resize(boneVertexRanges_.size());
+  boneBBoxValid_.assign(boneVertexRanges_.size(), false);
+  for (size_t boneIndex = 0; boneIndex < boneVertexRanges_.size(); ++boneIndex) {
+    if (!boneVertexRanges_[boneIndex].empty()) {
+      boneBBoxCache_[boneIndex] = computeBoneBoundingBox(boneIndex, *meshState.posedMesh_);
+      boneBBoxValid_[boneIndex] = true;
+    }
+  }
+
+  sdfBBoxCache_.resize(sdfColliders_.size());
+  for (size_t sdfIndex = 0; sdfIndex < sdfColliders_.size(); ++sdfIndex) {
+    sdfBBoxCache_[sdfIndex] = computeColliderWorldBoundingBox(sdfIndex, state);
+  }
+
+  for (size_t pairIndex = 0; pairIndex < boneCollisionPairs_.size(); ++pairIndex) {
+    const auto& pair = boneCollisionPairs_[pairIndex];
+    if (!boneBBoxValid_[pair.boneIndex]) {
+      continue;
+    }
+    activePairs_[pairIndex] =
+        boneBBoxCache_[pair.boneIndex].intersects(sdfBBoxCache_[pair.sdfColliderIndex]);
+  }
+}
+
+template <typename T, typename SdfColliderType>
+axel::BoundingBox<T> SDFCollisionErrorFunctionT<T, SdfColliderType>::computeBoneBoundingBox(
+    size_t boneIndex,
+    const MeshT<T>& posedMesh) const {
+  const auto& range = boneVertexRanges_[boneIndex];
+  if (range.empty()) {
+    return axel::BoundingBox<T>();
+  }
+  const size_t firstVertexIndex = activeVertexIndices_[range.start];
+  const auto& firstPos = posedMesh.vertices[firstVertexIndex];
+  axel::BoundingBox<T> bbox(firstPos, T(0));
+  for (size_t i = range.start + 1; i < range.end; ++i) {
+    const size_t vertexIndex = activeVertexIndices_[i];
+    bbox.extend(posedMesh.vertices[vertexIndex]);
+  }
+  return bbox;
+}
+
+template <typename T, typename SdfColliderType>
+axel::BoundingBox<T>
+SDFCollisionErrorFunctionT<T, SdfColliderType>::computeColliderWorldBoundingBox(
+    size_t sdfColliderIndex,
+    const SkeletonStateT<T>& state) const {
+  const auto& collider = sdfColliders_[sdfColliderIndex];
+  if (!collider.isValid()) {
+    return axel::BoundingBox<T>();
+  }
+
+  TransformT<T> colliderWorldTransform;
+  const auto parentJoint = collider.parentJoint();
+  if (parentJoint == kInvalidIndex) {
+    colliderWorldTransform = collider.localToParentTransform().template cast<T>();
+  } else {
+    MT_CHECK(parentJoint < state.jointState.size(), "Invalid parent joint index: {}", parentJoint);
+    colliderWorldTransform = state.jointState[parentJoint].transform *
+        collider.localToParentTransform().template cast<T>();
+  }
+
+  const auto& localBounds = collider.bounds();
+  const auto& minCorner = localBounds.min();
+  const auto& maxCorner = localBounds.max();
+
+  std::array<Eigen::Vector3<T>, 8> corners = {
+      {{minCorner.x(), minCorner.y(), minCorner.z()},
+       {maxCorner.x(), minCorner.y(), minCorner.z()},
+       {minCorner.x(), maxCorner.y(), minCorner.z()},
+       {maxCorner.x(), maxCorner.y(), minCorner.z()},
+       {minCorner.x(), minCorner.y(), maxCorner.z()},
+       {maxCorner.x(), minCorner.y(), maxCorner.z()},
+       {minCorner.x(), maxCorner.y(), maxCorner.z()},
+       {maxCorner.x(), maxCorner.y(), maxCorner.z()}}};
+
+  const auto firstWorldCorner = colliderWorldTransform * corners[0];
+  axel::BoundingBox<T> worldBounds(firstWorldCorner, T(0));
+  for (size_t i = 1; i < corners.size(); ++i) {
+    worldBounds.extend(colliderWorldTransform * corners[i]);
+  }
+  return worldBounds;
+}
 
 } // namespace momentum

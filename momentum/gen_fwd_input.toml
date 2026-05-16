@@ -104,7 +104,6 @@ template_classes = [
     "PoseTransformSolver",
     "PositionErrorFunction",
     "ProjectionErrorFunction",
-    "SDFCollisionErrorFunction",
     "SimdCollisionErrorFunction",
     "SkeletonDerivative",
     "SkeletonErrorFunction",

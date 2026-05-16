@@ -27,6 +27,62 @@ using Types = testing::Types<float, double>;
 
 TYPED_TEST_SUITE(Momentum_ErrorFunctionsTest, Types);
 
+namespace {
+
+struct UpdateTrackingCollider {
+  struct State {
+    int updateCalls = 0;
+    Eigen::VectorXf lastParams;
+  };
+
+  std::shared_ptr<State> state;
+
+  void update(const Eigen::VectorXf& modelParams) {
+    ++state->updateCalls;
+    state->lastParams = modelParams;
+  }
+
+  [[nodiscard]] float evaluate(const Eigen::Vector3f&) const {
+    return 1.0f;
+  }
+
+  [[nodiscard]] std::pair<float, Eigen::Vector3f> evaluateWithGradient(
+      const Eigen::Vector3f&) const {
+    return {1.0f, Eigen::Vector3f::UnitX()};
+  }
+
+  [[nodiscard]] axel::BoundingBox<float> bounds() const {
+    return {Eigen::Vector3f::Constant(-1.0f), Eigen::Vector3f::Constant(1.0f)};
+  }
+
+  [[nodiscard]] size_t parentJoint() const {
+    return 0;
+  }
+
+  [[nodiscard]] TransformT<float> localToParentTransform() const {
+    return TransformT<float>();
+  }
+
+  [[nodiscard]] bool isValid() const {
+    return true;
+  }
+};
+
+} // namespace
+
+TEST(Momentum_ErrorFunctionsTest, SDFCollisionError_UpdatesCollidersBeforeRestPoseFiltering) {
+  const Character character = createTestCharacter(3);
+  auto state = std::make_shared<UpdateTrackingCollider::State>();
+  const std::vector<UpdateTrackingCollider> colliders = {UpdateTrackingCollider{state}};
+
+  SDFCollisionErrorFunctionT<float, UpdateTrackingCollider> errorFunction(
+      character, colliders, {0});
+
+  EXPECT_EQ(state->updateCalls, 1);
+  EXPECT_EQ(state->lastParams.size(), character.parameterTransform.numAllModelParameters());
+  EXPECT_TRUE(state->lastParams.isZero());
+}
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, SDFCollisionError_WorldSDF_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
 
