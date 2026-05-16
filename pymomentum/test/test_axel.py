@@ -576,6 +576,88 @@ class TestAxel(unittest.TestCase):
             err_msg="In-place and return overloads should produce identical results",
         )
 
+    def _make_cube(self):
+        """Return cube vertices and outward-facing triangles."""
+        vertices = np.array(
+            [
+                [-1, -1, -1],
+                [1, -1, -1],
+                [1, 1, -1],
+                [-1, 1, -1],
+                [-1, -1, 1],
+                [1, -1, 1],
+                [1, 1, 1],
+                [-1, 1, 1],
+            ],
+            dtype=np.float32,
+        )
+        # Outward-facing normals (CCW from outside)
+        triangles = np.array(
+            [
+                [0, 2, 1],
+                [0, 3, 2],  # bottom (z=-1), normal -Z
+                [4, 5, 6],
+                [4, 6, 7],  # top (z=+1), normal +Z
+                [0, 1, 5],
+                [0, 5, 4],  # front (y=-1), normal -Y
+                [2, 3, 7],
+                [2, 7, 6],  # back (y=+1), normal +Y
+                [0, 4, 7],
+                [0, 7, 3],  # left (x=-1), normal -X
+                [1, 2, 6],
+                [1, 6, 5],  # right (x=+1), normal +X
+            ],
+            dtype=np.int32,
+        )
+        return vertices, triangles
+
+    def test_sign_method_enum(self):
+        """Test SignMethod enum values and config integration."""
+        self.assertEqual(axel.SignMethod.RayCasting.name, "RayCasting")
+        self.assertEqual(axel.SignMethod.WindingNumber.name, "WindingNumber")
+        self.assertEqual(
+            axel.SignMethod.WindingNumberPermissive.name, "WindingNumberPermissive"
+        )
+
+        config = axel.MeshToSdfConfig()
+        self.assertEqual(config.sign_method, axel.SignMethod.RayCasting)
+
+        config.sign_method = axel.SignMethod.WindingNumber
+        self.assertEqual(config.sign_method, axel.SignMethod.WindingNumber)
+        self.assertIn("WindingNumber", repr(config))
+
+        config.sign_method = axel.SignMethod.WindingNumberPermissive
+        self.assertIn("WindingNumberPermissive", repr(config))
+
+    def test_mesh_to_sdf_winding_number(self):
+        """Test mesh_to_sdf with WindingNumber on an outward-normal cube."""
+        vertices, triangles = self._make_cube()
+
+        config = axel.MeshToSdfConfig()
+        config.sign_method = axel.SignMethod.WindingNumber
+
+        sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.25, config=config)
+
+        center = sdf.sample(np.array([0.0, 0.0, 0.0], dtype=np.float32))
+        self.assertLess(center, 0, "Center should be inside with winding number")
+
+        outside = sdf.sample(np.array([2.0, 2.0, 2.0], dtype=np.float32))
+        self.assertGreater(outside, 0, "Outside point should be positive")
+
+    def test_mesh_to_sdf_winding_number_permissive_open_mesh(self):
+        """Test that WindingNumberPermissive handles a non-watertight mesh."""
+        vertices, triangles = self._make_cube()
+        # Remove top face (indices 2 and 3)
+        triangles = np.delete(triangles, [2, 3], axis=0)
+
+        config = axel.MeshToSdfConfig()
+        config.sign_method = axel.SignMethod.WindingNumberPermissive
+
+        sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.25, config=config)
+
+        center = sdf.sample(np.array([0.0, 0.0, 0.0], dtype=np.float32))
+        self.assertLess(center, 0, "Center should be inside even with missing top face")
+
     def test_fill_holes_cube_with_hole(self):
         """Test fill_holes with a cube mesh that has a missing face (hole)."""
         # Create a cube mesh with missing top face

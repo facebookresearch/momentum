@@ -458,6 +458,29 @@ More efficient than calling sample() and gradient() separately.
             maxPt.z());
       });
 
+  // Bind SignMethod enum
+  py::enum_<axel::SignMethod>(
+      m,
+      "SignMethod",
+      R"(Method for inside/outside classification during SDF sign determination.
+
+Available methods:
+- RayCasting: Ray casting with 6-direction majority vote (default, fast but can fail on non-watertight meshes)
+- WindingNumber: Winding number assuming consistent outward-facing normals (wn > 0.5)
+- WindingNumberPermissive: Winding number tolerant of either winding convention (abs(wn) > 0.5))")
+      .value(
+          "RayCasting",
+          axel::SignMethod::RayCasting,
+          "Ray casting with 6-direction majority vote. Fast but can fail on non-watertight meshes where rays pass through gaps.")
+      .value(
+          "WindingNumber",
+          axel::SignMethod::WindingNumber,
+          "Winding number assuming consistent outward-facing normals (wn > 0.5). Will reject meshes with accidentally flipped normals rather than silently accepting them.")
+      .value(
+          "WindingNumberPermissive",
+          axel::SignMethod::WindingNumberPermissive,
+          "Winding number tolerant of either winding convention (abs(wn) > 0.5). Handles mesh soups, mixed orientations, and geometry from multiple sources.");
+
   // Bind MeshToSdfConfig
   py::class_<axel::MeshToSdfConfig<float>>(m, "MeshToSdfConfig")
       .def(py::init<>(), "Create MeshToSdfConfig with default parameters.")
@@ -473,12 +496,17 @@ More efficient than calling sample() and gradient() separately.
           "tolerance",
           &axel::MeshToSdfConfig<float>::tolerance,
           R"(Numerical tolerance for computations. Default: machine epsilon * 1000)")
+      .def_readwrite(
+          "sign_method",
+          &axel::MeshToSdfConfig<float>::signMethod,
+          R"(Method for inside/outside classification. Default: :py:attr:`SignMethod.RayCasting`)")
       .def("__repr__", [](const axel::MeshToSdfConfig<float>& self) {
         return fmt::format(
-            "MeshToSdfConfig(narrow_band_width={:.3f}, max_distance={:.3f}, tolerance={:.6e})",
+            "MeshToSdfConfig(narrow_band_width={:.3f}, max_distance={:.3f}, tolerance={:.6e}, sign_method=SignMethod.{})",
             self.narrowBandWidth,
             self.maxDistance,
-            self.tolerance);
+            self.tolerance,
+            py::cast(self.signMethod).attr("name").cast<std::string>());
       });
 
   // Bind MeshToSdfPadding

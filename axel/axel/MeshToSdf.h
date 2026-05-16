@@ -21,6 +21,24 @@
 namespace axel {
 
 /**
+ * Method for determining inside/outside classification in SDF sign determination.
+ */
+enum class SignMethod {
+  /// Ray casting with 6-direction majority vote. Fast but fails on non-watertight meshes.
+  RayCasting,
+
+  /// Winding number assuming consistent outward-facing normals (wn > 0.5).
+  /// Will reject meshes with accidentally flipped normals rather than silently
+  /// accepting them. Use when triangle orientation is known to be correct.
+  WindingNumber,
+
+  /// Winding number tolerant of either winding convention (abs(wn) > 0.5).
+  /// Handles mesh soups, mixed orientations, and geometry from multiple sources
+  /// where consistent winding cannot be guaranteed.
+  WindingNumberPermissive,
+};
+
+/**
  * Configuration parameters for mesh-to-SDF conversion.
  */
 template <typename ScalarType>
@@ -39,6 +57,9 @@ struct MeshToSdfConfig {
 
   /// Print progress messages to stdout
   bool verbose = false;
+
+  /// Method for inside/outside classification during sign determination.
+  SignMethod signMethod = SignMethod::RayCasting;
 };
 
 /**
@@ -60,7 +81,7 @@ struct MeshToSdfPadding {
  * Convert a triangle mesh to a signed distance field using modern 3-step approach:
  * 1. Narrow band initialization with exact triangle distances
  * 2. Fast marching propagation using Eikonal equation
- * 3. Sign determination using ray casting
+ * 3. Sign determination (configurable via `SignMethod`)
  *
  * @param vertices Vertex positions as span (works with std::vector, arrays, subranges)
  * @param triangles Triangle indices as span (indices must be valid within vertices)
@@ -141,7 +162,8 @@ template <typename ScalarType>
 void applySignsToDistanceField(
     SignedDistanceField<ScalarType>& sdf,
     std::span<const Eigen::Vector3<ScalarType>> vertices,
-    std::span<const Eigen::Vector3i> triangles);
+    std::span<const Eigen::Vector3i> triangles,
+    SignMethod signMethod = SignMethod::RayCasting);
 
 /**
  * Compute mesh bounding box from vertex spans.
