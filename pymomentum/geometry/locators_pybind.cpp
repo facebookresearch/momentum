@@ -109,7 +109,8 @@ void registerLocatorBindings(
                       const Eigen::VectorXi& parents,
                       const Eigen::VectorXf& skinWeights,
                       const std::optional<Eigen::Vector3f>& position,
-                      float weight) {
+                      float weight,
+                      float skinOffset) {
             if (parents.size() != skinWeights.size()) {
               throw std::runtime_error("parents and skin_weights must have the same size");
             }
@@ -145,13 +146,15 @@ void registerLocatorBindings(
                 parentsTmp,
                 skinWeightsTmp,
                 position.value_or(Eigen::Vector3f::Zero()),
-                weight);
+                weight,
+                skinOffset);
           }),
           py::arg("name"),
           py::arg("parents"),
           py::arg("skin_weights"),
           py::arg("position") = std::nullopt,
-          py::arg("weight") = 1.0f)
+          py::arg("weight") = 1.0f,
+          py::arg("skin_offset") = 0.0f)
       .def_readonly("name", &mm::SkinnedLocator::name, "The skinned locator's name.")
       .def_property_readonly(
           "parents",
