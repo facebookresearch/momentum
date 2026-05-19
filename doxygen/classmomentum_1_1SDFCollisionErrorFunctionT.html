@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Momentum: momentum::SDFCollisionErrorFunctionT&lt; T &gt; Class Template Reference</title>
+<title>Momentum: momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -94,7 +94,7 @@ $(document).ready(function(){initNavTree('classmomentum_1_1SDFCollisionErrorFunc
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="classmomentum_1_1SDFCollisionErrorFunctionT-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">momentum::SDFCollisionErrorFunctionT&lt; T &gt; Class Template Reference</div></div>
+  <div class="headertitle"><div class="title">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
@@ -103,46 +103,38 @@ $(document).ready(function(){initNavTree('classmomentum_1_1SDFCollisionErrorFunc
 
 <p><code>#include &lt;<a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SDFCollisionErrorFunctionT&lt; T &gt;:</div>
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
-  <img src="classmomentum_1_1SDFCollisionErrorFunctionT.png" usemap="#momentum::SDFCollisionErrorFunctionT_3C_20T_20_3E_map" alt=""/>
-  <map id="momentum::SDFCollisionErrorFunctionT_3C_20T_20_3E_map" name="momentum::SDFCollisionErrorFunctionT_3C_20T_20_3E_map">
-<area href="classmomentum_1_1SkeletonErrorFunctionT.html" alt="momentum::SkeletonErrorFunctionT&lt; T &gt;" shape="rect" coords="0,0,266,24"/>
+  <img src="classmomentum_1_1SDFCollisionErrorFunctionT.png" usemap="#momentum::SDFCollisionErrorFunctionT_3C_20T_2C_20SdfColliderType_20_3E_map" alt=""/>
+  <map id="momentum::SDFCollisionErrorFunctionT_3C_20T_2C_20SdfColliderType_20_3E_map" name="momentum::SDFCollisionErrorFunctionT_3C_20T_2C_20SdfColliderType_20_3E_map">
+<area href="classmomentum_1_1SkeletonErrorFunctionT.html" alt="momentum::SkeletonErrorFunctionT&lt; T &gt;" shape="rect" coords="0,0,366,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a02a223b9262e501ce949ab7c18957c5e" id="r_a02a223b9262e501ce949ab7c18957c5e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a02a223b9262e501ce949ab7c18957c5e">SDFCollisionErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#af0e46fb9bdc1cabaca7f59df6d624de9">SDFCollisionGeometry</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sdfColliders</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a>={}, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;vertexWeights={}, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filterRestPoseIntersections</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint8_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxCollisionsPerVertex</a>=1)</td></tr>
-<tr class="memdesc:a02a223b9262e501ce949ab7c18957c5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with vertex index list and uniform weights.  <br /></td></tr>
-<tr class="separator:a02a223b9262e501ce949ab7c18957c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f89109cbe73c686f89f1536c12e8f70" id="r_a6f89109cbe73c686f89f1536c12e8f70"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a6f89109cbe73c686f89f1536c12e8f70">~SDFCollisionErrorFunctionT</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
-<tr class="memdesc:a6f89109cbe73c686f89f1536c12e8f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <br /></td></tr>
-<tr class="separator:a6f89109cbe73c686f89f1536c12e8f70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3cbc5561414c3f4d4a481d156a24c24" id="r_ab3cbc5561414c3f4d4a481d156a24c24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#ab3cbc5561414c3f4d4a481d156a24c24">getError</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
-<tr class="memdesc:ab3cbc5561414c3f4d4a481d156a24c24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the collision error for the given model parameters and skeleton state.  <br /></td></tr>
-<tr class="separator:ab3cbc5561414c3f4d4a481d156a24c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9391c688712020c2ce6348d84dc0a00" id="r_ab9391c688712020c2ce6348d84dc0a00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#ab9391c688712020c2ce6348d84dc0a00">getGradient</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
-<tr class="memdesc:ab9391c688712020c2ce6348d84dc0a00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the collision error and its gradient.  <br /></td></tr>
-<tr class="separator:ab9391c688712020c2ce6348d84dc0a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ee45651edf591d667c9f0b1319f1566" id="r_a2ee45651edf591d667c9f0b1319f1566"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a2ee45651edf591d667c9f0b1319f1566">getJacobian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState, Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="sequence__cholesky__solver_8cpp.html#a9034ab8b31d0ecd1e2e4e89c1d3fb144">jacobian</a>, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="sequence__cholesky__solver_8cpp.html#a969b4d63376cc4dba8a9b8e0436e3f36">residual</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &amp;<a class="el" href="sequence__cholesky__solver_8cpp.html#a6191c3819af1ac2a8aebd7f1e3b87932">usedRows</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
-<tr class="memdesc:a2ee45651edf591d667c9f0b1319f1566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the collision error Jacobian and residual.  <br /></td></tr>
-<tr class="separator:a2ee45651edf591d667c9f0b1319f1566"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8257da1ae121b109e5a7be26b40ca91" id="r_ae8257da1ae121b109e5a7be26b40ca91"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#ae8257da1ae121b109e5a7be26b40ca91">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
-<tr class="memdesc:ae8257da1ae121b109e5a7be26b40ca91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the maximum number of Jacobian rows needed.  <br /></td></tr>
-<tr class="separator:ae8257da1ae121b109e5a7be26b40ca91"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93e6dc8245fce2ecf8b0b79409c03bb6" id="r_a93e6dc8245fce2ecf8b0b79409c03bb6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a93e6dc8245fce2ecf8b0b79409c03bb6">needsMesh</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
-<tr class="memdesc:a93e6dc8245fce2ecf8b0b79409c03bb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true because this error function requires mesh state.  <br /></td></tr>
-<tr class="separator:a93e6dc8245fce2ecf8b0b79409c03bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67a79e986133fe9486c01d13215c3722" id="r_a67a79e986133fe9486c01d13215c3722"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a67a79e986133fe9486c01d13215c3722">getNumActiveVertices</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a67a79e986133fe9486c01d13215c3722"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of active vertices participating in collisions.  <br /></td></tr>
-<tr class="separator:a67a79e986133fe9486c01d13215c3722"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26be11a5af6572f085c98db879e8c888" id="r_a26be11a5af6572f085c98db879e8c888"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a26be11a5af6572f085c98db879e8c888">getNumCollisionPairs</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
-<tr class="memdesc:a26be11a5af6572f085c98db879e8c888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of bone-collider pairs being tested.  <br /></td></tr>
-<tr class="separator:a26be11a5af6572f085c98db879e8c888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d457161ee006d5c491f31046f8aeb4d" id="r_a5d457161ee006d5c491f31046f8aeb4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a5d457161ee006d5c491f31046f8aeb4d">SDFCollisionErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">sdfColliders</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">participatingVertices</a>={}, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;vertexWeights={}, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filterRestPoseIntersections</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">true</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">uint8_t</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">maxCollisionsPerVertex</a>=1)</td></tr>
+<tr class="memdesc:a5d457161ee006d5c491f31046f8aeb4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor with vertex index list and uniform weights.  <br /></td></tr>
+<tr class="separator:a5d457161ee006d5c491f31046f8aeb4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad965ed4111cffe08bcaf2bd93a2c85ea" id="r_ad965ed4111cffe08bcaf2bd93a2c85ea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#ad965ed4111cffe08bcaf2bd93a2c85ea">~SDFCollisionErrorFunctionT</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a>=<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">default</a></td></tr>
+<tr class="separator:ad965ed4111cffe08bcaf2bd93a2c85ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f3178fc58c688d60a097b9384e2a081" id="r_a3f3178fc58c688d60a097b9384e2a081"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a3f3178fc58c688d60a097b9384e2a081">getError</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a3f3178fc58c688d60a097b9384e2a081"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d13715ab889867c7d5539894eacc2d5" id="r_a8d13715ab889867c7d5539894eacc2d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a8d13715ab889867c7d5539894eacc2d5">getGradient</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">gradient</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a8d13715ab889867c7d5539894eacc2d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4be08b3b995a531883fa38991cad472e" id="r_a4be08b3b995a531883fa38991cad472e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a4be08b3b995a531883fa38991cad472e">getJacobian</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">params</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1SkeletonStateT.html">SkeletonStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">state</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1MeshStateT.html">MeshStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;meshState, Eigen::Ref&lt; Eigen::MatrixX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="sequence__cholesky__solver_8cpp.html#a9034ab8b31d0ecd1e2e4e89c1d3fb144">jacobian</a>, Eigen::Ref&lt; Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt; <a class="el" href="sequence__cholesky__solver_8cpp.html#a969b4d63376cc4dba8a9b8e0436e3f36">residual</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &amp;<a class="el" href="sequence__cholesky__solver_8cpp.html#a6191c3819af1ac2a8aebd7f1e3b87932">usedRows</a>) <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a4be08b3b995a531883fa38991cad472e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a906fabc32140ac650a53ad9112c98f96" id="r_a906fabc32140ac650a53ad9112c98f96"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a906fabc32140ac650a53ad9112c98f96">getJacobianSize</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a906fabc32140ac650a53ad9112c98f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a066a1e4f8242f9926b1711530b1c88f6" id="r_a066a1e4f8242f9926b1711530b1c88f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a066a1e4f8242f9926b1711530b1c88f6">needsMesh</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">override</a></td></tr>
+<tr class="separator:a066a1e4f8242f9926b1711530b1c88f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49449c969a44a403810064ecf0ac3d18" id="r_a49449c969a44a403810064ecf0ac3d18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a49449c969a44a403810064ecf0ac3d18">getNumActiveVertices</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:a49449c969a44a403810064ecf0ac3d18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7557adf6bf77a803b976317e7b984cd" id="r_ac7557adf6bf77a803b976317e7b984cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#ac7557adf6bf77a803b976317e7b984cd">getNumCollisionPairs</a> () <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a></td></tr>
+<tr class="separator:ac7557adf6bf77a803b976317e7b984cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classmomentum_1_1SkeletonErrorFunctionT"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classmomentum_1_1SkeletonErrorFunctionT')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html">momentum::SkeletonErrorFunctionT&lt; T &gt;</a></td></tr>
 <tr class="memitem:a7e2cbf27313c809844ee08a6cda4fdad inherit pub_methods_classmomentum_1_1SkeletonErrorFunctionT" id="r_a7e2cbf27313c809844ee08a6cda4fdad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a7e2cbf27313c809844ee08a6cda4fdad">SkeletonErrorFunctionT</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skel</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">pt</a>)</td></tr>
 <tr class="separator:a7e2cbf27313c809844ee08a6cda4fdad inherit pub_methods_classmomentum_1_1SkeletonErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -170,9 +162,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a496ecfe90bc593c7fbd443bc1ae046b3" id="r_a496ecfe90bc593c7fbd443bc1ae046b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a496ecfe90bc593c7fbd443bc1ae046b3">kSDFCollisionWeight</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(5<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-3)</td></tr>
-<tr class="memdesc:a496ecfe90bc593c7fbd443bc1ae046b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight constant for SDF collision penalties.  <br /></td></tr>
-<tr class="separator:a496ecfe90bc593c7fbd443bc1ae046b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ab0d77146cfc04b0c242e2c58e4e8ea" id="r_a5ab0d77146cfc04b0c242e2c58e4e8ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">static</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html#a5ab0d77146cfc04b0c242e2c58e4e8ea">kSDFCollisionWeight</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(5<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-3)</td></tr>
+<tr class="separator:a5ab0d77146cfc04b0c242e2c58e4e8ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -191,30 +182,34 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a935c03f07e1ef8aaeed9f9688b03075a inherit pro_attribs_classmomentum_1_1SkeletonErrorFunctionT"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::SDFCollisionErrorFunctionT&lt; T &gt;</div><p>SDF-based collision error function that penalizes vertex penetration into SDF colliders. </p>
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> = SDFColliderT&lt;float&gt;&gt;<br />
+class momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;</div><p>SDF-based collision error function that penalizes vertex penetration into SDF colliders. </p>
 <p>This error function tests source vertices against SDF collision objects and applies penalties for interpenetration. It uses an efficient contiguous memory layout where vertices are grouped by their primary bone index to improve cache locality and reduce memory usage.</p>
-<p>Key features:</p><ul>
-<li>Configurable vertex selection for performance with high-resolution meshes</li>
-<li>Bone-based collision filtering to exclude rest pose intersections</li>
-<li>Efficient contiguous memory organization for cache-friendly processing </li>
+<p>The SdfColliderType must provide the following duck-typed interface:</p><ul>
+<li><code>T evaluate(const Vector3&lt;T&gt;&amp; localPos) const</code> — signed distance</li>
+<li><code>pair&lt;T, Vector3&lt;T&gt;&gt; evaluateWithGradient(const Vector3&lt;T&gt;&amp; localPos) const</code></li>
+<li><code>BoundingBox&lt;S&gt; bounds() const</code> — local-frame AABB</li>
+<li><code>size_t parentJoint() const</code> — parent joint index</li>
+<li><code><a class="el" href="structmomentum_1_1TransformT.html" title="Lightweight transform with separate rotation, translation, and uniform scaling.">TransformT</a>&lt;S&gt; localToParentTransform() const</code> — local-to-parent transform</li>
+<li><code>void update(const VectorX&lt;T&gt;&amp; modelParams)</code> — per-iteration update</li>
+<li><code>bool isValid() const</code> — whether the collider is usable </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00058">58</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00076">76</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a02a223b9262e501ce949ab7c18957c5e" name="a02a223b9262e501ce949ab7c18957c5e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02a223b9262e501ce949ab7c18957c5e">&#9670;&#160;</a></span>SDFCollisionErrorFunctionT()</h2>
+<a id="a5d457161ee006d5c491f31046f8aeb4d" name="a5d457161ee006d5c491f31046f8aeb4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d457161ee006d5c491f31046f8aeb4d">&#9670;&#160;</a></span>SDFCollisionErrorFunctionT()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::SDFCollisionErrorFunctionT </td>
+          <td class="memname"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::SDFCollisionErrorFunctionT </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;&#160;</td>
           <td class="paramname"><em>character</em>, </td>
@@ -222,7 +217,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#af0e46fb9bdc1cabaca7f59df6d624de9">SDFCollisionGeometry</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>sdfColliders</em>, </td>
         </tr>
         <tr>
@@ -273,25 +268,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8cpp_source.html#l00075">75</a> of file <a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00243">243</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 <p class="reference">References <a class="el" href="character_8h_source.html#l00053">momentum::Character::mesh</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="checks_8h_source.html#l00045">MT_CHECK_NOTNULL</a>, and <a class="el" href="character_8h_source.html#l00056">momentum::Character::skinWeights</a>.</p>
 
 </div>
 </div>
-<a id="a6f89109cbe73c686f89f1536c12e8f70" name="a6f89109cbe73c686f89f1536c12e8f70"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f89109cbe73c686f89f1536c12e8f70">&#9670;&#160;</a></span>~SDFCollisionErrorFunctionT()</h2>
+<a id="ad965ed4111cffe08bcaf2bd93a2c85ea" name="ad965ed4111cffe08bcaf2bd93a2c85ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad965ed4111cffe08bcaf2bd93a2c85ea">&#9670;&#160;</a></span>~SDFCollisionErrorFunctionT()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a>  = SDFColliderT&lt;float&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::~<a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a> </td>
+          <td class="memname"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::~<a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -304,24 +299,22 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Destructor. </p>
-
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab3cbc5561414c3f4d4a481d156a24c24" name="ab3cbc5561414c3f4d4a481d156a24c24"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3cbc5561414c3f4d4a481d156a24c24">&#9670;&#160;</a></span>getError()</h2>
+<a id="a3f3178fc58c688d60a097b9384e2a081" name="a3f3178fc58c688d60a097b9384e2a081"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f3178fc58c688d60a097b9384e2a081">&#9670;&#160;</a></span>getError()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getError </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getError </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>params</em>, </td>
@@ -351,38 +344,27 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Computes the collision error for the given model parameters and skeleton state. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">params</td><td>The model parameters </td></tr>
-    <tr><td class="paramname">state</td><td>The skeleton state </td></tr>
-    <tr><td class="paramname">meshState</td><td>The mesh state containing posed mesh for collision testing </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The collision error value </dd></dl>
-
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a9004873fbd8970a3c7026c425f7585f7">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8cpp_source.html#l00278">278</a> of file <a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00434">434</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 <p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00162">distance</a>, <a class="el" href="checks_8h_source.html#l00045">MT_CHECK_NOTNULL</a>, <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>, <a class="el" href="mesh__state_8h_source.html#l00032">momentum::MeshStateT&lt; T &gt;::posedMesh_</a>, and <a class="el" href="texture__classification_8cpp_source.html#l00219">vertexIndex</a>.</p>
 
 </div>
 </div>
-<a id="ab9391c688712020c2ce6348d84dc0a00" name="ab9391c688712020c2ce6348d84dc0a00"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9391c688712020c2ce6348d84dc0a00">&#9670;&#160;</a></span>getGradient()</h2>
+<a id="a8d13715ab889867c7d5539894eacc2d5" name="a8d13715ab889867c7d5539894eacc2d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d13715ab889867c7d5539894eacc2d5">&#9670;&#160;</a></span>getGradient()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getGradient </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getGradient </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>params</em>, </td>
@@ -418,39 +400,27 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Computes the collision error and its gradient. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">params</td><td>The model parameters </td></tr>
-    <tr><td class="paramname">state</td><td>The skeleton state </td></tr>
-    <tr><td class="paramname">meshState</td><td>The mesh state containing posed mesh for collision testing </td></tr>
-    <tr><td class="paramname">gradient</td><td>Output gradient vector </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The collision error value </dd></dl>
-
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a8edd68fc2cc8b2d67048c5b3fe69541a">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8cpp_source.html#l00458">458</a> of file <a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00584">584</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 <p class="reference">References <a class="el" href="state__sequence__error__function_8cpp_source.html#l00225">diff</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00162">distance</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00221">jointIndex</a>, <a class="el" href="character_2types_8h_source.html#l00193">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="checks_8h_source.html#l00045">MT_CHECK_NOTNULL</a>, <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>, <a class="el" href="mesh__state_8h_source.html#l00032">momentum::MeshStateT&lt; T &gt;::posedMesh_</a>, <a class="el" href="mesh__state_8h_source.html#l00030">momentum::MeshStateT&lt; T &gt;::restMesh_</a>, <a class="el" href="texture__classification_8cpp_source.html#l00219">vertexIndex</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
-<a id="a2ee45651edf591d667c9f0b1319f1566" name="a2ee45651edf591d667c9f0b1319f1566"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2ee45651edf591d667c9f0b1319f1566">&#9670;&#160;</a></span>getJacobian()</h2>
+<a id="a4be08b3b995a531883fa38991cad472e" name="a4be08b3b995a531883fa38991cad472e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4be08b3b995a531883fa38991cad472e">&#9670;&#160;</a></span>getJacobian()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobian </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getJacobian </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1ModelParametersT.html">ModelParametersT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>params</em>, </td>
@@ -498,41 +468,27 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Computes the collision error Jacobian and residual. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">params</td><td>The model parameters </td></tr>
-    <tr><td class="paramname">state</td><td>The skeleton state </td></tr>
-    <tr><td class="paramname">meshState</td><td>The mesh state containing posed mesh for collision testing </td></tr>
-    <tr><td class="paramname">jacobian</td><td>Output Jacobian matrix </td></tr>
-    <tr><td class="paramname">residual</td><td>Output residual vector </td></tr>
-    <tr><td class="paramname">usedRows</td><td>Number of rows actually used in jacobian and residual </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The collision error value </dd></dl>
-
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a68eb5c4782e23bc8e92ec7701947d6cf">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8cpp_source.html#l00597">597</a> of file <a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00674">674</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 <p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00162">distance</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00041">jacobian</a>, <a class="el" href="state__sequence__error__function_8cpp_source.html#l00221">jointIndex</a>, <a class="el" href="character_2types_8h_source.html#l00193">momentum::kInvalidIndex</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="checks_8h_source.html#l00045">MT_CHECK_NOTNULL</a>, <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>, <a class="el" href="mesh__state_8h_source.html#l00032">momentum::MeshStateT&lt; T &gt;::posedMesh_</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00042">residual</a>, <a class="el" href="mesh__state_8h_source.html#l00030">momentum::MeshStateT&lt; T &gt;::restMesh_</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00045">usedRows</a>, <a class="el" href="texture__classification_8cpp_source.html#l00219">vertexIndex</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
 </div>
 </div>
-<a id="ae8257da1ae121b109e5a7be26b40ca91" name="ae8257da1ae121b109e5a7be26b40ca91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae8257da1ae121b109e5a7be26b40ca91">&#9670;&#160;</a></span>getJacobianSize()</h2>
+<a id="a906fabc32140ac650a53ad9112c98f96" name="a906fabc32140ac650a53ad9112c98f96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a906fabc32140ac650a53ad9112c98f96">&#9670;&#160;</a></span>getJacobianSize()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getJacobianSize </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getJacobianSize </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -545,27 +501,25 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Returns the maximum number of Jacobian rows needed. </p>
-
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8cpp_source.html#l00772">772</a> of file <a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00786">786</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 </div>
 </div>
-<a id="a67a79e986133fe9486c01d13215c3722" name="a67a79e986133fe9486c01d13215c3722"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a67a79e986133fe9486c01d13215c3722">&#9670;&#160;</a></span>getNumActiveVertices()</h2>
+<a id="a49449c969a44a403810064ecf0ac3d18" name="a49449c969a44a403810064ecf0ac3d18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49449c969a44a403810064ecf0ac3d18">&#9670;&#160;</a></span>getNumActiveVertices()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a>  = SDFColliderT&lt;float&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getNumActiveVertices </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getNumActiveVertices </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -578,25 +532,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Returns the number of active vertices participating in collisions. </p>
-
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00127">127</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00119">119</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 </div>
 </div>
-<a id="a26be11a5af6572f085c98db879e8c888" name="a26be11a5af6572f085c98db879e8c888"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26be11a5af6572f085c98db879e8c888">&#9670;&#160;</a></span>getNumCollisionPairs()</h2>
+<a id="ac7557adf6bf77a803b976317e7b984cd" name="ac7557adf6bf77a803b976317e7b984cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7557adf6bf77a803b976317e7b984cd">&#9670;&#160;</a></span>getNumCollisionPairs()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a>  = SDFColliderT&lt;float&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::getNumCollisionPairs </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::getNumCollisionPairs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -609,25 +561,23 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Returns the number of bone-collider pairs being tested. </p>
-
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00132">132</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00123">123</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 </div>
 </div>
-<a id="a93e6dc8245fce2ecf8b0b79409c03bb6" name="a93e6dc8245fce2ecf8b0b79409c03bb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93e6dc8245fce2ecf8b0b79409c03bb6">&#9670;&#160;</a></span>needsMesh()</h2>
+<a id="a066a1e4f8242f9926b1711530b1c88f6" name="a066a1e4f8242f9926b1711530b1c88f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a066a1e4f8242f9926b1711530b1c88f6">&#9670;&#160;</a></span>needsMesh()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a>  = SDFColliderT&lt;float&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::needsMesh </td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::needsMesh </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -640,28 +590,26 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Returns true because this error function requires mesh state. </p>
-
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#aec7acd2180c714506cca74b033ad8b35">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00122">122</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00115">115</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a496ecfe90bc593c7fbd443bc1ae046b3" name="a496ecfe90bc593c7fbd443bc1ae046b3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a496ecfe90bc593c7fbd443bc1ae046b3">&#9670;&#160;</a></span>kSDFCollisionWeight</h2>
+<a id="a5ab0d77146cfc04b0c242e2c58e4e8ea" name="a5ab0d77146cfc04b0c242e2c58e4e8ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ab0d77146cfc04b0c242e2c58e4e8ea">&#9670;&#160;</a></span>kSDFCollisionWeight</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> , <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a>  = SDFColliderT&lt;float&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::kSDFCollisionWeight = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(5<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-3)</td>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constexpr</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">SdfColliderType</a> &gt;::kSDFCollisionWeight = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(5<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">e</a>-3)</td>
         </tr>
       </table>
   </td>
@@ -671,16 +619,12 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p>Weight constant for SDF collision penalties. </p>
-
-<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00137">137</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="sdf__collision__error__function_8h_source.html#l00127">127</a> of file <a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a>.</p>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
-<li>character_solver/<a class="el" href="character__solver_2fwd_8h_source.html">fwd.h</a></li>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>character_solver/<a class="el" href="sdf__collision__error__function_8h_source.html">sdf_collision_error_function.h</a></li>
-<li>character_solver/<a class="el" href="sdf__collision__error__function_8cpp_source.html">sdf_collision_error_function.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -688,7 +632,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a></li>
-    <li class="footer">Generated on Sat May 16 2026 01:35:20 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon May 18 2026 23:53:22 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

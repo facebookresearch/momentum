@@ -220,7 +220,7 @@ var hierarchy =
       [ "momentum::ProjectionErrorFunctionT< T >", "classmomentum_1_1ProjectionErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableProjectionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableProjectionErrorFunctionT.html", null ]
       ] ],
-      [ "momentum::SDFCollisionErrorFunctionT< T >", "classmomentum_1_1SDFCollisionErrorFunctionT.html", null ],
+      [ "momentum::SDFCollisionErrorFunctionT< T, SdfColliderType >", "classmomentum_1_1SDFCollisionErrorFunctionT.html", null ],
       [ "momentum::SkinnedLocatorErrorFunctionT< T >", "classmomentum_1_1SkinnedLocatorErrorFunctionT.html", null ],
       [ "momentum::SkinnedLocatorTriangleErrorFunctionT< T >", "classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html", null ],
       [ "momentum::StateErrorFunctionT< T >", "classmomentum_1_1StateErrorFunctionT.html", [

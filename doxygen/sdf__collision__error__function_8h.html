@@ -92,16 +92,31 @@ $(document).ready(function(){initNavTree('sdf__collision__error__function_8h.htm
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">sdf_collision_error_function.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="sdf__collision__geometry_8h_source.html">momentum/character/sdf_collision_geometry.h</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mesh__state_8h_source.html">momentum/character/mesh_state.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="sdf__collision__geometry_8h_source.html">momentum/character/sdf_collision_geometry.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="skeleton_8h_source.html">momentum/character/skeleton.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="skeleton__state_8h_source.html">momentum/character/skeleton_state.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="skin__weights_8h_source.html">momentum/character/skin_weights.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="error__function__utils_8h_source.html">momentum/character_solver/error_function_utils.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="character__solver_2fwd_8h_source.html">momentum/character_solver/fwd.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="skeleton__error__function_8h_source.html">momentum/character_solver/skeleton_error_function.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="skinning__weight__iterator_8h_source.html">momentum/character_solver/skinning_weight_iterator.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="checks_8h_source.html">momentum/common/checks.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="profile_8h_source.html">momentum/common/profile.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="math_2fwd_8h_source.html">momentum/math/fwd.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="math_2utility_8h_source.html">momentum/math/utility.h</a>&gt;</code><br />
 <code>#include &lt;axel/BoundingBox.h&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="sdf__collision__error__function_8h_source.html">Go to the source code of this file.</a></p>
@@ -114,7 +129,7 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1BoneCollisionPairT.html">momentum::BoneCollisionPairT&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collision pair information for bone-SDF collider combinations.  <a href="structmomentum_1_1BoneCollisionPairT.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT&lt; T &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SDF-based collision error function that penalizes vertex penetration into SDF colliders.  <a href="classmomentum_1_1SDFCollisionErrorFunctionT.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -122,6 +137,15 @@ Classes</h2></td></tr>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacemomentum_1_1detail__sdf__collision" id="r_namespacemomentum_1_1detail__sdf__collision"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail__sdf__collision.html">momentum::detail_sdf_collision</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ab31b754a3e3976845a1a26415a32a5d0" id="r_ab31b754a3e3976845a1a26415a32a5d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ab31b754a3e3976845a1a26415a32a5d0">momentum::SDFCollisionErrorFunction</a> = <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;</td></tr>
+<tr class="separator:ab31b754a3e3976845a1a26415a32a5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae202a2808b7f6f5ebea7e4597578849a" id="r_ae202a2808b7f6f5ebea7e4597578849a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ae202a2808b7f6f5ebea7e4597578849a">momentum::SDFCollisionErrorFunctiond</a> = <a class="el" href="classmomentum_1_1SDFCollisionErrorFunctionT.html">SDFCollisionErrorFunctionT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt;</td></tr>
+<tr class="separator:ae202a2808b7f6f5ebea7e4597578849a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -129,7 +153,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="sdf__collision__error__function_8h.html">sdf_collision_error_function.h</a></li>
-    <li class="footer">Generated on Sat May 16 2026 01:35:19 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon May 18 2026 23:53:21 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -22,7 +22,7 @@ var searchData=
   ['_7emultiposesolvert_19',['~MultiposeSolverT',['../classmomentum_1_1MultiposeSolverT.html#ae1af2a7e44a71cc09eab0928e91c936f',1,'momentum::MultiposeSolverT']]],
   ['_7epointtrianglevertexerrorfunctiont_20',['~PointTriangleVertexErrorFunctionT',['../classmomentum_1_1PointTriangleVertexErrorFunctionT.html#acdd69ab1a638334b60e930d6b4c68906',1,'momentum::PointTriangleVertexErrorFunctionT']]],
   ['_7eposetransformsolvert_21',['~PoseTransformSolverT',['../classmomentum_1_1PoseTransformSolverT.html#a84f4ffedd6dd941613fee492466415f5',1,'momentum::PoseTransformSolverT']]],
-  ['_7esdfcollisionerrorfunctiont_22',['~SDFCollisionErrorFunctionT',['../classmomentum_1_1SDFCollisionErrorFunctionT.html#a6f89109cbe73c686f89f1536c12e8f70',1,'momentum::SDFCollisionErrorFunctionT']]],
+  ['_7esdfcollisionerrorfunctiont_22',['~SDFCollisionErrorFunctionT',['../classmomentum_1_1SDFCollisionErrorFunctionT.html#ad965ed4111cffe08bcaf2bd93a2c85ea',1,'momentum::SDFCollisionErrorFunctionT']]],
   ['_7esequenceerrorfunctiont_23',['~SequenceErrorFunctionT',['../classmomentum_1_1SequenceErrorFunctionT.html#a9091821c1fc8bc530cbb55d3281c5d41',1,'momentum::SequenceErrorFunctionT']]],
   ['_7esequencesolverfunctiont_24',['~SequenceSolverFunctionT',['../classmomentum_1_1SequenceSolverFunctionT.html#ae6152bb68d277ab95e0b1a7b564091e7',1,'momentum::SequenceSolverFunctionT']]],
   ['_7eskeletonerrorfunctiont_25',['~SkeletonErrorFunctionT',['../classmomentum_1_1SkeletonErrorFunctionT.html#ad6025189c7338ca959ff7137b9f12ca2',1,'momentum::SkeletonErrorFunctionT']]],
