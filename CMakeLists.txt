@@ -83,6 +83,7 @@ mt_option(MOMENTUM_BUILD_IO_USD "Build USD I/O support" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
+mt_option(MOMENTUM_BUILD_RERUN "Build native Rerun C++ visualization support" ON)
 mt_option(MOMENTUM_ENABLE_PROFILING "Enable building with profiling annotations" OFF)
 mt_option(MOMENTUM_ENABLE_SIMD "Enable building with SIMD instructions" ON)
 mt_option(MOMENTUM_INSTALL_EXAMPLES "Install examples" OFF)
@@ -143,26 +144,28 @@ set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
 set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(mdspan)
 
-if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
-  find_package(rerun_sdk CONFIG REQUIRED)
-else()
-  include(FetchContent)
-  FetchContent_Declare(rerun_sdk
-    URL https://github.com/rerun-io/rerun/releases/download/0.28.2/rerun_cpp_sdk.zip
-  )
-  FetchContent_MakeAvailable(rerun_sdk)
-endif()
-
-# Workaround for Arrow build failure in cibuildwheel
-if(TARGET arrow_shared)
-  # If arrow_shared is already defined (e.g. by rerun_sdk), ensure we don't try to build it again
-  # or if it's an imported target, we are good.
-elseif(TARGET Arrow::arrow_shared)
-  # System arrow found
-else()
-  # If rerun_sdk didn't provide arrow, we might need to find it
+if(MOMENTUM_BUILD_RERUN)
   if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
-    find_package(Arrow CONFIG REQUIRED)
+    find_package(rerun_sdk CONFIG REQUIRED)
+  else()
+    include(FetchContent)
+    FetchContent_Declare(rerun_sdk
+      URL https://github.com/rerun-io/rerun/releases/download/0.28.2/rerun_cpp_sdk.zip
+    )
+    FetchContent_MakeAvailable(rerun_sdk)
+  endif()
+
+  # Workaround for Arrow build failure in cibuildwheel
+  if(TARGET arrow_shared)
+    # If arrow_shared is already defined (e.g. by rerun_sdk), ensure we don't try to build it again
+    # or if it's an imported target, we are good.
+  elseif(TARGET Arrow::arrow_shared)
+    # System arrow found
+  else()
+    # If rerun_sdk didn't provide arrow, we might need to find it
+    if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
+      find_package(Arrow CONFIG REQUIRED)
+    endif()
   endif()
 endif()
 
@@ -674,28 +677,30 @@ mt_library(
     Microsoft.GSL::GSL
 )
 
-mt_library(
-  NAME rerun_eigen_adapters
-  HEADERS_VARS
-    rerun_eigen_adapters_public_headers
-  PUBLIC_LINK_LIBRARIES
-    Eigen3::Eigen
-    rerun_sdk
-)
+if(MOMENTUM_BUILD_RERUN)
+  mt_library(
+    NAME rerun_eigen_adapters
+    HEADERS_VARS
+      rerun_eigen_adapters_public_headers
+    PUBLIC_LINK_LIBRARIES
+      Eigen3::Eigen
+      rerun_sdk
+  )
 
-mt_library(
-  NAME rerun
-  HEADERS_VARS
-    rerun_public_headers
-  SOURCES_VARS
-    rerun_sources
-  PUBLIC_LINK_LIBRARIES
-    character
-    rerun_sdk
-  PRIVATE_LINK_LIBRARIES
-    rerun_eigen_adapters
-    axel
-)
+  mt_library(
+    NAME rerun
+    HEADERS_VARS
+      rerun_public_headers
+    SOURCES_VARS
+      rerun_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+      rerun_sdk
+    PRIVATE_LINK_LIBRARIES
+      rerun_eigen_adapters
+      axel
+  )
+endif()
 
 #===============================================================================
 # Tests
@@ -1000,14 +1005,16 @@ if(MOMENTUM_BUILD_TESTING)
       marker_tracker
   )
 
-  mt_test(
-    NAME rerun_test
-    SOURCES_VARS rerun_test_sources
-    LINK_LIBRARIES
-      character_test_helpers
-      rerun
-      rerun_eigen_adapters
-  )
+  if(MOMENTUM_BUILD_RERUN)
+    mt_test(
+      NAME rerun_test
+      SOURCES_VARS rerun_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        rerun
+        rerun_eigen_adapters
+    )
+  endif()
 endif()
 
 #===============================================================================
@@ -1031,55 +1038,57 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
-  mt_executable(
-    NAME glb_viewer
-    SOURCES_VARS glb_viewer_sources
-    LINK_LIBRARIES
-      io_gltf
-      rerun
-      CLI11::CLI11
-      rerun_sdk
-  )
+  if(MOMENTUM_BUILD_RERUN)
+    mt_executable(
+      NAME glb_viewer
+      SOURCES_VARS glb_viewer_sources
+      LINK_LIBRARIES
+        io_gltf
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
 
-  mt_executable(
-    NAME fbx_viewer
-    SOURCES_VARS fbx_viewer_sources
-    LINK_LIBRARIES
-      io_fbx
-      rerun
-      CLI11::CLI11
-      rerun_sdk
-  )
+    mt_executable(
+      NAME fbx_viewer
+      SOURCES_VARS fbx_viewer_sources
+      LINK_LIBRARIES
+        io_fbx
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
 
-  mt_executable(
-    NAME c3d_viewer
-    SOURCES_VARS c3d_viewer_sources
-    LINK_LIBRARIES
-      io_marker
-      rerun
-      CLI11::CLI11
-      rerun_sdk
-  )
+    mt_executable(
+      NAME c3d_viewer
+      SOURCES_VARS c3d_viewer_sources
+      LINK_LIBRARIES
+        io_marker
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
 
-  mt_executable(
-    NAME urdf_viewer
-    SOURCES_VARS urdf_viewer_sources
-    LINK_LIBRARIES
-      io_urdf
-      rerun
-      CLI11::CLI11
-      rerun_sdk
-  )
+    mt_executable(
+      NAME urdf_viewer
+      SOURCES_VARS urdf_viewer_sources
+      LINK_LIBRARIES
+        io_urdf
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
 
-  mt_executable(
-    NAME bvh_viewer
-    SOURCES_VARS bvh_viewer_sources
-    LINK_LIBRARIES
-      io_bvh
-      rerun
-      CLI11::CLI11
-      rerun_sdk
-  )
+    mt_executable(
+      NAME bvh_viewer
+      SOURCES_VARS bvh_viewer_sources
+      LINK_LIBRARIES
+        io_bvh
+        rerun
+        CLI11::CLI11
+        rerun_sdk
+    )
+  endif()
 
   mt_executable(
     NAME animate_shapes
@@ -1120,7 +1129,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
-  if(MOMENTUM_BUILD_IO_USD)
+  if(MOMENTUM_BUILD_IO_USD AND MOMENTUM_BUILD_RERUN)
     mt_executable(
       NAME usd_viewer
       SOURCES_VARS usd_viewer_sources
