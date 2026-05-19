@@ -88,6 +88,7 @@ mt_option(MOMENTUM_ENABLE_PROFILING "Enable building with profiling annotations"
 mt_option(MOMENTUM_ENABLE_SIMD "Enable building with SIMD instructions" ON)
 mt_option(MOMENTUM_INSTALL_EXAMPLES "Install examples" OFF)
 mt_option(MOMENTUM_USE_SYSTEM_GOOGLETEST "Use GoogleTest installed in system" OFF)
+mt_option(MOMENTUM_USE_SYSTEM_MDSPAN "Use mdspan installed in system" OFF)
 mt_option(MOMENTUM_USE_SYSTEM_PYBIND11 "Use pybind11 installed in system" OFF)
 mt_option(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK "Use Rerun C++ SDK installed in system" OFF)
 mt_option(MOMENTUM_USE_SYSTEM_TRACY "Use Tracy installed in system" OFF)
@@ -132,17 +133,21 @@ find_package(re2 MODULE REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(urdfdom CONFIG REQUIRED)
 
-# Use standalone mdspan (header-only) instead of full Kokkos.
-# Full Kokkos with CUDA sets CMAKE_CXX_COMPILER to nvcc_wrapper globally,
-# which breaks pybind11 compilation. We only need mdspan headers.
-include(FetchContent)
-FetchContent_Declare(mdspan
-  URL https://github.com/kokkos/mdspan/archive/refs/heads/stable.tar.gz
-)
-set(MDSPAN_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
-set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
-set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(mdspan)
+if(MOMENTUM_USE_SYSTEM_MDSPAN)
+  find_package(mdspan CONFIG REQUIRED)
+else()
+  # Use standalone mdspan (header-only) instead of full Kokkos.
+  # Full Kokkos with CUDA sets CMAKE_CXX_COMPILER to nvcc_wrapper globally,
+  # which breaks pybind11 compilation. We only need mdspan headers.
+  include(FetchContent)
+  FetchContent_Declare(mdspan
+    URL https://github.com/kokkos/mdspan/archive/refs/heads/stable.tar.gz
+  )
+  set(MDSPAN_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+  set(MDSPAN_ENABLE_BENCHMARKS OFF CACHE BOOL "" FORCE)
+  set(MDSPAN_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(mdspan)
+endif()
 
 if(MOMENTUM_BUILD_RERUN)
   if(MOMENTUM_USE_SYSTEM_RERUN_CPP_SDK)
