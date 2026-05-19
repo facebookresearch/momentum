@@ -877,7 +877,7 @@ void parseSkinnedModel(
   }
 
   mesh.normals.resize(vertexOffset + nVerts, Vector3f::Zero());
-  mesh.colors.resize(vertexOffset + nVerts, Vector3b::Zero());
+  mesh.colors.resize(vertexOffset + nVerts, Vector3b::Constant(255));
   mesh.confidence.resize(vertexOffset + nVerts, 1);
 
   const size_t textureCoordOffset = mesh.texcoords.size();
