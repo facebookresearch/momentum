@@ -89,6 +89,10 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       bool filterRestPoseIntersections = true,
       uint8_t maxCollisionsPerVertex = 1);
 
+  SDFCollisionErrorFunctionT(const SDFCollisionErrorFunctionT&) = default;
+  SDFCollisionErrorFunctionT& operator=(const SDFCollisionErrorFunctionT&) = delete;
+  SDFCollisionErrorFunctionT(SDFCollisionErrorFunctionT&&) noexcept = default;
+  SDFCollisionErrorFunctionT& operator=(SDFCollisionErrorFunctionT&&) noexcept = delete;
   ~SDFCollisionErrorFunctionT() override = default;
 
   [[nodiscard]] double getError(
@@ -114,6 +118,11 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   [[nodiscard]] bool needsMesh() const override {
     return true;
+  }
+
+  /// Returns the character used to update mesh state for SDF collision evaluation.
+  [[nodiscard]] const Character* getCharacter() const override {
+    return &character_;
   }
 
   [[nodiscard]] size_t getNumActiveVertices() const {
