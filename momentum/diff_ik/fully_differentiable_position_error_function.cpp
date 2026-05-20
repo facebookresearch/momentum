@@ -14,6 +14,8 @@
 #include <momentum/math/utility.h>
 
 #include <algorithm>
+#include <atomic>
+#include <cassert>
 
 namespace momentum {
 

@@ -407,7 +407,12 @@ double SequenceSolverT<T>::processPerFrameErrors_parallel(
           return {
               .frameIndex = iFrame,
               .jacobian = jacRes.jacobian.topRows(jacRes.usedRows)(
-                  Eigen::all, fn->universalParameterIndices_),
+#if EIGEN_VERSION_AT_LEAST(5, 0, 0)
+                  Eigen::placeholders::all,
+#else
+                  Eigen::all,
+#endif
+                  fn->universalParameterIndices_),
               .residual = jacRes.residual.topRows(jacRes.usedRows),
               .error = jacRes.error,
               .nFunctions = jacRes.nFunctions,

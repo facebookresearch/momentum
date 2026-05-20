@@ -13,6 +13,8 @@
 
 #include <Eigen/Eigenvalues>
 
+#include <cassert>
+
 namespace momentum {
 
 template <typename T>

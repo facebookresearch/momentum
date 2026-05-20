@@ -10,6 +10,8 @@
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 
+#include <cassert>
+
 namespace momentum {
 
 template <typename T>
