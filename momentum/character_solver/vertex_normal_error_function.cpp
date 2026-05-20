@@ -113,6 +113,7 @@ double VertexNormalErrorFunctionT<T>::getGradient(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   const SkeletonDerivativeT<T> skeletonDerivative(
       this->skeleton_,
@@ -259,6 +260,7 @@ double VertexNormalErrorFunctionT<T>::getJacobian(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   const SkeletonDerivativeT<T> skeletonDerivative(
       this->skeleton_,

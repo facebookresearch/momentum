@@ -68,6 +68,7 @@ double VertexErrorFunctionT<T, Data, FuncDim>::getError(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   double error = 0.0;
   for (size_t i = 0; i < numConstraints; ++i) {
@@ -101,6 +102,7 @@ double VertexErrorFunctionT<T, Data, FuncDim>::getGradient(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   auto dispensoOptions = dispenso::ParForOptions();
   dispensoOptions.maxThreads = static_cast<uint32_t>(maxThreads_);
@@ -197,6 +199,7 @@ double VertexErrorFunctionT<T, Data, FuncDim>::getJacobian(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   auto dispensoOptions = dispenso::ParForOptions();
   dispensoOptions.maxThreads = static_cast<uint32_t>(maxThreads_);

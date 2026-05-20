@@ -65,6 +65,7 @@ double VertexPositionErrorFunctionT<T>::getGradient(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   auto dispensoOptions = dispenso::ParForOptions();
   dispensoOptions.maxThreads = static_cast<uint32_t>(this->maxThreads_);
@@ -153,6 +154,7 @@ double VertexPositionErrorFunctionT<T>::getJacobian(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   auto dispensoOptions = dispenso::ParForOptions();
   dispensoOptions.maxThreads = static_cast<uint32_t>(this->maxThreads_);

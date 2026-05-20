@@ -11,6 +11,7 @@
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/skeleton_derivative.h"
+#include "momentum/common/checks.h"
 
 #include <dispenso/parallel_for.h>
 
@@ -83,6 +84,8 @@ double CameraVertexProjectionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& skeletonState,
     const MeshStateT<T>& meshState) {
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
+
   double error = 0;
 
   const auto& intrinsics = (intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams())
@@ -131,6 +134,7 @@ double CameraVertexProjectionErrorFunctionT<T>::getGradient(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   const bool hasIntrinsics = intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams();
   const auto& intrinsics =
@@ -253,6 +257,7 @@ double CameraVertexProjectionErrorFunctionT<T>::getJacobian(
   if (numConstraints == 0) {
     return 0.0;
   }
+  MT_CHECK_NOTNULL(meshState.posedMesh_);
 
   const bool hasIntrinsics = intrinsicsMapping_ && intrinsicsMapping_->hasActiveParams();
   const auto& intrinsics =
