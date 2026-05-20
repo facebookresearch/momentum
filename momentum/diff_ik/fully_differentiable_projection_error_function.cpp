@@ -13,6 +13,8 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/diff_ik/ceres_utility.h"
 
+#include <cassert>
+
 namespace momentum {
 
 template <typename T>

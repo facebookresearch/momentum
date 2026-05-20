@@ -11,6 +11,8 @@
 #include "momentum/common/log.h"
 #include "momentum/diff_ik/ceres_utility.h"
 
+#include <cassert>
+
 namespace momentum {
 
 template <typename T>

@@ -19,6 +19,7 @@
 
 #include <dispenso/parallel_for.h>
 
+#include <atomic>
 #include <numeric>
 
 namespace momentum {
