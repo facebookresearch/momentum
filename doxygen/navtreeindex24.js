@@ -1,5 +1,15 @@
 var NAVTREEINDEX24 =
 {
+"namespacemomentum.html#a2f226da273502885272704ccc8a93cc6":[1,0,2,1273],
+"namespacemomentum.html#a2f2ad085afaf6612f340a2ed36c69f3f":[1,0,2,822],
+"namespacemomentum.html#a2f34a7efcb613b1a00a52ea722107ab6":[1,0,2,1429],
+"namespacemomentum.html#a2f614b7d62b006a78653e680eefc5a0d":[1,0,2,708],
+"namespacemomentum.html#a2f67b815e9ebce8f6b6a2268ead2850d":[1,0,2,2262],
+"namespacemomentum.html#a2f6f9496cefa73b17dee22ede767dad2":[1,0,2,1151],
+"namespacemomentum.html#a2f900b73d9fc502b4b3dea878ec9cbc5":[1,0,2,1252],
+"namespacemomentum.html#a2f9c92ad13f1415cdca34045995174a1":[1,0,2,2449],
+"namespacemomentum.html#a2f9e22329e02c73909ba8adc756b974e":[1,0,2,410],
+"namespacemomentum.html#a2f9ed099fa9b206312926f7d04f8ddd9":[1,0,2,2840],
 "namespacemomentum.html#a2fa04ee08fd542c41836bf77ef02f933":[1,0,2,1609],
 "namespacemomentum.html#a2fa3be5441fed27f6146a904f6da3ef9":[1,0,2,903],
 "namespacemomentum.html#a2fbed6abd182b947970d8ae590b96b4b":[1,0,2,2157],
@@ -239,15 +249,5 @@ var NAVTREEINDEX24 =
 "namespacemomentum.html#a451522ca4c242443fcf19ac0e3ce4df7":[1,0,2,2492],
 "namespacemomentum.html#a452372931c61158a9688eb2e538a1a50":[1,0,2,2677],
 "namespacemomentum.html#a452bfb00fae3148cb14c0be54e80aaab":[1,0,2,2228],
-"namespacemomentum.html#a45366c24fc59ef0ec268465c4a3fa738":[1,0,2,644],
-"namespacemomentum.html#a454e37f4c968cdf4d78a5dbbd056d4a6":[1,0,2,487],
-"namespacemomentum.html#a456470069fc01a625874885c93a2749b":[1,0,2,1548],
-"namespacemomentum.html#a4591df41bc5c72d11bab59b07ddf5284":[1,0,2,2338],
-"namespacemomentum.html#a4592ff582211f3fcf32daa8b95376d2f":[1,0,2,1126],
-"namespacemomentum.html#a4599734e249bc439434c7965d1ca48d4":[1,0,2,1839],
-"namespacemomentum.html#a459beb8ce2fd85f051b8d3c5cf89c6b7":[1,0,2,768],
-"namespacemomentum.html#a45e0cc724cd386a18c40573f9f63518f":[1,0,2,1016],
-"namespacemomentum.html#a45e7bad11d6956c9cd6651e17c98772d":[1,0,2,1400],
-"namespacemomentum.html#a45f8cc060d23644dd2303d447d56915b":[1,0,2,521],
-"namespacemomentum.html#a464462c9333e8e10a5c72b7740f6cb82":[1,0,2,2003]
+"namespacemomentum.html#a45366c24fc59ef0ec268465c4a3fa738":[1,0,2,644]
 };
