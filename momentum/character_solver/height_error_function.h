@@ -122,26 +122,32 @@ class HeightErrorFunctionT : public SkeletonErrorFunctionT<T> {
   };
 
   /// Calculate the current height of the mesh
+  /// @param meshState The mesh state to calculate height from
   /// @return Height result containing the height and the min/max vertex indices
-  [[nodiscard]] HeightResult calculateHeight() const;
+  [[nodiscard]] HeightResult calculateHeight(const MeshStateT<T>& meshState) const;
 
   /// Calculate jacobian contribution from a vertex
   template <typename Derived>
   void calculateVertexJacobian(
       size_t vertexIndex,
       const Eigen::Vector3<T>& jacobianDirection,
+      const SkeletonStateT<T>& skeletonState,
+      const MeshStateT<T>& meshState,
       Eigen::MatrixBase<Derived>& jacobian) const;
 
   /// Calculate gradient contribution from a vertex
   void calculateVertexGradient(
       size_t vertexIndex,
       const Eigen::Vector3<T>& gradientDirection,
+      const SkeletonStateT<T>& skeletonState,
+      const MeshStateT<T>& meshState,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
   /// Calculate world space position derivative for blend shape parameters
   void calculateDWorldPos(
       size_t vertexIndex,
       const Eigen::Vector3<T>& d_restPos,
+      const SkeletonStateT<T>& skeletonState,
       Eigen::Vector3<T>& d_worldPos) const;
 
   const Character& character_;
@@ -156,21 +162,6 @@ class HeightErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// affect the height measurement. Inactive parameters are zeroed out before
   /// computing the skeleton and mesh state.
   ParameterSet activeModelParams_;
-
-  /// Internal skeleton state for skinning (computed from active parameters only)
-  ///
-  /// This is updated in getError/getGradient/getJacobian by zeroing out all
-  /// inactive parameters from the input model parameters. This ensures derivatives
-  /// w.r.t. inactive parameters are automatically zero.
-  mutable SkeletonStateT<T> skeletonState_;
-
-  /// Internal mesh state (updated using skeletonState_ and active parameters only)
-  ///
-  /// We maintain our own mesh state because we use skeletonState_ (computed from
-  /// active parameters only) rather than the state parameter passed to
-  /// getError/getGradient/getJacobian. This is marked mutable so we can update
-  /// it in const methods like getError.
-  mutable MeshStateT<T> meshState_;
 };
 
 } // namespace momentum
