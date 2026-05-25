@@ -281,10 +281,11 @@ void rasterizeSpheres(
     radiusAccessor.emplace(*radius, nSpheres);
   }
 
+  std::optional<VectorArrayAccessor<float, 3>> colorAccessor;
   std::optional<typename VectorArrayAccessor<float, 3>::ElementView> colorView;
   if (color.has_value()) {
-    VectorArrayAccessor<float, 3> colorAccessor(*color, LeadingDimensions{}, nSpheres);
-    colorView = colorAccessor.view({});
+    colorAccessor.emplace(*color, LeadingDimensions{}, nSpheres);
+    colorView = colorAccessor->view({});
   }
 
   // Create mdspans while holding GIL
@@ -386,10 +387,11 @@ void rasterizeCylinders(
     radiusAccessor.emplace(*radius, nCylinders);
   }
 
+  std::optional<VectorArrayAccessor<float, 3>> colorAccessor;
   std::optional<typename VectorArrayAccessor<float, 3>::ElementView> colorView;
   if (color.has_value()) {
-    VectorArrayAccessor<float, 3> colorAccessor(*color, LeadingDimensions{}, nCylinders);
-    colorView = colorAccessor.view({});
+    colorAccessor.emplace(*color, LeadingDimensions{}, nCylinders);
+    colorView = colorAccessor->view({});
   }
 
   // Create mdspans while holding GIL
@@ -409,12 +411,16 @@ void rasterizeCylinders(
       materialCur.diffuseColor = colorView->get(i);
     }
 
-    const float length = (endPos - startPos).norm();
+    const Eigen::Vector3f direction = endPos - startPos;
+    const float length = direction.norm();
+    if (length <= 1e-8f) {
+      continue;
+    }
+
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
     transform.translate(startPos);
     transform.rotate(
-        Eigen::Quaternionf::FromTwoVectors(
-            Eigen::Vector3f::UnitX(), (endPos - startPos).normalized()));
+        Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), direction.stableNormalized()));
     transform.scale(Eigen::Vector3f(length, radiusVal, radiusVal));
 
     momentum::rasterizer::rasterizeMesh(

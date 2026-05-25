@@ -561,7 +561,7 @@ std::array<Mesh, 2> makeCheckerboard(float width, int numChecks, int subdivision
         width * (static_cast<float>(i) / static_cast<float>(numChecks * subdivisions) - 0.5f));
   }
 
-  std::array<Mesh, 2> result;
+  std::array<Mesh, 2> result{};
 
   for (size_t iMesh = 0; iMesh < 2; ++iMesh) {
     std::vector<Eigen::Vector3f> positions;
