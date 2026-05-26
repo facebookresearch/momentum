@@ -270,7 +270,9 @@ class Skeleton(torch.nn.Module):
         return pym_trs.where(jp >= 0, local_trs, global_trs)
 
     def local_skeleton_state_to_skeleton_state(
-        self, local_skel_state: torch.Tensor
+        self,
+        local_skel_state: torch.Tensor,
+        use_double_precision: bool = True,
     ) -> torch.Tensor:
         return skel_state_backend.global_skel_state_from_local_skel_state(
             local_skel_state=local_skel_state,
@@ -280,6 +282,7 @@ class Skeleton(torch.nn.Module):
                     dim=1,
                 )
             ),
+            use_double_precision=use_double_precision,
         )
 
     def skeleton_state_to_local_skeleton_state(
@@ -847,11 +850,15 @@ class Character(torch.nn.Module):
         )
 
     def local_skeleton_state_to_skeleton_state(
-        self, local_skel_state: torch.Tensor
+        self,
+        local_skel_state: torch.Tensor,
+        use_double_precision: bool = True,
     ) -> torch.Tensor:
         if not hasattr(self, "skeleton"):
             raise RuntimeError("Character has no skeleton, please provide one")
-        return self.skeleton.local_skeleton_state_to_skeleton_state(local_skel_state)
+        return self.skeleton.local_skeleton_state_to_skeleton_state(
+            local_skel_state, use_double_precision=use_double_precision
+        )
 
     def model_parameters_to_joint_parameters(
         self, model_parameters: torch.Tensor
@@ -863,18 +870,25 @@ class Character(torch.nn.Module):
         return self.parameter_transform.forward(model_parameters)
 
     def joint_parameters_to_skeleton_state(
-        self, joint_parameters: torch.Tensor
+        self,
+        joint_parameters: torch.Tensor,
+        use_double_precision: bool = True,
     ) -> torch.Tensor:
         local_skel_state = self.joint_parameters_to_local_skeleton_state(
             joint_parameters
         )
-        return self.local_skeleton_state_to_skeleton_state(local_skel_state)
+        return self.local_skeleton_state_to_skeleton_state(
+            local_skel_state, use_double_precision=use_double_precision
+        )
 
     def model_parameters_to_skeleton_state(
-        self, model_parameters: torch.Tensor
+        self,
+        model_parameters: torch.Tensor,
+        use_double_precision: bool = True,
     ) -> torch.Tensor:
         return self.joint_parameters_to_skeleton_state(
-            self.model_parameters_to_joint_parameters(model_parameters)
+            self.model_parameters_to_joint_parameters(model_parameters),
+            use_double_precision=use_double_precision,
         )
 
     def model_parameters_to_blendshape_coefficients(
