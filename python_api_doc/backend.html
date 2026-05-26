@@ -185,11 +185,12 @@ output.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_double_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.forward" title="Link to this definition"></a></dt>
 <dd><p>Compute forward pass for differentiable forward kinematics.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>local_skel_state: Local joint transformations, shape (batch_size, num_joints, 8)
-prefix_mul_indices: List of [child_index, parent_index] tensor pairs</p>
+prefix_mul_indices: List of [child_index, parent_index] tensor pairs
+use_double_precision: If True, compute in float64 for numerical stability.</p>
 </dd>
 <dt>Returns:</dt><dd><p>Tuple of (global_skel_state, intermediate_results)</p>
 </dd>
@@ -202,7 +203,7 @@ prefix_mul_indices: List of [child_index, parent_index] tensor pairs</p>
 <dd><p>Save context for backward pass.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>ctx: Context object for saving tensors and data
-inputs: Tuple of (local_skel_state, prefix_mul_indices)
+inputs: Tuple of (local_skel_state, prefix_mul_indices, use_double_precision)
 outputs: Tuple of (global_skel_state, intermediate_results)</p>
 </dd>
 </dl>
@@ -212,7 +213,7 @@ outputs: Tuple of (global_skel_state, intermediate_results)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state">
-<span class="sig-prename descclassname"><span class="pre">pymomentum.backend.skel_state_backend.</span></span><span class="sig-name descname"><span class="pre">global_skel_state_from_local_skel_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pymomentum.backend.skel_state_backend.</span></span><span class="sig-name descname"><span class="pre">global_skel_state_from_local_skel_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_mul_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_double_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.backend.skel_state_backend.global_skel_state_from_local_skel_state" title="Link to this definition"></a></dt>
 <dd><p>Compute global skeleton state from local joint transformations (user-facing wrapper).</p>
 <p>This is the main entry point for forward kinematics using skeleton states. It automatically
 selects between JIT-compiled and autograd-enabled implementations based on the execution context.</p>
@@ -221,6 +222,9 @@ selects between JIT-compiled and autograd-enabled implementations based on the e
 <dt>local_skel_state: Local joint transformations, shape (batch_size, num_joints, 8).</dt><dd><p>Each joint contains [tx, ty, tz, qx, qy, qz, qw, s] parameters.</p>
 </dd>
 <dt>prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining</dt><dd><p>the kinematic hierarchy traversal order.</p>
+</dd>
+<dt>use_double_precision: If True (default), performs computations in float64 for improved</dt><dd><p>numerical stability. Set to False for better GPU performance when
+float32 accuracy is sufficient.</p>
 </dd>
 </dl>
 </dd>
