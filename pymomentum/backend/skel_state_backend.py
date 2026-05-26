@@ -308,6 +308,7 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
     def forward(
         local_skel_state: th.Tensor,
         prefix_mul_indices: List[th.Tensor],
+        use_double_precision: bool = True,
     ) -> Tuple[th.Tensor, List[th.Tensor]]:
         """
         Compute forward pass for differentiable forward kinematics.
@@ -315,6 +316,7 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
         Args:
             local_skel_state: Local joint transformations, shape (batch_size, num_joints, 8)
             prefix_mul_indices: List of [child_index, parent_index] tensor pairs
+            use_double_precision: If True, compute in float64 for numerical stability.
 
         Returns:
             Tuple of (global_skel_state, intermediate_results)
@@ -322,6 +324,7 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
         return global_skel_state_from_local_skel_state_no_grad(
             local_skel_state,
             prefix_mul_indices,
+            use_double_precision=use_double_precision,
         )
 
     @staticmethod
@@ -333,12 +336,13 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
 
         Args:
             ctx: Context object for saving tensors and data
-            inputs: Tuple of (local_skel_state, prefix_mul_indices)
+            inputs: Tuple of (local_skel_state, prefix_mul_indices, use_double_precision)
             outputs: Tuple of (global_skel_state, intermediate_results)
         """
         (
             _,
             prefix_mul_indices,
+            use_double_precision,
         ) = inputs
         (
             global_skel_state,
@@ -348,6 +352,7 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
         ctx.save_for_backward(global_skel_state.clone())
         ctx.intermediate_results = intermediate_results
         ctx.prefix_mul_indices = prefix_mul_indices
+        ctx.use_double_precision = use_double_precision
 
     @staticmethod
     # pyre-ignore[14]
@@ -367,13 +372,15 @@ class GlobalSkelStateFromLocalSkelStateJIT(th.autograd.Function):
             grad_global_skel_state,
             prefix_mul_indices,
             intermediate_results,
+            use_double_precision=ctx.use_double_precision,
         )
-        return grad_local_state, None
+        return grad_local_state, None, None
 
 
 def global_skel_state_from_local_skel_state(
     local_skel_state: th.Tensor,
     prefix_mul_indices: List[th.Tensor],
+    use_double_precision: bool = True,
 ) -> th.Tensor:
     """
     Compute global skeleton state from local joint transformations (user-facing wrapper).
@@ -386,6 +393,9 @@ def global_skel_state_from_local_skel_state(
                          Each joint contains [tx, ty, tz, qx, qy, qz, qw, s] parameters.
         prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining
                            the kinematic hierarchy traversal order.
+        use_double_precision: If True (default), performs computations in float64 for improved
+                            numerical stability. Set to False for better GPU performance when
+                            float32 accuracy is sufficient.
 
     Returns:
         global_skel_state: Global joint transformations, shape (batch_size, num_joints, 8).
@@ -403,13 +413,16 @@ def global_skel_state_from_local_skel_state(
 
     if th.jit.is_tracing() or th.jit.is_scripting():
         global_skel_state, _ = global_skel_state_from_local_skel_state_impl(
-            local_skel_state, prefix_mul_indices
+            local_skel_state,
+            prefix_mul_indices,
+            use_double_precision=use_double_precision,
         )
         return global_skel_state
     else:
         global_skel_state, _ = GlobalSkelStateFromLocalSkelStateJIT.apply(
             local_skel_state,
             prefix_mul_indices,
+            use_double_precision,
         )
         return global_skel_state
 
