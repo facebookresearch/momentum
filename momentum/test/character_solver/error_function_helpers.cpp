@@ -59,14 +59,14 @@ Eigen::VectorX<T> computeNumericalGradient(
     if (errorFunction->needsMesh()) {
       meshState.update(parameters, state, character);
     }
-    const T h_1 = errorFunction->getError(parameters, state, meshState);
+    const double h_1 = errorFunction->getError(parameters, state, meshState);
     parameters(p) = referenceParameters(p) + stepSize;
     state.set(transform.apply(parameters), character.skeleton);
     if (errorFunction->needsMesh()) {
       meshState.update(parameters, state, character);
     }
-    const T h1 = errorFunction->getError(parameters, state, meshState);
-    gradient(p) = (h1 - h_1) / (2.0 * stepSize);
+    const double h1 = errorFunction->getError(parameters, state, meshState);
+    gradient(p) = static_cast<T>((h1 - h_1) / (2.0 * static_cast<double>(stepSize)));
   }
   return gradient;
 }
