@@ -259,14 +259,18 @@ def to_rotation_matrix_assume_normalized(q: torch.Tensor) -> torch.Tensor:
     return result.reshape(list(q.shape[:-1]) + [3, 3])
 
 
-def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:
+def to_rotation_matrix(q: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
     """
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
+    :parameter eps: Minimum quaternion norm used during normalization.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
-    return to_rotation_matrix_assume_normalized(normalize(q))
+    check(q)
+    return to_rotation_matrix_assume_normalized(
+        torch.nn.functional.normalize(q, dim=-1, eps=eps)
+    )
 
 
 def identity(

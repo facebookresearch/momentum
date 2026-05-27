@@ -354,7 +354,7 @@ mt_python_library(
 
 mt_python_library(
   NAME backend
-  PYMOMENTUM_SOURCES_VARS backend_torch_core_sources backend_torch_sources
+  PYMOMENTUM_SOURCES_VARS backend_common_sources backend_torch_core_sources backend_torch_sources backend_triton_sources
   PRESERVE_DIRECTORY_STRUCTURE
 )
 
