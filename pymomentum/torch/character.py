@@ -5,14 +5,20 @@
 
 # pyre-strict
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.skel_state as pym_skel_state
 import pymomentum.trs as pym_trs
 import torch
-from pymomentum.backend import skel_state_backend, trs_backend, utils as backend_utils
+from pymomentum.backend import (
+    skel_state_backend,
+    triton_fk,
+    trs_backend,
+    utils as backend_utils,
+)
+from pymomentum.backend.selection import resolve_backend
 from pymomentum.torch.parameter_limits import ParameterLimits
 from pymomentum.torch.utility import _unsqueeze_joint_params
 
@@ -87,9 +93,10 @@ class Skeleton(torch.nn.Module):
         local_state_s = torch.exp(0.6931471824645996 * joint_parameters[..., 6:])
         return torch.cat([local_state_t, local_state_q, local_state_s], dim=-1)
 
+    @torch.jit.unused
     def joint_parameters_to_local_trs(
         self, joint_parameters: torch.Tensor
-    ) -> pym_trs.TRSTransform:
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Convert joint parameters to local TRS (Translation-Rotation-Scale) state.
 
@@ -136,9 +143,10 @@ class Skeleton(torch.nn.Module):
             joint_rotation=joint_rotation_matrices,
         )
 
+    @torch.jit.unused
     def joint_parameters_to_trs(
         self, joint_parameters: torch.Tensor
-    ) -> pym_trs.TRSTransform:
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Convert joint parameters directly to global TRS (Translation-Rotation-Scale) state.
 
@@ -183,10 +191,11 @@ class Skeleton(torch.nn.Module):
             ),
         )
 
+    @torch.jit.unused
     def local_trs_to_global_trs(
         self,
-        local_trs: pym_trs.TRSTransform,
-    ) -> pym_trs.TRSTransform:
+        local_trs: Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Convert local TRS state to global TRS state using forward kinematics.
 
@@ -222,10 +231,11 @@ class Skeleton(torch.nn.Module):
             ),
         )
 
+    @torch.jit.unused
     def global_trs_to_local_trs(
         self,
-        global_trs: pym_trs.TRSTransform,
-    ) -> pym_trs.TRSTransform:
+        global_trs: Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Convert global TRS state to local TRS state.
 
@@ -274,14 +284,24 @@ class Skeleton(torch.nn.Module):
         local_skel_state: torch.Tensor,
         use_double_precision: bool = True,
     ) -> torch.Tensor:
+        prefix_mul_indices = list(
+            self.pmi.split(
+                split_size=self._pmi_buffer_sizes,
+                dim=1,
+            )
+        )
+        if torch.jit.is_scripting():
+            global_skel_state, _ = (
+                skel_state_backend.global_skel_state_from_local_skel_state_impl(
+                    local_skel_state=local_skel_state,
+                    prefix_mul_indices=prefix_mul_indices,
+                    use_double_precision=use_double_precision,
+                )
+            )
+            return global_skel_state
         return skel_state_backend.global_skel_state_from_local_skel_state(
             local_skel_state=local_skel_state,
-            prefix_mul_indices=list(
-                self.pmi.split(
-                    split_size=self._pmi_buffer_sizes,
-                    dim=1,
-                )
-            ),
+            prefix_mul_indices=prefix_mul_indices,
             use_double_precision=use_double_precision,
         )
 
@@ -337,17 +357,70 @@ class Skeleton(torch.nn.Module):
         ).flatten(-2, -1)
 
     def skeleton_state_to_joint_parameters(
-        self, skel_state: torch.Tensor
+        self,
+        skel_state: torch.Tensor,
     ) -> torch.Tensor:
         return self.local_skeleton_state_to_joint_parameters(
             self.skeleton_state_to_local_skeleton_state(skel_state)
         )
 
-    def forward(self, joint_parameters: torch.Tensor) -> torch.Tensor:
+    def joint_parameters_to_skeleton_state(
+        self,
+        joint_parameters: torch.Tensor,
+        use_double_precision: bool = True,
+        fk_backend: str = "auto",
+        active_joints: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        if torch.jit.is_scripting():
+            resolved = "torch" if fk_backend == "auto" else fk_backend
+        else:
+            resolved = resolve_backend(
+                fk_backend, joint_parameters.float(), use_double_precision
+            )
+        if resolved == "triton" and use_double_precision:
+            raise RuntimeError(
+                "Triton FK does not support double precision; "
+                "pass use_double_precision=False"
+            )
+        if resolved == "triton":
+            with torch.amp.autocast("cuda", enabled=False):
+                return triton_fk.joint_parameters_to_skeleton_state(
+                    _unsqueeze_joint_params(joint_parameters.float()),
+                    self.joint_translation_offsets,
+                    self.joint_prerotations,
+                    self.joint_parents,
+                    active_joints,
+                )
+        return self.local_skeleton_state_to_skeleton_state(
+            self.joint_parameters_to_local_skeleton_state(joint_parameters),
+            use_double_precision=use_double_precision,
+        )
+
+    def forward(
+        self,
+        joint_parameters: torch.Tensor,
+        use_double_precision: bool = True,
+    ) -> torch.Tensor:
         if joint_parameters.ndim == 1:
             joint_parameters = joint_parameters[None, :]
-        return self.local_skeleton_state_to_skeleton_state(
-            self.joint_parameters_to_local_skeleton_state(joint_parameters)
+        if torch.jit.is_scripting():
+            global_skel_state, _ = (
+                skel_state_backend.global_skel_state_from_local_skel_state_impl(
+                    local_skel_state=self.joint_parameters_to_local_skeleton_state(
+                        joint_parameters
+                    ),
+                    prefix_mul_indices=list(
+                        self.pmi.split(
+                            split_size=self._pmi_buffer_sizes,
+                            dim=1,
+                        )
+                    ),
+                    use_double_precision=use_double_precision,
+                )
+            )
+            return global_skel_state
+        return self.joint_parameters_to_skeleton_state(
+            joint_parameters, use_double_precision=use_double_precision
         )
 
 
@@ -413,7 +486,7 @@ class LinearBlendSkinning(torch.nn.Module):
 
     def skin_with_trs(
         self,
-        global_trs: pym_trs.TRSTransform,
+        global_trs: Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
         rest_vertex_positions: torch.Tensor,
     ) -> torch.Tensor:
         """
@@ -611,6 +684,10 @@ class ParameterTransform(torch.nn.Module):
             torch.tensor(
                 character.parameter_transform.scaling_parameters, requires_grad=False
             ),
+        )
+        self.register_buffer(
+            "active_joints",
+            self.parameter_transform.ne(0).any(dim=1).reshape(-1, 7).any(dim=1),
         )
 
         self.parameter_names: list[str] = character.parameter_transform.names
@@ -873,22 +950,40 @@ class Character(torch.nn.Module):
         self,
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
+        fk_backend: str = "torch",
+        active_joints: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        local_skel_state = self.joint_parameters_to_local_skeleton_state(
-            joint_parameters
-        )
-        return self.local_skeleton_state_to_skeleton_state(
-            local_skel_state, use_double_precision=use_double_precision
+        if not hasattr(self, "skeleton"):
+            raise RuntimeError("Character has no skeleton, please provide one")
+        return self.skeleton.joint_parameters_to_skeleton_state(
+            joint_parameters,
+            use_double_precision=use_double_precision,
+            fk_backend=fk_backend,
+            active_joints=active_joints,
         )
 
     def model_parameters_to_skeleton_state(
         self,
         model_parameters: torch.Tensor,
         use_double_precision: bool = True,
+        fk_backend: str = "torch",
     ) -> torch.Tensor:
+        if not hasattr(self, "parameter_transform"):
+            raise RuntimeError(
+                "Character has no parameter transform, please provide one"
+            )
+        if torch.jit.is_scripting():
+            resolved = "torch" if fk_backend == "auto" else fk_backend
+        else:
+            resolved = resolve_backend(
+                fk_backend, model_parameters.float(), use_double_precision
+            )
+        active_joints = self.parameter_transform.active_joints
         return self.joint_parameters_to_skeleton_state(
             self.model_parameters_to_joint_parameters(model_parameters),
             use_double_precision=use_double_precision,
+            fk_backend=resolved,
+            active_joints=active_joints,
         )
 
     def model_parameters_to_blendshape_coefficients(
@@ -904,7 +999,7 @@ class Character(torch.nn.Module):
     def skin_points(
         self,
         skel_state: torch.Tensor,
-        rest_vertex_positions: torch.Tensor | None = None,
+        rest_vertex_positions: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         if rest_vertex_positions is None:
             if not hasattr(self, "mesh"):
