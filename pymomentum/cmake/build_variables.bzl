@@ -3,8 +3,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-backend_sources = [
-    "backend/__init__.py",
+backend_torch_core_sources = [
+    "backend/torch_quaternion.py",
+]
+
+backend_torch_sources = [
     "backend/skel_state_backend.py",
     "backend/trs_backend.py",
     "backend/utils.py",
