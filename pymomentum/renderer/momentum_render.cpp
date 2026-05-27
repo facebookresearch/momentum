@@ -157,22 +157,22 @@ momentum::Camera makeOutsideInCameraForBody(
   // If `horizontal`, we place the camera horizontally, with camera up vector
   // facing upward. We assume the world Y axis points upward.
   // Otherwise, the camera is placed perpendicular to the spine direction.
-  Eigen::Vector3f camera_up_world;
+  Eigen::Vector3f camera_up_world = Eigen::Vector3f::Zero();
 
   if (horizontal) {
     camera_up_world = Eigen::Vector3f::UnitY();
     camera_forward_world[1] = 0.0;
-    camera_forward_world = camera_forward_world.normalized();
+    camera_forward_world = camera_forward_world.stableNormalized();
     if (camera_forward_world.norm() < 1e-5) {
       // The horizontal camera placement is degenerate. Revert back to the
       // original placement.
       camera_forward_world = -body_forward_world;
       camera_up_world = spineLocalToWorldXF.linear() * Eigen::Vector3f::UnitX();
-      camera_up_world = camera_up_world.normalized();
+      camera_up_world = camera_up_world.stableNormalized();
     }
   } else {
     camera_up_world = spineLocalToWorldXF.linear() * Eigen::Vector3f::UnitX();
-    camera_up_world = camera_up_world.normalized();
+    camera_up_world = camera_up_world.stableNormalized();
   }
 
   if (cameraAngle != 0.0) {
