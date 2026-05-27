@@ -3,6 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+backend_common_sources = [
+    "backend/selection.py",
+]
+
 backend_torch_core_sources = [
     "backend/skel_state_torch.py",
     "backend/torch_quaternion.py",
@@ -12,6 +16,10 @@ backend_torch_sources = [
     "backend/skel_state_backend.py",
     "backend/trs_backend.py",
     "backend/utils.py",
+]
+
+backend_triton_sources = [
+    "backend/triton_quaternion.py",
 ]
 
 python_utility_public_headers = [
