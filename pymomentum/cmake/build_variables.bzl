@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 backend_torch_core_sources = [
+    "backend/skel_state_torch.py",
     "backend/torch_quaternion.py",
 ]
 
