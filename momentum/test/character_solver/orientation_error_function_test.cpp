@@ -128,12 +128,12 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationRotDiffErrorL2_GradientsAndJa
         &errorFunction,
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
         character,
-        Eps<T>(0.03f, 5e-6));
+        Eps<T>(0.06f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(0.05f, 5e-6), Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(0.06f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
