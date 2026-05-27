@@ -59,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.multiply_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.multiply_backprop"><code class="docutils literal notranslate"><span class="pre">multiply_backprop()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
@@ -317,6 +318,34 @@ formatted and the quaternions are normalized, skipping validation checks.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state.multiply_backprop">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state.</span></span><span class="sig-name descname"><span class="pre">multiply_backprop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.skel_state.multiply_backprop" title="Link to this definition"></a></dt>
+<dd><p>Backpropagate gradients through skeleton state multiplication.</p>
+<p>This function computes the gradients with respect to the two input skeleton states
+given the gradient with respect to the output of skeleton state multiplication.</p>
+<p>The forward formula is (matching the corrected skel_state.multiply):
+- t = t1 + s1 * quaternion.rotate_vector(q1, t2)
+- q = quaternion.multiply(q1, q2)
+- s = s1 * s2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state1</strong> (<em>torch.Tensor</em>) – The first skeleton state (parent).</p></li>
+<li><p><strong>state2</strong> (<em>torch.Tensor</em>) – The second skeleton state (child).</p></li>
+<li><p><strong>grad_state</strong> (<em>torch.Tensor</em>) – The gradient with respect to the output skeleton state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (grad_state1, grad_state2) representing gradients with respect
+to the first and second skeleton states respectively.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[torch.Tensor, torch.Tensor]</p>
 </dd>
 </dl>
 </dd></dl>
