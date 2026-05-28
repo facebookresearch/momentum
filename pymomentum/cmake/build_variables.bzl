@@ -19,6 +19,8 @@ backend_torch_sources = [
 ]
 
 backend_triton_sources = [
+    "backend/triton_common.py",
+    "backend/triton_fk.py",
     "backend/triton_quaternion.py",
 ]
 
