@@ -56,6 +56,7 @@ from typing import Sequence
 
 import torch
 from pymomentum.backend import skel_state_torch
+from pymomentum.backend.selection import resolve_backend
 
 # pyre-strict
 
@@ -163,7 +164,29 @@ def _multiply_split_skel_states(
     return skel_state_torch._multiply_split_skel_states(skel_state1, skel_state2)
 
 
-def multiply(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
+@torch.jit.ignore
+def _multiply_triton(
+    s1: torch.Tensor,
+    s2: torch.Tensor,
+    assume_normalized: bool,
+) -> torch.Tensor:
+    from pymomentum.backend import triton_skel_state
+
+    if assume_normalized:
+        return triton_skel_state.multiply_assume_normalized(s1, s2)
+    return triton_skel_state.multiply(s1, s2)
+
+
+@torch.jit.ignore
+def _inverse_triton(skeleton_states: torch.Tensor) -> torch.Tensor:
+    from pymomentum.backend import triton_skel_state
+
+    return triton_skel_state.inverse(skeleton_states)
+
+
+def multiply(
+    s1: torch.Tensor, s2: torch.Tensor, backend: str = "torch"
+) -> torch.Tensor:
     """
     Multiply two skeleton states.
 
@@ -171,13 +194,27 @@ def multiply(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
     :type s1: torch.Tensor
     :parameter s2: The second skeleton state.
     :type s2: torch.Tensor
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :type backend: str
     :return: The product of the two skeleton states.
     :rtype: torch.Tensor
     """
+    backend = resolve_backend(
+        backend,
+        s2,
+        use_double_precision=s1.dtype == torch.float64 or s2.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _multiply_triton(s1, s2, assume_normalized=False)
+    if backend != "torch":
+        raise ValueError(f"Unsupported skel_state backend: {backend}")
+
     return skel_state_torch.multiply(s1, s2)
 
 
-def multiply_assume_normalized(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tensor:
+def multiply_assume_normalized(
+    s1: torch.Tensor, s2: torch.Tensor, backend: str = "torch"
+) -> torch.Tensor:
     """
     Multiply two skeleton states.
     This is an optimized version that assumes both skeleton states are already properly
@@ -187,21 +224,45 @@ def multiply_assume_normalized(s1: torch.Tensor, s2: torch.Tensor) -> torch.Tens
     :type s1: torch.Tensor
     :parameter s2: The second skeleton state.
     :type s2: torch.Tensor
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :type backend: str
     :return: The product of the two skeleton states.
     :rtype: torch.Tensor
     """
+    backend = resolve_backend(
+        backend,
+        s2,
+        use_double_precision=s1.dtype == torch.float64 or s2.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _multiply_triton(s1, s2, assume_normalized=True)
+    if backend != "torch":
+        raise ValueError(f"Unsupported skel_state backend: {backend}")
+
     return skel_state_torch.multiply_assume_normalized(s1, s2)
 
 
-def inverse(skeleton_states: torch.Tensor) -> torch.Tensor:
+def inverse(skeleton_states: torch.Tensor, backend: str = "torch") -> torch.Tensor:
     """
     Compute the inverse of a skeleton state.
 
     :parameter skeleton_states: The skeleton state to invert.
     :type skeleton_states: torch.Tensor
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :type backend: str
     :return: The inverted skeleton state.
     :rtype: torch.Tensor
     """
+    backend = resolve_backend(
+        backend,
+        skeleton_states,
+        use_double_precision=skeleton_states.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _inverse_triton(skeleton_states)
+    if backend != "torch":
+        raise ValueError(f"Unsupported skel_state backend: {backend}")
+
     return skel_state_torch.inverse(skeleton_states)
 
 
