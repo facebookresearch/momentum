@@ -712,6 +712,123 @@ class TestQuaternion(unittest.TestCase):
                 "Round-trip quaternion conversion should be consistent up to sign",
             )
 
+    def test_axis_angle_round_trip(self) -> None:
+        torch.manual_seed(0)
+        # Keep angles in [0, pi) so axis-angle representation is unique.
+        dirs = torch.nn.functional.normalize(
+            torch.randn(50, 3, dtype=torch.float64), dim=-1
+        )
+        magnitudes = torch.rand(50, 1, dtype=torch.float64) * (math.pi - 0.01)
+        axis_angles = dirs * magnitudes
+
+        quats = quaternion.from_axis_angle(axis_angles)
+        recovered = quaternion.to_axis_angle(quats)
+        torch.testing.assert_close(axis_angles, recovered, atol=1e-6, rtol=1e-6)
+
+    def test_axis_angle_known_values(self) -> None:
+        axis_angles = torch.tensor(
+            [
+                [0.0, 0.0, 0.0],
+                [math.pi / 2.0, 0.0, 0.0],
+                [0.0, math.pi, 0.0],
+                [0.0, 0.0, math.pi / 3.0],
+            ],
+            dtype=torch.float64,
+        )
+        expected_quats = torch.tensor(
+            [
+                [0.0, 0.0, 0.0, 1.0],
+                [math.sqrt(0.5), 0.0, 0.0, math.sqrt(0.5)],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.5, math.sqrt(3.0) / 2.0],
+            ],
+            dtype=torch.float64,
+        )
+
+        quats = quaternion.from_axis_angle(axis_angles)
+        torch.testing.assert_close(quats, expected_quats, atol=1e-12, rtol=1e-12)
+        torch.testing.assert_close(
+            quaternion.to_axis_angle(quats), axis_angles, atol=1e-12, rtol=1e-12
+        )
+
+    def test_axis_angle_sinc_half_near_zero(self) -> None:
+        """Verify the Taylor expansion gives accurate results near the origin."""
+        torch.manual_seed(0)
+        near_zero = torch.randn(20, 3, dtype=torch.float64) * 1e-8
+        quats = quaternion.from_axis_angle(near_zero)
+        recovered = quaternion.to_axis_angle(quats)
+        torch.testing.assert_close(near_zero, recovered, atol=1e-10, rtol=1e-4)
+
+        # Verify exact zero works.
+        zero = torch.zeros(3, dtype=torch.float64)
+        quats_zero = quaternion.from_axis_angle(zero)
+        torch.testing.assert_close(
+            quats_zero, quaternion.identity(dtype=torch.float64), atol=1e-12, rtol=0.0
+        )
+        recovered_zero = quaternion.to_axis_angle(quats_zero)
+        torch.testing.assert_close(zero, recovered_zero, atol=1e-12, rtol=0.0)
+
+    def test_to_axis_angle_negative_w(self) -> None:
+        """to_axis_angle must handle quaternions with w < 0 (angle > pi)."""
+        # A quaternion with negative w represents the same rotation as its
+        # negation (which has positive w). to_axis_angle should not produce nan.
+        q = torch.tensor([0.0, 0.0, 0.0, -1.0], dtype=torch.float64)
+        aa = quaternion.to_axis_angle(q)
+        self.assertTrue(torch.isfinite(aa).all())
+        torch.testing.assert_close(
+            aa, torch.zeros(3, dtype=torch.float64), atol=1e-12, rtol=0.0
+        )
+
+        # Near-2pi rotation: w slightly negative, small vector part.
+        q2 = quaternion.normalize(
+            torch.tensor([1e-4, 0.0, 0.0, -1.0], dtype=torch.float64)
+        )
+        aa2 = quaternion.to_axis_angle(q2)
+        self.assertTrue(torch.isfinite(aa2).all())
+        torch.testing.assert_close(
+            aa2, quaternion.to_axis_angle(-q2), atol=1e-12, rtol=1e-12
+        )
+        recovered_q2 = quaternion.from_axis_angle(aa2)
+        expected_q2 = torch.where(q2[..., 3:] < 0, -q2, q2)
+        torch.testing.assert_close(
+            quaternion.normalize(recovered_q2),
+            expected_q2,
+            atol=1e-6,
+            rtol=1e-6,
+        )
+
+    def test_axis_angle_gradcheck_near_sinc_half_branch(self) -> None:
+        """Check value/gradient stability around the _sinc_half Taylor branch."""
+        near_zero = torch.tensor(
+            [[1e-7, -2e-7, 3e-7]], dtype=torch.float64, requires_grad=True
+        )
+        self.assertTrue(
+            torch.autograd.gradcheck(
+                quaternion.from_axis_angle,
+                (near_zero,),
+                eps=1e-8,
+                atol=1e-5,
+                rtol=1e-3,
+            )
+        )
+
+        small_angle_quat = (
+            quaternion.from_axis_angle(
+                torch.tensor([[1e-4, -2e-4, 3e-4]], dtype=torch.float64)
+            )
+            .detach()
+            .requires_grad_(True)
+        )
+        self.assertTrue(
+            torch.autograd.gradcheck(
+                quaternion.to_axis_angle,
+                (small_angle_quat,),
+                eps=1e-6,
+                atol=1e-5,
+                rtol=1e-3,
+            )
+        )
+
     def test_backprop_gradient_consistency(self) -> None:
         """Test that custom backprop functions match PyTorch autograd gradients."""
         torch.manual_seed(0)
