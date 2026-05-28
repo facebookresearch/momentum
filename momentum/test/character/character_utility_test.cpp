@@ -24,6 +24,8 @@
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/helpers/expect_throw.h"
 
+#include <algorithm>
+
 using namespace momentum;
 
 // Test fixture for CharacterUtility tests
@@ -43,9 +45,92 @@ class CharacterUtilityTest : public ::testing::Test {
   Character characterWithBlendShapes;
 };
 
+JointPhysicalProperties makeTestJointPhysicalProperties(
+    const Character& character,
+    const size_t jointIndex,
+    const float mass) {
+  JointPhysicalProperties properties;
+  properties.jointName = character.skeleton.joints.at(jointIndex).name;
+  properties.jointIndex = jointIndex;
+  properties.mass = mass;
+  properties.centerOfMassOffset = Vector3f(mass, mass + 1.0f, mass + 2.0f);
+  properties.inertia = mass * Matrix3f::Identity();
+  properties.inertiaRotation = Quaternionf(Eigen::AngleAxisf(0.1f * mass, Vector3f::UnitZ()));
+  return properties;
+}
+
+void setTestPhysicalProperties(Character& character) {
+  character.physicalProperties = {
+      makeTestJointPhysicalProperties(character, 0, 1.0f),
+      makeTestJointPhysicalProperties(character, 1, 2.0f),
+      makeTestJointPhysicalProperties(character, 2, 3.0f)};
+}
+
+const JointPhysicalProperties* findPhysicalPropertiesByJointName(
+    const PhysicalProperties& physicalProperties,
+    const std::string& jointName) {
+  const auto it = std::find_if(
+      physicalProperties.begin(),
+      physicalProperties.end(),
+      [&](const JointPhysicalProperties& properties) { return properties.jointName == jointName; });
+  return it == physicalProperties.end() ? nullptr : &*it;
+}
+
+void expectVector3fApprox(const Vector3f& actual, const Vector3f& expected, const char* fieldName) {
+  EXPECT_TRUE(actual.isApprox(expected))
+      << fieldName << " mismatch\nExpected: " << expected.transpose()
+      << "\nActual: " << actual.transpose();
+}
+
+void expectMatrix3fApprox(const Matrix3f& actual, const Matrix3f& expected, const char* fieldName) {
+  EXPECT_TRUE(actual.isApprox(expected)) << fieldName << " mismatch\nExpected:\n"
+                                         << expected << "\nActual:\n"
+                                         << actual;
+}
+
+void expectQuaternionfApprox(
+    const Quaternionf& actual,
+    const Quaternionf& expected,
+    const char* fieldName) {
+  EXPECT_TRUE(actual.isApprox(expected))
+      << fieldName << " mismatch\nExpected coeffs: " << expected.coeffs().transpose()
+      << "\nActual coeffs: " << actual.coeffs().transpose();
+}
+
+void expectPhysicalPropertiesJointIndexMatchesSkeleton(
+    const JointPhysicalProperties& properties,
+    const Skeleton& skeleton) {
+  const size_t resolvedJointIndex = skeleton.getJointIdByName(properties.jointName);
+  ASSERT_NE(resolvedJointIndex, kInvalidIndex);
+  EXPECT_EQ(properties.jointIndex, resolvedJointIndex);
+}
+
+void expectScaledPhysicalProperties(
+    const PhysicalProperties& scaledPhysicalProperties,
+    const PhysicalProperties& originalPhysicalProperties,
+    const float lengthScale,
+    const float massScale) {
+  ASSERT_EQ(scaledPhysicalProperties.size(), originalPhysicalProperties.size());
+  for (size_t i = 0; i < originalPhysicalProperties.size(); ++i) {
+    SCOPED_TRACE(testing::Message() << "physical properties index " << i);
+    const auto& scaled = scaledPhysicalProperties.at(i);
+    const auto& original = originalPhysicalProperties.at(i);
+    EXPECT_EQ(scaled.jointName, original.jointName);
+    EXPECT_EQ(scaled.jointIndex, original.jointIndex);
+    EXPECT_FLOAT_EQ(scaled.mass, original.mass * massScale);
+    expectVector3fApprox(
+        scaled.centerOfMassOffset, original.centerOfMassOffset * lengthScale, "centerOfMassOffset");
+    expectMatrix3fApprox(
+        scaled.inertia, original.inertia * massScale * lengthScale * lengthScale, "inertia");
+    expectQuaternionfApprox(scaled.inertiaRotation, original.inertiaRotation, "inertiaRotation");
+  }
+}
+
 // Test scaleCharacter function
 TEST_F(CharacterUtilityTest, ScaleCharacter) {
   const float scale = 2.0f;
+  setTestPhysicalProperties(this->character);
+  const PhysicalProperties originalPhysicalProperties = this->character.physicalProperties;
 
   // Store original values for comparison
   Vector3f originalTranslation = this->character.skeleton.joints[1].translationOffset;
@@ -91,6 +176,10 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
         this->character.inverseBindPose[i].translation() * scale);
   }
 
+  // Check that physical properties are scaled in Momentum units.
+  expectScaledPhysicalProperties(
+      scaledCharacter.physicalProperties, originalPhysicalProperties, scale, 1.0f);
+
   // Test with scale = 1.0 (should be identity operation)
   Character identityScaledCharacter = scaleCharacter(this->character, 1.0f);
   EXPECT_EQ(identityScaledCharacter.skeleton.joints[1].translationOffset, originalTranslation);
@@ -98,6 +187,27 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
 
   // Test with negative scale (should cause a fatal error)
   MOMENTUM_EXPECT_DEATH(static_cast<void>(scaleCharacter(this->character, -1.0f)), "scale > 0.0f");
+}
+
+TEST_F(CharacterUtilityTest, ScaleCharacterPreservesDensityPhysicalProperties) {
+  const float scale = 2.0f;
+  setTestPhysicalProperties(this->character);
+  const PhysicalProperties originalPhysicalProperties = this->character.physicalProperties;
+
+  const Character scaledCharacter =
+      scaleCharacter(this->character, scale, CharacterMassScale::PreserveDensity);
+
+  const float massScale = scale * scale * scale;
+  expectScaledPhysicalProperties(
+      scaledCharacter.physicalProperties, originalPhysicalProperties, scale, massScale);
+}
+
+TEST_F(CharacterUtilityTest, ScaleCharacterRejectsNonPositiveLengthScale) {
+  setTestPhysicalProperties(this->character);
+
+  MOMENTUM_EXPECT_DEATH(
+      static_cast<void>(scaleCharacter(this->character, 0.0f, CharacterMassScale::PreserveDensity)),
+      "scale > 0.0f");
 }
 
 std::shared_ptr<momentum::Mesh> toSkinnedMesh(
@@ -169,6 +279,21 @@ void testTransformCharacter(const Character& character) {
     EXPECT_TRUE(transformedCharacter.inverseBindPose[i].isApprox(expectedInverseBindPose));
   }
 
+  // Physical properties are joint-local, so rigid coordinate transforms preserve them.
+  ASSERT_EQ(transformedCharacter.physicalProperties.size(), character.physicalProperties.size());
+  for (size_t i = 0; i < character.physicalProperties.size(); ++i) {
+    const auto& original = character.physicalProperties.at(i);
+    const auto& transformed = transformedCharacter.physicalProperties.at(i);
+    EXPECT_EQ(transformed.jointName, original.jointName);
+    EXPECT_EQ(transformed.jointIndex, original.jointIndex);
+    EXPECT_FLOAT_EQ(transformed.mass, original.mass);
+    expectVector3fApprox(
+        transformed.centerOfMassOffset, original.centerOfMassOffset, "centerOfMassOffset");
+    expectMatrix3fApprox(transformed.inertia, original.inertia, "inertia");
+    expectQuaternionfApprox(
+        transformed.inertiaRotation, original.inertiaRotation, "inertiaRotation");
+  }
+
   // Test with identity transform (should be identity operation)
   Character identityTransformedCharacter =
       transformCharacter(character, Eigen::Affine3f::Identity());
@@ -187,6 +312,9 @@ void testTransformCharacter(const Character& character) {
 
 // Test transformCharacter function
 TEST_F(CharacterUtilityTest, TransformCharacter) {
+  setTestPhysicalProperties(this->character);
+  setTestPhysicalProperties(this->characterWithBlendShapes);
+
   // test a character without blend shapes
   testTransformCharacter(this->character);
 
@@ -200,6 +328,7 @@ TEST_F(CharacterUtilityTest, RemoveJoints) {
   if (this->character.skeleton.joints.size() < 5) {
     return;
   }
+  setTestPhysicalProperties(this->character);
 
   // Create a list of joints to remove
   std::vector<size_t> jointsToRemove = {2, 4}; // Remove joints 2 and 4
@@ -223,6 +352,21 @@ TEST_F(CharacterUtilityTest, RemoveJoints) {
 
   // Note: Joint 3 might be removed if it's a child of joint 2
   // The implementation of removeJoints also removes child joints
+
+  const JointPhysicalProperties* rootProperties = findPhysicalPropertiesByJointName(
+      resultCharacter.physicalProperties, this->character.skeleton.joints[0].name);
+  ASSERT_NE(rootProperties, nullptr);
+  expectPhysicalPropertiesJointIndexMatchesSkeleton(*rootProperties, resultCharacter.skeleton);
+
+  const JointPhysicalProperties* childProperties = findPhysicalPropertiesByJointName(
+      resultCharacter.physicalProperties, this->character.skeleton.joints[1].name);
+  ASSERT_NE(childProperties, nullptr);
+  expectPhysicalPropertiesJointIndexMatchesSkeleton(*childProperties, resultCharacter.skeleton);
+
+  EXPECT_EQ(
+      findPhysicalPropertiesByJointName(
+          resultCharacter.physicalProperties, this->character.skeleton.joints[2].name),
+      nullptr);
 
   // Verify activeJointParams is correctly mapped for surviving joints
   {
@@ -425,6 +569,10 @@ TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyBasic) {
   // Create source and target characters with unique parameter names
   Character sourceCharacter = createTestCharacter(3);
   Character targetCharacter = createTestCharacter(3);
+  setTestPhysicalProperties(sourceCharacter);
+  setTestPhysicalProperties(targetCharacter);
+  sourceCharacter.physicalProperties.at(2) =
+      makeTestJointPhysicalProperties(sourceCharacter, 2, 30.0f);
 
   // Ensure parameter names don't conflict by renaming source parameters
   for (auto& name : sourceCharacter.parameterTransform.name) {
@@ -447,6 +595,28 @@ TEST_F(CharacterUtilityTest, ReplaceSkeletonHierarchyBasic) {
 
   // Check that the target root joint exists in the result
   EXPECT_NE(resultCharacter.skeleton.getJointIdByName(targetRootJoint), kInvalidIndex);
+
+  const JointPhysicalProperties* targetRootProperties =
+      findPhysicalPropertiesByJointName(resultCharacter.physicalProperties, targetRootJoint);
+  ASSERT_NE(targetRootProperties, nullptr);
+  expectPhysicalPropertiesJointIndexMatchesSkeleton(
+      *targetRootProperties, resultCharacter.skeleton);
+  EXPECT_FLOAT_EQ(targetRootProperties->mass, targetCharacter.physicalProperties.at(1).mass);
+  expectVector3fApprox(
+      targetRootProperties->centerOfMassOffset,
+      targetCharacter.physicalProperties.at(1).centerOfMassOffset,
+      "centerOfMassOffset");
+
+  const JointPhysicalProperties* sourceChildProperties = findPhysicalPropertiesByJointName(
+      resultCharacter.physicalProperties, sourceCharacter.skeleton.joints[2].name);
+  ASSERT_NE(sourceChildProperties, nullptr);
+  expectPhysicalPropertiesJointIndexMatchesSkeleton(
+      *sourceChildProperties, resultCharacter.skeleton);
+  EXPECT_FLOAT_EQ(sourceChildProperties->mass, sourceCharacter.physicalProperties.at(2).mass);
+  expectVector3fApprox(
+      sourceChildProperties->centerOfMassOffset,
+      sourceCharacter.physicalProperties.at(2).centerOfMassOffset,
+      "centerOfMassOffset");
 }
 
 // Test edge cases and error conditions
@@ -1272,6 +1442,7 @@ TYPED_TEST(SkeletonStateToJointParametersRespectingTransformTest, EdgeCases) {
 }
 
 TEST_F(CharacterUtilityTest, AddRigidTransformNode) {
+  setTestPhysicalProperties(character);
   const size_t originalJointCount = character.skeleton.joints.size();
   const size_t originalParamCount = character.parameterTransform.numAllModelParameters();
 
@@ -1342,6 +1513,10 @@ TEST_F(CharacterUtilityTest, AddRigidTransformNode) {
   EXPECT_EQ(result.character.mesh->vertices.size(), character.mesh->vertices.size());
   EXPECT_EQ(result.character.name, character.name);
   EXPECT_EQ(result.character.metadata, character.metadata);
+  ASSERT_EQ(result.character.physicalProperties.size(), character.physicalProperties.size());
+  EXPECT_EQ(
+      result.character.physicalProperties.front().jointName,
+      character.physicalProperties.front().jointName);
 
   // Validate inverse bind pose was recomputed
   EXPECT_EQ(result.character.inverseBindPose.size(), originalJointCount + 1);

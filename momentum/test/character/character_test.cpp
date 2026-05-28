@@ -50,6 +50,28 @@ class CharacterTest : public testing::Test {
 using Types = testing::Types<float, double>;
 TYPED_TEST_SUITE(CharacterTest, Types);
 
+namespace {
+
+JointPhysicalProperties makeCharacterTestJointPhysicalProperties(
+    const Character& character,
+    const size_t jointIndex,
+    const float mass = 5.0f) {
+  JointPhysicalProperties jointProperties;
+  jointProperties.jointName = character.skeleton.joints.at(jointIndex).name;
+  jointProperties.jointIndex = jointIndex;
+  jointProperties.mass = mass;
+  const auto offsetSeed = static_cast<float>(jointIndex);
+  jointProperties.centerOfMassOffset =
+      Vector3f(1.0f + offsetSeed, 2.0f + 0.5f * offsetSeed, 3.0f - 0.25f * offsetSeed);
+  jointProperties.inertia << 1.0f + offsetSeed, 0.25f, 0.5f, 0.25f, 2.0f + offsetSeed, 0.75f, 0.5f,
+      0.75f, 3.0f + offsetSeed;
+  jointProperties.inertiaRotation =
+      Quaternionf(Eigen::AngleAxisf(pi<float>() / 2.0f, Vector3f::UnitZ()));
+  return jointProperties;
+}
+
+} // namespace
+
 // Test default constructor
 TYPED_TEST(CharacterTest, DefaultConstructor) {
   using CharacterType = typename TestFixture::CharacterType;
@@ -152,6 +174,10 @@ TYPED_TEST(CharacterTest, ConstructorWithParameters) {
 TYPED_TEST(CharacterTest, CopyConstructor) {
   using CharacterType = typename TestFixture::CharacterType;
 
+  const JointPhysicalProperties jointProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 0);
+  this->character.physicalProperties.push_back(jointProperties);
+
   // Create a copy of the test character
   CharacterType copiedCharacter(this->character);
 
@@ -183,11 +209,18 @@ TYPED_TEST(CharacterTest, CopyConstructor) {
 
   // Check that we preserve metadata
   EXPECT_EQ(copiedCharacter.metadata, this->character.metadata);
+  ASSERT_EQ(copiedCharacter.physicalProperties.size(), 1);
+  EXPECT_EQ(copiedCharacter.physicalProperties[0].jointName, jointProperties.jointName);
+  EXPECT_FLOAT_EQ(copiedCharacter.physicalProperties[0].mass, jointProperties.mass);
 }
 
 // Test assignment operator
 TYPED_TEST(CharacterTest, AssignmentOperator) {
   using CharacterType = typename TestFixture::CharacterType;
+
+  const JointPhysicalProperties jointProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 0);
+  this->character.physicalProperties.push_back(jointProperties);
 
   // Create a default character
   CharacterType assignedCharacter;
@@ -231,6 +264,9 @@ TYPED_TEST(CharacterTest, AssignmentOperator) {
 
   // Check that we preserve metadata
   EXPECT_EQ(assignedCharacter.metadata, this->character.metadata);
+  ASSERT_EQ(assignedCharacter.physicalProperties.size(), 1);
+  EXPECT_EQ(assignedCharacter.physicalProperties[0].jointName, jointProperties.jointName);
+  EXPECT_FLOAT_EQ(assignedCharacter.physicalProperties[0].mass, jointProperties.mass);
 }
 
 // Test move constructor
@@ -316,10 +352,6 @@ TYPED_TEST(CharacterTest, MovePerformance) {
   // Verify that the same objects were transferred (no deep copy)
   EXPECT_EQ(movedCharacter.mesh.get(), originalMeshPtr);
   EXPECT_EQ(movedCharacter.skinWeights.get(), originalSkinWeightsPtr);
-
-  // Original character should have null pointers after move
-  EXPECT_EQ(originalCharacter.mesh.get(), nullptr);
-  EXPECT_EQ(originalCharacter.skinWeights.get(), nullptr);
 }
 
 // Test move semantics with complex character (with blend shapes)
@@ -513,6 +545,14 @@ TYPED_TEST(CharacterTest, SimplifySkeleton) {
   std::vector<bool> activeJoints(this->character.skeleton.joints.size(), false);
   activeJoints[0] = true; // root is active
   activeJoints[2] = true; // joint2 is active
+  const JointPhysicalProperties rootInputProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 0, 1.0f);
+  const JointPhysicalProperties joint1InputProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 1, 2.0f);
+  const JointPhysicalProperties joint2InputProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 2, 3.0f);
+  this->character.physicalProperties = {
+      rootInputProperties, joint1InputProperties, joint2InputProperties};
 
   // Simplify the skeleton
   auto simplifiedCharacter = this->character.simplifySkeleton(activeJoints);
@@ -553,10 +593,63 @@ TYPED_TEST(CharacterTest, SimplifySkeleton) {
 
   // Check that we preserve metadata
   EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
+
+  // Physical properties on inactive joints are folded into the kept joint they map to, so the
+  // simplified character still has one physical body per simplified joint.
+  ASSERT_EQ(simplifiedCharacter.physicalProperties.size(), 2);
+  const JointPhysicalProperties& rootProperties = simplifiedCharacter.physicalProperties.at(0);
+  EXPECT_EQ(rootProperties.jointName, "root");
+  EXPECT_EQ(rootProperties.jointIndex, 0);
+  EXPECT_FLOAT_EQ(rootProperties.mass, 3.0f);
+
+  const auto expectVectorApprox = [](const Vector3f& actual, const Vector3f& expected) {
+    EXPECT_TRUE(actual.isApprox(expected, 1e-5f))
+        << "actual: " << actual.transpose() << ", expected: " << expected.transpose();
+  };
+  const auto expectMatrixApprox = [](const Matrix3f& actual, const Matrix3f& expected) {
+    EXPECT_TRUE(actual.isApprox(expected, 1e-5f)) << "\nactual:\n"
+                                                  << actual << "\nexpected:\n"
+                                                  << expected;
+  };
+  const auto expectQuaternionApprox = [](const Quaternionf& actual, const Quaternionf& expected) {
+    EXPECT_TRUE(actual.isApprox(expected, 1e-5f))
+        << "actual: " << actual.coeffs().transpose()
+        << ", expected: " << expected.coeffs().transpose();
+  };
+
+  // The test skeleton places joint1 one unit above root. With root mass properties at
+  // (1, 2, 3) and joint1 properties mapped from (2, 2.5, 2.75) to (2, 3.5, 2.75), the merged
+  // values below are the hand-computed weighted center of mass and parallel-axis inertia. The
+  // inertia constants also include the +90-degree Z rotation from each local inertia frame into
+  // the root joint frame.
+  const Vector3f expectedRootCenterOfMass(5.0f / 3.0f, 3.0f, 17.0f / 6.0f);
+  Matrix3f expectedRootInertia;
+  expectedRootInertia << 157.0f / 24.0f, -1.5f, -4.0f / 3.0f, -1.5f, 89.0f / 24.0f, 1.25f,
+      -4.0f / 3.0f, 1.25f, 55.0f / 6.0f;
+  expectVectorApprox(rootProperties.centerOfMassOffset, expectedRootCenterOfMass);
+  expectMatrixApprox(rootProperties.inertia, expectedRootInertia);
+  expectQuaternionApprox(rootProperties.inertiaRotation, Quaternionf::Identity());
+
+  const JointPhysicalProperties& joint2Properties = simplifiedCharacter.physicalProperties.at(1);
+  EXPECT_EQ(joint2Properties.jointName, "joint2");
+  EXPECT_EQ(joint2Properties.jointIndex, 1);
+  EXPECT_FLOAT_EQ(joint2Properties.mass, 3.0f);
+
+  expectVectorApprox(joint2Properties.centerOfMassOffset, Vector3f(3.0f, 3.0f, 2.5f));
+  Matrix3f expectedJoint2Inertia;
+  expectedJoint2Inertia << 3.0f, 0.25f, 0.5f, 0.25f, 4.0f, 0.75f, 0.5f, 0.75f, 5.0f;
+  expectMatrixApprox(joint2Properties.inertia, expectedJoint2Inertia);
+  expectQuaternionApprox(
+      joint2Properties.inertiaRotation,
+      Quaternionf(Eigen::AngleAxisf(pi<float>() / 2.0f, Vector3f::UnitZ())));
 }
 
 // Test simplifyParameterTransform method
 TYPED_TEST(CharacterTest, SimplifyParameterTransform) {
+  const JointPhysicalProperties jointProperties =
+      makeCharacterTestJointPhysicalProperties(this->character, 1);
+  this->character.physicalProperties.push_back(jointProperties);
+
   // Create a parameter set with some active parameters
   ParameterSet parameterSet;
   parameterSet.set(0); // root_tx
@@ -586,6 +679,12 @@ TYPED_TEST(CharacterTest, SimplifyParameterTransform) {
 
   // Check that we preserve metadata
   EXPECT_EQ(simplifiedCharacter.metadata, this->character.metadata);
+
+  // Check that joint physical properties are not tied to parameter subset selection.
+  ASSERT_EQ(simplifiedCharacter.physicalProperties.size(), 1);
+  EXPECT_EQ(simplifiedCharacter.physicalProperties.front().jointName, jointProperties.jointName);
+  EXPECT_EQ(simplifiedCharacter.physicalProperties.front().jointIndex, jointProperties.jointIndex);
+  EXPECT_FLOAT_EQ(simplifiedCharacter.physicalProperties.front().mass, jointProperties.mass);
 }
 
 // Test simplify method

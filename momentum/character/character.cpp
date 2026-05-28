@@ -10,6 +10,7 @@
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/blend_shape_skinning.h"
 #include "momentum/character/character_state.h"
+#include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry.h"
 #include "momentum/character/joint.h"
 #include "momentum/character/linear_skinning.h"
@@ -21,6 +22,7 @@
 
 #include <numeric>
 #include <utility>
+#include <vector>
 
 namespace momentum {
 
@@ -108,6 +110,116 @@ size_t findSimplifiedAncestor(
   return intermediateJointMap.at(ancestor);
 }
 
+Matrix3f inertiaInJointFrame(const JointPhysicalProperties& properties) {
+  const Matrix3f inertiaRotation = properties.inertiaRotation.toRotationMatrix();
+  return inertiaRotation * properties.inertia * inertiaRotation.transpose();
+}
+
+void addParallelAxisShift(Matrix3f& inertia, const float mass, const Vector3f& offset) {
+  const float dx = offset.x();
+  const float dy = offset.y();
+  const float dz = offset.z();
+  inertia(0, 0) += mass * (dy * dy + dz * dz);
+  inertia(1, 1) += mass * (dx * dx + dz * dz);
+  inertia(2, 2) += mass * (dx * dx + dy * dy);
+
+  const float xy = -mass * dx * dy;
+  const float xz = -mass * dx * dz;
+  const float yz = -mass * dy * dz;
+  inertia(0, 1) += xy;
+  inertia(1, 0) += xy;
+  inertia(0, 2) += xz;
+  inertia(2, 0) += xz;
+  inertia(1, 2) += yz;
+  inertia(2, 1) += yz;
+}
+
+Matrix3f inertiaShiftedToCenter(
+    const JointPhysicalProperties& properties,
+    const Vector3f& centerOfMassOffset) {
+  Matrix3f result = inertiaInJointFrame(properties);
+  const Vector3f offset = properties.centerOfMassOffset - centerOfMassOffset;
+  addParallelAxisShift(result, properties.mass, offset);
+  return result;
+}
+
+void symmetrizeInPlace(Matrix3f& inertia) {
+  const float xy = 0.5f * (inertia(0, 1) + inertia(1, 0));
+  const float xz = 0.5f * (inertia(0, 2) + inertia(2, 0));
+  const float yz = 0.5f * (inertia(1, 2) + inertia(2, 1));
+  inertia(0, 1) = xy;
+  inertia(1, 0) = xy;
+  inertia(0, 2) = xz;
+  inertia(2, 0) = xz;
+  inertia(1, 2) = yz;
+  inertia(2, 1) = yz;
+}
+
+void mergePhysicalProperties(
+    JointPhysicalProperties& target,
+    const JointPhysicalProperties& source) {
+  const float mergedMass = target.mass + source.mass;
+  const Vector3f mergedCenterOfMassOffset = mergedMass > 0.0f
+      ? (target.mass * target.centerOfMassOffset + source.mass * source.centerOfMassOffset) /
+          mergedMass
+      : target.centerOfMassOffset;
+  Matrix3f mergedInertia = inertiaShiftedToCenter(target, mergedCenterOfMassOffset) +
+      inertiaShiftedToCenter(source, mergedCenterOfMassOffset);
+  symmetrizeInPlace(mergedInertia);
+
+  target.mass = mergedMass;
+  target.centerOfMassOffset = mergedCenterOfMassOffset;
+  target.inertia = mergedInertia;
+  target.inertiaRotation = Quaternionf::Identity();
+}
+
+PhysicalProperties remapPhysicalProperties(
+    const PhysicalProperties& physicalProperties,
+    const Skeleton& sourceSkeleton,
+    const Skeleton& targetSkeleton,
+    const std::vector<size_t>& jointMap,
+    const SkeletonState& sourceBindState,
+    const SkeletonState& targetBindState) {
+  PhysicalProperties result;
+  result.reserve(physicalProperties.size());
+  std::vector<size_t> resultIndexByJoint(targetSkeleton.joints.size(), kInvalidIndex);
+
+  for (const auto& jointProperties : physicalProperties) {
+    const size_t oldJointIndex =
+        resolvePhysicalPropertiesJointIndex(jointProperties, sourceSkeleton);
+    if (oldJointIndex == kInvalidIndex || oldJointIndex >= jointMap.size()) {
+      continue;
+    }
+
+    const size_t newJointIndex = jointMap[oldJointIndex];
+    if (newJointIndex == kInvalidIndex || newJointIndex >= targetSkeleton.joints.size()) {
+      continue;
+    }
+
+    JointPhysicalProperties mappedProperties = jointProperties;
+    mappedProperties.jointIndex = newJointIndex;
+    mappedProperties.jointName = targetSkeleton.joints.at(newJointIndex).name;
+
+    const auto oldToNewLocal = targetBindState.jointState.at(newJointIndex).transform.inverse() *
+        sourceBindState.jointState.at(oldJointIndex).transform;
+    mappedProperties.centerOfMassOffset = oldToNewLocal * jointProperties.centerOfMassOffset;
+    mappedProperties.inertiaRotation =
+        (oldToNewLocal.rotation * jointProperties.inertiaRotation).normalized();
+
+    // Skeleton simplification can fold multiple source joints into one target joint. Keep the
+    // one-body-per-joint invariant by merging those bodies in the target joint frame.
+    size_t& resultIndex = resultIndexByJoint.at(newJointIndex);
+    if (resultIndex == kInvalidIndex) {
+      resultIndex = result.size();
+      result.push_back(std::move(mappedProperties));
+    } else {
+      mergePhysicalProperties(result.at(resultIndex), mappedProperties);
+    }
+  }
+
+  return result;
+}
+
 std::unique_ptr<CollisionGeometry> remapCollisionGeometry(
     const CollisionGeometry* collision,
     const std::vector<size_t>& jointMap,
@@ -147,12 +259,14 @@ Character::Character(
     const std::string& nameIn,
     const momentum::TransformationList& inverseBindPose_in,
     const SkinnedLocatorList& skinnedLocators,
-    std::string_view metadataIn)
+    std::string_view metadataIn,
+    const PhysicalProperties& physicalPropertiesIn)
     : skeleton(s),
       parameterTransform(pt),
       parameterLimits(pl),
       locators(l),
       skinnedLocators(skinnedLocators),
+      physicalProperties(physicalPropertiesIn),
       blendShape(std::move(blendShapes)),
       faceExpressionBlendShape(std::move(faceExpressionBlendShapes)),
       inverseBindPose(inverseBindPose_in),
@@ -188,6 +302,7 @@ Character::Character(const Character& c)
       parameterLimits(c.parameterLimits),
       locators(c.locators),
       skinnedLocators(c.skinnedLocators),
+      physicalProperties(c.physicalProperties),
       blendShape(c.blendShape),
       faceExpressionBlendShape(c.faceExpressionBlendShape),
       inverseBindPose(c.inverseBindPose),
@@ -232,6 +347,7 @@ Character& Character::operator=(const Character& rhs) {
   std::swap(poseShapes, tmp.poseShapes);
   std::swap(skinWeights, tmp.skinWeights);
   std::swap(collision, tmp.collision);
+  std::swap(physicalProperties, tmp.physicalProperties);
   std::swap(blendShape, tmp.blendShape);
   std::swap(faceExpressionBlendShape, tmp.faceExpressionBlendShape);
   std::swap(name, tmp.name);
@@ -383,6 +499,17 @@ Character Character::simplifySkeleton(const std::vector<bool>& activeJoints) con
   const SkeletonState sourceBindState(parameterTransform.bindPose(), skeleton, false);
   const SkeletonState targetBindState(result.parameterTransform.bindPose(), result.skeleton, false);
 
+  // -------------------------------------------------------------------
+  //  remap physical joint properties if present
+  // -------------------------------------------------------------------
+  result.physicalProperties = remapPhysicalProperties(
+      physicalProperties,
+      skeleton,
+      result.skeleton,
+      result.jointMap,
+      sourceBindState,
+      targetBindState);
+
   if (mesh && skinWeights) {
     result.mesh = std::make_unique<Mesh>(*mesh);
     result.skinWeights =
@@ -419,7 +546,8 @@ Character Character::simplifyParameterTransform(const ParameterSet& parameterSet
       name,
       inverseBindPose,
       skinnedLocators,
-      metadata};
+      metadata,
+      physicalProperties};
 }
 
 Character Character::simplify(const ParameterSet& activeParams) const {

@@ -26,6 +26,7 @@
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
 #include "pymomentum/geometry/texture_classification.h"
+#include "pymomentum/python_utility/eigen_quaternion.h"
 
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
@@ -211,6 +212,14 @@ PYBIND11_MODULE(geometry, m) {
       "This struct consolidates save options that were previously scattered across "
       "multiple function parameters. Format-specific options (e.g., FBX coordinate "
       "system, GLTF extensions) are included but only used by their respective formats.");
+  auto characterMassScaleClass = py::enum_<mm::CharacterMassScale>(
+      m, "CharacterMassScale", "Physical mass scaling policy used when scaling a Character.");
+  auto jointPhysicalPropertiesClass = py::class_<mm::JointPhysicalProperties>(
+      m,
+      "JointPhysicalProperties",
+      "Physical mass properties for one skeleton joint. Length-valued fields use "
+      "Momentum units: centimeters for offsets and kilogram-centimeters squared "
+      "for inertia.");
 
   blendShapeBaseClass
       .def_property_readonly(
@@ -462,6 +471,39 @@ The resulting arrays are as follows:
             tc.length,
             tc.radius[0],
             tc.radius[1]);
+      });
+
+  characterMassScaleClass.value("PreserveMass", mm::CharacterMassScale::PreserveMass)
+      .value("PreserveDensity", mm::CharacterMassScale::PreserveDensity);
+
+  jointPhysicalPropertiesClass.def(py::init<>())
+      .def_readwrite(
+          "joint_name",
+          &mm::JointPhysicalProperties::jointName,
+          "Name of the skeleton joint that owns this physical body.")
+      .def_readwrite(
+          "joint_index",
+          &mm::JointPhysicalProperties::jointIndex,
+          "Index of the skeleton joint that owns this physical body.")
+      .def_readwrite("mass", &mm::JointPhysicalProperties::mass, "Body mass in kilograms.")
+      .def_readwrite(
+          "center_of_mass_offset",
+          &mm::JointPhysicalProperties::centerOfMassOffset,
+          "Local center-of-mass offset from the joint frame, in centimeters.")
+      .def_readwrite(
+          "inertia",
+          &mm::JointPhysicalProperties::inertia,
+          "Inertia tensor expressed in the local inertia frame, in kilogram-centimeters squared.")
+      .def_readwrite(
+          "inertia_rotation",
+          &mm::JointPhysicalProperties::inertiaRotation,
+          "Rotation from the inertia frame to the joint frame.")
+      .def("__repr__", [](const mm::JointPhysicalProperties& properties) {
+        return fmt::format(
+            "JointPhysicalProperties(joint_name='{}', joint_index={}, mass={})",
+            properties.jointName,
+            properties.jointIndex,
+            properties.mass);
       });
 
   // Class Marker, defining the properties:
