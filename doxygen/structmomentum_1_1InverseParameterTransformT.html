@@ -121,8 +121,8 @@ Public Member Functions</h2></td></tr>
 Public Attributes</h2></td></tr>
 <tr class="memitem:abdb7f8980230d04671d661273e7dba10" id="r_abdb7f8980230d04671d661273e7dba10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab1a85bae6e46239d072561e4ad72013f">SparseRowMatrix</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1InverseParameterTransformT.html#abdb7f8980230d04671d661273e7dba10">transform</a></td></tr>
 <tr class="separator:abdb7f8980230d04671d661273e7dba10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d5904f7a0a7714c18958c7478d21d8a" id="r_a0d5904f7a0a7714c18958c7478d21d8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::SparseQR&lt; Eigen::SparseMatrix&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;, Eigen::COLAMDOrdering&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1InverseParameterTransformT.html#a0d5904f7a0a7714c18958c7478d21d8a">inverseTransform</a></td></tr>
-<tr class="separator:a0d5904f7a0a7714c18958c7478d21d8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6a5fa2d90c8a50e3ffcd70f5fcc20de" id="r_ad6a5fa2d90c8a50e3ffcd70f5fcc20de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1InverseParameterTransformT.html#ad6a5fa2d90c8a50e3ffcd70f5fcc20de">pseudoInverseMatrix</a></td></tr>
+<tr class="separator:ad6a5fa2d90c8a50e3ffcd70f5fcc20de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e756372c5ed81779bbfd4608ca2fc7c" id="r_a6e756372c5ed81779bbfd4608ca2fc7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::VectorX&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1InverseParameterTransformT.html#a6e756372c5ed81779bbfd4608ca2fc7c">offsets</a></td></tr>
 <tr class="separator:a6e756372c5ed81779bbfd4608ca2fc7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -132,7 +132,7 @@ struct momentum::InverseParameterTransformT&lt; T &gt;</div><p>Maps from joint p
 <p>Because the joint parameters have a much higher dimensionality (7*nJoints) than the number of model parameters, in general we can't always find a set of model parameters that reproduce the passed-in joint parameters. Therefore, the mapping is done in a least squares sense: we find the model parameters that bring us closest to the passed-in joint parameters under L2.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>The parameter transform must be well-formed, in the sense that it has rank equal to the number of model parameters. Any sane parameter transform should have this property (if not, it would be possible to generate the same set of joint parameters with two different model parameter vectors). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">31</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00029">29</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af2d092e6b60111395439b2066ca7733d" name="af2d092e6b60111395439b2066ca7733d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af2d092e6b60111395439b2066ca7733d">&#9670;&#160;</a></span>InverseParameterTransformT()</h2>
@@ -160,7 +160,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00025">25</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00019">19</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
 
 </div>
 </div>
@@ -186,7 +186,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>Map joint parameters to model parameters. </p>
 <dl class="section return"><dt>Returns</dt><dd>The fit model parameters; the residual from the least-squares fit is left in the result's <code>offsets</code> vector. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00032">32</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">26</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="character_2types_8h_source.html#l00176">momentum::CharacterParametersT&lt; T &gt;::offsets</a>, <a class="el" href="character_2types_8h_source.html#l00172">momentum::CharacterParametersT&lt; T &gt;::pose</a>, <a class="el" href="character_2types_8h_source.html#l00087">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, and <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
@@ -219,9 +219,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of the output model parameters vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00050">50</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00044">44</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
-<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">momentum::InverseParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">momentum::InverseParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
@@ -252,31 +252,13 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Dimension of the input joint parameters vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00055">55</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00049">49</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
-<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">momentum::InverseParameterTransformT&lt; T &gt;::transform</a>.</p>
+<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">momentum::InverseParameterTransformT&lt; T &gt;::transform</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a0d5904f7a0a7714c18958c7478d21d8a" name="a0d5904f7a0a7714c18958c7478d21d8a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d5904f7a0a7714c18958c7478d21d8a">&#9670;&#160;</a></span>inverseTransform</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> Eigen::SparseQR&lt;Eigen::SparseMatrix&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;, Eigen::COLAMDOrdering&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>&gt; &gt; <a class="el" href="structmomentum_1_1InverseParameterTransformT.html">momentum::InverseParameterTransformT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::inverseTransform</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00034">34</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
-
-</div>
-</div>
 <a id="a6e756372c5ed81779bbfd4608ca2fc7c" name="a6e756372c5ed81779bbfd4608ca2fc7c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6e756372c5ed81779bbfd4608ca2fc7c">&#9670;&#160;</a></span>offsets</h2>
 
@@ -290,9 +272,26 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt><dd>Constant offset factor for each joint; retained for ABI compatibility but no longer consulted by <code><a class="el" href="structmomentum_1_1InverseParameterTransformT.html#a377e4fdee4331d4310870e7f67d634f4" title="Map joint parameters to model parameters.">apply()</a></code>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00039">39</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">33</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+
+</div>
+</div>
+<a id="ad6a5fa2d90c8a50e3ffcd70f5fcc20de" name="ad6a5fa2d90c8a50e3ffcd70f5fcc20de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6a5fa2d90c8a50e3ffcd70f5fcc20de">&#9670;&#160;</a></span>pseudoInverseMatrix</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a0856ffe72332c6d962dd5f857737c62e">MatrixX</a>&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt; <a class="el" href="structmomentum_1_1InverseParameterTransformT.html">momentum::InverseParameterTransformT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::pseudoInverseMatrix</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">32</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 </div>
 </div>
@@ -310,9 +309,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">33</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">31</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8h_source.html#l00050">momentum::InverseParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, and <a class="el" href="inverse__parameter__transform_8h_source.html#l00055">momentum::InverseParameterTransformT&lt; T &gt;::numJointParameters()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8h_source.html#l00044">momentum::InverseParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, and <a class="el" href="inverse__parameter__transform_8h_source.html#l00049">momentum::InverseParameterTransformT&lt; T &gt;::numJointParameters()</a>.</p>
 
 </div>
 </div>
@@ -326,7 +325,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1InverseParameterTransformT.html">InverseParameterTransformT</a></li>
-    <li class="footer">Generated on Thu May 28 2026 05:13:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu May 28 2026 21:52:03 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

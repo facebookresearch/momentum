@@ -1,7 +1,5 @@
 var NAVTREEINDEX43 =
 {
-"urdf__mesh__io_8cpp.html#ae4f9e12ca5c04054ee78a1cbdad1795e":[3,0,6,9,2,3],
-"urdf__mesh__io_8cpp_source.html":[3,0,6,9,2],
 "urdf__mesh__io_8h.html":[3,0,6,9,3],
 "urdf__mesh__io_8h.html#a2320df89c5b2822fa7d0fb3cbf89ebc5":[3,0,6,9,3,1],
 "urdf__mesh__io_8h.html#a7d064df966c22c54b0f5780fa9fefce6":[3,0,6,9,3,2],

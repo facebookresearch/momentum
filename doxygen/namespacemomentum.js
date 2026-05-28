@@ -2838,7 +2838,6 @@ var namespacemomentum =
     [ "subsetVecToFullVec", "namespacemomentum.html#a872764b59e717b6ee1f6e42fc92b16b0", null ],
     [ "times_parameterTransform_times_v", "namespacemomentum.html#a53436820624e74aeace11c89c25ccb0d", null ],
     [ "toCm", "namespacemomentum.html#a696395c265b72a334cc61f3903c52c99", null ],
-    [ "toColumnMajor", "namespacemomentum.html#a88ac492359d0eef59bc827a961b5a09e", null ],
     [ "toDeg", "namespacemomentum.html#a3f2b81dcd7011fe109445947b18e1005", null ],
     [ "toJson", "namespacemomentum.html#a5fbedfbb21a5565b976acedaf9068ffb", null ],
     [ "tokenize", "namespacemomentum.html#ab53d9f9a4dfad1f55e473a1ee36a14fa", null ],
