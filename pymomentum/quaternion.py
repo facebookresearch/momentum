@@ -263,10 +263,28 @@ def from_axis_angle(axis_angle: torch.Tensor) -> torch.Tensor:
     """
     Convert an axis-angle tensor to a quaternion.
 
+    The axis-angle representation is a 3-vector whose direction is the rotation axis
+    and whose magnitude is the rotation angle in radians. This is equivalent to the
+    exponential map from so(3) to unit quaternions.
+
     :parameter axis_angle: A tensor of shape (..., 3) representing the axis-angle.
     :return: A tensor of shape (..., 4) representing the quaternion in ((x, y, z), w) format.
     """
     return torch_quaternion.from_axis_angle(axis_angle)
+
+
+def to_axis_angle(quaternions: torch.Tensor) -> torch.Tensor:
+    """
+    Convert a quaternion to an axis-angle tensor.
+
+    Returns the inverse of :func:`from_axis_angle`: a 3-vector whose direction is the
+    rotation axis and whose magnitude is the rotation angle. This is equivalent to
+    the logarithmic map from unit quaternions to so(3).
+
+    :parameter quaternions: A tensor of shape (..., 4) representing quaternions in ((x, y, z), w) format.
+    :return: A tensor of shape (..., 3) representing the axis-angle with magnitude in [0, π].
+    """
+    return torch_quaternion.to_axis_angle(quaternions)
 
 
 def euler_xyz_to_quaternion(euler_xyz: torch.Tensor) -> torch.Tensor:
