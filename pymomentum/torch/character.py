@@ -362,10 +362,7 @@ class Skeleton(torch.nn.Module):
         skel_state: torch.Tensor,
         backend: str = "torch",
     ) -> torch.Tensor:
-        if torch.jit.is_scripting():
-            resolved = "torch" if backend == "auto" else backend
-        else:
-            resolved = resolve_backend(backend, skel_state.float())
+        resolved = resolve_backend(backend, skel_state.float())
         if resolved == "triton":
             with torch.amp.autocast("cuda", enabled=False):
                 return triton_skel_state.skeleton_state_to_joint_parameters(
@@ -387,12 +384,9 @@ class Skeleton(torch.nn.Module):
         fk_backend: str = "auto",
         active_joints: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        if torch.jit.is_scripting():
-            resolved = "torch" if fk_backend == "auto" else fk_backend
-        else:
-            resolved = resolve_backend(
-                fk_backend, joint_parameters.float(), use_double_precision
-            )
+        resolved = resolve_backend(
+            fk_backend, joint_parameters.float(), use_double_precision
+        )
         if resolved == "triton" and use_double_precision:
             raise RuntimeError(
                 "Triton FK does not support double precision; "
@@ -988,12 +982,9 @@ class Character(torch.nn.Module):
             raise RuntimeError(
                 "Character has no parameter transform, please provide one"
             )
-        if torch.jit.is_scripting():
-            resolved = "torch" if fk_backend == "auto" else fk_backend
-        else:
-            resolved = resolve_backend(
-                fk_backend, model_parameters.float(), use_double_precision
-            )
+        resolved = resolve_backend(
+            fk_backend, model_parameters.float(), use_double_precision
+        )
         active_joints = self.parameter_transform.active_joints
         return self.joint_parameters_to_skeleton_state(
             self.model_parameters_to_joint_parameters(model_parameters),
