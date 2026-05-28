@@ -9,6 +9,7 @@
 
 #include <momentum/character/collision_geometry.h>
 #include <momentum/character/fwd.h>
+#include <momentum/character/joint.h>
 #include <momentum/character/locator.h>
 #include <momentum/character/parameter_limits.h>
 #include <momentum/character/parameter_transform.h>
@@ -16,6 +17,7 @@
 #include <momentum/character/skinned_locator.h>
 #include <momentum/character/types.h>
 #include <momentum/math/fwd.h>
+#include <momentum/math/types.h>
 
 namespace momentum {
 
@@ -61,6 +63,9 @@ struct Character {
   /// Collision volumes for the character
   CollisionGeometry_u collision;
 
+  /// Joint-level physical mass and inertia data loaded from model assets
+  PhysicalProperties physicalProperties;
+
   /// Shape variations that can be blended
   BlendShape_const_p blendShape;
 
@@ -101,6 +106,7 @@ struct Character {
   /// @param inverseBindPose Optional inverse bind pose transformations
   /// @param skinnedLocators Optional points of interest attached to joints, with skinning weights
   /// @param metadataIn Optional metadata
+  /// @param physicalPropertiesIn Optional physical mass properties attached to joints
   Character(
       const Skeleton& s,
       const ParameterTransform& pt,
@@ -115,7 +121,8 @@ struct Character {
       const std::string& nameIn = "",
       const momentum::TransformationList& inverseBindPose = {},
       const SkinnedLocatorList& skinnedLocators = {},
-      std::string_view metadataIn = "");
+      std::string_view metadataIn = "",
+      const PhysicalProperties& physicalPropertiesIn = PhysicalProperties());
 
   Character(const Character& c);
   Character(Character&& c) noexcept;

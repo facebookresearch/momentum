@@ -11,12 +11,41 @@
 
 namespace momentum {
 
+/// Policy for choosing how physical mass changes when scaling a character.
+///
+/// This is intentionally not a raw multiplier: call sites must spell out whether scaling preserves
+/// total mass or density, and any new behavior should be added as a named policy.
+enum class CharacterMassScale {
+  /// Preserve total mass while scaling lengths. This is appropriate for unit conversions.
+  PreserveMass,
+
+  /// Preserve density while scaling lengths, so mass changes with volume.
+  PreserveDensity,
+};
+
+/// Resolves physical mass properties to a skeleton joint.
+///
+/// A non-empty joint name is the source of truth: the cached joint index is used only when it is
+/// valid and points at the same joint name. If not, the name is looked up in the skeleton.
+[[nodiscard]] size_t resolvePhysicalPropertiesJointIndex(
+    const JointPhysicalProperties& properties,
+    const Skeleton& skeleton);
+
 /// Scales the character (mesh and skeleton) by the desired amount.
 ///
 /// Note that this should primarily be used when transforming the character into different units. If
 /// you simply want to apply an identity-specific scale to the character, you should use the
 /// 'scale_global' parameter in the ParameterTransform class.
-[[nodiscard]] Character scaleCharacter(const Character& character, float scale);
+///
+/// The optional mass scale policy controls how physical mass changes during the scale. With
+/// `PreserveMass`, inertia scales by `scale^2`; with `PreserveDensity`, mass scales by `scale^3`
+/// and inertia scales by `scale^5`.
+///
+/// @pre `scale > 0.0f`.
+[[nodiscard]] Character scaleCharacter(
+    const Character& character,
+    float scale,
+    CharacterMassScale massScale = CharacterMassScale::PreserveMass);
 
 /// Transforms the character (mesh and skeleton) by the desired transformation matrix.
 ///
