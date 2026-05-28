@@ -299,7 +299,9 @@ def euler_zyx_to_quaternion(euler_zyx: torch.Tensor) -> torch.Tensor:
     return torch_quaternion.euler_zyx_to_quaternion(euler_zyx)
 
 
-def from_rotation_matrix(matrices: torch.Tensor, eta: float = 1e-6) -> torch.Tensor:
+def from_rotation_matrix(
+    matrices: torch.Tensor, eta: float = 1e-6, backend: str = "torch"
+) -> torch.Tensor:
     """
     Convert a rotation matrix to a quaternion using numerically stable method.
 
@@ -309,8 +311,18 @@ def from_rotation_matrix(matrices: torch.Tensor, eta: float = 1e-6) -> torch.Ten
 
     :parameter matrices: A tensor of shape (..., 3, 3) representing the rotation matrices.
     :parameter eta: Numerical precision threshold (unused, kept for compatibility).
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
     :return: A tensor of shape (..., 4) representing the quaternions in ((x, y, z), w) format.
     """
+    backend = resolve_backend(
+        backend,
+        matrices,
+        use_double_precision=matrices.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _get_triton_quaternion().from_rotation_matrix(matrices)
+    if backend != "torch":
+        raise ValueError(f"Unsupported quaternion backend: {backend}")
     return torch_quaternion.from_rotation_matrix(matrices, eta)
 
 

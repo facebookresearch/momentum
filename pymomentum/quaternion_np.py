@@ -334,7 +334,7 @@ def euler_zyx_to_quaternion(euler_zyx: NDArray) -> NDArray:
     return np.stack((x, y, z, w), axis=-1)
 
 
-def from_rotation_matrix(matrices: NDArray, eta: float = 1e-6) -> NDArray:
+def from_rotation_matrix(matrices: NDArray) -> NDArray:
     """
     Convert a rotation matrix to a quaternion using numerically stable method.
 
@@ -343,7 +343,6 @@ def from_rotation_matrix(matrices: NDArray, eta: float = 1e-6) -> NDArray:
     stability across all rotation matrix configurations.
 
     :parameter matrices: An array of shape (..., 3, 3) representing the rotation matrices.
-    :parameter eta: Numerical precision threshold (unused, kept for compatibility).
     :return: An array of shape (..., 4) representing the quaternions in ((x, y, z), w) format.
     """
     m = matrices
