@@ -7,11 +7,15 @@
 
 #pragma once
 
+#include <momentum/character/fwd.h>
+#include <momentum/character/joint.h>
 #include <momentum/character/parameter_limits.h>
 #include <momentum/character/parameter_transform.h>
 
 #include <nlohmann/json.hpp>
 #include <Eigen/Core>
+
+#include <string>
 
 namespace momentum {
 
@@ -93,10 +97,30 @@ void parameterSetsToJson(const Character& character, nlohmann::json& j);
 void poseConstraintsToJson(const Character& character, nlohmann::json& j);
 void parameterTransformToJson(const Character& character, nlohmann::json& j);
 
+/// Serializes one joint's physical mass properties.
+///
+/// The JSON object contains `mass`, `centerOfMass` as a 3-element vector, `inertia` as the six
+/// symmetric tensor fields `ixx`, `ixy`, `ixz`, `iyy`, `iyz`, `izz`, and `inertiaRotation` as a
+/// quaternion in `[w, x, y, z]` order. Length-valued fields use the Momentum units documented on
+/// `JointPhysicalProperties`.
+void jointPhysicalPropertiesToJson(
+    const JointPhysicalProperties& jointProperties,
+    nlohmann::json& j);
+
 // from json conversion functions
 ParameterLimits parameterLimitsFromJson(const Character& character, const nlohmann::json& j);
 ParameterSets parameterSetsFromJson(const Character& character, const nlohmann::json& j);
 PoseConstraints poseConstraintsFromJson(const Character& character, const nlohmann::json& j);
 ParameterTransform parameterTransformFromJson(const Character& character, const nlohmann::json& j);
+
+/// Parses one joint's physical mass properties from JSON.
+///
+/// All fields written by `jointPhysicalPropertiesToJson()` are required. `jointName` and
+/// `jointIndex` are supplied by the enclosing skeleton node, because the per-node schema does not
+/// duplicate the joint identity inside the physical-properties object.
+JointPhysicalProperties jointPhysicalPropertiesFromJson(
+    const nlohmann::json& j,
+    const std::string& jointName,
+    size_t jointIndex);
 
 } // namespace momentum

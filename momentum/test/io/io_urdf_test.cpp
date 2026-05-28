@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/urdf/urdf_io.h>
 #include <momentum/io/urdf/urdf_mesh_io.h>
 #include <momentum/math/constants.h>
@@ -20,6 +21,7 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include <tuple>
 
 using namespace momentum;
 
@@ -45,6 +47,74 @@ void expectPhysicalPropertiesJointMatches(
   ASSERT_LT(properties.jointIndex, character.skeleton.joints.size());
   EXPECT_EQ(character.skeleton.getJointIdByName(properties.jointName), properties.jointIndex);
   EXPECT_EQ(character.skeleton.joints.at(properties.jointIndex).name, properties.jointName);
+}
+
+std::string urdfWithFixedMixedInertialLinks() {
+  return R"(
+    <?xml version="1.0"?>
+    <robot name="test_robot">
+      <link name="base_link">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="2.0"/>
+          <inertia ixx="0.10" ixy="0.00" ixz="0.00" iyy="0.20" iyz="0.00" izz="0.30"/>
+        </inertial>
+      </link>
+      <link name="middle_link"/>
+      <link name="tip_link">
+        <inertial>
+          <origin xyz="0 0 0.01" rpy="0 0 0"/>
+          <mass value="1.0"/>
+          <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.02" iyz="0.00" izz="0.03"/>
+        </inertial>
+      </link>
+      <joint name="joint1" type="fixed">
+        <parent link="base_link"/>
+        <child link="middle_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+      <joint name="joint2" type="fixed">
+        <parent link="middle_link"/>
+        <child link="tip_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+    </robot>
+  )";
+}
+
+std::string urdfWithRevoluteMixedInertialLinks() {
+  return R"(
+    <?xml version="1.0"?>
+    <robot name="test_robot">
+      <link name="base_link">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="2.0"/>
+          <inertia ixx="0.10" ixy="0.00" ixz="0.00" iyy="0.20" iyz="0.00" izz="0.30"/>
+        </inertial>
+      </link>
+      <link name="middle_link"/>
+      <link name="tip_link">
+        <inertial>
+          <origin xyz="0 0 0.01" rpy="0 0 0"/>
+          <mass value="1.0"/>
+          <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.02" iyz="0.00" izz="0.03"/>
+        </inertial>
+      </link>
+      <joint name="joint1" type="fixed">
+        <parent link="base_link"/>
+        <child link="middle_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+      <joint name="joint2" type="revolute">
+        <parent link="middle_link"/>
+        <child link="tip_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-1.0" upper="1.0" effort="100" velocity="1"/>
+      </joint>
+    </robot>
+  )";
 }
 
 TEST(IoUrdfTest, LoadCharacter) {
@@ -289,36 +359,7 @@ TEST(IoUrdfTest, LoadUrdfWithInertialPhysicalProperties) {
 }
 
 TEST(IoUrdfTest, LoadUrdfSkipsLinksWithoutInertialPhysicalProperties) {
-  const std::string urdfContent = R"(
-    <?xml version="1.0"?>
-    <robot name="test_robot">
-      <link name="base_link">
-        <inertial>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <mass value="2.0"/>
-          <inertia ixx="0.10" ixy="0.00" ixz="0.00" iyy="0.20" iyz="0.00" izz="0.30"/>
-        </inertial>
-      </link>
-      <link name="middle_link"/>
-      <link name="tip_link">
-        <inertial>
-          <origin xyz="0 0 0.01" rpy="0 0 0"/>
-          <mass value="1.0"/>
-          <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.02" iyz="0.00" izz="0.03"/>
-        </inertial>
-      </link>
-      <joint name="joint1" type="fixed">
-        <parent link="base_link"/>
-        <child link="middle_link"/>
-        <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      </joint>
-      <joint name="joint2" type="fixed">
-        <parent link="middle_link"/>
-        <child link="tip_link"/>
-        <origin xyz="0 0 0.5" rpy="0 0 0"/>
-      </joint>
-    </robot>
-  )";
+  const std::string urdfContent = urdfWithFixedMixedInertialLinks();
 
   const auto bytes = std::as_bytes(std::span(urdfContent));
   const auto character = loadUrdfCharacter(bytes);
@@ -340,6 +381,36 @@ TEST(IoUrdfTest, LoadUrdfSkipsLinksWithoutInertialPhysicalProperties) {
       << "tip_link center-of-mass offset mismatch. Expected "
       << expectedTipCenterOfMassOffset.transpose() << ", got "
       << tip.centerOfMassOffset.transpose();
+}
+
+TEST(IoUrdfTest, GltfRoundTripPreservesPhysicalProperties) {
+  const std::string urdfContent = urdfWithRevoluteMixedInertialLinks();
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const Character urdfCharacter = loadUrdfCharacter(bytes);
+  ASSERT_FALSE(urdfCharacter.parameterTransform.name.empty());
+
+  const TemporaryFile gltfFile = temporaryFile("urdf_gltf_physical_properties", "gltf");
+  const MatrixXf motion = MatrixXf::Zero(urdfCharacter.parameterTransform.name.size(), 1);
+  saveGltfCharacter(
+      gltfFile.path(),
+      urdfCharacter,
+      30.0f,
+      std::make_tuple(urdfCharacter.parameterTransform.name, motion));
+  ASSERT_TRUE(filesystem::exists(gltfFile.path())) << "No file at " << gltfFile.path();
+
+  const Character gltfCharacter = loadGltfCharacter(gltfFile.path());
+  compareChars(urdfCharacter, gltfCharacter, false);
+
+  ASSERT_EQ(gltfCharacter.physicalProperties.size(), 2);
+  const auto& base = gltfCharacter.physicalProperties.at(0);
+  EXPECT_EQ(base.jointName, "base_link");
+  EXPECT_EQ(base.jointIndex, 0);
+  expectPhysicalPropertiesJointMatches(gltfCharacter, base);
+
+  const auto& tip = gltfCharacter.physicalProperties.at(1);
+  EXPECT_EQ(tip.jointName, "tip_link");
+  EXPECT_EQ(tip.jointIndex, 2);
+  expectPhysicalPropertiesJointMatches(gltfCharacter, tip);
 }
 
 TEST(IoUrdfTest, LoadUrdfWithSphereVisual) {
