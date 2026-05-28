@@ -11,6 +11,7 @@ import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_tes
 import pymomentum.quaternion as pym_quaternion
 import pymomentum.torch.character as pym_character
 import torch
+from pymomentum.backend import selection as backend_selection
 
 
 def _cuda_device() -> torch.device:
@@ -22,6 +23,31 @@ def _cuda_device() -> torch.device:
 
 
 class TritonBackendTest(unittest.TestCase):
+    def test_auto_backend_selection(self) -> None:
+        cpu_tensor = torch.empty((1,), dtype=torch.float32)
+
+        self.assertEqual(backend_selection.resolve_backend("auto", cpu_tensor), "torch")
+        self.assertEqual(
+            backend_selection.resolve_backend(
+                "auto",
+                cpu_tensor.to(torch.float64),
+                use_double_precision=True,
+            ),
+            "torch",
+        )
+        self.assertEqual(
+            backend_selection.resolve_backend("torch", cpu_tensor), "torch"
+        )
+        self.assertEqual(
+            backend_selection.resolve_backend("triton", cpu_tensor), "triton"
+        )
+
+        if torch.cuda.is_available() and backend_selection._HAS_TRITON:
+            cuda_tensor = cpu_tensor.cuda()
+            self.assertEqual(
+                backend_selection.resolve_backend("auto", cuda_tensor), "triton"
+            )
+
     def test_fk_matches_torch(self) -> None:
         device = _cuda_device()
         character_cpu = pym_test_utils.create_test_character()
@@ -177,6 +203,38 @@ class TritonBackendTest(unittest.TestCase):
             assume_normalized=True,
             eps=1e-12,
         )
+
+    def test_quaternion_from_rotation_matrix_matches_torch(self) -> None:
+        device = _cuda_device()
+
+        torch.manual_seed(0)
+        quaternions = pym_quaternion.normalize(
+            torch.randn((2, 3, 257, 4), device=device, dtype=torch.float32)
+        )
+        matrices = pym_quaternion.to_rotation_matrix(quaternions)
+
+        torch_matrices = matrices.detach().clone().requires_grad_()
+        triton_matrices = matrices.detach().clone().requires_grad_()
+
+        torch_result = pym_quaternion.from_rotation_matrix(torch_matrices)
+        triton_result = pym_quaternion.from_rotation_matrix(
+            triton_matrices,
+            backend="triton",
+        )
+
+        torch.testing.assert_close(torch_result, triton_result, atol=1e-6, rtol=1e-6)
+
+        grad_output = torch.randn_like(torch_result)
+        torch_result.backward(grad_output)
+        triton_result.backward(grad_output)
+
+        torch_grad = torch_matrices.grad
+        triton_grad = triton_matrices.grad
+        self.assertIsNotNone(torch_grad)
+        self.assertIsNotNone(triton_grad)
+        if torch_grad is None or triton_grad is None:
+            return
+        torch.testing.assert_close(torch_grad, triton_grad, atol=1e-5, rtol=1e-5)
 
     def test_zero_quaternion_is_finite(self) -> None:
         device = _cuda_device()

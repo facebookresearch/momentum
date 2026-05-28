@@ -92,6 +92,10 @@ class TestQuaternion(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "input is on CPU"):
             quaternion.to_rotation_matrix(quats, backend="triton")
 
+        mats = quaternion.to_rotation_matrix(quats)
+        with self.assertRaisesRegex(RuntimeError, "input is on CPU"):
+            quaternion.from_rotation_matrix(mats, backend="triton")
+
     def test_multiply(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
         nMat = 5
