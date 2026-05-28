@@ -24,6 +24,115 @@
 
 namespace momentum {
 
+namespace {
+
+ParameterTransform zeroActiveJointOffsets(
+    ParameterTransform parameterTransform,
+    const std::vector<bool>& activeJoints) {
+  for (size_t jointIndex = 0; jointIndex < activeJoints.size(); ++jointIndex) {
+    if (!activeJoints[jointIndex]) {
+      continue;
+    }
+
+    for (size_t offset = 0; offset < kParametersPerJoint; ++offset) {
+      parameterTransform.offsets(jointIndex * kParametersPerJoint + offset) = 0.0f;
+    }
+  }
+
+  return parameterTransform;
+}
+
+struct SimplifiedJointPlacement {
+  size_t parent = kInvalidIndex;
+  size_t retainedAncestor = kInvalidIndex;
+  Vector3f translationOffset = Vector3f::Zero();
+};
+
+SimplifiedJointPlacement getSimplifiedJointPlacement(
+    const Skeleton& skeleton,
+    const SkeletonState& referenceState,
+    const std::vector<size_t>& lastJoint,
+    const size_t jointIndex) {
+  const Joint& joint = skeleton.joints.at(jointIndex);
+  if (joint.parent == kInvalidIndex) {
+    return {kInvalidIndex, jointIndex, joint.translationOffset};
+  }
+
+  size_t retainedAncestor = jointIndex;
+  size_t simplifiedParent = kInvalidIndex;
+  while (simplifiedParent == kInvalidIndex && retainedAncestor != kInvalidIndex) {
+    retainedAncestor = skeleton.joints.at(retainedAncestor).parent;
+    if (retainedAncestor != kInvalidIndex) {
+      simplifiedParent = lastJoint.at(retainedAncestor);
+    }
+  }
+
+  const Vector3f offset = retainedAncestor != kInvalidIndex
+      ? referenceState.jointState.at(retainedAncestor).transform.inverse() *
+          referenceState.jointState.at(jointIndex).translation()
+      : referenceState.jointState.at(jointIndex).translation();
+  return {simplifiedParent, retainedAncestor, offset};
+}
+
+Joint makeSimplifiedJoint(
+    const Skeleton& skeleton,
+    const size_t jointIndex,
+    const SimplifiedJointPlacement& placement) {
+  Joint result = skeleton.joints.at(jointIndex);
+  result.parent = placement.parent;
+  result.translationOffset = placement.translationOffset;
+
+  size_t parent = skeleton.joints.at(jointIndex).parent;
+  while (parent != placement.retainedAncestor && parent != kInvalidIndex) {
+    result.preRotation = skeleton.joints.at(parent).preRotation * result.preRotation;
+    parent = skeleton.joints.at(parent).parent;
+  }
+
+  return result;
+}
+
+size_t findSimplifiedAncestor(
+    const Skeleton& skeleton,
+    const std::vector<size_t>& intermediateJointMap,
+    const size_t jointIndex) {
+  size_t ancestor = jointIndex;
+  while (ancestor != kInvalidIndex && intermediateJointMap.at(ancestor) == kInvalidIndex) {
+    ancestor = skeleton.joints.at(ancestor).parent;
+  }
+
+  MT_THROW_IF(
+      ancestor == kInvalidIndex,
+      "During skeleton simplification, inactive joint '{}' has no valid parent joint.  "
+      "Every joint in the simplified skeleton must have at least one parent joint that is not disabled.",
+      skeleton.joints.at(jointIndex).name);
+  return intermediateJointMap.at(ancestor);
+}
+
+std::unique_ptr<CollisionGeometry> remapCollisionGeometry(
+    const CollisionGeometry* collision,
+    const std::vector<size_t>& jointMap,
+    const SkeletonState& sourceBindState,
+    const SkeletonState& targetBindState) {
+  if (collision == nullptr) {
+    return {};
+  }
+
+  auto result = std::make_unique<CollisionGeometry>(*collision);
+  for (auto& collisionGeometry : *result) {
+    const auto oldParent = collisionGeometry.parent;
+    collisionGeometry.parent = jointMap.at(collisionGeometry.parent);
+    // Re-express the collision shape's local transform in the new parent's frame:
+    //   newLocal = targetParentBind^-1 * sourceParentBind * oldLocal
+    collisionGeometry.transformation =
+        targetBindState.jointState.at(collisionGeometry.parent).transform.inverse() *
+        sourceBindState.jointState.at(oldParent).transform * collisionGeometry.transformation;
+  }
+
+  return result;
+}
+
+} // namespace
+
 Character::Character(
     const Skeleton& s,
     const ParameterTransform& pt,
@@ -201,22 +310,9 @@ Character Character::simplifySkeleton(const std::vector<bool>& activeJoints) con
   //  start by remapping the skeleton and parameter transform
   // -------------------------------------------------------------------
 
-  // Running count of joints kept in the simplified skeleton.
-  size_t jointCount = 0;
-
   // Build a parameter transform whose offsets are zero for active joints but preserved for
   // inactive ones, so the reference state below "bakes" the inactive offsets in.
-  auto zeroTransform = parameterTransform;
-
-  for (size_t jointIndex = 0; jointIndex < activeJoints.size(); ++jointIndex) {
-    // Zero the offsets for active joints; inactive joints keep their offsets so their effect is
-    // captured in the reference state's world transforms below.
-    if (activeJoints[jointIndex]) {
-      for (size_t o = 0; o < kParametersPerJoint; o++) {
-        zeroTransform.offsets(jointIndex * kParametersPerJoint + o) = 0.0f;
-      }
-    }
-  }
+  const auto zeroTransform = zeroActiveJointOffsets(parameterTransform, activeJoints);
 
   // Maps each original joint index to its position in `simplifiedSkeleton.joints` (or
   // kInvalidIndex if the joint is dropped). Populated below as we iterate.
@@ -236,68 +332,22 @@ Character Character::simplifySkeleton(const std::vector<bool>& activeJoints) con
 
   std::vector<size_t> simplifiedJointMap(skeleton.joints.size(), kInvalidIndex);
   for (size_t aIndex = 0; aIndex < skeleton.joints.size(); aIndex++) {
-    const Joint& j = skeleton.joints[aIndex];
-
-    // Walk up the original hierarchy to find the nearest active ancestor; that becomes this
-    // joint's parent in the simplified skeleton, with the offset re-expressed in the new
-    // parent's local frame.
-    Vector3f offset = j.translationOffset;
-    size_t currentParent = kInvalidIndex;
-    size_t sIndex = aIndex;
-    if (j.parent != kInvalidIndex) {
-      while (currentParent == kInvalidIndex && sIndex != kInvalidIndex) {
-        sIndex = skeleton.joints[sIndex].parent;
-        if (sIndex == kInvalidIndex) {
-          break;
-        }
-        currentParent = lastJoint.at(sIndex);
-      }
-      // Re-express the joint's translation in the (new) parent's local frame; if no parent
-      // remains, the translation is in world space (root joint case).
-      if (sIndex != kInvalidIndex) {
-        offset = referenceState.jointState[sIndex].transform.inverse() *
-            referenceState.jointState[aIndex].translation();
-      } else {
-        offset = referenceState.jointState[aIndex].translation();
-      }
-    }
+    // `retainedAncestor` identifies the original ancestor whose simplified mapping supplies the
+    // new parent frame. Dropped joints between it and this joint are folded into the kept joint.
+    const auto placement = getSimplifiedJointPlacement(skeleton, referenceState, lastJoint, aIndex);
 
     if (activeJoints[aIndex]) {
-      Joint jt = j;
-
-      jt.parent = currentParent;
-
-      jt.translationOffset = offset;
-
-      // Compose pre-rotations from every dropped intermediate ancestor into this joint, so the
-      // pruned hierarchy still produces the same orientation chain.
-      size_t parent = j.parent;
-      while (parent != sIndex && parent != kInvalidIndex) {
-        jt.preRotation = skeleton.joints[parent].preRotation * jt.preRotation;
-        parent = skeleton.joints[parent].parent;
-      }
-
-      simplifiedSkeleton.joints.push_back(jt);
-
-      intermediateJointMap.at(aIndex) = jointCount;
-      jointCount++;
-      lastJoint.at(aIndex) = simplifiedSkeleton.joints.size() - 1;
-
-      simplifiedJointMap.at(aIndex) = jointCount - 1;
+      simplifiedSkeleton.joints.push_back(makeSimplifiedJoint(skeleton, aIndex, placement));
+      const size_t newJointIndex = simplifiedSkeleton.joints.size() - 1;
+      intermediateJointMap.at(aIndex) = newJointIndex;
+      lastJoint.at(aIndex) = newJointIndex;
+      simplifiedJointMap.at(aIndex) = newJointIndex;
     } else {
       // Inactive joints are not added to the simplified skeleton; instead, point their entry in
       // simplifiedJointMap at the nearest active ancestor so consumers (locators, skin weights,
       // etc.) can still resolve them.
-      size_t index = aIndex;
-      while (index != kInvalidIndex && intermediateJointMap.at(index) == kInvalidIndex) {
-        index = skeleton.joints[index].parent;
-      }
-      MT_THROW_IF(
-          index == kInvalidIndex,
-          "During skeleton simplification, inactive joint '{}' has no valid parent joint.  "
-          "Every joint in the simplified skeleton must have at least one parent joint that is not disabled.",
-          skeleton.joints.at(aIndex).name);
-      simplifiedJointMap.at(aIndex) = intermediateJointMap.at(index);
+      simplifiedJointMap.at(aIndex) =
+          findSimplifiedAncestor(skeleton, intermediateJointMap, aIndex);
     }
   }
   MT_THROW_IF(
@@ -342,18 +392,8 @@ Character Character::simplifySkeleton(const std::vector<bool>& activeJoints) con
   // -------------------------------------------------------------------
   //  remap the collision if we have any
   // -------------------------------------------------------------------
-  if (collision != nullptr) {
-    result.collision = std::make_unique<CollisionGeometry>(*collision);
-    for (auto&& c : *result.collision) {
-      const auto oldParent = c.parent;
-      c.parent = result.jointMap.at(c.parent);
-      // Re-express the collision shape's local transform in the new parent's frame:
-      //   newLocal = targetParentBind^-1 * sourceParentBind * oldLocal
-      c.transformation =
-          (targetBindState.jointState[c.parent].transform.inverse() *
-           sourceBindState.jointState[oldParent].transform * c.transformation);
-    }
-  }
+  result.collision =
+      remapCollisionGeometry(collision.get(), result.jointMap, sourceBindState, targetBindState);
 
   return result;
 }
