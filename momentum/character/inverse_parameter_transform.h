@@ -12,8 +12,6 @@
 #include <momentum/character/types.h>
 #include <momentum/math/types.h>
 
-#include <Eigen/Sparse>
-
 namespace momentum {
 
 /// Maps from joint parameters back to the model parameters.
@@ -31,11 +29,7 @@ template <typename T>
 struct InverseParameterTransformT {
  public:
   const SparseRowMatrix<T> transform;
-  const Eigen::SparseQR<Eigen::SparseMatrix<T>, Eigen::COLAMDOrdering<int>> inverseTransform;
-  // TODO: `offsets` is unused by the inverse mapping below and is documented as deprecated; remove
-  // it and update all constructors/consumers.
-  /// @deprecated Constant offset factor for each joint; retained for ABI compatibility but no
-  /// longer consulted by `apply()`.
+  const MatrixX<T> pseudoInverseMatrix;
   const Eigen::VectorX<T> offsets;
 
   explicit InverseParameterTransformT(const ParameterTransformT<T>& paramTransform);

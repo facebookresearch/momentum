@@ -444,31 +444,13 @@ variable_list ApplyInverseParameterTransformFunction::backward(
       dLoss_dModelParameters.size(1) != inverseParamTransform->numAllModelParameters(),
       "Unexpected error: mismatch in parameter transform sizes.");
 
-  const auto nBatch = dLoss_dModelParameters.size(0);
-
-  const int nModelParams = static_cast<int>(inverseParamTransform->numAllModelParameters());
-  const int nJointParams = static_cast<int>(inverseParamTransform->numJointParameters());
-
-  auto result = at::zeros({nBatch, nJointParams}, at::kFloat);
-
-  // To solve for the model parameters, given the joint parameters,
-  // inverseParameterTransform uses the QR decomposition,
-  //    modelParams = R^{-1} * Q^T * jointParams
-  // When taking the backwards-mode derivative, we need to apply the transpose
-  // of this,
-  //    dLoss_dJointParams = (R^{-1} * Q^T)^T * dLoss_dModelParams
-  //                       = (R^{-1})^T * Q * dLoss_dModelParams
-  // As the Q matrix is an implicitly (nJointParam x nJointParam) matrix, so
-  // to apply it we need to pad the dLoss_dModelParams vector with zeros;
-  // we'll use the tmp vector to store it.
-  Eigen::VectorXf tmp = Eigen::VectorXf::Zero(nJointParams);
-  const auto& qrDecomposition = inverseParamTransform->inverseTransform;
-  for (int64_t iBatch = 0; iBatch < nBatch; ++iBatch) {
-    tmp.head(nModelParams) =
-        qrDecomposition.matrixR().triangularView<Eigen::Upper>().transpose().solve(
-            toEigenMap<float>(dLoss_dModelParameters.select(0, iBatch)));
-    toEigenMap<float>(result.select(0, iBatch)) = (qrDecomposition.matrixQ() * tmp).eval();
-  }
+  // The forward pass computes:
+  //    modelParams = pseudoInverseMatrix * (jointParams - offsets)
+  // The backward-mode derivative is the transpose:
+  //    dLoss_dJointParams = pseudoInverseMatrix^T * dLoss_dModelParams
+  // In batched row-vector form: result = dLoss_dModelParameters @ pinv
+  const auto pinvTensor = to2DTensor(inverseParamTransform->pseudoInverseMatrix);
+  auto result = at::mm(dLoss_dModelParameters, pinvTensor);
 
   if (squeeze) {
     result = result.sum(0);
