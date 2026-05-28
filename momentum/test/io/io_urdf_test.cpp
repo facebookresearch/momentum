@@ -5,16 +5,21 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "momentum/io/urdf/urdf_io.h"
-#include "momentum/io/urdf/urdf_mesh_io.h"
-#include "momentum/test/character/character_helpers.h"
-#include "momentum/test/character/character_helpers_gtest.h"
-#include "momentum/test/io/io_helpers.h"
+#include <momentum/io/urdf/urdf_io.h>
+#include <momentum/io/urdf/urdf_mesh_io.h>
+#include <momentum/math/constants.h>
+#include <momentum/test/character/character_helpers.h>
+#include <momentum/test/character/character_helpers_gtest.h>
+#include <momentum/test/io/io_helpers.h>
 
 #include <gtest/gtest.h>
+#include <Eigen/Geometry>
 
 #include <array>
 #include <fstream>
+#include <iomanip>
+#include <limits>
+#include <sstream>
 
 using namespace momentum;
 
@@ -32,6 +37,14 @@ void expectColorEq(const Eigen::Vector3b& actual, const Eigen::Vector3b& expecte
   EXPECT_EQ(static_cast<int>(actual.x()), static_cast<int>(expected.x()));
   EXPECT_EQ(static_cast<int>(actual.y()), static_cast<int>(expected.y()));
   EXPECT_EQ(static_cast<int>(actual.z()), static_cast<int>(expected.z()));
+}
+
+void expectPhysicalPropertiesJointMatches(
+    const Character& character,
+    const JointPhysicalProperties& properties) {
+  ASSERT_LT(properties.jointIndex, character.skeleton.joints.size());
+  EXPECT_EQ(character.skeleton.getJointIdByName(properties.jointName), properties.jointIndex);
+  EXPECT_EQ(character.skeleton.joints.at(properties.jointIndex).name, properties.jointName);
 }
 
 TEST(IoUrdfTest, LoadCharacter) {
@@ -189,6 +202,144 @@ TEST(IoUrdfTest, LoadUrdfWithPrimitiveVisuals) {
     EXPECT_EQ(character.skinWeights->index(i, 0), 1);
     EXPECT_FLOAT_EQ(character.skinWeights->weight(i, 0), 1.0f);
   }
+}
+
+TEST(IoUrdfTest, LoadUrdfWithInertialPhysicalProperties) {
+  constexpr float kBaseInertiaRotationZ = pi<float>() / 2.0f;
+  std::ostringstream urdfContent;
+  urdfContent << R"(
+    <?xml version="1.0"?>
+    <robot name="test_robot">
+      <link name="base_link">
+        <inertial>
+          <origin xyz="0.01 0.02 0.03" rpy="0 0 )"
+              << std::setprecision(std::numeric_limits<float>::max_digits10)
+              << kBaseInertiaRotationZ << R"("/>
+          <mass value="2.5"/>
+          <inertia ixx="0.10" ixy="0.01" ixz="0.02" iyy="0.20" iyz="0.03" izz="0.30"/>
+        </inertial>
+      </link>
+      <link name="child_link">
+        <inertial>
+          <origin xyz="-0.10 0.00 0.25" rpy="0 0 0"/>
+          <mass value="1.25"/>
+          <inertia ixx="0.04" ixy="0.00" ixz="0.00" iyy="0.05" iyz="0.00" izz="0.06"/>
+        </inertial>
+      </link>
+      <joint name="joint1" type="fixed">
+        <parent link="base_link"/>
+        <child link="child_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto urdfString = urdfContent.str();
+  const auto bytes = std::as_bytes(std::span(urdfString));
+  const auto character = loadUrdfCharacter(bytes);
+
+  ASSERT_EQ(character.physicalProperties.size(), 2);
+  const auto& base = character.physicalProperties.at(0);
+  EXPECT_EQ(base.jointName, "base_link");
+  EXPECT_EQ(base.jointIndex, 0);
+  expectPhysicalPropertiesJointMatches(character, base);
+  EXPECT_FLOAT_EQ(base.mass, 2.5f);
+  const Eigen::Vector3f expectedBaseCenterOfMassOffset(1.0f, 2.0f, 3.0f);
+  EXPECT_TRUE(base.centerOfMassOffset.isApprox(expectedBaseCenterOfMassOffset))
+      << "base_link center-of-mass offset mismatch. Expected "
+      << expectedBaseCenterOfMassOffset.transpose() << ", got "
+      << base.centerOfMassOffset.transpose();
+  constexpr float kInertiaScaleFromMetersSquaredToCentimetersSquared = 10000.0f;
+  Eigen::Matrix3f expectedBaseInertia;
+  expectedBaseInertia << 0.10f, 0.01f, 0.02f, 0.01f, 0.20f, 0.03f, 0.02f, 0.03f, 0.30f;
+  const Eigen::Matrix3f expectedBaseInertiaMomentum =
+      expectedBaseInertia * kInertiaScaleFromMetersSquaredToCentimetersSquared;
+  EXPECT_TRUE(base.inertia.isApprox(expectedBaseInertiaMomentum))
+      << "base_link inertia mismatch. Expected:\n"
+      << expectedBaseInertiaMomentum << "\nGot:\n"
+      << base.inertia;
+  const Eigen::Quaternionf expectedBaseRotation(
+      Eigen::AngleAxisf(kBaseInertiaRotationZ, Eigen::Vector3f::UnitZ()));
+  const float baseRotationAngularDistance =
+      base.inertiaRotation.angularDistance(expectedBaseRotation);
+  EXPECT_NEAR(baseRotationAngularDistance, 0.0f, 1e-5f)
+      << "base_link inertia rotation mismatch. Expected coeffs "
+      << expectedBaseRotation.coeffs().transpose() << ", got "
+      << base.inertiaRotation.coeffs().transpose() << ", angular distance "
+      << baseRotationAngularDistance;
+
+  const auto& child = character.physicalProperties.at(1);
+  EXPECT_EQ(child.jointName, "child_link");
+  EXPECT_EQ(child.jointIndex, 1);
+  expectPhysicalPropertiesJointMatches(character, child);
+  EXPECT_FLOAT_EQ(child.mass, 1.25f);
+  const Eigen::Vector3f expectedChildCenterOfMassOffset(-10.0f, 0.0f, 25.0f);
+  EXPECT_TRUE(child.centerOfMassOffset.isApprox(expectedChildCenterOfMassOffset))
+      << "child_link center-of-mass offset mismatch. Expected "
+      << expectedChildCenterOfMassOffset.transpose() << ", got "
+      << child.centerOfMassOffset.transpose();
+  Eigen::Matrix3f expectedChildInertia;
+  expectedChildInertia << 0.04f, 0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 0.0f, 0.0f, 0.06f;
+  const Eigen::Matrix3f expectedChildInertiaMomentum =
+      expectedChildInertia * kInertiaScaleFromMetersSquaredToCentimetersSquared;
+  EXPECT_TRUE(child.inertia.isApprox(expectedChildInertiaMomentum))
+      << "child_link inertia mismatch. Expected:\n"
+      << expectedChildInertiaMomentum << "\nGot:\n"
+      << child.inertia;
+}
+
+TEST(IoUrdfTest, LoadUrdfSkipsLinksWithoutInertialPhysicalProperties) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="test_robot">
+      <link name="base_link">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="2.0"/>
+          <inertia ixx="0.10" ixy="0.00" ixz="0.00" iyy="0.20" iyz="0.00" izz="0.30"/>
+        </inertial>
+      </link>
+      <link name="middle_link"/>
+      <link name="tip_link">
+        <inertial>
+          <origin xyz="0 0 0.01" rpy="0 0 0"/>
+          <mass value="1.0"/>
+          <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.02" iyz="0.00" izz="0.03"/>
+        </inertial>
+      </link>
+      <joint name="joint1" type="fixed">
+        <parent link="base_link"/>
+        <child link="middle_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+      <joint name="joint2" type="fixed">
+        <parent link="middle_link"/>
+        <child link="tip_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  ASSERT_EQ(character.skeleton.joints.size(), 3);
+  ASSERT_EQ(character.physicalProperties.size(), 2);
+
+  const auto& base = character.physicalProperties.at(0);
+  EXPECT_EQ(base.jointName, "base_link");
+  EXPECT_EQ(base.jointIndex, 0);
+  expectPhysicalPropertiesJointMatches(character, base);
+
+  const auto& tip = character.physicalProperties.at(1);
+  EXPECT_EQ(tip.jointName, "tip_link");
+  EXPECT_EQ(tip.jointIndex, 2);
+  expectPhysicalPropertiesJointMatches(character, tip);
+  const Eigen::Vector3f expectedTipCenterOfMassOffset(0.0f, 0.0f, 1.0f);
+  EXPECT_TRUE(tip.centerOfMassOffset.isApprox(expectedTipCenterOfMassOffset))
+      << "tip_link center-of-mass offset mismatch. Expected "
+      << expectedTipCenterOfMassOffset.transpose() << ", got "
+      << tip.centerOfMassOffset.transpose();
 }
 
 TEST(IoUrdfTest, LoadUrdfWithSphereVisual) {
