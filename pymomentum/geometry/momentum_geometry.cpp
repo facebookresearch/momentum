@@ -153,7 +153,9 @@ momentum::Character loadConfigFromFile(
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators};
+      character.skinnedLocators,
+      character.metadata,
+      character.physicalProperties};
 }
 
 momentum::Character loadFBXCharacterFromBytes(
@@ -188,7 +190,9 @@ momentum::Character loadConfigFromBytes(
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators};
+      character.skinnedLocators,
+      character.metadata,
+      character.physicalProperties};
 }
 
 momentum::Character loadLocatorsFromBytes(
@@ -394,7 +398,9 @@ momentum::Character replaceRestMesh(const momentum::Character& character, RowMat
       character.faceExpressionBlendShape,
       character.name,
       character.inverseBindPose,
-      character.skinnedLocators};
+      character.skinnedLocators,
+      character.metadata,
+      character.physicalProperties};
 }
 
 // Get a boolean vector for selected vertices from selected bones.

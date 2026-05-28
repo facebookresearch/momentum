@@ -19,6 +19,22 @@
 
 namespace momentum {
 
+size_t resolvePhysicalPropertiesJointIndex(
+    const JointPhysicalProperties& properties,
+    const Skeleton& skeleton) {
+  if (properties.jointIndex < skeleton.joints.size() &&
+      (properties.jointName.empty() ||
+       skeleton.joints.at(properties.jointIndex).name == properties.jointName)) {
+    return properties.jointIndex;
+  }
+
+  if (!properties.jointName.empty()) {
+    return skeleton.getJointIdByName(properties.jointName);
+  }
+
+  return kInvalidIndex;
+}
+
 namespace {
 
 Skeleton scale(const Skeleton& skel, float scale) {
@@ -80,6 +96,33 @@ std::unique_ptr<CollisionGeometry> scale(
   return result;
 }
 
+float getPhysicalMassScale(CharacterMassScale massScale, float lengthScale) {
+  switch (massScale) {
+    case CharacterMassScale::PreserveMass:
+      return 1.0f;
+    case CharacterMassScale::PreserveDensity:
+      return lengthScale * lengthScale * lengthScale;
+  }
+
+  // Keep the switch exhaustive for compiler warnings; this catches invalid runtime enum values.
+  MT_THROW("Unknown CharacterMassScale policy: {}", static_cast<int>(massScale));
+}
+
+PhysicalProperties scale(
+    const PhysicalProperties& physicalProperties,
+    float lengthScale,
+    CharacterMassScale massScale) {
+  const float massScaleValue = getPhysicalMassScale(massScale, lengthScale);
+
+  PhysicalProperties result = physicalProperties;
+  for (auto& jointProperties : result) {
+    jointProperties.centerOfMassOffset *= lengthScale;
+    jointProperties.mass *= massScaleValue;
+    jointProperties.inertia *= massScaleValue * lengthScale * lengthScale;
+  }
+  return result;
+}
+
 TransformationList scaleInverseBindPose(
     const TransformationList& transformations,
     const float scale) {
@@ -88,6 +131,35 @@ TransformationList scaleInverseBindPose(
   for (auto& t : result) {
     t.translation() *= scale;
   }
+  return result;
+}
+
+PhysicalProperties mapPhysicalProperties(
+    const PhysicalProperties& physicalProperties,
+    const Skeleton& sourceSkeleton,
+    const std::vector<size_t>& jointMapping,
+    const Skeleton& targetSkeleton) {
+  PhysicalProperties result;
+  result.reserve(physicalProperties.size());
+
+  for (const auto& jointProperties : physicalProperties) {
+    const size_t sourceJointIndex =
+        resolvePhysicalPropertiesJointIndex(jointProperties, sourceSkeleton);
+    if (sourceJointIndex == kInvalidIndex || sourceJointIndex >= jointMapping.size()) {
+      continue;
+    }
+
+    const size_t targetJointIndex = jointMapping[sourceJointIndex];
+    if (targetJointIndex == kInvalidIndex || targetJointIndex >= targetSkeleton.joints.size()) {
+      continue;
+    }
+
+    JointPhysicalProperties mappedProperties = jointProperties;
+    mappedProperties.jointIndex = targetJointIndex;
+    mappedProperties.jointName = targetSkeleton.joints.at(targetJointIndex).name;
+    result.push_back(std::move(mappedProperties));
+  }
+
   return result;
 }
 
@@ -312,9 +384,31 @@ LocatorList removeDuplicateLocators(LocatorList locators, const LocatorList& toR
   return locators;
 }
 
+PhysicalProperties removeDuplicatePhysicalProperties(
+    PhysicalProperties properties,
+    const PhysicalProperties& toRemove) {
+  std::unordered_set<size_t> toRemoveJointIndices;
+  for (const auto& jointProperties : toRemove) {
+    toRemoveJointIndices.insert(jointProperties.jointIndex);
+  }
+
+  properties.erase(
+      std::remove_if(
+          properties.begin(),
+          properties.end(),
+          [&toRemoveJointIndices](const JointPhysicalProperties& jointProperties) {
+            return toRemoveJointIndices.count(jointProperties.jointIndex) > 0;
+          }),
+      properties.end());
+
+  return properties;
+}
+
 } // namespace
 
-Character scaleCharacter(const Character& character, float s) {
+Character scaleCharacter(const Character& character, float s, CharacterMassScale massScale) {
+  MT_CHECK(s > 0.0f, "scale > 0.0f, got {}", s);
+
   return {
       scale(character.skeleton, s),
       character.parameterTransform,
@@ -327,7 +421,10 @@ Character scaleCharacter(const Character& character, float s) {
       character.blendShape,
       character.faceExpressionBlendShape,
       character.name,
-      scaleInverseBindPose(character.inverseBindPose, s)};
+      scaleInverseBindPose(character.inverseBindPose, s),
+      SkinnedLocatorList{},
+      "",
+      scale(character.physicalProperties, s, massScale)};
 }
 
 namespace {
@@ -439,7 +536,10 @@ Character transformCharacter(const Character& character, const Affine3f& xform) 
       transformBlendShape(character.blendShape, xform),
       character.faceExpressionBlendShape,
       character.name,
-      transformInverseBindPose(character.inverseBindPose, xform)};
+      transformInverseBindPose(character.inverseBindPose, xform),
+      SkinnedLocatorList{},
+      "",
+      character.physicalProperties};
 }
 
 Character replaceSkeletonHierarchy(
@@ -592,6 +692,26 @@ Character replaceSkeletonHierarchy(
     }
   }
 
+  const PhysicalProperties combinedPhysicalProperties = [&]() {
+    const PhysicalProperties remappedSrcPhysicalProperties = mapPhysicalProperties(
+        srcCharacter.physicalProperties,
+        srcCharacter.skeleton,
+        srcToCombinedJoints,
+        combinedSkeleton);
+    const PhysicalProperties remappedTgtPhysicalProperties = mapPhysicalProperties(
+        tgtCharacter.physicalProperties,
+        tgtCharacter.skeleton,
+        tgtToCombinedJoints,
+        combinedSkeleton);
+
+    // The source hierarchy replaces the target subtree. If both sides provide physical properties
+    // for the same combined joint, keep the source body rather than duplicating mass and inertia.
+    return mergeVectors(
+        removeDuplicatePhysicalProperties(
+            remappedTgtPhysicalProperties, remappedSrcPhysicalProperties),
+        remappedSrcPhysicalProperties);
+  }();
+
   return {
       combinedSkeleton,
       combinedParamTransform,
@@ -601,7 +721,13 @@ Character replaceSkeletonHierarchy(
       skinWeightsCombined.get(),
       combinedCollisionGeometry.empty() ? nullptr : &combinedCollisionGeometry,
       tgtCharacter.poseShapes.get(),
-      tgtCharacter.blendShape};
+      tgtCharacter.blendShape,
+      BlendShapeBase_const_p{},
+      "",
+      TransformationList{},
+      SkinnedLocatorList{},
+      "",
+      combinedPhysicalProperties};
 }
 
 Character removeJoints(const Character& character, momentum::span<const size_t> jointsToRemove) {
@@ -687,6 +813,9 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
   const ParameterLimits resultParameterLimits =
       mapParameterLimits(character.parameterLimits, srcToResultJoints, srcToResultParameters);
 
+  const PhysicalProperties resultPhysicalProperties = mapPhysicalProperties(
+      character.physicalProperties, character.skeleton, srcToResultJoints, resultSkeleton);
+
   return {
       resultSkeleton,
       resultParamTransform,
@@ -696,7 +825,13 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
       resultSkinWeights.get(),
       resultCollisionGeometry.empty() ? nullptr : &resultCollisionGeometry,
       character.poseShapes.get(),
-      character.blendShape};
+      character.blendShape,
+      BlendShapeBase_const_p{},
+      "",
+      TransformationList{},
+      SkinnedLocatorList{},
+      "",
+      resultPhysicalProperties};
 }
 
 RigidTransformNodeResult addRigidTransformNode(
@@ -751,25 +886,27 @@ RigidTransformNodeResult addRigidTransformNode(
   // Recompute activeJointParams
   newParamTransform.activeJointParams = newParamTransform.computeActiveJointParams();
 
-  // 3. Construct and return the new Character
-  // Pass empty inverseBindPose so the Character constructor calls initInverseBindPose()
-  Character newCharacter(
-      newSkeleton,
-      newParamTransform,
-      character.parameterLimits,
-      character.locators,
-      character.mesh.get(),
-      character.skinWeights.get(),
-      character.collision.get(),
-      character.poseShapes.get(),
-      character.blendShape,
-      character.faceExpressionBlendShape,
-      character.name,
-      TransformationList{},
-      character.skinnedLocators,
-      character.metadata);
-
-  return {std::move(newCharacter), boneIndex, parameterStartIndex};
+  // 3. Construct and return the new Character. Pass empty inverseBindPose so the constructor calls
+  // initInverseBindPose().
+  return {
+      Character(
+          newSkeleton,
+          newParamTransform,
+          character.parameterLimits,
+          character.locators,
+          character.mesh.get(),
+          character.skinWeights.get(),
+          character.collision.get(),
+          character.poseShapes.get(),
+          character.blendShape,
+          character.faceExpressionBlendShape,
+          character.name,
+          TransformationList{},
+          character.skinnedLocators,
+          character.metadata,
+          character.physicalProperties),
+      boneIndex,
+      parameterStartIndex};
 }
 
 MatrixXf mapMotionToCharacter(
@@ -1260,7 +1397,10 @@ Character reduceMeshComponents(
       std::move(newBlendShape),
       std::move(newFaceExpressionBlendShape),
       character.name,
-      character.inverseBindPose};
+      character.inverseBindPose,
+      character.skinnedLocators,
+      character.metadata,
+      character.physicalProperties};
 }
 
 } // namespace

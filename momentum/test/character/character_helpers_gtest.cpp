@@ -53,6 +53,8 @@ MATCHER(ElementsIsApprox, "Elements mismatch") {
   return ::testing::get<0>(arg).isApprox(::testing::get<1>(arg));
 }
 
+constexpr float kPhysicalPropertiesTolerance = 1e-5f;
+
 template <typename DerivedIndexMatrix, typename DerivedWeightMatrix>
 void sortSkinWeightsRows(
     Eigen::MatrixBase<DerivedIndexMatrix>& indexMap,
@@ -195,7 +197,8 @@ void compareChars(
     const Character& refChar,
     const Character& character,
     const bool withMesh,
-    const bool withParameterTransform) {
+    const bool withParameterTransform,
+    const bool withPhysicalProperties) {
   ASSERT_EQ(refChar.name, character.name);
   const auto& refJoints = refChar.skeleton.joints;
   const auto& joints = character.skeleton.joints;
@@ -231,6 +234,32 @@ void compareChars(
         << character.inverseBindPose[i].matrix() << std::endl;
   }
   EXPECT_EQ(refChar.jointMap, character.jointMap);
+  if (withPhysicalProperties) {
+    ASSERT_EQ(refChar.physicalProperties.size(), character.physicalProperties.size());
+    for (size_t i = 0; i < refChar.physicalProperties.size(); ++i) {
+      const auto& refProperties = refChar.physicalProperties.at(i);
+      const auto& properties = character.physicalProperties.at(i);
+      EXPECT_EQ(refProperties.jointName, properties.jointName);
+      EXPECT_EQ(refProperties.jointIndex, properties.jointIndex);
+      EXPECT_FLOAT_EQ(refProperties.mass, properties.mass);
+      EXPECT_TRUE(refProperties.centerOfMassOffset.isApprox(
+          properties.centerOfMassOffset, kPhysicalPropertiesTolerance))
+          << "Physical center-of-mass offset " << i << " is not equal:\n"
+          << "- Expected: " << refProperties.centerOfMassOffset.transpose() << "\n"
+          << "- Actual  : " << properties.centerOfMassOffset.transpose() << "\n";
+      EXPECT_TRUE(refProperties.inertia.isApprox(properties.inertia, kPhysicalPropertiesTolerance))
+          << "Physical inertia " << i << " is not equal:\n"
+          << "- Expected:\n"
+          << refProperties.inertia << "\n"
+          << "- Actual:\n"
+          << properties.inertia << "\n";
+      EXPECT_TRUE(refProperties.inertiaRotation.isApprox(
+          properties.inertiaRotation, kPhysicalPropertiesTolerance))
+          << "Physical inertia rotation " << i << " is not equal:\n"
+          << "- Expected: " << refProperties.inertiaRotation.coeffs().transpose() << "\n"
+          << "- Actual  : " << properties.inertiaRotation.coeffs().transpose() << "\n";
+    }
+  }
 
   if (withMesh) {
     auto ptrValEq = [](auto& l, auto& r) {

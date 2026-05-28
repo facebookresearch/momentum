@@ -42,6 +42,15 @@ using Character_const_p = ::std::shared_ptr<const Character>;
 using Character_const_u = ::std::unique_ptr<const Character>;
 using Character_const_w = ::std::weak_ptr<const Character>;
 
+struct JointPhysicalProperties;
+
+using JointPhysicalProperties_p = ::std::shared_ptr<JointPhysicalProperties>;
+using JointPhysicalProperties_u = ::std::unique_ptr<JointPhysicalProperties>;
+using JointPhysicalProperties_w = ::std::weak_ptr<JointPhysicalProperties>;
+using JointPhysicalProperties_const_p = ::std::shared_ptr<const JointPhysicalProperties>;
+using JointPhysicalProperties_const_u = ::std::unique_ptr<const JointPhysicalProperties>;
+using JointPhysicalProperties_const_w = ::std::weak_ptr<const JointPhysicalProperties>;
+
 struct Locator;
 
 using Locator_p = ::std::shared_ptr<Locator>;

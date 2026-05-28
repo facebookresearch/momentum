@@ -23,6 +23,7 @@ structs = [
     "BlendShape",
     "BlendShapeBase",
     "Character",
+    "JointPhysicalProperties",
     "Locator",
     "PoseShape",
     "SkinWeights",
