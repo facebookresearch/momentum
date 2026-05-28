@@ -513,6 +513,41 @@ def skin_points_from_skel_state(
 
 
 @th.jit.script
+def skin_points_from_skel_state_assume_normalized(
+    template: th.Tensor,
+    global_skel_state: th.Tensor,
+    binded_skel_state_inv: th.Tensor,
+    skin_indices_flattened: th.Tensor,
+    skin_weights_flattened: th.Tensor,
+    vert_indices_flattened: th.Tensor,
+) -> th.Tensor:
+    assert template.shape[-1] == 3
+    while template.ndim < global_skel_state.ndim:
+        template = template.unsqueeze(0)
+
+    template = template.expand(
+        list(global_skel_state.shape[:-2]) + list(template.shape[-2:])
+    )
+
+    joint_state = skel_state.multiply_assume_normalized(
+        global_skel_state,
+        binded_skel_state_inv,
+    )
+
+    skinned = th.zeros_like(template)
+    skinned = skinned.index_add(
+        -2,
+        vert_indices_flattened,
+        skel_state.transform_points_assume_normalized(
+            th.index_select(joint_state, -2, skin_indices_flattened),
+            th.index_select(template, -2, vert_indices_flattened),
+        )
+        * skin_weights_flattened[None, :, None],
+    )
+    return skinned
+
+
+@th.jit.script
 def skin_oriented_points_from_skel_state(
     means: th.Tensor,
     quaternions: th.Tensor,
