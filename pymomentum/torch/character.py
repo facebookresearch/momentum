@@ -16,6 +16,7 @@ from pymomentum.backend import (
     skel_state_backend,
     triton_fk,
     triton_skel_state,
+    triton_skinning,
     trs_backend,
     utils as backend_utils,
 )
@@ -372,24 +373,24 @@ class Skeleton(torch.nn.Module):
         self,
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
-        fk_backend: str = "torch",
+        backend: str = "torch",
     ) -> torch.Tensor:
         return self._joint_parameters_to_skeleton_state(
             joint_parameters,
             use_double_precision=use_double_precision,
-            fk_backend=fk_backend,
+            backend=backend,
         )
 
     def _joint_parameters_to_skeleton_state(
         self,
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
-        fk_backend: str = "torch",
+        backend: str = "torch",
         active_joints: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         joint_parameters = _unsqueeze_joint_params(joint_parameters)
         resolved = resolve_fk_backend(
-            fk_backend,
+            backend,
             joint_parameters.float(),
             use_double_precision,
         )
@@ -433,22 +434,32 @@ class LinearBlendSkinning(torch.nn.Module):
 
         self.register_buffer(
             "inverse_bind_pose",
-            pym_skel_state.from_matrix(
-                torch.tensor(character.inverse_bind_pose, dtype=dtype)
-            )
-            .detach()
-            .clone(),
+            self._normalize_skel_state_quaternion(
+                pym_skel_state.from_matrix(
+                    torch.tensor(character.inverse_bind_pose, dtype=dtype)
+                )
+            ).detach(),
         )
 
         self.num_vertices: int = character.skin_weights.index.shape[0]
+        self.register_buffer(
+            "skin_indices",
+            torch.tensor(character.skin_weights.index, dtype=torch.int32)
+            .detach()
+            .clone(),
+        )
+        self.register_buffer(
+            "skin_weights",
+            torch.tensor(character.skin_weights.weight, dtype=dtype).detach().clone(),
+        )
 
         (
             skin_indices_flattened,
             skin_weights_flattened,
             vert_indices_flattened,
         ) = backend_utils.flatten_skinning_weights_and_indices(
-            skin_weights=torch.tensor(character.skin_weights.weight, dtype=dtype),
-            skin_indices=torch.tensor(character.skin_weights.index, dtype=torch.int32),
+            skin_weights=self.skin_weights,
+            skin_indices=self.skin_indices,
         )
 
         self.register_buffer(
@@ -461,10 +472,22 @@ class LinearBlendSkinning(torch.nn.Module):
             "vert_indices_flattened", vert_indices_flattened.detach().clone()
         )
 
+    @staticmethod
+    def _normalize_skel_state_quaternion(skel_state: torch.Tensor) -> torch.Tensor:
+        return torch.cat(
+            [
+                skel_state[..., :3],
+                pym_quaternion.normalize(skel_state[..., 3:7]),
+                skel_state[..., 7:],
+            ],
+            dim=-1,
+        )
+
     def forward(
         self,
         skel_state: torch.Tensor,
         rest_vertex_positions: torch.Tensor,
+        backend: str = "torch",
     ) -> torch.Tensor:
         assert rest_vertex_positions.shape[-1] == 3
         assert rest_vertex_positions.shape[-2] == self.num_vertices
@@ -473,7 +496,24 @@ class LinearBlendSkinning(torch.nn.Module):
         while inverse_bind_pose.ndim < skel_state.ndim:
             inverse_bind_pose = inverse_bind_pose.unsqueeze(0)
 
-        return skel_state_backend.skin_points_from_skel_state(
+        skel_state = self._normalize_skel_state_quaternion(skel_state)
+
+        resolved = resolve_backend(backend, skel_state.float())
+        if resolved == "triton":
+            with torch.amp.autocast("cuda", enabled=False):
+                return triton_skinning.skin_points_from_skel_state(
+                    template=rest_vertex_positions.float(),
+                    global_skel_state=skel_state.float(),
+                    binded_skel_state_inv=inverse_bind_pose.float(),
+                    skin_indices=self.skin_indices,
+                    skin_weights=self.skin_weights.float(),
+                    skin_indices_flattened=self.skin_indices_flattened,
+                    skin_weights_flattened=self.skin_weights_flattened,
+                    vert_indices_flattened=self.vert_indices_flattened,
+                )
+        if resolved != "torch":
+            raise ValueError(f"Unsupported skinning backend: {resolved}")
+        return skel_state_backend.skin_points_from_skel_state_assume_normalized(
             template=rest_vertex_positions,
             global_skel_state=skel_state,
             binded_skel_state_inv=inverse_bind_pose,
@@ -948,21 +988,21 @@ class Character(torch.nn.Module):
         self,
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
-        fk_backend: str = "torch",
+        backend: str = "torch",
     ) -> torch.Tensor:
         if not hasattr(self, "skeleton"):
             raise RuntimeError("Character has no skeleton, please provide one")
         return self.skeleton.joint_parameters_to_skeleton_state(
             joint_parameters,
             use_double_precision=use_double_precision,
-            fk_backend=fk_backend,
+            backend=backend,
         )
 
     def model_parameters_to_skeleton_state(
         self,
         model_parameters: torch.Tensor,
         use_double_precision: bool = True,
-        fk_backend: str = "torch",
+        backend: str = "torch",
     ) -> torch.Tensor:
         if not hasattr(self, "parameter_transform"):
             raise RuntimeError(
@@ -974,7 +1014,7 @@ class Character(torch.nn.Module):
         return self.skeleton._joint_parameters_to_skeleton_state(
             self.model_parameters_to_joint_parameters(model_parameters),
             use_double_precision=use_double_precision,
-            fk_backend=fk_backend,
+            backend=backend,
             active_joints=active_joints,
         )
 
@@ -992,6 +1032,7 @@ class Character(torch.nn.Module):
         self,
         skel_state: torch.Tensor,
         rest_vertex_positions: Optional[torch.Tensor] = None,
+        backend: str = "torch",
     ) -> torch.Tensor:
         if rest_vertex_positions is None:
             if not hasattr(self, "mesh"):
@@ -1004,6 +1045,7 @@ class Character(torch.nn.Module):
         return self.linear_blend_skinning.forward(
             skel_state,
             rest_vertex_positions,
+            backend=backend,
         )
 
     def unpose(
