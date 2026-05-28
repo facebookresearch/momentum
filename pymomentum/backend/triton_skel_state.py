@@ -28,6 +28,7 @@ except ImportError:
 
 
 _BLOCK_BATCH = 128
+_BLOCK_SIZE = 256
 _LN2 = math.log(2.0)
 _NORM_EPS = 1e-12
 _EULER_EPS = 1e-6
@@ -151,6 +152,280 @@ if triton is not None and tl is not None:  # noqa: C901
             tl.load(base + 5, mask=mask, other=0.0),
             tl.load(base + 6, mask=mask, other=1.0),
             tl.load(base + 7, mask=mask, other=1.0),
+        )
+
+    @triton.jit
+    def _load_flat_state(data, offset, mask):
+        base = data + offset * 8
+        return (
+            tl.load(base + 0, mask=mask, other=0.0),
+            tl.load(base + 1, mask=mask, other=0.0),
+            tl.load(base + 2, mask=mask, other=0.0),
+            tl.load(base + 3, mask=mask, other=0.0),
+            tl.load(base + 4, mask=mask, other=0.0),
+            tl.load(base + 5, mask=mask, other=0.0),
+            tl.load(base + 6, mask=mask, other=1.0),
+            tl.load(base + 7, mask=mask, other=1.0),
+        )
+
+    @triton.jit
+    def _store_flat_state(output, offset, state, mask):
+        base = output + offset * 8
+        tl.store(base + 0, state[0], mask=mask)
+        tl.store(base + 1, state[1], mask=mask)
+        tl.store(base + 2, state[2], mask=mask)
+        tl.store(base + 3, state[3], mask=mask)
+        tl.store(base + 4, state[4], mask=mask)
+        tl.store(base + 5, state[5], mask=mask)
+        tl.store(base + 6, state[6], mask=mask)
+        tl.store(base + 7, state[7], mask=mask)
+
+    @triton.jit
+    def _multiply_state(state1, state2, NORMALIZE: tl.constexpr):
+        t1x, t1y, t1z, q1x, q1y, q1z, q1w, s1 = state1
+        t2x, t2y, t2z, q2x, q2y, q2z, q2w, s2 = state2
+        if NORMALIZE:
+            q1x, q1y, q1z, q1w = _normalize_quaternion(q1x, q1y, q1z, q1w)
+            q2x, q2y, q2z, q2w = _normalize_quaternion(q2x, q2y, q2z, q2w)
+        rtx, rty, rtz = _rotate_vector(q1x, q1y, q1z, q1w, t2x, t2y, t2z)
+        qx, qy, qz, qw = _quat_multiply(q1x, q1y, q1z, q1w, q2x, q2y, q2z, q2w)
+        return (
+            t1x + s1 * rtx,
+            t1y + s1 * rty,
+            t1z + s1 * rtz,
+            qx,
+            qy,
+            qz,
+            qw,
+            s1 * s2,
+        )
+
+    @triton.jit
+    def _multiply_kernel(
+        state1,
+        state2,
+        output,
+        n_states,
+        NORMALIZE: tl.constexpr,
+        BLOCK_SIZE: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < n_states
+        _store_flat_state(
+            output,
+            offsets,
+            _multiply_state(
+                _load_flat_state(state1, offsets, mask),
+                _load_flat_state(state2, offsets, mask),
+                NORMALIZE,
+            ),
+            mask,
+        )
+
+    @triton.jit
+    def _inverse_kernel(state, output, n_states, BLOCK_SIZE: tl.constexpr):
+        offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < n_states
+        tx, ty, tz, qx, qy, qz, qw, s = _load_flat_state(state, offsets, mask)
+        q_norm2 = tl.maximum(qx * qx + qy * qy + qz * qz + qw * qw, 1.0e-7)
+        iqx = -qx / q_norm2
+        iqy = -qy / q_norm2
+        iqz = -qz / q_norm2
+        iqw = qw / q_norm2
+        niqx, niqy, niqz, niqw = _normalize_quaternion(iqx, iqy, iqz, iqw)
+        rtx, rty, rtz = _rotate_vector(niqx, niqy, niqz, niqw, tx, ty, tz)
+        s_inv = 1.0 / s
+        _store_flat_state(
+            output,
+            offsets,
+            (
+                -s_inv * rtx,
+                -s_inv * rty,
+                -s_inv * rtz,
+                iqx,
+                iqy,
+                iqz,
+                iqw,
+                s_inv,
+            ),
+            mask,
+        )
+
+    @triton.jit
+    def _multiply_backward_kernel(
+        state1,
+        state2,
+        grad_output,
+        grad_state1,
+        grad_state2,
+        n_states,
+        NORMALIZE: tl.constexpr,
+        BLOCK_SIZE: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < n_states
+        t1x, t1y, t1z, q1x, q1y, q1z, q1w, s1 = _load_flat_state(state1, offsets, mask)
+        t2x, t2y, t2z, q2x, q2y, q2z, q2w, s2 = _load_flat_state(state2, offsets, mask)
+        gtx, gty, gtz, gqx, gqy, gqz, gqw, gs = _load_flat_state(
+            grad_output, offsets, mask
+        )
+
+        nq1x = q1x
+        nq1y = q1y
+        nq1z = q1z
+        nq1w = q1w
+        nq2x = q2x
+        nq2y = q2y
+        nq2z = q2z
+        nq2w = q2w
+        if NORMALIZE:
+            nq1x, nq1y, nq1z, nq1w = _normalize_quaternion(q1x, q1y, q1z, q1w)
+            nq2x, nq2y, nq2z, nq2w = _normalize_quaternion(q2x, q2y, q2z, q2w)
+
+        rtx, rty, rtz = _rotate_vector(nq1x, nq1y, nq1z, nq1w, t2x, t2y, t2z)
+        (
+            gq1x_from_t,
+            gq1y_from_t,
+            gq1z_from_t,
+            gq1w_from_t,
+            gt2x,
+            gt2y,
+            gt2z,
+        ) = _rotate_vector_backward(
+            nq1x,
+            nq1y,
+            nq1z,
+            nq1w,
+            t2x,
+            t2y,
+            t2z,
+            s1 * gtx,
+            s1 * gty,
+            s1 * gtz,
+        )
+        (
+            gq1x_from_q,
+            gq1y_from_q,
+            gq1z_from_q,
+            gq1w_from_q,
+            gq2x,
+            gq2y,
+            gq2z,
+            gq2w,
+        ) = _quat_multiply_backward(
+            nq1x, nq1y, nq1z, nq1w, nq2x, nq2y, nq2z, nq2w, gqx, gqy, gqz, gqw
+        )
+
+        gq1x = gq1x_from_t + gq1x_from_q
+        gq1y = gq1y_from_t + gq1y_from_q
+        gq1z = gq1z_from_t + gq1z_from_q
+        gq1w = gq1w_from_t + gq1w_from_q
+        if NORMALIZE:
+            gq1x, gq1y, gq1z, gq1w = _normalize_quaternion_backward(
+                q1x, q1y, q1z, q1w, gq1x, gq1y, gq1z, gq1w
+            )
+            gq2x, gq2y, gq2z, gq2w = _normalize_quaternion_backward(
+                q2x, q2y, q2z, q2w, gq2x, gq2y, gq2z, gq2w
+            )
+
+        _store_flat_state(
+            grad_state1,
+            offsets,
+            (
+                gtx,
+                gty,
+                gtz,
+                gq1x,
+                gq1y,
+                gq1z,
+                gq1w,
+                rtx * gtx + rty * gty + rtz * gtz + gs * s2,
+            ),
+            mask,
+        )
+        _store_flat_state(
+            grad_state2,
+            offsets,
+            (gt2x, gt2y, gt2z, gq2x, gq2y, gq2z, gq2w, gs * s1),
+            mask,
+        )
+
+    @triton.jit
+    def _inverse_backward_kernel(
+        state,
+        grad_output,
+        grad_state,
+        n_states,
+        BLOCK_SIZE: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
+        mask = offsets < n_states
+        tx, ty, tz, qx, qy, qz, qw, s = _load_flat_state(state, offsets, mask)
+        gtx, gty, gtz, gqx_out, gqy_out, gqz_out, gqw_out, gs_out = _load_flat_state(
+            grad_output, offsets, mask
+        )
+
+        norm2 = qx * qx + qy * qy + qz * qz + qw * qw
+        denom = tl.maximum(norm2, 1.0e-7)
+        iqx = -qx / denom
+        iqy = -qy / denom
+        iqz = -qz / denom
+        iqw = qw / denom
+        niqx, niqy, niqz, niqw = _normalize_quaternion(iqx, iqy, iqz, iqw)
+        rtx, rty, rtz = _rotate_vector(niqx, niqy, niqz, niqw, tx, ty, tz)
+        s_inv = 1.0 / s
+
+        (
+            giqx_from_t,
+            giqy_from_t,
+            giqz_from_t,
+            giqw_from_t,
+            grad_tx,
+            grad_ty,
+            grad_tz,
+        ) = _rotate_vector_backward(
+            niqx,
+            niqy,
+            niqz,
+            niqw,
+            tx,
+            ty,
+            tz,
+            -s_inv * gtx,
+            -s_inv * gty,
+            -s_inv * gtz,
+        )
+        giqx_from_t, giqy_from_t, giqz_from_t, giqw_from_t = (
+            _normalize_quaternion_backward(
+                iqx, iqy, iqz, iqw, giqx_from_t, giqy_from_t, giqz_from_t, giqw_from_t
+            )
+        )
+        giqx = gqx_out + giqx_from_t
+        giqy = gqy_out + giqy_from_t
+        giqz = gqz_out + giqz_from_t
+        giqw = gqw_out + giqw_from_t
+
+        inv_denom = 1.0 / denom
+        grad_qx = -giqx * inv_denom
+        grad_qy = -giqy * inv_denom
+        grad_qz = -giqz * inv_denom
+        grad_qw = giqw * inv_denom
+        grad_denom = -(giqx * (-qx) + giqy * (-qy) + giqz * (-qz) + giqw * qw) * (
+            inv_denom * inv_denom
+        )
+        use_denom_grad = norm2 >= 1.0e-7
+        grad_qx += tl.where(use_denom_grad, grad_denom * 2.0 * qx, 0.0)
+        grad_qy += tl.where(use_denom_grad, grad_denom * 2.0 * qy, 0.0)
+        grad_qz += tl.where(use_denom_grad, grad_denom * 2.0 * qz, 0.0)
+        grad_qw += tl.where(use_denom_grad, grad_denom * 2.0 * qw, 0.0)
+
+        grad_s_inv = -(rtx * gtx + rty * gty + rtz * gtz) + gs_out
+        grad_s = -grad_s_inv * s_inv * s_inv
+        _store_flat_state(
+            grad_state,
+            offsets,
+            (grad_tx, grad_ty, grad_tz, grad_qx, grad_qy, grad_qz, grad_qw, grad_s),
+            mask,
         )
 
     @triton.jit
@@ -486,6 +761,165 @@ def _require_triton() -> None:
         )
 
 
+def _validate_skel_state(state: torch.Tensor) -> None:
+    if not state.is_cuda:
+        raise RuntimeError("Triton skel_state backend requested, but input is on CPU.")
+    if state.dtype != torch.float32:
+        raise RuntimeError("Triton skel_state backend currently only supports float32.")
+    if state.ndim == 0 or state.shape[-1] != 8:
+        raise RuntimeError("Skeleton state tensor must have shape [..., 8].")
+
+
+def _launch_multiply(
+    state1: torch.Tensor,
+    state2: torch.Tensor,
+    normalize: bool,
+) -> torch.Tensor:
+    _validate_skel_state(state1)
+    _validate_skel_state(state2)
+    _require_triton()
+    state1, state2 = torch.broadcast_tensors(state1, state2)
+    shape = state2.shape
+    state1 = state1.contiguous().reshape(-1, 8)
+    state2 = state2.contiguous().reshape(-1, 8)
+    output = torch.empty_like(state2)
+    n_states = state2.shape[0]
+    grid = (triton.cdiv(n_states, _BLOCK_SIZE),)
+    _multiply_kernel[grid](
+        state1,
+        state2,
+        output,
+        n_states,
+        NORMALIZE=normalize,
+        BLOCK_SIZE=_BLOCK_SIZE,
+    )
+    return output.reshape(shape)
+
+
+def _launch_inverse(state: torch.Tensor) -> torch.Tensor:
+    _validate_skel_state(state)
+    _require_triton()
+    shape = state.shape
+    state = state.contiguous().reshape(-1, 8)
+    output = torch.empty_like(state)
+    n_states = state.shape[0]
+    grid = (triton.cdiv(n_states, _BLOCK_SIZE),)
+    _inverse_kernel[grid](state, output, n_states, BLOCK_SIZE=_BLOCK_SIZE)
+    return output.reshape(shape)
+
+
+def _launch_multiply_backward(
+    state1: torch.Tensor,
+    state2: torch.Tensor,
+    grad_output: torch.Tensor,
+    normalize: bool,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    state1 = state1.contiguous().reshape(-1, 8)
+    state2 = state2.contiguous().reshape(-1, 8)
+    grad_output = grad_output.contiguous().reshape(-1, 8)
+    grad_state1 = torch.empty_like(state1)
+    grad_state2 = torch.empty_like(state2)
+    n_states = state2.shape[0]
+    grid = (triton.cdiv(n_states, _BLOCK_SIZE),)
+    _multiply_backward_kernel[grid](
+        state1,
+        state2,
+        grad_output,
+        grad_state1,
+        grad_state2,
+        n_states,
+        NORMALIZE=normalize,
+        BLOCK_SIZE=_BLOCK_SIZE,
+    )
+    return grad_state1, grad_state2
+
+
+def _launch_inverse_backward(
+    state: torch.Tensor,
+    grad_output: torch.Tensor,
+) -> torch.Tensor:
+    state = state.contiguous().reshape(-1, 8)
+    grad_output = grad_output.contiguous().reshape(-1, 8)
+    grad_state = torch.empty_like(state)
+    n_states = state.shape[0]
+    grid = (triton.cdiv(n_states, _BLOCK_SIZE),)
+    _inverse_backward_kernel[grid](
+        state,
+        grad_output,
+        grad_state,
+        n_states,
+        BLOCK_SIZE=_BLOCK_SIZE,
+    )
+    return grad_state
+
+
+class _Multiply(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx: torch.autograd.function.FunctionCtx,
+        state1: torch.Tensor,
+        state2: torch.Tensor,
+        normalize: bool,
+    ) -> torch.Tensor:
+        shape = state2.shape
+        ctx.normalize = normalize
+        ctx.shape = shape
+        ctx.save_for_backward(state1, state2)
+        return _launch_multiply(state1, state2, normalize)
+
+    @staticmethod
+    def backward(
+        ctx: torch.autograd.function.FunctionCtx,
+        grad_output: torch.Tensor,
+    ):
+        state1, state2 = ctx.saved_tensors
+        grad_state1, grad_state2 = _launch_multiply_backward(
+            state1,
+            state2,
+            grad_output,
+            ctx.normalize,
+        )
+        return grad_state1.reshape(ctx.shape), grad_state2.reshape(ctx.shape), None
+
+
+class _Inverse(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx: torch.autograd.function.FunctionCtx,
+        state: torch.Tensor,
+    ) -> torch.Tensor:
+        ctx.save_for_backward(state)
+        return _launch_inverse(state)
+
+    @staticmethod
+    def backward(
+        ctx: torch.autograd.function.FunctionCtx,
+        grad_output: torch.Tensor,
+    ):
+        (state,) = ctx.saved_tensors
+        grad_state = _launch_inverse_backward(
+            state,
+            grad_output,
+        )
+        return (grad_state.reshape(state.shape),)
+
+
+def multiply(state1: torch.Tensor, state2: torch.Tensor) -> torch.Tensor:
+    state1, state2 = torch.broadcast_tensors(state1, state2)
+    return _Multiply.apply(state1, state2, True)
+
+
+def multiply_assume_normalized(
+    state1: torch.Tensor, state2: torch.Tensor
+) -> torch.Tensor:
+    state1, state2 = torch.broadcast_tensors(state1, state2)
+    return _Multiply.apply(state1, state2, False)
+
+
+def inverse(state: torch.Tensor) -> torch.Tensor:
+    return _Inverse.apply(state)
+
+
 def _validate_inputs(
     skel_state: torch.Tensor,
     joint_translation_offsets: torch.Tensor,
@@ -606,7 +1040,7 @@ class _SkeletonStateToJointParameters(torch.autograd.Function):
     def backward(
         ctx: torch.autograd.function.FunctionCtx,
         grad_output: torch.Tensor,
-    ) -> tuple[torch.Tensor | None, None, None, None]:
+    ):
         (
             skel_state,
             joint_translation_offsets,
