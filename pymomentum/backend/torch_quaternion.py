@@ -295,6 +295,15 @@ def identity(
     )
 
 
+def _sinc_half(angles: torch.Tensor) -> torch.Tensor:
+    """Compute sin(θ/2)/θ with a Taylor expansion near the origin."""
+    return torch.where(
+        torch.abs(angles) < 1e-6,
+        0.5 - (angles * angles) / 48.0,
+        torch.sin(angles / 2.0) / angles.clamp(min=1e-10),
+    )
+
+
 def from_axis_angle(axis_angle: torch.Tensor) -> torch.Tensor:
     """
     Convert an axis-angle tensor to a quaternion.
@@ -303,11 +312,24 @@ def from_axis_angle(axis_angle: torch.Tensor) -> torch.Tensor:
     :return: A tensor of shape (..., 4) representing the quaternion in ((x, y, z), w) format.
     """
     angles = axis_angle.norm(dim=-1, keepdim=True)
-    normed_axes = axis_angle / angles.clamp(min=1e-8)
-    sin_half_angles = torch.sin(angles / 2)
     cos_half_angles = torch.cos(angles / 2)
+    return torch.cat([axis_angle * _sinc_half(angles), cos_half_angles], dim=-1)
 
-    return torch.cat([normed_axes * sin_half_angles, cos_half_angles], dim=-1)
+
+def to_axis_angle(quaternions: torch.Tensor) -> torch.Tensor:
+    """
+    Convert a quaternion to an axis-angle tensor.
+
+    :parameter quaternions: A tensor of shape (..., 4) representing quaternions in ((x, y, z), w) format.
+    :return: A tensor of shape (..., 3) representing the axis-angle with magnitude in [0, π].
+    """
+    # Map to the short-arc hemisphere (w >= 0) so angles stay in [0, π]
+    # and _sinc_half is bounded away from zero.
+    quaternions = torch.where(quaternions[..., 3:] < 0, -quaternions, quaternions)
+    vector = quaternions[..., :3]
+    scalar = quaternions[..., 3:]
+    angles = 2.0 * torch.atan2(torch.linalg.norm(vector, dim=-1, keepdim=True), scalar)
+    return vector / _sinc_half(angles)
 
 
 def euler_xyz_to_quaternion(euler_xyz: torch.Tensor) -> torch.Tensor:
