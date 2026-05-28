@@ -11,21 +11,15 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
+#include "momentum/math/utility.h"
 
 namespace momentum {
-
-template <typename T>
-Eigen::SparseMatrix<T> toColumnMajor(const SparseRowMatrix<T>& mat) {
-  Eigen::SparseMatrix<T> result = mat;
-  result.makeCompressed();
-  return result;
-}
 
 template <typename T>
 InverseParameterTransformT<T>::InverseParameterTransformT(
     const ParameterTransformT<T>& paramTransform)
     : transform(paramTransform.transform),
-      inverseTransform(toColumnMajor<T>(paramTransform.transform)),
+      pseudoInverseMatrix(pseudoInverse(MatrixX<T>(paramTransform.transform))),
       offsets(paramTransform.offsets) {}
 
 template <typename T>
@@ -38,7 +32,7 @@ CharacterParametersT<T> InverseParameterTransformT<T>::apply(
       transform.rows());
   MT_CHECK(offsets.size() == transform.rows(), "{} is not {}", offsets.size(), transform.rows());
   CharacterParametersT<T> result;
-  result.pose = inverseTransform.solve(jointParameters.v - offsets);
+  result.pose = pseudoInverseMatrix * (jointParameters.v - offsets);
   result.offsets = jointParameters.v - transform * result.pose.v;
   return result;
 }
