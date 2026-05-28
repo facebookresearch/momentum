@@ -67,8 +67,16 @@ from collections.abc import Sequence
 
 import torch
 from pymomentum.backend import torch_quaternion
+from pymomentum.backend.selection import resolve_backend
 
 # pyre-strict
+
+
+def _get_triton_quaternion():  # type: ignore[no-untyped-def]
+    """Lazy import to avoid circular dependency with pymomentum.backend."""
+    from pymomentum.backend import triton_quaternion
+
+    return triton_quaternion
 
 
 def check(q: torch.Tensor) -> None:
@@ -191,24 +199,49 @@ def rotate_vector_assume_normalized(q: torch.Tensor, v: torch.Tensor) -> torch.T
     return torch_quaternion.rotate_vector_assume_normalized(q, v)
 
 
-def to_rotation_matrix_assume_normalized(q: torch.Tensor) -> torch.Tensor:
+def to_rotation_matrix_assume_normalized(
+    q: torch.Tensor, backend: str = "torch"
+) -> torch.Tensor:
     """
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
+    backend = resolve_backend(
+        backend,
+        q,
+        use_double_precision=q.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _get_triton_quaternion().to_rotation_matrix_assume_normalized(q)
+    if backend != "torch":
+        raise ValueError(f"Unsupported quaternion backend: {backend}")
     return torch_quaternion.to_rotation_matrix_assume_normalized(q)
 
 
-def to_rotation_matrix(q: torch.Tensor) -> torch.Tensor:
+def to_rotation_matrix(
+    q: torch.Tensor, backend: str = "torch", eps: float = 1e-12
+) -> torch.Tensor:
     """
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :parameter eps: Minimum quaternion norm used during normalization.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
-    return torch_quaternion.to_rotation_matrix(q)
+    backend = resolve_backend(
+        backend,
+        q,
+        use_double_precision=q.dtype == torch.float64,
+    )
+    if backend == "triton":
+        return _get_triton_quaternion().to_rotation_matrix(q, eps=eps)
+    if backend != "torch":
+        raise ValueError(f"Unsupported quaternion backend: {backend}")
+    return torch_quaternion.to_rotation_matrix(q, eps=eps)
 
 
 def identity(
