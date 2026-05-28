@@ -850,6 +850,7 @@ if(MOMENTUM_BUILD_TESTING)
       character_test_helpers
       error_function_helper
       solver_test_helper
+      test_helpers
   )
 
   if(NOT APPLE) # TODO: Fix
