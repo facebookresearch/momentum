@@ -19,7 +19,7 @@ from pymomentum.backend import (
     trs_backend,
     utils as backend_utils,
 )
-from pymomentum.backend.selection import resolve_backend
+from pymomentum.backend.selection import resolve_backend, resolve_fk_backend
 from pymomentum.torch.parameter_limits import ParameterLimits
 from pymomentum.torch.utility import _unsqueeze_joint_params
 
@@ -291,15 +291,6 @@ class Skeleton(torch.nn.Module):
                 dim=1,
             )
         )
-        if torch.jit.is_scripting():
-            global_skel_state, _ = (
-                skel_state_backend.global_skel_state_from_local_skel_state_impl(
-                    local_skel_state=local_skel_state,
-                    prefix_mul_indices=prefix_mul_indices,
-                    use_double_precision=use_double_precision,
-                )
-            )
-            return global_skel_state
         return skel_state_backend.global_skel_state_from_local_skel_state(
             local_skel_state=local_skel_state,
             prefix_mul_indices=prefix_mul_indices,
@@ -381,26 +372,38 @@ class Skeleton(torch.nn.Module):
         self,
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
-        fk_backend: str = "auto",
+        fk_backend: str = "torch",
+    ) -> torch.Tensor:
+        return self._joint_parameters_to_skeleton_state(
+            joint_parameters,
+            use_double_precision=use_double_precision,
+            fk_backend=fk_backend,
+        )
+
+    def _joint_parameters_to_skeleton_state(
+        self,
+        joint_parameters: torch.Tensor,
+        use_double_precision: bool = True,
+        fk_backend: str = "torch",
         active_joints: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        resolved = resolve_backend(
-            fk_backend, joint_parameters.float(), use_double_precision
+        joint_parameters = _unsqueeze_joint_params(joint_parameters)
+        resolved = resolve_fk_backend(
+            fk_backend,
+            joint_parameters.float(),
+            use_double_precision,
         )
-        if resolved == "triton" and use_double_precision:
-            raise RuntimeError(
-                "Triton FK does not support double precision; "
-                "pass use_double_precision=False"
-            )
         if resolved == "triton":
             with torch.amp.autocast("cuda", enabled=False):
                 return triton_fk.joint_parameters_to_skeleton_state(
-                    _unsqueeze_joint_params(joint_parameters.float()),
+                    joint_parameters.float(),
                     self.joint_translation_offsets,
                     self.joint_prerotations,
                     self.joint_parents,
                     active_joints,
                 )
+        if resolved != "torch":
+            raise ValueError(f"Unsupported FK backend: {resolved}")
         return self.local_skeleton_state_to_skeleton_state(
             self.joint_parameters_to_local_skeleton_state(joint_parameters),
             use_double_precision=use_double_precision,
@@ -413,24 +416,9 @@ class Skeleton(torch.nn.Module):
     ) -> torch.Tensor:
         if joint_parameters.ndim == 1:
             joint_parameters = joint_parameters[None, :]
-        if torch.jit.is_scripting():
-            global_skel_state, _ = (
-                skel_state_backend.global_skel_state_from_local_skel_state_impl(
-                    local_skel_state=self.joint_parameters_to_local_skeleton_state(
-                        joint_parameters
-                    ),
-                    prefix_mul_indices=list(
-                        self.pmi.split(
-                            split_size=self._pmi_buffer_sizes,
-                            dim=1,
-                        )
-                    ),
-                    use_double_precision=use_double_precision,
-                )
-            )
-            return global_skel_state
-        return self.joint_parameters_to_skeleton_state(
-            joint_parameters, use_double_precision=use_double_precision
+        return self.local_skeleton_state_to_skeleton_state(
+            self.joint_parameters_to_local_skeleton_state(joint_parameters),
+            use_double_precision=use_double_precision,
         )
 
 
@@ -961,7 +949,6 @@ class Character(torch.nn.Module):
         joint_parameters: torch.Tensor,
         use_double_precision: bool = True,
         fk_backend: str = "torch",
-        active_joints: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         if not hasattr(self, "skeleton"):
             raise RuntimeError("Character has no skeleton, please provide one")
@@ -969,7 +956,6 @@ class Character(torch.nn.Module):
             joint_parameters,
             use_double_precision=use_double_precision,
             fk_backend=fk_backend,
-            active_joints=active_joints,
         )
 
     def model_parameters_to_skeleton_state(
@@ -982,14 +968,13 @@ class Character(torch.nn.Module):
             raise RuntimeError(
                 "Character has no parameter transform, please provide one"
             )
-        resolved = resolve_backend(
-            fk_backend, model_parameters.float(), use_double_precision
-        )
         active_joints = self.parameter_transform.active_joints
-        return self.joint_parameters_to_skeleton_state(
+        if not hasattr(self, "skeleton"):
+            raise RuntimeError("Character has no skeleton, please provide one")
+        return self.skeleton._joint_parameters_to_skeleton_state(
             self.model_parameters_to_joint_parameters(model_parameters),
             use_double_precision=use_double_precision,
-            fk_backend=resolved,
+            fk_backend=fk_backend,
             active_joints=active_joints,
         )
 

@@ -34,3 +34,17 @@ def resolve_backend(
     ):
         return "triton"
     return "torch"
+
+
+def resolve_fk_backend(
+    backend: str,
+    tensor: torch.Tensor,
+    use_double_precision: bool = False,
+) -> str:
+    resolved = resolve_backend(backend, tensor, use_double_precision)
+    if resolved == "triton" and use_double_precision:
+        raise RuntimeError(
+            "Triton FK does not support double precision; "
+            "pass use_double_precision=False"
+        )
+    return resolved
