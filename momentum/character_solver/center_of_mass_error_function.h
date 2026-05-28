@@ -29,6 +29,11 @@ namespace momentum {
 /// CenterOfMassConstraintT<float> constraint;
 /// constraint.jointIndices = {0, 1, 2, 3};  // Spine joints
 /// constraint.masses = {1.0f, 2.0f, 1.5f, 1.0f};
+/// constraint.offsets = {
+///     Eigen::Vector3f::Zero(),
+///     Eigen::Vector3f(0.0f, 2.0f, 0.0f),
+///     Eigen::Vector3f(0.0f, 1.5f, 0.0f),
+///     Eigen::Vector3f::Zero()};
 /// constraint.target = Eigen::Vector3f(0, 1.0f, 0);  // Target CoM position
 /// constraint.weight = 1.0f;
 /// @endcode
@@ -39,6 +44,13 @@ struct CenterOfMassConstraintT {
 
   /// Mass values for each joint (must match jointIndices size)
   std::vector<T> masses;
+
+  /// Optional local center-of-mass offsets for each joint.
+  ///
+  /// If empty, all masses are treated as located at their joint origins. If present,
+  /// this must match jointIndices size and each joint-local offset is transformed by the
+  /// corresponding joint state before computing the weighted center of mass.
+  std::vector<Eigen::Vector3<T>> offsets;
 
   /// Target position for the center of mass
   Eigen::Vector3<T> target = Eigen::Vector3<T>::Zero();
