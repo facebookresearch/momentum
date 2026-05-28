@@ -15,6 +15,7 @@ import torch
 from pymomentum.backend import (
     skel_state_backend,
     triton_fk,
+    triton_skel_state,
     trs_backend,
     utils as backend_utils,
 )
@@ -359,7 +360,22 @@ class Skeleton(torch.nn.Module):
     def skeleton_state_to_joint_parameters(
         self,
         skel_state: torch.Tensor,
+        backend: str = "torch",
     ) -> torch.Tensor:
+        if torch.jit.is_scripting():
+            resolved = "torch" if backend == "auto" else backend
+        else:
+            resolved = resolve_backend(backend, skel_state.float())
+        if resolved == "triton":
+            with torch.amp.autocast("cuda", enabled=False):
+                return triton_skel_state.skeleton_state_to_joint_parameters(
+                    skel_state.float(),
+                    self.joint_translation_offsets,
+                    self.joint_prerotations,
+                    self.joint_parents,
+                )
+        if resolved != "torch":
+            raise ValueError(f"Unsupported skeleton-state backend: {resolved}")
         return self.local_skeleton_state_to_joint_parameters(
             self.skeleton_state_to_local_skeleton_state(skel_state)
         )
