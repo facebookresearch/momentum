@@ -15,6 +15,10 @@
 #include <momentum/math/random.h>
 #include <momentum/test/character/character_helpers.h>
 #include <momentum/test/character_solver/error_function_helpers.h>
+#include <momentum/test/helpers/expect_throw.h>
+
+#include <array>
+#include <span>
 
 using namespace momentum;
 
@@ -44,6 +48,7 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, GradientsAndJacobians) {
   for (size_t j = 0; j < numJoints; ++j) {
     constraint.jointIndices.push_back(j);
     constraint.masses.push_back(T(1) + T(j) * T(0.5));
+    constraint.offsets.push_back(uniform<Vector3<T>>(-0.25, 0.25));
   }
   constraint.target = uniform<Vector3<T>>(-1, 1);
   constraint.weight = T(1.5);
@@ -82,7 +87,8 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, ZeroError) {
     constraint.jointIndices.push_back(j);
     const T mass = T(1) + T(j);
     constraint.masses.push_back(mass);
-    actualCoM += mass * skelState.jointState[j].translation();
+    constraint.offsets.push_back(Eigen::Vector3<T>(T(0.1) * T(j), T(0.2), T(-0.05)));
+    actualCoM += mass * (skelState.jointState[j].transform * constraint.offsets.back());
     totalMass += mass;
   }
   actualCoM /= totalMass;
@@ -122,6 +128,30 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, ConstraintManagement) {
   // Clear
   errorFunction.clearConstraints();
   EXPECT_EQ(errorFunction.getNumConstraints(), 0u);
+}
+
+TYPED_TEST(CenterOfMassErrorFunctionTest, RejectsMismatchedOffsetsSize) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  const auto& skeleton = character.skeleton;
+  const auto& parameterTransform = character.parameterTransform;
+
+  CenterOfMassErrorFunctionT<T> errorFunction(skeleton, parameterTransform);
+
+  CenterOfMassConstraintT<T> constraint;
+  constraint.jointIndices = {0, 1};
+  constraint.masses = {T(1), T(2)};
+  constraint.offsets = {Eigen::Vector3<T>::Zero()};
+
+  using Constraint = CenterOfMassConstraintT<T>;
+  const std::array<Constraint, 1> constraints = {constraint};
+  auto setInvalidConstraints = [&]() {
+    errorFunction.setConstraints(
+        std::span<const Constraint>(constraints.data(), constraints.size()));
+  };
+
+  MOMENTUM_EXPECT_DEATH(setInvalidConstraints(), ".*");
 }
 
 TYPED_TEST(CenterOfMassErrorFunctionTest, MultipleConstraints) {

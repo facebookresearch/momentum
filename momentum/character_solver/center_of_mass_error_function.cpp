@@ -13,8 +13,24 @@
 #include "momentum/common/profile.h"
 
 #include <numeric>
+#include <vector>
 
 namespace momentum {
+
+namespace {
+
+template <typename T>
+Eigen::Vector3<T> worldMassPosition(
+    const JointStateT<T>& jointState,
+    const CenterOfMassConstraintT<T>& constraint,
+    const size_t index) {
+  if (constraint.offsets.empty()) {
+    return jointState.translation();
+  }
+  return jointState.transform * constraint.offsets[index];
+}
+
+} // namespace
 
 // CenterOfMassConstraintT methods
 template <typename T>
@@ -42,6 +58,9 @@ void CenterOfMassErrorFunctionT<T>::addConstraint(const ConstraintType& constrai
   MT_CHECK(
       constraint.jointIndices.size() == constraint.masses.size(),
       "Joint indices and masses must have the same size");
+  MT_CHECK(
+      constraint.offsets.empty() || constraint.offsets.size() == constraint.jointIndices.size(),
+      "Offsets must be empty or have the same size as joint indices");
   MT_CHECK(!constraint.jointIndices.empty(), "Constraint must have at least one joint");
   MT_CHECK(constraint.totalMass() > T(0), "Total mass must be positive");
 
@@ -55,7 +74,11 @@ void CenterOfMassErrorFunctionT<T>::addConstraint(const ConstraintType& constrai
 
 template <typename T>
 void CenterOfMassErrorFunctionT<T>::setConstraints(std::span<const ConstraintType> constraints) {
-  constraints_.assign(constraints.begin(), constraints.end());
+  constraints_.clear();
+  constraints_.reserve(constraints.size());
+  for (const auto& constraint : constraints) {
+    addConstraint(constraint);
+  }
 }
 
 template <typename T>
@@ -91,7 +114,8 @@ double CenterOfMassErrorFunctionT<T>::getError(
     // Compute center of mass: CoM = (sum m_k * p_k) / (sum m_k)
     Eigen::Vector3<T> com = Eigen::Vector3<T>::Zero();
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
-      const Eigen::Vector3<T> worldPos = state.jointState[constr.jointIndices[i]].translation();
+      const Eigen::Vector3<T> worldPos =
+          worldMassPosition(state.jointState[constr.jointIndices[i]], constr, i);
       com += constr.masses[i] * worldPos;
     }
     com *= invTotalMass;
@@ -121,14 +145,23 @@ double CenterOfMassErrorFunctionT<T>::getGradient(
   // Pre-allocate joint gradient storage
   Eigen::VectorX<T> jointGrad =
       Eigen::VectorX<T>::Zero(this->parameterTransform_.numAllModelParameters());
+  std::vector<Eigen::Vector3<T>> worldPositions;
 
   for (const auto& constr : constraints_) {
     const T invTotalMass = T(1) / constr.totalMass();
+    const bool hasOffsets = !constr.offsets.empty();
+    if (hasOffsets) {
+      worldPositions.resize(constr.jointIndices.size());
+    }
 
     // Compute center of mass
     Eigen::Vector3<T> com = Eigen::Vector3<T>::Zero();
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
-      const Eigen::Vector3<T> worldPos = state.jointState[constr.jointIndices[i]].translation();
+      const Eigen::Vector3<T> worldPos =
+          worldMassPosition(state.jointState[constr.jointIndices[i]], constr, i);
+      if (hasOffsets) {
+        worldPositions[i] = worldPos;
+      }
       com += constr.masses[i] * worldPos;
     }
     com *= invTotalMass;
@@ -147,7 +180,8 @@ double CenterOfMassErrorFunctionT<T>::getGradient(
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
       const size_t jointIdx = constr.jointIndices[i];
       const T normalizedMass = constr.masses[i] * invTotalMass;
-      const Eigen::Vector3<T> worldPos = state.jointState[jointIdx].translation();
+      const Eigen::Vector3<T> worldPos =
+          hasOffsets ? worldPositions[i] : state.jointState[jointIdx].translation();
 
       const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * Eigen::Matrix<T, 3, 3>::Identity();
       std::array<Eigen::Vector3<T>, 1> worldVecs = {worldPos};
@@ -186,14 +220,23 @@ double CenterOfMassErrorFunctionT<T>::getJacobian(
 
   double error = 0.0;
   size_t rowIndex = 0;
+  std::vector<Eigen::Vector3<T>> worldPositions;
 
   for (const auto& constr : constraints_) {
     const T invTotalMass = T(1) / constr.totalMass();
+    const bool hasOffsets = !constr.offsets.empty();
+    if (hasOffsets) {
+      worldPositions.resize(constr.jointIndices.size());
+    }
 
     // Compute center of mass
     Eigen::Vector3<T> com = Eigen::Vector3<T>::Zero();
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
-      const Eigen::Vector3<T> worldPos = state.jointState[constr.jointIndices[i]].translation();
+      const Eigen::Vector3<T> worldPos =
+          worldMassPosition(state.jointState[constr.jointIndices[i]], constr, i);
+      if (hasOffsets) {
+        worldPositions[i] = worldPos;
+      }
       com += constr.masses[i] * worldPos;
     }
     com *= invTotalMass;
@@ -209,7 +252,8 @@ double CenterOfMassErrorFunctionT<T>::getJacobian(
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
       const size_t jointIdx = constr.jointIndices[i];
       const T normalizedMass = constr.masses[i] * invTotalMass;
-      const Eigen::Vector3<T> worldPos = state.jointState[jointIdx].translation();
+      const Eigen::Vector3<T> worldPos =
+          hasOffsets ? worldPositions[i] : state.jointState[jointIdx].translation();
 
       const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * Eigen::Matrix<T, 3, 3>::Identity();
       std::array<Eigen::Vector3<T>, 1> worldVecs = {worldPos};
