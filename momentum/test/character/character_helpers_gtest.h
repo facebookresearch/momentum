@@ -18,6 +18,7 @@ void compareChars(
     const Character& refChar,
     const Character& character,
     bool withMesh = true,
-    bool withParameterTransform = true);
+    bool withParameterTransform = true,
+    bool withPhysicalProperties = true);
 
 } // namespace momentum
