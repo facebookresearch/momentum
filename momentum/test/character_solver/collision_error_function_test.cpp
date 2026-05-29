@@ -375,6 +375,98 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, EllipsoidCollisionError_ProducesError) {
   ASSERT_GE(numTestedPoses, 3) << "Too few poses produced collisions";
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, BoxCollisionError_ProducesError) {
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter(3);
+  const auto numJointParams = baseCharacter.skeleton.joints.size() * kParametersPerJoint;
+  ParameterTransform rootYTransform;
+  rootYTransform.name = {"root_ty"};
+  rootYTransform.offsets = Eigen::VectorXf::Zero(numJointParams);
+  rootYTransform.transform.resize(numJointParams, 1);
+  std::vector<Eigen::Triplet<float>> triplets;
+  triplets.emplace_back(0 * kParametersPerJoint + 1, 0, 1.0f);
+  rootYTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
+  rootYTransform.activeJointParams = rootYTransform.computeActiveJointParams();
+
+  CollisionGeometry cg;
+
+  TaperedCapsule jointCapsule;
+  jointCapsule.parent = 0;
+  jointCapsule.length = 1.0f;
+  jointCapsule.radius = Eigen::Vector2f(0.25f, 0.25f);
+  cg.push_back(jointCapsule);
+
+  CollisionBox worldBox;
+  worldBox.parent = kInvalidIndex;
+  worldBox.transformation.translation = Eigen::Vector3f(0.5f, 0.45f, 0.0f);
+  worldBox.halfExtents = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(worldBox);
+
+  const Character character(
+      baseCharacter.skeleton,
+      rootYTransform,
+      ParameterLimits(),
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &cg);
+
+  CollisionErrorFunctionT<T> errorFunction(character, false);
+  CollisionErrorFunctionStatelessT<T> errorFunctionStateless(character);
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> zeroParams =
+      ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> state(transform.apply(zeroParams), character.skeleton);
+
+  const double error = errorFunction.getError(zeroParams, state, MeshStateT<T>());
+  const double statelessError = errorFunctionStateless.getError(zeroParams, state, MeshStateT<T>());
+
+  EXPECT_GT(error, 0.0);
+  EXPECT_NEAR(error, statelessError, 1e-10);
+  EXPECT_EQ(errorFunction.getCollisionPairs().size(), 1);
+  const auto debugInfo = errorFunction.getCollisionDebugInfo();
+  ASSERT_EQ(debugInfo.size(), 1);
+  EXPECT_GT(debugInfo[0].overlap, 0.0);
+
+  Random<>::GetSingleton().setSeed(TestFixture::kTestSeed);
+  size_t numTestedPoses = 0;
+  for (size_t iTrial = 0; iTrial < 10; ++iTrial) {
+    const ModelParametersT<T> mp = uniform<VectorX<T>>(
+        transform.numAllModelParameters(), static_cast<T>(-0.03), static_cast<T>(0.03));
+    const SkeletonStateT<T> trialState(transform.apply(mp), character.skeleton);
+    if (errorFunction.getError(mp, trialState, MeshStateT<T>()) <= 0.0) {
+      continue;
+    }
+    SCOPED_TRACE("trial=" + std::to_string(iTrial));
+    // Keep the perturbation on the contact normal so finite differences stay on the same smooth
+    // box support feature.
+    const T numThreshold = T(0.02);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/true);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunctionStateless,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/true);
+    VALIDATE_IDENTICAL(
+        T, errorFunction, errorFunctionStateless, character.skeleton, transform, mp.v);
+    ++numTestedPoses;
+  }
+  ASSERT_GE(numTestedPoses, 3) << "Too few poses produced collisions";
+}
+
 // Test capsule collision gradients on a shared skeleton with global scaling.
 // Uses a double-branch skeleton (root → joint1 → joint2, root → joint3 → joint4)
 // so that:

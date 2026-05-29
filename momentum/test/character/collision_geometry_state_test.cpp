@@ -151,6 +151,33 @@ TEST_F(CollisionGeometryStateTest, UpdateWithEllipsoid) {
   EXPECT_TRUE(collisionState.ellipsoidRadii[2].isApprox(Vector3f(0.4f, 0.8f, 1.2f)));
 }
 
+TEST_F(CollisionGeometryStateTest, UpdateWithBox) {
+  CollisionBox box;
+  box.parent = 0;
+  box.transformation.translation = Vector3f(0.25f, 0.5f, 0.75f);
+  box.transformation.rotation = Quaternionf(Eigen::AngleAxisf(pi() / 2.0f, Vector3f::UnitZ()));
+  box.halfExtents = Vector3f(0.2f, 0.4f, 0.6f);
+  collisionGeometry.push_back(box);
+
+  skeletonState.jointState[0].transform.translation = Vector3f(1.0f, 2.0f, 3.0f);
+  skeletonState.jointState[0].transform.scale = 2.0f;
+
+  CollisionGeometryState collisionState;
+  collisionState.update(skeletonState, collisionGeometry);
+
+  ASSERT_EQ(collisionState.type.size(), 3);
+  EXPECT_EQ(collisionState.type[2], CollisionPrimitiveType::Box);
+  EXPECT_TRUE(collisionState.origin[2].isApprox(Vector3f(1.5f, 3.0f, 4.5f)));
+  EXPECT_TRUE(collisionState.direction[2].isZero());
+  EXPECT_TRUE(collisionState.radius[2].isZero());
+  EXPECT_FLOAT_EQ(collisionState.delta[2], 0.0f);
+  EXPECT_TRUE(collisionState.ellipsoidRadii[2].isZero());
+  EXPECT_TRUE(collisionState.boxHalfExtents[2].isApprox(Vector3f(0.4f, 0.8f, 1.2f)));
+  const Quaternionf expectedOrientation =
+      skeletonState.jointState[0].transform.rotation * box.transformation.rotation;
+  EXPECT_TRUE(collisionState.orientation[2].isApprox(expectedOrientation));
+}
+
 // Test the overlaps function with non-overlapping capsules
 TEST_F(CollisionGeometryStateTest, OverlapsNonOverlapping) {
   // Create two non-overlapping capsules
@@ -213,6 +240,63 @@ TEST_F(CollisionGeometryStateTest, OverlapsCapsuleEllipsoid) {
   EXPECT_NEAR(overlap.overlap, 0.1f, 1e-5f);
 }
 
+TEST_F(CollisionGeometryStateTest, OverlapsCapsuleBox) {
+  CollisionGeometry geometry;
+
+  TaperedCapsule capsule;
+  capsule.parent = 0;
+  capsule.length = 1.0f;
+  capsule.radius = Vector2f(0.25f, 0.25f);
+  geometry.push_back(capsule);
+
+  CollisionBox box;
+  box.parent = 1;
+  box.transformation.translation = Vector3f(0.5f, 0.3f, 0.3f);
+  box.halfExtents = Vector3f(0.2f, 0.3f, 0.2f);
+  geometry.push_back(box);
+
+  CollisionGeometryState collisionState;
+  collisionState.update(skeletonState, geometry);
+
+  CollisionOverlapResultT<float> overlap;
+  EXPECT_TRUE(overlaps(collisionState, geometry, 0, 1, overlap));
+  EXPECT_NEAR(overlap.distance, 0.42426407f, 1e-5f);
+  EXPECT_NEAR(overlap.closestPoints[0], 0.5f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusA, 0.25f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusB, 0.35355338f, 1e-5f);
+  EXPECT_NEAR(overlap.overlap, 0.17928931f, 1e-5f);
+}
+
+TEST_F(CollisionGeometryStateTest, OverlapsBoxCapsule) {
+  CollisionGeometry geometry;
+
+  TaperedCapsule capsule;
+  capsule.parent = 0;
+  capsule.length = 1.0f;
+  capsule.radius = Vector2f(0.25f, 0.25f);
+  geometry.push_back(capsule);
+
+  CollisionBox box;
+  box.parent = 1;
+  box.transformation.translation = Vector3f(0.5f, 0.3f, 0.3f);
+  box.halfExtents = Vector3f(0.2f, 0.3f, 0.2f);
+  geometry.push_back(box);
+
+  CollisionGeometryState collisionState;
+  collisionState.update(skeletonState, geometry);
+
+  CollisionOverlapResultT<float> overlap;
+  EXPECT_TRUE(overlaps(collisionState, geometry, 1, 0, overlap));
+  EXPECT_NEAR(overlap.distance, 0.42426407f, 1e-5f);
+  EXPECT_NEAR(overlap.closestPoints[0], 0.0f, 1e-5f);
+  EXPECT_NEAR(overlap.closestPoints[1], 0.5f, 1e-5f);
+  EXPECT_TRUE(overlap.positionA.isApprox(Vector3f(0.5f, 0.3f, 0.3f), 1e-5f));
+  EXPECT_TRUE(overlap.positionB.isApprox(Vector3f(0.5f, 0.0f, 0.0f), 1e-5f));
+  EXPECT_NEAR(overlap.radiusA, 0.35355338f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusB, 0.25f, 1e-5f);
+  EXPECT_NEAR(overlap.overlap, 0.17928931f, 1e-5f);
+}
+
 TEST_F(CollisionGeometryStateTest, OverlapsEllipsoidEllipsoid) {
   CollisionGeometry geometry;
 
@@ -236,6 +320,56 @@ TEST_F(CollisionGeometryStateTest, OverlapsEllipsoidEllipsoid) {
   EXPECT_NEAR(overlap.radiusA, 0.5f, 1e-5f);
   EXPECT_NEAR(overlap.radiusB, 0.4f, 1e-5f);
   EXPECT_NEAR(overlap.overlap, 0.1f, 1e-5f);
+}
+
+TEST_F(CollisionGeometryStateTest, OverlapsEllipsoidBox) {
+  CollisionGeometry geometry;
+
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = 0;
+  ellipsoid.radii = Vector3f(0.5f, 0.2f, 0.2f);
+  geometry.push_back(ellipsoid);
+
+  CollisionBox box;
+  box.parent = 1;
+  box.transformation.translation = Vector3f(0.5f, 0.3f, 0.3f);
+  box.halfExtents = Vector3f(0.4f, 0.2f, 0.2f);
+  geometry.push_back(box);
+
+  CollisionGeometryState collisionState;
+  collisionState.update(skeletonState, geometry);
+
+  CollisionOverlapResultT<float> overlap;
+  EXPECT_TRUE(overlaps(collisionState, geometry, 0, 1, overlap));
+  EXPECT_NEAR(overlap.distance, 0.65574385f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusA, 0.40260778f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusB, 0.48799543f, 1e-5f);
+  EXPECT_NEAR(overlap.overlap, 0.23485935f, 1e-5f);
+}
+
+TEST_F(CollisionGeometryStateTest, OverlapsBoxBox) {
+  CollisionGeometry geometry;
+
+  CollisionBox boxA;
+  boxA.parent = 0;
+  boxA.halfExtents = Vector3f(0.5f, 0.2f, 0.2f);
+  geometry.push_back(boxA);
+
+  CollisionBox boxB;
+  boxB.parent = 1;
+  boxB.transformation.translation = Vector3f(0.5f, 0.3f, 0.3f);
+  boxB.halfExtents = Vector3f(0.4f, 0.2f, 0.2f);
+  geometry.push_back(boxB);
+
+  CollisionGeometryState collisionState;
+  collisionState.update(skeletonState, geometry);
+
+  CollisionOverlapResultT<float> overlap;
+  EXPECT_TRUE(overlaps(collisionState, geometry, 0, 1, overlap));
+  EXPECT_NEAR(overlap.distance, 0.65574385f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusA, 0.56424469f, 1e-5f);
+  EXPECT_NEAR(overlap.radiusB, 0.48799543f, 1e-5f);
+  EXPECT_NEAR(overlap.overlap, 0.39649630f, 1e-5f);
 }
 
 // Test the overlaps function with overlapping capsules
@@ -406,6 +540,30 @@ TEST_F(CollisionGeometryStateTest, UpdateEllipsoidAabb) {
   // Tight half-extent along X and Y is sqrt((cos45*2)^2 + (sin45*1)^2) = sqrt(2.5) ~= 1.5811,
   // whereas the box/L1 bound would be cos45*2 + sin45*1 ~= 2.1213. Z is unrotated, so 3.0.
   const float hXy = std::sqrt(2.5f);
+  const float hZ = 3.0f;
+  EXPECT_NEAR(aabb.aabb.min().x(), center.x() - hXy, 1e-5f);
+  EXPECT_NEAR(aabb.aabb.min().y(), center.y() - hXy, 1e-5f);
+  EXPECT_NEAR(aabb.aabb.min().z(), center.z() - hZ, 1e-5f);
+  EXPECT_NEAR(aabb.aabb.max().x(), center.x() + hXy, 1e-5f);
+  EXPECT_NEAR(aabb.aabb.max().y(), center.y() + hXy, 1e-5f);
+  EXPECT_NEAR(aabb.aabb.max().z(), center.z() + hZ, 1e-5f);
+}
+
+// Test that updateBoxAabb uses the exact OBB/L1 bound (cos45*hx + sin45*hy), which is the tight
+// AABB for an oriented box. It is intentionally looser than the ellipsoid L2 bound for the same
+// extents; using the ellipsoid formula here would under-bound the box and miss collisions.
+TEST_F(CollisionGeometryStateTest, UpdateBoxAabb) {
+  const Vector3f center(1.0f, 2.0f, 5.0f);
+  // Unit quaternion (w, x, y, z) for a +45-degree rotation about the Z axis.
+  const Quaternionf orientation(0.9238795325f, 0.0f, 0.0f, 0.3826834324f);
+  const Vector3f halfExtents(2.0f, 1.0f, 3.0f);
+
+  axel::BoundingBox<float> aabb;
+  updateBoxAabb(aabb, center, orientation, halfExtents);
+
+  // Exact OBB half-extent along X and Y is cos45*2 + sin45*1 = sqrt(0.5)*3 ~= 2.1213 (vs the
+  // ellipsoid L2 bound sqrt(2.5) ~= 1.5811 for the same extents). Z is unrotated, so 3.0.
+  const float hXy = std::sqrt(0.5f) * 3.0f;
   const float hZ = 3.0f;
   EXPECT_NEAR(aabb.aabb.min().x(), center.x() - hXy, 1e-5f);
   EXPECT_NEAR(aabb.aabb.min().y(), center.y() - hXy, 1e-5f);

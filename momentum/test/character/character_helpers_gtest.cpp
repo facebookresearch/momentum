@@ -181,6 +181,12 @@ void compareCollisionGeometry(
       if (lessLexicographic(l2.ellipsoidRadii, l1.ellipsoidRadii)) {
         return false;
       }
+      if (lessLexicographic(l1.boxHalfExtents, l2.boxHalfExtents)) {
+        return true;
+      }
+      if (lessLexicographic(l2.boxHalfExtents, l1.boxHalfExtents)) {
+        return false;
+      }
       const auto t1 = l1.transformation.toMatrix();
       const auto t2 = l2.transformation.toMatrix();
       EXPECT_EQ(t1.size(), t2.size());
@@ -204,6 +210,7 @@ void compareCollisionGeometry(
           << "  - radius_0 : " << collA.radius.x() << "\n"
           << "  - radius_1 : " << collA.radius.y() << "\n"
           << "  - radii    : " << collA.ellipsoidRadii.transpose() << "\n"
+          << "  - half_ext : " << collA.boxHalfExtents.transpose() << "\n"
           << "  - length   : " << collA.length << "\n"
           << "  - parent   : " << collA.parent << "\n"
           << "  - transform:\n"
@@ -213,6 +220,7 @@ void compareCollisionGeometry(
           << "  - radius_0 : " << collB.radius.x() << "\n"
           << "  - radius_1 : " << collB.radius.y() << "\n"
           << "  - radii    : " << collB.ellipsoidRadii.transpose() << "\n"
+          << "  - half_ext : " << collB.boxHalfExtents.transpose() << "\n"
           << "  - length   : " << collB.length << "\n"
           << "  - parent   : " << collB.parent << "\n"
           << "  - transform:\n"
