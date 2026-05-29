@@ -46,6 +46,36 @@ rerun::HalfSize3D toRerunHalfSizes3D(const Eigen::MatrixBase<Derived>& vec3) {
 
 } // namespace
 
+namespace detail {
+
+CollisionBoxLogData makeCollisionBoxLogData(
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonState& skeletonState) {
+  CollisionBoxLogData data;
+  data.centers.reserve(collisionGeometry.size());
+  data.halfSizes.reserve(collisionGeometry.size());
+  data.quaternions.reserve(collisionGeometry.size());
+
+  for (const auto& cg : collisionGeometry) {
+    if (cg.type != CollisionPrimitiveType::Box) {
+      continue;
+    }
+
+    const Transform parentTransform = (cg.parent == kInvalidIndex)
+        ? Transform()
+        : skeletonState.jointState.at(cg.parent).transform;
+    const Transform tf = parentTransform * cg.transformation;
+
+    data.centers.push_back(tf.translation);
+    data.halfSizes.emplace_back(cg.boxHalfExtents * parentTransform.scale);
+    data.quaternions.push_back(tf.rotation);
+  }
+
+  return data;
+}
+
+} // namespace detail
+
 void logMesh(
     const rerun::RecordingStream& rec,
     const std::string& streamName,
@@ -498,6 +528,30 @@ void logCollisionGeometry(
         streamName + "/ellipsoids",
         rerun::Ellipsoids3D::from_centers_and_half_sizes(ellipsoidCenters, ellipsoidHalfSizes)
             .with_quaternions(ellipsoidQuaternions)
+            .with_colors(rerun::Color(128, 64, 64)));
+  }
+
+  const auto boxLogData = detail::makeCollisionBoxLogData(collisionGeometry, skeletonState);
+  if (!boxLogData.halfSizes.empty()) {
+    std::vector<rerun::Position3D> boxCenters;
+    std::vector<rerun::HalfSize3D> boxHalfSizes;
+    std::vector<rerun::Quaternion> boxQuaternions;
+    boxCenters.reserve(boxLogData.centers.size());
+    boxHalfSizes.reserve(boxLogData.halfSizes.size());
+    boxQuaternions.reserve(boxLogData.quaternions.size());
+
+    for (size_t i = 0; i < boxLogData.halfSizes.size(); ++i) {
+      const Quaternionf& q = boxLogData.quaternions[i];
+      boxCenters.push_back(toRerunPosition3D(boxLogData.centers[i]));
+      boxHalfSizes.push_back(toRerunHalfSizes3D(boxLogData.halfSizes[i]));
+      boxQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+    }
+
+    safeLog(
+        rec,
+        streamName + "/boxes",
+        rerun::Boxes3D::from_centers_and_half_sizes(boxCenters, boxHalfSizes)
+            .with_quaternions(boxQuaternions)
             .with_colors(rerun::Color(128, 64, 64)));
   }
 

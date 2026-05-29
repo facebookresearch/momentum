@@ -41,7 +41,7 @@ Individual logging functions are also available for finer control:
 
 - :func:`log_mesh` — log a :class:`~pymomentum.geometry.Mesh`
 - :func:`log_joints` — log skeleton bones and per-joint transforms
-- :func:`log_collision_geometry` — log tapered capsule and ellipsoid collision primitives
+- :func:`log_collision_geometry` — log capsule, ellipsoid, and box collision primitives
 - :func:`log_locators` — log locator world-space positions
 """
 
@@ -80,6 +80,9 @@ class _CollisionGeometryArrays:
     ellipsoid_centers: np.ndarray
     ellipsoid_quaternions: np.ndarray
     ellipsoid_half_sizes: np.ndarray
+    box_centers: np.ndarray
+    box_quaternions: np.ndarray
+    box_half_sizes: np.ndarray
 
 
 def _empty_array(shape: tuple[int, ...], dtype: Any = np.float32) -> np.ndarray:
@@ -129,6 +132,9 @@ def _collision_geometry_arrays(
     ellipsoid_centers: list[np.ndarray] = []
     ellipsoid_quaternions: list[np.ndarray] = []
     ellipsoid_half_sizes: list[np.ndarray] = []
+    box_centers: list[np.ndarray] = []
+    box_quaternions: list[np.ndarray] = []
+    box_half_sizes: list[np.ndarray] = []
 
     for primitive in character.collision_geometry:
         translation, quaternion, parent_scale, world_scale = _collision_world_transform(
@@ -156,6 +162,10 @@ def _collision_geometry_arrays(
             ellipsoid_centers.append(translation)
             ellipsoid_quaternions.append(quaternion)
             ellipsoid_half_sizes.append(np.asarray(primitive.radii) * parent_scale)
+        elif hasattr(primitive, "half_extents"):
+            box_centers.append(translation)
+            box_quaternions.append(quaternion)
+            box_half_sizes.append(np.asarray(primitive.half_extents) * parent_scale)
 
     return _CollisionGeometryArrays(
         capsule_translations=np.asarray(capsule_translations, dtype=np.float32).reshape(
@@ -184,6 +194,15 @@ def _collision_geometry_arrays(
             (-1, 3)
         )
         if ellipsoid_half_sizes
+        else _empty_array((3,)),
+        box_centers=np.asarray(box_centers, dtype=np.float32).reshape((-1, 3))
+        if box_centers
+        else _empty_array((3,)),
+        box_quaternions=np.asarray(box_quaternions, dtype=np.float32).reshape((-1, 4))
+        if box_quaternions
+        else _empty_array((4,)),
+        box_half_sizes=np.asarray(box_half_sizes, dtype=np.float32).reshape((-1, 3))
+        if box_half_sizes
         else _empty_array((3,)),
     )
 
@@ -381,6 +400,16 @@ def log_collision_geometry(
                 centers=arrays.ellipsoid_centers,
                 quaternions=arrays.ellipsoid_quaternions,
                 colors=_colors(arrays.ellipsoid_half_sizes.shape[0]),
+            ),
+        )
+    if arrays.box_half_sizes.shape[0] > 0:
+        rec.log(
+            f"{entity_path}/boxes",
+            rr.Boxes3D(
+                half_sizes=arrays.box_half_sizes,
+                centers=arrays.box_centers,
+                quaternions=arrays.box_quaternions,
+                colors=_colors(arrays.box_half_sizes.shape[0]),
             ),
         )
 
@@ -686,6 +715,21 @@ def _send_collision_geometry_columns(
         rec.send_columns(
             f"{entity_path}/ellipsoids", indexes=time_cols, columns=ellipsoid_cols
         )
+
+    n_boxes = arrays_by_frame[0].box_half_sizes.shape[0]
+    if n_boxes > 0:
+        box_cols = rr.Boxes3D.columns(
+            half_sizes=np.concatenate(
+                [arrays.box_half_sizes for arrays in arrays_by_frame]
+            ),
+            centers=np.concatenate([arrays.box_centers for arrays in arrays_by_frame]),
+            quaternions=np.concatenate(
+                [arrays.box_quaternions for arrays in arrays_by_frame]
+            ),
+            colors=_colors(n_frames * n_boxes),
+        )
+        box_cols = box_cols.partition(np.full(n_frames, n_boxes))
+        rec.send_columns(f"{entity_path}/boxes", indexes=time_cols, columns=box_cols)
 
 
 def log_animation(

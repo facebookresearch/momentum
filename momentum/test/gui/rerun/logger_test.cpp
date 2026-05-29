@@ -21,8 +21,8 @@ using namespace momentum;
 // Note on assertion level: The logger functions call rec_->log() / rec_->log_static()
 // which is a fire-and-forget API — the rerun RecordingStream provides no inspection
 // or readback mechanism for logged data. EXPECT_NO_THROW is the strongest assertion
-// possible for these integration tests. The value assertions for data conversion
-// correctness live in eigen_adapters_test.cpp and rerun_compat_test.cpp instead.
+// possible for those integration calls. Value assertions cover the conversion helpers
+// before the data reaches the stream.
 
 class RerunLoggerTest : public testing::Test {
  protected:
@@ -128,8 +128,42 @@ TEST_F(RerunLoggerTest, LogMarkerLocatorCorrespondence) {
 
 TEST_F(RerunLoggerTest, LogCollisionGeometry) {
   ASSERT_NE(character_.collision, nullptr);
-  EXPECT_NO_THROW(logCollisionGeometry(
-      *rec_, "test/collision", *character_.collision, characterState_.skeletonState));
+  auto& parentTransform = characterState_.skeletonState.jointState[0].transform;
+  parentTransform.translation = Eigen::Vector3f(1.0f, 2.0f, 3.0f);
+  parentTransform.rotation = Quaternionf(Eigen::AngleAxisf(0.5f, Eigen::Vector3f::UnitZ()));
+  parentTransform.scale = 2.0f;
+
+  CollisionGeometry collision = *character_.collision;
+  CollisionBox box;
+  box.parent = kInvalidIndex;
+  box.transformation.translation = Eigen::Vector3f(0.2f, 0.3f, 0.4f);
+  box.halfExtents = Eigen::Vector3f(0.4f, 0.3f, 0.2f);
+  collision.push_back(box);
+
+  CollisionBox parentedBox;
+  parentedBox.parent = 0;
+  parentedBox.transformation.translation = Eigen::Vector3f(0.1f, 0.2f, 0.3f);
+  parentedBox.transformation.rotation =
+      Quaternionf(Eigen::AngleAxisf(0.25f, Eigen::Vector3f::UnitX()));
+  parentedBox.halfExtents = Eigen::Vector3f(0.2f, 0.3f, 0.4f);
+  collision.push_back(parentedBox);
+
+  const auto boxLogData = detail::makeCollisionBoxLogData(collision, characterState_.skeletonState);
+  ASSERT_EQ(boxLogData.centers.size(), 2);
+  ASSERT_EQ(boxLogData.halfSizes.size(), 2);
+  ASSERT_EQ(boxLogData.quaternions.size(), 2);
+
+  EXPECT_TRUE(boxLogData.centers[0].isApprox(Eigen::Vector3f(0.2f, 0.3f, 0.4f)));
+  EXPECT_TRUE(boxLogData.halfSizes[0].isApprox(Eigen::Vector3f(0.4f, 0.3f, 0.2f)));
+  EXPECT_TRUE(boxLogData.quaternions[0].coeffs().isApprox(Quaternionf::Identity().coeffs()));
+  const Transform expectedParentedTransform = parentTransform * parentedBox.transformation;
+  EXPECT_TRUE(boxLogData.centers[1].isApprox(expectedParentedTransform.translation));
+  EXPECT_TRUE(boxLogData.halfSizes[1].isApprox(parentedBox.halfExtents * parentTransform.scale));
+  EXPECT_TRUE(
+      boxLogData.quaternions[1].coeffs().isApprox(expectedParentedTransform.rotation.coeffs()));
+
+  EXPECT_NO_THROW(
+      logCollisionGeometry(*rec_, "test/collision", collision, characterState_.skeletonState));
 }
 
 // --- logBvh tests ---

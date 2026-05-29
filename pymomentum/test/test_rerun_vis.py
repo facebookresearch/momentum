@@ -48,7 +48,7 @@ def _is_tsan_active() -> bool:
 # load_tests() alone) so that pytest — which does not honor unittest's
 # load_tests protocol — cannot discover and instantiate it when rerun is
 # unavailable. load_tests is kept for the TSan skip path (BUCK / unittest only).
-if _HAS_RERUN:
+if _HAS_RERUN:  # noqa: C901
 
     class TestRerunVis(unittest.TestCase):
         @classmethod
@@ -91,6 +91,10 @@ if _HAS_RERUN:
                     geo.Ellipsoid(
                         parent=1,
                         radii=np.array([0.3, 0.2, 0.1], dtype=np.float32),
+                    ),
+                    geo.Box(
+                        parent=2,
+                        half_extents=np.array([0.4, 0.3, 0.2], dtype=np.float32),
                     ),
                 ]
             )
@@ -148,8 +152,10 @@ if _HAS_RERUN:
             logged = {c.args[0]: c.args[1] for c in mock_rec.log.call_args_list}
             capsules = logged["collision/capsules"]
             ellipsoids = logged["collision/ellipsoids"]
+            boxes = logged["collision/boxes"]
             self.assertIsInstance(capsules, rr.Capsules3D)
             self.assertIsInstance(ellipsoids, rr.Ellipsoids3D)
+            self.assertIsInstance(boxes, rr.Boxes3D)
 
             capsule_parent_scale = skel_state[0, 7]
             capsule_translations = self._component_batch_array(capsules.translations)
@@ -173,6 +179,15 @@ if _HAS_RERUN:
                 np.array([[0.3, 0.2, 0.1]], dtype=np.float32) * ellipsoid_parent_scale,
             )
 
+            box_parent_scale = skel_state[2, 7]
+            box_centers = self._component_batch_array(boxes.centers)
+            self.assertEqual(box_centers.shape, (1, 3))
+            np.testing.assert_allclose(box_centers[0], skel_state[2, :3])
+            np.testing.assert_allclose(
+                self._component_batch_array(boxes.half_sizes),
+                np.array([[0.4, 0.3, 0.2]], dtype=np.float32) * box_parent_scale,
+            )
+
         def test_log_character_includes_collision_geometry(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
             character = self._with_mixed_collision_geometry(character)
@@ -182,6 +197,7 @@ if _HAS_RERUN:
             paths = [c.args[0] for c in mock_rec.log.call_args_list]
             self.assertIn("ch_collision/collision_geometry/capsules", paths)
             self.assertIn("ch_collision/collision_geometry/ellipsoids", paths)
+            self.assertIn("ch_collision/collision_geometry/boxes", paths)
 
         def test_log_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
@@ -253,6 +269,7 @@ if _HAS_RERUN:
                 self.assertIn("test/anim/locators", send_paths)
             self.assertIn("test/anim/collision_geometry/capsules", send_paths)
             self.assertIn("test/anim/collision_geometry/ellipsoids", send_paths)
+            self.assertIn("test/anim/collision_geometry/boxes", send_paths)
 
         def test_log_animation_without_mesh(self) -> None:
             character, _, skel_states, _ = self._make_animation_inputs(3)
