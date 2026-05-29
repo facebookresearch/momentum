@@ -62,7 +62,7 @@ bool SimdNormalConstraints::addConstraint(
     const Vector3f& normal,
     const Vector3f& target,
     const float targetWeight) {
-  MT_CHECK(jointIndex < constraintCount.size());
+  MT_CHECK(jointIndex < static_cast<size_t>(numJoints));
 
   // add the constraint to the corresponding arrays of the jointIndex if there's enough space
   uint32_t index = 0;

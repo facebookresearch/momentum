@@ -62,7 +62,7 @@ void SimdPlaneConstraints::addConstraint(
     const Vector3f& targetNormal,
     const float targetOffset,
     const float targetWeight) {
-  MT_CHECK(jointIndex < constraintCount.size());
+  MT_CHECK(jointIndex < static_cast<size_t>(numJoints));
 
   // add the constraint to the corresponding arrays of the jointIndex if there's enough space
   uint32_t index = 0;

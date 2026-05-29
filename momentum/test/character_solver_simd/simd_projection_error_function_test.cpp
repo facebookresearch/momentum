@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 #include "momentum/character_solver/projection_error_function.h"
 #include "momentum/character_solver_simd/simd_projection_error_function.h"
 
@@ -21,6 +23,33 @@
 #include "momentum/test/character_solver/error_function_helpers.h"
 
 using namespace momentum;
+
+TEST(Momentum_ErrorFunctions, SimdProjectionConstraintsRejectsJointIndexOutsideSkeleton) {
+  const Character character = createTestCharacter(3);
+  const Skeleton& skeleton = character.skeleton;
+  SimdProjectionConstraints constraints(&skeleton);
+
+  const size_t invalidJointIndex = skeleton.joints.size();
+  ASSERT_LT(invalidJointIndex, SimdProjectionConstraints::kMaxJoints);
+
+  const auto addInvalidConstraint = [&]() {
+    constraints.addConstraint(
+        invalidJointIndex,
+        Vector3f::Zero(),
+        Eigen::Matrix<float, 3, 4>::Zero(),
+        Vector2f::Zero(),
+        1.0f);
+  };
+
+  // MT_CHECK aborts via XR_CHECK in XR-logger builds, but throws std::runtime_error in the
+  // non-XR backend.
+#if defined(MOMENTUM_WITH_XR_LOGGER)
+  EXPECT_DEATH_IF_SUPPORTED(
+      addInvalidConstraint(), "jointIndex < static_cast<size_t>\\(numJoints\\)");
+#else
+  EXPECT_THROW(addInvalidConstraint(), std::runtime_error);
+#endif
+}
 
 TEST(Momentum_ErrorFunctions, SimdProjectionFunctionIsSame) {
   const bool verbose = false;
