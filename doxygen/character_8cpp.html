@@ -99,6 +99,7 @@ $(document).ready(function(){initNavTree('character_8cpp.html',''); initResizabl
 <code>#include &quot;<a class="el" href="blend__shape_8h_source.html">momentum/character/blend_shape.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="blend__shape__skinning_8h_source.html">momentum/character/blend_shape_skinning.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="character__state_8h_source.html">momentum/character/character_state.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="character__utility_8h_source.html">momentum/character/character_utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="collision__geometry_8h_source.html">momentum/character/collision_geometry.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="joint_8h_source.html">momentum/character/joint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="linear__skinning_8h_source.html">momentum/character/linear_skinning.h</a>&quot;</code><br />
@@ -109,6 +110,7 @@ $(document).ready(function(){initNavTree('character_8cpp.html',''); initResizabl
 <code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
 <code>#include &lt;numeric&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="character_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -117,13 +119,66 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="a911f4daadd0450a091a589eb27d02f52" name="a911f4daadd0450a091a589eb27d02f52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a911f4daadd0450a091a589eb27d02f52">&#9670;&#160;</a></span>parent</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t parent = kInvalidIndex</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00048">48</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="fully__differentiable__distance__error__function_8cpp_source.html#l00099">momentum::FullyDifferentiableDistanceErrorFunctionT&lt; T &gt;::d_gradient_d_input_dot()</a>, <a class="el" href="fully__differentiable__projection__error__function_8cpp_source.html#l00119">momentum::FullyDifferentiableProjectionErrorFunctionT&lt; T &gt;::d_gradient_d_input_dot()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00730">momentum::extractLocatorsFromCharacter()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00243">momentum::locatorsToSkinnedLocators()</a>, <a class="el" href="character__utility_8cpp_source.html#l00733">momentum::removeJoints()</a>, <a class="el" href="locator__io_8cpp_source.html#l00210">momentum::saveLocators()</a>, <a class="el" href="joint__state_8cpp_source.html#l00022">momentum::JointStateT&lt; T &gt;::set()</a>, <a class="el" href="skeleton_8cpp_source.html#l00016">momentum::SkeletonT&lt; T &gt;::SkeletonT()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00043">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::updateCollisionPairs()</a>, and <a class="el" href="collision__error__function_8cpp_source.html#l00048">momentum::CollisionErrorFunctionT&lt; T &gt;::updateCollisionPairs()</a>.</p>
+
+</div>
+</div>
+<a id="a7f25c7ccde997558aecd4ebe73d52a17" name="a7f25c7ccde997558aecd4ebe73d52a17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f25c7ccde997558aecd4ebe73d52a17">&#9670;&#160;</a></span>retainedAncestor</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t retainedAncestor = kInvalidIndex</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00049">49</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4d300e3ba60410d8997707920e5036f2" name="a4d300e3ba60410d8997707920e5036f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d300e3ba60410d8997707920e5036f2">&#9670;&#160;</a></span>translationOffset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector3f translationOffset = Vector3f::Zero()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="character_8cpp_source.html#l00050">50</a> of file <a class="el" href="character_8cpp_source.html">character.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="character__utility_8cpp_source.html#l00837">momentum::addRigidTransformNode()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="character_8cpp.html">character.cpp</a></li>
-    <li class="footer">Generated on Fri May 29 2026 00:16:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 29 2026 02:49:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

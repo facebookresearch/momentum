@@ -6,7 +6,7 @@ var dir_b19dfde638f642544c68678fc7a0f0f5 =
     [ "blend_shape_base.h", "blend__shape__base_8h.html", "blend__shape__base_8h" ],
     [ "blend_shape_skinning.cpp", "blend__shape__skinning_8cpp.html", "blend__shape__skinning_8cpp" ],
     [ "blend_shape_skinning.h", "blend__shape__skinning_8h.html", "blend__shape__skinning_8h" ],
-    [ "character.cpp", "character_8cpp.html", null ],
+    [ "character.cpp", "character_8cpp.html", "character_8cpp" ],
     [ "character.h", "character_8h.html", "character_8h" ],
     [ "character_state.cpp", "character__state_8cpp.html", null ],
     [ "character_state.h", "character__state_8h.html", "character__state_8h" ],

@@ -96,10 +96,13 @@ $(document).ready(function(){initNavTree('json__utils_8h.html',''); initResizabl
   <div class="headertitle"><div class="title">json_utils.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="parameter__limits_8h_source.html">momentum/character/parameter_limits.h</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="character_2fwd_8h_source.html">momentum/character/fwd.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="joint_8h_source.html">momentum/character/joint.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="parameter__limits_8h_source.html">momentum/character/parameter_limits.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="parameter__transform_8h_source.html">momentum/character/parameter_transform.h</a>&gt;</code><br />
 <code>#include &lt;nlohmann/json.hpp&gt;</code><br />
 <code>#include &lt;Eigen/Core&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
 </div>
 <p><a href="json__utils_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -124,6 +127,9 @@ Functions</h2></td></tr>
 <tr class="separator:a9bb264a8b00945007bcbd040e79a8500"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab96431ab5c9c4024c15c77a84a7bb191" id="r_ab96431ab5c9c4024c15c77a84a7bb191"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ab96431ab5c9c4024c15c77a84a7bb191">momentum::parameterTransformToJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>)</td></tr>
 <tr class="separator:ab96431ab5c9c4024c15c77a84a7bb191"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79ad521fb8bf02d7bdf96b879a89ca55" id="r_a79ad521fb8bf02d7bdf96b879a89ca55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a79ad521fb8bf02d7bdf96b879a89ca55">momentum::jointPhysicalPropertiesToJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1JointPhysicalProperties.html">JointPhysicalProperties</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointProperties</a>, nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>)</td></tr>
+<tr class="memdesc:a79ad521fb8bf02d7bdf96b879a89ca55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serializes one joint's physical mass properties.  <br /></td></tr>
+<tr class="separator:a79ad521fb8bf02d7bdf96b879a89ca55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05a1cc0958a1517cd60bbb0be5fdee7b" id="r_a05a1cc0958a1517cd60bbb0be5fdee7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#af510f44c571cb8771263cbfbb1971367">ParameterLimits</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a05a1cc0958a1517cd60bbb0be5fdee7b">momentum::parameterLimitsFromJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>)</td></tr>
 <tr class="separator:a05a1cc0958a1517cd60bbb0be5fdee7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb8cef1c4ffba9a25bf0261f3d6c96c5" id="r_acb8cef1c4ffba9a25bf0261f3d6c96c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ae62e037873cf19e02900dac22d52c43f">ParameterSets</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#acb8cef1c4ffba9a25bf0261f3d6c96c5">momentum::parameterSetsFromJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>)</td></tr>
@@ -132,6 +138,9 @@ Functions</h2></td></tr>
 <tr class="separator:ae6605834aeab3fb3f186aa02785979ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa1a7fbd414924422797c20e5a5241c2" id="r_aaa1a7fbd414924422797c20e5a5241c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ac1f6905464260f1a5c2dff54fc03d422">ParameterTransform</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aaa1a7fbd414924422797c20e5a5241c2">momentum::parameterTransformFromJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>)</td></tr>
 <tr class="separator:aaa1a7fbd414924422797c20e5a5241c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef47afe3183e9004f2643cf6098b0b5" id="r_a7ef47afe3183e9004f2643cf6098b0b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1JointPhysicalProperties.html">JointPhysicalProperties</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7ef47afe3183e9004f2643cf6098b0b5">momentum::jointPhysicalPropertiesFromJson</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> nlohmann::json &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;jointName, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a> <a class="el" href="state__sequence__error__function_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c">jointIndex</a>)</td></tr>
+<tr class="memdesc:a7ef47afe3183e9004f2643cf6098b0b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses one joint's physical mass properties from JSON.  <br /></td></tr>
+<tr class="separator:a7ef47afe3183e9004f2643cf6098b0b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -139,7 +148,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c6663ea744fa78d5b13e43f1978a7a4d.html">common</a></li><li class="navelem"><a class="el" href="json__utils_8h.html">json_utils.h</a></li>
-    <li class="footer">Generated on Fri May 29 2026 00:16:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 29 2026 02:49:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -12,12 +12,13 @@ var searchData=
   ['jointerrorfunctiont_3c_20t_2c_20positiondatat_3c_20t_20_3e_20_3e_9',['JointErrorFunctionT&lt; T, PositionDataT&lt; T &gt; &gt;',['../classmomentum_1_1JointErrorFunctionT.html',1,'momentum']]],
   ['jointparameterst_10',['JointParametersT',['../structmomentum_1_1JointParametersT.html',1,'momentum']]],
   ['jointparameterst_3c_20float_20_3e_11',['JointParametersT&lt; float &gt;',['../structmomentum_1_1JointParametersT.html',1,'momentum']]],
-  ['jointstatet_12',['JointStateT',['../structmomentum_1_1JointStateT.html',1,'momentum']]],
-  ['jointt_13',['JointT',['../structmomentum_1_1JointT.html',1,'momentum']]],
-  ['jointtojointdistanceconstraintt_14',['JointToJointDistanceConstraintT',['../structmomentum_1_1JointToJointDistanceConstraintT.html',1,'momentum']]],
-  ['jointtojointdistanceerrorfunctiont_15',['JointToJointDistanceErrorFunctionT',['../classmomentum_1_1JointToJointDistanceErrorFunctionT.html',1,'momentum']]],
-  ['jointtojointorientationdatat_16',['JointToJointOrientationDataT',['../structmomentum_1_1JointToJointOrientationDataT.html',1,'momentum']]],
-  ['jointtojointorientationerrorfunctiont_17',['JointToJointOrientationErrorFunctionT',['../classmomentum_1_1JointToJointOrientationErrorFunctionT.html',1,'momentum']]],
-  ['jointtojointpositiondatat_18',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
-  ['jointtojointpositionerrorfunctiont_19',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
+  ['jointphysicalproperties_12',['JointPhysicalProperties',['../structmomentum_1_1JointPhysicalProperties.html',1,'momentum']]],
+  ['jointstatet_13',['JointStateT',['../structmomentum_1_1JointStateT.html',1,'momentum']]],
+  ['jointt_14',['JointT',['../structmomentum_1_1JointT.html',1,'momentum']]],
+  ['jointtojointdistanceconstraintt_15',['JointToJointDistanceConstraintT',['../structmomentum_1_1JointToJointDistanceConstraintT.html',1,'momentum']]],
+  ['jointtojointdistanceerrorfunctiont_16',['JointToJointDistanceErrorFunctionT',['../classmomentum_1_1JointToJointDistanceErrorFunctionT.html',1,'momentum']]],
+  ['jointtojointorientationdatat_17',['JointToJointOrientationDataT',['../structmomentum_1_1JointToJointOrientationDataT.html',1,'momentum']]],
+  ['jointtojointorientationerrorfunctiont_18',['JointToJointOrientationErrorFunctionT',['../classmomentum_1_1JointToJointOrientationErrorFunctionT.html',1,'momentum']]],
+  ['jointtojointpositiondatat_19',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
+  ['jointtojointpositionerrorfunctiont_20',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
 ];

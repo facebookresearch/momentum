@@ -6,5 +6,5 @@ var gltf__skeleton__io_8cpp =
     [ "createSkeletonWithOnlyRoot", "gltf__skeleton__io_8cpp.html#a5fa6d9afe8923beb9a71a87461e75a43", null ],
     [ "gatherSkeletonRoots", "gltf__skeleton__io_8cpp.html#a9c6cc2c6c3640f45a6aaf51616e2bba4", null ],
     [ "isHierarchyNode", "gltf__skeleton__io_8cpp.html#a0ae511a4861de1abaa163c4eab9ec4b5", null ],
-    [ "loadHierarchy", "gltf__skeleton__io_8cpp.html#ac11b5b6c37f5554908d07b55c2687d7d", null ]
+    [ "loadHierarchy", "gltf__skeleton__io_8cpp.html#a235cd2d51947ea5ba6c2f9a37765c32a", null ]
 ];

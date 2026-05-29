@@ -117,6 +117,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aa935f2c9485fa937878da42807b1f37a" id="r_aa935f2c9485fa937878da42807b1f37a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#aa935f2c9485fa937878da42807b1f37a">masses</a></td></tr>
 <tr class="memdesc:aa935f2c9485fa937878da42807b1f37a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mass values for each joint (must match jointIndices size)  <br /></td></tr>
 <tr class="separator:aa935f2c9485fa937878da42807b1f37a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b903e8b4524e862816aa460706adaf8" id="r_a7b903e8b4524e862816aa460706adaf8"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a7b903e8b4524e862816aa460706adaf8">offsets</a></td></tr>
+<tr class="memdesc:a7b903e8b4524e862816aa460706adaf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional local center-of-mass offsets for each joint.  <br /></td></tr>
+<tr class="separator:a7b903e8b4524e862816aa460706adaf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45070ab5c4a18955af88aea6dc8c1f42" id="r_a45070ab5c4a18955af88aea6dc8c1f42"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a45070ab5c4a18955af88aea6dc8c1f42">target</a> = Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;::Zero()</td></tr>
 <tr class="memdesc:a45070ab5c4a18955af88aea6dc8c1f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target position for the center of mass.  <br /></td></tr>
 <tr class="separator:a45070ab5c4a18955af88aea6dc8c1f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,11 +139,16 @@ Example</h1>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">CenterOfMassConstraintT&lt;float&gt;</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>;</div>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.jointIndices = {0, 1, 2, 3};  <span class="comment">// Spine joints</span></div>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.masses = {1.0f, 2.0f, 1.5f, 1.0f};</div>
+<div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.offsets = {</div>
+<div class="line">    Eigen::Vector3f::Zero(),</div>
+<div class="line">    Eigen::Vector3f(0.0f, 2.0f, 0.0f),</div>
+<div class="line">    Eigen::Vector3f(0.0f, 1.5f, 0.0f),</div>
+<div class="line">    Eigen::Vector3f::Zero()};</div>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.target = Eigen::Vector3f(0, 1.0f, 0);  <span class="comment">// Target CoM position</span></div>
 <div class="line"><a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">constraint</a>.weight = 1.0f;</div>
 <div class="ttc" id="anamespacemomentum_html_a1f12cb470d2d0a22b8eb57b097739e06"><div class="ttname"><a href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::Vector3</a></div><div class="ttdeci">Vector&lt; T, 3 &gt; Vector3</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00235">types.h:235</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00036">36</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00041">41</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a150193a75837129f3b944a5d6d6c4de7" name="a150193a75837129f3b944a5d6d6c4de7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a150193a75837129f3b944a5d6d6c4de7">&#9670;&#160;</a></span>totalMass()</h2>
@@ -161,7 +169,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the total mass (sum of all masses) </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00021">21</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00037">37</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -182,7 +190,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Indices of joints contributing to this CoM constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00038">38</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00043">43</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -202,7 +210,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Mass values for each joint (must match jointIndices size) </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00041">41</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00046">46</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -222,7 +230,28 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Optional name for debugging. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00050">50</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00062">62</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+
+</div>
+</div>
+<a id="a7b903e8b4524e862816aa460706adaf8" name="a7b903e8b4524e862816aa460706adaf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b903e8b4524e862816aa460706adaf8">&#9670;&#160;</a></span>offsets</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt; &gt; <a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">momentum::CenterOfMassConstraintT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::offsets</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Optional local center-of-mass offsets for each joint. </p>
+<p>If empty, all masses are treated as located at their joint origins. If present, this must match jointIndices size and each joint-local offset is transformed by the corresponding joint state before computing the weighted center of mass. </p>
+
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00053">53</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -242,7 +271,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Target position for the center of mass. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00044">44</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00056">56</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -262,7 +291,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Weight of this constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00047">47</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00059">59</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -276,7 +305,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">CenterOfMassConstraintT</a></li>
-    <li class="footer">Generated on Fri May 29 2026 00:16:55 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 29 2026 02:49:24 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

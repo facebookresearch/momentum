@@ -88,6 +88,7 @@ var annotated_dup =
       [ "JerkSequenceErrorFunctionT", "classmomentum_1_1JerkSequenceErrorFunctionT.html", "classmomentum_1_1JerkSequenceErrorFunctionT" ],
       [ "JointErrorFunctionT", "classmomentum_1_1JointErrorFunctionT.html", "classmomentum_1_1JointErrorFunctionT" ],
       [ "JointParametersT", "structmomentum_1_1JointParametersT.html", "structmomentum_1_1JointParametersT" ],
+      [ "JointPhysicalProperties", "structmomentum_1_1JointPhysicalProperties.html", "structmomentum_1_1JointPhysicalProperties" ],
       [ "JointStateT", "structmomentum_1_1JointStateT.html", "structmomentum_1_1JointStateT" ],
       [ "JointT", "structmomentum_1_1JointT.html", "structmomentum_1_1JointT" ],
       [ "JointToJointDistanceConstraintT", "structmomentum_1_1JointToJointDistanceConstraintT.html", "structmomentum_1_1JointToJointDistanceConstraintT" ],

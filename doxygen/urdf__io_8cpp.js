@@ -14,6 +14,7 @@ var urdf__io_8cpp =
     [ "multiplier", "urdf__io_8cpp.html#ad8ced9750fbc50c34e6cea95537794c7", null ],
     [ "offset", "urdf__io_8cpp.html#a3e60b3c561be982d7c8e23f14c01fd5b", null ],
     [ "parameterTransform", "urdf__io_8cpp.html#aacee21189c36568c46df3e96ebea9c3f", null ],
+    [ "physicalProperties", "urdf__io_8cpp.html#a7c77a35b106e97626e47dbdfc723d113", null ],
     [ "sign", "urdf__io_8cpp.html#ad125c86b5c90028862a7d54b27883718", null ],
     [ "skeleton", "urdf__io_8cpp.html#a203af5339c4908869cbd5b26b1201ce4", null ],
     [ "totalDoFs", "urdf__io_8cpp.html#ad34a727e4c877a400756378aff424070", null ],

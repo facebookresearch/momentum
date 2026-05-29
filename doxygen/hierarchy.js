@@ -92,6 +92,7 @@ var hierarchy =
       [ "momentum::ispanstream", "structmomentum_1_1ispanstream.html", null ]
     ] ],
     [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", null ],
+    [ "momentum::JointPhysicalProperties", "structmomentum_1_1JointPhysicalProperties.html", null ],
     [ "momentum::JointStateT< T >", "structmomentum_1_1JointStateT.html", null ],
     [ "momentum::JointT< T >", "structmomentum_1_1JointT.html", null ],
     [ "momentum::JointToJointDistanceConstraintT< T >", "structmomentum_1_1JointToJointDistanceConstraintT.html", null ],

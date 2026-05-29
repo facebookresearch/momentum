@@ -18,7 +18,7 @@ var searchData=
   ['endframe_15',['endFrame',['../marker__gap__fill_8cpp.html#a34900c0108fc7a00e73f92bc4524455a',1,'marker_gap_fill.cpp']]],
   ['enforcefloorinfirstframe_16',['enforceFloorInFirstFrame',['../structmomentum_1_1CalibrationConfig.html#a11e7eb7cbb3939b836025488fa891d22',1,'momentum::CalibrationConfig']]],
   ['eps_17',['Eps',['../namespacemomentum.html#a0a3afe859147839030e5b1ebf4bb021e',1,'momentum']]],
-  ['error_18',['error',['../namespacemomentum.html#a0da6407898e254fc522385ff8028bf1ba902b0d55fddef6f8d651fe1035b7d4bd',1,'momentum::Error'],['../sequence__cholesky__solver_8cpp.html#a1ec236df65b93a338aecdf3fa64790f9',1,'error:&#160;sequence_cholesky_solver.cpp']]],
+  ['error_18',['error',['../sequence__cholesky__solver_8cpp.html#a1ec236df65b93a338aecdf3fa64790f9',1,'error:&#160;sequence_cholesky_solver.cpp'],['../namespacemomentum.html#a0da6407898e254fc522385ff8028bf1ba902b0d55fddef6f8d651fe1035b7d4bd',1,'momentum::Error']]],
   ['error_5f_19',['error_',['../classmomentum_1_1SolverT.html#ab397937a801ffe831f859e46bccf3d96',1,'momentum::SolverT']]],
   ['error_5ffunction_5ftypes_2ecpp_20',['error_function_types.cpp',['../error__function__types_8cpp.html',1,'']]],
   ['error_5ffunction_5ftypes_2eh_21',['error_function_types.h',['../error__function__types_8h.html',1,'']]],

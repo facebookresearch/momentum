@@ -2,7 +2,7 @@ var structmomentum_1_1Character =
 [
     [ "Character", "structmomentum_1_1Character.html#a0782be847daa9fcd2864305d356a11eb", null ],
     [ "~Character", "structmomentum_1_1Character.html#a87a640040c227b2b8d7702a7ad1290f2", null ],
-    [ "Character", "structmomentum_1_1Character.html#ac986428102a06fb9c0a20fbd9bea6a04", null ],
+    [ "Character", "structmomentum_1_1Character.html#a292c074128666b8f72c4baeef2813c18", null ],
     [ "Character", "structmomentum_1_1Character.html#ac8b13cbdadb16036e17410751bede4ac", null ],
     [ "Character", "structmomentum_1_1Character.html#a88f25061182241178affaa8e12c0b3d5", null ],
     [ "activeJointsToParameters", "structmomentum_1_1Character.html#ac6515275f870213c9431651a99fb76ae", null ],
@@ -38,6 +38,7 @@ var structmomentum_1_1Character =
     [ "name", "structmomentum_1_1Character.html#a82b6ecfcbf3356281100ef277f25cc84", null ],
     [ "parameterLimits", "structmomentum_1_1Character.html#a62ec0b3f3236cf6016ec8dc48779b972", null ],
     [ "parameterTransform", "structmomentum_1_1Character.html#ac5db551bb53f073c17318a12d8f612e4", null ],
+    [ "physicalProperties", "structmomentum_1_1Character.html#a564983fe8436c77b84b8c298065ac5df", null ],
     [ "poseShapes", "structmomentum_1_1Character.html#a682ad0019bc57757e39aa21e7da3bf51", null ],
     [ "skeleton", "structmomentum_1_1Character.html#a69a49cbec2972605ba7185b60fe3c9ca", null ],
     [ "skinnedLocators", "structmomentum_1_1Character.html#aaa81375004ef6e25c21f2c6133ce357f", null ],
