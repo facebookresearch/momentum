@@ -359,12 +359,11 @@ loadHierarchy(const fx::gltf::Document& model) {
   MT_THROW_IF(model.nodes.empty(), "No valid node found in the gltf file.");
   std::string name = model.nodes.at(0).name;
 
-  std::sort(
-      collision->begin(), collision->end(), [](const TaperedCapsule& c1, const TaperedCapsule& c2) {
-        int c1Parent = c1.parent == kInvalidIndex ? -1 : static_cast<int>(c1.parent);
-        int c2Parent = c2.parent == kInvalidIndex ? -1 : static_cast<int>(c2.parent);
-        return c1Parent < c2Parent;
-      });
+  std::sort(collision->begin(), collision->end(), [](const auto& c1, const auto& c2) {
+    int c1Parent = c1.parent == kInvalidIndex ? -1 : static_cast<int>(c1.parent);
+    int c2Parent = c2.parent == kInvalidIndex ? -1 : static_cast<int>(c2.parent);
+    return c1Parent < c2Parent;
+  });
   std::sort(locators.begin(), locators.end(), [](const Locator& l1, const Locator& l2) {
     int l1Parent = l1.parent == kInvalidIndex ? -1 : static_cast<int>(l1.parent);
     int l2Parent = l2.parent == kInvalidIndex ? -1 : static_cast<int>(l2.parent);

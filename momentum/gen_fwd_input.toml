@@ -31,7 +31,9 @@ structs = [
 ]
 template_structs = [
     "CharacterState",
+    "CollisionPrimitive",
     "CollisionGeometryState",
+    "CollisionEllipsoid",
     "Joint",
     "JointState",
     "ParameterTransform",
