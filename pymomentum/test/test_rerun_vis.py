@@ -7,6 +7,7 @@
 
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -15,6 +16,7 @@ import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_ut
 from pymomentum.rerun_vis import (
     log_animation,
     log_character,
+    log_collision_geometry,
     log_joints,
     log_locators,
     log_mesh,
@@ -76,6 +78,27 @@ if _HAS_RERUN:
             joint_params = np.zeros(character.skeleton.size * 7, dtype=np.float32)
             return character.pose_mesh(joint_params)
 
+        def _with_mixed_collision_geometry(
+            self, character: geo.Character
+        ) -> geo.Character:
+            return character.with_collision_geometry(
+                [
+                    geo.TaperedCapsule(
+                        parent=0,
+                        radius=np.array([0.1, 0.2], dtype=np.float32),
+                        length=1.0,
+                    ),
+                    geo.Ellipsoid(
+                        parent=1,
+                        radii=np.array([0.3, 0.2, 0.1], dtype=np.float32),
+                    ),
+                ]
+            )
+
+        def _component_batch_array(self, component_batch: Any) -> np.ndarray:
+            self.assertIsNotNone(component_batch)
+            return np.asarray(component_batch.as_arrow_array().to_pylist())
+
         def test_log_joints_uses_skeleton_state(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
             # Smoke check: the call should consume the full skel_state and not
@@ -115,6 +138,50 @@ if _HAS_RERUN:
             path, archetype = mock_rec.log.call_args.args
             self.assertEqual(path, "locs")
             self.assertIsInstance(archetype, rr.Points3D)
+
+        def test_log_collision_geometry(self) -> None:
+            character, skel_state = self._make_character_and_skel_state()
+            character = self._with_mixed_collision_geometry(character)
+
+            mock_rec = MagicMock()
+            log_collision_geometry(mock_rec, "collision", character, skel_state)
+            logged = {c.args[0]: c.args[1] for c in mock_rec.log.call_args_list}
+            capsules = logged["collision/capsules"]
+            ellipsoids = logged["collision/ellipsoids"]
+            self.assertIsInstance(capsules, rr.Capsules3D)
+            self.assertIsInstance(ellipsoids, rr.Ellipsoids3D)
+
+            capsule_parent_scale = skel_state[0, 7]
+            capsule_translations = self._component_batch_array(capsules.translations)
+            self.assertEqual(capsule_translations.shape, (1, 3))
+            np.testing.assert_allclose(capsule_translations[0], skel_state[0, :3])
+            np.testing.assert_allclose(
+                self._component_batch_array(capsules.lengths),
+                np.array([1.0 * capsule_parent_scale], dtype=np.float32),
+            )
+            np.testing.assert_allclose(
+                self._component_batch_array(capsules.radii),
+                np.array([0.2 * capsule_parent_scale], dtype=np.float32),
+            )
+
+            ellipsoid_parent_scale = skel_state[1, 7]
+            ellipsoid_centers = self._component_batch_array(ellipsoids.centers)
+            self.assertEqual(ellipsoid_centers.shape, (1, 3))
+            np.testing.assert_allclose(ellipsoid_centers[0], skel_state[1, :3])
+            np.testing.assert_allclose(
+                self._component_batch_array(ellipsoids.half_sizes),
+                np.array([[0.3, 0.2, 0.1]], dtype=np.float32) * ellipsoid_parent_scale,
+            )
+
+        def test_log_character_includes_collision_geometry(self) -> None:
+            character, skel_state = self._make_character_and_skel_state()
+            character = self._with_mixed_collision_geometry(character)
+
+            mock_rec = MagicMock()
+            log_character(mock_rec, "ch_collision", character, skel_state)
+            paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertIn("ch_collision/collision_geometry/capsules", paths)
+            self.assertIn("ch_collision/collision_geometry/ellipsoids", paths)
 
         def test_log_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
@@ -156,6 +223,7 @@ if _HAS_RERUN:
 
         def test_log_animation_sends_columns(self) -> None:
             character, _, skel_states, posed_meshes = self._make_animation_inputs(5)
+            character = self._with_mixed_collision_geometry(character)
 
             mock_rec = MagicMock()
             log_animation(
@@ -183,6 +251,8 @@ if _HAS_RERUN:
             self.assertEqual(len(joint_subpaths), character.skeleton.size)
             if character.locators:
                 self.assertIn("test/anim/locators", send_paths)
+            self.assertIn("test/anim/collision_geometry/capsules", send_paths)
+            self.assertIn("test/anim/collision_geometry/ellipsoids", send_paths)
 
         def test_log_animation_without_mesh(self) -> None:
             character, _, skel_states, _ = self._make_animation_inputs(3)
