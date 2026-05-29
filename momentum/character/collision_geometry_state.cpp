@@ -21,18 +21,35 @@ void CollisionGeometryStateT<T>::update(
   direction.resize(numElements);
   radius.resize(numElements);
   delta.resize(numElements);
+  type.resize(numElements);
+  orientation.resize(numElements);
+  ellipsoidRadii.resize(numElements);
 
-  // TODO: This per-capsule loop is independent across iterations and could be parallelized.
+  // TODO: This per-primitive loop is independent across iterations and could be parallelized.
   for (size_t i = 0; i < numElements; ++i) {
-    const auto& tc = collisionGeometry[i];
-    const TransformT<T> parentTransform = (tc.parent == kInvalidIndex)
+    const auto& primitive = collisionGeometry[i];
+    const TransformT<T> parentTransform = (primitive.parent == kInvalidIndex)
         ? TransformT<T>()
-        : skeletonState.jointState[tc.parent].transform;
-    const TransformT<T> transform = parentTransform * tc.transformation.cast<T>();
+        : skeletonState.jointState[primitive.parent].transform;
+    const TransformT<T> transform = parentTransform * primitive.transformation.cast<T>();
+    type[i] = primitive.type;
     origin[i] = transform.translation;
-    direction[i].noalias() = transform.getAxisX() * transform.scale * tc.length;
-    radius[i].noalias() = tc.radius.cast<T>() * parentTransform.scale;
-    delta[i] = radius[i][1] - radius[i][0];
+    orientation[i] = transform.rotation;
+
+    if (primitive.type == CollisionPrimitiveType::TaperedCapsule) {
+      direction[i].noalias() = transform.getAxisX() * transform.scale * primitive.length;
+      radius[i].noalias() = primitive.radius.cast<T>() * parentTransform.scale;
+      delta[i] = radius[i][1] - radius[i][0];
+      ellipsoidRadii[i].setZero();
+      continue;
+    }
+
+    if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
+      direction[i].setZero();
+      radius[i].setZero();
+      delta[i] = T(0);
+      ellipsoidRadii[i].noalias() = primitive.ellipsoidRadii.cast<T>() * parentTransform.scale;
+    }
   }
 }
 

@@ -33,6 +33,7 @@ template_structs = [
     "CharacterState",
     "CollisionPrimitive",
     "CollisionGeometryState",
+    "CollisionOverlapResult",
     "CollisionEllipsoid",
     "Joint",
     "JointState",

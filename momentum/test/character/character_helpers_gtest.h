@@ -14,6 +14,9 @@ namespace momentum {
 
 // Matching methods
 void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh);
+void compareCollisionGeometry(
+    const CollisionGeometry_u& refCollision,
+    const CollisionGeometry_u& collision);
 void compareChars(
     const Character& refChar,
     const Character& character,
