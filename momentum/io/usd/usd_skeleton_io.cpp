@@ -35,13 +35,14 @@ TF_DEFINE_PRIVATE_TOKENS(
     _tokens,
     (Collision)(Locators)((momentumType, "momentum:type"))((momentumParent, "momentum:parent"))(
         (momentumLength, "momentum:length"))((momentumRadius, "momentum:radius"))(
-        (momentumRadii, "momentum:radii"))((momentumTranslation, "momentum:translation"))(
-        (momentumRotation, "momentum:rotation"))((momentumName, "momentum:name"))(
-        (momentumOffset, "momentum:offset"))((momentumWeight, "momentum:weight"))(
-        (momentumLocked, "momentum:locked"))((momentumLimitOrigin, "momentum:limitOrigin"))(
-        (momentumLimitWeight,
-         "momentum:limitWeight"))((momentumAttachedToSkin, "momentum:attachedToSkin"))(
-        (momentumSkinOffset, "momentum:skinOffset")));
+        (momentumRadii, "momentum:radii"))((momentumHalfExtents, "momentum:halfExtents"))(
+        (momentumTranslation, "momentum:translation"))((momentumRotation, "momentum:rotation"))(
+        (momentumName, "momentum:name"))((momentumOffset, "momentum:offset"))(
+        (momentumWeight, "momentum:weight"))((momentumLocked, "momentum:locked"))(
+        (momentumLimitOrigin,
+         "momentum:limitOrigin"))((momentumLimitWeight, "momentum:limitWeight"))(
+        (momentumAttachedToSkin,
+         "momentum:attachedToSkin"))((momentumSkinOffset, "momentum:skinOffset")));
 
 namespace momentum {
 
@@ -262,6 +263,9 @@ void saveCollisionGeometryToUsd(
       case CollisionPrimitiveType::Ellipsoid:
         type = "collision_ellipsoid";
         break;
+      case CollisionPrimitiveType::Box:
+        type = "collision_box";
+        break;
     }
     if (type.empty()) {
       MT_LOGW(
@@ -295,6 +299,12 @@ void saveCollisionGeometryToUsd(
               primitive.ellipsoidRadii.x(),
               primitive.ellipsoidRadii.y(),
               primitive.ellipsoidRadii.z()));
+    } else if (primitive.type == CollisionPrimitiveType::Box) {
+      prim.CreateAttribute(_tokens->momentumHalfExtents, SdfValueTypeNames->Float3)
+          .Set(GfVec3f(
+              primitive.boxHalfExtents.x(),
+              primitive.boxHalfExtents.y(),
+              primitive.boxHalfExtents.z()));
     }
 
     const auto& t = primitive.transformation.translation;
@@ -319,7 +329,8 @@ CollisionGeometry loadCollisionGeometryFromUsd(
     }
 
     std::string type;
-    if (!typeAttr.Get(&type) || (type != "collision_capsule" && type != "collision_ellipsoid")) {
+    if (!typeAttr.Get(&type) ||
+        (type != "collision_capsule" && type != "collision_ellipsoid" && type != "collision_box")) {
       continue;
     }
 
@@ -348,6 +359,13 @@ CollisionGeometry loadCollisionGeometryFromUsd(
       if (auto attr = prim.GetAttribute(_tokens->momentumRadii); attr) {
         attr.Get(&radii);
         primitive.ellipsoidRadii = Eigen::Vector3f(radii[0], radii[1], radii[2]);
+      }
+    } else if (type == "collision_box") {
+      primitive.type = CollisionPrimitiveType::Box;
+      GfVec3f halfExtents(0.0f, 0.0f, 0.0f);
+      if (auto attr = prim.GetAttribute(_tokens->momentumHalfExtents); attr) {
+        attr.Get(&halfExtents);
+        primitive.boxHalfExtents = Eigen::Vector3f(halfExtents[0], halfExtents[1], halfExtents[2]);
       }
     }
 

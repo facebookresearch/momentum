@@ -67,6 +67,8 @@ py::list collisionGeometryToPython(const mm::CollisionGeometry& collisionGeometr
       result.append(py::cast(primitive.toTaperedCapsule()));
     } else if (primitive.type == mm::CollisionPrimitiveType::Ellipsoid) {
       result.append(py::cast(primitive.toEllipsoid()));
+    } else if (primitive.type == mm::CollisionPrimitiveType::Box) {
+      result.append(py::cast(primitive.toBox()));
     } else {
       MT_THROW(
           "Unsupported collision primitive type while converting collision geometry to Python: {}",
@@ -84,9 +86,11 @@ mm::CollisionGeometry collisionGeometryFromPython(const py::sequence& collisionG
       result.push_back(item.cast<mm::TaperedCapsule>());
     } else if (py::isinstance<mm::CollisionEllipsoid>(item)) {
       result.push_back(item.cast<mm::CollisionEllipsoid>());
+    } else if (py::isinstance<mm::CollisionBox>(item)) {
+      result.push_back(item.cast<mm::CollisionBox>());
     } else {
       MT_THROW(
-          "Collision geometry entries must be TaperedCapsule or Ellipsoid; got {}",
+          "Collision geometry entries must be TaperedCapsule, Ellipsoid, or Box; got {}",
           py::str(py::type::handle_of(item)).cast<std::string>());
     }
   }
@@ -411,7 +415,7 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
               return py::list();
             }
           },
-          ":return: A list of :class:`TaperedCapsule` and :class:`Ellipsoid` objects representing the character's collision geometry.")
+          ":return: A list of collision geometry primitives (:class:`TaperedCapsule`, :class:`Ellipsoid`, and :class:`Box` objects) representing the character's collision geometry.")
       .def(
           "with_blend_shape",
           &withBlendShapeImpl,
