@@ -81,4 +81,36 @@ using JointListT = std::vector<JointT<T>>;
 using JointList = JointListT<float>;
 using JointListd = JointListT<double>;
 
+/// Physical mass properties attached to one skeleton joint.
+///
+/// Length-valued fields use Momentum units after import: centimeters for
+/// offsets and kilogram-centimeters squared for inertia.
+struct JointPhysicalProperties {
+  /// Skeleton joint that owns this physical body.
+  ///
+  /// When both `jointName` and `jointIndex` are set, `jointName` is the source of truth and
+  /// `jointIndex` is a cache.
+  std::string jointName;
+
+  /// Cached joint index. Loaders also preserve the name so copied/remapped
+  /// characters can resolve the body robustly.
+  size_t jointIndex = kInvalidIndex;
+
+  /// Body mass in kilograms.
+  float mass = 0.0f;
+
+  /// Local center-of-mass offset from the joint frame, in centimeters.
+  Vector3f centerOfMassOffset = Vector3f::Zero();
+
+  /// Inertia tensor about the body's center of mass, expressed in the local inertia frame, in
+  /// kilogram-centimeters squared.
+  Matrix3f inertia = Matrix3f::Zero();
+
+  /// Rotation from the inertia frame to the joint frame.
+  Quaternionf inertiaRotation = Quaternionf::Identity();
+};
+
+/// Optional physical mass properties for a character.
+using PhysicalProperties = std::vector<JointPhysicalProperties>;
+
 } // namespace momentum

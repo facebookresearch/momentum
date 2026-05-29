@@ -181,7 +181,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.name,
                 character.inverseBindPose,
                 character.skinnedLocators,
-                character.metadata);
+                character.metadata,
+                character.physicalProperties);
           },
           "Adds mesh and skin weight to the character and return a new character instance",
           py::arg("mesh"),
@@ -204,7 +205,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.name,
                 character.inverseBindPose,
                 character.skinnedLocators,
-                character.metadata);
+                character.metadata,
+                character.physicalProperties);
           },
           "Returns a new character with the parameter limits set to the passed-in limits.",
           py::arg("parameter_limits"))
@@ -239,7 +241,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.name,
                 character.inverseBindPose,
                 character.skinnedLocators,
-                character.metadata);
+                character.metadata,
+                character.physicalProperties);
           },
           R"(Returns a new character with the passed-in locators.  If 'replace' is true, the existing locators are replaced, otherwise (the default) the new locators are appended to the existing ones.
 
@@ -291,7 +294,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
                 character.name,
                 character.inverseBindPose,
                 combinedSkinnedLocators,
-                character.metadata);
+                character.metadata,
+                character.physicalProperties);
           },
           R"(Returns a new character with the passed-in skinned locators.  If 'replace' is true, the existing skinned locators are replaced, otherwise (the default) the new skinned locators are appended to the existing ones.
 
@@ -321,6 +325,10 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           "skinned_locators",
           &mm::Character::skinnedLocators,
           "List of skinned locators on the mesh.")
+      .def_readwrite(
+          "physical_properties",
+          &mm::Character::physicalProperties,
+          "Joint-level mass, center-of-mass, and inertia data attached to the character joints.")
       .def_property_readonly(
           "mesh",
           [](const mm::Character& c) -> std::unique_ptr<mm::Mesh> {
@@ -413,7 +421,8 @@ It can be used to solve for facial expressions.
                 c.name,
                 c.inverseBindPose,
                 c.skinnedLocators,
-                c.metadata);
+                c.metadata,
+                c.physicalProperties);
           },
           "Returns a new :class:`Character` with the collision geometry replaced.")
       .def(
@@ -479,7 +488,11 @@ to compute their world-space positions given a skeleton state.
           py::arg("rest_positions") = std::optional<py::buffer>())
       .def(
           "scaled",
-          &momentum::scaleCharacter,
+          [](const momentum::Character& character,
+             float scale,
+             momentum::CharacterMassScale massScale) {
+            return momentum::scaleCharacter(character, scale, massScale);
+          },
           R"(Scale the character (mesh and skeleton) by the desired amount.
 
 Note that this primarily be used when transforming the character into different units; if you
@@ -488,8 +501,10 @@ simply want to apply an identity-specific scale to the character, you should use
 
 :return: a new :class:`Character` that has been scaled.
 :param character: The character to be scaled.
-:param scale: The scale to apply.)",
-          py::arg("scale"))
+:param scale: The length scale to apply.
+:param mass_scale: The physical mass scaling policy to apply.)",
+          py::arg("scale"),
+          py::arg("mass_scale") = momentum::CharacterMassScale::PreserveMass)
       .def(
           "transformed",
           [](const momentum::Character& character, const Eigen::Matrix4f& xform) {
