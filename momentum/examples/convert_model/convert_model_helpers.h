@@ -24,6 +24,7 @@ struct Options {
   std::string output_model_file;
   std::string output_locator_local;
   std::string output_locator_global;
+  std::string output_params_file;
   std::string fbx_namespace;
   bool save_markers = false;
   bool character_mesh_save = false;
@@ -55,6 +56,9 @@ MotionData loadFbxMotion(
     Character& character,
     bool hasModel,
     const Options& options);
+
+/// Loads the input model character, applying optional parameter and locator files.
+Character loadModelCharacter(const Options& options);
 
 /// Initializes the character from FBX data when no separate model was provided.
 /// Applies parameter transform and locators if specified in the options.

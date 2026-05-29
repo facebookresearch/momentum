@@ -10,14 +10,18 @@
 #include "convert_model_helpers.h"
 
 #include <momentum/character/character.h>
+#include <momentum/common/exception.h>
 #include <momentum/common/log.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/locator_io.h>
+#include <momentum/io/skeleton/parameter_transform_io.h>
 
 #include <CLI/CLI.hpp>
+
+#include <fstream>
 
 using namespace momentum;
 
@@ -30,7 +34,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
          "-m,--model",
          opt->input_model_file,
-         "Input model (.fbx/.glb); not required if reading animation from glb or fbx")
+         "Input model (.fbx/.glb/.gltf/.urdf); not required if reading animation from glb or fbx")
       ->check(CLI::ExistingFile);
   app.add_option("-p,--parameters", opt->input_params_file, "Input model parameter file (.model)")
       ->check(CLI::ExistingFile);
@@ -40,16 +44,20 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option("-d,--motion", opt->input_motion_file, "Input motion data file (.glb/.fbx)")
       ->check(CLI::ExistingFile);
 
-  app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb)")->required();
+  app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb/.gltf)")->required();
 
   app.add_option(
-      "--out-locator-local",
+      "--out-locators-local",
       opt->output_locator_local,
       "Output a locator file (.locators) in local space for transferring between identities");
   app.add_option(
-      "--out-locator-global",
+      "--out-locators-global",
       opt->output_locator_global,
       "Output a locator file (.locators) in global space for authoring a template");
+  app.add_option(
+      "--out-parameters",
+      opt->output_params_file,
+      "Output a model parameter file (.model) containing the parameter transform and limits");
   app.add_option("--fbx-namespace", opt->fbx_namespace, "Namespace in output fbx file");
 
   app.add_flag(
@@ -156,6 +164,23 @@ void saveLocatorFiles(const Options& options, const Character& character) {
   }
 }
 
+// Saves the character's parameter transform and limits to a .model file if an
+// output path is specified.
+void saveParameterFile(const Options& options, const Character& character) {
+  if (options.output_params_file.empty()) {
+    return;
+  }
+
+  MT_LOGI("Saving model parameter file...");
+  std::ofstream ofs(options.output_params_file);
+  MT_THROW_IF(
+      !ofs.is_open(),
+      "Cannot open output parameter file for writing: {}",
+      options.output_params_file);
+  ofs << writeModelDefinition(
+      character.skeleton, character.parameterTransform, character.parameterLimits);
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -177,8 +202,7 @@ int main(int argc, char** argv) {
     const bool hasModel = !options->input_model_file.empty();
     Character character;
     if (hasModel) {
-      character = loadFullCharacter(
-          options->input_model_file, options->input_params_file, options->input_locator_file);
+      character = loadModelCharacter(*options);
     }
 
     // Load motion data
@@ -200,6 +224,9 @@ int main(int argc, char** argv) {
 
     // Save locator files
     saveLocatorFiles(*options, character);
+
+    // Save model parameter file
+    saveParameterFile(*options, character);
   } catch (std::exception& e) {
     MT_LOGE("Failed to convert model. Error: {}", e.what());
     return EXIT_FAILURE;

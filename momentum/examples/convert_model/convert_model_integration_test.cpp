@@ -10,6 +10,8 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -120,9 +122,9 @@ TEST_F(ConvertModelIntegrationTest, Pairwise01_Glb_Glb_Fbx_Full) {
        testFile("character.locators"),
        "--out",
        out,
-       "--out-locator-local",
+       "--out-locators-local",
        outLocLocal,
-       "--out-locator-global",
+       "--out-locators-global",
        outLocGlobal,
        "--save-markers",
        "--character-mesh",
@@ -199,9 +201,9 @@ TEST_F(ConvertModelIntegrationTest, Pairwise06_NoModel_GlbMotion_Gltf) {
        testFile("character_with_motion.glb"),
        "--out",
        out,
-       "--out-locator-local",
+       "--out-locators-local",
        outLocLocal,
-       "--out-locator-global",
+       "--out-locators-global",
        outLocGlobal});
 
   EXPECT_EQ(rc, 0) << "convert_model should succeed";
@@ -274,9 +276,9 @@ TEST_F(ConvertModelIntegrationTest, Pairwise10_Glb_Glb_Glb_Locators) {
        testFile("character.locators"),
        "--out",
        out,
-       "--out-locator-local",
+       "--out-locators-local",
        outLocLocal,
-       "--out-locator-global",
+       "--out-locators-global",
        outLocGlobal});
 
   EXPECT_EQ(rc, 0) << "convert_model should succeed";
@@ -422,6 +424,34 @@ TEST_F(ConvertModelIntegrationTest, Error_UnknownMotionFormat) {
   EXPECT_EQ(rc, 0);
 }
 
+// Test: Parameter output writes a valid .model file
+TEST_F(ConvertModelIntegrationTest, ParameterOutput_WritesModelFile) {
+  const auto out = outputFile("params_test.glb");
+  const auto outParams = outputFile("exported.model");
+
+  int rc = runConvertModel(
+      {"--model",
+       testFile("character_with_motion.glb"),
+       "--parameters",
+       testFile("character.model"),
+       "--out",
+       out,
+       "--out-parameters",
+       outParams});
+
+  ASSERT_EQ(rc, 0);
+  ASSERT_TRUE(std::filesystem::exists(outParams));
+  EXPECT_GT(std::filesystem::file_size(outParams), 0u);
+
+  std::ifstream paramsFile(outParams);
+  ASSERT_TRUE(paramsFile.is_open());
+  const std::string paramsData{
+      std::istreambuf_iterator<char>{paramsFile}, std::istreambuf_iterator<char>{}};
+  EXPECT_NE(paramsData.find("[ParameterTransform]"), std::string::npos);
+  EXPECT_NE(paramsData.find("root.tx = 1*root_tx"), std::string::npos);
+  EXPECT_NE(paramsData.find("joint2.rz = 0.5*shared_rz"), std::string::npos);
+}
+
 // Test: Locator output (local and global)
 TEST_F(ConvertModelIntegrationTest, LocatorOutput_LocalAndGlobal) {
   const auto out = outputFile("locator_test.fbx");
@@ -435,9 +465,9 @@ TEST_F(ConvertModelIntegrationTest, LocatorOutput_LocalAndGlobal) {
        testFile("character.locators"),
        "--out",
        out,
-       "--out-locator-local",
+       "--out-locators-local",
        outLocLocal,
-       "--out-locator-global",
+       "--out-locators-global",
        outLocGlobal});
 
   EXPECT_EQ(rc, 0);

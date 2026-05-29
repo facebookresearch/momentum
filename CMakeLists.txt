@@ -1044,6 +1044,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
     LINK_LIBRARIES
       io_character
       io_marker
+      io_urdf
       CLI11::CLI11
   )
 
