@@ -88,6 +88,12 @@ MatrixXf mapMotionToCharacter(
 /// Maps the input JointParameter vector to a target character by matching joint names. Mismatched
 /// names will be discarded (source) or set to zero (target). For every matched joint, all 7
 /// parameters will be copied over.
+///
+/// @pre `std::get<0>(inputIdentity).size() * kParametersPerJoint ==
+/// std::get<1>(inputIdentity).size()`. Callers that may not have identity data (e.g. glTF motion
+/// files saved without identity offsets) must check this before assembling the tuple — passing
+/// joint names paired with an empty identity vector violates the precondition. Either skip the call
+/// entirely or pass a fully empty `IdentityParameters{}`, which yields a zero-padded result.
 JointParameters mapIdentityToCharacter(
     const IdentityParameters& inputIdentity,
     const Character& targetCharacter);

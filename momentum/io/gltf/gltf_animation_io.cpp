@@ -222,9 +222,15 @@ std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacterCommon(
     const std::variant<filesystem::path, std::span<const std::byte>>& input,
     const Character& character) {
   const auto [loadedChar, motion, identity, fps] = loadCharacterWithMotionCommon(input);
+  // glTF files that store motion without per-joint identity offsets surface as an empty `identity`
+  // vector. Skip mapIdentityToCharacter in that case to preserve the "no identity present" signal
+  // and to avoid violating its size precondition (joint names paired with an empty values vector).
+  const JointParameters mappedIdentity = identity.size() != 0
+      ? mapIdentityToCharacter({loadedChar.skeleton.getJointNames(), identity}, character)
+      : identity;
   return {
       mapMotionToCharacter({loadedChar.parameterTransform.name, motion}, character),
-      mapIdentityToCharacter({loadedChar.skeleton.getJointNames(), identity}, character),
+      mappedIdentity,
       fps};
 }
 
