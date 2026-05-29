@@ -15,7 +15,7 @@ the C++ ``momentum::logCharacter`` family of functions in
 ``momentum/gui/rerun/logger.h``.
 
 The primary entry point is :func:`log_character`, which logs the skeleton,
-mesh, and locators of a character in a structured entity tree::
+mesh, collision geometry, and locators of a character in a structured entity tree::
 
     import rerun as rr
     import pymomentum.geometry as geo
@@ -41,15 +41,19 @@ Individual logging functions are also available for finer control:
 
 - :func:`log_mesh` — log a :class:`~pymomentum.geometry.Mesh`
 - :func:`log_joints` — log skeleton bones and per-joint transforms
+- :func:`log_collision_geometry` — log tapered capsule and ellipsoid collision primitives
 - :func:`log_locators` — log locator world-space positions
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 from pymomentum.quaternion_np import (
+    from_rotation_matrix,
+    multiply_assume_normalized,
     rotate_vector_assume_normalized,
     to_rotation_matrix_assume_normalized,
 )
@@ -59,6 +63,133 @@ if TYPE_CHECKING:
 
     import rerun as rr  # @manual=fbsource//third-party/pypi/rerun-sdk:rerun-sdk
     from pymomentum.geometry import Character, Mesh  # @manual=:geometry
+
+
+_COLLISION_COLOR: tuple[int, int, int] = (128, 64, 64)
+_Z_TO_X_QUAT_XYZW: np.ndarray = np.array(
+    [0.0, np.sqrt(0.5), 0.0, np.sqrt(0.5)], dtype=np.float64
+)
+
+
+@dataclass(frozen=True)
+class _CollisionGeometryArrays:
+    capsule_translations: np.ndarray
+    capsule_quaternions: np.ndarray
+    capsule_lengths: np.ndarray
+    capsule_radii: np.ndarray
+    ellipsoid_centers: np.ndarray
+    ellipsoid_quaternions: np.ndarray
+    ellipsoid_half_sizes: np.ndarray
+
+
+def _empty_array(shape: tuple[int, ...], dtype: Any = np.float32) -> np.ndarray:
+    return np.empty((0, *shape), dtype=dtype)
+
+
+def _is_valid_parent(parent: int, skel_state: np.ndarray) -> bool:
+    return 0 <= parent < skel_state.shape[0]
+
+
+def _uniform_scale(linear: np.ndarray) -> float:
+    scale = float(np.linalg.norm(linear[:, 0]))
+    return scale if scale > 1e-8 else 1.0
+
+
+def _collision_world_transform(
+    primitive: Any,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float, float]:
+    local = np.asarray(primitive.transformation, dtype=np.float64)
+    parent_scale = 1.0
+    parent_transform = np.eye(4, dtype=np.float64)
+    parent = int(primitive.parent)
+    if _is_valid_parent(parent, skel_state):
+        parent_scale = float(skel_state[parent, 7])
+        parent_rotation = to_rotation_matrix_assume_normalized(
+            skel_state[parent, 3:7][None, :]
+        )[0]
+        parent_transform[:3, :3] = parent_rotation * parent_scale
+        parent_transform[:3, 3] = skel_state[parent, :3]
+
+    world = parent_transform @ local
+    world_scale = _uniform_scale(world[:3, :3])
+    rotation = world[:3, :3] / world_scale
+    world_quat = from_rotation_matrix(rotation[None, :, :])[0].astype(np.float64)
+    return world[:3, 3], world_quat, parent_scale, world_scale
+
+
+def _collision_geometry_arrays(
+    character: Character,
+    skel_state: np.ndarray,
+) -> _CollisionGeometryArrays:
+    capsule_translations: list[np.ndarray] = []
+    capsule_quaternions: list[np.ndarray] = []
+    capsule_lengths: list[float] = []
+    capsule_radii: list[float] = []
+    ellipsoid_centers: list[np.ndarray] = []
+    ellipsoid_quaternions: list[np.ndarray] = []
+    ellipsoid_half_sizes: list[np.ndarray] = []
+
+    for primitive in character.collision_geometry:
+        translation, quaternion, parent_scale, world_scale = _collision_world_transform(
+            primitive, skel_state
+        )
+        if hasattr(primitive, "length"):
+            capsule_translations.append(translation)
+            capsule_quaternions.append(
+                multiply_assume_normalized(quaternion, _Z_TO_X_QUAT_XYZW)
+            )
+            # Intentional scale asymmetry, mirroring momentum's C++ collision
+            # convention (CollisionGeometryStateT::update in
+            # collision_geometry_state.cpp): the capsule length runs along the
+            # composed-transform X axis and so is scaled by the full world scale
+            # (direction = getAxisX() * transform.scale * length), while the
+            # radius is scaled by the parent joint scale only
+            # (radius = primitive.radius * parentTransform.scale). Do not collapse
+            # these to a single factor; that would diverge from the geometry the
+            # solver actually uses.
+            capsule_lengths.append(float(primitive.length) * world_scale)
+            capsule_radii.append(
+                float(np.max(np.asarray(primitive.radius))) * parent_scale
+            )
+        elif hasattr(primitive, "radii"):
+            ellipsoid_centers.append(translation)
+            ellipsoid_quaternions.append(quaternion)
+            ellipsoid_half_sizes.append(np.asarray(primitive.radii) * parent_scale)
+
+    return _CollisionGeometryArrays(
+        capsule_translations=np.asarray(capsule_translations, dtype=np.float32).reshape(
+            (-1, 3)
+        )
+        if capsule_translations
+        else _empty_array((3,)),
+        capsule_quaternions=np.asarray(capsule_quaternions, dtype=np.float32).reshape(
+            (-1, 4)
+        )
+        if capsule_quaternions
+        else _empty_array((4,)),
+        capsule_lengths=np.asarray(capsule_lengths, dtype=np.float32),
+        capsule_radii=np.asarray(capsule_radii, dtype=np.float32),
+        ellipsoid_centers=np.asarray(ellipsoid_centers, dtype=np.float32).reshape(
+            (-1, 3)
+        )
+        if ellipsoid_centers
+        else _empty_array((3,)),
+        ellipsoid_quaternions=np.asarray(
+            ellipsoid_quaternions, dtype=np.float32
+        ).reshape((-1, 4))
+        if ellipsoid_quaternions
+        else _empty_array((4,)),
+        ellipsoid_half_sizes=np.asarray(ellipsoid_half_sizes, dtype=np.float32).reshape(
+            (-1, 3)
+        )
+        if ellipsoid_half_sizes
+        else _empty_array((3,)),
+    )
+
+
+def _colors(count: int) -> np.ndarray:
+    return np.tile(np.asarray([_COLLISION_COLOR], dtype=np.uint8), (count, 1))
 
 
 def log_mesh(
@@ -212,6 +343,48 @@ def log_locators(
     )
 
 
+def log_collision_geometry(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_state: np.ndarray,
+) -> None:
+    """Log character collision geometry to Rerun.
+
+    Tapered capsules are visualized as regular capsules using their maximum endpoint
+    radius because Rerun does not currently expose tapered capsule geometry.
+
+    :param rec: The Rerun recording stream.
+    :param entity_path: Entity path for the collision-geometry root.
+    :param character: The character whose collision primitives are logged.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    """
+    import rerun as rr
+
+    arrays = _collision_geometry_arrays(character, skel_state)
+    if arrays.capsule_lengths.size > 0:
+        rec.log(
+            f"{entity_path}/capsules",
+            rr.Capsules3D(
+                lengths=arrays.capsule_lengths,
+                radii=arrays.capsule_radii,
+                translations=arrays.capsule_translations,
+                quaternions=arrays.capsule_quaternions,
+                colors=_colors(arrays.capsule_lengths.shape[0]),
+            ),
+        )
+    if arrays.ellipsoid_half_sizes.shape[0] > 0:
+        rec.log(
+            f"{entity_path}/ellipsoids",
+            rr.Ellipsoids3D(
+                half_sizes=arrays.ellipsoid_half_sizes,
+                centers=arrays.ellipsoid_centers,
+                quaternions=arrays.ellipsoid_quaternions,
+                colors=_colors(arrays.ellipsoid_half_sizes.shape[0]),
+            ),
+        )
+
+
 def log_character(
     rec: rr.RecordingStream,
     entity_path: str,
@@ -224,10 +397,11 @@ def log_character(
     """Log a complete character visualization to Rerun.
 
     This is the top-level convenience function that logs the skeleton,
-    optionally the mesh, and locators as a structured entity tree:
+    optionally the mesh, collision geometry, and locators as a structured entity tree:
 
     - ``{entity_path}/mesh`` — posed mesh (if *posed_mesh* is provided)
     - ``{entity_path}/joints`` — skeleton bones and per-joint transforms
+    - ``{entity_path}/collision_geometry`` — collision primitives (if present)
     - ``{entity_path}/locators`` — locator positions (if character has locators)
 
     This is the Python equivalent of the C++ ``momentum::logCharacter`` function.
@@ -252,6 +426,11 @@ def log_character(
 
     if character.locators:
         log_locators(rec, f"{entity_path}/locators", character, skel_state)
+
+    if character.collision_geometry:
+        log_collision_geometry(
+            rec, f"{entity_path}/collision_geometry", character, skel_state
+        )
 
 
 def _make_time_columns(
@@ -448,6 +627,67 @@ def _send_locators_columns(
     rec.send_columns(entity_path, indexes=time_cols, columns=pos_cols)
 
 
+def _send_collision_geometry_columns(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_states: np.ndarray,
+    time_cols: list,
+) -> None:
+    """Send collision geometry for multiple frames via :meth:`rec.send_columns`."""
+    import rerun as rr
+
+    if not character.collision_geometry:
+        return
+
+    n_frames = skel_states.shape[0]
+    if n_frames == 0:
+        return
+
+    arrays_by_frame = [
+        _collision_geometry_arrays(character, skel_states[i]) for i in range(n_frames)
+    ]
+
+    n_capsules = arrays_by_frame[0].capsule_lengths.shape[0]
+    if n_capsules > 0:
+        capsule_cols = rr.Capsules3D.columns(
+            lengths=np.concatenate(
+                [arrays.capsule_lengths for arrays in arrays_by_frame]
+            ),
+            radii=np.concatenate([arrays.capsule_radii for arrays in arrays_by_frame]),
+            translations=np.concatenate(
+                [arrays.capsule_translations for arrays in arrays_by_frame]
+            ),
+            quaternions=np.concatenate(
+                [arrays.capsule_quaternions for arrays in arrays_by_frame]
+            ),
+            colors=_colors(n_frames * n_capsules),
+        )
+        capsule_cols = capsule_cols.partition(np.full(n_frames, n_capsules))
+        rec.send_columns(
+            f"{entity_path}/capsules", indexes=time_cols, columns=capsule_cols
+        )
+
+    n_ellipsoids = arrays_by_frame[0].ellipsoid_half_sizes.shape[0]
+    if n_ellipsoids > 0:
+        ellipsoid_cols = rr.Ellipsoids3D.columns(
+            half_sizes=np.concatenate(
+                [arrays.ellipsoid_half_sizes for arrays in arrays_by_frame]
+            ),
+            centers=np.concatenate(
+                [arrays.ellipsoid_centers for arrays in arrays_by_frame]
+            ),
+            quaternions=np.concatenate(
+                [arrays.ellipsoid_quaternions for arrays in arrays_by_frame]
+            ),
+            colors=_colors(n_frames * n_ellipsoids),
+        )
+        ellipsoid_cols = ellipsoid_cols.partition(np.full(n_frames, n_ellipsoids))
+        rec.send_columns(
+            f"{entity_path}/ellipsoids", indexes=time_cols, columns=ellipsoid_cols
+        )
+
+
 def log_animation(
     rec: rr.RecordingStream,
     entity_path: str,
@@ -523,4 +763,13 @@ def log_animation(
             time_cols,
             fps,
             frame_offset,
+        )
+
+    if character.collision_geometry:
+        _send_collision_geometry_columns(
+            rec,
+            f"{entity_path}/collision_geometry",
+            character,
+            skel_states,
+            time_cols,
         )
