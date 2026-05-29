@@ -66,9 +66,11 @@ namespace momentum {
 
 /// Loads a character from a URDF file.
 ///
-/// Parses the skeleton (joints, hierarchy, limits), parameter transform, and visual meshes.
-/// Mesh files referenced by `<visual>` elements (STL, OBJ) are resolved relative to the
-/// URDF file's directory.
+/// Parses the skeleton (joints, hierarchy, limits), parameter transform, visual meshes, and
+/// supported collision proxies. Currently only `<cylinder>` collision geometry is imported
+/// (as Momentum tapered capsules); other shapes (`<box>`, `<sphere>`, `<mesh>`) are skipped
+/// with a warning. Mesh files referenced by `<visual>` elements (STL, OBJ) are resolved
+/// relative to the URDF file's directory.
 ///
 /// @param filepath Path to the URDF file.
 /// @return The loaded character with skeleton, parameter transform, limits, and optionally

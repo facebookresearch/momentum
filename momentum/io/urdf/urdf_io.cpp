@@ -18,7 +18,9 @@
 #include <urdf_parser/urdf_parser.h>
 
 #include <algorithm>
+#include <array>
 #include <optional>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 
@@ -49,6 +51,7 @@ struct ParsingData {
   std::vector<Eigen::Triplet<float>> triplets;
   ParameterLimits limits;
   PhysicalProperties physicalProperties;
+  CollisionGeometry collision;
   size_t totalDoFs = 0;
 
   std::vector<LinkVisualData> linkVisuals;
@@ -122,6 +125,21 @@ void addPhysicalPropertiesForUrdfLink(
     default:
       return "UNKNOWN";
   }
+}
+
+[[nodiscard]] std::string_view toString(const urdf::Geometry& geometry) {
+  switch (geometry.type) {
+    case urdf::Geometry::SPHERE:
+      return "SPHERE";
+    case urdf::Geometry::BOX:
+      return "BOX";
+    case urdf::Geometry::CYLINDER:
+      return "CYLINDER";
+    case urdf::Geometry::MESH:
+      return "MESH";
+  }
+
+  return "UNKNOWN";
 }
 
 /// Returns the principal axis index (0=X, 1=Y, 2=Z) and sign (+1/-1) for a URDF axis vector.
@@ -230,6 +248,46 @@ std::optional<Mesh> loadVisualMesh(
       MT_LOGW("Unknown URDF geometry type: {}", static_cast<int>(geometry.type));
       return std::nullopt;
   }
+}
+
+std::optional<TaperedCapsule> loadCollisionCapsule(
+    const urdf::Collision& collision,
+    std::string_view linkName,
+    size_t jointIndex) {
+  if (!collision.geometry) {
+    MT_LOGW("Ignoring URDF collision on link '{}' because it has no geometry.", linkName);
+    return std::nullopt;
+  }
+
+  const auto& geometry = *collision.geometry;
+  if (geometry.type != urdf::Geometry::CYLINDER) {
+    MT_LOGW(
+        "Ignoring unsupported URDF collision geometry '{}' on link '{}'. "
+        "Only cylinder collision geometry can be imported as Momentum tapered capsules.",
+        toString(geometry),
+        linkName);
+    return std::nullopt;
+  }
+
+  const auto& cylinder = dynamic_cast<const urdf::Cylinder&>(geometry);
+  const auto collisionOrigin = toMomentumTransform<float>(collision.origin);
+
+  // Convention conversion: URDF cylinders are centered at the origin with their axis along
+  // +Z, while Momentum TaperedCapsules start at the origin with their axis along +X.
+  //   - Rotation: compose the URDF collision origin rotation with a UnitX→UnitZ rotation so the
+  //     local +X axis of the Momentum capsule maps to the local +Z axis of the URDF cylinder.
+  //   - Translation: convert the URDF center position to centimeters, then shift along the
+  //     URDF cylinder's local +Z by -length/2 so the capsule starts where the cylinder ends.
+  TaperedCapsule capsule;
+  capsule.parent = jointIndex;
+  capsule.length = static_cast<float>(cylinder.length) * toCm<float>();
+  capsule.radius = Eigen::Vector2f::Constant(static_cast<float>(cylinder.radius) * toCm<float>());
+  capsule.transformation.rotation = collisionOrigin.rotation *
+      Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitZ());
+  capsule.transformation.translation = collisionOrigin.translation * toCm<float>() +
+      collisionOrigin.rotation * Eigen::Vector3f(0.0f, 0.0f, -0.5f * capsule.length);
+
+  return capsule;
 }
 
 constexpr std::array<const char*, 3> kTranslationNames = {"tx", "ty", "tz"};
@@ -444,6 +502,17 @@ bool loadUrdfSkeletonRecursive(
     data.linkVisuals.push_back(std::move(visualData));
   }
 
+  for (const auto& collision : urdfLink->collision_array) {
+    if (!collision) {
+      MT_LOGW("Ignoring null URDF collision on link '{}'.", urdfLink->name);
+      continue;
+    }
+    auto capsule = loadCollisionCapsule(*collision, urdfLink->name, static_cast<size_t>(jointId));
+    if (capsule) {
+      data.collision.push_back(*capsule);
+    }
+  }
+
   // Continue parsing child links and joints
   for (const auto& childLink : urdfLink->child_links) {
     if (!loadUrdfSkeletonRecursive(data, jointId, urdfModel, childLink.get())) {
@@ -627,6 +696,7 @@ Character loadUrdfCharacterFromUrdfModel(
   data.parameterTransform.activeJointParams = data.parameterTransform.computeActiveJointParams();
 
   const std::string robotName = urdfModel->getName();
+  const CollisionGeometry* collision = data.collision.empty() ? nullptr : &data.collision;
 
   auto meshResult = buildCombinedMesh(data, urdfDir);
   if (meshResult) {
@@ -638,7 +708,7 @@ Character loadUrdfCharacterFromUrdfModel(
         LocatorList{},
         &mesh,
         &skinWeights,
-        nullptr, // collision
+        collision,
         nullptr, // poseShapes
         {}, // blendShapes
         {}, // faceExpressionBlendShapes
@@ -656,7 +726,7 @@ Character loadUrdfCharacterFromUrdfModel(
       LocatorList{},
       nullptr, // mesh
       nullptr, // skinWeights
-      nullptr, // collision
+      collision,
       nullptr, // poseShapes
       {}, // blendShapes
       {}, // faceExpressionBlendShapes
