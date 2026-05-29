@@ -38,13 +38,19 @@ Individual functions are also available:
 - :func:`add_skinned_mesh` / :func:`update_skinned_mesh` — upload mesh data once
   and update only bone transforms
 - :func:`add_joints` / :func:`update_joints` — manage skeleton joint frames
+- :func:`add_collision_geometry` / :func:`update_collision_geometry` — manage
+  collision proxy capsules
 - :func:`add_character` / :func:`update_character` / :func:`remove_character` —
   manage a complete character
+
+Mesh wireframe and collision proxy visibility are controlled through viser's
+built-in scene-tree panel (each is its own scene node), so no bespoke GUI
+toggle is provided — a single control avoids the desync between a custom
+checkbox and the scene tree's client-side visibility override.
 
 GUI widget helpers (optional, for apps building interactive viewers):
 
 - :func:`add_character_param_sliders` — one slider per model parameter
-- :func:`add_wireframe_toggle` — checkbox that toggles a character's mesh/wireframe
 - :func:`add_log_panel` — scrollable HTML log strip (returns a :class:`LogPanel`)
 """
 
@@ -55,11 +61,24 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, TYPE_CHECKING, TypeAlias
 
 import numpy as np
-from pymomentum.quaternion_np import from_rotation_matrix
+from pymomentum.quaternion_np import (
+    align_z_with,
+    from_rotation_matrix,
+    rotate_vector_assume_normalized,
+)
 
 if TYPE_CHECKING:
     import viser
     from pymomentum.geometry import Character, Mesh  # @manual=:geometry
+
+
+@dataclass
+class _CollisionCapsuleHandles:
+    """Handles for the three primitives that render one capsule."""
+
+    cylinder: Any
+    start_sphere: Any
+    end_sphere: Any
 
 
 @dataclass
@@ -74,6 +93,8 @@ class CharacterHandles:
     bones_handle: Any | None = None
     mesh_handle: Any | None = None
     wireframe_handle: Any | None = None
+    collision_root_handle: Any | None = None
+    collision_handles: list[_CollisionCapsuleHandles] = field(default_factory=list)
 
 
 @dataclass
@@ -91,6 +112,10 @@ _ColoredMeshGroups: TypeAlias = list[
 
 #: Default scale factor to convert momentum units (cm) to meters for viser.
 CM_TO_M: float = 0.01
+
+# Matches the Rerun viewer and the C++ logger so the same proxy looks identical
+# across visualization backends.
+_COLLISION_PROXY_COLOR: tuple[int, int, int] = (128, 64, 64)
 
 
 def _xyzw_to_wxyz(q: np.ndarray) -> np.ndarray:
@@ -160,11 +185,6 @@ def _solid_mesh_handles(mesh_handle: Any | None) -> list[Any]:
     if isinstance(mesh_handle, list):
         return [part.handle for part in mesh_handle]
     return [mesh_handle]
-
-
-def _set_solid_mesh_visible(mesh_handle: Any | None, visible: bool) -> None:
-    for handle in _solid_mesh_handles(mesh_handle):
-        handle.visible = visible
 
 
 def _remove_solid_mesh(mesh_handle: Any | None) -> None:
@@ -547,6 +567,211 @@ def _build_bone_segments(
     return np.array(segments, dtype=np.float32) * scale
 
 
+def _collision_capsule_segments(
+    character: Character,
+    skel_state: np.ndarray,
+    scale: float = 1.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build capsule centerline segments and radii from character collision geometry."""
+    collision_geometry = character.collision_geometry
+    n_joints = skel_state.shape[0]
+    segments: list[list[np.ndarray]] = []
+    radii: list[float] = []
+
+    for capsule in collision_geometry:
+        parent = int(capsule.parent)
+        if parent < 0 or parent >= n_joints:
+            continue
+
+        transform = np.asarray(capsule.transformation, dtype=np.float64)
+        length = float(capsule.length)
+        radius = float(np.max(np.asarray(capsule.radius, dtype=np.float64)))
+        if radius <= 0.0:
+            continue
+
+        local_start = transform[:3, 3]
+        local_end = local_start + transform[:3, 0] * length
+        parent_t = skel_state[parent, :3].astype(np.float64)
+        parent_q = skel_state[parent, 3:7].astype(np.float64)
+        parent_scale = float(skel_state[parent, 7])
+
+        start = parent_t + rotate_vector_assume_normalized(
+            parent_q, local_start * parent_scale
+        )
+        end = parent_t + rotate_vector_assume_normalized(
+            parent_q, local_end * parent_scale
+        )
+        segments.append([start.astype(np.float32), end.astype(np.float32)])
+        radii.append(radius * abs(parent_scale))
+
+    if not segments:
+        return (
+            np.empty((0, 2, 3), dtype=np.float32),
+            np.empty((0,), dtype=np.float32),
+        )
+
+    return (
+        np.asarray(segments, dtype=np.float32) * scale,
+        np.asarray(radii, dtype=np.float32) * scale,
+    )
+
+
+def _wxyz_from_z_axis(direction: np.ndarray) -> np.ndarray:
+    """Return a wxyz quaternion that rotates +Z onto *direction*."""
+    return _xyzw_to_wxyz(align_z_with(direction))
+
+
+def add_collision_geometry(
+    server: viser.ViserServer,
+    entity_path: str,
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+    color: tuple[int, int, int] = _COLLISION_PROXY_COLOR,
+    opacity: float = 0.45,
+    visible: bool = True,
+) -> tuple[Any, list[_CollisionCapsuleHandles]]:
+    """Add collision proxy capsules to the viser scene.
+
+    Momentum stores tapered capsules; viser renders each proxy as an ordinary
+    capsule using the larger endpoint radius.
+
+    :param server: The viser server instance.
+    :param entity_path: Scene-graph path for the collision proxy group.
+    :param character: The character whose collision geometry is visualized.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    :param scale: Unit conversion factor. Defaults to :data:`CM_TO_M`.
+    :param color: RGB color tuple for the collision proxies.
+    :param opacity: Material opacity for the proxies.
+    :param visible: Initial visibility for the collision proxy group.
+    :return: A tuple of (root_handle, capsule primitive handle groups).
+    """
+    segments, radii = _collision_capsule_segments(character, skel_state, scale=scale)
+    root_handle = server.scene.add_frame(
+        entity_path,
+        show_axes=False,
+        visible=visible,
+    )
+    collision_handles: list[_CollisionCapsuleHandles] = []
+    for i, (segment, radius) in enumerate(zip(segments, radii)):
+        start = segment[0].astype(np.float64)
+        end = segment[1].astype(np.float64)
+        direction = end - start
+        height = max(float(np.linalg.norm(direction)), 1e-8)
+        rendered_radius = max(float(radius), 1e-8)
+        capsule_path = f"{entity_path}/{i}"
+
+        cylinder = server.scene.add_cylinder(
+            f"{capsule_path}/body",
+            radius=rendered_radius,
+            height=height,
+            color=color,
+            radial_segments=16,
+            opacity=opacity,
+            side="double",
+            cast_shadow=False,
+            receive_shadow=False,
+            position=(start + end) * 0.5,
+            wxyz=_wxyz_from_z_axis(direction),
+            visible=True,
+        )
+        start_sphere = server.scene.add_icosphere(
+            f"{capsule_path}/start",
+            radius=rendered_radius,
+            color=color,
+            subdivisions=1,
+            opacity=opacity,
+            cast_shadow=False,
+            receive_shadow=False,
+            position=start,
+            visible=True,
+        )
+        end_sphere = server.scene.add_icosphere(
+            f"{capsule_path}/end",
+            radius=rendered_radius,
+            color=color,
+            subdivisions=1,
+            opacity=opacity,
+            cast_shadow=False,
+            receive_shadow=False,
+            position=end,
+            visible=True,
+        )
+        collision_handles.append(
+            _CollisionCapsuleHandles(
+                cylinder=cylinder,
+                start_sphere=start_sphere,
+                end_sphere=end_sphere,
+            )
+        )
+
+    return root_handle, collision_handles
+
+
+def update_collision_geometry(
+    collision_handles: list[_CollisionCapsuleHandles],
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+) -> None:
+    """Update collision proxy capsule positions and sizes.
+
+    Always repositions every capsule from the current ``skel_state``, regardless
+    of visibility, so the proxies stay in sync with the model. Visibility is a
+    separate concern controlled through viser's scene-tree panel; gating updates
+    on visibility would leave proxies stranded at a stale pose when later
+    revealed through a path that does not re-run this.
+
+    :param collision_handles: Capsule primitive handles returned by
+        :func:`add_collision_geometry`.
+    :param character: The character whose collision geometry is visualized.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    :param scale: Unit conversion factor. Defaults to :data:`CM_TO_M`.
+    :return: None.
+    """
+    if not collision_handles:
+        return
+
+    segments, radii = _collision_capsule_segments(character, skel_state, scale=scale)
+    if segments.shape[0] != len(collision_handles):
+        raise ValueError(
+            "Collision geometry capsule count does not match existing handles"
+        )
+
+    for capsule_handles, segment, radius in zip(collision_handles, segments, radii):
+        start = segment[0].astype(np.float64)
+        end = segment[1].astype(np.float64)
+        direction = end - start
+        height = max(float(np.linalg.norm(direction)), 1e-8)
+        rendered_radius = max(float(radius), 1e-8)
+
+        capsule_handles.cylinder.position = (start + end) * 0.5
+        capsule_handles.cylinder.wxyz = _wxyz_from_z_axis(direction)
+        capsule_handles.cylinder.height = height
+        capsule_handles.cylinder.radius = rendered_radius
+        capsule_handles.start_sphere.position = start
+        capsule_handles.start_sphere.radius = rendered_radius
+        capsule_handles.end_sphere.position = end
+        capsule_handles.end_sphere.radius = rendered_radius
+
+
+def _remove_collision_geometry(
+    collision_root_handle: Any | None,
+    collision_handles: list[_CollisionCapsuleHandles],
+) -> None:
+    # Idempotent: clear the list as we remove so a second call (e.g. accidental
+    # double-remove during cleanup) is a no-op rather than touching freed handles.
+    while collision_handles:
+        capsule_handles = collision_handles.pop()
+        capsule_handles.cylinder.remove()
+        capsule_handles.start_sphere.remove()
+        capsule_handles.end_sphere.remove()
+    if collision_root_handle is not None:
+        collision_root_handle.remove()
+
+
 def add_joints(
     server: viser.ViserServer,
     entity_path: str,
@@ -650,6 +875,8 @@ def add_character(
     scale: float = CM_TO_M,
     axes_length: float = 0.05,
     axes_radius: float = 0.002,
+    collision_geometry: bool = False,
+    collision_geometry_visible: bool = True,
 ) -> CharacterHandles:
     """Add a complete character visualization to the viser scene.
 
@@ -658,6 +885,7 @@ def add_character(
 
     - ``{entity_path}/joints/{name}`` — per-joint coordinate frames
     - ``{entity_path}/mesh`` — posed or skinned mesh
+    - ``{entity_path}/collision_proxies`` — collision capsules, if requested
 
     :param server: The viser server instance.
     :param entity_path: Root scene-graph path for the character.
@@ -670,6 +898,8 @@ def add_character(
     :param color: RGB color tuple for the mesh.
     :param axes_length: Length of joint axis indicators.
     :param axes_radius: Radius of joint axis indicators.
+    :param collision_geometry: If true, add collision proxy capsules.
+    :param collision_geometry_visible: Initial visibility for collision proxies.
     :return: A :class:`CharacterHandles` for use with :func:`update_character`.
     """
     handles = CharacterHandles(entity_path=entity_path)
@@ -696,6 +926,19 @@ def add_character(
     elif posed_mesh is not None:
         handles.mesh_handle, handles.wireframe_handle = add_mesh(
             server, f"{entity_path}/mesh", posed_mesh, color=color, scale=scale
+        )
+
+    if collision_geometry:
+        (
+            handles.collision_root_handle,
+            handles.collision_handles,
+        ) = add_collision_geometry(
+            server,
+            f"{entity_path}/collision_proxies",
+            character,
+            skel_state,
+            scale=scale,
+            visible=collision_geometry_visible,
         )
 
     return handles
@@ -738,6 +981,13 @@ def update_character(
                 handles.mesh_handle, handles.wireframe_handle, posed_mesh, scale=scale
             )
 
+        update_collision_geometry(
+            handles.collision_handles,
+            character,
+            skel_state,
+            scale=scale,
+        )
+
         server.flush()
 
 
@@ -761,11 +1011,17 @@ def remove_character(
         _remove_solid_mesh(handles.mesh_handle)
         if handles.wireframe_handle is not None:
             handles.wireframe_handle.remove()
+        _remove_collision_geometry(
+            handles.collision_root_handle,
+            handles.collision_handles,
+        )
 
     handles.joint_frames.clear()
     handles.bones_handle = None
     handles.mesh_handle = None
     handles.wireframe_handle = None
+    handles.collision_root_handle = None
+    handles.collision_handles.clear()
 
 
 # =============================================================================
@@ -830,57 +1086,6 @@ def add_character_param_sliders(
             slider.on_update(on_change)
         sliders.append(slider)
     return sliders
-
-
-def add_wireframe_toggle(
-    server: viser.ViserServer,
-    handles: CharacterHandles,
-    *,
-    label: str = "Wireframe",
-    initial_value: bool = False,
-) -> Any:
-    """Add a checkbox that toggles between solid and wireframe for *handles*.
-
-    :func:`add_mesh` (and therefore :func:`add_character`) creates both a solid
-    and a wireframe handle; this widget flips their ``.visible`` flags so only
-    one is shown at a time. Skinned mesh handles expose ``.wireframe`` directly,
-    so the widget toggles that property instead of requiring a duplicate mesh.
-    Sets initial visibility/state to match *initial_value*.
-
-    :param server: The viser server instance.
-    :param handles: The character handles whose mesh/wireframe to toggle.
-    :param label: Checkbox label shown in the GUI.
-    :param initial_value: ``True`` shows the wireframe initially, ``False``
-        shows the solid mesh.
-    :return: The viser checkbox handle.
-    """
-    cb = server.gui.add_checkbox(label, initial_value=initial_value)
-    skinned_handles = (
-        _skinned_mesh_handles(handles.mesh_handle)
-        if handles.wireframe_handle is None
-        else []
-    )
-    if skinned_handles:
-        for handle in skinned_handles:
-            handle.visible = True
-            handle.wireframe = initial_value
-    else:
-        _set_solid_mesh_visible(handles.mesh_handle, not initial_value)
-    if handles.wireframe_handle is not None:
-        handles.wireframe_handle.visible = initial_value
-
-    @cb.on_update
-    def _(_: object) -> None:
-        if skinned_handles:
-            for handle in skinned_handles:
-                handle.visible = True
-                handle.wireframe = cb.value
-        else:
-            _set_solid_mesh_visible(handles.mesh_handle, not cb.value)
-        if handles.wireframe_handle is not None:
-            handles.wireframe_handle.visible = cb.value
-
-    return cb
 
 
 class LogPanel:

@@ -6,7 +6,6 @@
 # pyre-strict
 
 import unittest
-from typing import Any
 
 import numpy as np
 import pymomentum.geometry as geo  # @manual=:geometry
@@ -38,7 +37,6 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
         add_log_panel,
         add_mesh,
         add_skinned_mesh,
-        add_wireframe_toggle,
         CharacterHandles,
         remove_character,
         update_character,
@@ -73,14 +71,27 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             self.assertEqual(skel_state.shape, (character.skeleton.size, 8))
             return character, skel_state
 
+        def _make_collision_character_and_skel_state(
+            self,
+        ) -> tuple[geo.Character, np.ndarray]:
+            character, _ = self._make_character_and_skel_state()
+            capsule = geo.TaperedCapsule(
+                parent=0,
+                transformation=np.eye(4, dtype=np.float32),
+                radius=np.array([1.0, 2.0], dtype=np.float32),
+                length=10.0,
+            )
+            character = character.with_collision_geometry([capsule])
+            self.assertEqual(len(character.collision_geometry), 1)
+
+            skel_state = np.zeros((character.skeleton.size, 8), dtype=np.float32)
+            skel_state[:, 6] = 1.0
+            skel_state[:, 7] = 1.0
+            return character, skel_state
+
         def _posed_mesh(self, character: geo.Character) -> geo.Mesh:
             joint_params = np.zeros(character.skeleton.size * 7, dtype=np.float32)
             return character.pose_mesh(joint_params)
-
-        def _solid_mesh_visibilities(self, mesh_handle: Any) -> list[bool]:
-            if isinstance(mesh_handle, list):
-                return [bool(part.handle.visible) for part in mesh_handle]
-            return [bool(mesh_handle.visible)]
 
         def _make_uncolored_character(self, character: geo.Character) -> geo.Character:
             mesh = geo.Mesh(
@@ -348,6 +359,49 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                 )
             remove_character(skinned)
 
+        def test_collision_proxies_track_model_revealed_via_scene_tree(self) -> None:
+            # Regression: proxy visibility is driven solely by viser's scene-tree
+            # panel, which flips the root frame's visibility directly. Because
+            # update_character repositions proxies regardless of visibility, a
+            # proxy revealed after the model moved is already at the current pose
+            # rather than stranded at the rest pose.
+            character, skel_state = self._make_collision_character_and_skel_state()
+            handles = add_character(
+                self.server,
+                "scene_tree_char",
+                character,
+                skel_state,
+                collision_geometry=True,
+                collision_geometry_visible=False,
+            )
+            root = handles.collision_root_handle
+            self.assertIsNotNone(root)
+            assert root is not None
+            self.assertFalse(root.visible)
+            capsule_handles = handles.collision_handles[0]
+
+            # Move the model while the proxies remain hidden.
+            moved = skel_state.copy()
+            moved[0, 0] = 10.0
+            update_character(self.server, handles, character, moved)
+
+            # Reveal via the scene-tree path: flip root visibility directly, with
+            # no checkbox/on_show refresh.
+            root.visible = True
+
+            # Proxy is at the moved pose, not stranded at the rest pose.
+            np.testing.assert_allclose(
+                np.asarray(capsule_handles.start_sphere.position),
+                [0.1, 0.0, 0.0],
+                atol=1e-5,
+            )
+            np.testing.assert_allclose(
+                np.asarray(capsule_handles.end_sphere.position),
+                [0.2, 0.0, 0.0],
+                atol=1e-5,
+            )
+            remove_character(handles)
+
         def test_xyzw_to_wxyz(self) -> None:
             # xyzw [0.1, 0.2, 0.3, 0.9] -> wxyz [0.9, 0.1, 0.2, 0.3]
             q_xyzw = np.array([0.1, 0.2, 0.3, 0.9])
@@ -400,96 +454,6 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             self.assertGreater(len(events), 0)
             for s in sliders:
                 s.remove()
-
-        def test_add_wireframe_toggle(self) -> None:
-            character, skel_state = self._make_character_and_skel_state()
-            posed_mesh = self._posed_mesh(character)
-            handles = add_character(
-                self.server, "test_wf", character, skel_state, posed_mesh=posed_mesh
-            )
-            self.assertIsNotNone(handles.mesh_handle)
-            self.assertIsNotNone(handles.wireframe_handle)
-
-            # Default initial_value=False: solid visible, wireframe hidden.
-            cb = add_wireframe_toggle(self.server, handles)
-            self.assertEqual(
-                self._solid_mesh_visibilities(handles.mesh_handle),
-                [True] * len(self._solid_mesh_visibilities(handles.mesh_handle)),
-            )
-            self.assertFalse(handles.wireframe_handle.visible)
-
-            # Flip the checkbox; visibility should swap.
-            cb.value = True
-            solid_visibilities = self._solid_mesh_visibilities(handles.mesh_handle)
-            self.assertEqual(
-                solid_visibilities,
-                [False] * len(solid_visibilities),
-            )
-            self.assertTrue(handles.wireframe_handle.visible)
-
-            cb.remove()
-            remove_character(handles)
-
-            uncolored_character = self._make_uncolored_character(character)
-            skinned = add_character(
-                self.server,
-                "test_wf_skinned",
-                uncolored_character,
-                skel_state,
-                use_skinned_mesh=True,
-            )
-            self.assertIsNotNone(skinned.mesh_handle)
-            self.assertIsNone(skinned.wireframe_handle)
-
-            skinned_cb = add_wireframe_toggle(self.server, skinned)
-            self.assertTrue(skinned.mesh_handle.visible)
-            self.assertFalse(skinned.mesh_handle.wireframe)
-
-            skinned_cb.value = True
-            self.assertTrue(skinned.mesh_handle.visible)
-            self.assertTrue(skinned.mesh_handle.wireframe)
-
-            skinned_cb.remove()
-            remove_character(skinned)
-
-            colored_character, colored_skel_state = (
-                self._make_colored_skinned_character_and_skel_state()
-            )
-            colored_skinned = add_character(
-                self.server,
-                "test_wf_color_skinned",
-                colored_character,
-                colored_skel_state,
-                use_skinned_mesh=True,
-            )
-            self.assertIsInstance(colored_skinned.mesh_handle, list)
-            self.assertIsNone(colored_skinned.wireframe_handle)
-
-            colored_skinned_cb = add_wireframe_toggle(self.server, colored_skinned)
-            for part in colored_skinned.mesh_handle:
-                self.assertTrue(part.handle.visible)
-                self.assertFalse(part.handle.wireframe)
-
-            colored_skinned_cb.value = True
-            for part in colored_skinned.mesh_handle:
-                self.assertTrue(part.handle.visible)
-                self.assertTrue(part.handle.wireframe)
-
-            moved = colored_skel_state.copy()
-            moved[:, 2] += 0.5
-            update_character(self.server, colored_skinned, colored_character, moved)
-            for part in colored_skinned.mesh_handle:
-                for i, bone in enumerate(
-                    part.handle.bones[: colored_character.skeleton.size]
-                ):
-                    np.testing.assert_allclose(
-                        np.asarray(bone.position),
-                        moved[i, :3] * 0.01,
-                        atol=1e-5,
-                    )
-
-            colored_skinned_cb.remove()
-            remove_character(colored_skinned)
 
         def test_add_log_panel(self) -> None:
             panel = add_log_panel(self.server, echo_to_stdout=False)
