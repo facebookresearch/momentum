@@ -31,6 +31,7 @@
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>
+#include <momentum/character/collision_geometry.h>
 #include <momentum/character/fwd.h>
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/joint.h>
@@ -50,6 +51,7 @@
 #include <momentum/math/mesh.h>
 #include <momentum/math/mppca.h>
 #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Eigen/Core>
@@ -63,6 +65,44 @@ namespace py = pybind11;
 namespace mm = momentum;
 
 using namespace pymomentum;
+
+namespace {
+
+using OptionalTransformArray =
+    std::optional<py::array_t<float, py::array::c_style | py::array::forcecast>>;
+
+Eigen::Matrix4f collisionTransformFromPython(const OptionalTransformArray& transformation) {
+  if (!transformation.has_value()) {
+    return Eigen::Matrix4f::Identity();
+  }
+
+  const auto& array = transformation.value();
+  MT_THROW_IF(
+      array.ndim() != 2 || array.shape(0) != 4 || array.shape(1) != 4,
+      "Expected collision primitive transformation to have shape (4, 4)");
+
+  Eigen::Matrix4f matrix;
+  const auto values = array.unchecked<2>();
+  for (Eigen::Index row = 0; row < 4; ++row) {
+    for (Eigen::Index col = 0; col < 4; ++col) {
+      matrix(row, col) = values(row, col);
+    }
+  }
+  return matrix;
+}
+
+int collisionParentToPython(size_t parent) {
+  if (parent == mm::kInvalidIndex) {
+    return -1;
+  }
+  MT_THROW_IF(
+      parent > static_cast<size_t>(std::numeric_limits<int>::max()),
+      "Collision primitive parent index {} cannot be represented as a Python int",
+      parent);
+  return static_cast<int>(parent);
+}
+
+} // namespace
 
 PYBIND11_MODULE(geometry, m) {
   // TODO more explanation
@@ -178,6 +218,11 @@ PYBIND11_MODULE(geometry, m) {
       "TaperedCapsule",
       "A tapered capsule primitive used for collision detection and physics simulation. "
       "Represents a capsule with potentially different radii at each end, attached to a skeleton joint.");
+  auto ellipsoidClass = py::class_<mm::CollisionEllipsoid>(
+      m,
+      "Ellipsoid",
+      "An ellipsoid primitive used for collision detection and physics simulation. "
+      "Represents an oriented ellipsoid attached to a skeleton joint.");
   py::class_<mm::SDFColliderT<float>> sdfColliderClass = py::class_<mm::SDFColliderT<float>>(
       m,
       "SDFCollider",
@@ -428,11 +473,11 @@ The resulting arrays are as follows:
   capsuleClass
       .def(
           py::init<>([](int parent,
-                        const std::optional<Eigen::Matrix4f>& transformation,
+                        const OptionalTransformArray& transformation,
                         const std::optional<Eigen::Vector2f>& radius,
                         float length) {
             mm::TaperedCapsule capsule;
-            capsule.transformation = transformation.value_or(Eigen::Matrix4f::Identity());
+            capsule.transformation = collisionTransformFromPython(transformation);
             capsule.radius = radius.value_or(Eigen::Vector2f::Ones());
             capsule.parent = parent;
             capsule.length = length;
@@ -445,7 +490,7 @@ The resulting arrays are as follows:
 :param parent: Parent joint to which the capsule is attached.
 :param length: Length of the capsule in local space.)",
           py::arg("parent"),
-          py::arg("transformation") = std::optional<Eigen::Matrix4f>{},
+          py::arg("transformation") = py::none(),
           py::arg("radius") = std::optional<Eigen::Vector2f>{},
           py::arg("length") = 1.0f)
       .def_property_readonly(
@@ -460,14 +505,16 @@ The resulting arrays are as follows:
           "Start and end radius for the capsule.")
       .def_property_readonly(
           "parent",
-          [](const mm::TaperedCapsule& capsule) -> int { return capsule.parent; },
+          [](const mm::TaperedCapsule& capsule) -> int {
+            return collisionParentToPython(capsule.parent);
+          },
           "Parent joint to which the capsule is attached.")
       .def_property_readonly(
           "length", [](const mm::TaperedCapsule& capsule) -> float { return capsule.length; })
       .def("__repr__", [](const mm::TaperedCapsule& tc) {
         return fmt::format(
             "TaperedCapsule(parent={}, length={}, radius=[{}, {}])",
-            tc.parent,
+            collisionParentToPython(tc.parent),
             tc.length,
             tc.radius[0],
             tc.radius[1]);
@@ -504,6 +551,53 @@ The resulting arrays are as follows:
             properties.jointName,
             properties.jointIndex,
             properties.mass);
+      });
+
+  ellipsoidClass
+      .def(
+          py::init<>([](int parent,
+                        const OptionalTransformArray& transformation,
+                        const std::optional<Eigen::Vector3f>& radii) {
+            mm::CollisionEllipsoid ellipsoid;
+            ellipsoid.transformation = collisionTransformFromPython(transformation);
+            ellipsoid.radii = radii.value_or(Eigen::Vector3f::Ones());
+            ellipsoid.parent = parent;
+            return ellipsoid;
+          }),
+          R"(Create an ellipsoid using its parent, transformation, and radii.
+
+:param parent: Parent joint to which the ellipsoid is attached.
+:param transformation: Transformation defining the center and orientation relative to the parent coordinate system.
+:param radii: Radii along the local x, y, and z axes.)",
+          py::arg("parent"),
+          py::kw_only(),
+          py::arg("transformation") = py::none(),
+          py::arg("radii") = std::optional<Eigen::Vector3f>{})
+      .def_property_readonly(
+          "transformation",
+          [](const mm::CollisionEllipsoid& ellipsoid) -> Eigen::Matrix4f {
+            return ellipsoid.transformation.toMatrix();
+          },
+          "Transformation defining the center and orientation relative to the parent coordinate system")
+      .def_property_readonly(
+          "radii",
+          [](const mm::CollisionEllipsoid& ellipsoid) -> Eigen::Vector3f {
+            return ellipsoid.radii;
+          },
+          "Radii along the local x, y, and z axes.")
+      .def_property_readonly(
+          "parent",
+          [](const mm::CollisionEllipsoid& ellipsoid) -> int {
+            return collisionParentToPython(ellipsoid.parent);
+          },
+          "Parent joint to which the ellipsoid is attached.")
+      .def("__repr__", [](const mm::CollisionEllipsoid& ellipsoid) {
+        return fmt::format(
+            "Ellipsoid(parent={}, radii=[{}, {}, {}])",
+            collisionParentToPython(ellipsoid.parent),
+            ellipsoid.radii[0],
+            ellipsoid.radii[1],
+            ellipsoid.radii[2]);
       });
 
   // Class Marker, defining the properties:
