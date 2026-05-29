@@ -411,8 +411,7 @@ void logBvh(
   for (size_t i = 0; i < n; ++i) {
     auto& aabb = aabbs[i];
     aabb.id = static_cast<axel::Index>(i);
-    updateAabb(
-        aabb, collisionState.origin[i], collisionState.direction[i], collisionState.radius[i]);
+    updateAabb(aabb, collisionState, i);
   }
 
   // Construct BVH
@@ -445,40 +444,62 @@ void logCollisionGeometry(
     const std::string& streamName,
     const CollisionGeometry& collisionGeometry,
     const SkeletonState& skeletonState) {
-  // TODO: update collision geometry representation from box to capsule
+  std::vector<rerun::Position3D> capsuleTranslations;
+  std::vector<rerun::Quaternion> capsuleQuaternions;
+  std::vector<float> capsuleLengths;
+  std::vector<float> capsuleRadii;
+  std::vector<rerun::Position3D> ellipsoidCenters;
+  std::vector<rerun::HalfSize3D> ellipsoidHalfSizes;
+  std::vector<rerun::Quaternion> ellipsoidQuaternions;
 
-  std::vector<rerun::Position3D> translations;
-  std::vector<rerun::Quaternion> quaternions;
-  std::vector<float> lengths;
-  std::vector<float> radii;
-
-  translations.reserve(collisionGeometry.size());
-  quaternions.reserve(collisionGeometry.size());
-  lengths.reserve(collisionGeometry.size());
-  radii.reserve(collisionGeometry.size());
+  capsuleTranslations.reserve(collisionGeometry.size());
+  capsuleQuaternions.reserve(collisionGeometry.size());
+  capsuleLengths.reserve(collisionGeometry.size());
+  capsuleRadii.reserve(collisionGeometry.size());
+  ellipsoidCenters.reserve(collisionGeometry.size());
+  ellipsoidHalfSizes.reserve(collisionGeometry.size());
+  ellipsoidQuaternions.reserve(collisionGeometry.size());
 
   for (const auto& cg : collisionGeometry) {
-    const auto& js = skeletonState.jointState.at(cg.parent);
+    const Transform parentTransform = (cg.parent == kInvalidIndex)
+        ? Transform()
+        : skeletonState.jointState.at(cg.parent).transform;
+    const Transform tf = parentTransform * cg.transformation;
 
-    const Transform tf = js.transform * cg.transformation;
-    const Quaternionf& q = tf.rotation * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
-
-    translations.push_back(toRerunPosition3D(tf.translation));
-    quaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
-    lengths.emplace_back(cg.length);
-    // TODO: Rerun doesn't support capsules with different radii (i.e. tapered capsule) yet
-    radii.emplace_back(cg.radius.maxCoeff());
+    if (cg.type == CollisionPrimitiveType::TaperedCapsule) {
+      const Quaternionf& q = tf.rotation * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
+      capsuleTranslations.push_back(toRerunPosition3D(tf.translation));
+      capsuleQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+      capsuleLengths.emplace_back(cg.length);
+      // TODO: Rerun doesn't support capsules with different radii (i.e. tapered capsule) yet
+      capsuleRadii.emplace_back(cg.radius.maxCoeff());
+    } else if (cg.type == CollisionPrimitiveType::Ellipsoid) {
+      const Vector3f halfSizes = cg.ellipsoidRadii * parentTransform.scale;
+      const Quaternionf& q = tf.rotation;
+      ellipsoidCenters.push_back(toRerunPosition3D(tf.translation));
+      ellipsoidHalfSizes.push_back(toRerunHalfSizes3D(halfSizes));
+      ellipsoidQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+    }
   }
 
-  // TODO: make radius and color configurable
-  safeLog(
-      rec,
-      streamName,
-      rerun::Capsules3D::from_lengths_and_radii(lengths, radii)
-          .with_translations(translations)
-          .with_quaternions(quaternions)
-          .with_colors(rerun::Color(128, 64, 64)));
-  // TODO: Switch to wireframe once available in Rerun
+  if (!capsuleLengths.empty()) {
+    safeLog(
+        rec,
+        streamName + "/capsules",
+        rerun::Capsules3D::from_lengths_and_radii(capsuleLengths, capsuleRadii)
+            .with_translations(capsuleTranslations)
+            .with_quaternions(capsuleQuaternions)
+            .with_colors(rerun::Color(128, 64, 64)));
+  }
+
+  if (!ellipsoidHalfSizes.empty()) {
+    safeLog(
+        rec,
+        streamName + "/ellipsoids",
+        rerun::Ellipsoids3D::from_centers_and_half_sizes(ellipsoidCenters, ellipsoidHalfSizes)
+            .with_quaternions(ellipsoidQuaternions)
+            .with_colors(rerun::Color(128, 64, 64)));
+  }
 
   logBvh(rec, streamName + "/bvh", collisionGeometry, skeletonState);
 }

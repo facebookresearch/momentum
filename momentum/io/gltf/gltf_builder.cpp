@@ -784,7 +784,7 @@ void addCollisionsToModel(
       model.nodes.at(jointToNodeMap.at(col.parent))
           .children.push_back(static_cast<int32_t>(nodeIndex));
 
-      // add values for the tapered capsule
+      // add values for the collision primitive
       node.name = character.skeleton.joints.at(col.parent).name + "_col";
 
       node.rotation = fromMomentumQuaternionf(col.transformation.rotation);
@@ -794,9 +794,14 @@ void addCollisionsToModel(
       // add extra properties
       if (addExtensions) {
         auto& extension = addMomentumExtension(node.extensionsAndExtras);
-        extension["type"] = "collision_capsule";
-        extension["length"] = col.length;
-        extension["radius"] = col.radius;
+        if (col.type == CollisionPrimitiveType::TaperedCapsule) {
+          extension["type"] = "collision_capsule";
+          extension["length"] = col.length;
+          extension["radius"] = col.radius;
+        } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
+          extension["type"] = "collision_ellipsoid";
+          extension["radii"] = col.ellipsoidRadii;
+        }
       }
     }
   }

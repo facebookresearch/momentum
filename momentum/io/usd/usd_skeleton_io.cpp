@@ -35,13 +35,13 @@ TF_DEFINE_PRIVATE_TOKENS(
     _tokens,
     (Collision)(Locators)((momentumType, "momentum:type"))((momentumParent, "momentum:parent"))(
         (momentumLength, "momentum:length"))((momentumRadius, "momentum:radius"))(
-        (momentumTranslation, "momentum:translation"))((momentumRotation, "momentum:rotation"))(
-        (momentumName, "momentum:name"))((momentumOffset, "momentum:offset"))(
-        (momentumWeight, "momentum:weight"))((momentumLocked, "momentum:locked"))(
-        (momentumLimitOrigin,
-         "momentum:limitOrigin"))((momentumLimitWeight, "momentum:limitWeight"))(
-        (momentumAttachedToSkin,
-         "momentum:attachedToSkin"))((momentumSkinOffset, "momentum:skinOffset")));
+        (momentumRadii, "momentum:radii"))((momentumTranslation, "momentum:translation"))(
+        (momentumRotation, "momentum:rotation"))((momentumName, "momentum:name"))(
+        (momentumOffset, "momentum:offset"))((momentumWeight, "momentum:weight"))(
+        (momentumLocked, "momentum:locked"))((momentumLimitOrigin, "momentum:limitOrigin"))(
+        (momentumLimitWeight,
+         "momentum:limitWeight"))((momentumAttachedToSkin, "momentum:attachedToSkin"))(
+        (momentumSkinOffset, "momentum:skinOffset")));
 
 namespace momentum {
 
@@ -67,11 +67,24 @@ Eigen::Matrix4f jointToLocalTransform(const Joint& joint) {
 
 // Compute world-space bind transform for a joint by walking up the parent chain.
 Eigen::Matrix4f computeWorldTransform(const Skeleton& skeleton, size_t jointIndex) {
-  Eigen::Matrix4f world = jointToLocalTransform(skeleton.joints[jointIndex]);
-  size_t parent = skeleton.joints[jointIndex].parent;
+  MT_THROW_IF(
+      jointIndex >= skeleton.joints.size(),
+      "Joint index {} exceeds skeleton joint count {}",
+      jointIndex,
+      skeleton.joints.size());
+
+  const auto& joint = skeleton.joints.at(jointIndex);
+  Eigen::Matrix4f world = jointToLocalTransform(joint);
+  size_t parent = joint.parent;
   while (parent != kInvalidIndex) {
-    world = jointToLocalTransform(skeleton.joints[parent]) * world;
-    parent = skeleton.joints[parent].parent;
+    MT_THROW_IF(
+        parent >= skeleton.joints.size(),
+        "Parent joint index {} exceeds skeleton joint count {}",
+        parent,
+        skeleton.joints.size());
+    const auto& parentJoint = skeleton.joints.at(parent);
+    world = jointToLocalTransform(parentJoint) * world;
+    parent = parentJoint.parent;
   }
   return world;
 }
@@ -94,16 +107,17 @@ std::string leafName(const std::string& path) {
 std::vector<std::string> buildHierarchicalPaths(const Skeleton& skeleton) {
   std::vector<std::string> paths(skeleton.joints.size());
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
-    if (skeleton.joints[i].parent == kInvalidIndex) {
-      paths[i] = skeleton.joints[i].name;
+    const auto& joint = skeleton.joints.at(i);
+    if (joint.parent == kInvalidIndex) {
+      paths.at(i) = joint.name;
     } else {
       MT_THROW_IF(
-          skeleton.joints[i].parent >= paths.size(),
+          joint.parent >= paths.size(),
           "Parent joint index {} exceeds paths size {} for joint {}",
-          skeleton.joints[i].parent,
+          joint.parent,
           paths.size(),
           i);
-      paths[i] = paths[skeleton.joints[i].parent] + "/" + skeleton.joints[i].name;
+      paths.at(i) = paths.at(joint.parent) + "/" + joint.name;
     }
   }
   return paths;
@@ -238,9 +252,26 @@ void saveCollisionGeometryToUsd(
   auto collisionScope = UsdGeomScope::Define(stage, skelRootPath.AppendChild(_tokens->Collision));
 
   for (size_t i = 0; i < collision.size(); ++i) {
-    const auto& capsule = collision[i];
-    const std::string jointName = (capsule.parent < skeleton.joints.size())
-        ? skeleton.joints.at(capsule.parent).name
+    const auto& primitive = collision[i];
+
+    std::string type;
+    switch (primitive.type) {
+      case CollisionPrimitiveType::TaperedCapsule:
+        type = "collision_capsule";
+        break;
+      case CollisionPrimitiveType::Ellipsoid:
+        type = "collision_ellipsoid";
+        break;
+    }
+    if (type.empty()) {
+      MT_LOGW(
+          "Skipping unsupported collision primitive type {} when saving USD collision geometry.",
+          static_cast<int>(primitive.type));
+      continue;
+    }
+
+    const std::string jointName = (primitive.parent < skeleton.joints.size())
+        ? skeleton.joints.at(primitive.parent).name
         : "unknown";
     const std::string primName = sanitizePrimName(jointName + "_col_" + std::to_string(i));
 
@@ -252,18 +283,25 @@ void saveCollisionGeometryToUsd(
         primName,
         jointName);
 
-    prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String)
-        .Set(std::string("collision_capsule"));
+    prim.CreateAttribute(_tokens->momentumType, SdfValueTypeNames->String).Set(type);
     prim.CreateAttribute(_tokens->momentumParent, SdfValueTypeNames->String).Set(jointName);
-    prim.CreateAttribute(_tokens->momentumLength, SdfValueTypeNames->Float).Set(capsule.length);
-    prim.CreateAttribute(_tokens->momentumRadius, SdfValueTypeNames->Float2)
-        .Set(GfVec2f(capsule.radius.x(), capsule.radius.y()));
+    if (primitive.type == CollisionPrimitiveType::TaperedCapsule) {
+      prim.CreateAttribute(_tokens->momentumLength, SdfValueTypeNames->Float).Set(primitive.length);
+      prim.CreateAttribute(_tokens->momentumRadius, SdfValueTypeNames->Float2)
+          .Set(GfVec2f(primitive.radius.x(), primitive.radius.y()));
+    } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
+      prim.CreateAttribute(_tokens->momentumRadii, SdfValueTypeNames->Float3)
+          .Set(GfVec3f(
+              primitive.ellipsoidRadii.x(),
+              primitive.ellipsoidRadii.y(),
+              primitive.ellipsoidRadii.z()));
+    }
 
-    const auto& t = capsule.transformation.translation;
+    const auto& t = primitive.transformation.translation;
     prim.CreateAttribute(_tokens->momentumTranslation, SdfValueTypeNames->Float3)
         .Set(GfVec3f(t.x(), t.y(), t.z()));
 
-    const auto& q = capsule.transformation.rotation;
+    const auto& q = primitive.transformation.rotation;
     prim.CreateAttribute(_tokens->momentumRotation, SdfValueTypeNames->Quatf)
         .Set(GfQuatf(q.w(), q.x(), q.y(), q.z()));
   }
@@ -281,46 +319,56 @@ CollisionGeometry loadCollisionGeometryFromUsd(
     }
 
     std::string type;
-    if (!typeAttr.Get(&type) || type != "collision_capsule") {
+    if (!typeAttr.Get(&type) || (type != "collision_capsule" && type != "collision_ellipsoid")) {
       continue;
     }
 
-    TaperedCapsule capsule;
+    CollisionPrimitive primitive;
 
     std::string parentName;
     if (auto attr = prim.GetAttribute(_tokens->momentumParent); attr) {
       attr.Get(&parentName);
-      capsule.parent = skeleton.getJointIdByName(parentName);
+      primitive.parent = skeleton.getJointIdByName(parentName);
     }
 
-    if (auto attr = prim.GetAttribute(_tokens->momentumLength); attr) {
-      attr.Get(&capsule.length);
-    }
+    if (type == "collision_capsule") {
+      primitive.type = CollisionPrimitiveType::TaperedCapsule;
+      if (auto attr = prim.GetAttribute(_tokens->momentumLength); attr) {
+        attr.Get(&primitive.length);
+      }
 
-    GfVec2f radius(0.0f, 0.0f);
-    if (auto attr = prim.GetAttribute(_tokens->momentumRadius); attr) {
-      attr.Get(&radius);
-      capsule.radius = Eigen::Vector2f(radius[0], radius[1]);
+      GfVec2f radius(0.0f, 0.0f);
+      if (auto attr = prim.GetAttribute(_tokens->momentumRadius); attr) {
+        attr.Get(&radius);
+        primitive.radius = Eigen::Vector2f(radius[0], radius[1]);
+      }
+    } else if (type == "collision_ellipsoid") {
+      primitive.type = CollisionPrimitiveType::Ellipsoid;
+      GfVec3f radii(0.0f, 0.0f, 0.0f);
+      if (auto attr = prim.GetAttribute(_tokens->momentumRadii); attr) {
+        attr.Get(&radii);
+        primitive.ellipsoidRadii = Eigen::Vector3f(radii[0], radii[1], radii[2]);
+      }
     }
 
     GfVec3f translation(0.0f, 0.0f, 0.0f);
     if (auto attr = prim.GetAttribute(_tokens->momentumTranslation); attr) {
       attr.Get(&translation);
-      capsule.transformation.translation =
+      primitive.transformation.translation =
           Eigen::Vector3f(translation[0], translation[1], translation[2]);
     }
 
     GfQuatf rotation(1.0f);
     if (auto attr = prim.GetAttribute(_tokens->momentumRotation); attr) {
       attr.Get(&rotation);
-      capsule.transformation.rotation = Eigen::Quaternionf(
+      primitive.transformation.rotation = Eigen::Quaternionf(
           rotation.GetReal(),
           rotation.GetImaginary()[0],
           rotation.GetImaginary()[1],
           rotation.GetImaginary()[2]);
     }
 
-    result.push_back(capsule);
+    result.push_back(primitive);
   }
 
   return result;
