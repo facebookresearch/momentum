@@ -9,6 +9,7 @@
 
 #include <momentum/character/collision_geometry.h>
 #include <momentum/character/collision_geometry_state.h>
+#include <momentum/character_solver/collision_error_function.h>
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/common/aligned.h>
@@ -16,6 +17,7 @@
 
 #include <axel/BoundingBox.h>
 
+#include <optional>
 #include <vector>
 
 namespace momentum {
@@ -62,6 +64,9 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// Update collisionState_, aabbs_, and collisionPairs_ given the new skeleton state.
   void computeBroadPhase(const SkeletonStateT<T>& state);
 
+  /// Synchronize scalar fallback settings before delegating non-capsule collision work.
+  CollisionErrorFunctionT<T>& syncScalarFallback();
+
   /// Pre-computed valid collision pair with common ancestor.
   struct CollisionPairInfo {
     size_t indexA;
@@ -70,6 +75,11 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   };
 
   const CollisionGeometry collisionGeometry_;
+
+  /// Scalar collision error function used to evaluate non-tapered-capsule primitives (e.g.
+  /// ellipsoids and boxes). Lazily created and re-synced from the SIMD inputs whenever
+  /// @c useScalarFallback_ is set.
+  std::optional<CollisionErrorFunctionT<T>> scalarFallback_;
 
   /// Pre-filtered list of valid collision pairs.
   std::vector<CollisionPairInfo> validPairs_;
@@ -84,6 +94,10 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   std::vector<axel::BoundingBox<T>> aabbs_;
 
   CollisionGeometryStateT<T> collisionState_;
+
+  /// True when the collision geometry contains a non-tapered-capsule primitive, in which case
+  /// getError/getGradient/getJacobian delegate to @c scalarFallback_ instead of the SIMD path.
+  bool useScalarFallback_ = false;
 
   // weights for the error functions
   static constexpr T kCollisionWeight = 5e-3f;
