@@ -16,6 +16,7 @@
 #include <momentum/character/skin_weights.h>
 #include <momentum/character/types.h>
 #include <momentum/common/exception.h>
+#include <momentum/common/log.h>
 #include <momentum/io/common/stream_utils.h>
 #include <momentum/math/mesh.h>
 #include <momentum/math/transform.h>
@@ -392,23 +393,52 @@ CollisionGeometry legacyCollisionToMomentum(const nlohmann::json& legacyCollisio
   if (legacyCollision.is_array()) {
     collision.reserve(legacyCollision.size());
 
-    for (const auto& capsuleJson : legacyCollision) {
+    for (const auto& primitiveJson : legacyCollision) {
+      const std::string type = primitiveJson.value("type", "tapered_capsule");
+
+      if (type == "ellipsoid" || type == "collision_ellipsoid") {
+        CollisionEllipsoid ellipsoid;
+
+        if (primitiveJson.contains("transformation")) {
+          ellipsoid.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
+        }
+
+        if (primitiveJson.contains("radii")) {
+          ellipsoid.radii = jsonArrayToEigenVector3<float>(primitiveJson["radii"]);
+        } else if (primitiveJson.contains("ellipsoidRadii")) {
+          ellipsoid.radii = jsonArrayToEigenVector3<float>(primitiveJson["ellipsoidRadii"]);
+        }
+
+        if (primitiveJson.contains("parent")) {
+          ellipsoid.parent = primitiveJson["parent"].get<size_t>();
+        }
+
+        collision.push_back(ellipsoid);
+        continue;
+      }
+
+      if (type != "tapered_capsule") {
+        MT_LOGW(
+            "Unknown collision primitive type '{}' in legacy JSON; falling back to tapered capsule.",
+            type);
+      }
+
       TaperedCapsule capsule;
 
-      if (capsuleJson.contains("transformation")) {
-        capsule.transformation = jsonToTransform<float>(capsuleJson["transformation"]);
+      if (primitiveJson.contains("transformation")) {
+        capsule.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
       }
 
-      if (capsuleJson.contains("radius")) {
-        capsule.radius = jsonArrayToEigenVector2<float>(capsuleJson["radius"]);
+      if (primitiveJson.contains("radius")) {
+        capsule.radius = jsonArrayToEigenVector2<float>(primitiveJson["radius"]);
       }
 
-      if (capsuleJson.contains("parent")) {
-        capsule.parent = capsuleJson["parent"].get<size_t>();
+      if (primitiveJson.contains("parent")) {
+        capsule.parent = primitiveJson["parent"].get<size_t>();
       }
 
-      if (capsuleJson.contains("length")) {
-        capsule.length = capsuleJson["length"].get<float>();
+      if (primitiveJson.contains("length")) {
+        capsule.length = primitiveJson["length"].get<float>();
       }
 
       collision.push_back(capsule);
@@ -421,15 +451,22 @@ CollisionGeometry legacyCollisionToMomentum(const nlohmann::json& legacyCollisio
 nlohmann::json momentumCollisionToLegacy(const CollisionGeometry& collision) {
   nlohmann::json legacyCollision = nlohmann::json::array();
 
-  for (const auto& capsule : collision) {
-    nlohmann::json capsuleJson;
+  for (const auto& primitive : collision) {
+    nlohmann::json primitiveJson;
 
-    capsuleJson["transformation"] = transformToJson(capsule.transformation);
-    capsuleJson["radius"] = eigenToJsonArray(capsule.radius);
-    capsuleJson["parent"] = capsule.parent;
-    capsuleJson["length"] = capsule.length;
+    primitiveJson["transformation"] = transformToJson(primitive.transformation);
+    primitiveJson["parent"] = primitive.parent;
 
-    legacyCollision.push_back(capsuleJson);
+    if (primitive.type == CollisionPrimitiveType::TaperedCapsule) {
+      primitiveJson["type"] = "tapered_capsule";
+      primitiveJson["radius"] = eigenToJsonArray(primitive.radius);
+      primitiveJson["length"] = primitive.length;
+    } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
+      primitiveJson["type"] = "ellipsoid";
+      primitiveJson["radii"] = eigenToJsonArray(primitive.ellipsoidRadii);
+    }
+
+    legacyCollision.push_back(primitiveJson);
   }
 
   return legacyCollision;
