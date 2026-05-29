@@ -130,6 +130,37 @@ def inverse(q: NDArray) -> NDArray:
     return conjugate(q) / np.maximum((q * q).sum(axis=-1, keepdims=True), 1e-7)
 
 
+def align_z_with(direction: NDArray) -> NDArray:
+    """
+    Return an xyzw quaternion that rotates the +Z axis onto *direction*.
+
+    The returned quaternion represents the shortest-arc rotation from ``[0, 0, 1]``
+    to the normalized direction vector. Useful for orienting Z-aligned primitives
+    (capsules, cylinders) along an arbitrary world-space direction.
+
+    :param direction: A 3D direction vector. Normalized internally; a near-zero
+        vector returns the identity quaternion.
+    :return: A normalized xyzw quaternion.
+    """
+    direction = np.asarray(direction, dtype=np.float64)
+    norm = float(np.linalg.norm(direction))
+    if norm <= 1e-12:
+        return np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float64)
+
+    z_axis = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+    target = direction / norm
+    dot = float(np.dot(z_axis, target))
+    if dot > 1.0 - 1e-10:
+        return np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float64)
+    if dot < -1.0 + 1e-10:
+        # 180-degree flip from +Z; use +X as the rotation axis.
+        return np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+
+    xyz = np.cross(z_axis, target)
+    q = np.array([xyz[0], xyz[1], xyz[2], 1.0 + dot], dtype=np.float64)
+    return q / np.linalg.norm(q)
+
+
 def _get_nonzero_denominator(d: NDArray, eps: float) -> NDArray:
     near_zeros = np.abs(d) < eps
     d = d * (~near_zeros)
