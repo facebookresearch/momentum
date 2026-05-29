@@ -39,7 +39,7 @@ Individual functions are also available:
   and update only bone transforms
 - :func:`add_joints` / :func:`update_joints` — manage skeleton joint frames
 - :func:`add_collision_geometry` / :func:`update_collision_geometry` — manage
-  tapered capsule and ellipsoid collision primitives
+  capsule, ellipsoid, and box collision primitives
 - :func:`add_character` / :func:`update_character` / :func:`remove_character` —
   manage a complete character
 
@@ -180,6 +180,20 @@ def _ellipsoid_render_state(
         primitive, skel_state
     )
     half_sizes = np.asarray(primitive.radii, dtype=np.float64) * parent_scale * scale
+    return center * scale, quaternion, np.maximum(half_sizes, 1e-8)
+
+
+def _box_render_state(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    center, quaternion, parent_scale, _world_scale = _collision_world_transform(
+        primitive, skel_state
+    )
+    half_sizes = (
+        np.asarray(primitive.half_extents, dtype=np.float64) * parent_scale * scale
+    )
     return center * scale, quaternion, np.maximum(half_sizes, 1e-8)
 
 
@@ -792,6 +806,19 @@ def add_collision_geometry(
                 position=center,
             )
             handles.append(_CollisionPrimitiveHandles("ellipsoid", (ellipsoid,)))
+        elif hasattr(primitive, "half_extents"):
+            center, quaternion, half_sizes = _box_render_state(
+                primitive, skel_state, scale
+            )
+            box = server.scene.add_box(
+                f"{entity_path}/box_{i}",
+                dimensions=tuple(float(v) for v in 2.0 * half_sizes),
+                color=color,
+                opacity=opacity,
+                wxyz=_xyzw_to_wxyz(quaternion),
+                position=center,
+            )
+            handles.append(_CollisionPrimitiveHandles("box", (box,)))
         else:
             raise ValueError(
                 f"Unsupported collision primitive at index {i}: {type(primitive).__name__}"
@@ -842,6 +869,14 @@ def update_collision_geometry(
             ellipsoid.position = center
             ellipsoid.wxyz = _xyzw_to_wxyz(quaternion)
             ellipsoid.scale = tuple(float(v) for v in half_sizes)
+        elif primitive_handles.kind == "box":
+            center, quaternion, half_sizes = _box_render_state(
+                primitive, skel_state, scale
+            )
+            (box,) = primitive_handles.parts
+            box.position = center
+            box.wxyz = _xyzw_to_wxyz(quaternion)
+            box.dimensions = tuple(float(v) for v in 2.0 * half_sizes)
         else:
             raise ValueError(
                 f"Unsupported collision handle kind: {primitive_handles.kind}"

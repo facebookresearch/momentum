@@ -106,6 +106,10 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                         parent=1,
                         radii=np.array([0.3, 0.2, 0.1], dtype=np.float32),
                     ),
+                    geo.Box(
+                        parent=2,
+                        half_extents=np.array([0.4, 0.3, 0.2], dtype=np.float32),
+                    ),
                 ]
             )
 
@@ -308,14 +312,17 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             handles = add_collision_geometry(
                 self.server, "test_collision_geometry", character, skel_state, scale=1.0
             )
-            self.assertEqual(len(handles), 2)
+            self.assertEqual(len(handles), 3)
             self.assertEqual(handles[0].kind, "capsule")
             self.assertEqual(handles[1].kind, "ellipsoid")
+            self.assertEqual(handles[2].kind, "box")
 
             cylinder = handles[0].parts[0]
             cylinder_position_before = float(cylinder.position[0])
             ellipsoid = handles[1].parts[0]
             ellipsoid_position_before = float(ellipsoid.position[0])
+            box = handles[2].parts[0]
+            box_position_before = float(box.position[0])
 
             moved = skel_state.copy()
             moved[:, 0] += 1.0
@@ -326,6 +333,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             self.assertGreater(
                 float(ellipsoid.position[0]), ellipsoid_position_before + 0.005
             )
+            self.assertGreater(float(box.position[0]), box_position_before + 0.005)
 
             for primitive_handles in handles:
                 for part in primitive_handles.parts:
@@ -337,12 +345,14 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             handles = add_character(
                 self.server, "test_char_collision", character, skel_state
             )
-            self.assertEqual(len(handles.collision_handles), 2)
+            self.assertEqual(len(handles.collision_handles), 3)
 
             cylinder = handles.collision_handles[0].parts[0]
             cylinder_position_before = float(cylinder.position[0])
             ellipsoid = handles.collision_handles[1].parts[0]
             ellipsoid_position_before = float(ellipsoid.position[0])
+            box = handles.collision_handles[2].parts[0]
+            box_position_before = float(box.position[0])
 
             moved = skel_state.copy()
             moved[:, 0] += 1.0
@@ -353,6 +363,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             self.assertGreater(
                 float(ellipsoid.position[0]), ellipsoid_position_before + 0.005
             )
+            self.assertGreater(float(box.position[0]), box_position_before + 0.005)
             remove_character(handles)
             self.assertEqual(handles.collision_handles, [])
 
