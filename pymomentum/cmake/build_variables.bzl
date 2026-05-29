@@ -23,6 +23,7 @@ backend_triton_sources = [
     "backend/triton_fk.py",
     "backend/triton_quaternion.py",
     "backend/triton_skel_state.py",
+    "backend/triton_skinning.py",
 ]
 
 python_utility_public_headers = [
