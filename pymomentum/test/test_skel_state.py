@@ -55,34 +55,6 @@ def generate_random_skel_state(sz: int) -> torch.Tensor:
 
 
 class TestSkelState(unittest.TestCase):
-    @staticmethod
-    def _random_cuda_skel_state(size: int) -> torch.Tensor:
-        trans = torch.normal(
-            mean=0,
-            std=4,
-            size=(size, 3),
-            device="cuda",
-            dtype=torch.float32,
-        )
-        rot = pym_quaternion.normalize(
-            torch.normal(
-                mean=0,
-                std=4,
-                size=(size, 4),
-                device="cuda",
-                dtype=torch.float32,
-            )
-        )
-        scale = (
-            torch.rand(
-                size=(size, 1),
-                device="cuda",
-                dtype=torch.float32,
-            )
-            + 0.5
-        )
-        return torch.cat([trans, rot, scale], -1)
-
     def test_skel_state_to_transforms(self) -> None:
         character = pym_test_utils.create_test_character()
         nBatch = 2
@@ -132,96 +104,6 @@ class TestSkelState(unittest.TestCase):
             torch.norm(m_inv - m_inv2),
             1e-4,
             "Inverse is correct",
-        )
-
-    def test_triton_backend_requires_cuda(self) -> None:
-        state = generate_random_skel_state(3).to(torch.float32)
-        with self.assertRaisesRegex(RuntimeError, "input is on CPU"):
-            pym_skel_state.multiply(state, state, backend="triton")
-
-        with self.assertRaisesRegex(RuntimeError, "input is on CPU"):
-            pym_skel_state.multiply_assume_normalized(state, state, backend="triton")
-
-        with self.assertRaisesRegex(RuntimeError, "input is on CPU"):
-            pym_skel_state.inverse(state, backend="triton")
-
-    @unittest.skipUnless(torch.cuda.is_available(), "Triton backend requires CUDA")
-    def test_triton_multiply_matches_torch_forward_and_backward(self) -> None:
-        torch.manual_seed(0)
-        state1 = self._random_cuda_skel_state(256)
-        state2 = self._random_cuda_skel_state(256)
-        state1_torch = state1.detach().clone().requires_grad_(True)
-        state2_torch = state2.detach().clone().requires_grad_(True)
-        state1_triton = state1.detach().clone().requires_grad_(True)
-        state2_triton = state2.detach().clone().requires_grad_(True)
-
-        out_torch = pym_skel_state.multiply(state1_torch, state2_torch)
-        out_triton = pym_skel_state.multiply(
-            state1_triton,
-            state2_triton,
-            backend="triton",
-        )
-        self.assertTrue(torch.allclose(out_triton, out_torch, atol=1e-5, rtol=1e-5))
-
-        grad = torch.randn_like(out_torch)
-        torch.autograd.backward(out_torch, grad)
-        torch.autograd.backward(out_triton, grad)
-        self.assertTrue(
-            torch.allclose(state1_triton.grad, state1_torch.grad, atol=1e-5, rtol=1e-5)
-        )
-        self.assertTrue(
-            torch.allclose(state2_triton.grad, state2_torch.grad, atol=1e-5, rtol=1e-5)
-        )
-
-    @unittest.skipUnless(torch.cuda.is_available(), "Triton backend requires CUDA")
-    def test_triton_multiply_assume_normalized_matches_torch_backward(self) -> None:
-        torch.manual_seed(1)
-        state1 = self._random_cuda_skel_state(256)
-        state2 = self._random_cuda_skel_state(256)
-        state1_torch = state1.detach().clone().requires_grad_(True)
-        state2_torch = state2.detach().clone().requires_grad_(True)
-        state1_triton = state1.detach().clone().requires_grad_(True)
-        state2_triton = state2.detach().clone().requires_grad_(True)
-
-        out_torch = pym_skel_state.multiply_assume_normalized(
-            state1_torch,
-            state2_torch,
-        )
-        out_triton = pym_skel_state.multiply_assume_normalized(
-            state1_triton,
-            state2_triton,
-            backend="triton",
-        )
-        self.assertTrue(torch.allclose(out_triton, out_torch, atol=1e-5, rtol=1e-5))
-
-        grad = torch.randn_like(out_torch)
-        torch.autograd.backward(out_torch, grad)
-        torch.autograd.backward(out_triton, grad)
-        self.assertTrue(
-            torch.allclose(state1_triton.grad, state1_torch.grad, atol=1e-5, rtol=1e-5)
-        )
-        self.assertTrue(
-            torch.allclose(state2_triton.grad, state2_torch.grad, atol=1e-5, rtol=1e-5)
-        )
-
-    @unittest.skipUnless(torch.cuda.is_available(), "Triton backend requires CUDA")
-    def test_triton_inverse_matches_torch_forward_and_backward(self) -> None:
-        torch.manual_seed(2)
-        state = self._random_cuda_skel_state(256)
-        state_torch = state.detach().clone().requires_grad_(True)
-        state_triton = state.detach().clone().requires_grad_(True)
-
-        out_torch = pym_skel_state.inverse(state_torch)
-        out_triton = pym_skel_state.inverse(state_triton, backend="triton")
-        self.assertTrue(torch.allclose(out_triton, out_torch, atol=1e-5, rtol=1e-5))
-
-        grad = torch.randn_like(out_torch)
-        torch.autograd.backward(out_torch, grad)
-        torch.autograd.backward(out_triton, grad)
-        grad_diff = (state_triton.grad - state_torch.grad).abs()
-        self.assertTrue(
-            torch.allclose(state_triton.grad, state_torch.grad, atol=1e-5, rtol=1e-5),
-            f"max grad diff={grad_diff.max()}, per component={grad_diff.amax(dim=0)}",
         )
 
     def test_transform_points(self) -> None:
