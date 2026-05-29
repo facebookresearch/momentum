@@ -38,6 +38,8 @@ Individual functions are also available:
 - :func:`add_skinned_mesh` / :func:`update_skinned_mesh` — upload mesh data once
   and update only bone transforms
 - :func:`add_joints` / :func:`update_joints` — manage skeleton joint frames
+- :func:`add_collision_geometry` / :func:`update_collision_geometry` — manage
+  tapered capsule and ellipsoid collision primitives
 - :func:`add_character` / :func:`update_character` / :func:`remove_character` —
   manage a complete character
 
@@ -55,11 +57,23 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, TYPE_CHECKING, TypeAlias
 
 import numpy as np
-from pymomentum.quaternion_np import from_rotation_matrix
+from pymomentum.quaternion_np import (
+    from_rotation_matrix,
+    multiply_assume_normalized,
+    to_rotation_matrix_assume_normalized,
+)
 
 if TYPE_CHECKING:
     import viser
     from pymomentum.geometry import Character, Mesh  # @manual=:geometry
+
+
+@dataclass
+class _CollisionPrimitiveHandles:
+    """Handle group for one rendered collision primitive."""
+
+    kind: str
+    parts: tuple[Any, ...]
 
 
 @dataclass
@@ -74,6 +88,7 @@ class CharacterHandles:
     bones_handle: Any | None = None
     mesh_handle: Any | None = None
     wireframe_handle: Any | None = None
+    collision_handles: list[_CollisionPrimitiveHandles] = field(default_factory=list)
 
 
 @dataclass
@@ -91,12 +106,81 @@ _ColoredMeshGroups: TypeAlias = list[
 
 #: Default scale factor to convert momentum units (cm) to meters for viser.
 CM_TO_M: float = 0.01
+_COLLISION_COLOR: tuple[int, int, int] = (128, 64, 64)
+_Z_TO_X_QUAT_XYZW: np.ndarray = np.array(
+    [0.0, math.sqrt(0.5), 0.0, math.sqrt(0.5)], dtype=np.float64
+)
 
 
 def _xyzw_to_wxyz(q: np.ndarray) -> np.ndarray:
     """Convert quaternion from ``[x, y, z, w]`` (pymomentum) to ``[w, x, y, z]`` (viser)."""
     q_arr = np.asarray(q, dtype=np.float64)
     return np.concatenate((q_arr[..., 3:4], q_arr[..., :3]), axis=-1)
+
+
+def _is_valid_parent(parent: int, skel_state: np.ndarray) -> bool:
+    return 0 <= parent < skel_state.shape[0]
+
+
+def _uniform_scale(linear: np.ndarray) -> float:
+    scale = float(np.linalg.norm(linear[:, 0]))
+    return scale if scale > 1e-8 else 1.0
+
+
+def _collision_world_transform(
+    primitive: Any,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float, float]:
+    local = np.asarray(primitive.transformation, dtype=np.float64)
+    parent_scale = 1.0
+    parent_transform = np.eye(4, dtype=np.float64)
+    parent = int(primitive.parent)
+    if _is_valid_parent(parent, skel_state):
+        parent_scale = float(skel_state[parent, 7])
+        parent_rotation = to_rotation_matrix_assume_normalized(
+            skel_state[parent, 3:7][None, :]
+        )[0]
+        parent_transform[:3, :3] = parent_rotation * parent_scale
+        parent_transform[:3, 3] = skel_state[parent, :3]
+
+    world = parent_transform @ local
+    world_scale = _uniform_scale(world[:3, :3])
+    rotation = world[:3, :3] / world_scale
+    world_quat = from_rotation_matrix(rotation[None, :, :])[0].astype(np.float64)
+    return world[:3, 3], world_quat, parent_scale, world_scale
+
+
+def _capsule_render_state(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, float, np.ndarray]:
+    origin, quaternion, parent_scale, world_scale = _collision_world_transform(
+        primitive, skel_state
+    )
+    capsule_quat = multiply_assume_normalized(quaternion, _Z_TO_X_QUAT_XYZW)
+    rotation = to_rotation_matrix_assume_normalized(quaternion[None, :])[0]
+    axis = rotation[:, 0]
+    length = max(float(primitive.length) * world_scale * scale, 1e-8)
+    radius = max(
+        float(np.max(np.asarray(primitive.radius))) * parent_scale * scale, 1e-8
+    )
+    start = origin * scale
+    end = start + axis * length
+    center = start + axis * (0.5 * length)
+    return center, start, end, radius, length, capsule_quat
+
+
+def _ellipsoid_render_state(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    center, quaternion, parent_scale, _world_scale = _collision_world_transform(
+        primitive, skel_state
+    )
+    half_sizes = np.asarray(primitive.radii, dtype=np.float64) * parent_scale * scale
+    return center * scale, quaternion, np.maximum(half_sizes, 1e-8)
 
 
 def _get_vertex_colors(mesh: Mesh, n_vertices: int) -> np.ndarray | None:
@@ -638,6 +722,138 @@ def update_joints(
             bones_handle.points = segments
 
 
+def add_collision_geometry(
+    server: viser.ViserServer,
+    entity_path: str,
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+    color: tuple[int, int, int] = _COLLISION_COLOR,
+    opacity: float = 0.35,
+) -> list[_CollisionPrimitiveHandles]:
+    """Add character collision primitives to the viser scene.
+
+    Tapered capsules are visualized with the maximum endpoint radius because
+    viser does not expose tapered capsules directly.
+
+    :param server: The viser server instance.
+    :param entity_path: Scene-graph path for the collision-geometry node.
+    :param character: The character whose collision primitives are added.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    :param scale: Unit conversion factor applied to positions and sizes.
+    :param color: RGB color tuple for rendered primitives.
+    :param opacity: Primitive opacity in the scene.
+    :return: Handle groups for the rendered collision primitives.
+    """
+    handles: list[_CollisionPrimitiveHandles] = []
+    for i, primitive in enumerate(character.collision_geometry):
+        if hasattr(primitive, "length"):
+            center, start, end, radius, length, quaternion = _capsule_render_state(
+                primitive, skel_state, scale
+            )
+            cylinder = server.scene.add_cylinder(
+                f"{entity_path}/capsule_{i}/body",
+                radius=radius,
+                height=length,
+                color=color,
+                opacity=opacity,
+                wxyz=_xyzw_to_wxyz(quaternion),
+                position=center,
+            )
+            start_cap = server.scene.add_icosphere(
+                f"{entity_path}/capsule_{i}/start",
+                radius=radius,
+                color=color,
+                opacity=opacity,
+                position=start,
+            )
+            end_cap = server.scene.add_icosphere(
+                f"{entity_path}/capsule_{i}/end",
+                radius=radius,
+                color=color,
+                opacity=opacity,
+                position=end,
+            )
+            handles.append(
+                _CollisionPrimitiveHandles("capsule", (cylinder, start_cap, end_cap))
+            )
+        elif hasattr(primitive, "radii"):
+            center, quaternion, half_sizes = _ellipsoid_render_state(
+                primitive, skel_state, scale
+            )
+            ellipsoid = server.scene.add_icosphere(
+                f"{entity_path}/ellipsoid_{i}",
+                radius=1.0,
+                color=color,
+                opacity=opacity,
+                scale=tuple(float(v) for v in half_sizes),
+                wxyz=_xyzw_to_wxyz(quaternion),
+                position=center,
+            )
+            handles.append(_CollisionPrimitiveHandles("ellipsoid", (ellipsoid,)))
+        else:
+            raise ValueError(
+                f"Unsupported collision primitive at index {i}: {type(primitive).__name__}"
+            )
+
+    return handles
+
+
+def update_collision_geometry(
+    handles: list[_CollisionPrimitiveHandles],
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+) -> None:
+    """Update existing viser collision primitive handles.
+
+    :param handles: Handle groups returned by :func:`add_collision_geometry`.
+    :param character: The character whose collision primitives are being updated.
+    :param skel_state: New skeleton state array of shape ``(n_joints, 8)``.
+    :param scale: Unit conversion factor applied to positions and sizes.
+    """
+    primitives = character.collision_geometry
+    if len(handles) != len(primitives):
+        raise ValueError(
+            f"Expected {len(handles)} collision handles for {len(primitives)} primitives"
+        )
+
+    for primitive_handles, primitive in zip(handles, primitives):
+        if primitive_handles.kind == "capsule":
+            center, start, end, radius, length, quaternion = _capsule_render_state(
+                primitive, skel_state, scale
+            )
+            cylinder, start_cap, end_cap = primitive_handles.parts
+            cylinder.position = center
+            cylinder.wxyz = _xyzw_to_wxyz(quaternion)
+            cylinder.radius = radius
+            cylinder.height = length
+            start_cap.position = start
+            start_cap.radius = radius
+            end_cap.position = end
+            end_cap.radius = radius
+        elif primitive_handles.kind == "ellipsoid":
+            center, quaternion, half_sizes = _ellipsoid_render_state(
+                primitive, skel_state, scale
+            )
+            (ellipsoid,) = primitive_handles.parts
+            ellipsoid.position = center
+            ellipsoid.wxyz = _xyzw_to_wxyz(quaternion)
+            ellipsoid.scale = tuple(float(v) for v in half_sizes)
+        else:
+            raise ValueError(
+                f"Unsupported collision handle kind: {primitive_handles.kind}"
+            )
+
+
+def _remove_collision_geometry(handles: list[_CollisionPrimitiveHandles]) -> None:
+    for primitive_handles in handles:
+        for part in primitive_handles.parts:
+            part.remove()
+
+
 def add_character(
     server: viser.ViserServer,
     entity_path: str,
@@ -653,11 +869,12 @@ def add_character(
 ) -> CharacterHandles:
     """Add a complete character visualization to the viser scene.
 
-    Creates joint frames and optionally a mesh, returning handles for
+    Creates joint frames, collision geometry, and optionally a mesh, returning handles for
     subsequent updates via :func:`update_character`.
 
     - ``{entity_path}/joints/{name}`` — per-joint coordinate frames
     - ``{entity_path}/mesh`` — posed or skinned mesh
+    - ``{entity_path}/collision_geometry`` — collision primitives
 
     :param server: The viser server instance.
     :param entity_path: Root scene-graph path for the character.
@@ -696,6 +913,15 @@ def add_character(
     elif posed_mesh is not None:
         handles.mesh_handle, handles.wireframe_handle = add_mesh(
             server, f"{entity_path}/mesh", posed_mesh, color=color, scale=scale
+        )
+
+    if character.collision_geometry:
+        handles.collision_handles = add_collision_geometry(
+            server,
+            f"{entity_path}/collision_geometry",
+            character,
+            skel_state,
+            scale=scale,
         )
 
     return handles
@@ -738,6 +964,11 @@ def update_character(
                 handles.mesh_handle, handles.wireframe_handle, posed_mesh, scale=scale
             )
 
+        if handles.collision_handles:
+            update_collision_geometry(
+                handles.collision_handles, character, skel_state, scale=scale
+            )
+
         server.flush()
 
 
@@ -761,11 +992,13 @@ def remove_character(
         _remove_solid_mesh(handles.mesh_handle)
         if handles.wireframe_handle is not None:
             handles.wireframe_handle.remove()
+        _remove_collision_geometry(handles.collision_handles)
 
     handles.joint_frames.clear()
     handles.bones_handle = None
     handles.mesh_handle = None
     handles.wireframe_handle = None
+    handles.collision_handles.clear()
 
 
 # =============================================================================

@@ -34,6 +34,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
         _xyzw_to_wxyz,
         add_character,
         add_character_param_sliders,
+        add_collision_geometry,
         add_joints,
         add_log_panel,
         add_mesh,
@@ -42,6 +43,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
         CharacterHandles,
         remove_character,
         update_character,
+        update_collision_geometry,
         update_joints,
         update_mesh,
         update_skinned_mesh,
@@ -89,6 +91,23 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                 normals=character.mesh.normals,
             )
             return character.with_mesh_and_skin_weights(mesh, character.skin_weights)
+
+        def _with_mixed_collision_geometry(
+            self, character: geo.Character
+        ) -> geo.Character:
+            return character.with_collision_geometry(
+                [
+                    geo.TaperedCapsule(
+                        parent=0,
+                        radius=np.array([0.1, 0.2], dtype=np.float32),
+                        length=1.0,
+                    ),
+                    geo.Ellipsoid(
+                        parent=1,
+                        radii=np.array([0.3, 0.2, 0.1], dtype=np.float32),
+                    ),
+                ]
+            )
 
         def _make_colored_skinned_character_and_skel_state(
             self,
@@ -282,6 +301,60 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             for part in solid_handle:
                 part.handle.remove()
             wireframe_handle.remove()
+
+        def test_add_and_update_collision_geometry(self) -> None:
+            character, skel_state = self._make_character_and_skel_state()
+            character = self._with_mixed_collision_geometry(character)
+            handles = add_collision_geometry(
+                self.server, "test_collision_geometry", character, skel_state, scale=1.0
+            )
+            self.assertEqual(len(handles), 2)
+            self.assertEqual(handles[0].kind, "capsule")
+            self.assertEqual(handles[1].kind, "ellipsoid")
+
+            cylinder = handles[0].parts[0]
+            cylinder_position_before = float(cylinder.position[0])
+            ellipsoid = handles[1].parts[0]
+            ellipsoid_position_before = float(ellipsoid.position[0])
+
+            moved = skel_state.copy()
+            moved[:, 0] += 1.0
+            update_collision_geometry(handles, character, moved, scale=1.0)
+            self.assertGreater(
+                float(cylinder.position[0]), cylinder_position_before + 0.005
+            )
+            self.assertGreater(
+                float(ellipsoid.position[0]), ellipsoid_position_before + 0.005
+            )
+
+            for primitive_handles in handles:
+                for part in primitive_handles.parts:
+                    part.remove()
+
+        def test_add_character_includes_collision_geometry(self) -> None:
+            character, skel_state = self._make_character_and_skel_state()
+            character = self._with_mixed_collision_geometry(character)
+            handles = add_character(
+                self.server, "test_char_collision", character, skel_state
+            )
+            self.assertEqual(len(handles.collision_handles), 2)
+
+            cylinder = handles.collision_handles[0].parts[0]
+            cylinder_position_before = float(cylinder.position[0])
+            ellipsoid = handles.collision_handles[1].parts[0]
+            ellipsoid_position_before = float(ellipsoid.position[0])
+
+            moved = skel_state.copy()
+            moved[:, 0] += 1.0
+            update_character(self.server, handles, character, moved)
+            self.assertGreater(
+                float(cylinder.position[0]), cylinder_position_before + 0.005
+            )
+            self.assertGreater(
+                float(ellipsoid.position[0]), ellipsoid_position_before + 0.005
+            )
+            remove_character(handles)
+            self.assertEqual(handles.collision_handles, [])
 
         def test_add_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
