@@ -14,8 +14,11 @@
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/test/io/io_helpers.h>
 
 #include <gtest/gtest.h>
+
+#include <fstream>
 
 using namespace momentum;
 
@@ -145,6 +148,38 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithParamsAndLocators_LoadsB
 
   EXPECT_GT(character.parameterTransform.numAllModelParameters(), 0);
   EXPECT_GT(character.locators.size(), 0);
+}
+
+TEST_F(ConvertModelTest, LoadModelCharacter_Urdf_LoadsCharacter) {
+  auto tempDir = temporaryDirectory("convert_model_urdf");
+  const auto urdfPath = tempDir.path() / "robot.urdf";
+  {
+    std::ofstream file(urdfPath);
+    ASSERT_TRUE(file.good());
+    file << R"(
+      <?xml version="1.0"?>
+      <robot name="convert_model_robot">
+        <link name="base_link"/>
+        <link name="child_link"/>
+        <joint name="joint1" type="fixed">
+          <parent link="base_link"/>
+          <child link="child_link"/>
+          <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        </joint>
+      </robot>
+    )";
+  }
+
+  Options options;
+  options.input_model_file = urdfPath.string();
+
+  const Character character = loadModelCharacter(options);
+
+  ASSERT_EQ(character.skeleton.joints.size(), 2);
+  EXPECT_EQ(character.name, "convert_model_robot");
+  EXPECT_EQ(character.skeleton.joints[0].name, "base_link");
+  EXPECT_EQ(character.skeleton.joints[1].name, "child_link");
+  EXPECT_EQ(character.skeleton.joints[1].parent, 0);
 }
 
 // ============================================================================

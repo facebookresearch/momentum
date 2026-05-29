@@ -19,6 +19,22 @@
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/skeleton/parameters_io.h>
+#include <momentum/io/urdf/urdf_io.h>
+
+namespace {
+
+void applyOptionalInputs(momentum::Character& character, const momentum::Options& options) {
+  if (!options.input_params_file.empty()) {
+    auto def = momentum::loadMomentumModel(options.input_params_file);
+    momentum::loadParameters(def, character);
+  }
+  if (!options.input_locator_file.empty()) {
+    character.locators = momentum::loadLocators(
+        options.input_locator_file, character.skeleton, character.parameterTransform);
+  }
+}
+
+} // namespace
 
 namespace momentum {
 
@@ -72,16 +88,23 @@ void initializeCharacterFromFbx(
     const Character& fbxCharacter,
     const Options& options) {
   character = fbxCharacter;
-  if (!options.input_params_file.empty()) {
-    auto def = loadMomentumModel(options.input_params_file);
-    loadParameters(def, character);
-  } else {
+  if (options.input_params_file.empty()) {
     character.parameterTransform = ParameterTransform::identity(character.skeleton.getJointNames());
   }
-  if (!options.input_locator_file.empty()) {
-    character.locators =
-        loadLocators(options.input_locator_file, character.skeleton, character.parameterTransform);
+  applyOptionalInputs(character, options);
+}
+
+Character loadModelCharacter(const Options& options) {
+  const filesystem::path modelPath(options.input_model_file);
+  if (modelPath.extension() != ".urdf") {
+    return loadFullCharacter(
+        options.input_model_file, options.input_params_file, options.input_locator_file);
   }
+
+  MT_LOGI("Loading URDF model...");
+  Character character = loadUrdfCharacter(modelPath);
+  applyOptionalInputs(character, options);
+  return character;
 }
 
 MatrixXf convertToModelParams(
