@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Convert Model
 
-The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX and GLB formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx` or `.glb`). If no input model is provided, the tool will automatically read the animation from an existing GLB or FBX file.
+The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX and GLB formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx`, `.glb`, `.gltf`, or `.urdf`). If no input model is provided, the tool will automatically read the animation from an existing GLB or FBX file.
 
 <FbInternalOnly>
 
@@ -19,13 +19,15 @@ convert_model [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
-  -m,--model TEXT:FILE        Input model (.fbx/.glb); not required if reading animation from glb or fbx
+  -m,--model TEXT:FILE        Input model (.fbx/.glb/.gltf/.urdf); not required if reading animation from glb or fbx
   -p,--parameters TEXT:FILE   Input model parameter file (.model)
   -l,--locator TEXT:FILE      Input locator file (.locators)
-  -d,--motion TEXT:FILE       Input motion data file (.mmo/.glb/.fbx)
-  -o,--out TEXT REQUIRED      Output file (.fbx/.glb)
-  --out-locator TEXT          Output a locator file (.locators)
-  --save-markers              Save marker data from motion file in output (glb only)
+  -d,--motion TEXT:FILE       Input motion data file (.glb/.fbx)
+  -o,--out TEXT REQUIRED      Output file (.fbx/.glb/.gltf)
+  --out-locators-local TEXT   Output a locator file (.locators) in local space for transferring between identities
+  --out-locators-global TEXT  Output a locator file (.locators) in global space for authoring a template
+  --out-parameters TEXT       Output a model parameter file (.model) containing the parameter transform and limits
+  --save-markers              Save marker data from input motion file in the output
   -c,--character-mesh         (FBX Output file only) Saves the Character Mesh to the output file.
 ```
 

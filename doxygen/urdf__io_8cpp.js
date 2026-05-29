@@ -4,6 +4,7 @@ var urdf__io_8cpp =
     [ "loadUrdfCharacter", "urdf__io_8cpp.html#a797797c5d470e56c2a5d738f858fe4d4", null ],
     [ "loadUrdfCharacter", "urdf__io_8cpp.html#a0dd4fee3a4c8a1aa1f3cb4626bbf9707", null ],
     [ "axisIdx", "urdf__io_8cpp.html#a0e2b7f200623cc5b9c40e295cc559e24", null ],
+    [ "collision", "urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13", null ],
     [ "isRotation", "urdf__io_8cpp.html#a9537ba68b600bf91e04252729a48cead", null ],
     [ "jointIndex", "urdf__io_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c", null ],
     [ "jointParamsBaseIndex", "urdf__io_8cpp.html#a0b76385c81b1a449cdd16587aa940852", null ],

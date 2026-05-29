@@ -136,6 +136,8 @@
 </li>
         <li><a href="geometry.html#pymomentum.geometry.Character.__init__">(pymomentum.geometry.Character method)</a>
 </li>
+        <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale.__init__">(pymomentum.geometry.CharacterMassScale method)</a>
+</li>
         <li><a href="geometry.html#pymomentum.geometry.FbxBuilder.__init__">(pymomentum.geometry.FbxBuilder method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.FbxCoordSystem.__init__">(pymomentum.geometry.FbxCoordSystem method)</a>
@@ -155,6 +157,8 @@
         <li><a href="geometry.html#pymomentum.geometry.InverseParameterTransform.__init__">(pymomentum.geometry.InverseParameterTransform method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.Joint.__init__">(pymomentum.geometry.Joint method)</a>
+</li>
+        <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.__init__">(pymomentum.geometry.JointPhysicalProperties method)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.LimitData.__init__">(pymomentum.geometry.LimitData method)</a>
 </li>
@@ -711,6 +715,8 @@
         <li><a href="renderer.html#pymomentum.renderer.VerticalAlignment.Center">(pymomentum.renderer.VerticalAlignment attribute)</a>
 </li>
       </ul></li>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.center_of_mass_offset">center_of_mass_offset (pymomentum.geometry.JointPhysicalProperties property)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.HoleFillingMethod.Centroid">Centroid (pymomentum.axel.HoleFillingMethod attribute)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character">Character (class in pymomentum.geometry)</a>
@@ -720,6 +726,8 @@
 </li>
       </ul></li>
       <li><a href="solver2.html#pymomentum.solver2.VertexSequenceErrorFunction.character">character (pymomentum.solver2.VertexSequenceErrorFunction property)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale">CharacterMassScale (class in pymomentum.geometry)</a>
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.check">check() (in module pymomentum.quaternion)</a>
 
@@ -793,10 +801,10 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Character.clone">clone() (pymomentum.geometry.Character method)</a>
 </li>
-      <li><a href="axel.html#pymomentum.axel.TriBvh.closest_hit">closest_hit() (pymomentum.axel.TriBvh method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="axel.html#pymomentum.axel.TriBvh.closest_hit">closest_hit() (pymomentum.axel.TriBvh method)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.TriBvh.closest_surface_point">closest_surface_point() (pymomentum.axel.TriBvh method)</a>
 </li>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Collision">Collision (pymomentum.solver.ErrorFunctionType attribute)</a>
@@ -1299,6 +1307,10 @@
 </li>
       <li><a href="trs.html#pymomentum.trs.index_select">index_select() (in module pymomentum.trs)</a>
 </li>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.inertia">inertia (pymomentum.geometry.JointPhysicalProperties property)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.inertia_rotation">inertia_rotation (pymomentum.geometry.JointPhysicalProperties property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.LogLevel.Info">Info (pymomentum.geometry.LogLevel attribute)</a>
 </li>
       <li><a href="quaternion.html#pymomentum.quaternion.inverse">inverse() (in module pymomentum.quaternion)</a>
@@ -1347,12 +1359,20 @@
 </li>
       <li><a href="solver2.html#pymomentum.solver2.JointToJointDistanceConstraint.joint2">joint2 (pymomentum.solver2.JointToJointDistanceConstraint property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.joint_index">joint_index (pymomentum.geometry.LimitMinMaxJoint property)</a>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.joint_index">joint_index (pymomentum.geometry.JointPhysicalProperties property)</a>
+
+      <ul>
+        <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.joint_index">(pymomentum.geometry.LimitMinMaxJoint property)</a>
 </li>
+      </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.joint_index">joint_index() (pymomentum.geometry.Skeleton method)</a>
 </li>
-      <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.joint_name">joint_name (pymomentum.marker_tracking.GloveSensorObservation property)</a>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.joint_name">joint_name (pymomentum.geometry.JointPhysicalProperties property)</a>
+
+      <ul>
+        <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveSensorObservation.joint_name">(pymomentum.marker_tracking.GloveSensorObservation property)</a>
 </li>
+      </ul></li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.joint_names">joint_names (pymomentum.geometry.Skeleton property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.LimitMinMaxJoint.joint_parameter_index">joint_parameter_index (pymomentum.geometry.LimitMinMaxJoint property)</a>
@@ -1392,6 +1412,8 @@
       <li><a href="solver2.html#pymomentum.solver2.StateErrorFunction.joint_position_weights">joint_position_weights (pymomentum.solver2.StateErrorFunction property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.StateErrorFunction.joint_rotation_weights">joint_rotation_weights (pymomentum.solver2.StateErrorFunction property)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties">JointPhysicalProperties (class in pymomentum.geometry)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.joints">joints (pymomentum.geometry.Skeleton property)</a>
 </li>
@@ -1621,6 +1643,8 @@
 </li>
       <li><a href="geometry.html#pymomentum.geometry.MarkerSequence">MarkerSequence (class in pymomentum.geometry)</a>
 </li>
+      <li><a href="geometry.html#pymomentum.geometry.JointPhysicalProperties.mass">mass (pymomentum.geometry.JointPhysicalProperties property)</a>
+</li>
       <li><a href="axel.html#pymomentum.axel.BoundingBox.max">max (pymomentum.axel.BoundingBox property)</a>
 
       <ul>
@@ -1701,10 +1725,10 @@
 </li>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.ModelOptions.model">model (pymomentum.marker_tracking.ModelOptions property)</a>
 </li>
-      <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.model_parameter_index">model_parameter_index (pymomentum.geometry.LimitMinMax property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="geometry.html#pymomentum.geometry.LimitMinMax.model_parameter_index">model_parameter_index (pymomentum.geometry.LimitMinMax property)</a>
+</li>
       <li><a href="geometry.html#pymomentum.geometry.Character.model_parameter_limits">model_parameter_limits (pymomentum.geometry.Character property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.model_parameters_to_blend_shape_coefficients">model_parameters_to_blend_shape_coefficients() (in module pymomentum.geometry)</a>
@@ -1830,6 +1854,8 @@
         <li><a href="axel.html#pymomentum.axel.SignMethod.name">(pymomentum.axel.SignMethod property)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.Character.name">(pymomentum.geometry.Character property)</a>
+</li>
+        <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale.name">(pymomentum.geometry.CharacterMassScale property)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.FbxCoordSystem.name">(pymomentum.geometry.FbxCoordSystem property)</a>
 </li>
@@ -2082,6 +2108,8 @@
 </li>
       <li><a href="renderer.html#pymomentum.renderer.PhongMaterial">PhongMaterial (class in pymomentum.renderer)</a>
 </li>
+      <li><a href="geometry.html#pymomentum.geometry.Character.physical_properties">physical_properties (pymomentum.geometry.Character property)</a>
+</li>
       <li><a href="renderer.html#pymomentum.renderer.SkeletonStyle.Pipes">Pipes (pymomentum.renderer.SkeletonStyle attribute)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.Plane">Plane (pymomentum.solver2.VertexConstraintType attribute)</a>
@@ -2120,14 +2148,14 @@
         <li><a href="renderer.html#pymomentum.renderer.Light.position">(pymomentum.renderer.Light property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="solver.html#pymomentum.solver.ErrorFunctionType.Position">Position (pymomentum.solver.ErrorFunctionType attribute)</a>
 
       <ul>
         <li><a href="solver2.html#pymomentum.solver2.VertexConstraintType.Position">(pymomentum.solver2.VertexConstraintType attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="marker_tracking.html#pymomentum.marker_tracking.GloveConfig.position_weight">position_weight (pymomentum.marker_tracking.GloveConfig property)</a>
 </li>
       <li><a href="solver2.html#pymomentum.solver2.PositionData">PositionData (class in pymomentum.solver2)</a>
@@ -2139,6 +2167,10 @@
       <li><a href="geometry.html#pymomentum.geometry.Joint.pre_rotation_matrix">pre_rotation_matrix (pymomentum.geometry.Joint property)</a>
 </li>
       <li><a href="geometry.html#pymomentum.geometry.Skeleton.pre_rotations">pre_rotations (pymomentum.geometry.Skeleton property)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale.PreserveDensity">PreserveDensity (pymomentum.geometry.CharacterMassScale attribute)</a>
+</li>
+      <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale.PreserveMass">PreserveMass (pymomentum.geometry.CharacterMassScale attribute)</a>
 </li>
       <li><a href="axel.html#pymomentum.axel.TriBvh.primitive_count">primitive_count (pymomentum.axel.TriBvh property)</a>
 </li>
@@ -2929,6 +2961,8 @@
 
       <ul>
         <li><a href="axel.html#pymomentum.axel.SignMethod.value">(pymomentum.axel.SignMethod property)</a>
+</li>
+        <li><a href="geometry.html#pymomentum.geometry.CharacterMassScale.value">(pymomentum.geometry.CharacterMassScale property)</a>
 </li>
         <li><a href="geometry.html#pymomentum.geometry.FbxCoordSystem.value">(pymomentum.geometry.FbxCoordSystem property)</a>
 </li>

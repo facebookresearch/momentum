@@ -478,10 +478,10 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>}</div>
 <div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
 <div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollisionToMomentum</a>(<span class="keyword">const</span> nlohmann::json&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a>) {</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>  <a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> collision;</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>  <a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>;</div>
 <div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span> </div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a>.is_array()) {</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    collision.reserve(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a>.size());</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>.reserve(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a>.size());</div>
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsuleJson</a> : <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a>) {</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>      <a class="code hl_typedef" href="namespacemomentum.html#a42e781cd144a85f659d95b59e9ab3647">TaperedCapsule</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a>;</div>
@@ -502,17 +502,17 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a>.length = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsuleJson</a>[<span class="stringliteral">&quot;length&quot;</span>].get&lt;<span class="keywordtype">float</span>&gt;();</div>
 <div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>      }</div>
 <div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span> </div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>      collision.push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a>);</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>      <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>.push_back(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a>);</div>
 <div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>    }</div>
 <div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>  }</div>
 <div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span> </div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>  <span class="keywordflow">return</span> collision;</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>  <span class="keywordflow">return</span> <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>;</div>
 <div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>}</div>
 <div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentumCollisionToLegacy</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a>&amp; collision) {</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentumCollisionToLegacy</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a>&amp; <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>) {</div>
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>  nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollision</a> = nlohmann::json::array();</div>
 <div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span> </div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a> : collision) {</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a> : <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>) {</div>
 <div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>    nlohmann::json <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsuleJson</a>;</div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span> </div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsuleJson</a>[<span class="stringliteral">&quot;transformation&quot;</span>] = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">transformToJson</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">capsule</a>.transformation);</div>
@@ -632,12 +632,12 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>  }</div>
 <div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span> </div>
 <div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>  <span class="comment">// Extract collision geometry if present - support multiple naming variants</span></div>
-<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>  std::unique_ptr&lt;CollisionGeometry&gt; collision;</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>  std::unique_ptr&lt;CollisionGeometry&gt; <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>;</div>
 <div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>  <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionItr</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">findFieldNames</a>(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>, {<span class="stringliteral">&quot;Collision&quot;</span>, <span class="stringliteral">&quot;collision&quot;</span>});</div>
 <div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>  <span class="keywordflow">if</span> (<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionItr</a> != <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">j</a>.end()) {</div>
 <div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>    <a class="code hl_typedef" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionData</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">legacyCollisionToMomentum</a>(*<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionItr</a>);</div>
 <div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>    <span class="keywordflow">if</span> (!<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionData</a>.empty()) {</div>
-<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>      collision = std::make_unique&lt;CollisionGeometry&gt;(std::move(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionData</a>));</div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>      <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a> = std::make_unique&lt;CollisionGeometry&gt;(std::move(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">collisionData</a>));</div>
 <div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    }</div>
 <div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>  }</div>
 <div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span> </div>
@@ -656,7 +656,7 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>      locators,</div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>      mesh.get(),</div>
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>      skinWeights.get(),</div>
-<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>      collision.get()};</div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>      <a class="code hl_variable" href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a>.get()};</div>
 <div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>}</div>
 </div>
 <div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span> </div>
@@ -755,13 +755,14 @@ $(document).ready(function(){initNavTree('legacy__json__io_8cpp_source.html','')
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html">momentum::SkeletonT&lt; float &gt;</a></div></div>
 <div class="ttc" id="astructmomentum_1_1SkeletonT_html_a88a0732a2701920900c3bf2b25650f56"><div class="ttname"><a href="structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56">momentum::SkeletonT::joints</a></div><div class="ttdeci">JointList joints</div><div class="ttdoc">The list of joints in this skeleton, ordered such that every joint's parent appears earlier in the li...</div><div class="ttdef"><b>Definition</b> <a href="skeleton_8h_source.html#l00025">skeleton.h:25</a></div></div>
 <div class="ttc" id="atransform_8h_html"><div class="ttname"><a href="transform_8h.html">transform.h</a></div></div>
+<div class="ttc" id="aurdf__io_8cpp_html_a8468b4299f9fb7adf6be592d8b107f13"><div class="ttname"><a href="urdf__io_8cpp.html#a8468b4299f9fb7adf6be592d8b107f13">collision</a></div><div class="ttdeci">CollisionGeometry collision</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00054">urdf_io.cpp:54</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_2bf28622ec42ff0c0285c7a4d596986b.html">legacy_json</a></li><li class="navelem"><a class="el" href="legacy__json__io_8cpp.html">legacy_json_io.cpp</a></li>
-    <li class="footer">Generated on Fri May 29 2026 02:49:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 29 2026 23:00:30 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

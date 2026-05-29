@@ -106,7 +106,9 @@ $(document).ready(function(){initNavTree('urdf__io_8cpp.html',''); initResizable
 <code>#include &lt;urdf_model/pose.h&gt;</code><br />
 <code>#include &lt;urdf_parser/urdf_parser.h&gt;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;unordered_map&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 </div>
@@ -142,7 +144,25 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00041">41</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00043">43</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a8468b4299f9fb7adf6be592d8b107f13" name="a8468b4299f9fb7adf6be592d8b107f13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8468b4299f9fb7adf6be592d8b107f13">&#9670;&#160;</a></span>collision</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CollisionGeometry collision</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00054">54</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00217">momentum::fbx_internal::createCollisionGeometryNodes()</a>, <a class="el" href="legacy__json__io_8cpp_source.html#l00515">momentum::loadCharacterFromLegacyJsonString()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00331">momentum::loadHierarchy()</a>, <a class="el" href="logger_8cpp_source.html#l00486">momentum::logCharacter()</a>, and <a class="el" href="usd__skeleton__io_8cpp_source.html#l00229">momentum::saveCollisionGeometryToUsd()</a>.</p>
 
 </div>
 </div>
@@ -158,7 +178,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00043">43</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00045">45</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -174,7 +194,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00031">31</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00033">33</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -190,7 +210,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00040">40</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00042">42</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -206,7 +226,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00050">50</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00052">52</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="parameter__limits_8cpp_source.html#l00040">momentum::applyPassiveJointParameterLimits()</a>, and <a class="el" href="character_8cpp_source.html#l00616">momentum::Character::remapParameterLimits()</a>.</p>
 
@@ -224,7 +244,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00054">54</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00057">57</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -242,7 +262,7 @@ Functions</h2></td></tr>
 
 <p>Mimic joints deferred until all joints are processed. </p>
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00060">60</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00063">63</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -258,7 +278,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00037">37</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00039">39</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -274,7 +294,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00038">38</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00040">40</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -290,7 +310,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00039">39</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00041">41</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -306,7 +326,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00048">48</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00050">50</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -322,7 +342,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00051">51</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00053">53</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00331">momentum::loadHierarchy()</a>.</p>
 
@@ -340,7 +360,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00042">42</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00044">44</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00082">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00165">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="velocity__magnitude__sequence__error__function_8cpp_source.html#l00241">momentum::VelocityMagnitudeSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="intersection_8cpp_source.html#l00036">momentum::intersectFace()</a>.</p>
 
@@ -358,7 +378,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00047">47</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00049">49</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -374,7 +394,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00052">52</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00055">55</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -390,7 +410,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00049">49</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00051">51</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="glove__utils_8cpp_source.html#l00090">momentum::addGloveCalibrationParameters()</a>, <a class="el" href="character__utility_8cpp_source.html#l00837">momentum::addRigidTransformNode()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00636">momentum::createLocatorCharacter()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00229">momentum::mapParameterTransformJoints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00202">momentum::parameterTransformFromJson()</a>, and <a class="el" href="parameter__transform__io_8cpp_source.html#l00288">momentum::parseParameterTransform()</a>.</p>
 
@@ -410,7 +430,7 @@ Functions</h2></td></tr>
 
 <p>Maps URDF joint name → model parameter index (for mimic joint resolution). </p>
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00057">57</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00060">60</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -426,7 +446,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00032">32</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="urdf__io_8cpp_source.html#l00034">34</a> of file <a class="el" href="urdf__io_8cpp_source.html">urdf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -436,7 +456,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_4297f711d4568e603196250a862d58ff.html">urdf</a></li><li class="navelem"><a class="el" href="urdf__io_8cpp.html">urdf_io.cpp</a></li>
-    <li class="footer">Generated on Fri May 29 2026 02:49:23 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri May 29 2026 23:00:31 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
