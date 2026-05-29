@@ -15,6 +15,7 @@ import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_ut
 from pymomentum.rerun_vis import (
     log_animation,
     log_character,
+    log_collision_geometry,
     log_joints,
     log_locators,
     log_mesh,
@@ -46,7 +47,7 @@ def _is_tsan_active() -> bool:
 # load_tests() alone) so that pytest — which does not honor unittest's
 # load_tests protocol — cannot discover and instantiate it when rerun is
 # unavailable. load_tests is kept for the TSan skip path (BUCK / unittest only).
-if _HAS_RERUN:
+if _HAS_RERUN:  # noqa: C901 — gating block intentionally wraps the whole suite
 
     class TestRerunVis(unittest.TestCase):
         @classmethod
@@ -70,6 +71,25 @@ if _HAS_RERUN:
             )
             skel_state = geo.model_parameters_to_skeleton_state(character, model_params)
             self.assertEqual(skel_state.shape, (character.skeleton.size, 8))
+            return character, skel_state
+
+        def _make_collision_character_and_skel_state(
+            self,
+        ) -> tuple[geo.Character, np.ndarray]:
+            character, _ = self._make_character_and_skel_state()
+            capsule_transform = np.eye(4, dtype=np.float32)
+            capsule = geo.TaperedCapsule(
+                parent=0,
+                transformation=capsule_transform,
+                radius=np.array([1.0, 2.0], dtype=np.float32),
+                length=10.0,
+            )
+            character = character.with_collision_geometry([capsule])
+            self.assertEqual(len(character.collision_geometry), 1)
+
+            skel_state = np.zeros((character.skeleton.size, 8), dtype=np.float32)
+            skel_state[:, 6] = 1.0
+            skel_state[:, 7] = 1.0
             return character, skel_state
 
         def _posed_mesh(self, character: geo.Character) -> geo.Mesh:
@@ -116,6 +136,29 @@ if _HAS_RERUN:
             self.assertEqual(path, "locs")
             self.assertIsInstance(archetype, rr.Points3D)
 
+        def test_log_collision_geometry(self) -> None:
+            character, skel_state = self._make_collision_character_and_skel_state()
+
+            mock_rec = MagicMock()
+            log_collision_geometry(mock_rec, "collisions", character, skel_state)
+
+            mock_rec.log.assert_called_once()
+            path, archetype = mock_rec.log.call_args.args
+            self.assertEqual(path, "collisions")
+            self.assertIsInstance(archetype, rr.Capsules3D)
+            self.assertIsNotNone(archetype.colors)
+            assert archetype.colors is not None
+            expected_color = (128 << 24) | (64 << 16) | (64 << 8) | 0xFF
+            self.assertEqual(
+                archetype.colors.as_arrow_array().to_pylist(), [expected_color]
+            )
+            self.assertIsNotNone(archetype.fill_mode)
+            assert archetype.fill_mode is not None
+            self.assertEqual(
+                archetype.fill_mode.as_arrow_array().to_pylist(),
+                [rr.components.FillMode.Solid.value],
+            )
+
         def test_log_character_with_and_without_mesh(self) -> None:
             character, skel_state = self._make_character_and_skel_state()
             posed_mesh = self._posed_mesh(character)
@@ -136,6 +179,21 @@ if _HAS_RERUN:
             paths_no_mesh = [c.args[0] for c in mock_rec.log.call_args_list]
             self.assertNotIn("ch_nm/mesh", paths_no_mesh)
             self.assertIn("ch_nm/joints", paths_no_mesh)
+
+        def test_log_character_collision_geometry_is_opt_in(self) -> None:
+            character, skel_state = self._make_collision_character_and_skel_state()
+
+            mock_rec = MagicMock()
+            log_character(mock_rec, "ch", character, skel_state)
+            paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertNotIn("ch/collision_proxies", paths)
+
+            mock_rec = MagicMock()
+            log_character(
+                mock_rec, "ch", character, skel_state, collision_geometry=True
+            )
+            paths = [c.args[0] for c in mock_rec.log.call_args_list]
+            self.assertIn("ch/collision_proxies", paths)
 
         def _make_animation_inputs(
             self, n_frames: int
@@ -183,6 +241,59 @@ if _HAS_RERUN:
             self.assertEqual(len(joint_subpaths), character.skeleton.size)
             if character.locators:
                 self.assertIn("test/anim/locators", send_paths)
+
+        def test_log_animation_with_collision_geometry(self) -> None:
+            character, skel_state = self._make_collision_character_and_skel_state()
+            moved_skel_state = skel_state.copy()
+            moved_skel_state[0, 0] = 5.0
+            skel_states = np.stack([skel_state, moved_skel_state], axis=0)
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec,
+                "test/collision_anim",
+                character,
+                skel_states,
+                fps=30.0,
+                collision_geometry=True,
+            )
+
+            send_paths = [c.args[0] for c in mock_rec.send_columns.call_args_list]
+            self.assertIn("test/collision_anim/collision_proxies", send_paths)
+            collision_calls = [
+                c
+                for c in mock_rec.send_columns.call_args_list
+                if c.args[0] == "test/collision_anim/collision_proxies"
+            ]
+            self.assertGreaterEqual(len(collision_calls), 1)
+            static_columns = {
+                column.component_descriptor().component: column.as_arrow_array().to_pylist()
+                for column in collision_calls[0].kwargs["columns"]
+            }
+            self.assertEqual(
+                static_columns["Capsules3D:fill_mode"],
+                [[rr.components.FillMode.Solid.value]],
+            )
+
+        def test_log_animation_without_collision_geometry_does_not_send(self) -> None:
+            # Regression: a character with no collision capsules but with
+            # collision_geometry=True should silently no-op (no send_columns call to
+            # collision_proxies), not crash.
+            character, _, skel_states, _ = self._make_animation_inputs(2)
+            character = character.with_collision_geometry([])
+            self.assertEqual(len(character.collision_geometry), 0)
+
+            mock_rec = MagicMock()
+            log_animation(
+                mock_rec,
+                "test/no_collision",
+                character,
+                skel_states,
+                fps=30.0,
+                collision_geometry=True,
+            )
+            send_paths = [c.args[0] for c in mock_rec.send_columns.call_args_list]
+            self.assertNotIn("test/no_collision/collision_proxies", send_paths)
 
         def test_log_animation_without_mesh(self) -> None:
             character, _, skel_states, _ = self._make_animation_inputs(3)

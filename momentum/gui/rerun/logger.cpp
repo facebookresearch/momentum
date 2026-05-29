@@ -477,8 +477,8 @@ void logCollisionGeometry(
       rerun::Capsules3D::from_lengths_and_radii(lengths, radii)
           .with_translations(translations)
           .with_quaternions(quaternions)
-          .with_colors(rerun::Color(128, 64, 64)));
-  // TODO: Switch to wireframe once available in Rerun
+          .with_colors(rerun::Color(128, 64, 64))
+          .with_fill_mode(rerun::FillMode::Solid));
 
   logBvh(rec, streamName + "/bvh", collisionGeometry, skeletonState);
 }

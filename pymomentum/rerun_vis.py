@@ -42,6 +42,7 @@ Individual logging functions are also available for finer control:
 - :func:`log_mesh` — log a :class:`~pymomentum.geometry.Mesh`
 - :func:`log_joints` — log skeleton bones and per-joint transforms
 - :func:`log_locators` — log locator world-space positions
+- :func:`log_collision_geometry` — log collision proxy capsules
 """
 
 from __future__ import annotations
@@ -50,6 +51,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from pymomentum.quaternion_np import (
+    align_z_with,
     rotate_vector_assume_normalized,
     to_rotation_matrix_assume_normalized,
 )
@@ -59,6 +61,83 @@ if TYPE_CHECKING:
 
     import rerun as rr  # @manual=fbsource//third-party/pypi/rerun-sdk:rerun-sdk
     from pymomentum.geometry import Character, Mesh  # @manual=:geometry
+
+
+_COLLISION_PROXY_COLOR: tuple[int, int, int] = (128, 64, 64)
+
+
+def _collision_capsule_segments(
+    character: Character,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    collision_geometry = character.collision_geometry
+    n_joints = skel_state.shape[0]
+    segments: list[list[np.ndarray]] = []
+    radii: list[float] = []
+    labels: list[str] = []
+
+    for i, capsule in enumerate(collision_geometry):
+        parent = int(capsule.parent)
+        if parent < 0 or parent >= n_joints:
+            continue
+
+        transform = np.asarray(capsule.transformation, dtype=np.float64)
+        length = float(capsule.length)
+        radius = float(np.max(np.asarray(capsule.radius, dtype=np.float64)))
+        if radius <= 0.0:
+            continue
+
+        local_start = transform[:3, 3]
+        local_end = local_start + transform[:3, 0] * length
+        parent_t = skel_state[parent, :3].astype(np.float64)
+        parent_q = skel_state[parent, 3:7].astype(np.float64)
+        parent_scale = float(skel_state[parent, 7])
+
+        start = parent_t + rotate_vector_assume_normalized(
+            parent_q, local_start * parent_scale
+        )
+        end = parent_t + rotate_vector_assume_normalized(
+            parent_q, local_end * parent_scale
+        )
+        segments.append([start.astype(np.float32), end.astype(np.float32)])
+        radii.append(radius * abs(parent_scale))
+        labels.append(f"collision_{i}")
+
+    if not segments:
+        return (
+            np.empty((0, 2, 3), dtype=np.float32),
+            np.empty((0,), dtype=np.float32),
+            [],
+        )
+
+    return (
+        np.asarray(segments, dtype=np.float32),
+        np.asarray(radii, dtype=np.float32),
+        labels,
+    )
+
+
+def _collision_capsules(
+    character: Character,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[str]]:
+    segments, radii, labels = _collision_capsule_segments(character, skel_state)
+    if segments.shape[0] == 0:
+        return (
+            np.empty((0, 3), dtype=np.float32),
+            np.empty((0,), dtype=np.float32),
+            np.empty((0,), dtype=np.float32),
+            np.empty((0, 4), dtype=np.float32),
+            [],
+        )
+
+    directions = segments[:, 1] - segments[:, 0]
+    lengths = np.linalg.norm(directions, axis=1).astype(np.float32)
+    quaternions = np.asarray(
+        [align_z_with(direction) for direction in directions],
+        dtype=np.float32,
+    )
+    return segments[:, 0], lengths, radii, quaternions, labels
 
 
 def log_mesh(
@@ -212,6 +291,48 @@ def log_locators(
     )
 
 
+def log_collision_geometry(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_state: np.ndarray,
+    *,
+    color: tuple[int, int, int] = _COLLISION_PROXY_COLOR,
+) -> None:
+    """Log collision proxy capsules to Rerun as capsules.
+
+    Momentum collision geometry is stored as tapered capsules. Rerun renders
+    them as ordinary capsules by using the larger endpoint radius.
+
+    :param rec: The Rerun recording stream.
+    :param entity_path: Entity path for the collision proxy entity.
+    :param character: The character whose collision geometry is logged.
+    :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
+    :param color: RGB color tuple for the collision proxies.
+    """
+    import rerun as rr
+
+    translations, lengths, radii, quaternions, labels = _collision_capsules(
+        character,
+        skel_state,
+    )
+    if lengths.shape[0] == 0:
+        return
+
+    rec.log(
+        entity_path,
+        rr.Capsules3D(
+            lengths=lengths,
+            radii=radii,
+            translations=translations,
+            quaternions=quaternions,
+            colors=color,
+            fill_mode=rr.components.FillMode.Solid,
+            labels=labels,
+        ),
+    )
+
+
 def log_character(
     rec: rr.RecordingStream,
     entity_path: str,
@@ -220,6 +341,7 @@ def log_character(
     *,
     posed_mesh: Mesh | None = None,
     color: tuple[int, int, int] = (200, 200, 200),
+    collision_geometry: bool = False,
 ) -> None:
     """Log a complete character visualization to Rerun.
 
@@ -229,6 +351,7 @@ def log_character(
     - ``{entity_path}/mesh`` — posed mesh (if *posed_mesh* is provided)
     - ``{entity_path}/joints`` — skeleton bones and per-joint transforms
     - ``{entity_path}/locators`` — locator positions (if character has locators)
+    - ``{entity_path}/collision_proxies`` — collision capsules (when requested)
 
     This is the Python equivalent of the C++ ``momentum::logCharacter`` function.
 
@@ -244,6 +367,7 @@ def log_character(
         is logged.
     :param color: RGB color tuple for the mesh albedo.  Defaults to light grey
         ``(200, 200, 200)``.
+    :param collision_geometry: If ``True``, log collision proxy capsules.
     """
     if posed_mesh is not None:
         log_mesh(rec, f"{entity_path}/mesh", posed_mesh, color=color)
@@ -252,6 +376,14 @@ def log_character(
 
     if character.locators:
         log_locators(rec, f"{entity_path}/locators", character, skel_state)
+
+    if collision_geometry:
+        log_collision_geometry(
+            rec,
+            f"{entity_path}/collision_proxies",
+            character,
+            skel_state,
+        )
 
 
 def _make_time_columns(
@@ -448,6 +580,65 @@ def _send_locators_columns(
     rec.send_columns(entity_path, indexes=time_cols, columns=pos_cols)
 
 
+def _send_collision_geometry_columns(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_states: np.ndarray,
+    time_cols: list,
+    fps: float,
+    frame_offset: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Send collision proxy capsules for multiple frames via columns."""
+    import rerun as rr
+
+    n_frames = skel_states.shape[0]
+    frame_lengths: list[np.ndarray] = []
+    frame_radii: list[np.ndarray] = []
+    frame_translations: list[np.ndarray] = []
+    frame_quaternions: list[np.ndarray] = []
+    n_capsules = 0
+
+    for frame in range(n_frames):
+        translations, lengths, radii, quaternions, _labels = _collision_capsules(
+            character, skel_states[frame]
+        )
+        if frame == 0:
+            n_capsules = lengths.shape[0]
+            if n_capsules == 0:
+                return
+        elif lengths.shape[0] != n_capsules:
+            raise ValueError(
+                "Collision geometry capsule count changed mid-animation "
+                f"(frame {frame}: {lengths.shape[0]} capsules vs frame 0: "
+                f"{n_capsules} capsules); Rerun's columnar partitioning requires "
+                "a constant capsule count across frames."
+            )
+
+        frame_lengths.append(lengths)
+        frame_radii.append(radii)
+        frame_translations.append(translations)
+        frame_quaternions.append(quaternions)
+
+    first_time = _make_time_columns(1, fps, frame_offset)
+    static_cols = rr.Capsules3D.columns(
+        colors=np.tile(np.asarray(color, dtype=np.uint8), (n_capsules, 1)),
+        fill_mode=[rr.components.FillMode.Solid] * n_capsules,
+    )
+    static_cols = static_cols.partition(np.array([n_capsules]))
+    rec.send_columns(entity_path, indexes=first_time, columns=static_cols)
+
+    capsule_cols = rr.Capsules3D.columns(
+        lengths=np.concatenate(frame_lengths, axis=0),
+        radii=np.concatenate(frame_radii, axis=0),
+        translations=np.concatenate(frame_translations, axis=0),
+        quaternions=np.concatenate(frame_quaternions, axis=0),
+    )
+    capsule_cols = capsule_cols.partition(np.full(n_frames, n_capsules))
+    rec.send_columns(entity_path, indexes=time_cols, columns=capsule_cols)
+
+
 def log_animation(
     rec: rr.RecordingStream,
     entity_path: str,
@@ -458,6 +649,7 @@ def log_animation(
     fps: float = 30.0,
     color: tuple[int, int, int] = (200, 200, 200),
     frame_offset: int = 0,
+    collision_geometry: bool = False,
 ) -> None:
     """Log a multi-frame character animation using columnar batch sends.
 
@@ -489,6 +681,7 @@ def log_animation(
     :param color: RGB color for the mesh albedo factor.
     :param frame_offset: Starting frame index for the time columns.  Use when
         sending multiple chunks of the same animation.
+    :param collision_geometry: If ``True``, log collision proxy capsules.
     """
     n_frames = skel_states.shape[0]
     time_cols = _make_time_columns(n_frames, fps, frame_offset)
@@ -523,4 +716,16 @@ def log_animation(
             time_cols,
             fps,
             frame_offset,
+        )
+
+    if collision_geometry:
+        _send_collision_geometry_columns(
+            rec,
+            f"{entity_path}/collision_proxies",
+            character,
+            skel_states,
+            time_cols,
+            fps,
+            frame_offset,
+            _COLLISION_PROXY_COLOR,
         )
