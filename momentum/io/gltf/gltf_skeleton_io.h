@@ -27,6 +27,15 @@ namespace momentum {
 /// @return The created TaperedCapsule object.
 TaperedCapsule createCollisionCapsule(const fx::gltf::Node& node, const nlohmann::json& extension);
 
+/// Create a collision ellipsoid from a glTF node.
+///
+/// @param[in] node The glTF node containing the collision ellipsoid data.
+/// @param[in] extension The FB_momentum extension JSON data.
+/// @return The created CollisionEllipsoid object.
+CollisionEllipsoid createCollisionEllipsoid(
+    const fx::gltf::Node& node,
+    const nlohmann::json& extension);
+
 /// Create a locator from a glTF node.
 ///
 /// @param[in] node The glTF node containing the locator data.
