@@ -29,6 +29,19 @@ TEST(CollisionGeometryTest, DefaultConstructor) {
   EXPECT_TRUE(capsuleDouble.radius.isApprox(Vector2<double>::Zero()));
   EXPECT_EQ(capsuleDouble.parent, kInvalidIndex);
   EXPECT_DOUBLE_EQ(capsuleDouble.length, 0.0);
+
+  CollisionEllipsoidT<float> ellipsoidFloat;
+  EXPECT_TRUE(ellipsoidFloat.transformation.isApprox(TransformT<float>()));
+  EXPECT_TRUE(ellipsoidFloat.radii.isApprox(Vector3<float>::Zero()));
+  EXPECT_EQ(ellipsoidFloat.parent, kInvalidIndex);
+
+  CollisionPrimitiveT<float> primitiveFloat;
+  EXPECT_EQ(primitiveFloat.type, CollisionPrimitiveType::TaperedCapsule);
+  EXPECT_TRUE(primitiveFloat.transformation.isApprox(TransformT<float>()));
+  EXPECT_TRUE(primitiveFloat.radius.isApprox(Vector2<float>::Zero()));
+  EXPECT_TRUE(primitiveFloat.ellipsoidRadii.isApprox(Vector3<float>::Zero()));
+  EXPECT_EQ(primitiveFloat.parent, kInvalidIndex);
+  EXPECT_FLOAT_EQ(primitiveFloat.length, 0.0f);
 }
 
 // Test the isApprox method of TaperedCapsuleT
@@ -66,6 +79,25 @@ TEST(CollisionGeometryTest, IsApprox) {
       capsule1.isApprox(capsule2, 1e-4f)); // Should be approximately equal with this tolerance
   EXPECT_FALSE(
       capsule1.isApprox(capsule2, 1e-6f)); // Should not be approximately equal with this tolerance
+
+  CollisionEllipsoidT<float> ellipsoid1;
+  CollisionEllipsoidT<float> ellipsoid2;
+  EXPECT_TRUE(ellipsoid1.isApprox(ellipsoid2));
+
+  ellipsoid2.radii = Vector3<float>(1.0f, 2.0f, 3.0f);
+  EXPECT_FALSE(ellipsoid1.isApprox(ellipsoid2));
+
+  CollisionPrimitiveT<float> primitive1(capsule1);
+  CollisionPrimitiveT<float> primitive2(capsule1);
+  EXPECT_TRUE(primitive1.isApprox(primitive2));
+  EXPECT_TRUE(primitive1.isTaperedCapsule());
+  EXPECT_FALSE(primitive1.isEllipsoid());
+  EXPECT_TRUE(primitive1.toTaperedCapsule().isApprox(capsule1));
+
+  primitive2 = ellipsoid2;
+  EXPECT_FALSE(primitive1.isApprox(primitive2));
+  EXPECT_TRUE(primitive2.isEllipsoid());
+  EXPECT_TRUE(primitive2.toEllipsoid().isApprox(ellipsoid2));
 }
 
 // Test the CollisionGeometryT type alias
@@ -85,6 +117,16 @@ TEST(CollisionGeometryTest, CollisionGeometryT) {
   EXPECT_TRUE(collisionGeometryFloat[0].radius.isApprox(Vector2<float>(1.0f, 2.0f)));
   EXPECT_FLOAT_EQ(collisionGeometryFloat[0].length, 3.0f);
   EXPECT_EQ(collisionGeometryFloat[0].parent, 0);
+
+  CollisionEllipsoidT<float> ellipsoidFloat;
+  ellipsoidFloat.radii = Vector3<float>(1.0f, 2.0f, 3.0f);
+  ellipsoidFloat.parent = 1;
+  collisionGeometryFloat.push_back(ellipsoidFloat);
+
+  EXPECT_EQ(collisionGeometryFloat.size(), 2);
+  EXPECT_TRUE(collisionGeometryFloat[1].isEllipsoid());
+  EXPECT_TRUE(collisionGeometryFloat[1].ellipsoidRadii.isApprox(Vector3<float>(1.0f, 2.0f, 3.0f)));
+  EXPECT_EQ(collisionGeometryFloat[1].parent, 1);
 
   // Create a collision geometry with double precision
   CollisionGeometryT<double> collisionGeometryDouble;
