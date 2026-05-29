@@ -55,7 +55,7 @@ void SimdDistanceConstraints::addConstraint(
     const Vector3f& origin,
     const float target,
     const float targetWeight) {
-  MT_CHECK(jointIndex < constraintCount.size());
+  MT_CHECK(jointIndex < static_cast<size_t>(numJoints));
 
   uint32_t index = 0;
   while (true) {

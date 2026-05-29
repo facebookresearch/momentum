@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 #include "momentum/character_solver/distance_error_function.h"
 #include "momentum/character_solver_simd/simd_distance_error_function.h"
 
@@ -21,6 +23,28 @@
 #include "momentum/test/character_solver/error_function_helpers.h"
 
 using namespace momentum;
+
+TEST(Momentum_ErrorFunctions, SimdDistanceConstraintsRejectsJointIndexOutsideSkeleton) {
+  const Character character = createTestCharacter(3);
+  const Skeleton& skeleton = character.skeleton;
+  SimdDistanceConstraints constraints(&skeleton);
+
+  const size_t invalidJointIndex = skeleton.joints.size();
+  ASSERT_LT(invalidJointIndex, SimdDistanceConstraints::kMaxJoints);
+
+  const auto addInvalidConstraint = [&]() {
+    constraints.addConstraint(invalidJointIndex, Vector3f::Zero(), Vector3f::UnitX(), 1.0f, 1.0f);
+  };
+
+  // MT_CHECK aborts via XR_CHECK in XR-logger builds, but throws std::runtime_error in the
+  // non-XR backend.
+#if defined(MOMENTUM_WITH_XR_LOGGER)
+  EXPECT_DEATH_IF_SUPPORTED(
+      addInvalidConstraint(), "jointIndex < static_cast<size_t>\\(numJoints\\)");
+#else
+  EXPECT_THROW(addInvalidConstraint(), std::runtime_error);
+#endif
+}
 
 // Verify SIMD distance error function matches the scalar reference at multiple constraint counts
 // that exercise both partial and full SIMD packets.

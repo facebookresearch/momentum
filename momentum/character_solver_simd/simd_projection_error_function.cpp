@@ -55,7 +55,7 @@ void SimdProjectionConstraints::addConstraint(
     const Eigen::Matrix<float, 3, 4>& proj,
     const Eigen::Vector2f& target,
     const float targetWeight) {
-  MT_CHECK(jointIndex < constraintCount.size());
+  MT_CHECK(jointIndex < static_cast<size_t>(numJoints));
 
   uint32_t index = 0;
   while (true) {
