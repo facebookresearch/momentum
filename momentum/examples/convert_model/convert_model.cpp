@@ -122,12 +122,19 @@ void saveGltfOutput(
     bool hasMotion) {
   MT_LOGI("Saving gltf/glb file...");
   if (hasMotion) {
+    // Empty offsets mean "the loaded motion has no per-joint identity vector"; passing the
+    // skeleton's joint names paired with an empty identity vector would violate
+    // mapIdentityToCharacter's size precondition. Use a fully empty IdentityParameters so the
+    // glTF writer sees "no identity data" rather than a mismatched tuple.
+    const IdentityParameters offsets = motionData.offsets.size() == 0
+        ? IdentityParameters{}
+        : IdentityParameters{character.skeleton.getJointNames(), motionData.offsets};
     saveGltfCharacter(
         outputFile,
         character,
         motionData.fps,
         {character.parameterTransform.name, motionData.poses},
-        {character.skeleton.getJointNames(), motionData.offsets},
+        offsets,
         markerSequence.frames);
   } else {
     saveGltfCharacter(outputFile, character);
