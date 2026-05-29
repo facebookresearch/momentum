@@ -65,9 +65,15 @@ Joint createJoint(const fx::gltf::Node& node);
 /// objects.
 ///
 /// @param[in] model The glTF document.
-/// @return A tuple containing the name, joints, collision geometry, locators, and node-to-object
-/// map.
-std::tuple<std::string, JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>>
+/// @return A tuple containing the name, joints, collision geometry, locators, physical properties,
+/// and node-to-object map.
+std::tuple<
+    std::string,
+    JointList,
+    CollisionGeometry_u,
+    LocatorList,
+    PhysicalProperties,
+    std::vector<size_t>>
 loadHierarchy(const fx::gltf::Document& model);
 
 /// Create a skeleton with only a root joint.

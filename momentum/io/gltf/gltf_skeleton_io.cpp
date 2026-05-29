@@ -83,6 +83,7 @@ void loadHierarchyRecursive(
     JointList& joints,
     CollisionGeometry_u& collision,
     LocatorList& locators,
+    PhysicalProperties& physicalProperties,
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension) {
   MT_THROW_IF(
@@ -127,6 +128,10 @@ void loadHierarchyRecursive(
     joints.push_back(joint);
     nodeToObjectMap[nodeId] = joints.size() - 1;
     newParentJointId = joints.size() - 1;
+    if (extension.contains("physicalProperties")) {
+      physicalProperties.push_back(jointPhysicalPropertiesFromJson(
+          extension.at("physicalProperties"), joint.name, newParentJointId));
+    }
   }
   // #TODO: log skipped nodes
 
@@ -144,6 +149,7 @@ void loadHierarchyRecursive(
         joints,
         collision,
         locators,
+        physicalProperties,
         nodeToObjectMap,
         useExtension);
   }
@@ -315,11 +321,18 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
   return result;
 }
 
-std::tuple<std::string, JointList, CollisionGeometry_u, LocatorList, std::vector<size_t>>
+std::tuple<
+    std::string,
+    JointList,
+    CollisionGeometry_u,
+    LocatorList,
+    PhysicalProperties,
+    std::vector<size_t>>
 loadHierarchy(const fx::gltf::Document& model) {
   JointList joints;
   auto collision = std::make_unique<CollisionGeometry>();
   LocatorList locators;
+  PhysicalProperties physicalProperties;
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
   const bool useExtension = hasMomentumExtension(model);
 
@@ -330,7 +343,15 @@ loadHierarchy(const fx::gltf::Document& model) {
   MT_CHECK(skeletonRoots.size() == 1, "{}", skeletonRoots.size());
   for (const auto& rootNode : skeletonRoots[0]) {
     loadHierarchyRecursive(
-        model, rootNode, kInvalidIndex, joints, collision, locators, nodeToObjectMap, useExtension);
+        model,
+        rootNode,
+        kInvalidIndex,
+        joints,
+        collision,
+        locators,
+        physicalProperties,
+        nodeToObjectMap,
+        useExtension);
     if (!joints.empty()) {
       break;
     }
@@ -353,7 +374,8 @@ loadHierarchy(const fx::gltf::Document& model) {
   if (collision->empty()) {
     collision.reset();
   }
-  return std::make_tuple(name, joints, std::move(collision), locators, nodeToObjectMap);
+  return std::make_tuple(
+      name, joints, std::move(collision), locators, physicalProperties, nodeToObjectMap);
 }
 
 JointList createSkeletonWithOnlyRoot() {

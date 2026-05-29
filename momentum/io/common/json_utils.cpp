@@ -14,7 +14,94 @@
 
 #include <nlohmann/json.hpp>
 
+#include <cmath>
+#include <utility>
+
 namespace momentum {
+
+namespace {
+
+nlohmann::json vector3ToJson(const Vector3f& value) {
+  return nlohmann::json::array({value.x(), value.y(), value.z()});
+}
+
+Vector3f vector3FromJson(const nlohmann::json& value, const std::string& fieldName) {
+  MT_THROW_IF(
+      !value.is_array() || value.size() != 3,
+      "Physical properties field '{}' must be a 3-element vector",
+      fieldName);
+  Vector3f result(value.at(0).get<float>(), value.at(1).get<float>(), value.at(2).get<float>());
+  MT_THROW_IF(
+      !result.allFinite(),
+      "Physical properties field '{}' must contain only finite values",
+      fieldName);
+  return result;
+}
+
+nlohmann::json quaternionToJson(const Quaternionf& value) {
+  return nlohmann::json::array({value.w(), value.x(), value.y(), value.z()});
+}
+
+Quaternionf quaternionFromJson(const nlohmann::json& value, const std::string& fieldName) {
+  MT_THROW_IF(
+      !value.is_array() || value.size() != 4,
+      "Physical properties field '{}' must be a 4-element quaternion [w, x, y, z]",
+      fieldName);
+  Quaternionf result(
+      value.at(0).get<float>(),
+      value.at(1).get<float>(),
+      value.at(2).get<float>(),
+      value.at(3).get<float>());
+  MT_THROW_IF(
+      !result.coeffs().allFinite(),
+      "Physical properties field '{}' must contain only finite values",
+      fieldName);
+  MT_THROW_IF(
+      result.norm() <= 0.0f,
+      "Physical properties field '{}' must be a non-zero quaternion",
+      fieldName);
+  return result.normalized();
+}
+
+nlohmann::json inertiaToJson(const Matrix3f& value) {
+  nlohmann::json result;
+  result["ixx"] = value(0, 0);
+  result["ixy"] = value(0, 1);
+  result["ixz"] = value(0, 2);
+  result["iyy"] = value(1, 1);
+  result["iyz"] = value(1, 2);
+  result["izz"] = value(2, 2);
+  return result;
+}
+
+Matrix3f inertiaFromJson(const nlohmann::json& value) {
+  MT_THROW_IF(!value.is_object(), "Physical properties field 'inertia' must be an object");
+
+  const auto getComponent = [&](const char* fieldName) {
+    MT_THROW_IF(
+        !value.contains(fieldName) || !value.at(fieldName).is_number(),
+        "Physical properties field 'inertia' must contain numeric field '{}'",
+        fieldName);
+    const float result = value.at(fieldName).get<float>();
+    MT_THROW_IF(
+        !std::isfinite(result),
+        "Physical properties field 'inertia.{}' must contain a finite value",
+        fieldName);
+    return result;
+  };
+
+  const float ixx = getComponent("ixx");
+  const float ixy = getComponent("ixy");
+  const float ixz = getComponent("ixz");
+  const float iyy = getComponent("iyy");
+  const float iyz = getComponent("iyz");
+  const float izz = getComponent("izz");
+  Matrix3f result;
+  result << ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz;
+  return result;
+}
+
+} // namespace
 
 void parameterSetsToJson(const Character& character, nlohmann::json& j) {
   j = nlohmann::json::object();
@@ -216,6 +303,72 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
   }
 
   return pt;
+}
+
+void jointPhysicalPropertiesToJson(
+    const JointPhysicalProperties& jointProperties,
+    nlohmann::json& j) {
+  MT_THROW_IF(
+      !std::isfinite(jointProperties.mass) || jointProperties.mass <= 0.0f,
+      "Physical properties entry for '{}' must have positive finite mass",
+      jointProperties.jointName);
+  MT_THROW_IF(
+      !jointProperties.centerOfMassOffset.allFinite(),
+      "Physical properties entry for '{}' must have finite center-of-mass offset",
+      jointProperties.jointName);
+  MT_THROW_IF(
+      !jointProperties.inertia.allFinite(),
+      "Physical properties entry for '{}' must have finite inertia",
+      jointProperties.jointName);
+  MT_THROW_IF(
+      !jointProperties.inertiaRotation.coeffs().allFinite() ||
+          jointProperties.inertiaRotation.norm() <= 0.0f,
+      "Physical properties entry for '{}' must have finite non-zero inertia rotation",
+      jointProperties.jointName);
+
+  j = nlohmann::json::object();
+  j["mass"] = jointProperties.mass;
+  j["centerOfMass"] = vector3ToJson(jointProperties.centerOfMassOffset);
+  j["inertia"] = inertiaToJson(jointProperties.inertia);
+  j["inertiaRotation"] = quaternionToJson(jointProperties.inertiaRotation.normalized());
+}
+
+JointPhysicalProperties jointPhysicalPropertiesFromJson(
+    const nlohmann::json& j,
+    const std::string& jointName,
+    const size_t jointIndex) {
+  MT_THROW_IF(!j.is_object(), "Physical properties entry for '{}' must be an object", jointName);
+  MT_THROW_IF(
+      !j.contains("mass") || !j.at("mass").is_number(),
+      "Physical properties entry for '{}' must contain numeric field 'mass'",
+      jointName);
+  MT_THROW_IF(
+      !j.contains("centerOfMass"),
+      "Physical properties entry for '{}' must contain field 'centerOfMass'",
+      jointName);
+  MT_THROW_IF(
+      !j.contains("inertia"),
+      "Physical properties entry for '{}' must contain field 'inertia'",
+      jointName);
+  MT_THROW_IF(
+      !j.contains("inertiaRotation"),
+      "Physical properties entry for '{}' must contain field 'inertiaRotation'",
+      jointName);
+
+  JointPhysicalProperties jointProperties;
+  jointProperties.jointName = jointName;
+  jointProperties.jointIndex = jointIndex;
+  jointProperties.mass = j.at("mass").get<float>();
+  MT_THROW_IF(
+      !std::isfinite(jointProperties.mass) || jointProperties.mass <= 0.0f,
+      "Physical properties entry for '{}' must have positive finite mass",
+      jointProperties.jointName);
+
+  jointProperties.centerOfMassOffset = vector3FromJson(j.at("centerOfMass"), "centerOfMass");
+  jointProperties.inertia = inertiaFromJson(j.at("inertia"));
+  jointProperties.inertiaRotation = quaternionFromJson(j.at("inertiaRotation"), "inertiaRotation");
+
+  return jointProperties;
 }
 
 namespace {

@@ -31,6 +31,7 @@
 
 #include <fx/gltf.h>
 
+#include <unordered_map>
 #include <variant>
 
 namespace {
@@ -704,6 +705,21 @@ std::vector<size_t> addSkeletonToModel(
     size_t modelRootNodeIndex = kInvalidIndex) {
   // add all joints to node list
   std::vector<size_t> jointToNodeMap;
+  std::unordered_map<size_t, const JointPhysicalProperties*> physicalPropertiesByJoint;
+  if (updateExtension) {
+    physicalPropertiesByJoint.reserve(character.physicalProperties.size());
+    for (const JointPhysicalProperties& properties : character.physicalProperties) {
+      const size_t jointIndex = resolvePhysicalPropertiesJointIndex(properties, character.skeleton);
+      if (jointIndex != kInvalidIndex) {
+        const auto emplaceResult = physicalPropertiesByJoint.emplace(jointIndex, &properties);
+        MT_THROW_IF(
+            !emplaceResult.second,
+            "Multiple physical properties entries resolve to joint '{}' (index {})",
+            character.skeleton.joints.at(jointIndex).name,
+            jointIndex);
+      }
+    }
+  }
 
   for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
     const auto& joint = character.skeleton.joints[i];
@@ -728,6 +744,10 @@ std::vector<size_t> addSkeletonToModel(
     if (updateExtension) {
       auto& extension = addMomentumExtension(node.extensionsAndExtras);
       extension["type"] = std::string("skeleton_joint");
+      const auto propertiesIt = physicalPropertiesByJoint.find(i);
+      if (propertiesIt != physicalPropertiesByJoint.end()) {
+        jointPhysicalPropertiesToJson(*propertiesIt->second, extension["physicalProperties"]);
+      }
     }
 
     // add node as child to parent joint

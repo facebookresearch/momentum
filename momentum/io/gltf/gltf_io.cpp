@@ -100,8 +100,12 @@ Character populateCharacterFromModel(
   // load the joints, collision geometry and locators
   // ---------------------------------------------
   std::tie(
-      result.name, result.skeleton.joints, result.collision, result.locators, nodeToObjectMap) =
-      loadHierarchy(model);
+      result.name,
+      result.skeleton.joints,
+      result.collision,
+      result.locators,
+      result.physicalProperties,
+      nodeToObjectMap) = loadHierarchy(model);
   MT_CHECK(
       nodeToObjectMap.size() == model.nodes.size(),
       "nodeMap: {}, nodes: {}",
