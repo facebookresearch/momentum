@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 
 namespace momentum {
 
@@ -47,6 +48,7 @@ struct ParsingData {
   ParameterTransform parameterTransform;
   std::vector<Eigen::Triplet<float>> triplets;
   ParameterLimits limits;
+  PhysicalProperties physicalProperties;
   size_t totalDoFs = 0;
 
   std::vector<LinkVisualData> linkVisuals;
@@ -72,6 +74,37 @@ template <typename S>
 [[nodiscard]] TransformT<S> toMomentumTransform(const urdf::Pose& urdfPose) {
   return TransformT<S>(
       toMomentumVector3<S>(urdfPose.position), toMomentumQuaternion<S>(urdfPose.rotation));
+}
+
+[[nodiscard]] Matrix3f toMomentumInertia(const urdf::Inertial& inertial) {
+  constexpr float kInertiaScale = toCm<float>() * toCm<float>();
+  Matrix3f result;
+  result << static_cast<float>(inertial.ixx), static_cast<float>(inertial.ixy),
+      static_cast<float>(inertial.ixz), static_cast<float>(inertial.ixy),
+      static_cast<float>(inertial.iyy), static_cast<float>(inertial.iyz),
+      static_cast<float>(inertial.ixz), static_cast<float>(inertial.iyz),
+      static_cast<float>(inertial.izz);
+  return (result * kInertiaScale).eval();
+}
+
+void addPhysicalPropertiesForUrdfLink(
+    PhysicalProperties& physicalProperties,
+    const urdf::Link& urdfLink,
+    const size_t jointIndex) {
+  if (!urdfLink.inertial) {
+    return;
+  }
+
+  JointPhysicalProperties jointProperties;
+  jointProperties.jointName = urdfLink.name;
+  jointProperties.jointIndex = jointIndex;
+  jointProperties.mass = static_cast<float>(urdfLink.inertial->mass);
+  jointProperties.centerOfMassOffset =
+      toMomentumVector3<float>(urdfLink.inertial->origin.position) * toCm<float>();
+  jointProperties.inertia = toMomentumInertia(*urdfLink.inertial);
+  jointProperties.inertiaRotation =
+      toMomentumQuaternion<float>(urdfLink.inertial->origin.rotation).normalized();
+  physicalProperties.push_back(std::move(jointProperties));
 }
 
 [[nodiscard]] std::string_view toString(int jointType) {
@@ -400,6 +433,8 @@ bool loadUrdfSkeletonRecursive(
   }
 
   data.skeleton.joints.push_back(joint);
+  addPhysicalPropertiesForUrdfLink(
+      data.physicalProperties, *urdfLink, static_cast<size_t>(jointId));
 
   // Collect visual elements for mesh loading
   if (!urdfLink->visual_array.empty()) {
@@ -607,7 +642,11 @@ Character loadUrdfCharacterFromUrdfModel(
         nullptr, // poseShapes
         {}, // blendShapes
         {}, // faceExpressionBlendShapes
-        robotName};
+        robotName,
+        {}, // inverseBindPose
+        {}, // skinnedLocators
+        {}, // metadata
+        data.physicalProperties};
   }
 
   return {
@@ -621,7 +660,11 @@ Character loadUrdfCharacterFromUrdfModel(
       nullptr, // poseShapes
       {}, // blendShapes
       {}, // faceExpressionBlendShapes
-      robotName};
+      robotName,
+      {}, // inverseBindPose
+      {}, // skinnedLocators
+      {}, // metadata
+      data.physicalProperties};
 }
 
 } // namespace
