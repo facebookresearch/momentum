@@ -637,12 +637,12 @@ Character replaceSkeletonHierarchy(
   if (tgtCharacter.collision) {
     combinedCollisionGeometry = mergeVectors(
         combinedCollisionGeometry,
-        mapParents<TaperedCapsule>(*tgtCharacter.collision, tgtToCombinedJoints));
+        mapParents<CollisionPrimitive>(*tgtCharacter.collision, tgtToCombinedJoints));
   }
   if (srcCharacter.collision) {
     combinedCollisionGeometry = mergeVectors(
         combinedCollisionGeometry,
-        mapParents<TaperedCapsule>(*srcCharacter.collision, srcToCombinedJoints));
+        mapParents<CollisionPrimitive>(*srcCharacter.collision, srcToCombinedJoints));
   }
 
   // Build the merged parameter transform:
@@ -807,7 +807,8 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
 
   CollisionGeometry resultCollisionGeometry;
   if (character.collision) {
-    resultCollisionGeometry = mapParents<TaperedCapsule>(*character.collision, srcToResultJoints);
+    resultCollisionGeometry =
+        mapParents<CollisionPrimitive>(*character.collision, srcToResultJoints);
   }
 
   const ParameterLimits resultParameterLimits =

@@ -27,6 +27,18 @@ namespace momentum {
 
 namespace {
 
+template <typename LhsDerived, typename RhsDerived>
+bool lessLexicographic(
+    const Eigen::MatrixBase<LhsDerived>& lhs,
+    const Eigen::MatrixBase<RhsDerived>& rhs) {
+  for (Eigen::Index i = 0; i < lhs.size(); ++i) {
+    if (lhs[i] != rhs[i]) {
+      return lhs[i] < rhs[i];
+    }
+  }
+  return false;
+}
+
 MATCHER_P(FloatNearPointwise, tol, "Value mismatch") {
   for (int i = 0; i < std::get<0>(arg).size(); i++) {
     if (std::abs(std::get<0>(arg)[i] - std::get<1>(arg)[i]) > tol) {
@@ -147,16 +159,27 @@ void compareCollisionGeometry(
     EXPECT_EQ(refCollision->size(), collision->size());
     auto sortedRefCollision = *refCollision;
     auto sortedCollision = *collision;
-    auto compareCollisions = [](const TaperedCapsule& l1, const TaperedCapsule& l2) {
+    auto compareCollisions = [](const auto& l1, const auto& l2) {
       if (l1.parent != l2.parent) {
         return l1.parent < l2.parent;
+      }
+      if (l1.type != l2.type) {
+        return static_cast<int>(l1.type) < static_cast<int>(l2.type);
       }
       if (l1.length != l2.length) {
         return l1.length < l2.length;
       }
-      if (!l1.radius.isApprox(l2.radius)) {
-        return l1.radius.x() != l2.radius.x() ? l1.radius.x() < l2.radius.x()
-                                              : l1.radius.y() < l2.radius.y();
+      if (lessLexicographic(l1.radius, l2.radius)) {
+        return true;
+      }
+      if (lessLexicographic(l2.radius, l1.radius)) {
+        return false;
+      }
+      if (lessLexicographic(l1.ellipsoidRadii, l2.ellipsoidRadii)) {
+        return true;
+      }
+      if (lessLexicographic(l2.ellipsoidRadii, l1.ellipsoidRadii)) {
+        return false;
       }
       const auto t1 = l1.transformation.toMatrix();
       const auto t2 = l2.transformation.toMatrix();
@@ -174,21 +197,26 @@ void compareCollisionGeometry(
       const auto& collA = sortedRefCollision[i];
       const auto& collB = sortedCollision[i];
 
-      EXPECT_TRUE(collA.isApprox(collB)) << "Collision geometry mismatch at index " << i << ":\n"
-                                         << "- refCollision:\n"
-                                         << "  - radius_0 : " << collA.radius.x() << "\n"
-                                         << "  - radius_1 : " << collA.radius.y() << "\n"
-                                         << "  - length   : " << collA.length << "\n"
-                                         << "  - parent   : " << collA.parent << "\n"
-                                         << "  - transform:\n"
-                                         << collA.transformation.toMatrix() << "\n"
-                                         << "- collision:\n"
-                                         << "  - radius_0 : " << collB.radius.x() << "\n"
-                                         << "  - radius_1 : " << collB.radius.y() << "\n"
-                                         << "  - length   : " << collB.length << "\n"
-                                         << "  - parent   : " << collB.parent << "\n"
-                                         << "  - transform:\n"
-                                         << collB.transformation.toMatrix() << std::endl;
+      EXPECT_TRUE(collA.isApprox(collB))
+          << "Collision geometry mismatch at index " << i << ":\n"
+          << "- refCollision:\n"
+          << "  - type     : " << static_cast<int>(collA.type) << "\n"
+          << "  - radius_0 : " << collA.radius.x() << "\n"
+          << "  - radius_1 : " << collA.radius.y() << "\n"
+          << "  - radii    : " << collA.ellipsoidRadii.transpose() << "\n"
+          << "  - length   : " << collA.length << "\n"
+          << "  - parent   : " << collA.parent << "\n"
+          << "  - transform:\n"
+          << collA.transformation.toMatrix() << "\n"
+          << "- collision:\n"
+          << "  - type     : " << static_cast<int>(collB.type) << "\n"
+          << "  - radius_0 : " << collB.radius.x() << "\n"
+          << "  - radius_1 : " << collB.radius.y() << "\n"
+          << "  - radii    : " << collB.ellipsoidRadii.transpose() << "\n"
+          << "  - length   : " << collB.length << "\n"
+          << "  - parent   : " << collB.parent << "\n"
+          << "  - transform:\n"
+          << collB.transformation.toMatrix() << std::endl;
     }
   }
 }

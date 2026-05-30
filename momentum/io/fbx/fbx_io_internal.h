@@ -226,7 +226,13 @@ inline void createCollisionGeometryNodes(
 
   const auto& collisions = *character.collision;
   for (auto i = 0u; i < collisions.size(); ++i) {
-    const TaperedCapsule& collision = collisions[i];
+    const auto& collision = collisions[i];
+    if (!collision.isTaperedCapsule()) {
+      MT_LOGW(
+          "Skipping unsupported collision primitive type {} while writing FBX collision geometry",
+          static_cast<int>(collision.type));
+      continue;
+    }
 
     ::fbxsdk::FbxNode* collisionNode =
         ::fbxsdk::FbxNode::Create(scene, ("Collision " + std::to_string(i)).c_str());

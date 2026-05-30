@@ -107,6 +107,25 @@ using CharacterStated_const_u = ::std::unique_ptr<const CharacterStated>;
 using CharacterStated_const_w = ::std::weak_ptr<const CharacterStated>;
 
 template <typename T>
+struct CollisionPrimitiveT;
+using CollisionPrimitive = CollisionPrimitiveT<float>;
+using CollisionPrimitived = CollisionPrimitiveT<double>;
+
+using CollisionPrimitive_p = ::std::shared_ptr<CollisionPrimitive>;
+using CollisionPrimitive_u = ::std::unique_ptr<CollisionPrimitive>;
+using CollisionPrimitive_w = ::std::weak_ptr<CollisionPrimitive>;
+using CollisionPrimitive_const_p = ::std::shared_ptr<const CollisionPrimitive>;
+using CollisionPrimitive_const_u = ::std::unique_ptr<const CollisionPrimitive>;
+using CollisionPrimitive_const_w = ::std::weak_ptr<const CollisionPrimitive>;
+
+using CollisionPrimitived_p = ::std::shared_ptr<CollisionPrimitived>;
+using CollisionPrimitived_u = ::std::unique_ptr<CollisionPrimitived>;
+using CollisionPrimitived_w = ::std::weak_ptr<CollisionPrimitived>;
+using CollisionPrimitived_const_p = ::std::shared_ptr<const CollisionPrimitived>;
+using CollisionPrimitived_const_u = ::std::unique_ptr<const CollisionPrimitived>;
+using CollisionPrimitived_const_w = ::std::weak_ptr<const CollisionPrimitived>;
+
+template <typename T>
 struct CollisionGeometryStateT;
 using CollisionGeometryState = CollisionGeometryStateT<float>;
 using CollisionGeometryStated = CollisionGeometryStateT<double>;
@@ -124,6 +143,25 @@ using CollisionGeometryStated_w = ::std::weak_ptr<CollisionGeometryStated>;
 using CollisionGeometryStated_const_p = ::std::shared_ptr<const CollisionGeometryStated>;
 using CollisionGeometryStated_const_u = ::std::unique_ptr<const CollisionGeometryStated>;
 using CollisionGeometryStated_const_w = ::std::weak_ptr<const CollisionGeometryStated>;
+
+template <typename T>
+struct CollisionEllipsoidT;
+using CollisionEllipsoid = CollisionEllipsoidT<float>;
+using CollisionEllipsoidd = CollisionEllipsoidT<double>;
+
+using CollisionEllipsoid_p = ::std::shared_ptr<CollisionEllipsoid>;
+using CollisionEllipsoid_u = ::std::unique_ptr<CollisionEllipsoid>;
+using CollisionEllipsoid_w = ::std::weak_ptr<CollisionEllipsoid>;
+using CollisionEllipsoid_const_p = ::std::shared_ptr<const CollisionEllipsoid>;
+using CollisionEllipsoid_const_u = ::std::unique_ptr<const CollisionEllipsoid>;
+using CollisionEllipsoid_const_w = ::std::weak_ptr<const CollisionEllipsoid>;
+
+using CollisionEllipsoidd_p = ::std::shared_ptr<CollisionEllipsoidd>;
+using CollisionEllipsoidd_u = ::std::unique_ptr<CollisionEllipsoidd>;
+using CollisionEllipsoidd_w = ::std::weak_ptr<CollisionEllipsoidd>;
+using CollisionEllipsoidd_const_p = ::std::shared_ptr<const CollisionEllipsoidd>;
+using CollisionEllipsoidd_const_u = ::std::unique_ptr<const CollisionEllipsoidd>;
+using CollisionEllipsoidd_const_w = ::std::weak_ptr<const CollisionEllipsoidd>;
 
 template <typename T>
 struct JointT;
