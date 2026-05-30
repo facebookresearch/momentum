@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 import os
+import threading
 import weakref
 from typing import Any
 
@@ -64,6 +65,7 @@ _BACKWARD_STRIDED_CALL_LAYOUT_CACHE: dict[
 _FLUX_CUDA_READY = False
 _FLUX_ROW_MAJOR_STATE = "row_major"
 _FLUX_COMPONENT_MAJOR_STATE = "component_major"
+_CACHE_LOCK = threading.Lock()
 
 
 def _env_flag(name: str, default: str) -> bool:
@@ -76,15 +78,17 @@ def _bounded_cache_set(
     value: Any,
     max_entries: int,
 ) -> None:
-    if key not in cache and len(cache) >= max_entries:
-        cache.clear()
-    cache[key] = value
+    with _CACHE_LOCK:
+        if key not in cache and len(cache) >= max_entries:
+            cache.clear()
+        cache[key] = value
 
 
 def _bounded_set_add(cache: set[Any], key: Any, max_entries: int) -> None:
-    if key not in cache and len(cache) >= max_entries:
-        cache.clear()
-    cache.add(key)
+    with _CACHE_LOCK:
+        if key not in cache and len(cache) >= max_entries:
+            cache.clear()
+        cache.add(key)
 
 
 def _weak_tensor_ref(tensor: torch.Tensor) -> Any:
