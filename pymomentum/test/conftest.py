@@ -22,6 +22,13 @@ import os
 collect_ignore: list[str] = []
 
 try:
+    import torch
+
+    cuda_available = torch.cuda.is_available()
+except ImportError:
+    cuda_available = False
+
+try:
     import pymomentum.io_usd as _io_usd  # noqa: F401  # @manual=:io_usd
 
     usd_available = True
@@ -30,3 +37,12 @@ except ImportError:
 
 if not usd_available:
     collect_ignore.append(os.path.join(os.path.dirname(__file__), "test_usd.py"))
+
+if not cuda_available:
+    for test_file in (
+        "test_triton_fk_backend.py",
+        "test_triton_quaternion_backend.py",
+        "test_triton_skel_state_backend.py",
+        "test_triton_skinning_backend.py",
+    ):
+        collect_ignore.append(os.path.join(os.path.dirname(__file__), test_file))
