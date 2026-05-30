@@ -15,6 +15,7 @@
 #include <momentum/character/blend_shape.h>
 #include <momentum/character/character.h>
 #include <momentum/character/character_utility.h>
+#include <momentum/character/collision_geometry.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/io/fbx/fbx_io.h>
@@ -35,6 +36,7 @@
 #include <fmt/format.h>
 
 namespace mm = momentum;
+namespace py = pybind11;
 
 namespace {
 
@@ -58,24 +60,37 @@ mm::Character withBlendShapeImpl(
   return c.withBlendShape(blendShapePtr, nShapes < 0 ? INT_MAX : nShapes);
 }
 
-std::vector<mm::TaperedCapsule> collisionGeometryToPython(
-    const mm::CollisionGeometry& collisionGeometry) {
-  std::vector<mm::TaperedCapsule> result;
-  result.reserve(collisionGeometry.size());
+py::list collisionGeometryToPython(const mm::CollisionGeometry& collisionGeometry) {
+  py::list result;
   for (const auto& primitive : collisionGeometry) {
-    if (!primitive.isTaperedCapsule()) {
+    if (primitive.type == mm::CollisionPrimitiveType::TaperedCapsule) {
+      result.append(py::cast(primitive.toTaperedCapsule()));
+    } else if (primitive.type == mm::CollisionPrimitiveType::Ellipsoid) {
+      result.append(py::cast(primitive.toEllipsoid()));
+    } else {
       MT_THROW(
-          "Collision geometry contains unsupported primitive type for capsule-only Python binding: {}",
+          "Unsupported collision primitive type while converting collision geometry to Python: {}",
           static_cast<int>(primitive.type));
     }
-    result.push_back(primitive.toTaperedCapsule());
   }
   return result;
 }
 
-mm::CollisionGeometry collisionGeometryFromPython(
-    const std::vector<mm::TaperedCapsule>& collisionGeometry) {
-  return {collisionGeometry.begin(), collisionGeometry.end()};
+mm::CollisionGeometry collisionGeometryFromPython(const py::sequence& collisionGeometry) {
+  mm::CollisionGeometry result;
+  result.reserve(collisionGeometry.size());
+  for (const py::handle item : collisionGeometry) {
+    if (py::isinstance<mm::TaperedCapsule>(item)) {
+      result.push_back(item.cast<mm::TaperedCapsule>());
+    } else if (py::isinstance<mm::CollisionEllipsoid>(item)) {
+      result.push_back(item.cast<mm::CollisionEllipsoid>());
+    } else {
+      MT_THROW(
+          "Collision geometry entries must be TaperedCapsule or Ellipsoid; got {}",
+          py::str(py::type::handle_of(item)).cast<std::string>());
+    }
+  }
+  return result;
 }
 
 } // namespace
@@ -389,13 +404,14 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           ":return: The character's :class:`BlendShapeBase` basis, if present, or None.")
       .def_property_readonly(
           "collision_geometry",
-          [](const mm::Character& c) -> std::vector<mm::TaperedCapsule> {
+          [](const mm::Character& c) -> py::list {
             if (c.collision) {
               return collisionGeometryToPython(*c.collision);
+            } else {
+              return py::list();
             }
-            return {};
           },
-          ":return: A list of :class:`TaperedCapsule` representing the character's collision geometry.")
+          ":return: A list of :class:`TaperedCapsule` and :class:`Ellipsoid` objects representing the character's collision geometry.")
       .def(
           "with_blend_shape",
           &withBlendShapeImpl,
@@ -425,8 +441,9 @@ It can be used to solve for facial expressions.
           py::arg("n_shapes") = -1)
       .def(
           "with_collision_geometry",
-          [](const mm::Character& c, const std::vector<mm::TaperedCapsule>& collision_geometry) {
-            const mm::CollisionGeometry geometry = collisionGeometryFromPython(collision_geometry);
+          [](const mm::Character& c, const py::sequence& collision_geometry) {
+            const mm::CollisionGeometry collisionGeometry =
+                collisionGeometryFromPython(collision_geometry);
             return mm::Character(
                 c.skeleton,
                 c.parameterTransform,
@@ -434,7 +451,7 @@ It can be used to solve for facial expressions.
                 c.locators,
                 c.mesh.get(),
                 c.skinWeights.get(),
-                &geometry,
+                &collisionGeometry,
                 c.poseShapes.get(),
                 c.blendShape,
                 c.faceExpressionBlendShape,
