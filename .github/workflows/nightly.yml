@@ -47,7 +47,7 @@ jobs:
       - name: Build Python API Doc
         run: |
           MOMENTUM_BUILD_WITH_FBXSDK=ON \
-            pixi run doc_py
+            pixi run doc_py_no_build
 
       - name: Print ccache stats
         run: ccache -s

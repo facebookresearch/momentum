@@ -158,6 +158,7 @@ animate_shapes = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/animate_shape
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target install", depends-on = [
     "build",
 ], description = "Install built libraries and executables" }
+install_no_build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp/release -j --target install", description = "Install libraries and executables without rebuilding first" }
 tracy = { cmd = "tracy-profiler", description = "Launch Tracy profiler GUI" }
 test_py = { cmd = "pytest pymomentum/test/", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
@@ -165,6 +166,7 @@ test_py = { cmd = "pytest pymomentum/test/", env = { MOMENTUM_MODELS_PATH = "mom
 test_py_verbose = { cmd = "pytest pymomentum/test/ -v", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ], description = "Run Python tests with verbose output" }
+doc_py_no_build = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", description = "Build Python API documentation without rebuilding first" }
 doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
     "build_py",
 ], description = "Build Python API documentation with warnings as errors" }
@@ -494,6 +496,7 @@ animate_shapes = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/animate_shape
 install = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target install --config Release --parallel", depends-on = [
     "build",
 ] }
+install_no_build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --target install --config Release --parallel" }
 tracy = { cmd = "tracy-profiler.exe" }
 build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DMOMENTUM_ENABLE_FBX_SAVING=$MOMENTUM_ENABLE_FBX_SAVING \
