@@ -49,7 +49,8 @@ _ACTIVE_ALL_CACHE: dict[int, tuple[bool, ...]] = {}
 _FLUX_TENSOR_CACHE: dict[_TensorMetadataKey, _WeakTensorAndValue] = {}
 _FORWARD_JIT_CACHE: dict[Any, Any] = {}
 _FORWARD_JOINT_JIT_CACHE: dict[Any, Any] = {}
-_BACKWARD_JIT_CACHE: dict[Any, Any] = {}
+_BACKWARD_JOINT_JIT_CACHE: dict[Any, Any] = {}
+_BACKWARD_GRAPH_JIT_CACHE: dict[Any, Any] = {}
 _STRIDED_CALL_ARGS_CACHE: dict[
     tuple[int, int], tuple[list[int], list[int], list[int]]
 ] = {}
@@ -1589,7 +1590,7 @@ def _backward_joint_jit(
 ):
     assert fx is not None
     key = (has_parent, active, offset, prerotation)
-    cached = _cache_get(_BACKWARD_JIT_CACHE, key)
+    cached = _cache_get(_BACKWARD_JOINT_JIT_CACHE, key)
     if cached is not None:
         return cached
 
@@ -1714,7 +1715,7 @@ def _backward_joint_jit(
             )
 
         _bounded_cache_set(
-            _BACKWARD_JIT_CACHE,
+            _BACKWARD_JOINT_JIT_CACHE,
             key,
             backward_child,
             _MAX_SMALL_CACHE_ENTRIES,
@@ -1812,7 +1813,7 @@ def _backward_joint_jit(
         return zero, zero, zero, zero, zero, zero, zero
 
     _bounded_cache_set(
-        _BACKWARD_JIT_CACHE,
+        _BACKWARD_JOINT_JIT_CACHE,
         key,
         backward_root,
         _MAX_SMALL_CACHE_ENTRIES,
@@ -2092,7 +2093,7 @@ def _backward_jit(
 ):
     assert fx is not None
     key = _backward_jit_key(offsets, prerotations, parents, active_joints)
-    cached = _cache_get(_BACKWARD_JIT_CACHE, key)
+    cached = _cache_get(_BACKWARD_GRAPH_JIT_CACHE, key)
     if cached is not None:
         return cached
     num_joints = len(parents)
@@ -2122,7 +2123,7 @@ def _backward_jit(
         )
 
     _bounded_cache_set(
-        _BACKWARD_JIT_CACHE, key, backward_kernel, _MAX_SMALL_CACHE_ENTRIES
+        _BACKWARD_GRAPH_JIT_CACHE, key, backward_kernel, _MAX_SMALL_CACHE_ENTRIES
     )
     return backward_kernel
 
