@@ -66,6 +66,7 @@ _FLUX_CUDA_READY = False
 _FLUX_ROW_MAJOR_STATE = "row_major"
 _FLUX_COMPONENT_MAJOR_STATE = "component_major"
 _CACHE_LOCK = threading.Lock()
+_FLUX_CUDA_LOCK = threading.Lock()
 
 
 def _env_flag(name: str, default: str) -> bool:
@@ -157,7 +158,7 @@ def _require_flux() -> None:
 def _require_flux_cuda() -> None:
     global _FLUX_CUDA_READY
     _require_flux()
-    with _CACHE_LOCK:
+    with _FLUX_CUDA_LOCK:
         if _FLUX_CUDA_READY:
             return
         if hasattr(fx, "is_cuda_available") and not fx.is_cuda_available():
