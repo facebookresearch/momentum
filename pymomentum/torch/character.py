@@ -409,7 +409,14 @@ class Skeleton(torch.nn.Module):
                 "pass use_double_precision=False"
             )
         if resolved == "flux":
-            from pymomentum.backend import flux_fk  # @manual=:backend_flux
+            if not joint_parameters.is_cuda:
+                raise RuntimeError("Flux FK requested, but joint_parameters is on CPU")
+            try:
+                from pymomentum.backend import flux_fk  # @manual=:backend_flux
+            except ImportError as error:
+                raise RuntimeError(
+                    "Flux FK requested, but Flux backend is not available in this build"
+                ) from error
 
             with torch.amp.autocast("cuda", enabled=False):
                 return flux_fk.joint_parameters_to_skeleton_state(
