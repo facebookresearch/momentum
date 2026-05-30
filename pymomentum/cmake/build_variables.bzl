@@ -26,6 +26,10 @@ backend_triton_sources = [
     "backend/triton_skinning.py",
 ]
 
+backend_flux_sources = [
+    "backend/flux_fk.py",
+]
+
 python_utility_public_headers = [
     "python_utility/eigen_quaternion.h",
     "python_utility/python_utility.h",
