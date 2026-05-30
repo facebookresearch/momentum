@@ -403,6 +403,22 @@ class Skeleton(torch.nn.Module):
                     self.joint_parents,
                     active_joints,
                 )
+        if resolved == "flux" and use_double_precision:
+            raise RuntimeError(
+                "Flux FK does not support double precision; "
+                "pass use_double_precision=False"
+            )
+        if resolved == "flux":
+            from pymomentum.backend import flux_fk  # @manual=:backend_flux
+
+            with torch.amp.autocast("cuda", enabled=False):
+                return flux_fk.joint_parameters_to_skeleton_state(
+                    joint_parameters.float(),
+                    self.joint_translation_offsets,
+                    self.joint_prerotations,
+                    self.joint_parents,
+                    active_joints,
+                )
         if resolved != "torch":
             raise ValueError(f"Unsupported FK backend: {resolved}")
         return self.local_skeleton_state_to_skeleton_state(
