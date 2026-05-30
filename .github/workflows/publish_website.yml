@@ -2,6 +2,8 @@ name: Publish Website
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "momentum/website/**"
       - "momentum/Doxyfile"
@@ -11,7 +13,6 @@ on:
     paths:
       - "momentum/website/**"
       - "momentum/Doxyfile"
-      - "pymomentum/**"
       - ".github/workflows/publish_website.yml"
   workflow_dispatch:
 
@@ -59,9 +60,10 @@ jobs:
         yarn install --frozen-lockfile
         yarn run build
 
-    # 3) Build Python API docs (only when pymomentum source changed)
+    # 3) Build Python API docs for main-branch deploys when pymomentum changed.
+    # PR validation happens in CI Ubuntu after the PyMomentum tests build the extension.
     - name: Free up disk space before pixi
-      if: steps.check_pymomentum.outputs.changed == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pymomentum.outputs.changed == 'true'
       run: |
         sudo rm -rf /usr/share/dotnet || true
         sudo rm -rf /opt/ghc || true
@@ -75,26 +77,26 @@ jobs:
         df -h
 
     - name: Set up pixi
-      if: steps.check_pymomentum.outputs.changed == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pymomentum.outputs.changed == 'true'
       uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.5
       with:
         cache: false
         environments: default
 
     - name: Build Python API Documentation
-      if: steps.check_pymomentum.outputs.changed == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pymomentum.outputs.changed == 'true'
       run: |
         pixi run doc_py
 
     # 4) Copy Python API Documentation to Docusaurus (if built)
     - name: Copy Python API Documentation
-      if: steps.check_pymomentum.outputs.changed == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pymomentum.outputs.changed == 'true'
       run: |
         cp -R build/python_api_doc momentum/website/build/python_api_doc
 
     # 4.5) Preserve existing Python API docs from gh-pages (when not rebuilt)
     - name: Preserve existing Python API docs from gh-pages
-      if: steps.check_pymomentum.outputs.changed != 'true'
+      if: github.event_name != 'push' || github.ref != 'refs/heads/main' || steps.check_pymomentum.outputs.changed != 'true'
       run: |
         git fetch origin gh-pages --depth=1 || true
         if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then

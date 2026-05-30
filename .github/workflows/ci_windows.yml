@@ -3,7 +3,7 @@ name: CI Windows
 on:
   push:
     branches:
-      - "**"
+      - main
     paths-ignore:
       - "**/website/**"
   pull_request:
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install Momentum and Build hello_world
         run: |
-          pixi run install
+          pixi run install_no_build
           pixi run cmake `
             -S momentum/examples/hello_world `
             -B momentum/examples/hello_world/build
