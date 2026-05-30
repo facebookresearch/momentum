@@ -3,7 +3,7 @@ name: CI Ubuntu
 on:
   push:
     branches:
-      - "**"
+      - main
     paths-ignore:
       - "**/website/**"
   pull_request:
@@ -54,7 +54,7 @@ jobs:
         run: |
           MOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
             MOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
-            pixi run install
+            pixi run install_no_build
           pixi run cmake \
             -S momentum/examples/hello_world \
             -B momentum/examples/hello_world/build \
@@ -80,7 +80,7 @@ jobs:
 
       - name: Build Python API Doc
         run: |
-          pixi run -e py312 doc_py
+          pixi run -e py312 doc_py_no_build
 
       - name: Upload Python API Doc
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
