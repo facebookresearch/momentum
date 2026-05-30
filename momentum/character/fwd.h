@@ -145,6 +145,25 @@ using CollisionGeometryStated_const_u = ::std::unique_ptr<const CollisionGeometr
 using CollisionGeometryStated_const_w = ::std::weak_ptr<const CollisionGeometryStated>;
 
 template <typename T>
+struct CollisionOverlapResultT;
+using CollisionOverlapResult = CollisionOverlapResultT<float>;
+using CollisionOverlapResultd = CollisionOverlapResultT<double>;
+
+using CollisionOverlapResult_p = ::std::shared_ptr<CollisionOverlapResult>;
+using CollisionOverlapResult_u = ::std::unique_ptr<CollisionOverlapResult>;
+using CollisionOverlapResult_w = ::std::weak_ptr<CollisionOverlapResult>;
+using CollisionOverlapResult_const_p = ::std::shared_ptr<const CollisionOverlapResult>;
+using CollisionOverlapResult_const_u = ::std::unique_ptr<const CollisionOverlapResult>;
+using CollisionOverlapResult_const_w = ::std::weak_ptr<const CollisionOverlapResult>;
+
+using CollisionOverlapResultd_p = ::std::shared_ptr<CollisionOverlapResultd>;
+using CollisionOverlapResultd_u = ::std::unique_ptr<CollisionOverlapResultd>;
+using CollisionOverlapResultd_w = ::std::weak_ptr<CollisionOverlapResultd>;
+using CollisionOverlapResultd_const_p = ::std::shared_ptr<const CollisionOverlapResultd>;
+using CollisionOverlapResultd_const_u = ::std::unique_ptr<const CollisionOverlapResultd>;
+using CollisionOverlapResultd_const_w = ::std::weak_ptr<const CollisionOverlapResultd>;
+
+template <typename T>
 struct CollisionEllipsoidT;
 using CollisionEllipsoid = CollisionEllipsoidT<float>;
 using CollisionEllipsoidd = CollisionEllipsoidT<double>;

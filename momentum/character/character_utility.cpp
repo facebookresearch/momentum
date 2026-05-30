@@ -87,10 +87,14 @@ std::unique_ptr<CollisionGeometry> scale(
   }
 
   auto result = std::make_unique<CollisionGeometry>(*geom);
-  for (auto& capsule : (*result)) {
-    capsule.transformation.translation *= scale;
-    capsule.radius *= scale;
-    capsule.length *= scale;
+  for (auto& primitive : (*result)) {
+    primitive.transformation.translation *= scale;
+    if (primitive.type == CollisionPrimitiveType::TaperedCapsule) {
+      primitive.radius *= scale;
+      primitive.length *= scale;
+    } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
+      primitive.ellipsoidRadii *= scale;
+    }
   }
 
   return result;
@@ -168,6 +172,10 @@ std::vector<T> mapParents(const std::vector<T>& objects, const std::vector<size_
   std::vector<T> result;
   result.reserve(objects.size());
   for (auto o : objects) {
+    if (o.parent == kInvalidIndex) {
+      result.push_back(o);
+      continue;
+    }
     MT_CHECK(
         o.parent < jointMapping.size(),
         "Parent {} exceeds joint mapping size {}",
@@ -521,6 +529,23 @@ TransformationList transformInverseBindPose(
   return result;
 }
 
+std::unique_ptr<CollisionGeometry> transformCollisionGeometry(
+    const std::unique_ptr<CollisionGeometry>& collision,
+    const Eigen::Affine3f& xf) {
+  if (!collision) {
+    return {};
+  }
+
+  auto result = std::make_unique<CollisionGeometry>(*collision);
+  const Transform xformTransform(xf);
+  for (auto& primitive : *result) {
+    if (primitive.parent == kInvalidIndex) {
+      primitive.transformation = xformTransform * primitive.transformation;
+    }
+  }
+  return result;
+}
+
 } // namespace
 
 Character transformCharacter(const Character& character, const Affine3f& xform) {
@@ -531,7 +556,7 @@ Character transformCharacter(const Character& character, const Affine3f& xform) 
       character.locators,
       transformMesh(character.mesh, xform).get(),
       character.skinWeights.get(),
-      character.collision.get(),
+      transformCollisionGeometry(character.collision, xform).get(),
       character.poseShapes.get(),
       transformBlendShape(character.blendShape, xform),
       character.faceExpressionBlendShape,
@@ -636,13 +661,11 @@ Character replaceSkeletonHierarchy(
   CollisionGeometry combinedCollisionGeometry;
   if (tgtCharacter.collision) {
     combinedCollisionGeometry = mergeVectors(
-        combinedCollisionGeometry,
-        mapParents<CollisionPrimitive>(*tgtCharacter.collision, tgtToCombinedJoints));
+        combinedCollisionGeometry, mapParents(*tgtCharacter.collision, tgtToCombinedJoints));
   }
   if (srcCharacter.collision) {
     combinedCollisionGeometry = mergeVectors(
-        combinedCollisionGeometry,
-        mapParents<CollisionPrimitive>(*srcCharacter.collision, srcToCombinedJoints));
+        combinedCollisionGeometry, mapParents(*srcCharacter.collision, srcToCombinedJoints));
   }
 
   // Build the merged parameter transform:
@@ -807,8 +830,7 @@ Character removeJoints(const Character& character, momentum::span<const size_t> 
 
   CollisionGeometry resultCollisionGeometry;
   if (character.collision) {
-    resultCollisionGeometry =
-        mapParents<CollisionPrimitive>(*character.collision, srcToResultJoints);
+    resultCollisionGeometry = mapParents(*character.collision, srcToResultJoints);
   }
 
   const ParameterLimits resultParameterLimits =
