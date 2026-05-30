@@ -68,6 +68,7 @@ _FLUX_ROW_MAJOR_STATE = "row_major"
 _FLUX_COMPONENT_MAJOR_STATE = "component_major"
 _CACHE_LOCK = threading.Lock()
 _FLUX_CUDA_LOCK = threading.Lock()
+_FLUX_DEVICE_LOCK = threading.Lock()
 
 
 def _env_flag(name: str, default: str) -> bool:
@@ -255,8 +256,11 @@ def _torch_to_flux(tensor: torch.Tensor, *, cache: bool = False) -> Any:
         device_index = tensor.device.index
         if device_index is None:
             device_index = torch.cuda.current_device()
-        fx.set_device(int(device_index))
-    result = fx.from_dlpack(tensor.detach().__dlpack__())
+        with _FLUX_DEVICE_LOCK:
+            fx.set_device(int(device_index))
+            result = fx.from_dlpack(tensor.detach().__dlpack__())
+    else:
+        result = fx.from_dlpack(tensor.detach().__dlpack__())
     if cache:
         _bounded_cache_set(
             _FLUX_TENSOR_CACHE,
