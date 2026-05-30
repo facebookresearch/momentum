@@ -80,15 +80,25 @@ def _bounded_cache_set(
 ) -> None:
     with _CACHE_LOCK:
         if key not in cache and len(cache) >= max_entries:
-            cache.clear()
+            cache.pop(next(iter(cache)), None)
         cache[key] = value
 
 
 def _bounded_set_add(cache: set[Any], key: Any, max_entries: int) -> None:
     with _CACHE_LOCK:
         if key not in cache and len(cache) >= max_entries:
-            cache.clear()
+            cache.pop()
         cache.add(key)
+
+
+def _cache_get(cache: dict[Any, Any], key: Any) -> Any | None:
+    with _CACHE_LOCK:
+        return cache.get(key)
+
+
+def _cache_contains(cache: set[Any], key: Any) -> bool:
+    with _CACHE_LOCK:
+        return key in cache
 
 
 def _weak_tensor_ref(tensor: torch.Tensor) -> Any:
@@ -147,17 +157,18 @@ def _require_flux() -> None:
 def _require_flux_cuda() -> None:
     global _FLUX_CUDA_READY
     _require_flux()
-    if _FLUX_CUDA_READY:
-        return
-    if hasattr(fx, "is_cuda_available") and not fx.is_cuda_available():
-        reason = ""
-        if hasattr(fx, "cuda_runtime_disable_reason"):
-            reason = fx.cuda_runtime_disable_reason()
-        message = "Flux FK requested, but Flux CUDA runtime is not available."
-        if reason:
-            message = f"{message} Reason: {reason}"
-        raise RuntimeError(message)
-    _FLUX_CUDA_READY = True
+    with _CACHE_LOCK:
+        if _FLUX_CUDA_READY:
+            return
+        if hasattr(fx, "is_cuda_available") and not fx.is_cuda_available():
+            reason = ""
+            if hasattr(fx, "cuda_runtime_disable_reason"):
+                reason = fx.cuda_runtime_disable_reason()
+            message = "Flux FK requested, but Flux CUDA runtime is not available."
+            if reason:
+                message = f"{message} Reason: {reason}"
+            raise RuntimeError(message)
+        _FLUX_CUDA_READY = True
 
 
 def _should_use_backward_jit(num_joints: int) -> bool:
@@ -183,7 +194,7 @@ def _metadata_key(tensor: torch.Tensor) -> _TensorMetadataKey:
 
 def _float_tuple_2d(tensor: torch.Tensor) -> tuple[tuple[float, ...], ...]:
     key = _metadata_key(tensor)
-    cached = _METADATA_CACHE.get(key)
+    cached = _cache_get(_METADATA_CACHE, key)
     if cached is not None and _weak_tensor_matches(cached[0], tensor):
         return cached[1]
     result = tuple(
@@ -200,7 +211,7 @@ def _float_tuple_2d(tensor: torch.Tensor) -> tuple[tuple[float, ...], ...]:
 
 def _int_tuple_1d(tensor: torch.Tensor) -> tuple[int, ...]:
     key = _metadata_key(tensor)
-    cached = _METADATA_CACHE.get(key)
+    cached = _cache_get(_METADATA_CACHE, key)
     if cached is not None and _weak_tensor_matches(cached[0], tensor):
         return cached[1]
     result = tuple(int(value) for value in tensor.detach().cpu().tolist())
@@ -218,7 +229,7 @@ def _active_tuple(
     num_joints: int,
 ) -> tuple[bool, ...]:
     if active_joints is None:
-        cached = _ACTIVE_ALL_CACHE.get(num_joints)
+        cached = _cache_get(_ACTIVE_ALL_CACHE, num_joints)
         if cached is None:
             cached = (True,) * num_joints
             _bounded_cache_set(
@@ -235,7 +246,7 @@ def _torch_to_flux(tensor: torch.Tensor, *, cache: bool = False) -> Any:
     assert fx is not None
     if cache:
         key = _metadata_key(tensor)
-        cached = _FLUX_TENSOR_CACHE.get(key)
+        cached = _cache_get(_FLUX_TENSOR_CACHE, key)
         if cached is not None and _weak_tensor_matches(cached[0], tensor):
             return cached[1]
     if tensor.is_cuda:
@@ -305,7 +316,7 @@ def _strided_offsets(
     components_per_joint: int,
 ) -> tuple[int, ...]:
     key = (num_joints, components_per_joint)
-    cached = _STRIDED_OFFSET_CACHE.get(key)
+    cached = _cache_get(_STRIDED_OFFSET_CACHE, key)
     if cached is not None:
         return cached
     result = tuple(
@@ -343,7 +354,7 @@ def _component_indices(
     device: torch.device,
 ) -> tuple[Any, ...]:
     key = (batch_size, num_joints, components_per_joint, str(device))
-    cached = _INDEX_CACHE.get(key)
+    cached = _cache_get(_INDEX_CACHE, key)
     if cached is not None:
         return cached
     batch_base = torch.arange(batch_size, device=device, dtype=torch.int64) * (
@@ -892,7 +903,7 @@ def _validate_inputs(  # noqa: C901
         _metadata_key(joint_parents),
         None if active_joints is None else _metadata_key(active_joints),
     )
-    if validation_key in _VALIDATION_CACHE:
+    if _cache_contains(_VALIDATION_CACHE, validation_key):
         return
 
     if not joint_parameters.is_cuda:
@@ -942,7 +953,7 @@ def _forward_joint_jit(
 ):
     assert fx is not None
     key = (has_parent, offset, prerotation)
-    cached = _FORWARD_JOINT_JIT_CACHE.get(key)
+    cached = _cache_get(_FORWARD_JOINT_JIT_CACHE, key)
     if cached is not None:
         return cached
 
@@ -1160,7 +1171,7 @@ def _forward_jit(
 ):
     assert fx is not None
     key = _forward_jit_key(offsets, prerotations, parents)
-    cached = _FORWARD_JIT_CACHE.get(key)
+    cached = _cache_get(_FORWARD_JIT_CACHE, key)
     if cached is not None:
         return cached
     num_joints = len(parents)
@@ -1187,7 +1198,7 @@ def _strided_call_args(
     components_per_joint: int,
 ) -> tuple[list[int], list[int], list[int]]:
     key = (num_joints, components_per_joint)
-    cached = _STRIDED_CALL_ARGS_CACHE.get(key)
+    cached = _cache_get(_STRIDED_CALL_ARGS_CACHE, key)
     if cached is not None:
         return cached
     offsets = _strided_offsets(
@@ -1231,7 +1242,7 @@ def _strided_call_layout(
     components_per_joint: int,
 ):
     key = (num_joints, components_per_joint)
-    cached = _STRIDED_CALL_LAYOUT_CACHE.get(key)
+    cached = _cache_get(_STRIDED_CALL_LAYOUT_CACHE, key)
     if cached is not None:
         return cached
     base_indices, offsets, strides = _strided_call_args(
@@ -1264,7 +1275,7 @@ def _backward_strided_call_args(
         grad_component_offsets,
         grad_component_stride,
     )
-    cached = _BACKWARD_STRIDED_CALL_ARGS_CACHE.get(key)
+    cached = _cache_get(_BACKWARD_STRIDED_CALL_ARGS_CACHE, key)
     if cached is not None:
         return cached
 
@@ -1305,7 +1316,7 @@ def _backward_strided_call_layout(
         grad_component_offsets,
         grad_component_stride,
     )
-    cached = _BACKWARD_STRIDED_CALL_LAYOUT_CACHE.get(key)
+    cached = _cache_get(_BACKWARD_STRIDED_CALL_LAYOUT_CACHE, key)
     if cached is not None:
         return cached
     base_indices, offsets, strides = _backward_strided_call_args(
@@ -1577,7 +1588,7 @@ def _backward_joint_jit(
 ):
     assert fx is not None
     key = (has_parent, active, offset, prerotation)
-    cached = _BACKWARD_JIT_CACHE.get(key)
+    cached = _cache_get(_BACKWARD_JIT_CACHE, key)
     if cached is not None:
         return cached
 
@@ -2080,7 +2091,7 @@ def _backward_jit(
 ):
     assert fx is not None
     key = _backward_jit_key(offsets, prerotations, parents, active_joints)
-    cached = _BACKWARD_JIT_CACHE.get(key)
+    cached = _cache_get(_BACKWARD_JIT_CACHE, key)
     if cached is not None:
         return cached
     num_joints = len(parents)
@@ -2165,6 +2176,9 @@ def _backward_array_ops(  # noqa: C901
             components_per_joint=8,
         )
         state_component_stride = num_joints * 8
+    use_strided_state_components = (
+        global_state_flux is not None or global_state_packed is not None
+    )
     if grad_global_state_packed is not None:
         grad_output_buffer = _torch_to_flux(
             grad_global_state_packed.reshape(-1), cache=True
@@ -2298,7 +2312,7 @@ def _backward_array_ops(  # noqa: C901
                     components_per_joint=8,
                     device=joint_parameters.device,
                 )
-                if global_state_packed is None
+                if not use_strided_state_components
                 else _gather_strided_components(
                     global_state_buffer,
                     offsets=state_component_offsets,
@@ -2361,7 +2375,7 @@ def _backward_array_ops(  # noqa: C901
                         components_per_joint=8,
                         device=joint_parameters.device,
                     )
-                    if global_state_packed is None
+                    if not use_strided_state_components
                     else _gather_strided_components(
                         global_state_buffer,
                         offsets=state_component_offsets,
@@ -2413,7 +2427,7 @@ def _backward_array_ops(  # noqa: C901
                     components_per_joint=8,
                     device=joint_parameters.device,
                 )
-                if global_state_packed is None
+                if not use_strided_state_components
                 else _gather_strided_components(
                     global_state_buffer,
                     offsets=state_component_offsets,
