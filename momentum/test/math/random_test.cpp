@@ -453,6 +453,29 @@ TYPED_TEST(RandomTest, UniformQuaternion) {
   }
 }
 
+// Regression test: uniformQuaternion() must draw from the instance generator so it is reproducible
+// under a fixed seed. It previously delegated to Eigen::Quaternion::UnitRandom(), which uses the
+// unseeded global std::rand() and is therefore order-dependent and invisible to setSeed().
+TYPED_TEST(RandomTest, UniformQuaternionIsReproducibleFromSeed) {
+  using T = typename TestFixture::Type;
+
+  Random<> r0(777);
+  Random<> r1(777);
+  for (int i = 0; i < 16; ++i) {
+    const Quaternion<T> q0 = r0.template uniformQuaternion<T>();
+    const Quaternion<T> q1 = r1.template uniformQuaternion<T>();
+    EXPECT_TRUE(q0.coeffs().isApprox(q1.coeffs()))
+        << "q0=" << q0.coeffs().transpose() << " q1=" << q1.coeffs().transpose();
+  }
+
+  // Re-seeding restarts the quaternion sequence.
+  r0.setSeed(777);
+  const Quaternion<T> qFirstAgain = r0.template uniformQuaternion<T>();
+  Random<> rFresh(777);
+  const Quaternion<T> qFresh = rFresh.template uniformQuaternion<T>();
+  EXPECT_TRUE(qFirstAgain.coeffs().isApprox(qFresh.coeffs()));
+}
+
 TEST(RandomTest, ScalarNormal) {
   const auto numTests = 1000;
   const float mean = 2.5f;

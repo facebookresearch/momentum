@@ -8,9 +8,12 @@
 #pragma once
 
 #include <momentum/math/random.h>
+
+#include <momentum/math/constants.h>
 #include <momentum/math/types.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace momentum {
@@ -232,7 +235,16 @@ DynamicMatrix Random<Generator>::uniform(
 template <typename Generator>
 template <typename T>
 Quaternion<T> Random<Generator>::uniformQuaternion() {
-  return Quaternion<T>::UnitRandom();
+  // Shoemake's method for a uniformly distributed unit quaternion (Haar measure on SO(3)). This
+  // matches the distribution of Eigen::Quaternion::UnitRandom() but draws from this instance's
+  // generator, so the result is controlled by setSeed(). Eigen's UnitRandom() instead uses the
+  // unseeded global std::rand(), which is not reproducible and is invisible to setSeed().
+  const T u1 = this->template uniform<T>(T(0), T(1));
+  const T u2 = this->template uniform<T>(T(0), twopi<T>());
+  const T u3 = this->template uniform<T>(T(0), twopi<T>());
+  const T a = std::sqrt(T(1) - u1);
+  const T b = std::sqrt(u1);
+  return Quaternion<T>(a * std::sin(u2), a * std::cos(u2), b * std::sin(u3), b * std::cos(u3));
 }
 
 template <typename Generator>
