@@ -18,11 +18,14 @@ var searchData=
   ['collectionadapter_3c_20telement_2c_20std_3a_3avector_3c_20eigen_3a_3avector3_3c_20t_20_3e_20_3e_20_3e_15',['CollectionAdapter&lt; TElement, std::vector&lt; Eigen::Vector3&lt; T &gt; &gt; &gt;',['../structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html',1,'rerun']]],
   ['collectionadapter_3c_20telement_2c_20std_3a_3avector_3c_20eigen_3a_3avector4_3c_20t_20_3e_20_3e_20_3e_16',['CollectionAdapter&lt; TElement, std::vector&lt; Eigen::Vector4&lt; T &gt; &gt; &gt;',['../structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html',1,'rerun']]],
   ['collisiondebugentryt_17',['CollisionDebugEntryT',['../structmomentum_1_1CollisionDebugEntryT.html',1,'momentum']]],
-  ['collisionerrorfunctionstatelesst_18',['CollisionErrorFunctionStatelessT',['../classmomentum_1_1CollisionErrorFunctionStatelessT.html',1,'momentum']]],
-  ['collisionerrorfunctiont_19',['CollisionErrorFunctionT',['../classmomentum_1_1CollisionErrorFunctionT.html',1,'momentum']]],
-  ['collisiongeometrystatet_20',['CollisionGeometryStateT',['../structmomentum_1_1CollisionGeometryStateT.html',1,'momentum']]],
-  ['collisionpairinfo_21',['collisionpairinfo',['../structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html',1,'momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::CollisionPairInfo'],['../structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html',1,'momentum::CollisionErrorFunctionT&lt; T &gt;::CollisionPairInfo']]],
-  ['columnindexedmatrix_22',['ColumnIndexedMatrix',['../classmomentum_1_1ColumnIndexedMatrix.html',1,'momentum']]],
-  ['constraintdata_23',['ConstraintData',['../structmomentum_1_1ConstraintData.html',1,'momentum']]],
-  ['coordinatesystem_24',['CoordinateSystem',['../structmomentum_1_1CoordinateSystem.html',1,'momentum']]]
+  ['collisionellipsoidt_18',['CollisionEllipsoidT',['../structmomentum_1_1CollisionEllipsoidT.html',1,'momentum']]],
+  ['collisionerrorfunctionstatelesst_19',['CollisionErrorFunctionStatelessT',['../classmomentum_1_1CollisionErrorFunctionStatelessT.html',1,'momentum']]],
+  ['collisionerrorfunctiont_20',['CollisionErrorFunctionT',['../classmomentum_1_1CollisionErrorFunctionT.html',1,'momentum']]],
+  ['collisiongeometrystatet_21',['CollisionGeometryStateT',['../structmomentum_1_1CollisionGeometryStateT.html',1,'momentum']]],
+  ['collisionoverlapresultt_22',['CollisionOverlapResultT',['../structmomentum_1_1CollisionOverlapResultT.html',1,'momentum']]],
+  ['collisionpairinfo_23',['collisionpairinfo',['../structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html',1,'momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::CollisionPairInfo'],['../structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html',1,'momentum::CollisionErrorFunctionT&lt; T &gt;::CollisionPairInfo']]],
+  ['collisionprimitivet_24',['CollisionPrimitiveT',['../structmomentum_1_1CollisionPrimitiveT.html',1,'momentum']]],
+  ['columnindexedmatrix_25',['ColumnIndexedMatrix',['../classmomentum_1_1ColumnIndexedMatrix.html',1,'momentum']]],
+  ['constraintdata_26',['ConstraintData',['../structmomentum_1_1ConstraintData.html',1,'momentum']]],
+  ['coordinatesystem_27',['CoordinateSystem',['../structmomentum_1_1CoordinateSystem.html',1,'momentum']]]
 ];

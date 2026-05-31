@@ -24,7 +24,7 @@ var searchData=
   ['direction_21',['direction',['../structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105',1,'momentum::CollisionGeometryStateT']]],
   ['directsparsejtj_22',['directSparseJtJ',['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48',1,'momentum::SparseGaussNewtonSolverOptions']]],
   ['disabled_23',['Disabled',['../namespacemomentum.html#a0da6407898e254fc522385ff8028bf1bab9f5c797ebbf55adccdd8539a65a0241',1,'momentum']]],
-  ['distance_24',['distance',['../tracker__utils_8cpp.html#a06f14a9abd47b91465f895d5259cdc1b',1,'distance:&#160;tracker_utils.cpp'],['../structmomentum_1_1CollisionDebugEntryT.html#ad0851a04fc81e290bb00c72574899d9d',1,'momentum::CollisionDebugEntryT::distance']]],
+  ['distance_24',['distance',['../structmomentum_1_1CollisionDebugEntryT.html#ad0851a04fc81e290bb00c72574899d9d',1,'momentum::CollisionDebugEntryT::distance'],['../tracker__utils_8cpp.html#a06f14a9abd47b91465f895d5259cdc1b',1,'distance:&#160;tracker_utils.cpp'],['../structmomentum_1_1CollisionOverlapResultT.html#a5eb7341c958bf3414e7feba28df9e3c8',1,'momentum::CollisionOverlapResultT::distance']]],
   ['distance_5ferror_5ffunction_2ecpp_25',['distance_error_function.cpp',['../distance__error__function_8cpp.html',1,'']]],
   ['distance_5ferror_5ffunction_2eh_26',['distance_error_function.h',['../distance__error__function_8h.html',1,'']]],
   ['distanceconstraintdatat_27',['DistanceConstraintDataT',['../structmomentum_1_1DistanceConstraintDataT.html',1,'momentum']]],

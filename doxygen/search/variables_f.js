@@ -6,7 +6,7 @@ var searchData=
   ['offset2_3',['offset2',['../structmomentum_1_1JointToJointDistanceConstraintT.html#a5b31a8fa113dc71724deefd35968c027',1,'momentum::JointToJointDistanceConstraintT']]],
   ['offsets_4',['offsets',['../structmomentum_1_1CharacterParametersT.html#a11b608a996b975c09c15b7282f08c629',1,'momentum::CharacterParametersT::offsets'],['../structmomentum_1_1InverseParameterTransformT.html#a6e756372c5ed81779bbfd4608ca2fc7c',1,'momentum::InverseParameterTransformT::offsets'],['../structmomentum_1_1PolygonData.html#a56ed40b35d3af3d2e5ae3501f9b12ae1',1,'momentum::PolygonData::offsets'],['../structmomentum_1_1CenterOfMassConstraintT.html#a7b903e8b4524e862816aa460706adaf8',1,'momentum::CenterOfMassConstraintT::offsets'],['../structmomentum_1_1ParameterTransformT.html#a8e5a1efc82f2d081c6ce8a8b295fed97',1,'momentum::ParameterTransformT::offsets']]],
   ['oridata_5',['oriData',['../structmomentum_1_1GloveErrorFunctions.html#a100b48696445027e12b45ae551ba7a06',1,'momentum::GloveErrorFunctions']]],
-  ['orientation_6',['orientation',['../structmomentum_1_1GloveSensorObservation.html#ab53855def7f972b0d9f5738d4160a425',1,'momentum::GloveSensorObservation']]],
+  ['orientation_6',['orientation',['../structmomentum_1_1CollisionGeometryStateT.html#a6b2684d8f0825a90313f0a50c93694a1',1,'momentum::CollisionGeometryStateT::orientation'],['../structmomentum_1_1GloveSensorObservation.html#ab53855def7f972b0d9f5738d4160a425',1,'momentum::GloveSensorObservation::orientation']]],
   ['orientationerror_7',['orientationError',['../structmomentum_1_1StateSimilarity.html#acb6d375cf5952898ef788226fa40959a',1,'momentum::StateSimilarity']]],
   ['orientationmax_8',['orientationMax',['../structmomentum_1_1StateSimilarity.html#ab7bb6e4107a6d5e0ae401f94a5db7d39',1,'momentum::StateSimilarity']]],
   ['orientationrmse_9',['orientationRMSE',['../structmomentum_1_1StateSimilarity.html#a9996210ca9782dc8473dad5df4e46955',1,'momentum::StateSimilarity']]],
@@ -14,5 +14,5 @@ var searchData=
   ['orifunc_11',['oriFunc',['../structmomentum_1_1GloveErrorFunctions.html#ab271249153d273b3997d6bd85dc3ed6d',1,'momentum::GloveErrorFunctions']]],
   ['origin_12',['origin',['../structmomentum_1_1CollisionGeometryStateT.html#a1f1f2930836106c4e04e1d3b8a6ed5a9',1,'momentum::CollisionGeometryStateT::origin'],['../structmomentum_1_1DistanceConstraintDataT.html#a0b118747733297c2104717d393c50e9f',1,'momentum::DistanceConstraintDataT::origin']]],
   ['outputfile_13',['outputFile',['../structmomentum_1_1IOOptions.html#ad24ded11d286f857846afc24e37d68c8',1,'momentum::IOOptions']]],
-  ['overlap_14',['overlap',['../structmomentum_1_1CollisionDebugEntryT.html#af39df64b20a3dabc77db9afa92fcc233',1,'momentum::CollisionDebugEntryT']]]
+  ['overlap_14',['overlap',['../structmomentum_1_1CollisionOverlapResultT.html#a395e9a610919190fd6cf7a0fa8a0b281',1,'momentum::CollisionOverlapResultT::overlap'],['../structmomentum_1_1CollisionDebugEntryT.html#af39df64b20a3dabc77db9afa92fcc233',1,'momentum::CollisionDebugEntryT::overlap']]]
 ];

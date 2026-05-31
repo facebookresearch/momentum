@@ -28,9 +28,12 @@ var hierarchy =
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector3< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector3_3_01T_01_4_01_4_01_4.html", null ],
     [ "rerun::CollectionAdapter< TElement, std::vector< Eigen::Vector4< T > > >", "structrerun_1_1CollectionAdapter_3_01TElement_00_01std_1_1vector_3_01Eigen_1_1Vector4_3_01T_01_4_01_4_01_4.html", null ],
     [ "momentum::CollisionDebugEntryT< T >", "structmomentum_1_1CollisionDebugEntryT.html", null ],
+    [ "momentum::CollisionEllipsoidT< S >", "structmomentum_1_1CollisionEllipsoidT.html", null ],
     [ "momentum::CollisionGeometryStateT< T >", "structmomentum_1_1CollisionGeometryStateT.html", null ],
+    [ "momentum::CollisionOverlapResultT< T >", "structmomentum_1_1CollisionOverlapResultT.html", null ],
     [ "momentum::CollisionErrorFunctionStatelessT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionStatelessT_1_1CollisionPairInfo.html", null ],
     [ "momentum::CollisionErrorFunctionT< T >::CollisionPairInfo", "structmomentum_1_1CollisionErrorFunctionT_1_1CollisionPairInfo.html", null ],
+    [ "momentum::CollisionPrimitiveT< S >", "structmomentum_1_1CollisionPrimitiveT.html", null ],
     [ "momentum::ColumnIndexedMatrix< MatrixType >", "classmomentum_1_1ColumnIndexedMatrix.html", null ],
     [ "momentum::ConstraintData", "structmomentum_1_1ConstraintData.html", [
       [ "momentum::AimDataT< T >", "structmomentum_1_1AimDataT.html", null ],
