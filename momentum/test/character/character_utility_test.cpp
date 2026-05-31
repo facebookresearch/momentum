@@ -132,6 +132,13 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
   setTestPhysicalProperties(this->character);
   const PhysicalProperties originalPhysicalProperties = this->character.physicalProperties;
 
+  ASSERT_TRUE(this->character.collision);
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = 1;
+  ellipsoid.transformation.translation = Vector3f(0.1f, 0.2f, 0.3f);
+  ellipsoid.radii = Vector3f(0.3f, 0.2f, 0.1f);
+  this->character.collision->push_back(ellipsoid);
+
   // Store original values for comparison
   Vector3f originalTranslation = this->character.skeleton.joints[1].translationOffset;
   Vector3f originalVertex = this->character.mesh->vertices[0];
@@ -166,6 +173,11 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
         scaledCharacter.collision->at(0).radius, this->character.collision->at(0).radius * scale);
     EXPECT_EQ(
         scaledCharacter.collision->at(0).length, this->character.collision->at(0).length * scale);
+    const auto& scaledEllipsoid = scaledCharacter.collision->back();
+    EXPECT_EQ(scaledEllipsoid.type, CollisionPrimitiveType::Ellipsoid);
+    EXPECT_EQ(
+        scaledEllipsoid.transformation.translation, ellipsoid.transformation.translation * scale);
+    EXPECT_EQ(scaledEllipsoid.ellipsoidRadii, ellipsoid.radii * scale);
   }
 
   // Check that inverse bind pose was scaled
@@ -322,6 +334,48 @@ TEST_F(CharacterUtilityTest, TransformCharacter) {
   testTransformCharacter(this->characterWithBlendShapes);
 }
 
+TEST_F(CharacterUtilityTest, TransformCharacterTransformsWorldFixedCollisionGeometry) {
+  CollisionGeometry collisionGeometry;
+
+  CollisionEllipsoid parentedEllipsoid;
+  parentedEllipsoid.parent = 0;
+  parentedEllipsoid.transformation.translation = Vector3f(0.1f, 0.2f, 0.3f);
+  parentedEllipsoid.radii = Vector3f(0.2f, 0.3f, 0.4f);
+  collisionGeometry.push_back(parentedEllipsoid);
+
+  CollisionEllipsoid worldEllipsoid;
+  worldEllipsoid.parent = kInvalidIndex;
+  worldEllipsoid.transformation.translation = Vector3f(0.5f, 0.6f, 0.7f);
+  worldEllipsoid.transformation.rotation =
+      Quaternionf(Eigen::AngleAxisf(pi() / 3.0f, Vector3f::UnitZ()));
+  worldEllipsoid.radii = Vector3f(0.7f, 0.6f, 0.5f);
+  collisionGeometry.push_back(worldEllipsoid);
+
+  const Character character(
+      this->smallCharacter.skeleton,
+      this->smallCharacter.parameterTransform,
+      this->smallCharacter.parameterLimits,
+      this->smallCharacter.locators,
+      this->smallCharacter.mesh.get(),
+      this->smallCharacter.skinWeights.get(),
+      &collisionGeometry);
+
+  Affine3f transform = Affine3f::Identity();
+  transform.linear() =
+      Quaternionf(Eigen::AngleAxisf(pi() / 2.0f, Vector3f::UnitY())).toRotationMatrix();
+  transform.translation() = Vector3f(1.0f, 2.0f, 3.0f);
+
+  const Character transformedCharacter = transformCharacter(character, transform);
+
+  ASSERT_TRUE(transformedCharacter.collision);
+  ASSERT_EQ(transformedCharacter.collision->size(), 2);
+  EXPECT_TRUE(transformedCharacter.collision->at(0).transformation.isApprox(
+      parentedEllipsoid.transformation));
+  EXPECT_TRUE(transformedCharacter.collision->at(1).transformation.isApprox(
+      Transform(transform) * worldEllipsoid.transformation));
+  EXPECT_EQ(transformedCharacter.collision->at(1).ellipsoidRadii, worldEllipsoid.radii);
+}
+
 // Test removeJoints function
 TEST_F(CharacterUtilityTest, RemoveJoints) {
   // Skip if the character doesn't have enough joints
@@ -407,6 +461,38 @@ TEST_F(CharacterUtilityTest, RemoveJoints) {
   Character rootOnlyCharacter = removeJoints(this->character, allButRoot);
   EXPECT_EQ(rootOnlyCharacter.skeleton.joints.size(), 1);
   EXPECT_EQ(rootOnlyCharacter.skeleton.joints[0].name, this->character.skeleton.joints[0].name);
+}
+
+TEST_F(CharacterUtilityTest, RemoveJointsKeepsWorldFixedCollisionGeometry) {
+  CollisionGeometry collisionGeometry;
+
+  CollisionEllipsoid worldEllipsoid;
+  worldEllipsoid.parent = kInvalidIndex;
+  worldEllipsoid.radii = Vector3f(0.4f, 0.3f, 0.2f);
+  collisionGeometry.push_back(worldEllipsoid);
+
+  CollisionEllipsoid removedJointEllipsoid;
+  removedJointEllipsoid.parent = 1;
+  removedJointEllipsoid.radii = Vector3f(0.2f, 0.3f, 0.4f);
+  collisionGeometry.push_back(removedJointEllipsoid);
+
+  const Character character(
+      this->smallCharacter.skeleton,
+      this->smallCharacter.parameterTransform,
+      this->smallCharacter.parameterLimits,
+      this->smallCharacter.locators,
+      this->smallCharacter.mesh.get(),
+      this->smallCharacter.skinWeights.get(),
+      &collisionGeometry);
+
+  const std::vector<size_t> jointsToRemove = {1};
+  const Character resultCharacter = removeJoints(character, jointsToRemove);
+
+  ASSERT_TRUE(resultCharacter.collision);
+  ASSERT_EQ(resultCharacter.collision->size(), 1);
+  EXPECT_EQ(resultCharacter.collision->at(0).type, CollisionPrimitiveType::Ellipsoid);
+  EXPECT_EQ(resultCharacter.collision->at(0).parent, kInvalidIndex);
+  EXPECT_EQ(resultCharacter.collision->at(0).ellipsoidRadii, worldEllipsoid.radii);
 }
 
 // Test mapMotionToCharacter function
