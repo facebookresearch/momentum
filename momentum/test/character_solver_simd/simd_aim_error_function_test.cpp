@@ -48,6 +48,7 @@ TEST(Momentum_ErrorFunctions, SimdAimConstraintsRejectsJointIndexOutsideSkeleton
 }
 
 TEST(Momentum_ErrorFunctions, SimdAimDistFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

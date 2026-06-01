@@ -22,6 +22,7 @@
 using namespace momentum;
 
 TEST(Momentum_ErrorFunctions, SimdJointToJointDistanceFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

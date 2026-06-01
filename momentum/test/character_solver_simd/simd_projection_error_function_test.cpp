@@ -52,6 +52,7 @@ TEST(Momentum_ErrorFunctions, SimdProjectionConstraintsRejectsJointIndexOutsideS
 }
 
 TEST(Momentum_ErrorFunctions, SimdProjectionFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

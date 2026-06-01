@@ -47,6 +47,7 @@ TEST(Momentum_ErrorFunctions, SimdFixedAxisConstraintsRejectsJointIndexOutsideSk
 }
 
 TEST(Momentum_ErrorFunctions, SimdFixedAxisFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

@@ -48,6 +48,7 @@ TEST(Momentum_ErrorFunctions, SimdOrientationConstraintsRejectsJointIndexOutside
 }
 
 TEST(Momentum_ErrorFunctions, SimdOrientationFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

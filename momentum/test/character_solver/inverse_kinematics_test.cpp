@@ -13,6 +13,7 @@
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/skeleton_solver_function.h"
+#include "momentum/math/random.h"
 #include "momentum/solver/fwd.h"
 #include "momentum/solver/gauss_newton_solver.h"
 #include "momentum/solver/gradient_descent_solver.h"
@@ -25,6 +26,7 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct Momentum_InverseKinematicsTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(Momentum_InverseKinematicsTest, Types);
@@ -34,7 +36,7 @@ TEST(Momentum_InverseKinematics, Definitions) {
 }
 
 template <typename T, typename SolverT, typename SolverOptionsT>
-void testSimpleTargets(const SolverOptionsT& options) {
+void testSimpleTargets(Random<>& rng, const SolverOptionsT& options) {
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -84,7 +86,7 @@ void testSimpleTargets(const SolverOptionsT& options) {
   {
     SCOPED_TRACE("Checking optimizing target pose");
     for (size_t i = 0; i < 10; i++) {
-      constraints[0].target = Vector3<T>::Random() * 3.0;
+      constraints[0].target = rng.template uniform<Vector3<T>>(T(-1), T(1)) * T(3);
       errorFunction->setConstraints(constraints);
       const T error = solver.solve(optimizedParameters);
       state.set(castedCharacterParameterTransform.apply(optimizedParameters), skeleton);
@@ -106,7 +108,7 @@ TYPED_TEST(Momentum_InverseKinematicsTest, SimpleTargets) {
     options.minIterations = 6;
     options.threshold = 1.0;
     options.learningRate = 1.0;
-    testSimpleTargets<T, GradientDescentSolverT<T>>(options);
+    testSimpleTargets<T, GradientDescentSolverT<T>>(this->rng, options);
   }
 
   {
@@ -116,6 +118,6 @@ TYPED_TEST(Momentum_InverseKinematicsTest, SimpleTargets) {
     options.threshold = 1.0;
     options.regularization = 1e-7;
     options.useBlockJtJ = true;
-    testSimpleTargets<T, GaussNewtonSolverT<T>>(options);
+    testSimpleTargets<T, GaussNewtonSolverT<T>>(this->rng, options);
   }
 }
