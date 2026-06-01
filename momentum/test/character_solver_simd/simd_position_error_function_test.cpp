@@ -49,6 +49,7 @@ TEST(Momentum_ErrorFunctions, SimdPositionConstraintsRejectsJointIndexOutsideSke
 
 // TODO: Test for double once we have SIMD implementation for double
 TEST(Momentum_ErrorFunctions, SimdPositionFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   // create skeleton and reference values

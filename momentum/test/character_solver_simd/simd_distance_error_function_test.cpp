@@ -49,6 +49,7 @@ TEST(Momentum_ErrorFunctions, SimdDistanceConstraintsRejectsJointIndexOutsideSke
 // Verify SIMD distance error function matches the scalar reference at multiple constraint counts
 // that exercise both partial and full SIMD packets.
 TEST(Momentum_ErrorFunctions, SimdDistanceFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();

@@ -105,9 +105,11 @@ TEST(Momentum_ErrorFunctions, SimdPlaneConstraintsRejectsJointIndexOutsideSkelet
 
 // TODO: Test for double once we have SIMD implementation for double
 TEST(Momentum_ErrorFunctions, SimdPlaneFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   runSimdPlaneEquivalenceSweep(/*above=*/false);
 }
 
 TEST(Momentum_ErrorFunctions, SimdPlaneFunctionHalfPlaneIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   runSimdPlaneEquivalenceSweep(/*above=*/true);
 }
