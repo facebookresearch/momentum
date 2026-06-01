@@ -49,6 +49,14 @@ void CollisionGeometryStateT<T>::update(
       radius[i].setZero();
       delta[i] = T(0);
       ellipsoidRadii[i].noalias() = primitive.ellipsoidRadii.cast<T>() * parentTransform.scale;
+      continue;
+    }
+
+    if (primitive.type == CollisionPrimitiveType::Box) {
+      direction[i].setZero();
+      radius[i].setZero();
+      delta[i] = T(0);
+      ellipsoidRadii[i].setZero();
     }
   }
 }
