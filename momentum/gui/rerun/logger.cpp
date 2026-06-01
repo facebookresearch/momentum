@@ -46,6 +46,63 @@ rerun::HalfSize3D toRerunHalfSizes3D(const Eigen::MatrixBase<Derived>& vec3) {
 
 } // namespace
 
+namespace detail {
+
+CollisionEllipsoidLogData makeCollisionEllipsoidLogData(
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonState& skeletonState) {
+  CollisionEllipsoidLogData data;
+  data.centers.reserve(collisionGeometry.size());
+  data.halfSizes.reserve(collisionGeometry.size());
+  data.quaternions.reserve(collisionGeometry.size());
+
+  for (const auto& cg : collisionGeometry) {
+    if (cg.type != CollisionPrimitiveType::Ellipsoid) {
+      continue;
+    }
+
+    const Transform parentTransform = (cg.parent == kInvalidIndex)
+        ? Transform()
+        : skeletonState.jointState.at(cg.parent).transform;
+    const Transform tf = parentTransform * cg.transformation;
+
+    data.centers.push_back(tf.translation);
+    // Radii are scaled by the parent joint scale only (matches CollisionGeometryStateT::update).
+    data.halfSizes.emplace_back(cg.ellipsoidRadii * parentTransform.scale);
+    data.quaternions.push_back(tf.rotation);
+  }
+
+  return data;
+}
+
+CollisionBoxLogData makeCollisionBoxLogData(
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonState& skeletonState) {
+  CollisionBoxLogData data;
+  data.centers.reserve(collisionGeometry.size());
+  data.halfSizes.reserve(collisionGeometry.size());
+  data.quaternions.reserve(collisionGeometry.size());
+
+  for (const auto& cg : collisionGeometry) {
+    if (cg.type != CollisionPrimitiveType::Box) {
+      continue;
+    }
+
+    const Transform parentTransform = (cg.parent == kInvalidIndex)
+        ? Transform()
+        : skeletonState.jointState.at(cg.parent).transform;
+    const Transform tf = parentTransform * cg.transformation;
+
+    data.centers.push_back(tf.translation);
+    data.halfSizes.emplace_back(cg.boxHalfExtents * parentTransform.scale);
+    data.quaternions.push_back(tf.rotation);
+  }
+
+  return data;
+}
+
+} // namespace detail
+
 void logMesh(
     const rerun::RecordingStream& rec,
     const std::string& streamName,
@@ -448,41 +505,30 @@ void logCollisionGeometry(
   std::vector<rerun::Quaternion> capsuleQuaternions;
   std::vector<float> capsuleLengths;
   std::vector<float> capsuleRadii;
-  std::vector<rerun::Position3D> ellipsoidCenters;
-  std::vector<rerun::HalfSize3D> ellipsoidHalfSizes;
-  std::vector<rerun::Quaternion> ellipsoidQuaternions;
 
   capsuleTranslations.reserve(collisionGeometry.size());
   capsuleQuaternions.reserve(collisionGeometry.size());
   capsuleLengths.reserve(collisionGeometry.size());
   capsuleRadii.reserve(collisionGeometry.size());
-  ellipsoidCenters.reserve(collisionGeometry.size());
-  ellipsoidHalfSizes.reserve(collisionGeometry.size());
-  ellipsoidQuaternions.reserve(collisionGeometry.size());
 
   for (const auto& cg : collisionGeometry) {
+    if (cg.type != CollisionPrimitiveType::TaperedCapsule) {
+      continue;
+    }
     const Transform parentTransform = (cg.parent == kInvalidIndex)
         ? Transform()
         : skeletonState.jointState.at(cg.parent).transform;
     const Transform tf = parentTransform * cg.transformation;
 
-    if (cg.type == CollisionPrimitiveType::TaperedCapsule) {
-      const Quaternionf& q = tf.rotation * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
-      capsuleTranslations.push_back(toRerunPosition3D(tf.translation));
-      capsuleQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
-      // Match CollisionGeometryStateT::update: length runs along the composed-transform
-      // X axis (scaled by the full transform scale), radius is scaled by the parent joint
-      // scale only.
-      capsuleLengths.emplace_back(cg.length * tf.scale);
-      // TODO: Rerun doesn't support capsules with different radii (i.e. tapered capsule) yet
-      capsuleRadii.emplace_back(cg.radius.maxCoeff() * parentTransform.scale);
-    } else if (cg.type == CollisionPrimitiveType::Ellipsoid) {
-      const Vector3f halfSizes = cg.ellipsoidRadii * parentTransform.scale;
-      const Quaternionf& q = tf.rotation;
-      ellipsoidCenters.push_back(toRerunPosition3D(tf.translation));
-      ellipsoidHalfSizes.push_back(toRerunHalfSizes3D(halfSizes));
-      ellipsoidQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
-    }
+    const Quaternionf& q = tf.rotation * Eigen::AngleAxisf(0.5f * pi(), Vector3f::UnitY());
+    capsuleTranslations.push_back(toRerunPosition3D(tf.translation));
+    capsuleQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+    // Match CollisionGeometryStateT::update: length runs along the composed-transform
+    // X axis (scaled by the full transform scale), radius is scaled by the parent joint
+    // scale only.
+    capsuleLengths.emplace_back(cg.length * tf.scale);
+    // TODO: Rerun doesn't support capsules with different radii (i.e. tapered capsule) yet
+    capsuleRadii.emplace_back(cg.radius.maxCoeff() * parentTransform.scale);
   }
 
   if (!capsuleLengths.empty()) {
@@ -496,12 +542,53 @@ void logCollisionGeometry(
             .with_fill_mode(rerun::FillMode::Solid));
   }
 
-  if (!ellipsoidHalfSizes.empty()) {
+  const auto ellipsoidLogData =
+      detail::makeCollisionEllipsoidLogData(collisionGeometry, skeletonState);
+  if (!ellipsoidLogData.halfSizes.empty()) {
+    std::vector<rerun::Position3D> ellipsoidCenters;
+    std::vector<rerun::HalfSize3D> ellipsoidHalfSizes;
+    std::vector<rerun::Quaternion> ellipsoidQuaternions;
+    ellipsoidCenters.reserve(ellipsoidLogData.centers.size());
+    ellipsoidHalfSizes.reserve(ellipsoidLogData.halfSizes.size());
+    ellipsoidQuaternions.reserve(ellipsoidLogData.quaternions.size());
+
+    for (size_t i = 0; i < ellipsoidLogData.halfSizes.size(); ++i) {
+      const Quaternionf& q = ellipsoidLogData.quaternions[i];
+      ellipsoidCenters.push_back(toRerunPosition3D(ellipsoidLogData.centers[i]));
+      ellipsoidHalfSizes.push_back(toRerunHalfSizes3D(ellipsoidLogData.halfSizes[i]));
+      ellipsoidQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+    }
+
     safeLog(
         rec,
         streamName + "/ellipsoids",
         rerun::Ellipsoids3D::from_centers_and_half_sizes(ellipsoidCenters, ellipsoidHalfSizes)
             .with_quaternions(ellipsoidQuaternions)
+            .with_colors(rerun::Color(128, 64, 64))
+            .with_fill_mode(rerun::FillMode::Solid));
+  }
+
+  const auto boxLogData = detail::makeCollisionBoxLogData(collisionGeometry, skeletonState);
+  if (!boxLogData.halfSizes.empty()) {
+    std::vector<rerun::Position3D> boxCenters;
+    std::vector<rerun::HalfSize3D> boxHalfSizes;
+    std::vector<rerun::Quaternion> boxQuaternions;
+    boxCenters.reserve(boxLogData.centers.size());
+    boxHalfSizes.reserve(boxLogData.halfSizes.size());
+    boxQuaternions.reserve(boxLogData.quaternions.size());
+
+    for (size_t i = 0; i < boxLogData.halfSizes.size(); ++i) {
+      const Quaternionf& q = boxLogData.quaternions[i];
+      boxCenters.push_back(toRerunPosition3D(boxLogData.centers[i]));
+      boxHalfSizes.push_back(toRerunHalfSizes3D(boxLogData.halfSizes[i]));
+      boxQuaternions.emplace_back(rerun::Quaternion::from_xyzw(q.x(), q.y(), q.z(), q.w()));
+    }
+
+    safeLog(
+        rec,
+        streamName + "/boxes",
+        rerun::Boxes3D::from_centers_and_half_sizes(boxCenters, boxHalfSizes)
+            .with_quaternions(boxQuaternions)
             .with_colors(rerun::Color(128, 64, 64))
             .with_fill_mode(rerun::FillMode::Solid));
   }

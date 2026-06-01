@@ -124,6 +124,16 @@ void loadHierarchyRecursive(
     ellipsoid.parent = parentJointId;
     collision->push_back(ellipsoid);
     nodeToObjectMap[nodeId] = collision->size() - 1;
+  } else if (type == "collision_box") {
+    // Found collision geometry, should be the end node
+    MT_THROW_IF(
+        parentJointId == kInvalidIndex,
+        "Invalid collision box without a parent joint: {}",
+        node.name);
+    auto box = createCollisionBox(node, extension);
+    box.parent = parentJointId;
+    collision->push_back(box);
+    nodeToObjectMap[nodeId] = collision->size() - 1;
   } else if (type == "locator") {
     // Found locator, should be the end node
     MT_THROW_IF(
@@ -204,6 +214,24 @@ CollisionEllipsoid createCollisionEllipsoid(
         node.name);
   }
   return ellipsoid;
+}
+
+CollisionBox createCollisionBox(const fx::gltf::Node& node, const nlohmann::json& extension) {
+  CollisionBox box;
+  box.parent = kInvalidIndex;
+  box.transformation = Transform();
+  box.transformation.rotation = toMomentumQuaternionf(node.rotation);
+  box.transformation.translation = toMomentumVec3f(node.translation);
+
+  try {
+    box.halfExtents = fromJson<Vector3f>(extension["halfExtents"]);
+  } catch (const std::exception&) {
+    MT_THROW(
+        "Fail to parse json {} for collision box {} when loading character.",
+        extension.dump(),
+        node.name);
+  }
+  return box;
 }
 
 Locator createLocator(const fx::gltf::Node& node, const nlohmann::json& extension) {

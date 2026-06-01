@@ -417,6 +417,29 @@ CollisionGeometry legacyCollisionToMomentum(const nlohmann::json& legacyCollisio
         continue;
       }
 
+      if (type == "box" || type == "collision_box") {
+        CollisionBox box;
+
+        if (primitiveJson.contains("transformation")) {
+          box.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
+        }
+
+        if (primitiveJson.contains("halfExtents")) {
+          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["halfExtents"]);
+        } else if (primitiveJson.contains("half_extents")) {
+          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["half_extents"]);
+        } else if (primitiveJson.contains("boxHalfExtents")) {
+          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["boxHalfExtents"]);
+        }
+
+        if (primitiveJson.contains("parent")) {
+          box.parent = primitiveJson["parent"].get<size_t>();
+        }
+
+        collision.push_back(box);
+        continue;
+      }
+
       if (type != "tapered_capsule") {
         MT_LOGW(
             "Unknown collision primitive type '{}' in legacy JSON; falling back to tapered capsule.",
@@ -464,6 +487,9 @@ nlohmann::json momentumCollisionToLegacy(const CollisionGeometry& collision) {
     } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
       primitiveJson["type"] = "ellipsoid";
       primitiveJson["radii"] = eigenToJsonArray(primitive.ellipsoidRadii);
+    } else if (primitive.type == CollisionPrimitiveType::Box) {
+      primitiveJson["type"] = "box";
+      primitiveJson["halfExtents"] = eigenToJsonArray(primitive.boxHalfExtents);
     } else {
       MT_THROW(
           "Unsupported collision primitive type {} while writing legacy JSON collision geometry",

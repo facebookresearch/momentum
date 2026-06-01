@@ -494,6 +494,12 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionGeometry) {
   ellipsoid.radii = Eigen::Vector3f(0.3f, 0.2f, 0.1f);
   testCharacter.collision->push_back(ellipsoid);
 
+  CollisionBox box;
+  box.parent = 2;
+  box.transformation.translation = Eigen::Vector3f(0.4f, 0.3f, 0.2f);
+  box.halfExtents = Eigen::Vector3f(0.5f, 0.4f, 0.3f);
+  testCharacter.collision->push_back(box);
+
   auto tempFile = temporaryFile("momentum_usd_collision", ".usda");
   saveUsd(tempFile.path(), testCharacter);
 
@@ -508,11 +514,28 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionGeometry) {
 
     EXPECT_EQ(loaded.type, orig.type) << "Collision type mismatch at index " << i;
     EXPECT_EQ(loaded.parent, orig.parent) << "Collision parent mismatch at index " << i;
-    EXPECT_NEAR(loaded.length, orig.length, 1e-5f) << "Collision length mismatch at index " << i;
-    EXPECT_TRUE(loaded.radius.isApprox(orig.radius, 1e-5f))
-        << "Collision radius mismatch at index " << i;
-    EXPECT_TRUE(loaded.ellipsoidRadii.isApprox(orig.ellipsoidRadii, 1e-5f))
-        << "Collision ellipsoid radii mismatch at index " << i;
+    bool checkedTypeSpecificFields = false;
+    switch (loaded.type) {
+      case CollisionPrimitiveType::TaperedCapsule:
+        EXPECT_NEAR(loaded.length, orig.length, 1e-5f)
+            << "Collision length mismatch at index " << i;
+        EXPECT_TRUE(loaded.radius.isApprox(orig.radius, 1e-5f))
+            << "Collision radius mismatch at index " << i;
+        checkedTypeSpecificFields = true;
+        break;
+      case CollisionPrimitiveType::Ellipsoid:
+        EXPECT_TRUE(loaded.ellipsoidRadii.isApprox(orig.ellipsoidRadii, 1e-5f))
+            << "Collision ellipsoid radii mismatch at index " << i;
+        checkedTypeSpecificFields = true;
+        break;
+      case CollisionPrimitiveType::Box:
+        EXPECT_TRUE(loaded.boxHalfExtents.isApprox(orig.boxHalfExtents, 1e-5f))
+            << "Collision box half extents mismatch at index " << i;
+        checkedTypeSpecificFields = true;
+        break;
+    }
+    EXPECT_TRUE(checkedTypeSpecificFields) << "Unhandled CollisionPrimitiveType "
+                                           << static_cast<int>(loaded.type) << " at index " << i;
     EXPECT_TRUE(loaded.transformation.translation.isApprox(orig.transformation.translation, 1e-4f))
         << "Collision translation mismatch at index " << i;
     EXPECT_TRUE(loaded.transformation.rotation.toRotationMatrix().isApprox(

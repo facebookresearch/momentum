@@ -109,6 +109,12 @@ class LegacyJsonIOTest : public ::testing::Test {
     ellipsoid.radii = Eigen::Vector3f(0.3f, 0.2f, 0.1f);
     ellipsoid.parent = 1;
     collision->push_back(ellipsoid);
+    CollisionBox box;
+    box.transformation = Eigen::Affine3f::Identity();
+    box.transformation.translation = Eigen::Vector3f(0.4f, 0.3f, 0.2f);
+    box.halfExtents = Eigen::Vector3f(0.5f, 0.4f, 0.3f);
+    box.parent = 2;
+    collision->push_back(box);
 
     // Create parameter transform
     ParameterTransform parameterTransform =

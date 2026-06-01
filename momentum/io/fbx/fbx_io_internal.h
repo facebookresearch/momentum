@@ -228,22 +228,6 @@ inline void createCollisionGeometryNodes(
   for (auto i = 0u; i < collisions.size(); ++i) {
     const auto& collision = collisions[i];
 
-    bool supportedPrimitive = false;
-    switch (collision.type) {
-      case CollisionPrimitiveType::TaperedCapsule:
-      case CollisionPrimitiveType::Ellipsoid:
-        supportedPrimitive = true;
-        break;
-      case CollisionPrimitiveType::Box:
-        break;
-    }
-    if (!supportedPrimitive) {
-      MT_LOGW(
-          "Skipping unsupported collision primitive type {} while writing FBX collision geometry",
-          static_cast<int>(collision.type));
-      continue;
-    }
-
     ::fbxsdk::FbxNode* collisionNode =
         ::fbxsdk::FbxNode::Create(scene, ("Collision " + std::to_string(i)).c_str());
     auto* nullNodeAttr = ::fbxsdk::FbxNull::Create(scene, "Null");
@@ -268,6 +252,19 @@ inline void createCollisionGeometryNodes(
           .Set(collision.ellipsoidRadii.y());
       ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Radii_Z")
           .Set(collision.ellipsoidRadii.z());
+    } else if (collision.type == CollisionPrimitiveType::Box) {
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxStringDT, "Col_Shape")
+          .Set(FbxString("box"));
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Half_Extents_X")
+          .Set(collision.boxHalfExtents.x());
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Half_Extents_Y")
+          .Set(collision.boxHalfExtents.y());
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Half_Extents_Z")
+          .Set(collision.boxHalfExtents.z());
+    } else {
+      MT_THROW(
+          "Unsupported collision primitive type {} while writing FBX collision geometry",
+          static_cast<int>(collision.type));
     }
 
     collisionNode->LclTranslation.Set(FbxVector4(
