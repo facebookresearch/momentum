@@ -123,6 +123,15 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a45070ab5c4a18955af88aea6dc8c1f42" id="r_a45070ab5c4a18955af88aea6dc8c1f42"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a45070ab5c4a18955af88aea6dc8c1f42">target</a> = Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;::Zero()</td></tr>
 <tr class="memdesc:a45070ab5c4a18955af88aea6dc8c1f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target position for the center of mass.  <br /></td></tr>
 <tr class="separator:a45070ab5c4a18955af88aea6dc8c1f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ff682322882e9def22816c95ed7b69b" id="r_a2ff682322882e9def22816c95ed7b69b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a2ff682322882e9def22816c95ed7b69b">projectToPlane</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td></tr>
+<tr class="memdesc:a2ff682322882e9def22816c95ed7b69b"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, project the computed center of mass to <code>projectionNormal</code> dot x - <code>projectionD</code> = 0 before comparing it to <code>target</code>.  <br /></td></tr>
+<tr class="separator:a2ff682322882e9def22816c95ed7b69b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3cef4d67594840ee2f56134e3b4b309" id="r_af3cef4d67594840ee2f56134e3b4b309"><td class="memItemLeft" align="right" valign="top">Eigen::Vector3&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#af3cef4d67594840ee2f56134e3b4b309">projectionNormal</a> = Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">::UnitY</a>()</td></tr>
+<tr class="memdesc:af3cef4d67594840ee2f56134e3b4b309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal for the optional projection plane.  <br /></td></tr>
+<tr class="separator:af3cef4d67594840ee2f56134e3b4b309"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f5ab6a8d892a79cc2ec7de570067c03" id="r_a4f5ab6a8d892a79cc2ec7de570067c03"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a4f5ab6a8d892a79cc2ec7de570067c03">projectionD</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0)</td></tr>
+<tr class="memdesc:a4f5ab6a8d892a79cc2ec7de570067c03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Offset for the optional projection plane in the equation normal dot x - d = 0.  <br /></td></tr>
+<tr class="separator:a4f5ab6a8d892a79cc2ec7de570067c03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c0028877b232a7433e8cad7278f2e9c" id="r_a1c0028877b232a7433e8cad7278f2e9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html#a1c0028877b232a7433e8cad7278f2e9c">weight</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(1)</td></tr>
 <tr class="memdesc:a1c0028877b232a7433e8cad7278f2e9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weight of this constraint.  <br /></td></tr>
 <tr class="separator:a1c0028877b232a7433e8cad7278f2e9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,7 +178,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the total mass (sum of all masses) </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00037">37</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00085">85</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -230,7 +239,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Optional name for debugging. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00062">62</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00074">74</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -252,6 +261,67 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <p>If empty, all masses are treated as located at their joint origins. If present, this must match jointIndices size and each joint-local offset is transformed by the corresponding joint state before computing the weighted center of mass. </p>
 
 <p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00053">53</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+
+</div>
+</div>
+<a id="a4f5ab6a8d892a79cc2ec7de570067c03" name="a4f5ab6a8d892a79cc2ec7de570067c03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f5ab6a8d892a79cc2ec7de570067c03">&#9670;&#160;</a></span>projectionD</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> <a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">momentum::CenterOfMassConstraintT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::projectionD = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Offset for the optional projection plane in the equation normal dot x - d = 0. </p>
+
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00068">68</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+
+</div>
+</div>
+<a id="af3cef4d67594840ee2f56134e3b4b309" name="af3cef4d67594840ee2f56134e3b4b309"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3cef4d67594840ee2f56134e3b4b309">&#9670;&#160;</a></span>projectionNormal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt; <a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">momentum::CenterOfMassConstraintT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::projectionNormal = Eigen::Vector3&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">::UnitY</a>()</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Normal for the optional projection plane. </p>
+
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00065">65</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+
+</div>
+</div>
+<a id="a2ff682322882e9def22816c95ed7b69b" name="a2ff682322882e9def22816c95ed7b69b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ff682322882e9def22816c95ed7b69b">&#9670;&#160;</a></span>projectToPlane</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a> <a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">momentum::CenterOfMassConstraintT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::projectToPlane = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">false</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>If true, project the computed center of mass to <code>projectionNormal</code> dot x - <code>projectionD</code> = 0 before comparing it to <code>target</code>. </p>
+<p>The target is expected to already lie on the same projection plane. </p>
+
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00062">62</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -291,7 +361,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Weight of this constraint. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00059">59</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00071">71</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -305,7 +375,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CenterOfMassConstraintT.html">CenterOfMassConstraintT</a></li>
-    <li class="footer">Generated on Sun May 31 2026 03:47:27 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 1 2026 22:42:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

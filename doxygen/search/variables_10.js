@@ -20,7 +20,7 @@ var searchData=
   ['parents_17',['parents',['../structmomentum_1_1SkinnedLocator.html#a33a37c5a6752ce17bd9a118592b361c0',1,'momentum::SkinnedLocator']]],
   ['path_18',['path',['../usd__io_8cpp.html#aef4d3dade87ee186105e29dd22c6a9c6',1,'usd_io.cpp']]],
   ['permissive_19',['permissive',['../structmomentum_1_1FileSaveOptions.html#a66d5c683665478ce1fb2d15eaad0755e',1,'momentum::FileSaveOptions']]],
-  ['physicalproperties_20',['physicalproperties',['../structmomentum_1_1Character.html#a564983fe8436c77b84b8c298065ac5df',1,'momentum::Character::physicalProperties'],['../urdf__io_8cpp.html#a7c77a35b106e97626e47dbdfc723d113',1,'physicalProperties:&#160;urdf_io.cpp']]],
+  ['physicalproperties_20',['physicalproperties',['../urdf__io_8cpp.html#a7c77a35b106e97626e47dbdfc723d113',1,'physicalProperties:&#160;urdf_io.cpp'],['../structmomentum_1_1Character.html#a564983fe8436c77b84b8c298065ac5df',1,'momentum::Character::physicalProperties']]],
   ['pi_5f_21',['pi_',['../classmomentum_1_1FullyDifferentiablePosePriorErrorFunctionT.html#a2bd43a3b6fb084bbf866cd10bba047e5',1,'momentum::FullyDifferentiablePosePriorErrorFunctionT']]],
   ['point_22',['point',['../structmomentum_1_1VertexPlaneDataT.html#a09074d140bffa4d493ace3f65ab71e59',1,'momentum::VertexPlaneDataT']]],
   ['polyfaces_23',['polyFaces',['../structmomentum_1_1MeshT.html#a049699a783091e6bd764590959b37199',1,'momentum::MeshT']]],
@@ -34,7 +34,7 @@ var searchData=
   ['poseprior_5f_31',['posePrior_',['../classmomentum_1_1PosePriorErrorFunctionT.html#a71daf255ef33bc9e24bd57e75803cfa3',1,'momentum::PosePriorErrorFunctionT']]],
   ['poseshapes_32',['poseShapes',['../structmomentum_1_1Character.html#a682ad0019bc57757e39aa21e7da3bf51',1,'momentum::Character']]],
   ['posfunc_33',['posFunc',['../structmomentum_1_1GloveErrorFunctions.html#a0b6e0fd120489fd63731c8e9e51b74a4',1,'momentum::GloveErrorFunctions']]],
-  ['position_34',['position',['../structmomentum_1_1GloveSensorObservation.html#a10594eee6808495de4a8fd38086e5ef2',1,'momentum::GloveSensorObservation::position'],['../structmomentum_1_1PositionConstraintStateT.html#aa8fe3a7a4fddb76f9a0c6bbd68035a58',1,'momentum::PositionConstraintStateT::position'],['../structmomentum_1_1SkinnedLocator.html#acd766f1ff9610a3a3013fa3cba1a1fc3',1,'momentum::SkinnedLocator::position'],['../structmomentum_1_1LocatorState.html#a9dfef56c03d4a7227a853cd80af5c57c',1,'momentum::LocatorState::position']]],
+  ['position_34',['position',['../structmomentum_1_1LocatorState.html#a9dfef56c03d4a7227a853cd80af5c57c',1,'momentum::LocatorState::position'],['../structmomentum_1_1SkinnedLocator.html#acd766f1ff9610a3a3013fa3cba1a1fc3',1,'momentum::SkinnedLocator::position'],['../structmomentum_1_1PositionConstraintStateT.html#aa8fe3a7a4fddb76f9a0c6bbd68035a58',1,'momentum::PositionConstraintStateT::position'],['../structmomentum_1_1GloveSensorObservation.html#a10594eee6808495de4a8fd38086e5ef2',1,'momentum::GloveSensorObservation::position']]],
   ['positiona_35',['positionA',['../structmomentum_1_1CollisionOverlapResultT.html#ab12f94c8e98f00fbe504cfa900ab9987',1,'momentum::CollisionOverlapResultT']]],
   ['positionb_36',['positionB',['../structmomentum_1_1CollisionOverlapResultT.html#a8c4fb8d226010df60609c970b283fb56',1,'momentum::CollisionOverlapResultT']]],
   ['positionerror_37',['positionError',['../structmomentum_1_1StateSimilarity.html#af4f9de50f62b7698e6eceaaf66c2d957',1,'momentum::StateSimilarity']]],
@@ -48,8 +48,11 @@ var searchData=
   ['progressbar_45',['progressBar',['../structmomentum_1_1SequenceSolverOptionsBase.html#a4137bed75b13334ce22bb429f3ec13b0',1,'momentum::SequenceSolverOptionsBase']]],
   ['progressbar_5f_46',['progressBar_',['../classmomentum_1_1SequenceSolverBaseT.html#a72e3f8d529a5efe6085270f09b60b42b',1,'momentum::SequenceSolverBaseT']]],
   ['projection_47',['projection',['../structmomentum_1_1ProjectionConstraintDataT.html#a6c8315a71cc44847bb6670c3d52fde23',1,'momentum::ProjectionConstraintDataT']]],
-  ['projectionmatrix_48',['projectionMatrix',['../structmomentum_1_1VertexProjectionDataT.html#ae1df8f70705c7b388dc37904d889a897',1,'momentum::VertexProjectionDataT']]],
-  ['projectionweight_49',['projectionweight',['../structmomentum_1_1TrackingConfig.html#a73b756066f8c5337ee9dc4ff2f9ea855',1,'momentum::TrackingConfig::projectionWeight'],['../structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78',1,'momentum::CalibrationConfig::projectionWeight']]],
-  ['pseudoinversematrix_50',['pseudoInverseMatrix',['../structmomentum_1_1InverseParameterTransformT.html#ad6a5fa2d90c8a50e3ffcd70f5fcc20de',1,'momentum::InverseParameterTransformT']]],
-  ['pwgt_51',['pwgt',['../state__sequence__error__function_8cpp.html#a251dd2a0d439a8394afe009dcbe6b493',1,'state_sequence_error_function.cpp']]]
+  ['projectiond_48',['projectionD',['../structmomentum_1_1CenterOfMassConstraintT.html#a4f5ab6a8d892a79cc2ec7de570067c03',1,'momentum::CenterOfMassConstraintT']]],
+  ['projectionmatrix_49',['projectionMatrix',['../structmomentum_1_1VertexProjectionDataT.html#ae1df8f70705c7b388dc37904d889a897',1,'momentum::VertexProjectionDataT']]],
+  ['projectionnormal_50',['projectionNormal',['../structmomentum_1_1CenterOfMassConstraintT.html#af3cef4d67594840ee2f56134e3b4b309',1,'momentum::CenterOfMassConstraintT']]],
+  ['projectionweight_51',['projectionweight',['../structmomentum_1_1TrackingConfig.html#a73b756066f8c5337ee9dc4ff2f9ea855',1,'momentum::TrackingConfig::projectionWeight'],['../structmomentum_1_1CalibrationConfig.html#a37b9c1e5e51f2956421177f4e767eb78',1,'momentum::CalibrationConfig::projectionWeight']]],
+  ['projecttoplane_52',['projectToPlane',['../structmomentum_1_1CenterOfMassConstraintT.html#a2ff682322882e9def22816c95ed7b69b',1,'momentum::CenterOfMassConstraintT']]],
+  ['pseudoinversematrix_53',['pseudoInverseMatrix',['../structmomentum_1_1InverseParameterTransformT.html#ad6a5fa2d90c8a50e3ffcd70f5fcc20de',1,'momentum::InverseParameterTransformT']]],
+  ['pwgt_54',['pwgt',['../state__sequence__error__function_8cpp.html#a251dd2a0d439a8394afe009dcbe6b493',1,'state_sequence_error_function.cpp']]]
 ];

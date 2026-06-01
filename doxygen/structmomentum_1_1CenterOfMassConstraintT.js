@@ -5,6 +5,9 @@ var structmomentum_1_1CenterOfMassConstraintT =
     [ "masses", "structmomentum_1_1CenterOfMassConstraintT.html#aa935f2c9485fa937878da42807b1f37a", null ],
     [ "name", "structmomentum_1_1CenterOfMassConstraintT.html#afef9e342e062a1f49230a35503d03d5c", null ],
     [ "offsets", "structmomentum_1_1CenterOfMassConstraintT.html#a7b903e8b4524e862816aa460706adaf8", null ],
+    [ "projectionD", "structmomentum_1_1CenterOfMassConstraintT.html#a4f5ab6a8d892a79cc2ec7de570067c03", null ],
+    [ "projectionNormal", "structmomentum_1_1CenterOfMassConstraintT.html#af3cef4d67594840ee2f56134e3b4b309", null ],
+    [ "projectToPlane", "structmomentum_1_1CenterOfMassConstraintT.html#a2ff682322882e9def22816c95ed7b69b", null ],
     [ "target", "structmomentum_1_1CenterOfMassConstraintT.html#a45070ab5c4a18955af88aea6dc8c1f42", null ],
     [ "weight", "structmomentum_1_1CenterOfMassConstraintT.html#a1c0028877b232a7433e8cad7278f2e9c", null ]
 ];

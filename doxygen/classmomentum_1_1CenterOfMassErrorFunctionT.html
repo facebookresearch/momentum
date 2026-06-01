@@ -197,7 +197,7 @@ Additional Inherited Members</h2></td></tr>
 class momentum::CenterOfMassErrorFunctionT&lt; T &gt;</div><p>Error function that constrains the center of mass to a target position. </p>
 <p>The center of mass is computed as: CoM = (sum m_k * p_k) / (sum m_k)</p>
 <p>where m_k is the mass at joint k and p_k is the world position of joint k.</p>
-<p>The residual is: f = CoM - target</p>
+<p>The residual is: f = CoM - target or, when projection is enabled: f = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">project(CoM)</a> - target where <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">project(x)</a> orthogonally projects x to the configured plane.</p>
 <p>This uses <a class="el" href="classmomentum_1_1SkeletonDerivativeT.html" title="Shared utility for derivative computation in error functions.">SkeletonDerivativeT</a> for efficient hierarchy walks, similar to <a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html" title="Error function that projects 3D skeleton points through a bone-parented camera using an IntrinsicsMod...">CameraProjectionErrorFunctionT</a>.</p>
 <h1><a class="anchor" id="Usage"></a>
 Usage</h1>
@@ -220,7 +220,7 @@ Usage</h1>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00096">96</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00111">111</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="ade56baf39fc3359d9a421c3c8f24fc9b" name="ade56baf39fc3359d9a421c3c8f24fc9b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ade56baf39fc3359d9a421c3c8f24fc9b">&#9670;&#160;</a></span>ConstraintType</h2>
@@ -236,7 +236,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00098">98</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8h_source.html#l00113">113</a> of file <a class="el" href="center__of__mass__error__function_8h_source.html">center_of_mass_error_function.h</a>.</p>
 
 </div>
 </div>
@@ -278,7 +278,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00046">46</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00094">94</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -336,7 +336,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00057">57</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00105">105</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
 
@@ -361,7 +361,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Clears all constraints. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00085">85</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00146">146</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -384,7 +384,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the current constraints. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00090">90</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00151">151</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -432,9 +432,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a9004873fbd8970a3c7026c425f7585f7">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00101">101</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00162">162</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00043">error</a>, and <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00042">residual</a>.</p>
+<p class="reference">References <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00043">error</a>.</p>
 
 </div>
 </div>
@@ -488,7 +488,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a8edd68fc2cc8b2d67048c5b3fe69541a">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00132">132</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00182">182</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00043">error</a>, <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00042">residual</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
@@ -556,7 +556,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#a68eb5c4782e23bc8e92ec7701947d6cf">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00207">207</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00258">258</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00043">error</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00041">jacobian</a>, <a class="el" href="profile_8h_source.html#l00110">MT_PROFILE_FUNCTION</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00042">residual</a>, <a class="el" href="sequence__cholesky__solver_8cpp_source.html#l00045">usedRows</a>, and <a class="el" href="state__sequence__error__function_8cpp_source.html#l00345">wgt</a>.</p>
 
@@ -589,7 +589,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Reimplemented from <a class="el" href="classmomentum_1_1SkeletonErrorFunctionT.html#acdf427ac8dd801d2a4591a8d95ab905c">momentum::SkeletonErrorFunctionT&lt; T &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00282">282</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00334">334</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -612,7 +612,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Returns the number of constraints. </p>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00096">96</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00157">157</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -642,7 +642,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00076">76</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="center__of__mass__error__function_8cpp_source.html#l00137">137</a> of file <a class="el" href="center__of__mass__error__function_8cpp_source.html">center_of_mass_error_function.cpp</a>.</p>
 
 </div>
 </div>
@@ -656,7 +656,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1CenterOfMassErrorFunctionT.html">CenterOfMassErrorFunctionT</a></li>
-    <li class="footer">Generated on Sun May 31 2026 03:47:27 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 1 2026 22:42:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

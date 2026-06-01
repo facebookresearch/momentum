@@ -71,7 +71,7 @@ var NAVTREEINDEX =
 "character__solver_2fwd_8h.html#a5d8e2b066b608dfd55e04cd95be3b3e8",
 "character__solver_2fwd_8h.html#ab026bb0220e8253458684fd08e7271b9",
 "character__solver_2fwd_8h.html#afe274ae617e1daf7f426914e1316d78f",
-"classmomentum_1_1CollisionErrorFunctionStatelessT.html#a6cb0249bdd0447ccb8b3ad190ee011cf",
+"classmomentum_1_1CollisionErrorFunctionStatelessT.html#a725d62c13f5498136a5897250a797cce",
 "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html#a84de7027f65b1830ed6958b96678bff6",
 "classmomentum_1_1GltfBuilder.html#a706f934964523a73fed4bcb3c0bb011c",
 "classmomentum_1_1LowRankCovarianceMatrixT.html#ad4c7c1af9e70a055cef9e457cc3ace23",
@@ -101,14 +101,14 @@ var NAVTREEINDEX =
 "parameter__transform__io_8h.html#a85a2abf83eef8c0b11464ddb61a0714b",
 "skeleton__derivative_8cpp_source.html",
 "structmomentum_1_1AlignedAllocator_1_1rebind.html#a9d26668aa11881c6bf5825206ecf7bdd",
-"structmomentum_1_1Character.html#a8d30bddb689401810023cc0bee20df47",
-"structmomentum_1_1ErrorFunctionDerivativesT.html#ab009d26987637e92c39824243c8c2b06",
-"structmomentum_1_1JointStateT.html#ac1e6325593755ac7e58c483462b7d25c",
-"structmomentum_1_1MeshT.html#aa198a7be95aeca6c072129b0188114d7",
-"structmomentum_1_1PositionConstraintT.html#ae979c76f2de5f438b19b461d1960eb1a",
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c",
-"structmomentum_1_1ispanstream.html#a0987fac99c92cee38b0a42319a7b7158",
-"usd__animation__io_8h_source.html"
+"structmomentum_1_1Character.html#a82b6ecfcbf3356281100ef277f25cc84",
+"structmomentum_1_1EigenStrongType.html#ace6d8fa37fb83235e42fa8fde38b5199",
+"structmomentum_1_1JointStateT.html#ab0545224168eb612ed0322b5191c3769",
+"structmomentum_1_1MeshT.html#a69237a67fd0124f60fe21f7587322fae",
+"structmomentum_1_1PositionConstraintT.html#a4624a64be1340e645d324270200e3958",
+"structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59",
+"structmomentum_1_1io__detail_1_1SectionSegment.html#adb15936efeb1ab6382b1c62a60c3d454",
+"usd__animation__io_8h.html#a64627cc2dd8daa7f9518c2c590f405f1"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
