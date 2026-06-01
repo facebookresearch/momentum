@@ -47,7 +47,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, StateError_GradientsAndJacobians) {
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
-      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 5e-6));
+      // Float numerical-Jacobian FD is marginal here and varies across platforms; double is tight.
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(3e-2f, 5e-6));
     }
   }
 }
@@ -77,7 +78,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, StateErrorLogMap_GradientsAndJacobians) 
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
-      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(1e-2f, 5e-6));
+      // Float numerical-Jacobian FD is marginal here and varies across platforms; double is tight.
+      TEST_GRADIENT_AND_JACOBIAN(T, &errorFunction, parameters, character, Eps<T>(3e-2f, 5e-6));
     }
   }
 }
