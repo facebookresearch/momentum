@@ -65,6 +65,49 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, GradientsAndJacobians) {
       false);
 }
 
+TYPED_TEST(CenterOfMassErrorFunctionTest, ProjectedGradientsAndJacobians) {
+  using T = typename TestFixture::Type;
+  Random<>::GetSingleton().setSeed(12345);
+
+  const Character character = createTestCharacter();
+  const auto& skeleton = character.skeleton;
+  const auto& parameterTransform = character.parameterTransform;
+
+  const Eigen::VectorX<T> refParams =
+      0.25 * uniform<VectorX<T>>(parameterTransform.numAllModelParameters(), -1, 1);
+  const ModelParametersT<T> modelParams = refParams;
+
+  CenterOfMassErrorFunctionT<T> errorFunction(skeleton, parameterTransform);
+
+  const Eigen::Vector3<T> planeNormal = Eigen::Vector3<T>(T(1), T(2), T(-1)).normalized();
+  const T planeD = T(0.25);
+  const auto targetSeed = uniform<Vector3<T>>(-1, 1);
+
+  CenterOfMassConstraintT<T> constraint;
+  const size_t numJoints = std::min<size_t>(4, skeleton.joints.size());
+  for (size_t j = 0; j < numJoints; ++j) {
+    constraint.jointIndices.push_back(j);
+    constraint.masses.push_back(T(1) + T(j) * T(0.5));
+    constraint.offsets.push_back(uniform<Vector3<T>>(-0.25, 0.25));
+  }
+  constraint.target = targetSeed - planeNormal * (targetSeed.dot(planeNormal) - planeD);
+  constraint.projectToPlane = true;
+  constraint.projectionNormal = T(2) * planeNormal;
+  constraint.projectionD = T(2) * planeD;
+  constraint.weight = T(1.5);
+  errorFunction.addConstraint(constraint);
+
+  TEST_GRADIENT_AND_JACOBIAN(
+      T,
+      &errorFunction,
+      modelParams,
+      character,
+      Eps<T>(5e-2f, 5e-4),
+      Eps<T>(1e-4f, 1e-8),
+      false,
+      false);
+}
+
 TYPED_TEST(CenterOfMassErrorFunctionTest, ZeroError) {
   using T = typename TestFixture::Type;
 
@@ -93,6 +136,39 @@ TYPED_TEST(CenterOfMassErrorFunctionTest, ZeroError) {
   }
   actualCoM /= totalMass;
   constraint.target = actualCoM;
+  constraint.weight = T(1);
+  errorFunction.addConstraint(constraint);
+
+  const double error = errorFunction.getError(
+      modelParams, skelState, MeshStateT<T>(modelParams, skelState, character));
+  EXPECT_NEAR(error, 0.0, Eps<T>(1e-5f, 1e-10));
+}
+
+TYPED_TEST(CenterOfMassErrorFunctionTest, ProjectedZeroErrorIgnoresHeightAbovePlane) {
+  using T = typename TestFixture::Type;
+  Random<>::GetSingleton().setSeed(12345);
+
+  const Character character = createTestCharacter();
+  const auto& skeleton = character.skeleton;
+  const auto& parameterTransform = character.parameterTransform;
+  const ParameterTransformT<T> transform = parameterTransform.cast<T>();
+
+  ModelParametersT<T> modelParams =
+      ModelParametersT<T>::Zero(parameterTransform.numAllModelParameters());
+  modelParams(0) = T(1);
+  modelParams(1) = T(2);
+  modelParams(2) = T(3);
+  const SkeletonStateT<T> skelState(transform.apply(modelParams), skeleton);
+
+  CenterOfMassErrorFunctionT<T> errorFunction(skeleton, parameterTransform);
+
+  CenterOfMassConstraintT<T> constraint;
+  constraint.jointIndices = {0};
+  constraint.masses = {T(1)};
+  constraint.target = Eigen::Vector3<T>(T(1), T(0), T(3));
+  constraint.projectToPlane = true;
+  constraint.projectionNormal = Eigen::Vector3<T>(T(0), T(2), T(0));
+  constraint.projectionD = T(0);
   constraint.weight = T(1);
   errorFunction.addConstraint(constraint);
 
