@@ -314,9 +314,10 @@ uint32_t Random<Generator>::getSeed() const {
 
 template <typename Generator>
 void Random<Generator>::setSeed(uint32_t seed) {
-  if (seed == seed_) {
-    return;
-  }
+  // Always re-seed the engine, even when the value is unchanged. Callers (e.g. test fixtures that
+  // re-seed before every case) rely on setSeed() resetting the generator to the start of the
+  // deterministic sequence for `seed`; skipping the reset when seed == seed_ would silently leave
+  // the engine advanced by previous draws and make consumers order-dependent.
   seed_ = seed;
   generator_.seed(seed_);
 }
