@@ -12,7 +12,10 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 
+#include <array>
+#include <cmath>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 namespace momentum {
@@ -28,6 +31,51 @@ Eigen::Vector3<T> worldMassPosition(
     return jointState.translation();
   }
   return jointState.transform * constraint.offsets[index];
+}
+
+template <typename T>
+Eigen::Vector3<T> centerOfMass(
+    const CenterOfMassConstraintT<T>& constraint,
+    const JointStateListT<T>& jointStates) {
+  const T invTotalMass = T(1) / constraint.totalMass();
+
+  Eigen::Vector3<T> com = Eigen::Vector3<T>::Zero();
+  for (size_t i = 0; i < constraint.jointIndices.size(); ++i) {
+    const Eigen::Vector3<T> worldPos =
+        worldMassPosition(jointStates[constraint.jointIndices[i]], constraint, i);
+    com += constraint.masses[i] * worldPos;
+  }
+  return com * invTotalMass;
+}
+
+template <typename T>
+Eigen::Vector3<T> projectToPlane(
+    const Eigen::Vector3<T>& position,
+    const CenterOfMassConstraintT<T>& constraint) {
+  return position -
+      constraint.projectionNormal *
+      (position.dot(constraint.projectionNormal) - constraint.projectionD);
+}
+
+template <typename T>
+Eigen::Matrix<T, 3, 3> residualDerivative(const CenterOfMassConstraintT<T>& constraint) {
+  if (!constraint.projectToPlane) {
+    return Eigen::Matrix<T, 3, 3>::Identity();
+  }
+
+  return Eigen::Matrix<T, 3, 3>::Identity() -
+      constraint.projectionNormal * constraint.projectionNormal.transpose();
+}
+
+template <typename T>
+Eigen::Vector3<T> centerOfMassResidual(
+    const Eigen::Vector3<T>& com,
+    const CenterOfMassConstraintT<T>& constraint) {
+  if (!constraint.projectToPlane) {
+    return com - constraint.target;
+  }
+
+  return projectToPlane(com, constraint) - constraint.target;
 }
 
 } // namespace
@@ -69,7 +117,20 @@ void CenterOfMassErrorFunctionT<T>::addConstraint(const ConstraintType& constrai
     MT_CHECK(jointIdx < this->skeleton_.joints.size(), "Invalid joint index: {}", jointIdx);
   }
 
-  constraints_.push_back(constraint);
+  ConstraintType normalizedConstraint = constraint;
+  if (normalizedConstraint.projectToPlane) {
+    MT_CHECK(
+        normalizedConstraint.projectionNormal.allFinite(),
+        "Projection plane normal must contain only finite values");
+    MT_CHECK(
+        std::isfinite(normalizedConstraint.projectionD), "Projection plane offset must be finite");
+    const T normalNorm = normalizedConstraint.projectionNormal.norm();
+    MT_CHECK(normalNorm > T(1e-6), "Projection plane normal must be non-zero");
+    normalizedConstraint.projectionNormal /= normalNorm;
+    normalizedConstraint.projectionD /= normalNorm;
+  }
+
+  constraints_.push_back(std::move(normalizedConstraint));
 }
 
 template <typename T>
@@ -109,20 +170,9 @@ double CenterOfMassErrorFunctionT<T>::getError(
   double error = 0.0;
 
   for (const auto& constr : constraints_) {
-    const T invTotalMass = T(1) / constr.totalMass();
-
-    // Compute center of mass: CoM = (sum m_k * p_k) / (sum m_k)
-    Eigen::Vector3<T> com = Eigen::Vector3<T>::Zero();
-    for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
-      const Eigen::Vector3<T> worldPos =
-          worldMassPosition(state.jointState[constr.jointIndices[i]], constr, i);
-      com += constr.masses[i] * worldPos;
-    }
-    com *= invTotalMass;
-
-    // Residual: f = CoM - target
-    const Eigen::Vector3<T> residual = com - constr.target;
-    error += constr.weight * residual.squaredNorm() * this->weight_;
+    const Eigen::Vector3<T> com = centerOfMass(constr, state.jointState);
+    const Eigen::Vector3<T> res = centerOfMassResidual(com, constr);
+    error += constr.weight * res.squaredNorm() * this->weight_;
   }
 
   return error;
@@ -166,16 +216,17 @@ double CenterOfMassErrorFunctionT<T>::getGradient(
     }
     com *= invTotalMass;
 
-    // Residual: f = CoM - target
-    const Eigen::Vector3<T> residual = com - constr.target;
+    // Residual: f = project(CoM) - target (projection applied when configured)
+    const Eigen::Vector3<T> residual = centerOfMassResidual(com, constr);
     error += constr.weight * residual.squaredNorm() * this->weight_;
 
     const T wgt = T(2) * constr.weight * this->weight_;
 
     // The weighted residual for accumulateJointGradient is 2 * weight * f.
-    // The dfdv encodes the normalizedMass factor: dfdv = (m_k / totalMass) * I_3x3
+    // The dfdv encodes the normalizedMass factor and optional projection derivative.
     // accumulateJointGradient computes: gradient += weightedResidual^T * dfdv * d(worldPos)/dq
     const Eigen::Vector3<T> weightedRes = wgt * residual;
+    const Eigen::Matrix<T, 3, 3> dResidualDCom = residualDerivative(constr);
 
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
       const size_t jointIdx = constr.jointIndices[i];
@@ -183,7 +234,7 @@ double CenterOfMassErrorFunctionT<T>::getGradient(
       const Eigen::Vector3<T> worldPos =
           hasOffsets ? worldPositions[i] : state.jointState[jointIdx].translation();
 
-      const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * Eigen::Matrix<T, 3, 3>::Identity();
+      const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * dResidualDCom;
       std::array<Eigen::Vector3<T>, 1> worldVecs = {worldPos};
       std::array<Eigen::Matrix<T, 3, 3>, 1> dfdvArr = {dfdv};
       std::array<uint8_t, 1> isPoints = {1};
@@ -241,12 +292,13 @@ double CenterOfMassErrorFunctionT<T>::getJacobian(
     }
     com *= invTotalMass;
 
-    // Residual: f = CoM - target
-    const Eigen::Vector3<T> res = com - constr.target;
+    // Residual: f = project(CoM) - target (projection applied when configured)
+    const Eigen::Vector3<T> res = centerOfMassResidual(com, constr);
     error += constr.weight * res.squaredNorm() * this->weight_;
 
     const T wgt = std::sqrt(constr.weight * this->weight_);
     residual.template segment<3>(rowIndex) = wgt * res;
+    const Eigen::Matrix<T, 3, 3> dResidualDCom = residualDerivative(constr);
 
     // For each joint, accumulate Jacobian
     for (size_t i = 0; i < constr.jointIndices.size(); ++i) {
@@ -255,7 +307,7 @@ double CenterOfMassErrorFunctionT<T>::getJacobian(
       const Eigen::Vector3<T> worldPos =
           hasOffsets ? worldPositions[i] : state.jointState[jointIdx].translation();
 
-      const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * Eigen::Matrix<T, 3, 3>::Identity();
+      const Eigen::Matrix<T, 3, 3> dfdv = normalizedMass * dResidualDCom;
       std::array<Eigen::Vector3<T>, 1> worldVecs = {worldPos};
       std::array<Eigen::Matrix<T, 3, 3>, 1> dfdvArr = {dfdv};
       std::array<uint8_t, 1> isPoints = {1};

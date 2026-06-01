@@ -55,6 +55,18 @@ struct CenterOfMassConstraintT {
   /// Target position for the center of mass
   Eigen::Vector3<T> target = Eigen::Vector3<T>::Zero();
 
+  /// If true, project the computed center of mass to @p projectionNormal dot x - @p projectionD = 0
+  /// before comparing it to @p target.
+  ///
+  /// The target is expected to already lie on the same projection plane.
+  bool projectToPlane = false;
+
+  /// Normal for the optional projection plane.
+  Eigen::Vector3<T> projectionNormal = Eigen::Vector3<T>::UnitY();
+
+  /// Offset for the optional projection plane in the equation normal dot x - d = 0.
+  T projectionD = T(0);
+
   /// Weight of this constraint
   T weight = T(1);
 
@@ -74,6 +86,9 @@ struct CenterOfMassConstraintT {
 ///
 /// The residual is:
 ///   f = CoM - target
+/// or, when projection is enabled:
+///   f = project(CoM) - target
+/// where project(x) orthogonally projects x to the configured plane.
 ///
 /// This uses SkeletonDerivativeT for efficient hierarchy walks, similar to
 /// CameraProjectionErrorFunctionT.
