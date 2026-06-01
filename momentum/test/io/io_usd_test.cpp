@@ -488,6 +488,12 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionGeometry) {
   ASSERT_TRUE(testCharacter.collision);
   ASSERT_GT(testCharacter.collision->size(), 0);
 
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = 1;
+  ellipsoid.transformation.translation = Eigen::Vector3f(0.2f, 0.3f, 0.4f);
+  ellipsoid.radii = Eigen::Vector3f(0.3f, 0.2f, 0.1f);
+  testCharacter.collision->push_back(ellipsoid);
+
   auto tempFile = temporaryFile("momentum_usd_collision", ".usda");
   saveUsd(tempFile.path(), testCharacter);
 
@@ -500,15 +506,18 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_CollisionGeometry) {
     const auto& orig = (*testCharacter.collision)[i];
     const auto& loaded = (*loadedCharacter.collision)[i];
 
-    EXPECT_EQ(loaded.parent, orig.parent) << "Capsule parent mismatch at index " << i;
-    EXPECT_NEAR(loaded.length, orig.length, 1e-5f) << "Capsule length mismatch at index " << i;
+    EXPECT_EQ(loaded.type, orig.type) << "Collision type mismatch at index " << i;
+    EXPECT_EQ(loaded.parent, orig.parent) << "Collision parent mismatch at index " << i;
+    EXPECT_NEAR(loaded.length, orig.length, 1e-5f) << "Collision length mismatch at index " << i;
     EXPECT_TRUE(loaded.radius.isApprox(orig.radius, 1e-5f))
-        << "Capsule radius mismatch at index " << i;
+        << "Collision radius mismatch at index " << i;
+    EXPECT_TRUE(loaded.ellipsoidRadii.isApprox(orig.ellipsoidRadii, 1e-5f))
+        << "Collision ellipsoid radii mismatch at index " << i;
     EXPECT_TRUE(loaded.transformation.translation.isApprox(orig.transformation.translation, 1e-4f))
-        << "Capsule translation mismatch at index " << i;
+        << "Collision translation mismatch at index " << i;
     EXPECT_TRUE(loaded.transformation.rotation.toRotationMatrix().isApprox(
         orig.transformation.rotation.toRotationMatrix(), 1e-4f))
-        << "Capsule rotation mismatch at index " << i;
+        << "Collision rotation mismatch at index " << i;
   }
 }
 
