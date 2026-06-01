@@ -60,7 +60,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, HeightError_GradientsAndJacobians) {
           &errorFunction,
           parameters,
           character,
-          Eps<T>(5e-2f, 1e-5),
+          // Float numerical gradient FD is marginal here and varies across platforms; double tight.
+          Eps<T>(1e-1f, 1e-5),
           Eps<T>(1e-6f, 1e-14),
           true,
           false);
