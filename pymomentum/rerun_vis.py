@@ -42,16 +42,17 @@ Individual logging functions are also available for finer control:
 - :func:`log_mesh` — log a :class:`~pymomentum.geometry.Mesh`
 - :func:`log_joints` — log skeleton bones and per-joint transforms
 - :func:`log_locators` — log locator world-space positions
-- :func:`log_collision_geometry` — log collision proxy capsules
+- :func:`log_collision_geometry` — log collision proxy capsules, ellipsoids, and boxes
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 from pymomentum.quaternion_np import (
     align_z_with,
+    from_rotation_matrix,
     rotate_vector_assume_normalized,
     to_rotation_matrix_assume_normalized,
 )
@@ -66,20 +67,41 @@ if TYPE_CHECKING:
 _COLLISION_PROXY_COLOR: tuple[int, int, int] = (128, 64, 64)
 
 
+def _collision_parent_state(
+    parent: int,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    if 0 <= parent < skel_state.shape[0]:
+        return (
+            skel_state[parent, :3].astype(np.float64),
+            skel_state[parent, 3:7].astype(np.float64),
+            float(skel_state[parent, 7]),
+        )
+
+    return (
+        np.zeros(3, dtype=np.float64),
+        np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float64),
+        1.0,
+    )
+
+
 def _collision_capsule_segments(
     character: Character,
     skel_state: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     collision_geometry = character.collision_geometry
-    n_joints = skel_state.shape[0]
     segments: list[list[np.ndarray]] = []
     radii: list[float] = []
     labels: list[str] = []
 
     for i, capsule in enumerate(collision_geometry):
-        parent = int(capsule.parent)
-        if parent < 0 or parent >= n_joints:
+        # Only tapered capsules are rendered here; ellipsoids and boxes are
+        # handled by _collision_ellipsoids / _collision_boxes.
+        if not hasattr(capsule, "length"):
             continue
+
+        parent = int(capsule.parent)
+        parent_t, parent_q, parent_scale = _collision_parent_state(parent, skel_state)
 
         transform = np.asarray(capsule.transformation, dtype=np.float64)
         length = float(capsule.length)
@@ -89,9 +111,6 @@ def _collision_capsule_segments(
 
         local_start = transform[:3, 3]
         local_end = local_start + transform[:3, 0] * length
-        parent_t = skel_state[parent, :3].astype(np.float64)
-        parent_q = skel_state[parent, 3:7].astype(np.float64)
-        parent_scale = float(skel_state[parent, 7])
 
         start = parent_t + rotate_vector_assume_normalized(
             parent_q, local_start * parent_scale
@@ -138,6 +157,109 @@ def _collision_capsules(
         dtype=np.float32,
     )
     return segments[:, 0], lengths, radii, quaternions, labels
+
+
+def _collision_primitive_world_transform(
+    primitive: Any,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Compose a primitive's world transform from its parent joint state.
+
+    Mirrors momentum's C++ collision convention
+    (``CollisionGeometryStateT::update`` in ``collision_geometry_state.cpp``):
+    ``transform = parentTransform * primitive.transformation``, with the origin
+    taken from the composed translation and the orientation from the composed
+    rotation. World-space primitives without a parent joint
+    (``parent == kInvalidIndex``) use an identity parent transform.
+
+    :return: A tuple of (center, world xyzw quaternion, parent joint scale).
+        Ellipsoid radii and box half-extents are scaled by the parent joint
+        scale only, matching the C++ state update.
+    """
+    local = np.asarray(primitive.transformation, dtype=np.float64)
+    parent_t, parent_q, parent_scale = _collision_parent_state(
+        int(primitive.parent), skel_state
+    )
+    parent_transform = np.eye(4, dtype=np.float64)
+    parent_rotation = to_rotation_matrix_assume_normalized(parent_q[None, :])[0]
+    parent_transform[:3, :3] = parent_rotation * parent_scale
+    parent_transform[:3, 3] = parent_t
+
+    world = parent_transform @ local
+    world_scale = float(np.linalg.norm(world[:3, 0]))
+    if world_scale <= 1e-8:
+        world_scale = 1.0
+    rotation = world[:3, :3] / world_scale
+    world_quat = from_rotation_matrix(rotation[None, :, :])[0].astype(np.float32)
+    return world[:3, 3].astype(np.float32), world_quat, parent_scale
+
+
+def _collision_ellipsoids(
+    character: Character,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    centers: list[np.ndarray] = []
+    half_sizes: list[np.ndarray] = []
+    quaternions: list[np.ndarray] = []
+
+    for primitive in character.collision_geometry:
+        if not hasattr(primitive, "radii"):
+            continue
+        center, quaternion, parent_scale = _collision_primitive_world_transform(
+            primitive, skel_state
+        )
+        radii = np.asarray(primitive.radii, dtype=np.float64) * parent_scale
+        centers.append(center)
+        half_sizes.append(radii.astype(np.float32))
+        quaternions.append(quaternion)
+
+    if not centers:
+        return (
+            np.empty((0, 3), dtype=np.float32),
+            np.empty((0, 3), dtype=np.float32),
+            np.empty((0, 4), dtype=np.float32),
+        )
+
+    return (
+        np.asarray(centers, dtype=np.float32),
+        np.asarray(half_sizes, dtype=np.float32),
+        np.asarray(quaternions, dtype=np.float32),
+    )
+
+
+def _collision_boxes(
+    character: Character,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    centers: list[np.ndarray] = []
+    half_sizes: list[np.ndarray] = []
+    quaternions: list[np.ndarray] = []
+
+    for primitive in character.collision_geometry:
+        if not hasattr(primitive, "half_extents"):
+            continue
+        center, quaternion, parent_scale = _collision_primitive_world_transform(
+            primitive, skel_state
+        )
+        half_extents = (
+            np.asarray(primitive.half_extents, dtype=np.float64) * parent_scale
+        )
+        centers.append(center)
+        half_sizes.append(half_extents.astype(np.float32))
+        quaternions.append(quaternion)
+
+    if not centers:
+        return (
+            np.empty((0, 3), dtype=np.float32),
+            np.empty((0, 3), dtype=np.float32),
+            np.empty((0, 4), dtype=np.float32),
+        )
+
+    return (
+        np.asarray(centers, dtype=np.float32),
+        np.asarray(half_sizes, dtype=np.float32),
+        np.asarray(quaternions, dtype=np.float32),
+    )
 
 
 def log_mesh(
@@ -299,10 +421,12 @@ def log_collision_geometry(
     *,
     color: tuple[int, int, int] = _COLLISION_PROXY_COLOR,
 ) -> None:
-    """Log collision proxy capsules to Rerun as capsules.
+    """Log collision proxy primitives to Rerun.
 
-    Momentum collision geometry is stored as tapered capsules. Rerun renders
-    them as ordinary capsules by using the larger endpoint radius.
+    Momentum collision geometry is stored as tapered capsules, ellipsoids, and
+    boxes. Capsules are logged at ``entity_path`` (Rerun renders them as ordinary
+    capsules using the larger endpoint radius); ellipsoids and boxes are logged at
+    the ``{entity_path}/ellipsoids`` and ``{entity_path}/boxes`` sub-paths.
 
     :param rec: The Rerun recording stream.
     :param entity_path: Entity path for the collision proxy entity.
@@ -316,21 +440,49 @@ def log_collision_geometry(
         character,
         skel_state,
     )
-    if lengths.shape[0] == 0:
-        return
+    if lengths.shape[0] > 0:
+        rec.log(
+            entity_path,
+            rr.Capsules3D(
+                lengths=lengths,
+                radii=radii,
+                translations=translations,
+                quaternions=quaternions,
+                colors=color,
+                fill_mode=rr.components.FillMode.Solid,
+                labels=labels,
+            ),
+        )
 
-    rec.log(
-        entity_path,
-        rr.Capsules3D(
-            lengths=lengths,
-            radii=radii,
-            translations=translations,
-            quaternions=quaternions,
-            colors=color,
-            fill_mode=rr.components.FillMode.Solid,
-            labels=labels,
-        ),
+    ellipsoid_centers, ellipsoid_half_sizes, ellipsoid_quaternions = (
+        _collision_ellipsoids(character, skel_state)
     )
+    if ellipsoid_centers.shape[0] > 0:
+        rec.log(
+            f"{entity_path}/ellipsoids",
+            rr.Ellipsoids3D(
+                half_sizes=ellipsoid_half_sizes,
+                centers=ellipsoid_centers,
+                quaternions=ellipsoid_quaternions,
+                colors=color,
+                fill_mode=rr.components.FillMode.Solid,
+            ),
+        )
+
+    box_centers, box_half_sizes, box_quaternions = _collision_boxes(
+        character, skel_state
+    )
+    if box_centers.shape[0] > 0:
+        rec.log(
+            f"{entity_path}/boxes",
+            rr.Boxes3D(
+                half_sizes=box_half_sizes,
+                centers=box_centers,
+                quaternions=box_quaternions,
+                colors=color,
+                fill_mode=rr.components.FillMode.Solid,
+            ),
+        )
 
 
 def log_character(
@@ -351,7 +503,8 @@ def log_character(
     - ``{entity_path}/mesh`` — posed mesh (if *posed_mesh* is provided)
     - ``{entity_path}/joints`` — skeleton bones and per-joint transforms
     - ``{entity_path}/locators`` — locator positions (if character has locators)
-    - ``{entity_path}/collision_proxies`` — collision capsules (when requested)
+    - ``{entity_path}/collision_proxies`` — collision capsules, ellipsoids, and
+      boxes (when requested)
 
     This is the Python equivalent of the C++ ``momentum::logCharacter`` function.
 
@@ -367,7 +520,8 @@ def log_character(
         is logged.
     :param color: RGB color tuple for the mesh albedo.  Defaults to light grey
         ``(200, 200, 200)``.
-    :param collision_geometry: If ``True``, log collision proxy capsules.
+    :param collision_geometry: If ``True``, log collision proxy capsules,
+        ellipsoids, and boxes.
     """
     if posed_mesh is not None:
         log_mesh(rec, f"{entity_path}/mesh", posed_mesh, color=color)
@@ -580,7 +734,7 @@ def _send_locators_columns(
     rec.send_columns(entity_path, indexes=time_cols, columns=pos_cols)
 
 
-def _send_collision_geometry_columns(
+def _send_collision_capsule_columns(
     rec: rr.RecordingStream,
     entity_path: str,
     character: Character,
@@ -639,6 +793,167 @@ def _send_collision_geometry_columns(
     rec.send_columns(entity_path, indexes=time_cols, columns=capsule_cols)
 
 
+def _send_collision_ellipsoid_columns(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_states: np.ndarray,
+    time_cols: list,
+    fps: float,
+    frame_offset: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Send collision proxy ellipsoids for multiple frames via columns."""
+    import rerun as rr
+
+    n_frames = skel_states.shape[0]
+    frame_centers: list[np.ndarray] = []
+    frame_half_sizes: list[np.ndarray] = []
+    frame_quaternions: list[np.ndarray] = []
+    n_ellipsoids = 0
+
+    for frame in range(n_frames):
+        centers, half_sizes, quaternions = _collision_ellipsoids(
+            character, skel_states[frame]
+        )
+        if frame == 0:
+            n_ellipsoids = centers.shape[0]
+            if n_ellipsoids == 0:
+                return
+        elif centers.shape[0] != n_ellipsoids:
+            raise ValueError(
+                "Collision geometry ellipsoid count changed mid-animation "
+                f"(frame {frame}: {centers.shape[0]} ellipsoids vs frame 0: "
+                f"{n_ellipsoids} ellipsoids); Rerun's columnar partitioning requires "
+                "a constant ellipsoid count across frames."
+            )
+
+        frame_centers.append(centers)
+        frame_half_sizes.append(half_sizes)
+        frame_quaternions.append(quaternions)
+
+    first_time = _make_time_columns(1, fps, frame_offset)
+    static_cols = rr.Ellipsoids3D.columns(
+        colors=np.tile(np.asarray(color, dtype=np.uint8), (n_ellipsoids, 1)),
+        fill_mode=[rr.components.FillMode.Solid] * n_ellipsoids,
+    )
+    static_cols = static_cols.partition(np.array([n_ellipsoids]))
+    rec.send_columns(entity_path, indexes=first_time, columns=static_cols)
+
+    ellipsoid_cols = rr.Ellipsoids3D.columns(
+        half_sizes=np.concatenate(frame_half_sizes, axis=0),
+        centers=np.concatenate(frame_centers, axis=0),
+        quaternions=np.concatenate(frame_quaternions, axis=0),
+    )
+    ellipsoid_cols = ellipsoid_cols.partition(np.full(n_frames, n_ellipsoids))
+    rec.send_columns(entity_path, indexes=time_cols, columns=ellipsoid_cols)
+
+
+def _send_collision_box_columns(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_states: np.ndarray,
+    time_cols: list,
+    fps: float,
+    frame_offset: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Send collision proxy boxes for multiple frames via columns."""
+    import rerun as rr
+
+    n_frames = skel_states.shape[0]
+    frame_centers: list[np.ndarray] = []
+    frame_half_sizes: list[np.ndarray] = []
+    frame_quaternions: list[np.ndarray] = []
+    n_boxes = 0
+
+    for frame in range(n_frames):
+        centers, half_sizes, quaternions = _collision_boxes(
+            character, skel_states[frame]
+        )
+        if frame == 0:
+            n_boxes = centers.shape[0]
+            if n_boxes == 0:
+                return
+        elif centers.shape[0] != n_boxes:
+            raise ValueError(
+                "Collision geometry box count changed mid-animation "
+                f"(frame {frame}: {centers.shape[0]} boxes vs frame 0: "
+                f"{n_boxes} boxes); Rerun's columnar partitioning requires "
+                "a constant box count across frames."
+            )
+
+        frame_centers.append(centers)
+        frame_half_sizes.append(half_sizes)
+        frame_quaternions.append(quaternions)
+
+    first_time = _make_time_columns(1, fps, frame_offset)
+    static_cols = rr.Boxes3D.columns(
+        colors=np.tile(np.asarray(color, dtype=np.uint8), (n_boxes, 1)),
+        fill_mode=[rr.components.FillMode.Solid] * n_boxes,
+    )
+    static_cols = static_cols.partition(np.array([n_boxes]))
+    rec.send_columns(entity_path, indexes=first_time, columns=static_cols)
+
+    box_cols = rr.Boxes3D.columns(
+        half_sizes=np.concatenate(frame_half_sizes, axis=0),
+        centers=np.concatenate(frame_centers, axis=0),
+        quaternions=np.concatenate(frame_quaternions, axis=0),
+    )
+    box_cols = box_cols.partition(np.full(n_frames, n_boxes))
+    rec.send_columns(entity_path, indexes=time_cols, columns=box_cols)
+
+
+def _send_collision_geometry_columns(
+    rec: rr.RecordingStream,
+    entity_path: str,
+    character: Character,
+    skel_states: np.ndarray,
+    time_cols: list,
+    fps: float,
+    frame_offset: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Send collision proxy primitives for multiple frames via columns.
+
+    Capsules are sent at ``entity_path`` and ellipsoids/boxes at the
+    ``{entity_path}/ellipsoids`` and ``{entity_path}/boxes`` sub-paths, matching
+    the static :func:`log_collision_geometry` layout. Each primitive type is sent
+    independently so a character with only ellipsoids or only boxes still renders.
+    """
+    _send_collision_capsule_columns(
+        rec,
+        entity_path,
+        character,
+        skel_states,
+        time_cols,
+        fps,
+        frame_offset,
+        color,
+    )
+    _send_collision_ellipsoid_columns(
+        rec,
+        f"{entity_path}/ellipsoids",
+        character,
+        skel_states,
+        time_cols,
+        fps,
+        frame_offset,
+        color,
+    )
+    _send_collision_box_columns(
+        rec,
+        f"{entity_path}/boxes",
+        character,
+        skel_states,
+        time_cols,
+        fps,
+        frame_offset,
+        color,
+    )
+
+
 def log_animation(
     rec: rr.RecordingStream,
     entity_path: str,
@@ -681,7 +996,8 @@ def log_animation(
     :param color: RGB color for the mesh albedo factor.
     :param frame_offset: Starting frame index for the time columns.  Use when
         sending multiple chunks of the same animation.
-    :param collision_geometry: If ``True``, log collision proxy capsules.
+    :param collision_geometry: If ``True``, log collision proxy capsules,
+        ellipsoids, and boxes.
     """
     n_frames = skel_states.shape[0]
     time_cols = _make_time_columns(n_frames, fps, frame_offset)

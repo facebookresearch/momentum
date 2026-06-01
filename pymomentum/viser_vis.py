@@ -39,7 +39,7 @@ Individual functions are also available:
   and update only bone transforms
 - :func:`add_joints` / :func:`update_joints` — manage skeleton joint frames
 - :func:`add_collision_geometry` / :func:`update_collision_geometry` — manage
-  collision proxy capsules
+  collision proxy capsules, ellipsoids, and boxes
 - :func:`add_character` / :func:`update_character` / :func:`remove_character` —
   manage a complete character
 
@@ -65,6 +65,7 @@ from pymomentum.quaternion_np import (
     align_z_with,
     from_rotation_matrix,
     rotate_vector_assume_normalized,
+    to_rotation_matrix_assume_normalized,
 )
 
 if TYPE_CHECKING:
@@ -82,6 +83,27 @@ class _CollisionCapsuleHandles:
 
 
 @dataclass
+class _CollisionEllipsoidHandles:
+    """Handle for the single icosphere that renders one ellipsoid."""
+
+    ellipsoid: Any
+
+
+@dataclass
+class _CollisionBoxHandles:
+    """Handle for the single box mesh that renders one box."""
+
+    box: Any
+
+
+# Union of all collision primitive handle types stored in
+# :attr:`CharacterHandles.collision_handles`, in collision-geometry order.
+_CollisionPrimitiveHandles: TypeAlias = (
+    _CollisionCapsuleHandles | _CollisionEllipsoidHandles | _CollisionBoxHandles
+)
+
+
+@dataclass
 class CharacterHandles:
     """Opaque handle bag returned by :func:`add_character`.
 
@@ -94,7 +116,7 @@ class CharacterHandles:
     mesh_handle: Any | None = None
     wireframe_handle: Any | None = None
     collision_root_handle: Any | None = None
-    collision_handles: list[_CollisionCapsuleHandles] = field(default_factory=list)
+    collision_handles: list[_CollisionPrimitiveHandles] = field(default_factory=list)
 
 
 @dataclass
@@ -116,6 +138,54 @@ CM_TO_M: float = 0.01
 # Matches the Rerun viewer and the C++ logger so the same proxy looks identical
 # across visualization backends.
 _COLLISION_PROXY_COLOR: tuple[int, int, int] = (128, 64, 64)
+
+# Cached unit-sphere mesh used to render ellipsoid collision proxies. Viser has no
+# ellipsoid primitive, and the icosphere/box per-axis ``scale`` prop is shadowed by
+# the handle's dataclass default in this viser version (it does not reflect on the
+# handle). So we bake the per-axis half-sizes directly into a unit-sphere mesh's
+# vertices instead.
+_UNIT_SPHERE: tuple[np.ndarray, np.ndarray] | None = None
+
+
+def _unit_sphere_mesh() -> tuple[np.ndarray, np.ndarray]:
+    """Return cached (vertices, faces) for a radius-1 UV sphere centered at origin."""
+    global _UNIT_SPHERE
+    if _UNIT_SPHERE is not None:
+        return _UNIT_SPHERE
+
+    n_lat = 16  # number of stacks (excluding the two poles)
+    n_lon = 24  # number of slices around the equator
+    thetas = np.linspace(0.0, math.pi, n_lat + 2)[1:-1]  # exclude poles
+    phis = np.linspace(0.0, 2.0 * math.pi, n_lon, endpoint=False)
+
+    ring_x = np.outer(np.sin(thetas), np.cos(phis))
+    ring_y = np.outer(np.sin(thetas), np.sin(phis))
+    ring_z = np.outer(np.cos(thetas), np.ones_like(phis))
+    ring_vertices = np.stack([ring_x.ravel(), ring_y.ravel(), ring_z.ravel()], axis=1)
+    top = np.array([[0.0, 0.0, 1.0]], dtype=np.float64)
+    bottom = np.array([[0.0, 0.0, -1.0]], dtype=np.float64)
+    vertices = np.concatenate([ring_vertices, top, bottom], axis=0).astype(np.float32)
+
+    top_index = ring_vertices.shape[0]
+    bottom_index = top_index + 1
+    faces: list[tuple[int, int, int]] = []
+    for i in range(n_lat - 1):
+        for j in range(n_lon):
+            j_next = (j + 1) % n_lon
+            a = i * n_lon + j
+            b = i * n_lon + j_next
+            c = (i + 1) * n_lon + j
+            d = (i + 1) * n_lon + j_next
+            faces.append((a, c, b))
+            faces.append((b, c, d))
+    for j in range(n_lon):
+        j_next = (j + 1) % n_lon
+        faces.append((top_index, j, j_next))
+        last_ring = (n_lat - 1) * n_lon
+        faces.append((bottom_index, last_ring + j_next, last_ring + j))
+
+    _UNIT_SPHERE = (vertices, np.asarray(faces, dtype=np.int32))
+    return _UNIT_SPHERE
 
 
 def _xyzw_to_wxyz(q: np.ndarray) -> np.ndarray:
@@ -567,58 +637,125 @@ def _build_bone_segments(
     return np.array(segments, dtype=np.float32) * scale
 
 
-def _collision_capsule_segments(
-    character: Character,
-    skel_state: np.ndarray,
-    scale: float = 1.0,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Build capsule centerline segments and radii from character collision geometry."""
-    collision_geometry = character.collision_geometry
-    n_joints = skel_state.shape[0]
-    segments: list[list[np.ndarray]] = []
-    radii: list[float] = []
-
-    for capsule in collision_geometry:
-        parent = int(capsule.parent)
-        if parent < 0 or parent >= n_joints:
-            continue
-
-        transform = np.asarray(capsule.transformation, dtype=np.float64)
-        length = float(capsule.length)
-        radius = float(np.max(np.asarray(capsule.radius, dtype=np.float64)))
-        if radius <= 0.0:
-            continue
-
-        local_start = transform[:3, 3]
-        local_end = local_start + transform[:3, 0] * length
-        parent_t = skel_state[parent, :3].astype(np.float64)
-        parent_q = skel_state[parent, 3:7].astype(np.float64)
-        parent_scale = float(skel_state[parent, 7])
-
-        start = parent_t + rotate_vector_assume_normalized(
-            parent_q, local_start * parent_scale
-        )
-        end = parent_t + rotate_vector_assume_normalized(
-            parent_q, local_end * parent_scale
-        )
-        segments.append([start.astype(np.float32), end.astype(np.float32)])
-        radii.append(radius * abs(parent_scale))
-
-    if not segments:
-        return (
-            np.empty((0, 2, 3), dtype=np.float32),
-            np.empty((0,), dtype=np.float32),
-        )
-
-    return (
-        np.asarray(segments, dtype=np.float32) * scale,
-        np.asarray(radii, dtype=np.float32) * scale,
-    )
-
-
 def _wxyz_from_z_axis(direction: np.ndarray) -> np.ndarray:
     """Return a wxyz quaternion that rotates +Z onto *direction*."""
     return _xyzw_to_wxyz(align_z_with(direction))
+
+
+def _is_capsule(primitive: Any) -> bool:
+    return hasattr(primitive, "length")
+
+
+def _is_ellipsoid(primitive: Any) -> bool:
+    return hasattr(primitive, "radii")
+
+
+def _is_box(primitive: Any) -> bool:
+    return hasattr(primitive, "half_extents")
+
+
+def _collision_primitive_world_transform(
+    primitive: Any,
+    skel_state: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Compose a primitive's world transform from its parent joint state.
+
+    Mirrors momentum's C++ collision convention
+    (``CollisionGeometryStateT::update`` in ``collision_geometry_state.cpp``):
+    ``transform = parentTransform * primitive.transformation``, with the center
+    taken from the composed translation and the orientation from the composed
+    rotation. World-space primitives without a parent joint
+    (``parent == kInvalidIndex``) use an identity parent transform.
+
+    :return: A tuple of (center, world xyzw quaternion, parent joint scale).
+        Ellipsoid radii and box half-extents are scaled by the parent joint
+        scale only, matching the C++ state update.
+    """
+    local = np.asarray(primitive.transformation, dtype=np.float64)
+    parent_scale = 1.0
+    parent_transform = np.eye(4, dtype=np.float64)
+    parent = int(primitive.parent)
+    if 0 <= parent < skel_state.shape[0]:
+        parent_scale = float(skel_state[parent, 7])
+        parent_rotation = to_rotation_matrix_assume_normalized(
+            skel_state[parent, 3:7][None, :]
+        )[0]
+        parent_transform[:3, :3] = parent_rotation * parent_scale
+        parent_transform[:3, 3] = skel_state[parent, :3]
+
+    world = parent_transform @ local
+    world_scale = float(np.linalg.norm(world[:3, 0]))
+    if world_scale <= 1e-8:
+        world_scale = 1.0
+    rotation = world[:3, :3] / world_scale
+    world_quat = from_rotation_matrix(rotation[None, :, :])[0].astype(np.float64)
+    return world[:3, 3], world_quat, parent_scale
+
+
+def _ellipsoid_render_state(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return (center, xyzw quaternion, half_sizes) for one ellipsoid in scene units."""
+    center, quaternion, parent_scale = _collision_primitive_world_transform(
+        primitive, skel_state
+    )
+    half_sizes = np.asarray(primitive.radii, dtype=np.float64) * parent_scale * scale
+    return center * scale, quaternion, np.maximum(half_sizes, 1e-8)
+
+
+def _box_render_state(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return (center, xyzw quaternion, half_sizes) for one box in scene units."""
+    center, quaternion, parent_scale = _collision_primitive_world_transform(
+        primitive, skel_state
+    )
+    half_sizes = (
+        np.asarray(primitive.half_extents, dtype=np.float64) * parent_scale * scale
+    )
+    return center * scale, quaternion, np.maximum(half_sizes, 1e-8)
+
+
+def _capsule_render_segment(
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Return (start, end, radius) for one capsule centerline in scene units.
+
+    Uses the same parent-scale convention as the C++ collision state: the
+    centerline runs along the local X axis (scaled by parent joint scale), and
+    the rendered radius is the larger tapered endpoint radius scaled by the
+    parent joint scale.
+    """
+    transform = np.asarray(primitive.transformation, dtype=np.float64)
+    length = float(primitive.length)
+    radius = float(np.max(np.asarray(primitive.radius, dtype=np.float64)))
+
+    parent = int(primitive.parent)
+    if 0 <= parent < skel_state.shape[0]:
+        parent_t = skel_state[parent, :3].astype(np.float64)
+        parent_q = skel_state[parent, 3:7].astype(np.float64)
+        parent_scale = float(skel_state[parent, 7])
+    else:
+        parent_t = np.zeros(3, dtype=np.float64)
+        parent_q = np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float64)
+        parent_scale = 1.0
+
+    local_start = transform[:3, 3]
+    local_end = local_start + transform[:3, 0] * length
+    start = (
+        parent_t + rotate_vector_assume_normalized(parent_q, local_start * parent_scale)
+    ) * scale
+    end = (
+        parent_t + rotate_vector_assume_normalized(parent_q, local_end * parent_scale)
+    ) * scale
+    rendered_radius = max(radius * abs(parent_scale) * scale, 1e-8)
+    return start, end, rendered_radius
 
 
 def add_collision_geometry(
@@ -631,11 +768,13 @@ def add_collision_geometry(
     color: tuple[int, int, int] = _COLLISION_PROXY_COLOR,
     opacity: float = 0.45,
     visible: bool = True,
-) -> tuple[Any, list[_CollisionCapsuleHandles]]:
-    """Add collision proxy capsules to the viser scene.
+) -> tuple[Any, list[_CollisionPrimitiveHandles]]:
+    """Add collision proxy primitives to the viser scene.
 
-    Momentum stores tapered capsules; viser renders each proxy as an ordinary
-    capsule using the larger endpoint radius.
+    Momentum stores tapered capsules, ellipsoids, and boxes. Capsules are
+    rendered as a cylinder plus two end icospheres using the larger endpoint
+    radius (viser does not expose tapered capsules); ellipsoids are rendered as a
+    scaled icosphere and boxes as a box mesh.
 
     :param server: The viser server instance.
     :param entity_path: Scene-graph path for the collision proxy group.
@@ -645,86 +784,170 @@ def add_collision_geometry(
     :param color: RGB color tuple for the collision proxies.
     :param opacity: Material opacity for the proxies.
     :param visible: Initial visibility for the collision proxy group.
-    :return: A tuple of (root_handle, capsule primitive handle groups).
+    :return: A tuple of (root_handle, collision primitive handle groups), one
+        handle group per primitive in collision-geometry order.
     """
-    segments, radii = _collision_capsule_segments(character, skel_state, scale=scale)
     root_handle = server.scene.add_frame(
         entity_path,
         show_axes=False,
         visible=visible,
     )
-    collision_handles: list[_CollisionCapsuleHandles] = []
-    for i, (segment, radius) in enumerate(zip(segments, radii)):
-        start = segment[0].astype(np.float64)
-        end = segment[1].astype(np.float64)
-        direction = end - start
-        height = max(float(np.linalg.norm(direction)), 1e-8)
-        rendered_radius = max(float(radius), 1e-8)
-        capsule_path = f"{entity_path}/{i}"
-
-        cylinder = server.scene.add_cylinder(
-            f"{capsule_path}/body",
-            radius=rendered_radius,
-            height=height,
-            color=color,
-            radial_segments=16,
-            opacity=opacity,
-            side="double",
-            cast_shadow=False,
-            receive_shadow=False,
-            position=(start + end) * 0.5,
-            wxyz=_wxyz_from_z_axis(direction),
-            visible=True,
-        )
-        start_sphere = server.scene.add_icosphere(
-            f"{capsule_path}/start",
-            radius=rendered_radius,
-            color=color,
-            subdivisions=1,
-            opacity=opacity,
-            cast_shadow=False,
-            receive_shadow=False,
-            position=start,
-            visible=True,
-        )
-        end_sphere = server.scene.add_icosphere(
-            f"{capsule_path}/end",
-            radius=rendered_radius,
-            color=color,
-            subdivisions=1,
-            opacity=opacity,
-            cast_shadow=False,
-            receive_shadow=False,
-            position=end,
-            visible=True,
-        )
-        collision_handles.append(
-            _CollisionCapsuleHandles(
-                cylinder=cylinder,
-                start_sphere=start_sphere,
-                end_sphere=end_sphere,
+    collision_handles: list[_CollisionPrimitiveHandles] = []
+    for i, primitive in enumerate(character.collision_geometry):
+        primitive_path = f"{entity_path}/{i}"
+        if _is_capsule(primitive):
+            collision_handles.append(
+                _add_collision_capsule(
+                    server, primitive_path, primitive, skel_state, scale, color, opacity
+                )
             )
-        )
+        elif _is_ellipsoid(primitive):
+            collision_handles.append(
+                _add_collision_ellipsoid(
+                    server, primitive_path, primitive, skel_state, scale, color, opacity
+                )
+            )
+        elif _is_box(primitive):
+            collision_handles.append(
+                _add_collision_box(
+                    server, primitive_path, primitive, skel_state, scale, color, opacity
+                )
+            )
+        else:
+            raise ValueError(
+                f"Unsupported collision primitive at index {i}: "
+                f"{type(primitive).__name__}"
+            )
 
     return root_handle, collision_handles
 
 
+def _add_collision_capsule(
+    server: viser.ViserServer,
+    primitive_path: str,
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+    color: tuple[int, int, int],
+    opacity: float,
+) -> _CollisionCapsuleHandles:
+    start, end, rendered_radius = _capsule_render_segment(primitive, skel_state, scale)
+    direction = end - start
+    height = max(float(np.linalg.norm(direction)), 1e-8)
+
+    cylinder = server.scene.add_cylinder(
+        f"{primitive_path}/body",
+        radius=rendered_radius,
+        height=height,
+        color=color,
+        radial_segments=16,
+        opacity=opacity,
+        side="double",
+        cast_shadow=False,
+        receive_shadow=False,
+        position=(start + end) * 0.5,
+        wxyz=_wxyz_from_z_axis(direction),
+        visible=True,
+    )
+    start_sphere = server.scene.add_icosphere(
+        f"{primitive_path}/start",
+        radius=rendered_radius,
+        color=color,
+        subdivisions=1,
+        opacity=opacity,
+        cast_shadow=False,
+        receive_shadow=False,
+        position=start,
+        visible=True,
+    )
+    end_sphere = server.scene.add_icosphere(
+        f"{primitive_path}/end",
+        radius=rendered_radius,
+        color=color,
+        subdivisions=1,
+        opacity=opacity,
+        cast_shadow=False,
+        receive_shadow=False,
+        position=end,
+        visible=True,
+    )
+    return _CollisionCapsuleHandles(
+        cylinder=cylinder,
+        start_sphere=start_sphere,
+        end_sphere=end_sphere,
+    )
+
+
+def _add_collision_ellipsoid(
+    server: viser.ViserServer,
+    primitive_path: str,
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+    color: tuple[int, int, int],
+    opacity: float,
+) -> _CollisionEllipsoidHandles:
+    center, quaternion, half_sizes = _ellipsoid_render_state(
+        primitive, skel_state, scale
+    )
+    # Bake the per-axis half-sizes into the mesh vertices: viser has no ellipsoid
+    # primitive, and the icosphere ``scale`` prop does not reflect on the handle.
+    unit_vertices, faces = _unit_sphere_mesh()
+    ellipsoid = server.scene.add_mesh_simple(
+        f"{primitive_path}/body",
+        vertices=(unit_vertices * half_sizes).astype(np.float32),
+        faces=faces,
+        color=color,
+        opacity=opacity,
+        cast_shadow=False,
+        receive_shadow=False,
+        wxyz=_xyzw_to_wxyz(quaternion),
+        position=center,
+        visible=True,
+    )
+    return _CollisionEllipsoidHandles(ellipsoid=ellipsoid)
+
+
+def _add_collision_box(
+    server: viser.ViserServer,
+    primitive_path: str,
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+    color: tuple[int, int, int],
+    opacity: float,
+) -> _CollisionBoxHandles:
+    center, quaternion, half_sizes = _box_render_state(primitive, skel_state, scale)
+    box = server.scene.add_box(
+        f"{primitive_path}/body",
+        dimensions=tuple(float(v) for v in 2.0 * half_sizes),
+        color=color,
+        opacity=opacity,
+        cast_shadow=False,
+        receive_shadow=False,
+        wxyz=_xyzw_to_wxyz(quaternion),
+        position=center,
+        visible=True,
+    )
+    return _CollisionBoxHandles(box=box)
+
+
 def update_collision_geometry(
-    collision_handles: list[_CollisionCapsuleHandles],
+    collision_handles: list[_CollisionPrimitiveHandles],
     character: Character,
     skel_state: np.ndarray,
     *,
     scale: float = CM_TO_M,
 ) -> None:
-    """Update collision proxy capsule positions and sizes.
+    """Update collision proxy positions and sizes.
 
-    Always repositions every capsule from the current ``skel_state``, regardless
-    of visibility, so the proxies stay in sync with the model. Visibility is a
-    separate concern controlled through viser's scene-tree panel; gating updates
-    on visibility would leave proxies stranded at a stale pose when later
-    revealed through a path that does not re-run this.
+    Always repositions every primitive from the current ``skel_state``,
+    regardless of visibility, so the proxies stay in sync with the model.
+    Visibility is a separate concern controlled through viser's scene-tree panel;
+    gating updates on visibility would leave proxies stranded at a stale pose when
+    later revealed through a path that does not re-run this.
 
-    :param collision_handles: Capsule primitive handles returned by
+    :param collision_handles: Collision primitive handles returned by
         :func:`add_collision_geometry`.
     :param character: The character whose collision geometry is visualized.
     :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
@@ -734,40 +957,78 @@ def update_collision_geometry(
     if not collision_handles:
         return
 
-    segments, radii = _collision_capsule_segments(character, skel_state, scale=scale)
-    if segments.shape[0] != len(collision_handles):
+    primitives = character.collision_geometry
+    if len(primitives) != len(collision_handles):
         raise ValueError(
-            "Collision geometry capsule count does not match existing handles"
+            "Collision geometry primitive count does not match existing handles"
         )
 
-    for capsule_handles, segment, radius in zip(collision_handles, segments, radii):
-        start = segment[0].astype(np.float64)
-        end = segment[1].astype(np.float64)
-        direction = end - start
-        height = max(float(np.linalg.norm(direction)), 1e-8)
-        rendered_radius = max(float(radius), 1e-8)
+    for primitive_handles, primitive in zip(collision_handles, primitives):
+        if isinstance(primitive_handles, _CollisionCapsuleHandles):
+            _update_collision_capsule(primitive_handles, primitive, skel_state, scale)
+        elif isinstance(primitive_handles, _CollisionEllipsoidHandles):
+            center, quaternion, half_sizes = _ellipsoid_render_state(
+                primitive, skel_state, scale
+            )
+            unit_vertices, _faces = _unit_sphere_mesh()
+            primitive_handles.ellipsoid.position = center
+            primitive_handles.ellipsoid.wxyz = _xyzw_to_wxyz(quaternion)
+            primitive_handles.ellipsoid.vertices = (unit_vertices * half_sizes).astype(
+                np.float32
+            )
+        elif isinstance(primitive_handles, _CollisionBoxHandles):
+            center, quaternion, half_sizes = _box_render_state(
+                primitive, skel_state, scale
+            )
+            primitive_handles.box.position = center
+            primitive_handles.box.wxyz = _xyzw_to_wxyz(quaternion)
+            primitive_handles.box.dimensions = tuple(float(v) for v in 2.0 * half_sizes)
 
-        capsule_handles.cylinder.position = (start + end) * 0.5
-        capsule_handles.cylinder.wxyz = _wxyz_from_z_axis(direction)
-        capsule_handles.cylinder.height = height
-        capsule_handles.cylinder.radius = rendered_radius
-        capsule_handles.start_sphere.position = start
-        capsule_handles.start_sphere.radius = rendered_radius
-        capsule_handles.end_sphere.position = end
-        capsule_handles.end_sphere.radius = rendered_radius
+
+def _update_collision_capsule(
+    capsule_handles: _CollisionCapsuleHandles,
+    primitive: Any,
+    skel_state: np.ndarray,
+    scale: float,
+) -> None:
+    start, end, rendered_radius = _capsule_render_segment(primitive, skel_state, scale)
+    direction = end - start
+    height = max(float(np.linalg.norm(direction)), 1e-8)
+
+    capsule_handles.cylinder.position = (start + end) * 0.5
+    capsule_handles.cylinder.wxyz = _wxyz_from_z_axis(direction)
+    capsule_handles.cylinder.height = height
+    capsule_handles.cylinder.radius = rendered_radius
+    capsule_handles.start_sphere.position = start
+    capsule_handles.start_sphere.radius = rendered_radius
+    capsule_handles.end_sphere.position = end
+    capsule_handles.end_sphere.radius = rendered_radius
+
+
+def _collision_primitive_parts(
+    primitive_handles: _CollisionPrimitiveHandles,
+) -> tuple[Any, ...]:
+    if isinstance(primitive_handles, _CollisionCapsuleHandles):
+        return (
+            primitive_handles.cylinder,
+            primitive_handles.start_sphere,
+            primitive_handles.end_sphere,
+        )
+    if isinstance(primitive_handles, _CollisionEllipsoidHandles):
+        return (primitive_handles.ellipsoid,)
+    return (primitive_handles.box,)
 
 
 def _remove_collision_geometry(
     collision_root_handle: Any | None,
-    collision_handles: list[_CollisionCapsuleHandles],
+    collision_handles: list[_CollisionPrimitiveHandles],
 ) -> None:
     # Idempotent: clear the list as we remove so a second call (e.g. accidental
     # double-remove during cleanup) is a no-op rather than touching freed handles.
     while collision_handles:
-        capsule_handles = collision_handles.pop()
-        capsule_handles.cylinder.remove()
-        capsule_handles.start_sphere.remove()
-        capsule_handles.end_sphere.remove()
+        primitive_handles = collision_handles.pop()
+        for part in _collision_primitive_parts(primitive_handles):
+            part.remove()
     if collision_root_handle is not None:
         collision_root_handle.remove()
 
@@ -885,7 +1146,8 @@ def add_character(
 
     - ``{entity_path}/joints/{name}`` — per-joint coordinate frames
     - ``{entity_path}/mesh`` — posed or skinned mesh
-    - ``{entity_path}/collision_proxies`` — collision capsules, if requested
+    - ``{entity_path}/collision_proxies`` — collision capsules, ellipsoids, and
+      boxes, if requested
 
     :param server: The viser server instance.
     :param entity_path: Root scene-graph path for the character.
@@ -898,7 +1160,8 @@ def add_character(
     :param color: RGB color tuple for the mesh.
     :param axes_length: Length of joint axis indicators.
     :param axes_radius: Radius of joint axis indicators.
-    :param collision_geometry: If true, add collision proxy capsules.
+    :param collision_geometry: If true, add collision proxy capsules,
+        ellipsoids, and boxes.
     :param collision_geometry_visible: Initial visibility for collision proxies.
     :return: A :class:`CharacterHandles` for use with :func:`update_character`.
     """
