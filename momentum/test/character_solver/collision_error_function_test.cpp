@@ -291,6 +291,91 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CapsuleCollisionError_GradientsAndJacobi
   ASSERT_GE(numTestedPoses, 3) << "Too few poses produced collisions";
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, EllipsoidCollisionError_ProducesError) {
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter(3);
+
+  CollisionGeometry cg;
+
+  TaperedCapsule jointCapsule;
+  jointCapsule.parent = 0;
+  jointCapsule.length = 1.0f;
+  jointCapsule.radius = Eigen::Vector2f(0.25f, 0.25f);
+  cg.push_back(jointCapsule);
+
+  CollisionEllipsoid worldEllipsoid;
+  worldEllipsoid.parent = kInvalidIndex;
+  worldEllipsoid.transformation.translation = Eigen::Vector3f(0.5f, 0.45f, 0.0f);
+  worldEllipsoid.radii = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(worldEllipsoid);
+
+  const Character character(
+      baseCharacter.skeleton,
+      baseCharacter.parameterTransform,
+      baseCharacter.parameterLimits,
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &cg);
+
+  CollisionErrorFunctionT<T> errorFunction(character, false);
+  CollisionErrorFunctionStatelessT<T> errorFunctionStateless(character);
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> zeroParams =
+      ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> state(transform.apply(zeroParams), character.skeleton);
+
+  const double error = errorFunction.getError(zeroParams, state, MeshStateT<T>());
+  const double statelessError = errorFunctionStateless.getError(zeroParams, state, MeshStateT<T>());
+
+  EXPECT_GT(error, 0.0);
+  EXPECT_NEAR(error, statelessError, 1e-10);
+  EXPECT_EQ(errorFunction.getCollisionPairs().size(), 1);
+  const auto debugInfo = errorFunction.getCollisionDebugInfo();
+  ASSERT_EQ(debugInfo.size(), 1);
+  EXPECT_GT(debugInfo[0].overlap, 0.0);
+
+  Random<>::GetSingleton().setSeed(TestFixture::kTestSeed);
+  size_t numTestedPoses = 0;
+  for (size_t iTrial = 0; iTrial < 10; ++iTrial) {
+    const ModelParametersT<T> mp = uniform<VectorX<T>>(
+        transform.numAllModelParameters(), static_cast<T>(-0.03), static_cast<T>(0.03));
+    const SkeletonStateT<T> trialState(transform.apply(mp), character.skeleton);
+    if (errorFunction.getError(mp, trialState, MeshStateT<T>()) <= 0.0) {
+      continue;
+    }
+    SCOPED_TRACE("trial=" + std::to_string(iTrial));
+    // Ellipsoid contact finite differences are less stable than capsule contact even for double:
+    // the closest point and normal both move under perturbation, and these shallow overlaps have
+    // small gradient/Jacobian norms. Keep a relative 2% tolerance while checking analytical and
+    // stateless implementations against the same numerical result.
+    const T numThreshold = T(0.02);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/true);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunctionStateless,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/true);
+    VALIDATE_IDENTICAL(
+        T, errorFunction, errorFunctionStateless, character.skeleton, transform, mp.v);
+    ++numTestedPoses;
+  }
+  ASSERT_GE(numTestedPoses, 3) << "Too few poses produced collisions";
+}
+
 // Test capsule collision gradients on a shared skeleton with global scaling.
 // Uses a double-branch skeleton (root → joint1 → joint2, root → joint3 → joint4)
 // so that:

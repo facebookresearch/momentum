@@ -83,15 +83,13 @@ class CollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// Update collisionState_ and aabbs_ given the new skeleton state.
   void computeBroadPhase(const SkeletonStateT<T>& state);
 
-  /// AABB broadphase pre-check followed by narrow-phase capsule overlap test.
-  /// Returns true if the pair collides, filling distance, cp, and overlap.
+  /// AABB broadphase pre-check followed by narrow-phase collision overlap test.
+  /// Returns true when the pair collides, filling result with contact details.
   [[nodiscard]] bool checkCollision(
       const CollisionGeometryStateT<T>& colState,
       size_t indexA,
       size_t indexB,
-      T& distance,
-      Vector2<T>& cp,
-      T& overlap) const;
+      CollisionOverlapResultT<T>& result) const;
 
   /// Accumulate gradient contributions along a joint chain from startJoint up to (but not
   /// including) stopJoint. The sign of weight controls the push direction.
