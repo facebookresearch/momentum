@@ -149,7 +149,8 @@ inline SkeletonNodeResult createSkeletonNodes(
     skeletonNode->LclTranslation.Set(FbxDouble3(
         joint.translationOffset[0], joint.translationOffset[1], joint.translationOffset[2]));
 
-    const auto angles = rotationMatrixToEulerZYX(joint.preRotation.toRotationMatrix());
+    const auto angles =
+        rotationMatrixToEulerZYX(joint.preRotation.toRotationMatrix(), EulerConvention::Intrinsic);
     skeletonNode->SetPivotState(FbxNode::eSourcePivot, FbxNode::ePivotActive);
     skeletonNode->SetRotationActive(true);
     skeletonNode->SetPreRotation(

@@ -338,7 +338,8 @@ localTransformToJointParametersRespectingConstraints(
   } else if (numActiveAxes == 3) {
     // ZYX-then-reverse matches the (Rx * Ry * Rz) convention used elsewhere in momentum and
     // produces the same parameters as the unconstrained quaternionToEuler path.
-    result.template segment<3>(3) = rotationMatrixToEulerZYX(rotationMatrix).reverse();
+    result.template segment<3>(3) =
+        rotationMatrixToEulerZYX(rotationMatrix, EulerConvention::Intrinsic).reverse();
   } else {
     // numActiveAxes == 0: leave rotation parameters at zero.
   }
