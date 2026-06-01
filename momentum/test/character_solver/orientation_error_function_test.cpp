@@ -20,6 +20,20 @@ using namespace momentum;
 
 using Types = testing::Types<float, double>;
 
+namespace {
+// Random rotation with a bounded angle. Full-range uniformQuaternion() routes to Eigen's unseeded
+// std::rand and can yield near-pi rotations, where the float finite-difference gradient check is
+// unreliable and diverges across platforms/std libs. A bounded angle keeps the orientation
+// difference well away from the pi singularity, so the float FD check stays well-conditioned and
+// reproducible on every platform.
+template <typename T>
+Quaternion<T> boundedRandomRotation(Random<>& rng) {
+  const Vector3<T> axis = rng.uniform<Vector3<T>>(T(-1), T(1)).normalized();
+  const T angle = rng.uniform<T>(T(-0.7), T(0.7));
+  return Quaternion<T>(Eigen::AngleAxis<T>(angle, axis));
+}
+} // namespace
+
 TYPED_TEST_SUITE(Momentum_ErrorFunctionsTest, Types);
 
 TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians) {
@@ -33,12 +47,17 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
   // create constraints
   OrientationErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T kTestWeightValue = 4.5;
+  Random<>& rng = Random<>::GetSingleton();
 
   {
     SCOPED_TRACE("Orientation Constraint Test");
+    const Quaternion<T> offset0 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> target0 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> offset1 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> target1 = boundedRandomRotation<T>(rng);
     std::vector<OrientationDataT<T>> cl{
-        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 2, kTestWeightValue),
-        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 1, kTestWeightValue)};
+        OrientationDataT<T>(offset0, target0, 2, kTestWeightValue),
+        OrientationDataT<T>(offset1, target1, 1, kTestWeightValue)};
     errorFunction.setConstraints(std::move(cl));
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -49,7 +68,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationErrorL2_GradientsAndJacobians
         Eps<T>(0.03f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
+          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, character, Eps<T>(0.05f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
@@ -115,12 +134,17 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationRotDiffErrorL2_GradientsAndJa
   // create constraints
   OrientationRotDiffErrorFunctionT<T> errorFunction(skeleton, character.parameterTransform);
   const T kTestWeightValue = 4.5;
+  Random<>& rng = Random<>::GetSingleton();
 
   {
     SCOPED_TRACE("OrientationRotDiff Constraint Test");
+    const Quaternion<T> offset0 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> target0 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> offset1 = boundedRandomRotation<T>(rng);
+    const Quaternion<T> target1 = boundedRandomRotation<T>(rng);
     std::vector<OrientationDataT<T>> cl{
-        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 2, kTestWeightValue),
-        OrientationDataT<T>(uniformQuaternion<T>(), uniformQuaternion<T>(), 1, kTestWeightValue)};
+        OrientationDataT<T>(offset0, target0, 2, kTestWeightValue),
+        OrientationDataT<T>(offset1, target1, 1, kTestWeightValue)};
     errorFunction.setConstraints(std::move(cl));
 
     TEST_GRADIENT_AND_JACOBIAN(
@@ -131,7 +155,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, OrientationRotDiffErrorL2_GradientsAndJa
         Eps<T>(0.06f, 5e-6));
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
-          uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
+          rng.uniform<VectorX<T>>(transform.numAllModelParameters(), -1, 1) * 0.25;
       TEST_GRADIENT_AND_JACOBIAN(
           T, &errorFunction, parameters, character, Eps<T>(0.06f, 5e-6), Eps<T>(1e-6f, 1e-7));
     }
