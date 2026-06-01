@@ -12,14 +12,44 @@
 #include <momentum/character/locator.h>
 #include <momentum/character/locator_state.h>
 #include <momentum/character/marker.h>
+#include <momentum/math/types.h>
 
 #include <rerun.hpp>
 
 #include <cstdint>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace momentum {
+
+namespace detail {
+
+/// World-space ellipsoid collision primitive data prepared for Rerun ellipsoid logging.
+struct CollisionEllipsoidLogData {
+  std::vector<Vector3f> centers;
+  std::vector<Vector3f> halfSizes;
+  std::vector<Quaternionf> quaternions;
+};
+
+/// Extracts world-space ellipsoid collision geometry from the current skeleton state.
+CollisionEllipsoidLogData makeCollisionEllipsoidLogData(
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonState& skeletonState);
+
+/// World-space box collision primitive data prepared for Rerun box logging.
+struct CollisionBoxLogData {
+  std::vector<Vector3f> centers;
+  std::vector<Vector3f> halfSizes;
+  std::vector<Quaternionf> quaternions;
+};
+
+/// Extracts world-space box collision geometry from the current skeleton state.
+CollisionBoxLogData makeCollisionBoxLogData(
+    const CollisionGeometry& collisionGeometry,
+    const SkeletonState& skeletonState);
+
+} // namespace detail
 
 /// @param[in] (Optional) The color to use for the mesh. If not provided, the colors stored in the
 /// mesh are used.
