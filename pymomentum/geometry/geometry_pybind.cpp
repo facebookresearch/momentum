@@ -223,6 +223,11 @@ PYBIND11_MODULE(geometry, m) {
       "Ellipsoid",
       "An ellipsoid primitive used for collision detection and physics simulation. "
       "Represents an oriented ellipsoid attached to a skeleton joint.");
+  auto boxClass = py::class_<mm::CollisionBox>(
+      m,
+      "Box",
+      "A box primitive used for collision detection and physics simulation. "
+      "Represents an oriented box attached to a skeleton joint.");
   py::class_<mm::SDFColliderT<float>> sdfColliderClass = py::class_<mm::SDFColliderT<float>>(
       m,
       "SDFCollider",
@@ -598,6 +603,49 @@ The resulting arrays are as follows:
             ellipsoid.radii[0],
             ellipsoid.radii[1],
             ellipsoid.radii[2]);
+      });
+
+  boxClass
+      .def(
+          py::init<>([](int parent,
+                        const OptionalTransformArray& transformation,
+                        const std::optional<Eigen::Vector3f>& halfExtents) {
+            mm::CollisionBox box;
+            box.transformation = collisionTransformFromPython(transformation);
+            box.halfExtents = halfExtents.value_or(Eigen::Vector3f::Ones());
+            box.parent = parent;
+            return box;
+          }),
+          R"(Create a box using its parent, transformation, and half extents.
+
+:param parent: Parent joint to which the box is attached.
+:param transformation: Transformation defining the center and orientation relative to the parent coordinate system.
+:param half_extents: Half extents along the local x, y, and z axes.)",
+          py::arg("parent"),
+          py::kw_only(),
+          py::arg("transformation") = py::none(),
+          py::arg("half_extents") = std::optional<Eigen::Vector3f>{})
+      .def_property_readonly(
+          "transformation",
+          [](const mm::CollisionBox& box) -> Eigen::Matrix4f {
+            return box.transformation.toMatrix();
+          },
+          "Transformation defining the center and orientation relative to the parent coordinate system")
+      .def_property_readonly(
+          "half_extents",
+          [](const mm::CollisionBox& box) -> Eigen::Vector3f { return box.halfExtents; },
+          "Half extents along the local x, y, and z axes.")
+      .def_property_readonly(
+          "parent",
+          [](const mm::CollisionBox& box) -> int { return collisionParentToPython(box.parent); },
+          "Parent joint to which the box is attached.")
+      .def("__repr__", [](const mm::CollisionBox& box) {
+        return fmt::format(
+            "Box(parent={}, half_extents=[{}, {}, {}])",
+            collisionParentToPython(box.parent),
+            box.halfExtents[0],
+            box.halfExtents[1],
+            box.halfExtents[2]);
       });
 
   // Class Marker, defining the properties:

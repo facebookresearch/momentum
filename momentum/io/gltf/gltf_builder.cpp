@@ -801,6 +801,10 @@ void addCollisionsToModel(
         } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
           extension["type"] = "collision_ellipsoid";
           extension["radii"] = col.ellipsoidRadii;
+        } else {
+          MT_THROW(
+              "Unsupported collision primitive type {} while writing glTF collision geometry",
+              static_cast<int>(col.type));
         }
       }
     }
