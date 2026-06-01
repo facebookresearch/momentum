@@ -44,7 +44,7 @@ TYPED_TEST(TransformTest, FactoryMethods) {
   EXPECT_EQ(transTransform.scale, T(1));
 
   // Test makeScale
-  const T scale = uniform<T>(0.1, 10);
+  const T scale = this->rng.template uniform<T>(T(0.1), T(10));
   const TransformT<T> scaleTransform = TransformT<T>::makeScale(scale);
   EXPECT_TRUE(scaleTransform.translation.isZero());
   EXPECT_TRUE(scaleTransform.rotation.isApprox(Quaternion<T>::Identity()));
@@ -85,7 +85,7 @@ TYPED_TEST(TransformTest, Constructors) {
   // Test constructor with parameters
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
   const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
-  const T scale = uniform<T>(0.1, 10);
+  const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   const TransformT<T> paramTransform(translation, rotation, scale);
   EXPECT_TRUE(paramTransform.translation.isApprox(translation));
@@ -138,7 +138,7 @@ TYPED_TEST(TransformTest, AssignmentOperators) {
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
   const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
-  const T scale = uniform<T>(0.1, 10);
+  const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   // Test assignment from Affine3
   Affine3<T> affine = Affine3<T>::Identity();
@@ -174,7 +174,7 @@ TYPED_TEST(TransformTest, ConversionMethods) {
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
   const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
-  const T scale = uniform<T>(0.1, 10);
+  const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   const TransformT<T> transform(translation, rotation, scale);
 
@@ -238,7 +238,7 @@ TYPED_TEST(TransformTest, FromMethods) {
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
   const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
-  const T scale = uniform<T>(0.1, 10);
+  const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   // Test fromAffine3
   Affine3<T> affine = Translation3<T>(translation) * rotation * Eigen::Scaling(scale);
@@ -356,7 +356,7 @@ TYPED_TEST(TransformTest, TransformPoint) {
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
     const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
-    const auto randomPoint = uniform<Vector3<T>>(-10, 10);
+    const auto randomPoint = this->rng.template uniform<Vector3<T>>(T(-10), T(10));
 
     const Eigen::Vector3<T> res1 = trans1.transformPoint(randomPoint);
     const Eigen::Vector3<T> res2 = trans1.toAffine3() * randomPoint;
@@ -370,7 +370,8 @@ TYPED_TEST(TransformTest, TransformVec) {
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
     const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
-    const Eigen::Vector3<T> randomVec = uniform<Vector3<T>>(-1, 1).normalized();
+    const Eigen::Vector3<T> randomVec =
+        this->rng.template uniform<Vector3<T>>(T(-1), T(1)).normalized();
 
     const Eigen::Vector3<T> res1 = trans1.rotate(randomVec);
     const Eigen::Vector3<T> res2 = trans1.toAffine3().rotation() * randomVec;
