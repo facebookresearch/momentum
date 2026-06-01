@@ -234,6 +234,8 @@ inline void createCollisionGeometryNodes(
       case CollisionPrimitiveType::Ellipsoid:
         supportedPrimitive = true;
         break;
+      case CollisionPrimitiveType::Box:
+        break;
     }
     if (!supportedPrimitive) {
       MT_LOGW(
