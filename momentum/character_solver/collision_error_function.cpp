@@ -57,11 +57,7 @@ void CollisionErrorFunctionT<T>::updateCollisionPairs(bool filterRestPoseOverlap
   aabbs_.resize(n);
   for (size_t i = 0; i < n; ++i) {
     aabbs_[i].id = gsl::narrow_cast<axel::Index>(i);
-    updateAabb(
-        aabbs_[i],
-        collisionState_.origin[i],
-        collisionState_.direction[i],
-        collisionState_.radius[i]);
+    updateAabb(aabbs_[i], collisionState_, i);
   }
 
   if (n == 0) {
@@ -88,11 +84,7 @@ void CollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& stat
   }
 
   for (size_t i = 0; i < aabbs_.size(); ++i) {
-    updateAabb(
-        aabbs_[i],
-        collisionState_.origin[i],
-        collisionState_.direction[i],
-        collisionState_.radius[i]);
+    updateAabb(aabbs_[i], collisionState_, i);
   }
 }
 
@@ -101,24 +93,11 @@ bool CollisionErrorFunctionT<T>::checkCollision(
     const CollisionGeometryStateT<T>& colState,
     size_t indexA,
     size_t indexB,
-    T& distance,
-    Vector2<T>& cp,
-    T& overlap) const {
+    CollisionOverlapResultT<T>& result) const {
   if (!aabbs_[indexA].intersects(aabbs_[indexB])) {
     return false;
   }
-  return overlaps(
-      colState.origin[indexA],
-      colState.direction[indexA],
-      colState.radius[indexA],
-      colState.delta[indexA],
-      colState.origin[indexB],
-      colState.direction[indexB],
-      colState.radius[indexB],
-      colState.delta[indexB],
-      distance,
-      cp,
-      overlap);
+  return overlaps(colState, collisionGeometry_, indexA, indexB, result);
 }
 
 template <typename T>
@@ -201,10 +180,8 @@ template <typename T>
 std::vector<Vector2i> CollisionErrorFunctionT<T>::getCollisionPairs() const {
   std::vector<Vector2i> collidingPairs;
   for (const auto& pair : validPairs_) {
-    T distance;
-    Vector2<T> cp;
-    T overlap;
-    if (checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+    CollisionOverlapResultT<T> result;
+    if (checkCollision(collisionState_, pair.indexA, pair.indexB, result)) {
       collidingPairs.emplace_back(static_cast<int>(pair.indexA), static_cast<int>(pair.indexB));
     }
   }
@@ -229,14 +206,12 @@ double CollisionErrorFunctionT<T>::getError(
   double error = 0;
   size_t collidingCount = 0;
   for (const auto& pair : validPairs_) {
-    T distance;
-    Vector2<T> cp;
-    T overlap;
-    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+    CollisionOverlapResultT<T> result;
+    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, result)) {
       continue;
     }
     collidingCount++;
-    error += sqr(overlap) * kCollisionWeight * this->weight_;
+    error += sqr(result.overlap) * kCollisionWeight * this->weight_;
   }
 
   MT_LOGD(
@@ -267,46 +242,34 @@ double CollisionErrorFunctionT<T>::getGradient(
 
   double error = 0;
   for (const auto& pair : validPairs_) {
-    T distance;
-    Vector2<T> cp;
-    T overlap;
-    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+    CollisionOverlapResultT<T> result;
+    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, result)) {
       continue;
     }
 
-    error += sqr(overlap) * kCollisionWeight * this->weight_;
+    error += sqr(result.overlap) * kCollisionWeight * this->weight_;
 
-    const Vector3<T> position_i =
-        collisionState_.origin[pair.indexA] + collisionState_.direction[pair.indexA] * cp[0];
-    const Vector3<T> position_j =
-        collisionState_.origin[pair.indexB] + collisionState_.direction[pair.indexB] * cp[1];
-    const Vector3<T> direction = position_i - position_j;
-    const T wgt = -T(2) * kCollisionWeight * this->weight_ * (overlap / distance);
-
-    // Effective radii at the closest points (for scale derivative correction)
-    const T radiusA_at_cp =
-        collisionState_.radius[pair.indexA][0] + cp[0] * collisionState_.delta[pair.indexA];
-    const T radiusB_at_cp =
-        collisionState_.radius[pair.indexB][0] + cp[1] * collisionState_.delta[pair.indexB];
+    const Vector3<T> direction = result.positionA - result.positionB;
+    const T wgt = -T(2) * kCollisionWeight * this->weight_ * (result.overlap / result.distance);
 
     accumulateGradientAlongChain(
         state,
-        position_i,
+        result.positionA,
         direction,
         wgt,
         collisionGeometry_[pair.indexA].parent,
         pair.commonAncestor,
         gradient,
-        -distance * radiusA_at_cp * ln2<T>());
+        -result.distance * result.radiusA * ln2<T>());
     accumulateGradientAlongChain(
         state,
-        position_j,
+        result.positionB,
         direction,
         -wgt,
         collisionGeometry_[pair.indexB].parent,
         pair.commonAncestor,
         gradient,
-        distance * radiusB_at_cp * ln2<T>());
+        result.distance * result.radiusB * ln2<T>());
 
     // Scale derivatives above the common ancestor: translation and rotation derivatives cancel
     // above the LCA (both capsule endpoints move identically), but scale derivatives do not
@@ -314,7 +277,8 @@ double CollisionErrorFunctionT<T>::getGradient(
     // also changes capsule radii.
     {
       const T netScaleVal =
-          (direction.squaredNorm() - distance * (radiusA_at_cp + radiusB_at_cp)) * ln2<T>() * wgt;
+          (direction.squaredNorm() - result.distance * (result.radiusA + result.radiusB)) *
+          ln2<T>() * wgt;
       size_t ancestorIndex = pair.commonAncestor;
       while (ancestorIndex != kInvalidIndex) {
         const size_t paramIndex = ancestorIndex * kParametersPerJoint;
@@ -365,54 +329,42 @@ double CollisionErrorFunctionT<T>::getJacobian(
   double error = 0;
 
   for (const auto& pair : validPairs_) {
-    T distance;
-    Vector2<T> cp;
-    T overlap;
-    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+    CollisionOverlapResultT<T> result;
+    if (!checkCollision(collisionState_, pair.indexA, pair.indexB, result)) {
       continue;
     }
 
-    error += sqr(overlap) * kCollisionWeight * this->weight_;
+    error += sqr(result.overlap) * kCollisionWeight * this->weight_;
 
-    const Vector3<T> position_i =
-        collisionState_.origin[pair.indexA] + collisionState_.direction[pair.indexA] * cp[0];
-    const Vector3<T> position_j =
-        collisionState_.origin[pair.indexB] + collisionState_.direction[pair.indexB] * cp[1];
-    const Vector3<T> direction = position_i - position_j;
-    const T fac = wgt / distance;
+    const Vector3<T> direction = result.positionA - result.positionB;
+    const T fac = wgt / result.distance;
     const int row = pos++;
-
-    // Effective radii at the closest points (for scale derivative correction)
-    const T radiusA_at_cp =
-        collisionState_.radius[pair.indexA][0] + cp[0] * collisionState_.delta[pair.indexA];
-    const T radiusB_at_cp =
-        collisionState_.radius[pair.indexB][0] + cp[1] * collisionState_.delta[pair.indexB];
 
     accumulateJacobianAlongChain(
         state,
-        position_i,
+        result.positionA,
         direction,
         -fac,
         collisionGeometry_[pair.indexA].parent,
         pair.commonAncestor,
         jacobian,
         row,
-        -distance * radiusA_at_cp * ln2<T>());
+        -result.distance * result.radiusA * ln2<T>());
     accumulateJacobianAlongChain(
         state,
-        position_j,
+        result.positionB,
         direction,
         fac,
         collisionGeometry_[pair.indexB].parent,
         pair.commonAncestor,
         jacobian,
         row,
-        distance * radiusB_at_cp * ln2<T>());
+        result.distance * result.radiusB * ln2<T>());
 
     // Scale derivatives above the common ancestor
     {
       const T netScaleVal = -fac * ln2<T>() * direction.squaredNorm() +
-          wgt * (radiusA_at_cp + radiusB_at_cp) * ln2<T>();
+          wgt * (result.radiusA + result.radiusB) * ln2<T>();
       size_t ancestorIndex = pair.commonAncestor;
       while (ancestorIndex != kInvalidIndex) {
         const size_t paramIndex = ancestorIndex * kParametersPerJoint;
@@ -424,7 +376,7 @@ double CollisionErrorFunctionT<T>::getJacobian(
       }
     }
 
-    residual(row) = overlap * wgt;
+    residual(row) = result.overlap * wgt;
   }
 
   usedRows = pos;
@@ -435,17 +387,15 @@ template <typename T>
 std::vector<CollisionDebugEntryT<T>> CollisionErrorFunctionT<T>::getCollisionDebugInfo() const {
   std::vector<CollisionDebugEntryT<T>> entries;
   for (const auto& pair : validPairs_) {
-    T distance;
-    Vector2<T> cp;
-    T overlap;
-    if (checkCollision(collisionState_, pair.indexA, pair.indexB, distance, cp, overlap)) {
+    CollisionOverlapResultT<T> result;
+    if (checkCollision(collisionState_, pair.indexA, pair.indexB, result)) {
       entries.push_back(
           {pair.indexA,
            pair.indexB,
            collisionGeometry_[pair.indexA].parent,
            collisionGeometry_[pair.indexB].parent,
-           overlap,
-           distance});
+           result.overlap,
+           result.distance});
     }
   }
   return entries;
