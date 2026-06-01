@@ -138,6 +138,11 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
   ellipsoid.transformation.translation = Vector3f(0.1f, 0.2f, 0.3f);
   ellipsoid.radii = Vector3f(0.3f, 0.2f, 0.1f);
   this->character.collision->push_back(ellipsoid);
+  CollisionBox box;
+  box.parent = 2;
+  box.transformation.translation = Vector3f(0.4f, 0.5f, 0.6f);
+  box.halfExtents = Vector3f(0.6f, 0.5f, 0.4f);
+  this->character.collision->push_back(box);
 
   // Store original values for comparison
   Vector3f originalTranslation = this->character.skeleton.joints[1].translationOffset;
@@ -173,11 +178,16 @@ TEST_F(CharacterUtilityTest, ScaleCharacter) {
         scaledCharacter.collision->at(0).radius, this->character.collision->at(0).radius * scale);
     EXPECT_EQ(
         scaledCharacter.collision->at(0).length, this->character.collision->at(0).length * scale);
-    const auto& scaledEllipsoid = scaledCharacter.collision->back();
+    const auto& scaledEllipsoid =
+        scaledCharacter.collision->at(scaledCharacter.collision->size() - 2);
     EXPECT_EQ(scaledEllipsoid.type, CollisionPrimitiveType::Ellipsoid);
     EXPECT_EQ(
         scaledEllipsoid.transformation.translation, ellipsoid.transformation.translation * scale);
     EXPECT_EQ(scaledEllipsoid.ellipsoidRadii, ellipsoid.radii * scale);
+    const auto& scaledBox = scaledCharacter.collision->back();
+    EXPECT_EQ(scaledBox.type, CollisionPrimitiveType::Box);
+    EXPECT_EQ(scaledBox.transformation.translation, box.transformation.translation * scale);
+    EXPECT_EQ(scaledBox.boxHalfExtents, box.halfExtents * scale);
   }
 
   // Check that inverse bind pose was scaled
@@ -351,6 +361,13 @@ TEST_F(CharacterUtilityTest, TransformCharacterTransformsWorldFixedCollisionGeom
   worldEllipsoid.radii = Vector3f(0.7f, 0.6f, 0.5f);
   collisionGeometry.push_back(worldEllipsoid);
 
+  CollisionBox worldBox;
+  worldBox.parent = kInvalidIndex;
+  worldBox.transformation.translation = Vector3f(0.8f, 0.9f, 1.0f);
+  worldBox.transformation.rotation = Quaternionf(Eigen::AngleAxisf(pi() / 4.0f, Vector3f::UnitX()));
+  worldBox.halfExtents = Vector3f(0.5f, 0.4f, 0.3f);
+  collisionGeometry.push_back(worldBox);
+
   const Character character(
       this->smallCharacter.skeleton,
       this->smallCharacter.parameterTransform,
@@ -368,12 +385,15 @@ TEST_F(CharacterUtilityTest, TransformCharacterTransformsWorldFixedCollisionGeom
   const Character transformedCharacter = transformCharacter(character, transform);
 
   ASSERT_TRUE(transformedCharacter.collision);
-  ASSERT_EQ(transformedCharacter.collision->size(), 2);
+  ASSERT_EQ(transformedCharacter.collision->size(), 3);
   EXPECT_TRUE(transformedCharacter.collision->at(0).transformation.isApprox(
       parentedEllipsoid.transformation));
   EXPECT_TRUE(transformedCharacter.collision->at(1).transformation.isApprox(
       Transform(transform) * worldEllipsoid.transformation));
   EXPECT_EQ(transformedCharacter.collision->at(1).ellipsoidRadii, worldEllipsoid.radii);
+  EXPECT_TRUE(transformedCharacter.collision->at(2).transformation.isApprox(
+      Transform(transform) * worldBox.transformation));
+  EXPECT_EQ(transformedCharacter.collision->at(2).boxHalfExtents, worldBox.halfExtents);
 }
 
 // Test removeJoints function
@@ -476,6 +496,11 @@ TEST_F(CharacterUtilityTest, RemoveJointsKeepsWorldFixedCollisionGeometry) {
   removedJointEllipsoid.radii = Vector3f(0.2f, 0.3f, 0.4f);
   collisionGeometry.push_back(removedJointEllipsoid);
 
+  CollisionBox worldBox;
+  worldBox.parent = kInvalidIndex;
+  worldBox.halfExtents = Vector3f(0.6f, 0.5f, 0.4f);
+  collisionGeometry.push_back(worldBox);
+
   const Character character(
       this->smallCharacter.skeleton,
       this->smallCharacter.parameterTransform,
@@ -489,10 +514,13 @@ TEST_F(CharacterUtilityTest, RemoveJointsKeepsWorldFixedCollisionGeometry) {
   const Character resultCharacter = removeJoints(character, jointsToRemove);
 
   ASSERT_TRUE(resultCharacter.collision);
-  ASSERT_EQ(resultCharacter.collision->size(), 1);
+  ASSERT_EQ(resultCharacter.collision->size(), 2);
   EXPECT_EQ(resultCharacter.collision->at(0).type, CollisionPrimitiveType::Ellipsoid);
   EXPECT_EQ(resultCharacter.collision->at(0).parent, kInvalidIndex);
   EXPECT_EQ(resultCharacter.collision->at(0).ellipsoidRadii, worldEllipsoid.radii);
+  EXPECT_EQ(resultCharacter.collision->at(1).type, CollisionPrimitiveType::Box);
+  EXPECT_EQ(resultCharacter.collision->at(1).parent, kInvalidIndex);
+  EXPECT_EQ(resultCharacter.collision->at(1).boxHalfExtents, worldBox.halfExtents);
 }
 
 // Test mapMotionToCharacter function
