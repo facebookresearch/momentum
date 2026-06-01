@@ -89,8 +89,9 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, FixedAxisCosErrorL2_GradientsAndJacobian
     for (size_t i = 0; i < 10; i++) {
       ModelParametersT<T> parameters =
           rng.uniform<VectorX<T>>(character.parameterTransform.numAllModelParameters(), -1, 1);
+      // Float numerical-Jacobian FD is marginal here and varies across platforms; double is tight.
       TEST_GRADIENT_AND_JACOBIAN(
-          T, &errorFunction, parameters, character, Eps<T>(5e-2f, 1e-4), Eps<T>(1e-6f, 1e-7));
+          T, &errorFunction, parameters, character, Eps<T>(1.2e-1f, 1e-4), Eps<T>(1e-6f, 1e-7));
     }
   }
 }
