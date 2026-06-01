@@ -21,6 +21,7 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct UtilityTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(UtilityTest, Types);
@@ -240,10 +241,9 @@ TYPED_TEST(UtilityTest, QuaternionToEulerConventionIsExtrinsicXYZ) {
     EXPECT_FALSE(Rintr.isApprox(R, tol));
   }
 
-  // Randomized angles with fixed seed; verify extrinsic reconstruction at least
-  Random<> rng(12345);
+  // Randomized angles with fixture's seeded rng; verify extrinsic reconstruction at least
   for (int i = 0; i < 20; ++i) {
-    const Vector3<T> angles = rng.uniform<Vector3<T>>(-pi<T>(), pi<T>());
+    const auto angles = this->rng.template uniform<Vector3<T>>(-pi<T>(), pi<T>());
     const Quaternion<T> q = Quaternion<T>(
         AngleAxis<T>(angles[0], Vector3<T>::UnitX()) *
         AngleAxis<T>(angles[1], Vector3<T>::UnitY()) *
@@ -583,7 +583,7 @@ TYPED_TEST(UtilityTest, EulerAngles) {
 
   const auto numTests = 10;
   for (auto i = 0u; i < numTests; ++i) {
-    angles_set.push_back(Vector3<T>::Random());
+    angles_set.push_back(this->rng.template uniform<Vector3<T>>(T(-1), T(1)));
   }
 
   // Intrinsic XYZ
@@ -669,9 +669,9 @@ TYPED_TEST(UtilityTest, EulerAngles) {
 
 // Test function to check the conversion between intrinsic and extrinsic Euler angles
 template <typename T>
-void testIntrinsicExtrinsicConversion(int axis0, int axis1, int axis2) {
+void testIntrinsicExtrinsicConversion(Random<>& rng, int axis0, int axis1, int axis2) {
   for (auto i = 0u; i < 10; ++i) {
-    const Vector3<T> euler_angles = Vector3<T>::Random();
+    const auto euler_angles = rng.template uniform<Vector3<T>>(T(-1), T(1));
     Matrix3<T> m;
     m = AngleAxis<T>(euler_angles[0], Vector3<T>::Unit(axis0)) *
         AngleAxis<T>(euler_angles[1], Vector3<T>::Unit(axis1)) *
@@ -694,20 +694,20 @@ TYPED_TEST(UtilityTest, TestRoundTripIntrinsicExtrinsic) {
   using T = typename TestFixture::Type;
 
   // Test all possible angle orders (assuming the axes are distinct)
-  testIntrinsicExtrinsicConversion<T>(0, 1, 2);
-  testIntrinsicExtrinsicConversion<T>(0, 2, 1);
-  testIntrinsicExtrinsicConversion<T>(1, 0, 2);
-  testIntrinsicExtrinsicConversion<T>(1, 2, 0);
-  testIntrinsicExtrinsicConversion<T>(2, 0, 1);
-  testIntrinsicExtrinsicConversion<T>(2, 1, 0);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 0, 1, 2);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 0, 2, 1);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 1, 0, 2);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 1, 2, 0);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 2, 0, 1);
+  testIntrinsicExtrinsicConversion<T>(this->rng, 2, 1, 0);
 }
 
 // Test function to check the conversion between intrinsic and extrinsic Euler angles
 // and their corresponding quaternions
 template <typename T>
-void testEulerToQuaternionConversion(int axis0, int axis1, int axis2) {
+void testEulerToQuaternionConversion(Random<>& rng, int axis0, int axis1, int axis2) {
   for (auto i = 0u; i < 10; ++i) {
-    const Vector3<T> euler_angles = Vector3<T>::Random();
+    const auto euler_angles = rng.template uniform<Vector3<T>>(T(-1), T(1));
 
     const Quaternion<T> quaternion_intrinsic =
         eulerToQuaternion(euler_angles, axis0, axis1, axis2, EulerConvention::Intrinsic);
@@ -732,12 +732,12 @@ TYPED_TEST(UtilityTest, TestEulerToQuaternionIntrinsicExtrinsic) {
   using T = typename TestFixture::Type;
 
   // Test all possible angle orders (assuming the axes are distinct)
-  testEulerToQuaternionConversion<T>(0, 1, 2);
-  testEulerToQuaternionConversion<T>(0, 2, 1);
-  testEulerToQuaternionConversion<T>(1, 0, 2);
-  testEulerToQuaternionConversion<T>(1, 2, 0);
-  testEulerToQuaternionConversion<T>(2, 0, 1);
-  testEulerToQuaternionConversion<T>(2, 1, 0);
+  testEulerToQuaternionConversion<T>(this->rng, 0, 1, 2);
+  testEulerToQuaternionConversion<T>(this->rng, 0, 2, 1);
+  testEulerToQuaternionConversion<T>(this->rng, 1, 0, 2);
+  testEulerToQuaternionConversion<T>(this->rng, 1, 2, 0);
+  testEulerToQuaternionConversion<T>(this->rng, 2, 0, 1);
+  testEulerToQuaternionConversion<T>(this->rng, 2, 1, 0);
 }
 
 TYPED_TEST(UtilityTest, TestQuaternionLogMapExpMap) {
@@ -745,7 +745,7 @@ TYPED_TEST(UtilityTest, TestQuaternionLogMapExpMap) {
 
   const auto numTests = 10;
   for (auto i = 0u; i < numTests; ++i) {
-    const Vector3<T> rand_angles = Vector3<T>::Random();
+    const auto rand_angles = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
     const Quaternion<T> quaternion = AngleAxis<T>(rand_angles(0), Vector3<T>::UnitX()) *
         AngleAxis<T>(rand_angles(1), Vector3<T>::UnitY()) *
         AngleAxis<T>(rand_angles(2), Vector3<T>::UnitZ());
@@ -765,7 +765,7 @@ TYPED_TEST(UtilityTest, TestExpMapLogMap) {
 
   const auto numTests = 10;
   for (auto i = 0u; i < numTests; ++i) {
-    const Vector3<T> rand_rot_vec = Vector3<T>::Random();
+    const auto rand_rot_vec = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
 
     const Quaternion<T> quaternion = quaternionExpMap<T>(rand_rot_vec);
     const Vector3<T> rot_vec_from_quaternion = quaternionLogMap<T>(quaternion);
@@ -884,9 +884,8 @@ TYPED_TEST(UtilityTest, QuaternionLogMap) {
 
   // Test that logmap is inverse of expmap
   {
-    Random<> rng(42);
     for (int i = 0; i < 10; ++i) {
-      const auto v = rng.uniform<Vector3<T>>(T(-pi<T>()), T(pi<T>()));
+      const auto v = this->rng.template uniform<Vector3<T>>(T(-pi<T>()), T(pi<T>()));
       const Quaternion<T> q = quaternionExpMap<T>(v);
       const Vector3<T> logmap = quaternionLogMap<T>(q);
       EXPECT_TRUE(logmap.isApprox(v, T(1e-4))) << "Input: " << v.transpose() << "\n"
@@ -953,9 +952,9 @@ TYPED_TEST(UtilityTest, QuaternionExpMap) {
 
   // Test that expmap is inverse of logmap
   {
-    Random<> rng(42);
     for (int i = 0; i < 10; ++i) {
-      const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+      const Quaternion<T> q =
+          Quaternion<T>(this->rng.template uniform<Vector4<T>>(T(-1), T(1))).normalized();
       const Vector3<T> v = quaternionLogMap<T>(q);
       const Quaternion<T> q_reconstructed = quaternionExpMap<T>(v);
       EXPECT_TRUE(q.isApprox(q_reconstructed, T(1e-4)))
@@ -968,13 +967,11 @@ TYPED_TEST(UtilityTest, QuaternionExpMap) {
 TYPED_TEST(UtilityTest, QuaternionLogMapExpMapRoundtrip) {
   using T = typename TestFixture::Type;
 
-  Random<> rng(123);
-
   // Test forward: v → exp → log → v
   for (int i = 0; i < 20; ++i) {
     // Generate random rotation vector with angle in [-pi, pi]
-    const T angle = rng.uniform(T(-pi<T>()), T(pi<T>()));
-    const Vector3<T> axis = rng.uniform<Vector3<T>>(T(-1), T(1)).normalized();
+    const T angle = this->rng.uniform(T(-pi<T>()), T(pi<T>()));
+    const Vector3<T> axis = this->rng.template uniform<Vector3<T>>(T(-1), T(1)).normalized();
     const Vector3<T> v = axis * angle;
 
     const Quaternion<T> q = quaternionExpMap<T>(v);
@@ -987,7 +984,8 @@ TYPED_TEST(UtilityTest, QuaternionLogMapExpMapRoundtrip) {
 
   // Test backward: q → log → exp → q
   for (int i = 0; i < 20; ++i) {
-    const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+    const Quaternion<T> q =
+        Quaternion<T>(this->rng.template uniform<Vector4<T>>(T(-1), T(1))).normalized();
 
     const Vector3<T> v = quaternionLogMap<T>(q);
     const Quaternion<T> q_reconstructed = quaternionExpMap<T>(v);
@@ -1001,13 +999,12 @@ TYPED_TEST(UtilityTest, QuaternionLogMapExpMapRoundtrip) {
 TYPED_TEST(UtilityTest, QuaternionLogMapDerivative) {
   using T = typename TestFixture::Type;
 
-  Random<> rng(789);
-
   // Test the derivative of logmap with respect to quaternion components
   // We test this by computing finite differences along tangent directions
   for (int i = 0; i < 10; ++i) {
     // Generate a random quaternion
-    const Quaternion<T> q = Quaternion<T>(rng.uniform<Vector4<T>>(T(-1), T(1))).normalized();
+    const Quaternion<T> q =
+        Quaternion<T>(this->rng.template uniform<Vector4<T>>(T(-1), T(1))).normalized();
 
     // Compute the Jacobian: 3x4 matrix
     const Eigen::Matrix<T, 3, 4> jacobian = quaternionLogMapDerivative(q);
@@ -1017,7 +1014,7 @@ TYPED_TEST(UtilityTest, QuaternionLogMapDerivative) {
     // quaternion delta_q = [dw, dx, dy, dz] and then renormalizing
     const T h = Eps<T>(1e-4f, 1e-8);
 
-    Eigen::Vector4<T> testVec = rng.uniform<Vector4<T>>(T(-1), T(1)).normalized();
+    Eigen::Vector4<T> testVec = this->rng.template uniform<Vector4<T>>(T(-1), T(1)).normalized();
 
     // Perturb the quaternion: q_perturbed = (q + delta).normalized()
     Eigen::Vector4<T> q_coeffs_plus = q.coeffs() + h * testVec;
