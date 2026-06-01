@@ -16,9 +16,13 @@
 #include "momentum/math/constants.h"
 #include "momentum/simd/simd.h"
 
+#include <algorithm>
+
 namespace momentum {
 
 namespace {
+
+constexpr bool kFilterRestPoseOverlaps = true;
 
 template <typename T>
 [[nodiscard]] drjit::Array<T, 2> toDrJitVec(const Eigen::Vector2<T>& v) {
@@ -107,6 +111,20 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
   validPairs_.clear();
 
   const auto n = collisionGeometry_.size();
+  useScalarFallback_ =
+      std::any_of(collisionGeometry_.begin(), collisionGeometry_.end(), [](const auto& primitive) {
+        return primitive.type != CollisionPrimitiveType::TaperedCapsule;
+      });
+  if (useScalarFallback_ && !scalarFallback_) {
+    scalarFallback_.emplace(
+        this->skeleton_, this->parameterTransform_, collisionGeometry_, kFilterRestPoseOverlaps);
+  }
+  if (useScalarFallback_) {
+    commonAncestors_.clear();
+    collisionPairs_.clear();
+    aabbs_.clear();
+    return;
+  }
 
   const SkeletonStateT<T> state(
       this->parameterTransform_.zero().template cast<T>(), this->skeleton_);
@@ -115,11 +133,7 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
   aabbs_.resize(n);
   for (size_t i = 0; i < n; ++i) {
     aabbs_[i].id = gsl::narrow_cast<axel::Index>(i);
-    updateAabb(
-        aabbs_[i],
-        collisionState_.origin[i],
-        collisionState_.direction[i],
-        collisionState_.radius[i]);
+    updateAabb(aabbs_[i], collisionState_, i);
   }
 
   if (n == 0) {
@@ -131,9 +145,18 @@ void SimdCollisionErrorFunctionT<T>::updateCollisionPairs() {
 
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = i + 1; j < n; ++j) {
-      if (isValidCollisionPair(collisionState_, collisionGeometry_, this->skeleton_, i, j)) {
-        const size_t lca = this->skeleton_.commonAncestor(
-            collisionGeometry_[i].parent, collisionGeometry_[j].parent);
+      if (isValidCollisionPair(
+              collisionState_,
+              collisionGeometry_,
+              this->skeleton_,
+              i,
+              j,
+              kFilterRestPoseOverlaps)) {
+        const size_t lca = (collisionGeometry_[i].parent == kInvalidIndex ||
+                            collisionGeometry_[j].parent == kInvalidIndex)
+            ? kInvalidIndex
+            : this->skeleton_.commonAncestor(
+                  collisionGeometry_[i].parent, collisionGeometry_[j].parent);
         validPairs_.push_back({i, j, lca});
         commonAncestors_[i * n + j] = lca;
         commonAncestors_[j * n + i] = lca;
@@ -150,11 +173,7 @@ void SimdCollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& 
   }
 
   for (size_t i = 0; i < aabbs_.size(); ++i) {
-    updateAabb(
-        aabbs_[i],
-        collisionState_.origin[i],
-        collisionState_.direction[i],
-        collisionState_.radius[i]);
+    updateAabb(aabbs_[i], collisionState_, i);
   }
 
   for (auto& pairs : collisionPairs_) {
@@ -168,10 +187,20 @@ void SimdCollisionErrorFunctionT<T>::computeBroadPhase(const SkeletonStateT<T>& 
 }
 
 template <typename T>
+CollisionErrorFunctionT<T>& SimdCollisionErrorFunctionT<T>::syncScalarFallback() {
+  MT_CHECK(scalarFallback_.has_value());
+  auto& fallback = scalarFallback_.value();
+  fallback.setWeight(this->weight_);
+  fallback.setActiveJoints(this->activeJointParams_);
+  fallback.setEnabledParameters(this->enabledParameters_);
+  return fallback;
+}
+
+template <typename T>
 double SimdCollisionErrorFunctionT<T>::getError(
-    const ModelParametersT<T>& /*unused*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */) {
+    const MeshStateT<T>& meshState) {
   if (state.jointState.empty()) {
     return 0.0;
   }
@@ -179,6 +208,11 @@ double SimdCollisionErrorFunctionT<T>::getError(
   MT_CHECK(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
+
+  if (useScalarFallback_) {
+    auto& fallback = syncScalarFallback();
+    return fallback.getError(params, state, meshState);
+  }
 
   computeBroadPhase(state);
 
@@ -217,12 +251,17 @@ double SimdCollisionErrorFunctionT<T>::getError(
 
 template <typename T>
 double SimdCollisionErrorFunctionT<T>::getGradient(
-    const ModelParametersT<T>& /*unused*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Ref<VectorX<T>> gradient) {
   if (state.jointState.empty()) {
     return 0.0;
+  }
+
+  if (useScalarFallback_) {
+    auto& fallback = syncScalarFallback();
+    return fallback.getGradient(params, state, meshState, gradient);
   }
 
   computeBroadPhase(state);
@@ -382,12 +421,22 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
 
 template <typename T>
 double SimdCollisionErrorFunctionT<T>::getJacobian(
-    const ModelParametersT<T>& /*unused*/,
+    const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
-    const MeshStateT<T>& /* meshState */,
+    const MeshStateT<T>& meshState,
     Ref<MatrixX<T>> jacobian,
     Ref<VectorX<T>> residual,
     int& usedRows) {
+  if (state.jointState.empty()) {
+    usedRows = 0;
+    return 0.0;
+  }
+
+  if (useScalarFallback_) {
+    auto& fallback = syncScalarFallback();
+    return fallback.getJacobian(params, state, meshState, jacobian, residual, usedRows);
+  }
+
   computeBroadPhase(state);
 
   const auto numCapsules = collisionGeometry_.size();
@@ -547,6 +596,10 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
 
 template <typename T>
 size_t SimdCollisionErrorFunctionT<T>::getJacobianSize() const {
+  if (useScalarFallback_) {
+    MT_CHECK(scalarFallback_.has_value());
+    return scalarFallback_->getJacobianSize();
+  }
   return validPairs_.size();
 }
 
