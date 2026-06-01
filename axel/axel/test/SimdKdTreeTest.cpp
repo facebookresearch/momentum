@@ -296,8 +296,10 @@ void validateKdTree(
     const TreeType& kdTree) {
   using Scalar = SimdKdTree3f::Scalar;
 
-  momentum::Random<>::GetSingleton().setSeed(kTestRandomSeed);
-
+  // Do NOT re-seed the global RNG here: the caller already seeded it once and generated the tree
+  // points from that stream. Re-seeding to the same value would restart the stream so the random
+  // query points below coincide with the tree points (nearest distance 0), which then makes the
+  // radius-bounded queries spuriously find nothing. Continue the caller's stream instead.
   kdTree.validate();
   validateKdTreeNearestNeighbor<T>(points, normals, colors, kdTree, Eigen::Matrix<T, 3, 1>::Zero());
   validateKdTreeNearestNeighborWithAcceptance<T>(points, kdTree, Eigen::Matrix<T, 3, 1>::Zero());

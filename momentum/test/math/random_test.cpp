@@ -82,6 +82,23 @@ TEST(RandomTest, DeterministicBySeed) {
   }
 }
 
+// Regression test: setSeed() must reset the engine even when the new seed equals the current
+// seed. A previous early-return optimization skipped re-seeding in that case, which silently
+// defeated per-test reseeding (e.g. fixture SetUp()) and made whole test suites order-dependent
+// when run in a single process.
+TEST(RandomTest, SetSeedAlwaysResetsStream) {
+  Random<> rng(12345);
+  const auto first = rng.uniform<double>(0.0, 1.0);
+  const auto second = rng.uniform<double>(0.0, 1.0);
+  ASSERT_NE(first, second) << "sanity: drawing should advance the engine";
+
+  // Re-seed with the SAME value that is already stored; this must restart the sequence.
+  rng.setSeed(12345);
+  const auto afterReset = rng.uniform<double>(0.0, 1.0);
+  EXPECT_EQ(first, afterReset)
+      << "setSeed(currentSeed) must reset the engine to the start of the sequence";
+}
+
 TEST(RandomTest, ScalarUniform) {
   const auto numTests = 1000;
 
