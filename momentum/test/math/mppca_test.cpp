@@ -10,6 +10,7 @@
 
 #include "momentum/math/constants.h"
 #include "momentum/math/mppca.h"
+#include "momentum/math/random.h"
 
 namespace {
 
@@ -20,6 +21,7 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct MppcaTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(MppcaTest, Types);
@@ -54,8 +56,8 @@ TYPED_TEST(MppcaTest, Set) {
   mu << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W;
-  MatrixX<T> W1 = MatrixX<T>::Random(d, q);
-  MatrixX<T> W2 = MatrixX<T>::Random(d, q);
+  auto W1 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
+  auto W2 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
   W.push_back(W1);
   W.push_back(W2);
 
@@ -103,8 +105,8 @@ TYPED_TEST(MppcaTest, Cast) {
   mu << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W;
-  MatrixX<T> W1 = MatrixX<T>::Random(d, q);
-  MatrixX<T> W2 = MatrixX<T>::Random(d, q);
+  auto W1 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
+  auto W2 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
   W.push_back(W1);
   W.push_back(W2);
 
@@ -178,8 +180,8 @@ TYPED_TEST(MppcaTest, IsApprox) {
   mu << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W;
-  MatrixX<T> W1 = MatrixX<T>::Random(d, q);
-  MatrixX<T> W2 = MatrixX<T>::Random(d, q);
+  auto W1 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
+  auto W2 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
   W.push_back(W1);
   W.push_back(W2);
 
@@ -227,8 +229,8 @@ TYPED_TEST(MppcaTest, DifferentDimensions) {
   mu1 << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W1;
-  W1.push_back(MatrixX<T>::Random(d1, q1));
-  W1.push_back(MatrixX<T>::Random(d1, q1));
+  W1.push_back(this->rng.template uniform<MatrixX<T>>(d1, q1, T(-1), T(1)));
+  W1.push_back(this->rng.template uniform<MatrixX<T>>(d1, q1, T(-1), T(1)));
 
   VectorX<T> sigma2_1(p1);
   sigma2_1 << 0.1, 0.2;
@@ -250,9 +252,9 @@ TYPED_TEST(MppcaTest, DifferentDimensions) {
   mu2 << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0;
 
   std::vector<MatrixX<T>> W2;
-  W2.push_back(MatrixX<T>::Random(d2, q2));
-  W2.push_back(MatrixX<T>::Random(d2, q2));
-  W2.push_back(MatrixX<T>::Random(d2, q2));
+  W2.push_back(this->rng.template uniform<MatrixX<T>>(d2, q2, T(-1), T(1)));
+  W2.push_back(this->rng.template uniform<MatrixX<T>>(d2, q2, T(-1), T(1)));
+  W2.push_back(this->rng.template uniform<MatrixX<T>>(d2, q2, T(-1), T(1)));
 
   VectorX<T> sigma2_2(p2);
   sigma2_2 << 0.1, 0.2, 0.3;
@@ -331,8 +333,8 @@ TYPED_TEST(MppcaTest, Names) {
   mu << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W;
-  MatrixX<T> W1 = MatrixX<T>::Random(d, q);
-  MatrixX<T> W2 = MatrixX<T>::Random(d, q);
+  auto W1 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
+  auto W2 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
   W.push_back(W1);
   W.push_back(W2);
 
@@ -376,8 +378,8 @@ TYPED_TEST(MppcaTest, VecIsApprox) {
   mu << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   std::vector<MatrixX<T>> W;
-  MatrixX<T> W1 = MatrixX<T>::Random(d, q);
-  MatrixX<T> W2 = MatrixX<T>::Random(d, q);
+  auto W1 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
+  auto W2 = this->rng.template uniform<MatrixX<T>>(d, q, T(-1), T(1));
   W.push_back(W1);
   W.push_back(W2);
 
