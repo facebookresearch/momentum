@@ -18,6 +18,7 @@
 #include "momentum/character_solver/skeleton_solver_function.h"
 #include "momentum/character_solver/vertex_position_error_function.h"
 #include "momentum/math/mesh.h"
+#include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
 
 using namespace momentum;
@@ -27,6 +28,7 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct BlendShapesTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(BlendShapesTest, Types);
@@ -42,8 +44,9 @@ TYPED_TEST(BlendShapesTest, Skinning) {
   ASSERT_TRUE(characterBlend.blendShape);
   ASSERT_TRUE(characterBlend.skinWeights);
 
-  const ModelParametersT<T> modelParams =
-      0.25 * VectorX<T>::Random(castedCharacterBlendParameterTransform.numAllModelParameters());
+  const ModelParametersT<T> modelParams = T(0.25) *
+      this->rng.template uniform<VectorX<T>>(
+          castedCharacterBlendParameterTransform.numAllModelParameters(), T(-1), T(1));
   const SkeletonStateT<T> skelState(
       castedCharacterBlendParameterTransform.apply(modelParams), characterBlend.skeleton);
 
@@ -94,8 +97,9 @@ TYPED_TEST(BlendShapesTest, FaceExpressions) {
   ASSERT_TRUE(characterBlend.faceExpressionBlendShape);
   ASSERT_TRUE(characterBlend.skinWeights);
 
-  const ModelParametersT<T> modelParams =
-      0.25 * VectorX<T>::Random(castedCharacterBlendParameterTransform.numAllModelParameters());
+  const ModelParametersT<T> modelParams = T(0.25) *
+      this->rng.template uniform<VectorX<T>>(
+          castedCharacterBlendParameterTransform.numAllModelParameters(), T(-1), T(1));
 
   // Extract body shape blendshape weights
   const BlendWeightsT<T> blendWeights =
@@ -140,8 +144,9 @@ TYPED_TEST(BlendShapesTest, Fitting) {
   ASSERT_TRUE(characterBlend.blendShape);
   ASSERT_TRUE(characterBlend.skinWeights);
 
-  const ModelParametersT<T> modelParamsTarget =
-      0.5 * VectorX<T>::Random(characterBlend.parameterTransform.numAllModelParameters());
+  const ModelParametersT<T> modelParamsTarget = T(0.5) *
+      this->rng.template uniform<VectorX<T>>(
+          characterBlend.parameterTransform.numAllModelParameters(), T(-1), T(1));
   // Make sure there's actually a valid blend shape in there:
   EXPECT_GT(
       extractBlendWeights(characterBlend.parameterTransform, modelParamsTarget).v.norm(), 0.05);

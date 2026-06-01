@@ -35,6 +35,7 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct GaussNewtonQRTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(GaussNewtonQRTest, Types);
@@ -75,8 +76,8 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
-    ModelParametersT<T> randomParams_cur =
-        VectorX<T>::Random(parameterTransform.numAllModelParameters());
+    ModelParametersT<T> randomParams_cur = this->rng.template uniform<VectorX<T>>(
+        parameterTransform.numAllModelParameters(), T(-1), T(1));
 
     targetParams.push_back(randomParams_cur.v);
 
@@ -122,6 +123,7 @@ TYPED_TEST(GaussNewtonQRTest, CompareGaussNewton) {
 template <typename T>
 struct TrustRegionTest : public testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(TrustRegionTest, Types);
@@ -142,13 +144,16 @@ TYPED_TEST(TrustRegionTest, PerfectQuadratic) {
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
-    ModelParametersT<T> randomParams_cur =
-        VectorX<T>::Random(parameterTransform.numAllModelParameters());
+    ModelParametersT<T> randomParams_cur = this->rng.template uniform<VectorX<T>>(
+        parameterTransform.numAllModelParameters(), T(-1), T(1));
 
     auto mpErrorFunction =
         std::make_shared<ModelParametersErrorFunctionT<T>>(skeleton, parameterTransform);
     Eigen::VectorX<T> weights =
-        VectorX<T>::Random(parameterTransform.numAllModelParameters()).array().abs();
+        this->rng
+            .template uniform<VectorX<T>>(parameterTransform.numAllModelParameters(), T(-1), T(1))
+            .array()
+            .abs();
     mpErrorFunction->setTargetParameters(randomParams_cur, weights);
     solverFunction.addErrorFunction(mpErrorFunction);
 
@@ -183,8 +188,8 @@ TYPED_TEST(TrustRegionTest, SanityCheck) {
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     SkeletonSolverFunctionT<T> solverFunction(character, castedCharacterParameterTransform);
 
-    ModelParametersT<T> randomParams_cur =
-        VectorX<T>::Random(character.parameterTransform.numAllModelParameters());
+    ModelParametersT<T> randomParams_cur = this->rng.template uniform<VectorX<T>>(
+        character.parameterTransform.numAllModelParameters(), T(-1), T(1));
 
     targetParams.push_back(randomParams_cur.v);
 

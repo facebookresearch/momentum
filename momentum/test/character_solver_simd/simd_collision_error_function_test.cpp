@@ -127,6 +127,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CollisionBroadphaseAccuracy) {
 // Verify that the SIMD version of the collision error function is at least as fast as the
 // multithreaded versions. Disabled by default because it's too slow to run in CI.
 TEST(Momentum_ErrorFunctions, DISABLED_SimdCollisionErrorFunctionIsFaster) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t nJoints = 50;
 
   // create skeleton and reference values

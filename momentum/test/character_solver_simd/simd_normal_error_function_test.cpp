@@ -52,6 +52,7 @@ TEST(Momentum_ErrorFunctions, SimdNormalConstraintsRejectsJointIndexOutsideSkele
 
 // TODO: Test for double once we have SIMD implementation for double
 TEST(Momentum_ErrorFunctions, SimdNormalFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
