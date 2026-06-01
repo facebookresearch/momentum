@@ -114,6 +114,16 @@ void loadHierarchyRecursive(
     capsule.parent = parentJointId;
     collision->push_back(capsule);
     nodeToObjectMap[nodeId] = collision->size() - 1;
+  } else if (type == "collision_ellipsoid") {
+    // Found collision geometry, should be the end node
+    MT_THROW_IF(
+        parentJointId == kInvalidIndex,
+        "Invalid collision ellipsoid without a parent joint: {}",
+        node.name);
+    auto ellipsoid = createCollisionEllipsoid(node, extension);
+    ellipsoid.parent = parentJointId;
+    collision->push_back(ellipsoid);
+    nodeToObjectMap[nodeId] = collision->size() - 1;
   } else if (type == "locator") {
     // Found locator, should be the end node
     MT_THROW_IF(
@@ -174,6 +184,26 @@ TaperedCapsule createCollisionCapsule(const fx::gltf::Node& node, const nlohmann
         extension.dump());
   }
   return tc;
+}
+
+CollisionEllipsoid createCollisionEllipsoid(
+    const fx::gltf::Node& node,
+    const nlohmann::json& extension) {
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = kInvalidIndex;
+  ellipsoid.transformation = Transform();
+  ellipsoid.transformation.rotation = toMomentumQuaternionf(node.rotation);
+  ellipsoid.transformation.translation = toMomentumVec3f(node.translation);
+
+  try {
+    ellipsoid.radii = fromJson<Vector3f>(extension["radii"]);
+  } catch (const std::exception&) {
+    MT_THROW(
+        "Fail to parse json {} for collision ellipsoid {} when loading character.",
+        extension.dump(),
+        node.name);
+  }
+  return ellipsoid;
 }
 
 Locator createLocator(const fx::gltf::Node& node, const nlohmann::json& extension) {
@@ -362,7 +392,10 @@ loadHierarchy(const fx::gltf::Document& model) {
   std::sort(collision->begin(), collision->end(), [](const auto& c1, const auto& c2) {
     int c1Parent = c1.parent == kInvalidIndex ? -1 : static_cast<int>(c1.parent);
     int c2Parent = c2.parent == kInvalidIndex ? -1 : static_cast<int>(c2.parent);
-    return c1Parent < c2Parent;
+    if (c1Parent != c2Parent) {
+      return c1Parent < c2Parent;
+    }
+    return static_cast<int>(c1.type) < static_cast<int>(c2.type);
   });
   std::sort(locators.begin(), locators.end(), [](const Locator& l1, const Locator& l2) {
     int l1Parent = l1.parent == kInvalidIndex ? -1 : static_cast<int>(l1.parent);

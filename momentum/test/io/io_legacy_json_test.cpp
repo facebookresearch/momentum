@@ -103,6 +103,12 @@ class LegacyJsonIOTest : public ::testing::Test {
     capsule.parent = 0;
     capsule.length = 1.0f;
     collision->push_back(capsule);
+    CollisionEllipsoid ellipsoid;
+    ellipsoid.transformation = Eigen::Affine3f::Identity();
+    ellipsoid.transformation.translation = Eigen::Vector3f(0.2f, 0.3f, 0.4f);
+    ellipsoid.radii = Eigen::Vector3f(0.3f, 0.2f, 0.1f);
+    ellipsoid.parent = 1;
+    collision->push_back(ellipsoid);
 
     // Create parameter transform
     ParameterTransform parameterTransform =
@@ -165,7 +171,7 @@ TEST_F(LegacyJsonIOTest, RoundTripConversion) {
 
   // Verify collision geometry
   ASSERT_NE(roundTripCharacter.collision, nullptr);
-  EXPECT_EQ(roundTripCharacter.collision->size(), testCharacter_.collision->size());
+  compareCollisionGeometry(testCharacter_.collision, roundTripCharacter.collision);
 }
 
 TEST_F(LegacyJsonIOTest, SkeletonOnlyConversion) {

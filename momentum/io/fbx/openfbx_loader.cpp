@@ -167,6 +167,19 @@ bool equalsCaseInsensitive(const ofbx::DataView& data, const char* rhs) {
   return c2 == (const char*)data.end && *c == '\0';
 }
 
+bool equalsCaseInsensitive(const std::string& lhs, const char* rhs) {
+  const char* c = rhs;
+  auto it = lhs.begin();
+  while (*c && it != lhs.end()) {
+    if (tolower(static_cast<unsigned char>(*c)) != tolower(static_cast<unsigned char>(*it))) {
+      return false;
+    }
+    ++c;
+    ++it;
+  }
+  return it == lhs.end() && *c == '\0';
+}
+
 // This function is more or less copied from the OpenFBX SDK.
 ofbx::IElement* resolveProperty(const ofbx::Object& object, const char* name) {
   // This is black magic, but for some reason all the user properties are stored in an
@@ -362,6 +375,52 @@ void extractCollisionCapsule(const ofbx::Object* node, size_t parent, CollisionG
   capsules.push_back(capsule);
 }
 
+void extractCollisionEllipsoid(
+    const ofbx::Object* node,
+    size_t parent,
+    CollisionGeometry& collisionGeometry) {
+  const double radiusX = resolveDoubleProperty(*node, "radii_x");
+  const double radiusY = resolveDoubleProperty(*node, "radii_y");
+  const double radiusZ = resolveDoubleProperty(*node, "radii_z");
+
+  const auto xf = node->getLocalTransform();
+
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = parent;
+  ellipsoid.radii = Eigen::Vector3f(
+      static_cast<float>(radiusX), static_cast<float>(radiusY), static_cast<float>(radiusZ));
+  ellipsoid.transformation = toEigen(xf).cast<float>();
+  collisionGeometry.push_back(ellipsoid);
+}
+
+void extractCollisionPrimitive(
+    const ofbx::Object* node,
+    size_t parent,
+    CollisionGeometry& collisionGeometry) {
+  auto* shapeProperty = resolveProperty(*node, "col_shape");
+  if (shapeProperty != nullptr) {
+    const std::string shape = resolveStringProperty(*node, "col_shape");
+    if (equalsCaseInsensitive(shape, "ellipsoid") ||
+        equalsCaseInsensitive(shape, "collision_ellipsoid")) {
+      extractCollisionEllipsoid(node, parent, collisionGeometry);
+      return;
+    }
+    if (equalsCaseInsensitive(shape, "tapered_capsule") ||
+        equalsCaseInsensitive(shape, "capsule") ||
+        equalsCaseInsensitive(shape, "collision_capsule")) {
+      extractCollisionCapsule(node, parent, collisionGeometry);
+      return;
+    }
+
+    MT_LOGW(
+        "Unknown FBX collision shape '{}' on node '{}'; falling back to tapered capsule.",
+        shape,
+        node->name);
+  }
+
+  extractCollisionCapsule(node, parent, collisionGeometry);
+}
+
 void extractLocator(const ofbx::Object* node, size_t parent, LocatorList& locators) {
   Locator locator;
   locator.name = node->name;
@@ -440,7 +499,7 @@ void parseSkeleton(
   if (type == ofbx::Object::Type::NULL_NODE) {
     auto* res = resolveProperty(*curSkelNode, "col_type");
     if (res != nullptr) {
-      extractCollisionCapsule(curSkelNode, parent, capsules);
+      extractCollisionPrimitive(curSkelNode, parent, capsules);
     } else if (parent != kInvalidIndex) {
       extractLocator(curSkelNode, parent, locators);
     } else {
