@@ -339,6 +339,33 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           )",
           py::arg("skinned_locators"),
           py::arg("replace") = false)
+      .def(
+          "with_metadata",
+          [](const mm::Character& character, const std::string& metadata) {
+            return momentum::Character(
+                character.skeleton,
+                character.parameterTransform,
+                character.parameterLimits,
+                character.locators,
+                character.mesh.get(),
+                character.skinWeights.get(),
+                character.collision.get(),
+                character.poseShapes.get(),
+                character.blendShape,
+                character.faceExpressionBlendShape,
+                character.name,
+                character.inverseBindPose,
+                character.skinnedLocators,
+                metadata,
+                character.physicalProperties);
+          },
+          R"(Returns a new character with the passed-in metadata string.
+
+          When the character is exported to FBX, the metadata string is written as a "metadata" property on the skeleton root node, so it is a convenient channel for attaching arbitrary key/value data (e.g. JSON-encoded) to an exported clip.
+
+          :param metadata: The metadata string to attach to the character.
+          )",
+          py::arg("metadata"))
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly("metadata", &mm::Character::metadata, "The character's metadata.")
       .def_readonly(
