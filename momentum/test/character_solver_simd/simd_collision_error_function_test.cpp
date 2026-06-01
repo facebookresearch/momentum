@@ -124,6 +124,109 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CollisionBroadphaseAccuracy) {
       << "No collisions in " << kNumRandomPoses << " random poses; test is ineffective";
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionEllipsoidFallbackIsSame) {
+#ifndef MOMENTUM_ENABLE_SIMD
+  GTEST_SKIP() << "SIMD support is required for SIMD fallback comparison.";
+#else
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter(3);
+
+  CollisionGeometry cg;
+
+  TaperedCapsule jointCapsule;
+  jointCapsule.parent = 0;
+  jointCapsule.length = 1.0f;
+  jointCapsule.radius = Eigen::Vector2f(0.25f, 0.25f);
+  cg.push_back(jointCapsule);
+
+  CollisionEllipsoid worldEllipsoid;
+  worldEllipsoid.parent = kInvalidIndex;
+  worldEllipsoid.transformation.translation = Eigen::Vector3f(0.5f, 0.45f, 0.0f);
+  worldEllipsoid.radii = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(worldEllipsoid);
+
+  const Character character(
+      baseCharacter.skeleton,
+      baseCharacter.parameterTransform,
+      baseCharacter.parameterLimits,
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &cg);
+
+  CollisionErrorFunctionT<T> errfBase(character, true);
+  SimdCollisionErrorFunctionT<T> errfSimd(character);
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> mp = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> skelState(transform.apply(mp), character.skeleton);
+
+  const double errBase = errfBase.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_GT(errBase, 0.0);
+  const double errSimd = errfSimd.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_NEAR(errBase, errSimd, 1e-10);
+  VALIDATE_IDENTICAL(T, errfBase, errfSimd, character.skeleton, transform, mp.v);
+#endif
+}
+
+// Verify scalar-fallback equivalence with MULTIPLE ellipsoids in a single character. Complements
+// SimdCollisionErrorFunctionEllipsoidFallbackIsSame (single ellipsoid) by exercising the fallback
+// path when several non-capsule primitives are present in the collision geometry.
+TYPED_TEST(
+    Momentum_ErrorFunctionsTest,
+    SimdCollisionErrorFunctionMultipleEllipsoidsFallbackIsSame) {
+#ifndef MOMENTUM_ENABLE_SIMD
+  GTEST_SKIP() << "SIMD support is required for SIMD fallback comparison.";
+#else
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter(3);
+
+  CollisionGeometry cg;
+
+  TaperedCapsule jointCapsule;
+  jointCapsule.parent = 0;
+  jointCapsule.length = 1.0f;
+  jointCapsule.radius = Eigen::Vector2f(0.25f, 0.25f);
+  cg.push_back(jointCapsule);
+
+  CollisionEllipsoid ellipsoidA;
+  ellipsoidA.parent = kInvalidIndex;
+  ellipsoidA.transformation.translation = Eigen::Vector3f(0.5f, 0.45f, 0.0f);
+  ellipsoidA.radii = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(ellipsoidA);
+
+  CollisionEllipsoid ellipsoidB;
+  ellipsoidB.parent = kInvalidIndex;
+  ellipsoidB.transformation.translation = Eigen::Vector3f(-0.5f, 0.45f, 0.0f);
+  ellipsoidB.radii = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(ellipsoidB);
+
+  const Character character(
+      baseCharacter.skeleton,
+      baseCharacter.parameterTransform,
+      baseCharacter.parameterLimits,
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &cg);
+
+  CollisionErrorFunctionT<T> errfBase(character, true);
+  SimdCollisionErrorFunctionT<T> errfSimd(character);
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> mp = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> skelState(transform.apply(mp), character.skeleton);
+
+  const double errBase = errfBase.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_GT(errBase, 0.0);
+  const double errSimd = errfSimd.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_NEAR(errBase, errSimd, 1e-10);
+  VALIDATE_IDENTICAL(T, errfBase, errfSimd, character.skeleton, transform, mp.v);
+#endif
+}
+
 // Verify that the SIMD version of the collision error function is at least as fast as the
 // multithreaded versions. Disabled by default because it's too slow to run in CI.
 TEST(Momentum_ErrorFunctions, DISABLED_SimdCollisionErrorFunctionIsFaster) {
