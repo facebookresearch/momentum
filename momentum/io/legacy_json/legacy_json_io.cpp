@@ -464,6 +464,10 @@ nlohmann::json momentumCollisionToLegacy(const CollisionGeometry& collision) {
     } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
       primitiveJson["type"] = "ellipsoid";
       primitiveJson["radii"] = eigenToJsonArray(primitive.ellipsoidRadii);
+    } else {
+      MT_THROW(
+          "Unsupported collision primitive type {} while writing legacy JSON collision geometry",
+          static_cast<int>(primitive.type));
     }
 
     legacyCollision.push_back(primitiveJson);
