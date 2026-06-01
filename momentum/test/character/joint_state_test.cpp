@@ -9,6 +9,7 @@
 
 #include "momentum/character/joint_state.h"
 #include "momentum/math/constants.h"
+#include "momentum/math/random.h"
 
 using namespace momentum;
 
@@ -36,6 +37,7 @@ class JointStateTest : public testing::Test {
 
   JointType joint;
   JointVectorType parameters = JointVectorType::Zero();
+  Random<> rng{12345};
 };
 
 using Types = testing::Types<float, double>;
@@ -624,18 +626,17 @@ TYPED_TEST(JointStateTest, Scaling) {
 TYPED_TEST(JointStateTest, ToAffine3) {
   using JointStateType = typename TestFixture::JointStateType;
   using Vector3Type = typename TestFixture::Vector3Type;
-  using QuaternionType = typename TestFixture::QuaternionType;
   using Affine3Type = typename Eigen::Transform<TypeParam, 3, Eigen::Affine>;
 
   JointStateType state;
 
   // Set up the state with specific values
   state.localTransform.translation = Vector3Type(1, 2, 3);
-  state.localTransform.rotation = QuaternionType::UnitRandom();
+  state.localTransform.rotation = this->rng.template uniformQuaternion<TypeParam>();
   state.localTransform.scale = 2.0;
 
   state.transform.translation = Vector3Type(4, 5, 6);
-  state.transform.rotation = QuaternionType::UnitRandom();
+  state.transform.rotation = this->rng.template uniformQuaternion<TypeParam>();
   state.transform.scale = 3.0;
 
   // Get the Affine3 representation
@@ -717,11 +718,11 @@ TYPED_TEST(JointStateTest, AllAccessorMethods) {
 
   // Set up the state with specific values
   state.localTransform.translation = Vector3Type(1, 2, 3);
-  state.localTransform.rotation = QuaternionType::UnitRandom();
+  state.localTransform.rotation = this->rng.template uniformQuaternion<TypeParam>();
   state.localTransform.scale = 2.0;
 
   state.transform.translation = Vector3Type(4, 5, 6);
-  state.transform.rotation = QuaternionType::UnitRandom();
+  state.transform.rotation = this->rng.template uniformQuaternion<TypeParam>();
   state.transform.scale = 3.0;
 
   // Test all const accessor methods by using a const reference
@@ -745,7 +746,7 @@ TYPED_TEST(JointStateTest, AllAccessorMethods) {
   EXPECT_FLOAT_EQ(constState.quatZ(), state.transform.rotation.z());
 
   // Test all non-const accessor methods
-  QuaternionType newLocalRotation = QuaternionType::UnitRandom();
+  QuaternionType newLocalRotation = this->rng.template uniformQuaternion<TypeParam>();
   Vector3Type newLocalTranslation = Vector3Type(7, 8, 9);
   TypeParam newLocalScale = 4.0;
 
@@ -757,7 +758,7 @@ TYPED_TEST(JointStateTest, AllAccessorMethods) {
   EXPECT_TRUE(state.localTransform.translation.isApprox(newLocalTranslation));
   EXPECT_FLOAT_EQ(state.localTransform.scale, newLocalScale);
 
-  QuaternionType newRotation = QuaternionType::UnitRandom();
+  QuaternionType newRotation = this->rng.template uniformQuaternion<TypeParam>();
   Vector3Type newTranslation = Vector3Type(10, 11, 12);
   TypeParam newScale = 5.0;
 
