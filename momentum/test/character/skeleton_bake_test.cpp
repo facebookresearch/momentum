@@ -48,6 +48,7 @@ void activateSomeBakeableParams(const Character& c, ModelParametersT<T>& mp) {
 }
 
 TYPED_TEST(BakeTest, Geometry) {
+  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   // Build a character with both scale & blend-shape capabilities

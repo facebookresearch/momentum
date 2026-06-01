@@ -28,7 +28,7 @@ std::vector<Eigen::Vector3<T>> createRandomVertices(size_t count) {
   std::vector<Eigen::Vector3<T>> vertices;
   vertices.reserve(count);
   for (size_t i = 0; i < count; ++i) {
-    vertices.push_back(Eigen::Vector3<T>::Random());
+    vertices.push_back(uniform<Eigen::Vector3<T>>(T(-1), T(1)));
   }
   return vertices;
 }
@@ -37,12 +37,13 @@ std::vector<Eigen::Vector3<T>> createRandomVertices(size_t count) {
 template <typename T>
 BlendWeightsT<T> createRandomBlendWeights(size_t count) {
   BlendWeightsT<T> weights;
-  weights.v = VectorX<T>::Random(count);
+  weights.v = uniform<VectorX<T>>(count, T(-1), T(1));
   return weights;
 }
 
 // Tests for BlendShapeBase
 TEST(BlendShapeTest, BlendShapeBaseConstruction) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -55,6 +56,7 @@ TEST(BlendShapeTest, BlendShapeBaseConstruction) {
 }
 
 TEST(BlendShapeTest, BlendShapeBaseSetShapeVector) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -76,6 +78,7 @@ TEST(BlendShapeTest, BlendShapeBaseSetShapeVector) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeBaseComputeDeltas) {
+  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
@@ -117,6 +120,7 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseComputeDeltas) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeBaseApplyDeltas) {
+  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
@@ -161,6 +165,7 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseApplyDeltas) {
 
 // Tests for BlendShape
 TEST(BlendShapeTest, BlendShapeConstruction) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -185,6 +190,7 @@ TEST(BlendShapeTest, BlendShapeConstruction) {
 }
 
 TEST(BlendShapeTest, BlendShapeSetBaseShape) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -208,6 +214,7 @@ TEST(BlendShapeTest, BlendShapeSetBaseShape) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeComputeShape) {
+  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
@@ -267,6 +274,7 @@ TYPED_TEST(BlendShapeTest, BlendShapeComputeShape) {
 }
 
 TEST(BlendShapeTest, BlendShapeEstimateCoefficients) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -284,7 +292,7 @@ TEST(BlendShapeTest, BlendShapeEstimateCoefficients) {
   }
 
   // Create known blend weights
-  VectorXf knownCoefficients = VectorXf::Random(numShapes);
+  auto knownCoefficients = uniform<VectorXf>(numShapes, -1.f, 1.f);
   BlendWeightsT<float> blendWeights;
   blendWeights.v = knownCoefficients;
 
@@ -317,6 +325,7 @@ TEST(BlendShapeTest, BlendShapeEstimateCoefficients) {
 }
 
 TEST(BlendShapeTest, BlendShapeSetShapeVector) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -357,6 +366,7 @@ TEST(BlendShapeTest, BlendShapeSetShapeVector) {
 }
 
 TEST(BlendShapeTest, BlendShapeIsApprox) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -400,6 +410,7 @@ TEST(BlendShapeTest, BlendShapeIsApprox) {
 
 // Test edge cases
 TEST(BlendShapeTest, EdgeCases) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test with empty base shape and no shape vectors
   BlendShape emptyBlendShape;
   EXPECT_EQ(emptyBlendShape.modelSize(), 0);
@@ -433,6 +444,7 @@ TEST(BlendShapeTest, EdgeCases) {
 
 // Test error cases
 TEST(BlendShapeTest, ErrorCases) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -455,7 +467,7 @@ TEST(BlendShapeTest, ErrorCases) {
 
   // Test with blend weights that have more coefficients than shape vectors
   BlendWeightsT<float> tooManyWeights;
-  tooManyWeights.v = VectorXf::Random(numShapes + 1);
+  tooManyWeights.v = uniform<VectorXf>(numShapes + 1, -1.f, 1.f);
 
   // This should trigger an assertion failure, but we can't test that directly in gtest
   // Just documenting that this would be an error case
@@ -463,6 +475,7 @@ TEST(BlendShapeTest, ErrorCases) {
 
 // Test with different sizes
 TEST(BlendShapeTest, DifferentSizes) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test with a larger model
   const size_t largeModelSize = 1000;
   const size_t numShapes = 10;
@@ -485,6 +498,7 @@ TEST(BlendShapeTest, DifferentSizes) {
 }
 
 TEST(BlendShapeTest, BlendShapeNames) {
+  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
