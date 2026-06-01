@@ -68,6 +68,84 @@ struct UpdateTrackingCollider {
   }
 };
 
+// Build a double-branch skeleton (root → joint1 → joint2, root → joint3 → joint4) with a
+// scale_global parameter on the root, so:
+// 1. Both branches share the same scale_global parameter through the root.
+// 2. LCA(joint2, joint4) = root ≠ either parent, so a collision pair on the tip joints is
+//    not excluded as same/adjacent.
+// 3. Rotating joint1/joint3 around Z swings the tip joints (joint2/joint4) toward each other.
+// Used by the scale-gradient collision tests, which exercise the above-LCA shared-scale loop
+// and the per-side scale-correction term.
+std::pair<Skeleton, ParameterTransform> makeScalableDoubleBranchSkeletonAndTransform() {
+  Skeleton skeleton;
+  {
+    Joint root;
+    root.name = "root";
+    root.parent = kInvalidIndex;
+    root.preRotation = Eigen::Quaternionf::Identity();
+    root.translationOffset = Eigen::Vector3f::Zero();
+    skeleton.joints.push_back(root);
+
+    Joint j1;
+    j1.name = "joint1";
+    j1.parent = 0;
+    j1.preRotation = Eigen::Quaternionf::Identity();
+    j1.translationOffset = Eigen::Vector3f(0.0f, 0.5f, 0.0f);
+    skeleton.joints.push_back(j1);
+
+    Joint j2;
+    j2.name = "joint2";
+    j2.parent = 1;
+    j2.preRotation = Eigen::Quaternionf::Identity();
+    j2.translationOffset = Eigen::Vector3f(0.0f, 0.5f, 0.0f);
+    skeleton.joints.push_back(j2);
+
+    Joint j3;
+    j3.name = "joint3";
+    j3.parent = 0;
+    j3.preRotation = Eigen::Quaternionf::Identity();
+    j3.translationOffset = Eigen::Vector3f(0.0f, -0.5f, 0.0f);
+    skeleton.joints.push_back(j3);
+
+    Joint j4;
+    j4.name = "joint4";
+    j4.parent = 3;
+    j4.preRotation = Eigen::Quaternionf::Identity();
+    j4.translationOffset = Eigen::Vector3f(0.0f, -0.5f, 0.0f);
+    skeleton.joints.push_back(j4);
+  }
+
+  // Parameter transform: root 6-DOF + scale_global + joint1_rz + joint3_rz
+  ParameterTransform pt;
+  const auto numJointParams = skeleton.joints.size() * kParametersPerJoint;
+  pt.name = {
+      "root_tx",
+      "root_ty",
+      "root_tz",
+      "root_rx",
+      "root_ry",
+      "root_rz",
+      "scale_global",
+      "joint1_rz",
+      "joint3_rz"};
+  pt.offsets = Eigen::VectorXf::Zero(numJointParams);
+  pt.transform.resize(numJointParams, static_cast<int>(pt.name.size()));
+  std::vector<Eigen::Triplet<float>> triplets;
+  triplets.emplace_back(0 * kParametersPerJoint + 0, 0, 1.0f); // root_tx
+  triplets.emplace_back(0 * kParametersPerJoint + 1, 1, 1.0f); // root_ty
+  triplets.emplace_back(0 * kParametersPerJoint + 2, 2, 1.0f); // root_tz
+  triplets.emplace_back(0 * kParametersPerJoint + 3, 3, 1.0f); // root_rx
+  triplets.emplace_back(0 * kParametersPerJoint + 4, 4, 1.0f); // root_ry
+  triplets.emplace_back(0 * kParametersPerJoint + 5, 5, 1.0f); // root_rz
+  triplets.emplace_back(0 * kParametersPerJoint + 6, 6, 1.0f); // scale_global
+  triplets.emplace_back(1 * kParametersPerJoint + 5, 7, 1.0f); // joint1_rz
+  triplets.emplace_back(3 * kParametersPerJoint + 5, 8, 1.0f); // joint3_rz
+  pt.transform.setFromTriplets(triplets.begin(), triplets.end());
+  pt.activeJointParams = pt.computeActiveJointParams();
+
+  return {skeleton, pt};
+}
+
 } // namespace
 
 TEST(Momentum_ErrorFunctionsTest, SDFCollisionError_UpdatesCollidersBeforeRestPoseFiltering) {
@@ -319,7 +397,11 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, EllipsoidCollisionError_ProducesError) {
       baseCharacter.skinWeights.get(),
       &cg);
 
-  CollisionErrorFunctionT<T> errorFunction(character, false);
+  // Default rest-pose filtering (matches the always-filtering stateless function so the
+  // two stay identical). The single skeleton-capsule + world-fixed ellipsoid pair is kept
+  // regardless of the flag: isValidCollisionPair short-circuits world-fixed pairs as valid
+  // before the rest-pose-overlap check.
+  CollisionErrorFunctionT<T> errorFunction(character);
   CollisionErrorFunctionStatelessT<T> errorFunctionStateless(character);
   const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
   const ModelParametersT<T> zeroParams =
@@ -336,7 +418,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, EllipsoidCollisionError_ProducesError) {
   ASSERT_EQ(debugInfo.size(), 1);
   EXPECT_GT(debugInfo[0].overlap, 0.0);
 
-  Random<>::GetSingleton().setSeed(TestFixture::kTestSeed);
+  // The fixture already seeds the singleton RNG in SetUp(); no per-test re-seed needed.
   size_t numTestedPoses = 0;
   for (size_t iTrial = 0; iTrial < 10; ++iTrial) {
     const ModelParametersT<T> mp = uniform<VectorX<T>>(
@@ -386,76 +468,8 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, EllipsoidCollisionError_ProducesError) {
 TYPED_TEST(Momentum_ErrorFunctionsTest, CapsuleCollisionError_ScaleGradient) {
   using T = typename TestFixture::Type;
 
-  // Build a double-branch skeleton: root at origin, each branch has 2 joints.
-  // Joint1/3 are children of root at (0, ±0.5, 0). Joint2/4 are grandchildren
-  // at (0, ±0.5, 0) relative to their parents. At rest, joint2 is at (0, 1, 0)
-  // and joint4 is at (0, -1, 0). Rotating joint1/joint3 around Z can swing
-  // joint2/joint4 toward each other.
-  Skeleton skeleton;
-  {
-    Joint root;
-    root.name = "root";
-    root.parent = kInvalidIndex;
-    root.preRotation = Eigen::Quaternionf::Identity();
-    root.translationOffset = Eigen::Vector3f::Zero();
-    skeleton.joints.push_back(root);
-
-    Joint j1;
-    j1.name = "joint1";
-    j1.parent = 0;
-    j1.preRotation = Eigen::Quaternionf::Identity();
-    j1.translationOffset = Eigen::Vector3f(0.0f, 0.5f, 0.0f);
-    skeleton.joints.push_back(j1);
-
-    Joint j2;
-    j2.name = "joint2";
-    j2.parent = 1;
-    j2.preRotation = Eigen::Quaternionf::Identity();
-    j2.translationOffset = Eigen::Vector3f(0.0f, 0.5f, 0.0f);
-    skeleton.joints.push_back(j2);
-
-    Joint j3;
-    j3.name = "joint3";
-    j3.parent = 0;
-    j3.preRotation = Eigen::Quaternionf::Identity();
-    j3.translationOffset = Eigen::Vector3f(0.0f, -0.5f, 0.0f);
-    skeleton.joints.push_back(j3);
-
-    Joint j4;
-    j4.name = "joint4";
-    j4.parent = 3;
-    j4.preRotation = Eigen::Quaternionf::Identity();
-    j4.translationOffset = Eigen::Vector3f(0.0f, -0.5f, 0.0f);
-    skeleton.joints.push_back(j4);
-  }
-
-  // Parameter transform: root 6-DOF + scale_global + joint1_rz + joint3_rz
-  ParameterTransform pt;
-  const auto numJointParams = skeleton.joints.size() * kParametersPerJoint;
-  pt.name = {
-      "root_tx",
-      "root_ty",
-      "root_tz",
-      "root_rx",
-      "root_ry",
-      "root_rz",
-      "scale_global",
-      "joint1_rz",
-      "joint3_rz"};
-  pt.offsets = Eigen::VectorXf::Zero(numJointParams);
-  pt.transform.resize(numJointParams, static_cast<int>(pt.name.size()));
-  std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0 * kParametersPerJoint + 0, 0, 1.0f); // root_tx
-  triplets.emplace_back(0 * kParametersPerJoint + 1, 1, 1.0f); // root_ty
-  triplets.emplace_back(0 * kParametersPerJoint + 2, 2, 1.0f); // root_tz
-  triplets.emplace_back(0 * kParametersPerJoint + 3, 3, 1.0f); // root_rx
-  triplets.emplace_back(0 * kParametersPerJoint + 4, 4, 1.0f); // root_ry
-  triplets.emplace_back(0 * kParametersPerJoint + 5, 5, 1.0f); // root_rz
-  triplets.emplace_back(0 * kParametersPerJoint + 6, 6, 1.0f); // scale_global
-  triplets.emplace_back(1 * kParametersPerJoint + 5, 7, 1.0f); // joint1_rz
-  triplets.emplace_back(3 * kParametersPerJoint + 5, 8, 1.0f); // joint3_rz
-  pt.transform.setFromTriplets(triplets.begin(), triplets.end());
-  pt.activeJointParams = pt.computeActiveJointParams();
+  // Double-branch skeleton with a shared scale_global on the root (see helper for layout).
+  auto [skeleton, pt] = makeScalableDoubleBranchSkeletonAndTransform();
 
   // Two capsules on the tip joints (joint2 and joint4), with ±15° tilt around X
   // so they aren't parallel. Uniform radius 0.3, length 0.5.
@@ -511,6 +525,105 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, CapsuleCollisionError_ScaleGradient) {
     const T numThreshold = std::is_same_v<T, float> ? T(0.06) : TestFixture::getNumThreshold();
     // Disable numerical Jacobian check for float — the multi-joint chain with large
     // rotations exceeds float finite-difference accuracy. Double validates correctness.
+    const bool checkJac = !std::is_same_v<T, float>;
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunction,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/checkJac);
+    TEST_GRADIENT_AND_JACOBIAN(
+        T,
+        &errorFunctionStateless,
+        mp,
+        character,
+        numThreshold,
+        TestFixture::getJacThreshold(),
+        /*checkJacError=*/true,
+        /*checkJacobian=*/checkJac);
+    VALIDATE_IDENTICAL(
+        T, errorFunction, errorFunctionStateless, character.skeleton, transform, mp.v);
+    ++numTestedPoses;
+  }
+  ASSERT_GE(numTestedPoses, 3) << "Too few poses produced collisions";
+}
+
+// Centered-primitive analog of CapsuleCollisionError_ScaleGradient.
+//
+// The capsule scale-gradient test only swings two capsules; both collision sides go through
+// the capsule (segment) derivative path. This test attaches a centered primitive to a scalable
+// tip joint (joint4) that shares the root's scale_global with the colliding capsule (joint2),
+// so the finite-difference gradient/Jacobian checks exercise the parts of the joint-chain
+// derivative that a world-fixed primitive never reaches:
+// 1. the primitive-side accumulateGradient/JacobianAlongChain loop (translation + rotation
+//    derivatives for the centered primitive's own joint chain),
+// 2. the per-side scale-correction term using the centered-primitive support radius, and
+// 3. the above-LCA shared-scale loop with a centered primitive present.
+//
+// An ISOTROPIC sphere (CollisionEllipsoid with equal radii) is used on purpose: the analytical
+// derivatives are Gauss-Newton (contact normal held fixed). For a sphere the support radius is
+// direction-independent and the contact normal is the center-to-center line, so Gauss-Newton is
+// near-exact and the finite-difference check actually verifies the chain and the scale
+// correction. An anisotropic ellipsoid's support point slides over the curved surface as the
+// pose changes, which Gauss-Newton does not model, so its FD gradient legitimately diverges
+// from the analytical one (see EllipsoidCollisionError_ProducesError, which keeps a loose
+// tolerance for exactly this reason). Anisotropy adds no new derivative code — the scale
+// correction is generic in result.radiusA — so the sphere fully covers the centered-primitive
+// path without that approximation noise.
+TYPED_TEST(Momentum_ErrorFunctionsTest, CenteredPrimitiveCollisionError_ScaleGradient) {
+  using T = typename TestFixture::Type;
+
+  // Double-branch skeleton with a shared scale_global on the root (see helper for layout).
+  auto [skeleton, pt] = makeScalableDoubleBranchSkeletonAndTransform();
+
+  // Capsule on joint2 (radius 0.3, length 0.5, +15° tilt) colliding with an isotropic sphere on
+  // joint4, large enough that the folded-in tips overlap like the two-capsule test does.
+  CollisionGeometry cg;
+  {
+    TaperedCapsule cap1;
+    cap1.parent = 2;
+    cap1.length = 0.5f;
+    cap1.radius = Eigen::Vector2f(0.3f, 0.3f);
+    cap1.transformation.rotation =
+        Eigen::Quaternionf(Eigen::AngleAxisf(0.2618f, Eigen::Vector3f::UnitX())); // +15° tilt
+    cg.push_back(cap1);
+
+    CollisionEllipsoid sphere;
+    sphere.parent = 4;
+    sphere.radii = Eigen::Vector3f(0.5f, 0.5f, 0.5f);
+    cg.push_back(sphere);
+  }
+
+  const Character character(skeleton, pt, ParameterLimits(), LocatorList(), nullptr, nullptr, &cg);
+
+  CollisionErrorFunctionT<T> errorFunction(character);
+  CollisionErrorFunctionStatelessT<T> errorFunctionStateless(character);
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+
+  // Fold joint1/joint3 inward to swing the tips toward each other, then add small perturbation.
+  ModelParametersT<T> baseMp = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  baseMp.v[7] = static_cast<T>(2.5); // joint1_rz: fold arm1 inward toward center
+  baseMp.v[8] = static_cast<T>(-2.5); // joint3_rz: fold arm2 inward toward center
+
+  size_t numTestedPoses = 0;
+  for (size_t iTrial = 0; iTrial < 20; ++iTrial) {
+    ModelParametersT<T> mp = baseMp;
+    const auto perturbation = uniform<VectorX<T>>(
+        transform.numAllModelParameters(), static_cast<T>(-0.1), static_cast<T>(0.1));
+    mp.v += perturbation;
+    const SkeletonStateT<T> state(transform.apply(mp), character.skeleton);
+    if (errorFunction.getError(mp, state, MeshStateT<T>()) <= 0.0) {
+      continue;
+    }
+    SCOPED_TRACE("trial=" + std::to_string(iTrial));
+    // Relax float and skip the numerical Jacobian for float: the large fold angles (≈2.5 rad)
+    // amplify float cancellation in finite differences. Double validates correctness, and the
+    // sphere's Gauss-Newton-exact contact keeps it within the standard double tolerance.
+    const T numThreshold = std::is_same_v<T, float> ? T(0.06) : TestFixture::getNumThreshold();
     const bool checkJac = !std::is_same_v<T, float>;
     TEST_GRADIENT_AND_JACOBIAN(
         T,
