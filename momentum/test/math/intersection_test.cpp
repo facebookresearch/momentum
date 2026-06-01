@@ -9,6 +9,7 @@
 
 #include "momentum/math/intersection.h"
 #include "momentum/math/mesh.h"
+#include "momentum/math/random.h"
 
 using namespace momentum;
 
@@ -85,18 +86,19 @@ TEST(Momentum_Mesh_Intersection, MeshSelfIntersection) {
 }
 
 TEST(Momentum_Mesh_Intersection, MeshSelfIntersectionRandom) {
-  // Construct non-empty mesh
+  // Construct non-empty mesh with deterministic random data so the brute-force vs BVH
+  // comparison below is reproducible across runs and platforms.
+  Random<> rng{12345};
   constexpr size_t numVerts = 1000;
   constexpr size_t numFaces = 100;
   std::vector<Vector3<float>> vertices(numVerts);
   std::vector<Vector3<int32_t>> faces(numFaces);
   for (size_t iVert = 0; iVert < numVerts; iVert++) {
-    vertices[iVert] = Vector3<float>::Random();
+    vertices[iVert] = rng.uniform<Vector3<float>>(-1.0f, 1.0f);
   }
   for (size_t iFace = 0; iFace < numFaces; iFace++) {
-    faces[iFace] = Vector3<int32_t>::Random();
     for (size_t d = 0; d < 3; d++) {
-      faces[iFace][d] = faces[iFace][d] % numVerts;
+      faces[iFace][d] = static_cast<int32_t>(rng.uniform<int32_t>(0, numVerts - 1));
     }
   }
   Mesh mesh = {

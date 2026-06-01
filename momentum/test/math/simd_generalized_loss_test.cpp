@@ -61,18 +61,18 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct SimdGeneralizedLossTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(SimdGeneralizedLossTest, Types);
 
 template <typename T>
-void testSimdGeneralizedLoss(T alpha, T c, T absTol, T relTol) {
-  Random rand;
+void testSimdGeneralizedLoss(Random<>& rng, T alpha, T c, T absTol, T relTol) {
   const SimdGeneralizedLossT<T> loss(alpha, c);
 
   const T stepSize = Eps<T>(5e-3f, 5e-5);
   // make sure the value is greater than stepSize for finite difference test
-  const Packet<T> sqrError = rand.uniform<T>(stepSize, 1e3);
+  const Packet<T> sqrError = rng.template uniform<T>(stepSize, 1e3);
   const Packet<T> refDeriv = loss.deriv(sqrError);
 
   // finite difference test
@@ -105,14 +105,13 @@ void testSimdGeneralizedLoss(T alpha, T c, T absTol, T relTol) {
 TYPED_TEST(SimdGeneralizedLossTest, ValueFunctionTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const T relTol = 1e-5;
 
   // Test L2 loss
   {
     SCOPED_TRACE("L2 Value");
     SimdGeneralizedLossT<T> loss(GeneralizedLossT<T>::kL2, T(2));
-    Packet<T> sqrError = rand.uniform<T>(0, 10);
+    Packet<T> sqrError = this->rng.template uniform<T>(0, 10);
     Packet<T> expected = sqrError * T(0.25); // invC2 = 1/(2*2) = 0.25
     Packet<T> actual = loss.value(sqrError);
     EXPECT_TRUE(drjit::all(AreAlmostEqualRelative(actual, expected, relTol)));
@@ -122,7 +121,7 @@ TYPED_TEST(SimdGeneralizedLossTest, ValueFunctionTest) {
   {
     SCOPED_TRACE("L1 Value");
     SimdGeneralizedLossT<T> loss(GeneralizedLossT<T>::kL1, T(2));
-    Packet<T> sqrError = rand.uniform<T>(0, 10);
+    Packet<T> sqrError = this->rng.template uniform<T>(0, 10);
     Packet<T> expected = drjit::sqrt(sqrError * T(0.25) + T(1)) - T(1);
     Packet<T> actual = loss.value(sqrError);
     EXPECT_TRUE(drjit::all(AreAlmostEqualRelative(actual, expected, relTol)));
@@ -132,7 +131,7 @@ TYPED_TEST(SimdGeneralizedLossTest, ValueFunctionTest) {
   {
     SCOPED_TRACE("Cauchy Value");
     SimdGeneralizedLossT<T> loss(GeneralizedLossT<T>::kCauchy, T(2));
-    Packet<T> sqrError = rand.uniform<T>(0, 10);
+    Packet<T> sqrError = this->rng.template uniform<T>(0, 10);
     Packet<T> expected = drjit::log(T(0.5) * sqrError * T(0.25) + T(1));
     Packet<T> actual = loss.value(sqrError);
     EXPECT_TRUE(drjit::all(AreAlmostEqualRelative(actual, expected, relTol)));
@@ -146,7 +145,7 @@ TYPED_TEST(SimdGeneralizedLossTest, ValueFunctionTest) {
     SCOPED_TRACE("General Value");
     const T alpha = T(4);
     SimdGeneralizedLossT<T> loss(alpha, T(2));
-    Packet<T> sqrError = rand.uniform<T>(0, 10);
+    Packet<T> sqrError = this->rng.template uniform<T>(0, 10);
     // General case formula from the implementation
     Packet<T> expected = (drjit::pow(
                             sqrError * T(0.25) / std::fabs(alpha - T(2)) + T(1),
@@ -200,7 +199,6 @@ TYPED_TEST(SimdGeneralizedLossTest, EdgeCaseTest) {
 TYPED_TEST(SimdGeneralizedLossTest, CompareWithScalarTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const T absTol = Eps<T>(1e-5f, 1e-10);
   const T relTol = 1e-5;
 
@@ -216,13 +214,13 @@ TYPED_TEST(SimdGeneralizedLossTest, CompareWithScalarTest) {
   for (const T& alpha : alphaValues) {
     SCOPED_TRACE("Alpha = " + std::to_string(alpha));
 
-    const T c = rand.uniform<T>(0.5, 5);
+    const T c = this->rng.template uniform<T>(0.5, 5);
     SimdGeneralizedLossT<T> simdLoss(alpha, c);
     GeneralizedLossT<T> scalarLoss(alpha, c);
 
     // Test with various squared errors
     for (int i = 0; i < 10; ++i) {
-      T sqrError = rand.uniform<T>(0, 10);
+      T sqrError = this->rng.template uniform<T>(0, 10);
       compareWithScalar(simdLoss, scalarLoss, sqrError, absTol, relTol);
     }
 
@@ -237,31 +235,40 @@ TYPED_TEST(SimdGeneralizedLossTest, CompareWithScalarTest) {
 TYPED_TEST(SimdGeneralizedLossTest, SpecialCaseTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const size_t nTrials = 20;
   const T absTol = Eps<T>(5e-1f, 5e-5);
   const T relTol = 0.01; // 1% relative tolerance
   for (size_t i = 0; i < nTrials; ++i) {
     {
       SCOPED_TRACE("L2");
-      testSimdGeneralizedLoss<T>(SimdGeneralizedLossd::kL2, rand.uniform<T>(1, 10), absTol, relTol);
+      testSimdGeneralizedLoss<T>(
+          this->rng, SimdGeneralizedLossd::kL2, this->rng.template uniform<T>(1, 10), absTol, relTol);
     }
 
     {
       SCOPED_TRACE("L1");
-      testSimdGeneralizedLoss<T>(SimdGeneralizedLossd::kL1, rand.uniform<T>(1, 10), absTol, relTol);
+      testSimdGeneralizedLoss<T>(
+          this->rng, SimdGeneralizedLossd::kL1, this->rng.template uniform<T>(1, 10), absTol, relTol);
     }
 
     {
       SCOPED_TRACE("Cauchy");
       testSimdGeneralizedLoss<T>(
-          SimdGeneralizedLossd::kCauchy, rand.uniform<T>(1, 10), absTol, relTol);
+          this->rng,
+          SimdGeneralizedLossd::kCauchy,
+          this->rng.template uniform<T>(1, 10),
+          absTol,
+          relTol);
     }
 
     {
       SCOPED_TRACE("Welsch");
       testSimdGeneralizedLoss<T>(
-          SimdGeneralizedLossd::kWelsch, rand.uniform<T>(1, 10), absTol, relTol);
+          this->rng,
+          SimdGeneralizedLossd::kWelsch,
+          this->rng.template uniform<T>(1, 10),
+          absTol,
+          relTol);
     }
   }
 }
@@ -269,15 +276,19 @@ TYPED_TEST(SimdGeneralizedLossTest, SpecialCaseTest) {
 TYPED_TEST(SimdGeneralizedLossTest, GeneralCaseTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const size_t nTrials = 100;
   const T absTol = Eps<T>(1e-3f, 2e-6);
-  const T relTol = 0.02;  // 2% relative tolerance
+  const T relTol = 0.02; // 2% relative tolerance
 
   // Test an extreme case with relaxed tolerances due to numerical precision limits
-  testSimdGeneralizedLoss<T>(10, 10, Eps<T>(5e-3f, 1e-5), 0.05);  // 5% relative tolerance
+  testSimdGeneralizedLoss<T>(this->rng, 10, 10, Eps<T>(5e-3f, 1e-5), 0.05); // 5% relative tolerance
 
   for (size_t i = 0; i < nTrials; ++i) {
-    testSimdGeneralizedLoss<T>(rand.uniform<T>(-1e6, 9), rand.uniform<T>(0, 9), absTol, relTol);
+    // Draw alpha and c into named locals in a fixed order; the order of evaluation of function
+    // arguments is unspecified in C++, so drawing both inline would make the values
+    // compiler-dependent and defeat cross-platform reproducibility.
+    const T alpha = this->rng.template uniform<T>(-1e6, 9);
+    const T c = this->rng.template uniform<T>(0, 9);
+    testSimdGeneralizedLoss<T>(this->rng, alpha, c, absTol, relTol);
   }
 }
