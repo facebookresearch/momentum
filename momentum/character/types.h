@@ -130,17 +130,6 @@ struct JointParametersT : public EigenStrongType<JointParametersT, ::Eigen::Vect
   using t = ::Eigen::VectorX<T>;
   using EigenStrongType<JointParametersT, t>::EigenStrongType;
   using EigenStrongType<JointParametersT, t>::operator=;
-
-  [[nodiscard]] static ::Eigen::Vector3<T> fromRotationMatrix(const ::Eigen::Matrix3<T>& m) {
-    // From JointState::set(), we can see that localRotation = rz * ry * rx, but the order in
-    // JointParameters is [rx, ry, rz]. Therefore, the conversion should be
-    // rotationMatrixToEulerZYX.reverse.
-    return rotationMatrixToEulerZYX(m).reverse();
-  }
-
-  [[nodiscard]] static ::Eigen::Vector3<T> fromQuaternion(const ::Eigen::Quaternion<T>& q) {
-    return fromRotationMatrix(q.toRotationMatrix());
-  }
 };
 
 using JointParameters = JointParametersT<float>;
