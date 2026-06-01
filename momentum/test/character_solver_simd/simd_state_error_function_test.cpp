@@ -23,6 +23,7 @@
 using namespace momentum;
 
 TEST(Momentum_ErrorFunctions, SimdStateFunctionIsSame) {
+  Random<>::GetSingleton().setSeed(12345);
   const bool verbose = false;
 
   const Character character = createTestCharacter();
