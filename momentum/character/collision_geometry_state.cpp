@@ -24,6 +24,7 @@ void CollisionGeometryStateT<T>::update(
   type.resize(numElements);
   orientation.resize(numElements);
   ellipsoidRadii.resize(numElements);
+  boxHalfExtents.resize(numElements);
 
   // TODO: This per-primitive loop is independent across iterations and could be parallelized.
   for (size_t i = 0; i < numElements; ++i) {
@@ -41,6 +42,7 @@ void CollisionGeometryStateT<T>::update(
       radius[i].noalias() = primitive.radius.cast<T>() * parentTransform.scale;
       delta[i] = radius[i][1] - radius[i][0];
       ellipsoidRadii[i].setZero();
+      boxHalfExtents[i].setZero();
       continue;
     }
 
@@ -49,6 +51,7 @@ void CollisionGeometryStateT<T>::update(
       radius[i].setZero();
       delta[i] = T(0);
       ellipsoidRadii[i].noalias() = primitive.ellipsoidRadii.cast<T>() * parentTransform.scale;
+      boxHalfExtents[i].setZero();
       continue;
     }
 
@@ -57,6 +60,8 @@ void CollisionGeometryStateT<T>::update(
       radius[i].setZero();
       delta[i] = T(0);
       ellipsoidRadii[i].setZero();
+      boxHalfExtents[i].noalias() = primitive.boxHalfExtents.cast<T>() * parentTransform.scale;
+      continue;
     }
   }
 }

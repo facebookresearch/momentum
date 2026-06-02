@@ -227,6 +227,55 @@ TYPED_TEST(
 #endif
 }
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, SimdCollisionErrorFunctionBoxFallbackIsSame) {
+#ifndef MOMENTUM_ENABLE_SIMD
+  GTEST_SKIP() << "SIMD support is required for SIMD fallback comparison.";
+#else
+  using T = typename TestFixture::Type;
+
+  const Character baseCharacter = createTestCharacter(3);
+
+  CollisionGeometry cg;
+
+  TaperedCapsule jointCapsule;
+  jointCapsule.parent = 0;
+  jointCapsule.length = 1.0f;
+  jointCapsule.radius = Eigen::Vector2f(0.25f, 0.25f);
+  cg.push_back(jointCapsule);
+
+  CollisionBox worldBox;
+  worldBox.parent = kInvalidIndex;
+  worldBox.transformation.translation = Eigen::Vector3f(0.5f, 0.45f, 0.0f);
+  worldBox.halfExtents = Eigen::Vector3f(0.2f, 0.3f, 0.2f);
+  cg.push_back(worldBox);
+
+  const Character character(
+      baseCharacter.skeleton,
+      baseCharacter.parameterTransform,
+      baseCharacter.parameterLimits,
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &cg);
+
+  // Match the SIMD function's internal scalar fallback (kFilterRestPoseOverlaps=true) and the
+  // sibling ellipsoid fallback tests so the reference builds the same valid-pair list. (Inert
+  // here because the box is world-fixed, but keeps the comparison robust if it is reparented.)
+  CollisionErrorFunctionT<T> errfBase(character, true);
+  SimdCollisionErrorFunctionT<T> errfSimd(character);
+
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> mp = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> skelState(transform.apply(mp), character.skeleton);
+
+  const double errBase = errfBase.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_GT(errBase, 0.0);
+  const double errSimd = errfSimd.getError(mp, skelState, MeshStateT<T>());
+  EXPECT_NEAR(errBase, errSimd, 1e-10);
+  VALIDATE_IDENTICAL(T, errfBase, errfSimd, character.skeleton, transform, mp.v);
+#endif
+}
+
 // Verify that the SIMD version of the collision error function is at least as fast as the
 // multithreaded versions. Disabled by default because it's too slow to run in CI.
 TEST(Momentum_ErrorFunctions, DISABLED_SimdCollisionErrorFunctionIsFaster) {

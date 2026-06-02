@@ -36,7 +36,7 @@ struct CollisionGeometryStateT {
   //
   // Note: radius[0] and radius[1] can be different.
 
-  /// Capsule's origin in global coordinates.
+  /// Primitive origin/center in global coordinates.
   std::vector<Vector3<T>> origin;
 
   /// Capsule's direction vector (representing the X-axis) in global coordinates.
@@ -57,6 +57,9 @@ struct CollisionGeometryStateT {
   /// Scaled ellipsoid radii in global coordinates.
   std::vector<Vector3<T>> ellipsoidRadii;
 
+  /// Scaled box half extents in global coordinates.
+  std::vector<Vector3<T>> boxHalfExtents;
+
   /// Updates the state based on a given skeleton state and collision geometry.
   void update(const SkeletonStateT<T>& skeletonState, const CollisionGeometry& collisionGeometry);
 };
@@ -67,7 +70,7 @@ struct CollisionOverlapResultT {
   /// Distance between the primitive center features used by the narrow phase.
   T distance = T(0);
 
-  /// Parametric closest-point positions. Capsule entries use [0, 1]; ellipsoid entries use 0.
+  /// Parametric closest-point positions. Capsule entries use [0, 1]; centered primitives use 0.
   Vector2<T> closestPoints = Vector2<T>::Zero();
 
   /// Amount of overlap, positive when colliding.
@@ -168,43 +171,81 @@ template <typename T>
   return radii.cwiseAbs().cwiseProduct(localDirection).norm();
 }
 
-/// Test overlap between a tapered capsule and an oriented ellipsoid.
+/// Return the support radius of an oriented box along a unit world-space direction.
+template <typename T>
+[[nodiscard]] T boxRadiusAlongDirection(
+    const Quaternion<T>& orientation,
+    const Vector3<T>& halfExtents,
+    const Vector3<T>& unitDirection) {
+  const Vector3<T> localDirection = orientation.inverse() * unitDirection;
+  return halfExtents.cwiseAbs().dot(localDirection.cwiseAbs());
+}
+
+/// Return whether the primitive is represented by a center, orientation, and support radius.
+[[nodiscard]] inline bool isCenteredPrimitive(CollisionPrimitiveType type) {
+  return type == CollisionPrimitiveType::Ellipsoid || type == CollisionPrimitiveType::Box;
+}
+
+/// Return the support radius of an ellipsoid or box along a unit world-space direction.
+template <typename T>
+[[nodiscard]] T centeredPrimitiveRadiusAlongDirection(
+    CollisionPrimitiveType type,
+    const Quaternion<T>& orientation,
+    const Vector3<T>& ellipsoidRadii,
+    const Vector3<T>& boxHalfExtents,
+    const Vector3<T>& unitDirection) {
+  if (type == CollisionPrimitiveType::Ellipsoid) {
+    return ellipsoidRadiusAlongDirection(orientation, ellipsoidRadii, unitDirection);
+  }
+  if (type == CollisionPrimitiveType::Box) {
+    return boxRadiusAlongDirection(orientation, boxHalfExtents, unitDirection);
+  }
+  return T(0);
+}
+
+/// Test overlap between a tapered capsule and an oriented centered primitive.
 ///
-/// The function fills the closest capsule parameter, support radii, distance,
-/// and signed overlap used by the solver when a non-degenerate overlap is found.
+/// The centered primitive can be an ellipsoid or box. The function fills the
+/// closest capsule parameter, support radii, distance, and signed overlap used
+/// by the solver when a non-degenerate overlap is found.
 ///
 /// @param capsuleOrigin Origin of the capsule segment in world space.
 /// @param capsuleDirection Direction vector from capsule start to end in world space.
 /// @param capsuleRadii Radii at the capsule start and end points.
 /// @param capsuleDelta Signed difference between capsule radii (`capsuleRadii[1] -
 ///   capsuleRadii[0]`).
-/// @param ellipsoidCenter Ellipsoid center in world space.
-/// @param ellipsoidOrientation Ellipsoid orientation in world space.
-/// @param ellipsoidRadii Ellipsoid radii along its local axes.
-/// @param outDistance Output: distance between the capsule centerline point and ellipsoid center.
+/// @param primitiveType Centered primitive type; must be ellipsoid or box.
+/// @param primitiveCenter Primitive center in world space.
+/// @param primitiveOrientation Primitive orientation in world space.
+/// @param ellipsoidRadii Ellipsoid radii along its local axes; ignored for boxes.
+/// @param boxHalfExtents Box half extents along its local axes; ignored for ellipsoids.
+/// @param outDistance Output: distance between the capsule centerline point and primitive center.
 /// @param outCapsuleParam Output: parametric position in [0, 1] along the capsule segment.
 /// @param outOverlap Output: signed overlap amount, positive when overlapping.
 /// @param outCapsuleRadius Output: capsule support radius at `outCapsuleParam`.
-/// @param outEllipsoidRadius Output: ellipsoid support radius along the contact direction.
-/// @return True when the capsule and ellipsoid overlap with a non-degenerate contact direction.
+/// @param outPrimitiveRadius Output: primitive support radius along the contact direction.
+/// @return True when the capsule and centered primitive overlap with a non-degenerate contact
+///   direction.
 template <typename T>
-[[nodiscard]] bool overlapsCapsuleEllipsoid(
+[[nodiscard]] bool overlapsCapsuleCenteredPrimitive(
     const Vector3<T>& capsuleOrigin,
     const Vector3<T>& capsuleDirection,
     const Vector2<T>& capsuleRadii,
     T capsuleDelta,
-    const Vector3<T>& ellipsoidCenter,
-    const Quaternion<T>& ellipsoidOrientation,
+    CollisionPrimitiveType primitiveType,
+    const Vector3<T>& primitiveCenter,
+    const Quaternion<T>& primitiveOrientation,
     const Vector3<T>& ellipsoidRadii,
+    const Vector3<T>& boxHalfExtents,
     T& outDistance,
     T& outCapsuleParam,
     T& outOverlap,
     T& outCapsuleRadius,
-    T& outEllipsoidRadius) {
+    T& outPrimitiveRadius) {
   outCapsuleParam =
-      closestPointOnSegmentParameter(capsuleOrigin, capsuleDirection, ellipsoidCenter);
+      closestPointOnSegmentParameter(capsuleOrigin, capsuleDirection, primitiveCenter);
   const Vector3<T> capsulePoint = capsuleOrigin + capsuleDirection * outCapsuleParam;
-  const Vector3<T> separation = capsulePoint - ellipsoidCenter;
+  const Vector3<T> separation = capsulePoint - primitiveCenter;
   outDistance = separation.norm();
   if (outDistance < Eps<T>(1e-8, 1e-17)) {
     return false;
@@ -212,16 +253,17 @@ template <typename T>
 
   const Vector3<T> normal = separation / outDistance;
   outCapsuleRadius = capsuleRadii[0] + outCapsuleParam * capsuleDelta;
-  outEllipsoidRadius = ellipsoidRadiusAlongDirection(ellipsoidOrientation, ellipsoidRadii, normal);
-  outOverlap = outCapsuleRadius + outEllipsoidRadius - outDistance;
+  outPrimitiveRadius = centeredPrimitiveRadiusAlongDirection(
+      primitiveType, primitiveOrientation, ellipsoidRadii, boxHalfExtents, normal);
+  outOverlap = outCapsuleRadius + outPrimitiveRadius - outDistance;
   return outOverlap > T(0);
 }
 
 /// Determines whether two collision primitives overlap.
 ///
-/// Capsule-capsule pairs use the existing closest-segment query. Ellipsoid pairs use a support
-/// radius along the center-feature separation direction, which gives a stable contact normal for
-/// the solver and preserves the same overlap convention used by tapered capsules.
+/// Capsule-capsule pairs use the existing closest-segment query. Centered primitive pairs use a
+/// support radius along the center-feature separation direction, which gives a stable contact
+/// normal for the solver and preserves the same overlap convention used by tapered capsules.
 ///
 /// @param collisionState World-space collision state for `collisionGeometry`.
 /// @param collisionGeometry Collision primitives corresponding to `collisionState`.
@@ -267,16 +309,17 @@ template <typename T>
     return true;
   }
 
-  if (typeA == CollisionPrimitiveType::TaperedCapsule &&
-      typeB == CollisionPrimitiveType::Ellipsoid) {
-    if (!overlapsCapsuleEllipsoid(
+  if (typeA == CollisionPrimitiveType::TaperedCapsule && isCenteredPrimitive(typeB)) {
+    if (!overlapsCapsuleCenteredPrimitive(
             collisionState.origin[indexA],
             collisionState.direction[indexA],
             collisionState.radius[indexA],
             collisionState.delta[indexA],
+            typeB,
             collisionState.origin[indexB],
             collisionState.orientation[indexB],
             collisionState.ellipsoidRadii[indexB],
+            collisionState.boxHalfExtents[indexB],
             result.distance,
             result.closestPoints[0],
             result.overlap,
@@ -292,16 +335,17 @@ template <typename T>
     return true;
   }
 
-  if (typeA == CollisionPrimitiveType::Ellipsoid &&
-      typeB == CollisionPrimitiveType::TaperedCapsule) {
-    if (!overlapsCapsuleEllipsoid(
+  if (isCenteredPrimitive(typeA) && typeB == CollisionPrimitiveType::TaperedCapsule) {
+    if (!overlapsCapsuleCenteredPrimitive(
             collisionState.origin[indexB],
             collisionState.direction[indexB],
             collisionState.radius[indexB],
             collisionState.delta[indexB],
+            typeA,
             collisionState.origin[indexA],
             collisionState.orientation[indexA],
             collisionState.ellipsoidRadii[indexA],
+            collisionState.boxHalfExtents[indexA],
             result.distance,
             result.closestPoints[1],
             result.overlap,
@@ -317,7 +361,7 @@ template <typename T>
     return true;
   }
 
-  if (typeA == CollisionPrimitiveType::Ellipsoid && typeB == CollisionPrimitiveType::Ellipsoid) {
+  if (isCenteredPrimitive(typeA) && isCenteredPrimitive(typeB)) {
     const Vector3<T> separation = collisionState.origin[indexA] - collisionState.origin[indexB];
     result.distance = separation.norm();
     if (result.distance < Eps<T>(1e-8, 1e-17)) {
@@ -325,10 +369,18 @@ template <typename T>
     }
 
     const Vector3<T> normal = separation / result.distance;
-    result.radiusA = ellipsoidRadiusAlongDirection(
-        collisionState.orientation[indexA], collisionState.ellipsoidRadii[indexA], normal);
-    result.radiusB = ellipsoidRadiusAlongDirection(
-        collisionState.orientation[indexB], collisionState.ellipsoidRadii[indexB], normal);
+    result.radiusA = centeredPrimitiveRadiusAlongDirection(
+        typeA,
+        collisionState.orientation[indexA],
+        collisionState.ellipsoidRadii[indexA],
+        collisionState.boxHalfExtents[indexA],
+        normal);
+    result.radiusB = centeredPrimitiveRadiusAlongDirection(
+        typeB,
+        collisionState.orientation[indexB],
+        collisionState.ellipsoidRadii[indexB],
+        collisionState.boxHalfExtents[indexB],
+        normal);
     result.overlap = result.radiusA + result.radiusB - result.distance;
     result.positionA = collisionState.origin[indexA];
     result.positionB = collisionState.origin[indexB];
@@ -391,6 +443,28 @@ void updateEllipsoidAabb(
   aabb.aabb.max() = center + halfExtents;
 }
 
+/// Updates an axis-aligned bounding box to encompass an oriented box.
+///
+/// Uses the exact OBB half-extent h_i = sum_j |R_ij| * halfExtents_j (L1 over the
+/// rotated extents). For a box this is the tight, correct AABB; do NOT switch it to
+/// the ellipsoid L2 row-norm, which would under-bound the box and miss collisions.
+///
+/// @param aabb The bounding box to update
+/// @param center Center of the box
+/// @param orientation Orientation of the box
+/// @param halfExtents Half extents along the box's local axes
+template <typename T>
+void updateBoxAabb(
+    axel::BoundingBox<T>& aabb,
+    const Vector3<T>& center,
+    const Quaternion<T>& orientation,
+    const Vector3<T>& halfExtents) {
+  const Eigen::Matrix<T, 3, 3> absRotation = orientation.toRotationMatrix().cwiseAbs();
+  const Vector3<T> aabbHalfExtents = absRotation * halfExtents.cwiseAbs();
+  aabb.aabb.min() = center - aabbHalfExtents;
+  aabb.aabb.max() = center + aabbHalfExtents;
+}
+
 /// Updates an axis-aligned bounding box to encompass a collision primitive.
 template <typename T>
 void updateAabb(
@@ -412,6 +486,15 @@ void updateAabb(
         collisionState.origin[index],
         collisionState.orientation[index],
         collisionState.ellipsoidRadii[index]);
+    return;
+  }
+
+  if (collisionState.type[index] == CollisionPrimitiveType::Box) {
+    updateBoxAabb(
+        aabb,
+        collisionState.origin[index],
+        collisionState.orientation[index],
+        collisionState.boxHalfExtents[index]);
   }
 }
 
