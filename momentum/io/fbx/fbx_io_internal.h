@@ -228,7 +228,15 @@ inline void createCollisionGeometryNodes(
   const auto& collisions = *character.collision;
   for (auto i = 0u; i < collisions.size(); ++i) {
     const auto& collision = collisions[i];
-    if (!collision.isTaperedCapsule()) {
+
+    bool supportedPrimitive = false;
+    switch (collision.type) {
+      case CollisionPrimitiveType::TaperedCapsule:
+      case CollisionPrimitiveType::Ellipsoid:
+        supportedPrimitive = true;
+        break;
+    }
+    if (!supportedPrimitive) {
       MT_LOGW(
           "Skipping unsupported collision primitive type {} while writing FBX collision geometry",
           static_cast<int>(collision.type));
@@ -241,12 +249,25 @@ inline void createCollisionGeometryNodes(
     collisionNode->SetNodeAttribute(nullNodeAttr);
 
     ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxBoolDT, "Col_Type").Set(true);
-    ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Length")
-        .Set(collision.length);
-    ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Rad_A")
-        .Set(collision.radius[0]);
-    ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Rad_B")
-        .Set(collision.radius[1]);
+    if (collision.type == CollisionPrimitiveType::TaperedCapsule) {
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxStringDT, "Col_Shape")
+          .Set(FbxString("tapered_capsule"));
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Length")
+          .Set(collision.length);
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Rad_A")
+          .Set(collision.radius[0]);
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Rad_B")
+          .Set(collision.radius[1]);
+    } else if (collision.type == CollisionPrimitiveType::Ellipsoid) {
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxStringDT, "Col_Shape")
+          .Set(FbxString("ellipsoid"));
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Radii_X")
+          .Set(collision.ellipsoidRadii.x());
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Radii_Y")
+          .Set(collision.ellipsoidRadii.y());
+      ::fbxsdk::FbxProperty::Create(collisionNode, ::fbxsdk::FbxFloatDT, "Radii_Z")
+          .Set(collision.ellipsoidRadii.z());
+    }
 
     collisionNode->LclTranslation.Set(FbxVector4(
         collision.transformation.translation.x(),

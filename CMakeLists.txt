@@ -951,6 +951,7 @@ if(MOMENTUM_BUILD_TESTING)
     SOURCES_VARS io_legacy_json_test_sources
     LINK_LIBRARIES
       character_test_helpers
+      character_test_helpers_gtest
       io_legacy_json
       io_test_helper
     ENV
