@@ -189,21 +189,17 @@ template <typename T>
     int axis0,
     int axis1,
     int axis2,
-    EulerConvention convention = EulerConvention::Intrinsic);
+    EulerConvention convention);
 
 /// An optimized version of rotationMatrixToEuler(m, 0, 1, 2, convention) or
 /// rotationMatrixToEuler(m, 2, 1, 0, convention).reverse().
 template <typename T>
-[[nodiscard]] Vector3<T> rotationMatrixToEulerXYZ(
-    const Matrix3<T>& m,
-    EulerConvention convention = EulerConvention::Intrinsic);
+[[nodiscard]] Vector3<T> rotationMatrixToEulerXYZ(const Matrix3<T>& m, EulerConvention convention);
 
 /// An optimized version of rotationMatrixToEuler(m, 2, 1, 0, convention) or
 /// rotationMatrixToEuler(m, 0, 1, 2, convention).reverse().
 template <typename T>
-[[nodiscard]] Vector3<T> rotationMatrixToEulerZYX(
-    const Matrix3<T>& m,
-    EulerConvention convention = EulerConvention::Intrinsic);
+[[nodiscard]] Vector3<T> rotationMatrixToEulerZYX(const Matrix3<T>& m, EulerConvention convention);
 
 /// Fits a two-axis Euler rotation to a rotation matrix
 ///
@@ -250,7 +246,7 @@ template <typename T>
     int axis0,
     int axis1,
     int axis2,
-    EulerConvention convention = EulerConvention::Intrinsic);
+    EulerConvention convention);
 
 /// Converts Euler angles to rotation matrix
 ///
@@ -266,21 +262,21 @@ template <typename T>
     int axis0,
     int axis1,
     int axis2,
-    EulerConvention convention = EulerConvention::Intrinsic);
+    EulerConvention convention);
 
 /// An optimized version of eulerToRotationMatrix(angles, 0, 1, 2, convention) or
 /// eulerToRotationMatrix(angles.reverse(), 2, 1, 0, convention).
 template <typename T>
 [[nodiscard]] Matrix3<T> eulerXYZToRotationMatrix(
     const Vector3<T>& angles,
-    EulerConvention convention = EulerConvention::Intrinsic);
+    EulerConvention convention);
 
 /// An optimized version of eulerToRotationMatrix(angles, 2, 1, 0, convention) or
 /// eulerToRotationMatrix(angles.reverse(), 0, 1, 2, convention).
 template <typename T>
 [[nodiscard]] Matrix3<T> eulerZYXToRotationMatrix(
     const Vector3<T>& angles,
-    EulerConvention convention = EulerConvention::Intrinsic);
+    EulerConvention convention);
 
 /// Converts a quaternion to Euler angles using the Extrinsic XYZ convention
 ///

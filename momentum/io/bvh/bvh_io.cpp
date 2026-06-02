@@ -340,7 +340,8 @@ void mapBvhJointToModelParams(
     // Decompose to Momentum's ZYX convention: [rx, ry, rz]
     // Momentum applies rotations as R = Rz(rz) * Ry(ry) * Rx(rx)
     // so we decompose as ZYX and reverse to get [rx, ry, rz]
-    const Vector3f eulerAngles = rotationMatrixToEulerZYX(q.toRotationMatrix()).reverse();
+    const Vector3f eulerAngles =
+        rotationMatrixToEulerZYX(q.toRotationMatrix(), EulerConvention::Intrinsic).reverse();
     motion(jointParamBase + RX, frameIdx) = eulerAngles[0];
     motion(jointParamBase + RY, frameIdx) = eulerAngles[1];
     motion(jointParamBase + RZ, frameIdx) = eulerAngles[2];
