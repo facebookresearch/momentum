@@ -94,6 +94,8 @@ std::unique_ptr<CollisionGeometry> scale(
       primitive.length *= scale;
     } else if (primitive.type == CollisionPrimitiveType::Ellipsoid) {
       primitive.ellipsoidRadii *= scale;
+    } else if (primitive.type == CollisionPrimitiveType::Box) {
+      primitive.boxHalfExtents *= scale;
     }
   }
 

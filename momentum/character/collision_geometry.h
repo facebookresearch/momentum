@@ -22,6 +22,7 @@ namespace momentum {
 enum class CollisionPrimitiveType : uint8_t {
   TaperedCapsule,
   Ellipsoid,
+  Box,
 };
 
 /// Tapered capsule collision geometry for character collision detection.
@@ -112,6 +113,42 @@ struct CollisionEllipsoidT {
   }
 };
 
+/// Box collision geometry for character collision detection.
+///
+/// Defined by a transformation and three local-space half extents along the primitive's axes.
+template <typename S>
+struct CollisionBoxT {
+  using Scalar = S;
+
+  /// Transformation defining the box center and orientation relative to the parent.
+  TransformT<S> transformation;
+
+  /// Half extents along the local x, y, and z axes.
+  Vector3<S> halfExtents;
+
+  /// Parent joint to which the geometry is attached.
+  size_t parent;
+
+  CollisionBoxT()
+      : transformation(TransformT<S>()), halfExtents(Vector3<S>::Zero()), parent(kInvalidIndex) {
+    // Empty
+  }
+
+  /// Checks if the current box is approximately equal to another.
+  [[nodiscard]] bool isApprox(const CollisionBoxT& other, const S& tol = Eps<S>(1e-4f, 1e-10))
+      const {
+    if (!transformation.isApprox(other.transformation, tol)) {
+      return false;
+    }
+
+    if (!halfExtents.isApprox(other.halfExtents, tol)) {
+      return false;
+    }
+
+    return parent == other.parent;
+  }
+};
+
 /// Collision geometry primitive.
 ///
 /// The tapered capsule fields are kept directly on the primitive so existing code that
@@ -133,6 +170,9 @@ struct CollisionPrimitiveT {
   /// Radii along the local axes of an ellipsoid.
   Vector3<S> ellipsoidRadii;
 
+  /// Half extents along the local axes of a box.
+  Vector3<S> boxHalfExtents;
+
   /// Parent joint to which the geometry is attached.
   size_t parent;
 
@@ -144,6 +184,7 @@ struct CollisionPrimitiveT {
         transformation(TransformT<S>()),
         radius(Vector2<S>::Zero()),
         ellipsoidRadii(Vector3<S>::Zero()),
+        boxHalfExtents(Vector3<S>::Zero()),
         parent(kInvalidIndex),
         length(S(0)) {
     // Empty
@@ -155,6 +196,7 @@ struct CollisionPrimitiveT {
         transformation(capsule.transformation),
         radius(capsule.radius),
         ellipsoidRadii(Vector3<S>::Zero()),
+        boxHalfExtents(Vector3<S>::Zero()),
         parent(capsule.parent),
         length(capsule.length) {}
 
@@ -164,7 +206,18 @@ struct CollisionPrimitiveT {
         transformation(ellipsoid.transformation),
         radius(Vector2<S>::Zero()),
         ellipsoidRadii(ellipsoid.radii),
+        boxHalfExtents(Vector3<S>::Zero()),
         parent(ellipsoid.parent),
+        length(S(0)) {}
+
+  /// Creates a collision primitive from a box.
+  /* implicit */ CollisionPrimitiveT(const CollisionBoxT<S>& box)
+      : type(CollisionPrimitiveType::Box),
+        transformation(box.transformation),
+        radius(Vector2<S>::Zero()),
+        ellipsoidRadii(Vector3<S>::Zero()),
+        boxHalfExtents(box.halfExtents),
+        parent(box.parent),
         length(S(0)) {}
 
   /// Assigns tapered capsule data to this primitive.
@@ -173,6 +226,7 @@ struct CollisionPrimitiveT {
     transformation = capsule.transformation;
     radius = capsule.radius;
     ellipsoidRadii.setZero();
+    boxHalfExtents.setZero();
     parent = capsule.parent;
     length = capsule.length;
     return *this;
@@ -184,7 +238,20 @@ struct CollisionPrimitiveT {
     transformation = ellipsoid.transformation;
     radius.setZero();
     ellipsoidRadii = ellipsoid.radii;
+    boxHalfExtents.setZero();
     parent = ellipsoid.parent;
+    length = S(0);
+    return *this;
+  }
+
+  /// Assigns box data to this primitive.
+  CollisionPrimitiveT& operator=(const CollisionBoxT<S>& box) {
+    type = CollisionPrimitiveType::Box;
+    transformation = box.transformation;
+    radius.setZero();
+    ellipsoidRadii.setZero();
+    boxHalfExtents = box.halfExtents;
+    parent = box.parent;
     length = S(0);
     return *this;
   }
@@ -197,6 +264,11 @@ struct CollisionPrimitiveT {
   /// Returns true when this primitive stores ellipsoid data.
   [[nodiscard]] bool isEllipsoid() const {
     return type == CollisionPrimitiveType::Ellipsoid;
+  }
+
+  /// Returns true when this primitive stores box data.
+  [[nodiscard]] bool isBox() const {
+    return type == CollisionPrimitiveType::Box;
   }
 
   /// Converts this primitive to a tapered capsule.
@@ -234,6 +306,20 @@ struct CollisionPrimitiveT {
     return ellipsoid;
   }
 
+  /// Converts this primitive to a box.
+  ///
+  /// Requires `isBox()` so unhandled primitive types fail at the call site
+  /// instead of returning unrelated stale data.
+  [[nodiscard]] CollisionBoxT<S> toBox() const {
+    MT_CHECK(
+        isBox(), "Collision primitive type {} does not store box data", static_cast<int>(type));
+    CollisionBoxT<S> box;
+    box.transformation = transformation;
+    box.halfExtents = boxHalfExtents;
+    box.parent = parent;
+    return box;
+  }
+
   /// Checks if the current primitive is approximately equal to another.
   [[nodiscard]] bool isApprox(const CollisionPrimitiveT& other, const S& tol = Eps<S>(1e-4f, 1e-10))
       const {
@@ -251,6 +337,10 @@ struct CollisionPrimitiveT {
 
     if (type == CollisionPrimitiveType::Ellipsoid) {
       return ellipsoidRadii.isApprox(other.ellipsoidRadii, tol);
+    }
+
+    if (type == CollisionPrimitiveType::Box) {
+      return boxHalfExtents.isApprox(other.boxHalfExtents, tol);
     }
 
     return false;

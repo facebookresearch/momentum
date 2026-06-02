@@ -183,6 +183,25 @@ using CollisionEllipsoidd_const_u = ::std::unique_ptr<const CollisionEllipsoidd>
 using CollisionEllipsoidd_const_w = ::std::weak_ptr<const CollisionEllipsoidd>;
 
 template <typename T>
+struct CollisionBoxT;
+using CollisionBox = CollisionBoxT<float>;
+using CollisionBoxd = CollisionBoxT<double>;
+
+using CollisionBox_p = ::std::shared_ptr<CollisionBox>;
+using CollisionBox_u = ::std::unique_ptr<CollisionBox>;
+using CollisionBox_w = ::std::weak_ptr<CollisionBox>;
+using CollisionBox_const_p = ::std::shared_ptr<const CollisionBox>;
+using CollisionBox_const_u = ::std::unique_ptr<const CollisionBox>;
+using CollisionBox_const_w = ::std::weak_ptr<const CollisionBox>;
+
+using CollisionBoxd_p = ::std::shared_ptr<CollisionBoxd>;
+using CollisionBoxd_u = ::std::unique_ptr<CollisionBoxd>;
+using CollisionBoxd_w = ::std::weak_ptr<CollisionBoxd>;
+using CollisionBoxd_const_p = ::std::shared_ptr<const CollisionBoxd>;
+using CollisionBoxd_const_u = ::std::unique_ptr<const CollisionBoxd>;
+using CollisionBoxd_const_w = ::std::weak_ptr<const CollisionBoxd>;
+
+template <typename T>
 struct JointT;
 using Joint = JointT<float>;
 using Jointd = JointT<double>;
