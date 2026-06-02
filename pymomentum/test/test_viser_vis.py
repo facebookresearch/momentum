@@ -5,11 +5,14 @@
 
 # pyre-strict
 
+import math
 import unittest
+from typing import Any
 
 import numpy as np
 import pymomentum.geometry as geo  # @manual=:geometry
 import pymomentum.geometry_test_utils as test_utils  # @manual=:geometry_test_utils
+from pymomentum.quaternion_np import to_rotation_matrix_assume_normalized
 
 try:
     import viser
@@ -27,12 +30,16 @@ except ImportError:
 # still letting BUCK exercise the suite normally (viser is a hard dep there).
 if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suite
     from pymomentum.viser_vis import (
+        _CollisionBoxHandles,
+        _CollisionCapsuleHandles,
+        _CollisionEllipsoidHandles,
         _max_nonzero_skin_influences,
         _normalize_param_limit,
         _normalize_skin_weights,
         _xyzw_to_wxyz,
         add_character,
         add_character_param_sliders,
+        add_collision_geometry,
         add_joints,
         add_log_panel,
         add_mesh,
@@ -40,6 +47,7 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
         CharacterHandles,
         remove_character,
         update_character,
+        update_collision_geometry,
         update_joints,
         update_mesh,
         update_skinned_mesh,
@@ -89,9 +97,64 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             skel_state[:, 7] = 1.0
             return character, skel_state
 
+        def _make_mixed_collision_character_and_skel_state(
+            self,
+        ) -> tuple[geo.Character, np.ndarray]:
+            """Build a character with one capsule, one ellipsoid, and one box.
+
+            Each primitive has an identity local transform and a distinct parent
+            joint, so its world placement is fully determined by that joint's
+            state. The skel_state gives each joint a distinct translation, an
+            identity rotation, and a distinct (non-unit) scale so parent-scale
+            paths are exercised and independently verifiable.
+            """
+            character, _ = self._make_character_and_skel_state()
+            character = character.with_collision_geometry(
+                [
+                    geo.TaperedCapsule(
+                        parent=0,
+                        transformation=np.eye(4, dtype=np.float32),
+                        radius=np.array([1.0, 2.0], dtype=np.float32),
+                        length=10.0,
+                    ),
+                    geo.Ellipsoid(
+                        parent=1,
+                        transformation=np.eye(4, dtype=np.float32),
+                        radii=np.array([3.0, 2.0, 1.0], dtype=np.float32),
+                    ),
+                    geo.Box(
+                        parent=2,
+                        transformation=np.eye(4, dtype=np.float32),
+                        half_extents=np.array([4.0, 3.0, 2.0], dtype=np.float32),
+                    ),
+                ]
+            )
+            self.assertEqual(len(character.collision_geometry), 3)
+            self.assertGreaterEqual(character.skeleton.size, 3)
+
+            skel_state = np.zeros((character.skeleton.size, 8), dtype=np.float32)
+            skel_state[:, 0] = np.arange(character.skeleton.size, dtype=np.float32)
+            skel_state[:, 6] = 1.0
+            skel_state[:, 7] = 1.0 + 0.5 * np.arange(
+                character.skeleton.size, dtype=np.float32
+            )
+            return character, skel_state
+
         def _posed_mesh(self, character: geo.Character) -> geo.Mesh:
             joint_params = np.zeros(character.skeleton.size * 7, dtype=np.float32)
             return character.pose_mesh(joint_params)
+
+        def _cleanup_collision_handles(self, root: Any, handles: list[Any]) -> None:
+            for primitive_handles in handles:
+                if isinstance(primitive_handles, _CollisionCapsuleHandles):
+                    primitive_handles.cylinder.remove()
+                    primitive_handles.start_sphere.remove()
+                    primitive_handles.end_sphere.remove()
+                elif isinstance(primitive_handles, _CollisionEllipsoidHandles):
+                    primitive_handles.ellipsoid.remove()
+                else:
+                    primitive_handles.box.remove()
+            root.remove()
 
         def _make_uncolored_character(self, character: geo.Character) -> geo.Character:
             mesh = geo.Mesh(
@@ -402,6 +465,213 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
             )
             remove_character(handles)
 
+        def test_add_collision_geometry_mixed_primitives(self) -> None:
+            character, skel_state = (
+                self._make_mixed_collision_character_and_skel_state()
+            )
+            ellipsoid_rotation = np.array(
+                [0.0, 0.0, np.sqrt(0.5), np.sqrt(0.5)], dtype=np.float32
+            )
+            box_rotation = np.array(
+                [np.sqrt(0.5), 0.0, 0.0, np.sqrt(0.5)], dtype=np.float32
+            )
+            skel_state[1, 3:7] = ellipsoid_rotation
+            skel_state[2, 3:7] = box_rotation
+            # scale=1.0 so scene units equal momentum units for easy verification.
+            root, handles = add_collision_geometry(
+                self.server, "mixed_collision", character, skel_state, scale=1.0
+            )
+            self.assertIsNotNone(root)
+            self.assertEqual(len(handles), 3)
+            self.assertIsInstance(handles[0], _CollisionCapsuleHandles)
+            self.assertIsInstance(handles[1], _CollisionEllipsoidHandles)
+            self.assertIsInstance(handles[2], _CollisionBoxHandles)
+
+            # Ellipsoid (parent joint 1, identity local transform): centered at
+            # the parent translation. The ellipsoid is a unit-sphere mesh whose
+            # vertices are baked to the per-axis half-sizes (radii scaled by the
+            # parent joint scale), so its per-axis extent equals those half-sizes.
+            ellipsoid = handles[1].ellipsoid
+            np.testing.assert_allclose(
+                np.asarray(ellipsoid.position), skel_state[1, :3], atol=1e-5
+            )
+            # The UV-sphere tessellation samples discrete longitudes, so the
+            # measured per-axis extent is at most the true half-size and within a
+            # couple percent of it; the proportions still encode the radii.
+            ellipsoid_extent = np.max(np.abs(np.asarray(ellipsoid.vertices)), axis=0)
+            expected_radii = np.array([3.0, 2.0, 1.0]) * skel_state[1, 7]
+            np.testing.assert_array_less(ellipsoid_extent, expected_radii + 1e-4)
+            np.testing.assert_allclose(ellipsoid_extent, expected_radii, rtol=0.02)
+            np.testing.assert_allclose(
+                np.asarray(ellipsoid.wxyz),
+                [ellipsoid_rotation[3], *ellipsoid_rotation[:3]],
+                atol=1e-5,
+            )
+
+            # Box (parent joint 2): centered at the parent translation, with
+            # full dimensions = 2 * half_extents * parent joint scale.
+            box = handles[2].box
+            np.testing.assert_allclose(
+                np.asarray(box.position), skel_state[2, :3], atol=1e-5
+            )
+            np.testing.assert_allclose(
+                np.asarray(box.dimensions),
+                np.array([8.0, 6.0, 4.0]) * skel_state[2, 7],
+                atol=1e-5,
+            )
+            np.testing.assert_allclose(
+                np.asarray(box.wxyz), [box_rotation[3], *box_rotation[:3]], atol=1e-5
+            )
+
+            self._cleanup_collision_handles(root, handles)
+
+        def test_update_collision_geometry_mixed_primitives(self) -> None:
+            character, skel_state = (
+                self._make_mixed_collision_character_and_skel_state()
+            )
+            _root, handles = add_collision_geometry(
+                self.server, "mixed_collision_update", character, skel_state, scale=1.0
+            )
+
+            ellipsoid = handles[1].ellipsoid
+            box = handles[2].box
+            ellipsoid_before = np.asarray(ellipsoid.position).copy()
+            box_before = np.asarray(box.position).copy()
+
+            # Shift every joint by a known amount; primitives must follow.
+            shift = 7.0
+            moved = skel_state.copy()
+            moved[:, 0] += shift
+            update_collision_geometry(handles, character, moved, scale=1.0)
+
+            np.testing.assert_allclose(
+                np.asarray(ellipsoid.position),
+                ellipsoid_before + np.array([shift, 0.0, 0.0]),
+                atol=1e-5,
+            )
+            np.testing.assert_allclose(
+                np.asarray(box.position),
+                box_before + np.array([shift, 0.0, 0.0]),
+                atol=1e-5,
+            )
+
+            self._cleanup_collision_handles(_root, handles)
+
+        def test_add_collision_geometry_world_space_ellipsoid_and_box(self) -> None:
+            # World-fixed (parent=-1) ellipsoid and box with non-identity local rotation
+            # and translation. Complements test_add_collision_geometry_mixed_primitives
+            # (which parents the primitives to joints): this exercises the identity-parent
+            # fallback in viser_vis._collision_primitive_world_transform (world = identity
+            # @ local, parent scale 1.0), which the parented test does not cover.
+            character, skel_state = self._make_character_and_skel_state()
+
+            ellipsoid_rotation = np.array(
+                [0.0, 0.0, np.sqrt(0.5), np.sqrt(0.5)], dtype=np.float32
+            )
+            box_rotation = np.array(
+                [np.sqrt(0.5), 0.0, 0.0, np.sqrt(0.5)], dtype=np.float32
+            )
+            ellipsoid_translation = np.array([3.0, 4.0, 5.0], dtype=np.float32)
+            box_translation = np.array([-1.0, -2.0, -3.0], dtype=np.float32)
+            ellipsoid_radii = np.array([3.0, 2.0, 1.0], dtype=np.float32)
+            box_half_extents = np.array([4.0, 3.0, 2.0], dtype=np.float32)
+
+            ellipsoid_transform = np.eye(4, dtype=np.float32)
+            ellipsoid_transform[:3, :3] = to_rotation_matrix_assume_normalized(
+                ellipsoid_rotation[None, :]
+            )[0]
+            ellipsoid_transform[:3, 3] = ellipsoid_translation
+            box_transform = np.eye(4, dtype=np.float32)
+            box_transform[:3, :3] = to_rotation_matrix_assume_normalized(
+                box_rotation[None, :]
+            )[0]
+            box_transform[:3, 3] = box_translation
+
+            character = character.with_collision_geometry(
+                [
+                    geo.Ellipsoid(
+                        parent=-1,
+                        transformation=ellipsoid_transform,
+                        radii=ellipsoid_radii,
+                    ),
+                    geo.Box(
+                        parent=-1,
+                        transformation=box_transform,
+                        half_extents=box_half_extents,
+                    ),
+                ]
+            )
+
+            # scale=1.0 so scene units equal momentum units for easy verification.
+            root, handles = add_collision_geometry(
+                self.server, "world_collision", character, skel_state, scale=1.0
+            )
+            self.assertEqual(len(handles), 2)
+            self.assertIsInstance(handles[0], _CollisionEllipsoidHandles)
+            self.assertIsInstance(handles[1], _CollisionBoxHandles)
+
+            # Identity parent transform: world center == local translation, the per-axis
+            # extent encodes the raw radii (parent scale 1.0), and the handle orientation
+            # equals the local rotation.
+            ellipsoid = handles[0].ellipsoid
+            np.testing.assert_allclose(
+                np.asarray(ellipsoid.position), ellipsoid_translation, atol=1e-5
+            )
+            ellipsoid_extent = np.max(np.abs(np.asarray(ellipsoid.vertices)), axis=0)
+            np.testing.assert_array_less(ellipsoid_extent, ellipsoid_radii + 1e-4)
+            np.testing.assert_allclose(ellipsoid_extent, ellipsoid_radii, rtol=0.02)
+            np.testing.assert_allclose(
+                np.asarray(ellipsoid.wxyz),
+                [ellipsoid_rotation[3], *ellipsoid_rotation[:3]],
+                atol=1e-5,
+            )
+
+            # Box: full dimensions = 2 * half_extents (parent joint scale 1.0).
+            box = handles[1].box
+            np.testing.assert_allclose(
+                np.asarray(box.position), box_translation, atol=1e-5
+            )
+            np.testing.assert_allclose(
+                np.asarray(box.dimensions), 2.0 * box_half_extents, atol=1e-5
+            )
+            np.testing.assert_allclose(
+                np.asarray(box.wxyz), [box_rotation[3], *box_rotation[:3]], atol=1e-5
+            )
+
+            self._cleanup_collision_handles(root, handles)
+
+        def test_add_character_includes_mixed_collision_geometry(self) -> None:
+            character, skel_state = (
+                self._make_mixed_collision_character_and_skel_state()
+            )
+            handles = add_character(
+                self.server,
+                "char_mixed_collision",
+                character,
+                skel_state,
+                collision_geometry=True,
+            )
+            self.assertEqual(len(handles.collision_handles), 3)
+            self.assertIsInstance(
+                handles.collision_handles[1], _CollisionEllipsoidHandles
+            )
+            self.assertIsInstance(handles.collision_handles[2], _CollisionBoxHandles)
+
+            box = handles.collision_handles[2].box
+            box_before = float(np.asarray(box.position)[0])
+            moved = skel_state.copy()
+            moved[:, 0] += 5.0
+            update_character(self.server, handles, character, moved)
+            expected_shift = 5.0 * 0.01  # default CM_TO_M scale
+            np.testing.assert_allclose(
+                float(np.asarray(box.position)[0]),
+                box_before + expected_shift,
+                atol=1e-5,
+            )
+
+            remove_character(handles)
+            self.assertEqual(handles.collision_handles, [])
+
         def test_xyzw_to_wxyz(self) -> None:
             # xyzw [0.1, 0.2, 0.3, 0.9] -> wxyz [0.9, 0.1, 0.2, 0.3]
             q_xyzw = np.array([0.1, 0.2, 0.3, 0.9])
@@ -417,8 +687,6 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                 _normalize_param_limit("root_tx", -1e35, 1e35), (-200.0, 200.0)
             )
             # Rotation params get clamped to ±π.
-            import math
-
             lo, hi = _normalize_param_limit("hip_rx", -1e35, 1e35)
             self.assertAlmostEqual(lo, -math.pi)
             self.assertAlmostEqual(hi, math.pi)
