@@ -393,6 +393,26 @@ void extractCollisionEllipsoid(
   collisionGeometry.push_back(ellipsoid);
 }
 
+void extractCollisionBox(
+    const ofbx::Object* node,
+    size_t parent,
+    CollisionGeometry& collisionGeometry) {
+  const double halfExtentsX = resolveDoubleProperty(*node, "half_extents_x");
+  const double halfExtentsY = resolveDoubleProperty(*node, "half_extents_y");
+  const double halfExtentsZ = resolveDoubleProperty(*node, "half_extents_z");
+
+  const auto xf = node->getLocalTransform();
+
+  CollisionBox box;
+  box.parent = parent;
+  box.halfExtents = Eigen::Vector3f(
+      static_cast<float>(halfExtentsX),
+      static_cast<float>(halfExtentsY),
+      static_cast<float>(halfExtentsZ));
+  box.transformation = toEigen(xf).cast<float>();
+  collisionGeometry.push_back(box);
+}
+
 void extractCollisionPrimitive(
     const ofbx::Object* node,
     size_t parent,
@@ -403,6 +423,10 @@ void extractCollisionPrimitive(
     if (equalsCaseInsensitive(shape, "ellipsoid") ||
         equalsCaseInsensitive(shape, "collision_ellipsoid")) {
       extractCollisionEllipsoid(node, parent, collisionGeometry);
+      return;
+    }
+    if (equalsCaseInsensitive(shape, "box") || equalsCaseInsensitive(shape, "collision_box")) {
+      extractCollisionBox(node, parent, collisionGeometry);
       return;
     }
     if (equalsCaseInsensitive(shape, "tapered_capsule") ||
