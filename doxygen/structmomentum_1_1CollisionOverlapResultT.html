@@ -108,7 +108,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a5eb7341c958bf3414e7feba28df9e3c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Distance between the primitive center features used by the narrow phase.  <br /></td></tr>
 <tr class="separator:a5eb7341c958bf3414e7feba28df9e3c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7914a5a2795ee4f6f612dfea21a596be" id="r_a7914a5a2795ee4f6f612dfea21a596be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#aee224074a9b2b9755e2a2befa8c731bb">Vector2</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionOverlapResultT.html#a7914a5a2795ee4f6f612dfea21a596be">closestPoints</a> = <a class="el" href="namespacemomentum.html#aee224074a9b2b9755e2a2befa8c731bb">Vector2</a>&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;::Zero()</td></tr>
-<tr class="memdesc:a7914a5a2795ee4f6f612dfea21a596be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parametric closest-point positions. Capsule entries use [0, 1]; ellipsoid entries use 0.  <br /></td></tr>
+<tr class="memdesc:a7914a5a2795ee4f6f612dfea21a596be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parametric closest-point positions. Capsule entries use [0, 1]; centered primitives use 0.  <br /></td></tr>
 <tr class="separator:a7914a5a2795ee4f6f612dfea21a596be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a395e9a610919190fd6cf7a0fa8a0b281" id="r_a395e9a610919190fd6cf7a0fa8a0b281"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionOverlapResultT.html#a395e9a610919190fd6cf7a0fa8a0b281">overlap</a> = <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>(0)</td></tr>
 <tr class="memdesc:a395e9a610919190fd6cf7a0fa8a0b281"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amount of overlap, positive when colliding.  <br /></td></tr>
@@ -130,7 +130,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
 struct momentum::CollisionOverlapResultT&lt; T &gt;</div><p>Narrow-phase collision information for a pair of primitives. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00066">66</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00069">69</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a7914a5a2795ee4f6f612dfea21a596be" name="a7914a5a2795ee4f6f612dfea21a596be"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7914a5a2795ee4f6f612dfea21a596be">&#9670;&#160;</a></span>closestPoints</h2>
@@ -146,11 +146,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Parametric closest-point positions. Capsule entries use [0, 1]; ellipsoid entries use 0. </p>
+<p>Parametric closest-point positions. Capsule entries use [0, 1]; centered primitives use 0. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00071">71</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00074">74</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -170,9 +170,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Distance between the primitive center features used by the narrow phase. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00068">68</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00071">71</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00387">momentum::CollisionErrorFunctionT&lt; T &gt;::getCollisionDebugInfo()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00387">momentum::CollisionErrorFunctionT&lt; T &gt;::getCollisionDebugInfo()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -192,9 +192,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Amount of overlap, positive when colliding. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00074">74</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00077">77</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00387">momentum::CollisionErrorFunctionT&lt; T &gt;::getCollisionDebugInfo()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00192">momentum::CollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00186">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00387">momentum::CollisionErrorFunctionT&lt; T &gt;::getCollisionDebugInfo()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00192">momentum::CollisionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00186">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getError()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -214,9 +214,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Center feature position for the first primitive. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00077">77</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00080">80</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -236,9 +236,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Center feature position for the second primitive. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00080">80</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00083">83</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -258,9 +258,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Effective radius of the first primitive along the contact direction. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00083">83</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00086">86</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -280,9 +280,9 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p>Effective radius of the second primitive along the contact direction. </p>
 
-<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00086">86</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00089">89</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__error__function_8cpp_source.html#l00228">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00213">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00298">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00280">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -295,7 +295,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CollisionOverlapResultT.html">CollisionOverlapResultT</a></li>
-    <li class="footer">Generated on Mon Jun 1 2026 22:42:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 2 2026 01:08:58 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

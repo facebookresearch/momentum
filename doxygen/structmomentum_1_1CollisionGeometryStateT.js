@@ -1,6 +1,7 @@
 var structmomentum_1_1CollisionGeometryStateT =
 [
     [ "update", "structmomentum_1_1CollisionGeometryStateT.html#ad21db757e7569020951383b801808b8a", null ],
+    [ "boxHalfExtents", "structmomentum_1_1CollisionGeometryStateT.html#a2dab8c19f548a3b4bd62172785554186", null ],
     [ "delta", "structmomentum_1_1CollisionGeometryStateT.html#aa10f2a1653fc6a3e0e1dc7a513019caf", null ],
     [ "direction", "structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105", null ],
     [ "ellipsoidRadii", "structmomentum_1_1CollisionGeometryStateT.html#af8770aa95fb1fe9c3929d22fe96cfb0b", null ],

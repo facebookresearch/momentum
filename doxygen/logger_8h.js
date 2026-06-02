@@ -1,5 +1,7 @@
 var logger_8h =
 [
+    [ "momentum::detail::CollisionEllipsoidLogData", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData" ],
+    [ "momentum::detail::CollisionBoxLogData", "structmomentum_1_1detail_1_1CollisionBoxLogData.html", "structmomentum_1_1detail_1_1CollisionBoxLogData" ],
     [ "logBvh", "logger_8h.html#a80fc2eb087f15d82aa39715882938f6e", null ],
     [ "logCharacter", "logger_8h.html#a547ceea561db038d9ca67063015664b6", null ],
     [ "logCollisionGeometry", "logger_8h.html#aa6c689587c0cb74df685faa78a8fd69a", null ],
@@ -13,5 +15,7 @@ var logger_8h =
     [ "logMesh", "logger_8h.html#a7596a23543cd8d93653461ac6611c1f8", null ],
     [ "logModelParamNames", "logger_8h.html#ab098fe02e9c8f2822c15c296a365399a", null ],
     [ "logModelParams", "logger_8h.html#a048719b66fe441b806d39e4e220bbc41", null ],
-    [ "logModelParamsColumns", "logger_8h.html#a78b5deb644ef6239223144e34937bd6b", null ]
+    [ "logModelParamsColumns", "logger_8h.html#a78b5deb644ef6239223144e34937bd6b", null ],
+    [ "makeCollisionBoxLogData", "logger_8h.html#a7e948fa829b7221fd155441c7a5b30da", null ],
+    [ "makeCollisionEllipsoidLogData", "logger_8h.html#af40f20c6a3b560d6113dc737b30b191f", null ]
 ];

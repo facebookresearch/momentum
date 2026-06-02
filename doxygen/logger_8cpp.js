@@ -13,5 +13,7 @@ var logger_8cpp =
     [ "logMesh", "logger_8cpp.html#a7596a23543cd8d93653461ac6611c1f8", null ],
     [ "logModelParamNames", "logger_8cpp.html#ab098fe02e9c8f2822c15c296a365399a", null ],
     [ "logModelParams", "logger_8cpp.html#a048719b66fe441b806d39e4e220bbc41", null ],
-    [ "logModelParamsColumns", "logger_8cpp.html#a78b5deb644ef6239223144e34937bd6b", null ]
+    [ "logModelParamsColumns", "logger_8cpp.html#a78b5deb644ef6239223144e34937bd6b", null ],
+    [ "makeCollisionBoxLogData", "logger_8cpp.html#a7e948fa829b7221fd155441c7a5b30da", null ],
+    [ "makeCollisionEllipsoidLogData", "logger_8cpp.html#af40f20c6a3b560d6113dc737b30b191f", null ]
 ];

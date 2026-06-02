@@ -7,5 +7,5 @@ var usd__skeleton__io_8cpp =
     [ "saveCollisionGeometryToUsd", "usd__skeleton__io_8cpp.html#a57e01e0ae70786c12cfb0e86a31e8b12", null ],
     [ "saveLocatorsToUsd", "usd__skeleton__io_8cpp.html#ab7dca08cc5f41b28eef3a51534c7f802", null ],
     [ "saveSkeletonToUsd", "usd__skeleton__io_8cpp.html#a2d4fa6407bc99544d95afcbaf7d28583", null ],
-    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__skeleton__io_8cpp.html#a565e3435ced509a5ef5daeb172f11e78", null ]
+    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__skeleton__io_8cpp.html#a5be2b5cd0ee35234040c27c007fdfd86", null ]
 ];

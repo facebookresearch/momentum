@@ -2,6 +2,8 @@ var annotated_dup =
 [
     [ "momentum", "namespacemomentum.html", [
       [ "detail", "namespacemomentum_1_1detail.html", [
+        [ "CollisionBoxLogData", "structmomentum_1_1detail_1_1CollisionBoxLogData.html", "structmomentum_1_1detail_1_1CollisionBoxLogData" ],
+        [ "CollisionEllipsoidLogData", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData" ],
         [ "is_compatible_to_uniform_int_distribution", "structmomentum_1_1detail_1_1is__compatible__to__uniform__int__distribution.html", null ]
       ] ],
       [ "fbx_internal", "namespacemomentum_1_1fbx__internal.html", [
@@ -38,6 +40,7 @@ var annotated_dup =
       [ "Character", "structmomentum_1_1Character.html", "structmomentum_1_1Character" ],
       [ "CharacterParametersT", "structmomentum_1_1CharacterParametersT.html", "structmomentum_1_1CharacterParametersT" ],
       [ "CharacterStateT", "structmomentum_1_1CharacterStateT.html", "structmomentum_1_1CharacterStateT" ],
+      [ "CollisionBoxT", "structmomentum_1_1CollisionBoxT.html", "structmomentum_1_1CollisionBoxT" ],
       [ "CollisionDebugEntryT", "structmomentum_1_1CollisionDebugEntryT.html", "structmomentum_1_1CollisionDebugEntryT" ],
       [ "CollisionEllipsoidT", "structmomentum_1_1CollisionEllipsoidT.html", "structmomentum_1_1CollisionEllipsoidT" ],
       [ "CollisionErrorFunctionStatelessT", "classmomentum_1_1CollisionErrorFunctionStatelessT.html", "classmomentum_1_1CollisionErrorFunctionStatelessT" ],

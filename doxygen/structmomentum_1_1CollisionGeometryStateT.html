@@ -112,7 +112,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a1f1f2930836106c4e04e1d3b8a6ed5a9" id="r_a1f1f2930836106c4e04e1d3b8a6ed5a9"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html#a1f1f2930836106c4e04e1d3b8a6ed5a9">origin</a></td></tr>
-<tr class="memdesc:a1f1f2930836106c4e04e1d3b8a6ed5a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capsule's origin in global coordinates.  <br /></td></tr>
+<tr class="memdesc:a1f1f2930836106c4e04e1d3b8a6ed5a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive origin/center in global coordinates.  <br /></td></tr>
 <tr class="separator:a1f1f2930836106c4e04e1d3b8a6ed5a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d2c3727433dacc65aaede01f9bd7105" id="r_a3d2c3727433dacc65aaede01f9bd7105"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html#a3d2c3727433dacc65aaede01f9bd7105">direction</a></td></tr>
 <tr class="memdesc:a3d2c3727433dacc65aaede01f9bd7105"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capsule's direction vector (representing the X-axis) in global coordinates.  <br /></td></tr>
@@ -132,6 +132,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:af8770aa95fb1fe9c3929d22fe96cfb0b" id="r_af8770aa95fb1fe9c3929d22fe96cfb0b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html#af8770aa95fb1fe9c3929d22fe96cfb0b">ellipsoidRadii</a></td></tr>
 <tr class="memdesc:af8770aa95fb1fe9c3929d22fe96cfb0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaled ellipsoid radii in global coordinates.  <br /></td></tr>
 <tr class="separator:af8770aa95fb1fe9c3929d22fe96cfb0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dab8c19f548a3b4bd62172785554186" id="r_a2dab8c19f548a3b4bd62172785554186"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html#a2dab8c19f548a3b4bd62172785554186">boxHalfExtents</a></td></tr>
+<tr class="memdesc:a2dab8c19f548a3b4bd62172785554186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaled box half extents in global coordinates.  <br /></td></tr>
+<tr class="separator:a2dab8c19f548a3b4bd62172785554186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
@@ -171,11 +174,33 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8cpp_source.html#l00016">16</a> of file <a class="el" href="collision__geometry__state_8cpp_source.html">collision_geometry_state.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176aeee5397cecd880d16ef7244819aa383d">momentum::Ellipsoid</a>, <a class="el" href="transform_8h_source.html#l00173">momentum::TransformT&lt; T &gt;::getAxisX()</a>, <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00193">momentum::kInvalidIndex</a>, <a class="el" href="transform_8h_source.html#l00039">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00042">momentum::TransformT&lt; T &gt;::scale</a>, <a class="el" href="namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176a24effac8f5b99ca770d8f0ad5c23279d">momentum::TaperedCapsule</a>, and <a class="el" href="transform_8h_source.html#l00040">momentum::TransformT&lt; T &gt;::translation</a>.</p>
+<p class="reference">References <a class="el" href="namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176a3cfce651e667ab85486dd42a8185f98a">momentum::Box</a>, <a class="el" href="namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176aeee5397cecd880d16ef7244819aa383d">momentum::Ellipsoid</a>, <a class="el" href="transform_8h_source.html#l00173">momentum::TransformT&lt; T &gt;::getAxisX()</a>, <a class="el" href="skeleton__state_8h_source.html#l00050">momentum::SkeletonStateT&lt; T &gt;::jointState</a>, <a class="el" href="character_2types_8h_source.html#l00182">momentum::kInvalidIndex</a>, <a class="el" href="transform_8h_source.html#l00039">momentum::TransformT&lt; T &gt;::rotation</a>, <a class="el" href="transform_8h_source.html#l00042">momentum::TransformT&lt; T &gt;::scale</a>, <a class="el" href="namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176a24effac8f5b99ca770d8f0ad5c23279d">momentum::TaperedCapsule</a>, and <a class="el" href="transform_8h_source.html#l00040">momentum::TransformT&lt; T &gt;::translation</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2dab8c19f548a3b4bd62172785554186" name="a2dab8c19f548a3b4bd62172785554186"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dab8c19f548a3b4bd62172785554186">&#9670;&#160;</a></span>boxHalfExtents</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">Vector3</a>&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt; &gt; <a class="el" href="structmomentum_1_1CollisionGeometryStateT.html">momentum::CollisionGeometryStateT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a> &gt;::boxHalfExtents</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Scaled box half extents in global coordinates. </p>
+
+<p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00061">61</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
+
+</div>
+</div>
 <a id="aa10f2a1653fc6a3e0e1dc7a513019caf" name="aa10f2a1653fc6a3e0e1dc7a513019caf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa10f2a1653fc6a3e0e1dc7a513019caf">&#9670;&#160;</a></span>delta</h2>
 
@@ -194,7 +219,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00049">49</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>.</p>
 
 </div>
 </div>
@@ -216,7 +241,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00043">43</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -238,7 +263,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00058">58</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -260,7 +285,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00055">55</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -278,11 +303,11 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
       </table>
 </div><div class="memdoc">
 
-<p>Capsule's origin in global coordinates. </p>
+<p>Primitive origin/center in global coordinates. </p>
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00040">40</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -304,7 +329,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00046">46</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00233">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00275">momentum::overlaps()</a>, and <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -326,7 +351,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="collision__geometry__state_8h_source.html#l00052">52</a> of file <a class="el" href="collision__geometry__state_8h_source.html">collision_geometry_state.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00396">momentum::updateAabb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="collision__geometry__state_8h_source.html#l00470">momentum::updateAabb()</a>.</p>
 
 </div>
 </div>
@@ -340,7 +365,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="structmomentum_1_1CollisionGeometryStateT.html">CollisionGeometryStateT</a></li>
-    <li class="footer">Generated on Mon Jun 1 2026 22:42:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 2 2026 01:08:58 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

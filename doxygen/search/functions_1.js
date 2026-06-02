@@ -12,10 +12,11 @@ var searchData=
   ['blendshapebase_9',['blendshapebase',['../structmomentum_1_1BlendShapeBase.html#a584331c805330584312e184188477c2a',1,'momentum::BlendShapeBase::BlendShapeBase(size_t modelSize, size_t numShapes, momentum::span&lt; const std::string &gt; shapeNames={})'],['../structmomentum_1_1BlendShapeBase.html#a64b1454ea58e8a56f7883e395f0e73e2',1,'momentum::BlendShapeBase::BlendShapeBase(BlendShapeBase &amp;&amp;)=default'],['../structmomentum_1_1BlendShapeBase.html#a47c7b888b05194eb65c2e82984f6a526',1,'momentum::BlendShapeBase::BlendShapeBase(const BlendShapeBase &amp;)=default'],['../structmomentum_1_1BlendShapeBase.html#a0777a03e86d546dd29cd1fe0a5de8c6b',1,'momentum::BlendShapeBase::BlendShapeBase()=default']]],
   ['blendtransforms_10',['blendtransforms',['../namespacemomentum.html#ae26fbde0afac5376c2c93d11e3657108',1,'momentum::blendTransforms(momentum::span&lt; const TransformT&lt; T &gt; &gt; transforms, momentum::span&lt; const T &gt; weights)'],['../namespacemomentum.html#a1d11109c4ca3dcc42d362457b7aeb9af',1,'momentum::blendTransforms(momentum::span&lt; const TransformT&lt; float &gt; &gt; transforms, momentum::span&lt; const float &gt; weights)'],['../namespacemomentum.html#aa7f577296c061906e4b90952c6fde0fd',1,'momentum::blendTransforms(momentum::span&lt; const TransformT&lt; double &gt; &gt; transforms, momentum::span&lt; const double &gt; weights)']]],
   ['bounds_11',['bounds',['../structmomentum_1_1SDFColliderT.html#a6aef751a8671932810fcd0b44d151ed8',1,'momentum::SDFColliderT']]],
-  ['buildcalibbodysets_12',['buildCalibBodySets',['../namespacemomentum.html#a2ab7822fb4190a2c69eed640332f0f87',1,'momentum']]],
-  ['buildhierarchicalpaths_13',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
-  ['buildjetmat_14',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
-  ['buildjetvec_15',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['buildsequencecolumnindices_16',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
-  ['buildtriangleadjacency_17',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
+  ['boxradiusalongdirection_12',['boxRadiusAlongDirection',['../namespacemomentum.html#a4b67279200c74ca3da18dc3766a61cb8',1,'momentum']]],
+  ['buildcalibbodysets_13',['buildCalibBodySets',['../namespacemomentum.html#a2ab7822fb4190a2c69eed640332f0f87',1,'momentum']]],
+  ['buildhierarchicalpaths_14',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
+  ['buildjetmat_15',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
+  ['buildjetvec_16',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
+  ['buildsequencecolumnindices_17',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
+  ['buildtriangleadjacency_18',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
 ];

@@ -69,6 +69,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.BlendShapeBase.to_bytes"><code class="docutils literal notranslate"><span class="pre">BlendShapeBase.to_bytes()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Box.__init__"><code class="docutils literal notranslate"><span class="pre">Box.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Box.half_extents"><code class="docutils literal notranslate"><span class="pre">Box.half_extents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Box.parent"><code class="docutils literal notranslate"><span class="pre">Box.parent</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Box.transformation"><code class="docutils literal notranslate"><span class="pre">Box.transformation</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.Character"><code class="docutils literal notranslate"><span class="pre">Character</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.__init__"><code class="docutils literal notranslate"><span class="pre">Character.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.add_rigid_transform_node"><code class="docutils literal notranslate"><span class="pre">Character.add_rigid_transform_node()</span></code></a></li>
@@ -790,6 +797,46 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.geometry.Box">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Box</span></span><a class="headerlink" href="#pymomentum.geometry.Box" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>A box primitive used for collision detection and physics simulation. Represents an oriented box attached to a skeleton joint.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Box.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Box" title="pymomentum.geometry.Box"><span class="pre">pymomentum.geometry.Box</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half_extents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Box.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a box using its parent, transformation, and half extents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent</strong> – Parent joint to which the box is attached.</p></li>
+<li><p><strong>transformation</strong> – Transformation defining the center and orientation relative to the parent coordinate system.</p></li>
+<li><p><strong>half_extents</strong> – Half extents along the local x, y, and z axes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.Box.half_extents">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">half_extents</span></span><a class="headerlink" href="#pymomentum.geometry.Box.half_extents" title="Link to this definition"></a></dt>
+<dd><p>Half extents along the local x, y, and z axes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.Box.parent">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#pymomentum.geometry.Box.parent" title="Link to this definition"></a></dt>
+<dd><p>Parent joint to which the box is attached.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.geometry.Box.transformation">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transformation</span></span><a class="headerlink" href="#pymomentum.geometry.Box.transformation" title="Link to this definition"></a></dt>
+<dd><p>Transformation defining the center and orientation relative to the parent coordinate system</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">Character</span></span><a class="headerlink" href="#pymomentum.geometry.Character" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
@@ -879,7 +926,7 @@ limits are passed through unchanged.</p>
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collision_geometry</span></span><a class="headerlink" href="#pymomentum.geometry.Character.collision_geometry" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A list of <a class="reference internal" href="#pymomentum.geometry.TaperedCapsule" title="pymomentum.geometry.TaperedCapsule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaperedCapsule</span></code></a> and <a class="reference internal" href="#pymomentum.geometry.Ellipsoid" title="pymomentum.geometry.Ellipsoid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ellipsoid</span></code></a> objects representing the character’s collision geometry.</p>
+<dd class="field-odd"><p>A list of collision geometry primitives (<a class="reference internal" href="#pymomentum.geometry.TaperedCapsule" title="pymomentum.geometry.TaperedCapsule"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaperedCapsule</span></code></a>, <a class="reference internal" href="#pymomentum.geometry.Ellipsoid" title="pymomentum.geometry.Ellipsoid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ellipsoid</span></code></a>, and <a class="reference internal" href="#pymomentum.geometry.Box" title="pymomentum.geometry.Box"><code class="xref py py-class docutils literal notranslate"><span class="pre">Box</span></code></a> objects) representing the character’s collision geometry.</p>
 </dd>
 </dl>
 </dd></dl>

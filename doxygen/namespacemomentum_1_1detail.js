@@ -1,5 +1,7 @@
 var namespacemomentum_1_1detail =
 [
+    [ "CollisionBoxLogData", "structmomentum_1_1detail_1_1CollisionBoxLogData.html", "structmomentum_1_1detail_1_1CollisionBoxLogData" ],
+    [ "CollisionEllipsoidLogData", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html", "structmomentum_1_1detail_1_1CollisionEllipsoidLogData" ],
     [ "is_compatible_to_uniform_int_distribution", "structmomentum_1_1detail_1_1is__compatible__to__uniform__int__distribution.html", null ],
     [ "DefaultException", "namespacemomentum_1_1detail.html#a61b2f9f4ddba0b8c95c3934020e8dfb0", null ],
     [ "is_base_of_matrix", "namespacemomentum_1_1detail.html#a93561f6f90bf339ad74ca2b5a42d54c5", null ],
@@ -17,6 +19,8 @@ var namespacemomentum_1_1detail =
     [ "generateUniform", "namespacemomentum_1_1detail.html#ad4e7ff1957cb3dbc5694216732a20bad", null ],
     [ "is_base_of_template_impl", "namespacemomentum_1_1detail.html#a14fe915391d132242af24a2b2435d8d0", null ],
     [ "is_base_of_template_impl", "namespacemomentum_1_1detail.html#ac36a41e97a505c475623cb0782c2b430", null ],
+    [ "makeCollisionBoxLogData", "namespacemomentum_1_1detail.html#a7e948fa829b7221fd155441c7a5b30da", null ],
+    [ "makeCollisionEllipsoidLogData", "namespacemomentum_1_1detail.html#af40f20c6a3b560d6113dc737b30b191f", null ],
     [ "throwImpl", "namespacemomentum_1_1detail.html#a1809e5f22ece83c7f57a9887a8b114bd", null ],
     [ "throwImpl", "namespacemomentum_1_1detail.html#a7bfc6cd509e5a82687cf5f420b553aff", null ],
     [ "is_base_of_matrix_v", "namespacemomentum_1_1detail.html#a9763013f6c3661770f83e7a1ed7e523e", null ],

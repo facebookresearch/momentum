@@ -91,6 +91,7 @@ $(document).ready(function(){initNavTree('logger_8h.html',''); initResizable(); 
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">logger.h File Reference</div></div>
@@ -101,20 +102,39 @@ $(document).ready(function(){initNavTree('logger_8h.html',''); initResizable(); 
 <code>#include &lt;<a class="el" href="locator_8h_source.html">momentum/character/locator.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="locator__state_8h_source.html">momentum/character/locator_state.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="marker_8h_source.html">momentum/character/marker.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
 <code>#include &lt;rerun.hpp&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;map&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="logger_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html">momentum::detail::CollisionEllipsoidLogData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">World-space ellipsoid collision primitive data prepared for Rerun ellipsoid logging.  <a href="structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1detail_1_1CollisionBoxLogData.html">momentum::detail::CollisionBoxLogData</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">World-space box collision primitive data prepared for Rerun box logging.  <a href="structmomentum_1_1detail_1_1CollisionBoxLogData.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacemomentum_1_1detail" id="r_namespacemomentum_1_1detail"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html">momentum::detail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:af40f20c6a3b560d6113dc737b30b191f" id="r_af40f20c6a3b560d6113dc737b30b191f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html">CollisionEllipsoidLogData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html#af40f20c6a3b560d6113dc737b30b191f">momentum::detail::makeCollisionEllipsoidLogData</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> &amp;collisionGeometry, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;skeletonState)</td></tr>
+<tr class="memdesc:af40f20c6a3b560d6113dc737b30b191f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts world-space ellipsoid collision geometry from the current skeleton state.  <br /></td></tr>
+<tr class="separator:af40f20c6a3b560d6113dc737b30b191f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e948fa829b7221fd155441c7a5b30da" id="r_a7e948fa829b7221fd155441c7a5b30da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1detail_1_1CollisionBoxLogData.html">CollisionBoxLogData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1detail.html#a7e948fa829b7221fd155441c7a5b30da">momentum::detail::makeCollisionBoxLogData</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a7f43d746798db9b244d37e2566a49b29">CollisionGeometry</a> &amp;collisionGeometry, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#a800a78d5d2ea2fd86769021cc0692b63">SkeletonState</a> &amp;skeletonState)</td></tr>
+<tr class="memdesc:a7e948fa829b7221fd155441c7a5b30da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts world-space box collision geometry from the current skeleton state.  <br /></td></tr>
+<tr class="separator:a7e948fa829b7221fd155441c7a5b30da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7596a23543cd8d93653461ac6611c1f8" id="r_a7596a23543cd8d93653461ac6611c1f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a7596a23543cd8d93653461ac6611c1f8">momentum::logMesh</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> rerun::RecordingStream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rec</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">streamName</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> &amp;mesh, std::optional&lt; rerun::Color &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">color</a>)</td></tr>
 <tr class="separator:a7596a23543cd8d93653461ac6611c1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50891faf75ecdc715dd02f3a2027be53" id="r_a50891faf75ecdc715dd02f3a2027be53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a50891faf75ecdc715dd02f3a2027be53">momentum::logJoints</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> rerun::RecordingStream &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rec</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">streamName</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#ab2f864f0ca7e568dba712163aa8569f2">Skeleton</a> &amp;<a class="el" href="parameter__limits__io_8cpp.html#ada778489ae2a13019d0156bc37013fbf">skeleton</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="namespacemomentum.html#aa52a8becf3a530c31a11bcf971a4080d">JointStateList</a> &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">jointStates</a>)</td></tr>
@@ -152,7 +172,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a class="el" href="dir_48d37d9357baadef9a0e1c1d75190b6d.html">rerun</a></li><li class="navelem"><a class="el" href="logger_8h.html">logger.h</a></li>
-    <li class="footer">Generated on Mon Jun 1 2026 22:42:08 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 2 2026 01:08:58 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

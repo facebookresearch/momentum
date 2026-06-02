@@ -1,6 +1,8 @@
 var gltf__skeleton__io_8h =
 [
+    [ "createCollisionBox", "gltf__skeleton__io_8h.html#a36f2c5336379db9b1d5e899e2f2b1b28", null ],
     [ "createCollisionCapsule", "gltf__skeleton__io_8h.html#a8f1bb85b8493cc1e6b7e3af043265218", null ],
+    [ "createCollisionEllipsoid", "gltf__skeleton__io_8h.html#a668b0de9cb9f8f252df56bddbf6d3573", null ],
     [ "createJoint", "gltf__skeleton__io_8h.html#a24b0f96ee26bf432693e6444f12fb2b0", null ],
     [ "createLocator", "gltf__skeleton__io_8h.html#a6212be49f421e6f0ac812c6821a8646a", null ],
     [ "createSkeletonWithOnlyRoot", "gltf__skeleton__io_8h.html#a5fa6d9afe8923beb9a71a87461e75a43", null ],
