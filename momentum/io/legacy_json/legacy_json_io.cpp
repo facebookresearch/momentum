@@ -387,85 +387,90 @@ nlohmann::json momentumSkinnedModelToLegacy(const Mesh& mesh, const SkinWeights&
   return legacySkinnedModel;
 }
 
+void readLegacyCollisionCommonFields(
+    const nlohmann::json& primitiveJson,
+    CollisionPrimitive& primitive) {
+  if (primitiveJson.contains("transformation")) {
+    primitive.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
+  }
+
+  if (primitiveJson.contains("parent")) {
+    primitive.parent = primitiveJson["parent"].get<size_t>();
+  }
+}
+
+CollisionPrimitive legacyEllipsoidToMomentum(const nlohmann::json& primitiveJson) {
+  CollisionPrimitive ellipsoid;
+  ellipsoid.type = CollisionPrimitiveType::Ellipsoid;
+  readLegacyCollisionCommonFields(primitiveJson, ellipsoid);
+
+  const auto radii = findFieldNames(primitiveJson, {"radii", "ellipsoidRadii"});
+  if (radii != primitiveJson.end()) {
+    ellipsoid.ellipsoidRadii = jsonArrayToEigenVector3<float>(*radii);
+  }
+
+  return ellipsoid;
+}
+
+CollisionPrimitive legacyBoxToMomentum(const nlohmann::json& primitiveJson) {
+  CollisionPrimitive box;
+  box.type = CollisionPrimitiveType::Box;
+  readLegacyCollisionCommonFields(primitiveJson, box);
+
+  const auto halfExtents =
+      findFieldNames(primitiveJson, {"halfExtents", "half_extents", "boxHalfExtents"});
+  if (halfExtents != primitiveJson.end()) {
+    box.boxHalfExtents = jsonArrayToEigenVector3<float>(*halfExtents);
+  }
+
+  return box;
+}
+
+CollisionPrimitive legacyCapsuleToMomentum(const nlohmann::json& primitiveJson) {
+  CollisionPrimitive capsule;
+  readLegacyCollisionCommonFields(primitiveJson, capsule);
+
+  if (primitiveJson.contains("radius")) {
+    capsule.radius = jsonArrayToEigenVector2<float>(primitiveJson["radius"]);
+  }
+
+  if (primitiveJson.contains("length")) {
+    capsule.length = primitiveJson["length"].get<float>();
+  }
+
+  return capsule;
+}
+
+CollisionPrimitive legacyCollisionPrimitiveToMomentum(const nlohmann::json& primitiveJson) {
+  const std::string type = primitiveJson.value("type", "tapered_capsule");
+
+  if (type == "ellipsoid" || type == "collision_ellipsoid") {
+    return legacyEllipsoidToMomentum(primitiveJson);
+  }
+
+  if (type == "box" || type == "collision_box") {
+    return legacyBoxToMomentum(primitiveJson);
+  }
+
+  if (type != "tapered_capsule") {
+    MT_LOGW(
+        "Unknown collision primitive type '{}' in legacy JSON; falling back to tapered capsule.",
+        type);
+  }
+
+  return legacyCapsuleToMomentum(primitiveJson);
+}
+
 CollisionGeometry legacyCollisionToMomentum(const nlohmann::json& legacyCollision) {
   CollisionGeometry collision;
 
-  if (legacyCollision.is_array()) {
-    collision.reserve(legacyCollision.size());
+  if (!legacyCollision.is_array()) {
+    return collision;
+  }
 
-    for (const auto& primitiveJson : legacyCollision) {
-      const std::string type = primitiveJson.value("type", "tapered_capsule");
-
-      if (type == "ellipsoid" || type == "collision_ellipsoid") {
-        CollisionEllipsoid ellipsoid;
-
-        if (primitiveJson.contains("transformation")) {
-          ellipsoid.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
-        }
-
-        if (primitiveJson.contains("radii")) {
-          ellipsoid.radii = jsonArrayToEigenVector3<float>(primitiveJson["radii"]);
-        } else if (primitiveJson.contains("ellipsoidRadii")) {
-          ellipsoid.radii = jsonArrayToEigenVector3<float>(primitiveJson["ellipsoidRadii"]);
-        }
-
-        if (primitiveJson.contains("parent")) {
-          ellipsoid.parent = primitiveJson["parent"].get<size_t>();
-        }
-
-        collision.push_back(ellipsoid);
-        continue;
-      }
-
-      if (type == "box" || type == "collision_box") {
-        CollisionBox box;
-
-        if (primitiveJson.contains("transformation")) {
-          box.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
-        }
-
-        if (primitiveJson.contains("halfExtents")) {
-          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["halfExtents"]);
-        } else if (primitiveJson.contains("half_extents")) {
-          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["half_extents"]);
-        } else if (primitiveJson.contains("boxHalfExtents")) {
-          box.halfExtents = jsonArrayToEigenVector3<float>(primitiveJson["boxHalfExtents"]);
-        }
-
-        if (primitiveJson.contains("parent")) {
-          box.parent = primitiveJson["parent"].get<size_t>();
-        }
-
-        collision.push_back(box);
-        continue;
-      }
-
-      if (type != "tapered_capsule") {
-        MT_LOGW(
-            "Unknown collision primitive type '{}' in legacy JSON; falling back to tapered capsule.",
-            type);
-      }
-
-      TaperedCapsule capsule;
-
-      if (primitiveJson.contains("transformation")) {
-        capsule.transformation = jsonToTransform<float>(primitiveJson["transformation"]);
-      }
-
-      if (primitiveJson.contains("radius")) {
-        capsule.radius = jsonArrayToEigenVector2<float>(primitiveJson["radius"]);
-      }
-
-      if (primitiveJson.contains("parent")) {
-        capsule.parent = primitiveJson["parent"].get<size_t>();
-      }
-
-      if (primitiveJson.contains("length")) {
-        capsule.length = primitiveJson["length"].get<float>();
-      }
-
-      collision.push_back(capsule);
-    }
+  collision.reserve(legacyCollision.size());
+  for (const auto& primitiveJson : legacyCollision) {
+    collision.push_back(legacyCollisionPrimitiveToMomentum(primitiveJson));
   }
 
   return collision;
