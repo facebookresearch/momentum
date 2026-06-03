@@ -86,6 +86,27 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       T scaleGradient,
       Ref<VectorX<T>> gradient) const;
 
+  /// Accumulate Jacobian contributions along a joint chain from startJoint up to (but not
+  /// including) stopJoint. The sign of factor controls the push direction.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
+  void accumulateJacobianAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T factor,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<MatrixX<T>> jacobian,
+      int row,
+      T scaleCorrection = T(0)) const;
+
+  /// Accumulate the shared scale-Jacobian entry above a collision pair's common ancestor.
+  void accumulateCommonAncestorScaleJacobian(
+      size_t commonAncestor,
+      T scaleJacobian,
+      int row,
+      Ref<MatrixX<T>> jacobian) const;
+
   /// Pre-computed valid collision pair with common ancestor.
   struct CollisionPairInfo {
     size_t indexA;

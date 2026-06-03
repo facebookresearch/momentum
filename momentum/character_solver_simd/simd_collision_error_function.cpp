@@ -250,6 +250,62 @@ void SimdCollisionErrorFunctionT<T>::accumulateCommonAncestorScaleGradient(
 }
 
 template <typename T>
+void SimdCollisionErrorFunctionT<T>::accumulateJacobianAlongChain(
+    const SkeletonStateT<T>& state,
+    const Vector3<T>& position,
+    const Vector3<T>& direction,
+    const T factor,
+    size_t startJoint,
+    size_t stopJoint,
+    Ref<MatrixX<T>> jacobian,
+    const int row,
+    const T scaleCorrection) const {
+  size_t jointIndex = startJoint;
+  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (this->activeJointParams_[paramIndex + d]) {
+        const T val = direction.dot(jointState.getTranslationDerivative(d)) * factor;
+        jacobian_jointParams_to_modelParams(
+            val, paramIndex + d, row, this->parameterTransform_, jacobian);
+      }
+      if (this->activeJointParams_[paramIndex + 3 + d]) {
+        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * factor;
+        jacobian_jointParams_to_modelParams(
+            val, paramIndex + 3 + d, row, this->parameterTransform_, jacobian);
+      }
+    }
+    if (this->activeJointParams_[paramIndex + 6]) {
+      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * factor;
+      jacobian_jointParams_to_modelParams(
+          val, paramIndex + 6, row, this->parameterTransform_, jacobian);
+    }
+
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
+}
+
+template <typename T>
+void SimdCollisionErrorFunctionT<T>::accumulateCommonAncestorScaleJacobian(
+    size_t commonAncestor,
+    const T scaleJacobian,
+    const int row,
+    Ref<MatrixX<T>> jacobian) const {
+  size_t ancestorIndex = commonAncestor;
+  while (ancestorIndex != kInvalidIndex) {
+    const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+    if (this->activeJointParams_[paramIndex + 6]) {
+      jacobian_jointParams_to_modelParams(
+          scaleJacobian, paramIndex + 6, row, this->parameterTransform_, jacobian);
+    }
+    ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+  }
+}
+
+template <typename T>
 double SimdCollisionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
@@ -486,85 +542,32 @@ double SimdCollisionErrorFunctionT<T>::getJacobian(
         const T scaleCorr_A = -distance_k * radiusA_at_cp_k * ln2<T>();
         const T scaleCorr_B = distance_k * radiusB_at_cp_k * ln2<T>();
 
-        // -----------------------------------
-        //  process first joint
-        // -----------------------------------
-        size_t jointIndex = iJoint;
-        while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Eigen::Vector3<T> posd =
-              extractSingleElement(position_i, k) - jointState.translation();
+        const Vector3<T> position_ik = extractSingleElement(position_i, k);
+        const Vector3<T> position_jk = extractSingleElement(position_j, k);
+        accumulateJacobianAlongChain(
+            state,
+            position_ik,
+            direction_k,
+            -fac_k,
+            iJoint,
+            commonAncestor,
+            jacobian,
+            row,
+            scaleCorr_A);
+        accumulateJacobianAlongChain(
+            state,
+            position_jk,
+            direction_k,
+            fac_k,
+            jJoint,
+            commonAncestor,
+            jacobian,
+            row,
+            scaleCorr_B);
 
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * -fac_k;
-              jacobian_jointParams_to_modelParams(
-                  val, paramIndex + d, row, this->parameterTransform_, jacobian);
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * -fac_k;
-              jacobian_jointParams_to_modelParams(
-                  val, paramIndex + 3 + d, row, this->parameterTransform_, jacobian);
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            const T val =
-                (direction_k.dot(jointState.getScaleDerivative(posd)) + scaleCorr_A) * -fac_k;
-            jacobian_jointParams_to_modelParams(
-                val, paramIndex + 6, row, this->parameterTransform_, jacobian);
-          }
-
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        // -----------------------------------
-        //  process second joint
-        // -----------------------------------
-        jointIndex = jJoint;
-        while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Vector3<T> posd = extractSingleElement(position_j, k) - jointState.translation();
-
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * fac_k;
-              jacobian_jointParams_to_modelParams(
-                  val, paramIndex + d, row, this->parameterTransform_, jacobian);
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * fac_k;
-              jacobian_jointParams_to_modelParams(
-                  val, paramIndex + 3 + d, row, this->parameterTransform_, jacobian);
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            const T val =
-                (direction_k.dot(jointState.getScaleDerivative(posd)) + scaleCorr_B) * fac_k;
-            jacobian_jointParams_to_modelParams(
-                val, paramIndex + 6, row, this->parameterTransform_, jacobian);
-          }
-
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        // -----------------------------------
-        //  process scale derivatives above common ancestor
-        // -----------------------------------
-        {
-          const T netScaleVal = -fac_k * ln2<T>() * direction_k.squaredNorm() +
-              wgt * (radiusA_at_cp_k + radiusB_at_cp_k) * ln2<T>();
-          size_t ancestorIndex = commonAncestor;
-          while (ancestorIndex != kInvalidIndex) {
-            const size_t paramIndex = ancestorIndex * kParametersPerJoint;
-            if (this->activeJointParams_[paramIndex + 6]) {
-              jacobian_jointParams_to_modelParams(
-                  netScaleVal, paramIndex + 6, row, this->parameterTransform_, jacobian);
-            }
-            ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
-          }
-        }
+        const T netScaleVal = -fac_k * ln2<T>() * direction_k.squaredNorm() +
+            wgt * (radiusA_at_cp_k + radiusB_at_cp_k) * ln2<T>();
+        accumulateCommonAncestorScaleJacobian(commonAncestor, netScaleVal, row, jacobian);
 
         residual(row) = overlap[k] * wgt;
         row++;
