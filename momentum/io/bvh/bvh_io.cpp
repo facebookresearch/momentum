@@ -337,11 +337,9 @@ void mapBvhJointToModelParams(
   // Convert BVH rotation to Momentum's ZYX convention
   const Quaternionf q = convertBvhRotationToQuaternion(bvhJoint, frameData);
   if (!q.isApprox(Quaternionf::Identity())) {
-    // Decompose to Momentum's ZYX convention: [rx, ry, rz]
-    // Momentum applies rotations as R = Rz(rz) * Ry(ry) * Rx(rx)
-    // so we decompose as ZYX and reverse to get [rx, ry, rz]
+    // Decompose into Momentum's Extrinsic XYZ convention: [rx, ry, rz]
     const Vector3f eulerAngles =
-        rotationMatrixToEulerZYX(q.toRotationMatrix(), EulerConvention::Intrinsic).reverse();
+        rotationMatrixToEulerXYZ(q.toRotationMatrix(), EulerConvention::Extrinsic);
     motion(jointParamBase + RX, frameIdx) = eulerAngles[0];
     motion(jointParamBase + RY, frameIdx) = eulerAngles[1];
     motion(jointParamBase + RZ, frameIdx) = eulerAngles[2];

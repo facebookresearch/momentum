@@ -336,10 +336,10 @@ localTransformToJointParametersRespectingConstraints(
     result(3 + activeAxes[0]) = angles[0];
     result(3 + activeAxes[1]) = angles[1];
   } else if (numActiveAxes == 3) {
-    // ZYX-then-reverse matches the (Rx * Ry * Rz) convention used elsewhere in momentum and
-    // produces the same parameters as the unconstrained quaternionToEuler path.
+    // Decompose into Extrinsic XYZ angles [rx, ry, rz], matching the convention used by
+    // JointStateT::set() and the unconstrained quaternionToEuler path.
     result.template segment<3>(3) =
-        rotationMatrixToEulerZYX(rotationMatrix, EulerConvention::Intrinsic).reverse();
+        rotationMatrixToEulerXYZ(rotationMatrix, EulerConvention::Extrinsic);
   } else {
     // numActiveAxes == 0: leave rotation parameters at zero.
   }
