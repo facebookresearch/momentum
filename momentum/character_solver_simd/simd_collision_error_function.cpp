@@ -197,6 +197,59 @@ CollisionErrorFunctionT<T>& SimdCollisionErrorFunctionT<T>::syncScalarFallback()
 }
 
 template <typename T>
+void SimdCollisionErrorFunctionT<T>::accumulateGradientAlongChain(
+    const SkeletonStateT<T>& state,
+    const Vector3<T>& position,
+    const Vector3<T>& direction,
+    const T weight,
+    size_t startJoint,
+    size_t stopJoint,
+    Ref<VectorX<T>> gradient,
+    const T scaleCorrection) const {
+  size_t jointIndex = startJoint;
+  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
+    const auto& jointState = state.jointState[jointIndex];
+    const size_t paramIndex = jointIndex * kParametersPerJoint;
+    const Vector3<T> posd = position - jointState.translation();
+
+    for (size_t d = 0; d < 3; d++) {
+      if (this->activeJointParams_[paramIndex + d]) {
+        const T val = direction.dot(jointState.getTranslationDerivative(d)) * weight;
+        gradient_jointParams_to_modelParams(
+            val, paramIndex + d, this->parameterTransform_, gradient);
+      }
+      if (this->activeJointParams_[paramIndex + 3 + d]) {
+        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * weight;
+        gradient_jointParams_to_modelParams(
+            val, paramIndex + 3 + d, this->parameterTransform_, gradient);
+      }
+    }
+    if (this->activeJointParams_[paramIndex + 6]) {
+      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * weight;
+      gradient_jointParams_to_modelParams(val, paramIndex + 6, this->parameterTransform_, gradient);
+    }
+
+    jointIndex = this->skeleton_.joints[jointIndex].parent;
+  }
+}
+
+template <typename T>
+void SimdCollisionErrorFunctionT<T>::accumulateCommonAncestorScaleGradient(
+    size_t commonAncestor,
+    const T scaleGradient,
+    Ref<VectorX<T>> gradient) const {
+  size_t ancestorIndex = commonAncestor;
+  while (ancestorIndex != kInvalidIndex) {
+    const size_t paramIndex = ancestorIndex * kParametersPerJoint;
+    if (this->activeJointParams_[paramIndex + 6]) {
+      gradient_jointParams_to_modelParams(
+          scaleGradient, paramIndex + 6, this->parameterTransform_, gradient);
+    }
+    ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
+  }
+}
+
+template <typename T>
 double SimdCollisionErrorFunctionT<T>::getError(
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
@@ -329,85 +382,15 @@ double SimdCollisionErrorFunctionT<T>::getGradient(
         const T scaleCorr_A = -distance_k * radiusA_at_cp_k * ln2<T>();
         const T scaleCorr_B = distance_k * radiusB_at_cp_k * ln2<T>();
 
-        // -----------------------------------
-        //  process first joint
-        // -----------------------------------
-        size_t jointIndex = iJoint;
-        while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Vector3<T> posd = position_ik - jointState.translation();
+        accumulateGradientAlongChain(
+            state, position_ik, direction_k, wgt_k, iJoint, commonAncestor, gradient, scaleCorr_A);
+        accumulateGradientAlongChain(
+            state, position_jk, direction_k, -wgt_k, jJoint, commonAncestor, gradient, scaleCorr_B);
 
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * wgt_k;
-              gradient_jointParams_to_modelParams(
-                  val, paramIndex + d, this->parameterTransform_, gradient);
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * wgt_k;
-              gradient_jointParams_to_modelParams(
-                  val, paramIndex + 3 + d, this->parameterTransform_, gradient);
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            const T val =
-                (direction_k.dot(jointState.getScaleDerivative(posd)) + scaleCorr_A) * wgt_k;
-            gradient_jointParams_to_modelParams(
-                val, paramIndex + 6, this->parameterTransform_, gradient);
-          }
-
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        // -----------------------------------
-        //  process second joint
-        // -----------------------------------
-        jointIndex = jJoint;
-        while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-          const auto& jointState = state.jointState[jointIndex];
-          const size_t paramIndex = jointIndex * kParametersPerJoint;
-          const Vector3<T> posd = position_jk - jointState.translation();
-
-          for (size_t d = 0; d < 3; d++) {
-            if (this->activeJointParams_[paramIndex + d]) {
-              const T val = direction_k.dot(jointState.getTranslationDerivative(d)) * -wgt_k;
-              gradient_jointParams_to_modelParams(
-                  val, paramIndex + d, this->parameterTransform_, gradient);
-            }
-            if (this->activeJointParams_[paramIndex + 3 + d]) {
-              const T val = direction_k.dot(jointState.getRotationDerivative(d, posd)) * -wgt_k;
-              gradient_jointParams_to_modelParams(
-                  val, paramIndex + 3 + d, this->parameterTransform_, gradient);
-            }
-          }
-          if (this->activeJointParams_[paramIndex + 6]) {
-            const T val =
-                (direction_k.dot(jointState.getScaleDerivative(posd)) + scaleCorr_B) * -wgt_k;
-            gradient_jointParams_to_modelParams(
-                val, paramIndex + 6, this->parameterTransform_, gradient);
-          }
-
-          jointIndex = this->skeleton_.joints[jointIndex].parent;
-        }
-
-        // -----------------------------------
-        //  process scale derivatives above common ancestor
-        // -----------------------------------
-        {
-          const T netScaleVal =
-              (direction_k.squaredNorm() - distance_k * (radiusA_at_cp_k + radiusB_at_cp_k)) *
-              ln2<T>() * wgt_k;
-          size_t ancestorIndex = commonAncestor;
-          while (ancestorIndex != kInvalidIndex) {
-            const size_t paramIndex = ancestorIndex * kParametersPerJoint;
-            if (this->activeJointParams_[paramIndex + 6]) {
-              gradient_jointParams_to_modelParams(
-                  netScaleVal, paramIndex + 6, this->parameterTransform_, gradient);
-            }
-            ancestorIndex = this->skeleton_.joints[ancestorIndex].parent;
-          }
-        }
+        const T netScaleVal =
+            (direction_k.squaredNorm() - distance_k * (radiusA_at_cp_k + radiusB_at_cp_k)) *
+            ln2<T>() * wgt_k;
+        accumulateCommonAncestorScaleGradient(commonAncestor, netScaleVal, gradient);
       }
     }
   }

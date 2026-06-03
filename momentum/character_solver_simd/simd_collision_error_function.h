@@ -67,6 +67,25 @@ class SimdCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// Synchronize scalar fallback settings before delegating non-capsule collision work.
   CollisionErrorFunctionT<T>& syncScalarFallback();
 
+  /// Accumulate gradient contributions along a joint chain from startJoint up to (but not
+  /// including) stopJoint. The sign of weight controls the push direction.
+  /// scaleCorrection is an additive term for the scale derivative (for capsule radius correction).
+  void accumulateGradientAlongChain(
+      const SkeletonStateT<T>& state,
+      const Vector3<T>& position,
+      const Vector3<T>& direction,
+      T weight,
+      size_t startJoint,
+      size_t stopJoint,
+      Ref<VectorX<T>> gradient,
+      T scaleCorrection = T(0)) const;
+
+  /// Accumulate the shared scale-gradient contribution above a collision pair's common ancestor.
+  void accumulateCommonAncestorScaleGradient(
+      size_t commonAncestor,
+      T scaleGradient,
+      Ref<VectorX<T>> gradient) const;
+
   /// Pre-computed valid collision pair with common ancestor.
   struct CollisionPairInfo {
     size_t indexA;
