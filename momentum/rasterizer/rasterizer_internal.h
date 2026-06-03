@@ -10,11 +10,11 @@
 // Internal header for shared rasterizer implementation utilities.
 // Not intended for external use.
 
+#include <momentum/common/exception.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/rasterizer/utility.h>
 #include <Eigen/Core>
 #include <span>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -196,27 +196,29 @@ inline void validateTriangleIndices(
     const char* vertexType = "vertex",
     const char* triangleType = "triangles") {
   const auto nTri = triangles.size() / 3;
-  if (nTri * 3 != triangles.size()) {
-    std::ostringstream oss;
-    oss << triangleType << " array of size " << triangles.size() << " is not a multiple of three.";
-    throw std::runtime_error(oss.str());
-  }
+  MT_THROW_IF(
+      nTri * 3 != triangles.size(),
+      "{} array of size {} is not a multiple of three.",
+      triangleType,
+      triangles.size());
 
   const int maxVertIdx = triangles.maxCoeff();
-  if (maxVertIdx >= nVerts) {
-    std::ostringstream oss;
-    oss << "Invalid " << vertexType << " index " << maxVertIdx << " found in " << triangleType
-        << " array.";
-    throw std::runtime_error(oss.str());
-  }
+  MT_THROW_IF(
+      maxVertIdx >= nVerts,
+      "Invalid {} index {} found in {} array with {} {}s.",
+      vertexType,
+      maxVertIdx,
+      triangleType,
+      nVerts,
+      vertexType);
 
   const int minVertIdx = triangles.minCoeff();
-  if (minVertIdx < 0) {
-    std::ostringstream oss;
-    oss << "Invalid " << vertexType << " index " << minVertIdx << " found in " << triangleType
-        << " array.";
-    throw std::runtime_error(oss.str());
-  }
+  MT_THROW_IF(
+      minVertIdx < 0,
+      "Invalid {} index {} found in {} array.",
+      vertexType,
+      minVertIdx,
+      triangleType);
 }
 
 } // namespace momentum::rasterizer

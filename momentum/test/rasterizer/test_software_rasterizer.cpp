@@ -178,6 +178,78 @@ void testRasterizerWithGeometry(const Camera& camera, const Mesh& mesh) {
   ASSERT_LE(numDepthDifferences, 3);
 }
 
+Camera makeTestCamera() {
+  const int width = 20;
+  const int height = 10;
+  momentum::OpenCVDistortionParametersT<float> distortionParams;
+  auto intrinsics = std::make_shared<OpenCVIntrinsicsModel>(
+      width, height, width / 2.0f, height / 2.0f, width / 2.0f, height / 2.0f, distortionParams);
+  return Camera(intrinsics);
+}
+
+Mesh makeTexturedTriangleMesh() {
+  Mesh mesh;
+  mesh.vertices = {
+      Eigen::Vector3f(-0.51f, -0.51f, 1.5f),
+      Eigen::Vector3f(-0.51f, 0.51f, 1.5f),
+      Eigen::Vector3f(0.51f, -0.51f, 1.5f)};
+  mesh.normals = {Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitZ()};
+  mesh.faces = {Eigen::Vector3i(0, 1, 2)};
+  mesh.texcoords = {Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 1), Eigen::Vector2f(1, 0)};
+  mesh.texcoord_faces = {Eigen::Vector3i(0, 1, 2)};
+  return mesh;
+}
+
+void rasterizeValidationMesh(const Mesh& mesh) {
+  const Camera camera = makeTestCamera();
+  auto zBuffer = makeRasterizerZBuffer(camera);
+  auto rgbBuffer = makeRasterizerRGBBuffer(camera);
+
+  rasterizeMesh(
+      mesh,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      PhongMaterial{Eigen::Vector3f(1, 1, 0)},
+      zBuffer.view(),
+      rgbBuffer.view(),
+      {},
+      {},
+      {},
+      std::vector<Light>{createAmbientLight()},
+      true);
+}
+
+TEST(SoftwareRasterizer, ValidatesTextureTriangleIndicesWithoutTextureMap) {
+  Mesh mesh = makeTexturedTriangleMesh();
+  mesh.texcoord_faces = {Eigen::Vector3i(0, -1, 2)};
+
+  EXPECT_THROW(rasterizeValidationMesh(mesh), std::runtime_error);
+}
+
+TEST(SoftwareRasterizer, ValidatesTextureTrianglesRequireTextureCoords) {
+  Mesh mesh = makeTexturedTriangleMesh();
+  mesh.texcoords.clear();
+
+  EXPECT_THROW(rasterizeValidationMesh(mesh), std::runtime_error);
+}
+
+TEST(SoftwareRasterizer, ValidatesVertexAlignedTextureCoordsWhenTextureTrianglesMissing) {
+  Mesh mesh = makeTexturedTriangleMesh();
+  mesh.texcoord_faces.clear();
+  mesh.texcoords.pop_back();
+
+  EXPECT_THROW(rasterizeValidationMesh(mesh), std::runtime_error);
+}
+
+TEST(SoftwareRasterizer, SkipsTextureExtractionWhenTextureMapMissing) {
+  Mesh mesh = makeTexturedTriangleMesh();
+  mesh.texcoords.emplace_back(0.5f, 0.5f);
+  mesh.texcoord_faces = {Eigen::Vector3i(3, 1, 0)};
+
+  EXPECT_NO_THROW(rasterizeValidationMesh(mesh));
+}
+
 TEST(SoftwareRasterizer, OneQuad) {
   const int width = 20;
   const int height = 10;

@@ -384,6 +384,46 @@ inline void rasterizeOneTriangle(
   }
 }
 
+template <typename TriangleT>
+void validateTextureInputs(
+    const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& triangles,
+    const Eigen::Ref<const Eigen::VectorXf>& textureCoords,
+    const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& textureTriangles,
+    size_t nVerts) {
+  const bool hasTextureCoords = textureCoords.size() != 0;
+  const bool hasTextureTriangles = textureTriangles.size() != 0;
+  if (hasTextureCoords) {
+    const auto nTextureVerts = textureCoords.size() / 2;
+    MT_THROW_IF(
+        nTextureVerts * 2 != textureCoords.size(),
+        "Texture coordinates array of size {} is not a multiple of two.",
+        textureCoords.size());
+  }
+
+  if (hasTextureTriangles) {
+    MT_THROW_IF(
+        !hasTextureCoords,
+        "texture_triangles provided with {} entries, but texture_coordinates is empty",
+        textureTriangles.size());
+    MT_THROW_IF(
+        textureTriangles.size() != triangles.size(),
+        "texture_triangles size ({}) should match triangles size ({})",
+        textureTriangles.size(),
+        triangles.size());
+    validateTriangleIndices<TriangleT>(
+        textureTriangles, textureCoords.size() / 2, "texture_coordinate", "triangles");
+  } else if (hasTextureCoords) {
+    // Assume regular triangles are also texture triangles when a mesh does not
+    // provide separate texture-triangle topology.
+    MT_THROW_IF(
+        textureCoords.size() != 2 * nVerts,
+        "texture_triangles not provided, so texture_coordinates size ({}) should be 2 * "
+        "vertex count ({})",
+        textureCoords.size(),
+        nVerts);
+  }
+}
+
 // Support both signed and unsigned triangles for backward compatibility:
 template <typename TriangleT>
 void validateMeshInputs(
@@ -396,45 +436,27 @@ void validateMeshInputs(
     const PhongMaterial& material) {
   const auto nVerts = positions_world.size() / 3;
 
-  if (normals_world.size() != 0 && positions_world.size() != normals_world.size()) {
-    throw std::runtime_error("positions size doesn't match normals size");
-  }
-
-  if (perVertexDiffuseColor.size() != 0 && positions_world.size() != perVertexDiffuseColor.size()) {
-    throw std::runtime_error("per-vertex color size doesn't match normals size");
-  }
-
-  if (nVerts * 3 != positions_world.size()) {
-    std::ostringstream oss;
-    oss << "Positions array of size " << positions_world.size() << " is not a multiple of three.";
-    throw std::runtime_error(oss.str());
-  }
+  MT_THROW_IF(
+      normals_world.size() != 0 && positions_world.size() != normals_world.size(),
+      "positions size ({}) doesn't match normals size ({})",
+      positions_world.size(),
+      normals_world.size());
+  MT_THROW_IF(
+      perVertexDiffuseColor.size() != 0 && positions_world.size() != perVertexDiffuseColor.size(),
+      "per-vertex color size ({}) doesn't match positions size ({})",
+      perVertexDiffuseColor.size(),
+      positions_world.size());
+  MT_THROW_IF(
+      nVerts * 3 != positions_world.size(),
+      "Positions array of size {} is not a multiple of three.",
+      positions_world.size());
 
   validateTriangleIndices<TriangleT>(triangles, nVerts);
+  validateTextureInputs<TriangleT>(triangles, textureCoords, textureTriangles, nVerts);
 
-  const bool hasTextureMap = (textureCoords.size() != 0 && material.hasTextureMap());
-  if (hasTextureMap) {
-    // Check texture map invariants:
-    if (textureTriangles.size() != 0) {
-      const auto nTextureVerts = textureCoords.size() / 2;
-      if (textureTriangles.size() != triangles.size()) {
-        throw std::runtime_error("texture_triangles size should match triangles size");
-      }
-
-      validateTriangleIndices<TriangleT>(
-          textureTriangles, nTextureVerts, "texture_coordinate", "triangles");
-    } else {
-      // Assume regular triangles are also texture triangles:
-      if (textureCoords.size() != 2 * nVerts) {
-        throw std::runtime_error(
-            "texture_triangles not provided so texture_coordinates size should match vertices size");
-      }
-    }
-  }
-
-  if (perVertexDiffuseColor.size() != 0 && !material.diffuseTextureMap.empty()) {
-    throw std::runtime_error("Can't provide both per-vertex color and diffuse texture map.");
-  }
+  MT_THROW_IF(
+      perVertexDiffuseColor.size() != 0 && !material.diffuseTextureMap.empty(),
+      "Can't provide both per-vertex color and diffuse texture map.");
 }
 
 inline Matrix3fP computeTriangleEyeNormals(
@@ -460,6 +482,24 @@ inline Matrix3fP computeTriangleEyeNormals(
     }
   }
   return n_tri_eye;
+}
+
+// Support both signed and unsigned triangles for backward compatibility:
+template <typename TriangleT>
+Matrix3f getTextureAttributes(
+    const Eigen::Ref<const Eigen::VectorXf>& textureCoords,
+    const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& textureTriangles,
+    bool useTextureCoords,
+    int iTriangle,
+    const Eigen::Vector3i& triangle) {
+  if (!useTextureCoords) {
+    return drjit::zeros<Matrix3f>();
+  }
+
+  const Eigen::Vector3i textureTriangle = textureTriangles.size() == 0
+      ? triangle
+      : textureTriangles.template segment<3>(3 * iTriangle).template cast<int32_t>();
+  return extractTriangleAttributes<2>(textureCoords, textureTriangle);
 }
 
 // Support both signed and unsigned triangles for backward compatibility:
@@ -512,6 +552,7 @@ void rasterizeMeshImp(
       material);
 
   const bool usePerVertexColor = (perVertexDiffuseColor.size() != 0);
+  const bool useTextureCoords = (textureCoords.size() != 0 && material.hasTextureMap());
 
   const auto nTriangles = triangles.size() / 3;
 
@@ -612,9 +653,6 @@ void rasterizeMeshImp(
       const auto iTriangle = triangleIndices[triOffset];
       const Eigen::Vector3i triangle =
           triangles.template segment<3>(3 * iTriangle).template cast<int32_t>();
-      const Eigen::Vector3i textureTriangle = textureTriangles.size() == 0
-          ? triangle
-          : textureTriangles.template segment<3>(3 * iTriangle).template cast<int32_t>();
 
       rasterizeOneTriangle(
           iTriangle,
@@ -628,7 +666,8 @@ void rasterizeMeshImp(
           drjit::transpose(extractSingleElement(vertexMatrixInverse, triOffset)),
           extractSingleElement(p_tri_eye, triOffset),
           extractSingleElement(n_tri_eye, triOffset),
-          extractTriangleAttributes<2>(textureCoords, textureTriangle),
+          getTextureAttributes(
+              textureCoords, textureTriangles, useTextureCoords, iTriangle, triangle),
           usePerVertexColor ? extractTriangleAttributes<3>(perVertexDiffuseColor, triangle)
                             : diffuseColor,
           material,
