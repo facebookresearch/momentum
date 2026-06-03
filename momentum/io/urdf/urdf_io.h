@@ -35,15 +35,22 @@ namespace momentum {
 ///   parameters on fixed local principal axes: `rx`/`ry`/`rz`, `tx`/`ty`/`tz`.
 ///
 /// **Loader choice: child-link-centric import**
-/// - The imported Momentum node corresponds to the URDF child link and carries that link's
-///   incoming URDF joint.
-/// - `preRotation` is set to the URDF joint origin rotation only, so the imported local frame
-///   stays equal to the URDF child link frame.
+/// - For joints whose axis is already aligned with a Momentum principal axis, the imported
+///   Momentum node corresponds to the URDF child link and carries that link's incoming URDF
+///   joint.
+/// - `preRotation` is set to the URDF joint origin rotation only in this direct case, so the
+///   imported local frame stays equal to the URDF child link frame.
+/// - For a revolute or continuous joint with an arbitrary axis, the loader inserts an internal
+///   axis-aligned helper node followed by a fixed child-link node. The helper carries the single
+///   rotation DOF, and the fixed child-link node applies the inverse alignment.
 /// - This keeps child-link-authored data directly compatible with the imported skeleton.
 ///
 /// **Consequence for DOF mapping:**
 /// - DOFs are mapped onto the matching Momentum principal axis inside the preserved link frame.
 ///   For example, a revolute joint with axis `(0,0,1)` maps to `rz`.
+/// - A revolute or continuous joint with a non-principal axis maps its model parameter to the
+///   generated helper node's `rx` parameter. The helper-frame split makes the child link's
+///   transform exactly match the URDF transform for finite rotations about that axis.
 /// - The exposed model parameter preserves the URDF joint scalar coordinate. If the URDF axis
 ///   points along `-X`, `-Y`, or `-Z`, the parameter transform therefore carries a `-1`
 ///   coefficient into the corresponding local Momentum principal axis.
@@ -51,15 +58,17 @@ namespace momentum {
 ///   always numerically equal to the local positive-axis `rx`/`ry`/`rz` entry used by Momentum
 ///   FK. For negative-axis joints, a positive model parameter produces a negative local
 ///   principal-axis rotation.
-/// - Because the model parameter stays in URDF joint coordinates, revolute and prismatic limits
-///   and mimic relations remain in the same coordinate as the imported model parameter.
-/// - We do not bake an extra axis-alignment rotation into `preRotation`. Doing so would make
-///   the imported local frame differ from the URDF child link frame, and every child-link-
+/// - Prismatic joints with arbitrary axes map one model parameter to the parent-frame
+///   translation direction implied by the URDF joint origin rotation and axis.
+/// - Planar joints still require a principal-axis plane normal (±X, ±Y, ±Z); a non-principal
+///   planar axis is rejected. The arbitrary-axis helper-node split is currently implemented
+///   only for revolute and continuous joints.
+/// - Because revolute model parameters stay in URDF joint coordinates and prismatic model
+///   parameters keep Momentum's centimeter convention, limits and mimic relations remain in
+///   the same coordinate as the imported model parameter.
+/// - We do not leave an extra axis-alignment rotation on the child-link node. Doing so would
+///   make the imported local frame differ from the URDF child link frame, and every child-link-
 ///   authored quantity would need frame conversion.
-///
-/// **Limitation:** Only principal axes (±X, ±Y, ±Z) are supported. Non-principal axes
-/// (e.g., `(0.707, 0, 0.707)`) would require an additional axis-alignment frame or a more
-/// general joint representation, so the loader rejects them.
 ///
 /// **Units:** URDF uses meters; Momentum uses centimeters. All positions are converted
 /// automatically.

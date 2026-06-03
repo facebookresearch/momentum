@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <momentum/character/skeleton_state.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/urdf/urdf_io.h>
 #include <momentum/io/urdf/urdf_mesh_io.h>
@@ -125,6 +126,15 @@ void expectVectorNear(
       << "actual: " << actual.transpose() << ", expected: " << expected.transpose();
 }
 
+void expectQuaternionNear(
+    const Eigen::Quaternionf& actual,
+    const Eigen::Quaternionf& expected,
+    float tolerance = 1e-5f) {
+  EXPECT_LE(actual.angularDistance(expected), tolerance)
+      << "actual: " << actual.coeffs().transpose()
+      << ", expected: " << expected.coeffs().transpose();
+}
+
 TEST(IoUrdfTest, LoadCharacter) {
   auto urdfPath = getTestFilePath("character.urdf");
   if (!urdfPath.has_value()) {
@@ -133,7 +143,7 @@ TEST(IoUrdfTest, LoadCharacter) {
 
   const auto& character = loadUrdfCharacter(*urdfPath);
   const auto& skeleton = character.skeleton;
-  EXPECT_EQ(skeleton.joints.size(), 45);
+  EXPECT_EQ(skeleton.joints.size(), 46);
   EXPECT_EQ(skeleton.joints[0].name, "b_root");
   EXPECT_EQ(skeleton.joints[0].parent, kInvalidIndex);
   EXPECT_TRUE(skeleton.joints[0].preRotation.isApprox(Quaternionf::Identity()));
@@ -155,6 +165,49 @@ TEST(IoUrdfTest, LoadCharacter) {
   EXPECT_EQ(parameterLimits[0].data.minMax.parameterIndex, 6); // the first joint parameter
   EXPECT_FLOAT_EQ(parameterLimits[0].data.minMax.limits[0], -2.095);
   EXPECT_FLOAT_EQ(parameterLimits[0].data.minMax.limits[1], 0.785);
+}
+
+TEST(IoUrdfTest, LoadCharacterWithOffAxisJoint) {
+  auto urdfPath = getTestFilePath("character.urdf");
+  if (!urdfPath.has_value()) {
+    GTEST_SKIP() << "Environment variable 'TEST_MOMENTUM_MODELS_PATH' is not set.";
+  }
+
+  const auto character = loadUrdfCharacter(*urdfPath);
+  const auto& skeleton = character.skeleton;
+  const auto axisJointId = skeleton.getJointIdByName("head_rz_urdf_axis");
+  const auto headJointId = skeleton.getJointIdByName("b_head");
+  const auto neckJointId = skeleton.getJointIdByName("b_neck0");
+  ASSERT_NE(axisJointId, kInvalidIndex);
+  ASSERT_NE(headJointId, kInvalidIndex);
+  ASSERT_NE(neckJointId, kInvalidIndex);
+  EXPECT_EQ(skeleton.joints.at(axisJointId).parent, neckJointId);
+  EXPECT_EQ(skeleton.joints.at(headJointId).parent, axisJointId);
+
+  const auto headParamId = character.parameterTransform.getParameterIdByName("head_rz");
+  ASSERT_NE(headParamId, kInvalidIndex);
+  EXPECT_FLOAT_EQ(
+      character.parameterTransform.transform.coeff(
+          axisJointId * kParametersPerJoint + RX, headParamId),
+      1.0f);
+  EXPECT_FALSE(
+      character.parameterTransform.activeJointParams[headJointId * kParametersPerJoint + RX]);
+
+  ModelParameters modelParams(
+      Eigen::VectorXf::Zero(character.parameterTransform.numAllModelParameters()));
+  constexpr float kHeadAngle = 0.2f;
+  modelParams[headParamId] = kHeadAngle;
+  const SkeletonStateT<float> state(
+      character.parameterTransform.apply(modelParams), skeleton, false);
+  const Transform relative = state.jointState.at(neckJointId).transform.inverse() *
+      state.jointState.at(headJointId).transform;
+
+  expectVectorNear(relative.translation, Eigen::Vector3f(8.7f, 0.0f, 0.0f));
+  const Eigen::Quaternionf originRotation(Eigen::AngleAxisf(-0.292f, Eigen::Vector3f::UnitZ()));
+  const Eigen::Vector3f headAxis = Eigen::Vector3f(1.0f, 0.0f, 1.0f).normalized();
+  const Eigen::Quaternionf expectedRotation =
+      originRotation * Eigen::Quaternionf(Eigen::AngleAxisf(kHeadAngle, headAxis));
+  expectQuaternionNear(relative.rotation, expectedRotation);
 }
 
 // Test that the existing character.urdf (which has no visual meshes) still works
@@ -1020,6 +1073,172 @@ TEST(IoUrdfTest, NegativeAxisMimicUsesSignedUrdfModelParameter) {
   EXPECT_FLOAT_EQ(character.parameterTransform.transform.coeff(kJoint1RyIndex, 0), -1.0f);
   EXPECT_FLOAT_EQ(character.parameterTransform.transform.coeff(kJoint2RyIndex, 0), -2.0f);
   EXPECT_FLOAT_EQ(character.parameterTransform.offsets[kJoint2RyIndex], -0.1f);
+}
+
+TEST(IoUrdfTest, ArbitraryRevoluteAxisUsesInternalAxisFrame) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="arbitrary_revolute_robot">
+      <link name="base_link"/>
+      <link name="child_link">
+        <visual>
+          <geometry>
+            <box size="0.1 0.1 0.1"/>
+          </geometry>
+        </visual>
+      </link>
+      <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="child_link"/>
+        <origin xyz="0.01 0.02 0.03" rpy="0 0 0.25"/>
+        <axis xyz="1 0 1"/>
+        <limit lower="-1.0" upper="1.0" effort="100" velocity="1"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  const auto& skeleton = character.skeleton;
+  ASSERT_EQ(skeleton.joints.size(), 3);
+  const auto axisJointId = skeleton.getJointIdByName("joint1_urdf_axis");
+  const auto childJointId = skeleton.getJointIdByName("child_link");
+  ASSERT_NE(axisJointId, kInvalidIndex);
+  ASSERT_NE(childJointId, kInvalidIndex);
+  EXPECT_EQ(skeleton.joints.at(axisJointId).parent, 0);
+  EXPECT_EQ(skeleton.joints.at(childJointId).parent, axisJointId);
+
+  const auto& pt = character.parameterTransform;
+  ASSERT_EQ(pt.name.size(), 1);
+  EXPECT_EQ(pt.name.at(0), "joint1");
+  EXPECT_FLOAT_EQ(pt.transform.coeff(axisJointId * kParametersPerJoint + RX, 0), 1.0f);
+  EXPECT_TRUE(pt.activeJointParams[axisJointId * kParametersPerJoint + RX]);
+  EXPECT_FALSE(pt.activeJointParams[childJointId * kParametersPerJoint + RX]);
+
+  ASSERT_NE(character.skinWeights, nullptr);
+  ASSERT_GT(character.skinWeights->index.rows(), 0);
+  EXPECT_EQ(character.skinWeights->index(0, 0), static_cast<uint32_t>(childJointId));
+
+  constexpr float kJointAngle = 0.4f;
+  const ModelParameters modelParams(Eigen::VectorXf::Constant(1, kJointAngle));
+  const SkeletonStateT<float> state(pt.apply(modelParams), skeleton, false);
+  const Transform relative =
+      state.jointState.at(0).transform.inverse() * state.jointState.at(childJointId).transform;
+
+  expectVectorNear(relative.translation, Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+  const Eigen::Quaternionf originRotation(Eigen::AngleAxisf(0.25f, Eigen::Vector3f::UnitZ()));
+  const Eigen::Vector3f jointAxis = Eigen::Vector3f(1.0f, 0.0f, 1.0f).normalized();
+  const Eigen::Quaternionf expectedRotation =
+      originRotation * Eigen::Quaternionf(Eigen::AngleAxisf(kJointAngle, jointAxis));
+  expectQuaternionNear(relative.rotation, expectedRotation);
+}
+
+TEST(IoUrdfTest, ArbitraryRevoluteMimicUsesInternalAxisFrame) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="arbitrary_revolute_mimic_robot">
+      <link name="base_link"/>
+      <link name="link1"/>
+      <link name="link2"/>
+      <joint name="joint1" type="revolute">
+        <parent link="base_link"/>
+        <child link="link1"/>
+        <origin xyz="0.01 0 0" rpy="0 0 0"/>
+        <axis xyz="1 0 1"/>
+        <limit lower="-1.0" upper="1.0" effort="100" velocity="1"/>
+      </joint>
+      <joint name="joint2" type="revolute">
+        <parent link="base_link"/>
+        <child link="link2"/>
+        <origin xyz="0 0.02 0" rpy="0 0 0"/>
+        <axis xyz="0 1 1"/>
+        <limit lower="-2.0" upper="2.0" effort="100" velocity="1"/>
+        <mimic joint="joint1" multiplier="2" offset="0.1"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  const auto& skeleton = character.skeleton;
+  const auto joint1AxisId = skeleton.getJointIdByName("joint1_urdf_axis");
+  const auto joint2AxisId = skeleton.getJointIdByName("joint2_urdf_axis");
+  const auto link2Id = skeleton.getJointIdByName("link2");
+  ASSERT_NE(joint1AxisId, kInvalidIndex);
+  ASSERT_NE(joint2AxisId, kInvalidIndex);
+  ASSERT_NE(link2Id, kInvalidIndex);
+
+  const auto& pt = character.parameterTransform;
+  ASSERT_EQ(pt.name.size(), 1);
+  EXPECT_EQ(pt.name.at(0), "joint1");
+  EXPECT_FLOAT_EQ(pt.transform.coeff(joint1AxisId * kParametersPerJoint + RX, 0), 1.0f);
+  EXPECT_FLOAT_EQ(pt.transform.coeff(joint2AxisId * kParametersPerJoint + RX, 0), 2.0f);
+  EXPECT_FLOAT_EQ(pt.offsets[joint2AxisId * kParametersPerJoint + RX], 0.1f);
+  ASSERT_EQ(character.parameterLimits.size(), 1);
+
+  constexpr float kJointAngle = 0.25f;
+  const ModelParameters modelParams(Eigen::VectorXf::Constant(1, kJointAngle));
+  const SkeletonStateT<float> state(pt.apply(modelParams), skeleton, false);
+  const Transform relative =
+      state.jointState.at(0).transform.inverse() * state.jointState.at(link2Id).transform;
+
+  expectVectorNear(relative.translation, Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+  const Eigen::Vector3f jointAxis = Eigen::Vector3f(0.0f, 1.0f, 1.0f).normalized();
+  const Eigen::Quaternionf expectedRotation(
+      Eigen::AngleAxisf(2.0f * kJointAngle + 0.1f, jointAxis));
+  expectQuaternionNear(relative.rotation, expectedRotation);
+}
+
+TEST(IoUrdfTest, ArbitraryPrismaticAxisUsesParentFrameTranslation) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="arbitrary_prismatic_robot">
+      <link name="base_link"/>
+      <link name="child_link"/>
+      <joint name="joint1" type="prismatic">
+        <parent link="base_link"/>
+        <child link="child_link"/>
+        <origin xyz="0.01 0.02 0.03" rpy="0 0 1.57079632679"/>
+        <axis xyz="1 1 0"/>
+        <limit lower="-0.2" upper="0.3" effort="100" velocity="1"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  const auto& skeleton = character.skeleton;
+  ASSERT_EQ(skeleton.joints.size(), 2);
+  const auto childJointId = skeleton.getJointIdByName("child_link");
+  ASSERT_NE(childJointId, kInvalidIndex);
+
+  const Eigen::Quaternionf originRotation(
+      Eigen::AngleAxisf(pi<float>() / 2.0f, Eigen::Vector3f::UnitZ()));
+  const Eigen::Vector3f jointAxis = Eigen::Vector3f(1.0f, 1.0f, 0.0f).normalized();
+  const Eigen::Vector3f expectedDirection = originRotation * jointAxis;
+  const auto& pt = character.parameterTransform;
+  EXPECT_NEAR(
+      pt.transform.coeff(childJointId * kParametersPerJoint + TX, 0), expectedDirection.x(), 1e-5f);
+  EXPECT_NEAR(
+      pt.transform.coeff(childJointId * kParametersPerJoint + TY, 0), expectedDirection.y(), 1e-5f);
+  EXPECT_NEAR(
+      pt.transform.coeff(childJointId * kParametersPerJoint + TZ, 0), expectedDirection.z(), 1e-5f);
+  ASSERT_EQ(character.parameterLimits.size(), 1);
+  EXPECT_FLOAT_EQ(character.parameterLimits[0].data.minMax.limits[0], -20.0f);
+  EXPECT_FLOAT_EQ(character.parameterLimits[0].data.minMax.limits[1], 30.0f);
+
+  constexpr float kJointTranslation = 4.0f;
+  const ModelParameters modelParams(Eigen::VectorXf::Constant(1, kJointTranslation));
+  const SkeletonStateT<float> state(pt.apply(modelParams), skeleton, false);
+  const Transform relative =
+      state.jointState.at(0).transform.inverse() * state.jointState.at(childJointId).transform;
+  expectVectorNear(
+      relative.translation,
+      Eigen::Vector3f(1.0f, 2.0f, 3.0f) + expectedDirection * kJointTranslation);
+  expectQuaternionNear(relative.rotation, originRotation);
 }
 
 TEST(IoUrdfTest, MaterialColors) {
