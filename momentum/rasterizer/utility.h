@@ -263,10 +263,11 @@ inline auto extractSingleElement(const FloatP& vec, int index) {
 class SimdCamera {
  public:
   // Camera that operates on drjit::Vector3fP.
-  SimdCamera(const Camera& camera, Eigen::Matrix4f modelMatrix, Eigen::Vector2f imageOffset)
-      : _modelMatrix(modelMatrix),
-        _imageOffset(std::move(imageOffset)),
-        _intrinsics(camera.intrinsicsModel()),
+  SimdCamera(
+      const Camera& camera,
+      const Eigen::Matrix4f& modelMatrix,
+      const Eigen::Vector2f& /*imageOffset*/)
+      : _intrinsics(camera.intrinsicsModel()),
         _modelToWorld_rotation(toEnokiMat(modelMatrix.topLeftCorner<3, 3>())),
         _modelToWorld_translation(toEnokiVec(modelMatrix.block<3, 1>(0, 3))),
         _modelToWorld_row3(toEnokiVec(modelMatrix.block<1, 3>(3, 0))),
@@ -329,8 +330,6 @@ class SimdCamera {
   }
 
  private:
-  const Eigen::Matrix4f _modelMatrix;
-  const Eigen::Vector2f _imageOffset;
   std::shared_ptr<const momentum::IntrinsicsModelT<float>> _intrinsics;
 
   const Matrix3f _modelToWorld_rotation;
