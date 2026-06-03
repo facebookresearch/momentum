@@ -47,9 +47,10 @@ Mesh makeArrowhead(
     float length,
     float translation);
 
-// Creates an octahedron which is basically two pyramids stuck together.
-// "radius" is the width around the middle (where the two pyramid bases meet).
-// "midFraction" is the ratio of the two pyramid heights.
+/// Creates an octahedron (two pyramids joined at bases)
+/// @param radius Width around the middle where pyramid bases meet
+/// @param midFraction Ratio of the two pyramid heights (0.5 = symmetric)
+/// @return Tuple of (subdivided mesh, wireframe line segments)
 std::tuple<Mesh, std::vector<Eigen::Vector3f>> makeOctahedron(
     float radius = 0.5,
     float midFraction = 0.5);
@@ -59,8 +60,9 @@ makeCylinderTransform(const Eigen::Vector3f& startPos, const Eigen::Vector3f& en
 
 Eigen::Matrix4f makeSphereTransform(const Eigen::Vector3f& center, float radius);
 
-// Subdivides the lines until the longest segment is no longer than maxLength, except that it won't
-// generate more than maxSubdivisions segments for each line (to prevent infinite recursion).
+/// Subdivides line segments until no segment exceeds maxLength
+/// @param maxSubdivisions Maximum segments per line to prevent infinite recursion
+/// @post No line segment exceeds maxLength unless clamped by maxSubdivisions
 std::vector<Eigen::Vector3f> subdivideLines(
     const std::vector<Eigen::Vector3f>& lines,
     float maxLength,

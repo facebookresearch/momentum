@@ -32,8 +32,9 @@ inline std::array<index_t, Rank> computeContiguousStrides(
   return strides;
 }
 
-// Simplified Tensor class local to Rasterizer
-// Uses std::vector with aligned allocator and provides conversion to std::mdspan
+/// SIMD-aligned tensor for rasterizer operations
+/// @note Uses AlignedAllocator with kSimdAlignment for vectorized operations
+/// @note Provides mdspan view conversion for interop with rasterization APIs
 template <typename T, size_t Rank>
 class Tensor {
  private:

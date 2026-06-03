@@ -38,8 +38,8 @@ inline Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> mapVector(
   }
 }
 
-/// Validates buffer layout and alignment for all rasterizer buffers.
-/// All non-empty buffers must be properly aligned and have valid strides for SIMD operations.
+/// Validates all rasterizer buffers have proper SIMD alignment and strides
+/// @throws std::runtime_error if any non-empty buffer fails validation
 inline void validateBufferLayouts(
     Span2f zBuffer,
     Span3f rgbBuffer,
@@ -65,8 +65,10 @@ inline void validateBufferLayouts(
   }
 }
 
-/// Validates that buffer dimensions match the camera and each other.
-/// Z buffer dimensions must match camera image size, and all other buffers must match Z buffer.
+/// Validates buffer dimensions match camera and each other
+/// @throws std::runtime_error if dimensions are incompatible
+/// @pre Z buffer height must equal camera imageHeight
+/// @pre Z buffer width must be >= camera imageWidth (allows padding)
 inline void validateBufferDimensions(
     const SimdCamera& camera,
     Span2f zBuffer,
@@ -123,8 +125,9 @@ inline void validateBufferDimensions(
   }
 }
 
-/// Validates that all non-empty buffers have matching row strides.
-/// This is required because the rasterizer uses a single stride value for all buffer accesses.
+/// Validates all non-empty buffers have matching row strides
+/// @throws std::runtime_error if strides don't match
+/// @note Required because rasterizer uses single stride value for all buffer accesses
 inline void validateBufferStrides(
     Span2f zBuffer,
     Span3f rgbBuffer,
@@ -188,7 +191,10 @@ inline void checkBuffers(
       zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 }
 
-/// Validates that triangle indices are within bounds and the array size is a multiple of 3.
+/// Validates triangle indices are in bounds and array is properly sized
+/// @throws std::runtime_error if validation fails
+/// @pre triangles.size() must be multiple of 3
+/// @pre All indices must be in range [0, nVerts)
 template <typename TriangleT>
 inline void validateTriangleIndices(
     const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& triangles,

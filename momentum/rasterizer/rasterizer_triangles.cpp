@@ -31,19 +31,13 @@ namespace momentum::rasterizer {
 
 namespace {
 
-// This is the vertex interpolation matrix, where we map from
-// homgeneous coordinates to interpolate texture coordinates, etc.
-// https://redirect.cs.umbc.edu/~olano/papers/2dh-tri/2dh-tri.pdf
-// https://tayfunkayhan.wordpress.com/2018/12/30/rasterization-in-one-weekend-part-iii/
-// In our old rasterizer code, we assumed that the homogeneous
-// coordinates corresponded to points in eye space, since these are
-// before the perspective divide.  However, with the full distortion
-// camera model, going from window coordinates to eye coordinates is
-// very expensive.  Now, the only reason we care about the specific
-// homogeneous coordinates is to get perspective-correct
-// interpolation.  We're therefore going to solve the issue by
-// computing new pseudo-eye coordinates that ignore distortion,
-// using only the focal length:
+// Vertex interpolation matrix for perspective-correct texture coordinates
+// References:
+// - https://redirect.cs.umbc.edu/~olano/papers/2dh-tri/2dh-tri.pdf
+// - https://tayfunkayhan.wordpress.com/2018/12/30/rasterization-in-one-weekend-part-iii/
+//
+// We compute pseudo-eye coordinates that ignore distortion, using only focal length.
+// This enables perspective-correct interpolation without expensive undistortion operations.
 inline Matrix3fP createVertexMatrix(
     const std::array<Vector3fP, 3>& p_tri_window,
     const Camera& camera) {

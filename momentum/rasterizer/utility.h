@@ -150,12 +150,13 @@ bool isContiguous(const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer) {
   return true;
 }
 
-// Validates that an mdspan buffer is suitable for rasterization operations.
-// Throws std::runtime_error with descriptive message on failure.
-// This function checks:
-// 1. Data pointer is properly aligned for SIMD operations
-// 2. All dimensions except the first are contiguous (pixels are packed tightly)
-// 3. The stride for the first dimension is a multiple of kSimdPacketSize
+/// Validates buffer for rasterization with SIMD operations
+/// @throws std::runtime_error with descriptive message on validation failure
+/// @note Buffer dimensions and strides must support SIMD operations (kSimdPacketSize alignment)
+/// Validates:
+/// - Data pointer aligned to kSimdAlignment bytes
+/// - All dimensions except first are contiguous
+/// - First dimension stride is multiple of kSimdPacketSize
 template <typename T, typename Extents, typename Layout, typename Accessor>
 void validateRasterizerBuffer(
     const Kokkos::mdspan<T, Extents, Layout, Accessor>& buffer,
@@ -219,6 +220,8 @@ inline Matrix3f toEnokiMat(const Eigen::Matrix3f& m) {
   return {m(0, 0), m(0, 1), m(0, 2), m(1, 0), m(1, 1), m(1, 2), m(2, 0), m(2, 1), m(2, 2)};
 }
 
+/// Extract a single element from a SIMD packet type at the given index
+/// Used to convert from vectorized operations back to scalar values
 inline auto extractSingleElement(const Matrix3dP& mat, int index) {
   return Matrix3d{
       mat(0, 0)[index],
@@ -262,7 +265,9 @@ inline auto extractSingleElement(const FloatP& vec, int index) {
 
 class SimdCamera {
  public:
-  // Camera that operates on drjit::Vector3fP.
+  /// Camera adapter for SIMD-vectorized rasterization operations
+  /// @note Operates on SIMD packet types (Vector3fP) for parallel processing of multiple points
+  /// @note Handles perspective projection in model-to-world transform
   SimdCamera(const Camera& camera, Eigen::Matrix4f modelMatrix, Eigen::Vector2f imageOffset)
       : _modelMatrix(modelMatrix),
         _imageOffset(std::move(imageOffset)),
@@ -299,15 +304,15 @@ class SimdCamera {
     return _imageHeight;
   }
 
+  /// Transform points from world space to eye space
+  /// @note Supports projection in model-to-world matrix, requires separate handling
+  /// Model-to-world matrix format:
+  ///    [ mR   mT ]
+  ///    [ m3x m33 ]
+  /// Blockwise multiplication:
+  ///    [ mR   mT ] [ v ] = [ mR * v + mT    ]
+  ///    [ m3x m33 ] [ 1 ]   [ m3x^T * v + m33]
   [[nodiscard]] Vector3fP worldToEye(const Vector3fP& p_world) const {
-    // Because we support projection in the model-to-world matrix, we can't just combine it
-    // with the world-to-eye matrix, so we'll keep them separate.
-    // Model-to-world matrix looks like this:
-    //    [ mR   mT ]
-    //    [ m3x m33 ]
-    // Blockwise multiplication gives:
-    //    [ mR   mT ] [ v ] = [ mR * v + mT    ]
-    //    [ m3x m33 ] [ 1 ]   [ m3x^T * v + m33]
     const Vector3fP p_world_unnormalized =
         _modelToWorld_rotation * p_world + _modelToWorld_translation;
     const FloatP p_world_w = drjit::dot(_modelToWorld_row3, p_world) + _modelToWorld_33;

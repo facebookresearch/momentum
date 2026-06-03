@@ -134,6 +134,7 @@ void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, Span<T, 3> tgtImage, float alp
   }
 
   const float VERY_FAR = FLT_MAX / 2.0f;
+  // Use FLT_MAX/2 to avoid overflow in comparisons while representing "no surface rendered"
 
   // Since we're accumulating downsample*downsample entries, need to scale by
   // 1/downsample*downsample:
@@ -178,7 +179,8 @@ void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, Span<T, 3> tgtImage, float alp
       // apply global alpha:
       rgba.w() *= alpha;
 
-      // Check if target image is contiguous for optimization
+      // Optimize for contiguous target: use vectorized gather/scatter
+      // Non-contiguous fallback: scalar loop to handle arbitrary strides
       const bool tgtContiguous = isContiguous(tgtImage);
 
       if (tgtContiguous) {
