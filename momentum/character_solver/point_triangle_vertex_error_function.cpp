@@ -313,7 +313,6 @@ double PointTriangleVertexErrorFunctionT<T>::calculatePositionJacobian(
     Ref<Eigen::MatrixX<T>> jac,
     Ref<Eigen::VectorX<T>> res) const {
   // calculate the difference between target and position and error
-  const Eigen::Vector3<T> srcPos = meshState.posedMesh_->vertices[constr.srcVertexIndex];
   const Eigen::Vector3<T> tgtPos = computeTargetPosition(*meshState.posedMesh_, constr);
 
   const Eigen::Vector3<T> diff = meshState.posedMesh_->vertices[constr.srcVertexIndex] - tgtPos;
