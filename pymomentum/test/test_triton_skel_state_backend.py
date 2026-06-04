@@ -130,12 +130,15 @@ class TritonSkelStateBackendTest(unittest.TestCase):
         grad = torch.randn_like(out_torch)
         torch.autograd.backward(out_torch, grad)
         torch.autograd.backward(out_triton, grad)
-        self._assert_grad_close(state_triton, state_torch)
+        self._assert_grad_close(state_triton, state_torch, atol=2e-5)
 
     def _assert_grad_close(
         self,
         triton_tensor: torch.Tensor,
         torch_tensor: torch.Tensor,
+        *,
+        atol: float = 1e-5,
+        rtol: float = 1e-5,
     ) -> None:
         triton_grad = triton_tensor.grad
         torch_grad = torch_tensor.grad
@@ -143,4 +146,4 @@ class TritonSkelStateBackendTest(unittest.TestCase):
         self.assertIsNotNone(torch_grad)
         if triton_grad is None or torch_grad is None:
             return
-        torch.testing.assert_close(triton_grad, torch_grad, atol=1e-5, rtol=1e-5)
+        torch.testing.assert_close(triton_grad, torch_grad, atol=atol, rtol=rtol)

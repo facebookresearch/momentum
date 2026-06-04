@@ -20,7 +20,7 @@ except ImportError:
 
 
 _BLOCK_BATCH = 128
-_LN2 = math.log(2.0)
+_LN2 = tl.constexpr(math.log(2.0)) if tl is not None else math.log(2.0)
 if triton is not None and tl is not None:  # noqa: C901
     from pymomentum.backend.triton_common import (  # @manual=:backend_triton
         _quat_multiply,

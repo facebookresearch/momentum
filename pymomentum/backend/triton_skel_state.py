@@ -29,9 +29,9 @@ except ImportError:
 
 _BLOCK_BATCH = 128
 _BLOCK_SIZE = 256
-_LN2 = math.log(2.0)
-_NORM_EPS = 1e-12
-_EULER_EPS = 1e-6
+_LN2 = tl.constexpr(math.log(2.0)) if tl is not None else math.log(2.0)
+_NORM_EPS = tl.constexpr(1e-12) if tl is not None else 1e-12
+_EULER_EPS = tl.constexpr(1e-6) if tl is not None else 1e-6
 
 if triton is not None and tl is not None:  # noqa: C901
     from pymomentum.backend.triton_common import (  # @manual=:backend_triton
