@@ -137,18 +137,21 @@ URDF-to-Momentum Frame Convention</h2>
 <li>Each skeleton node stores a local frame (<code>preRotation</code> + translation offset) plus parameters on fixed local principal axes: <code>rx</code>/<code>ry</code>/<code>rz</code>, <code>tx</code>/<code>ty</code>/<code>tz</code>.</li>
 </ul>
 <p><b>Loader choice: child-link-centric import</b></p><ul>
-<li>The imported Momentum node corresponds to the URDF child link and carries that link's incoming URDF joint.</li>
-<li><code>preRotation</code> is set to the URDF joint origin rotation only, so the imported local frame stays equal to the URDF child link frame.</li>
+<li>For joints whose axis is already aligned with a Momentum principal axis, the imported Momentum node corresponds to the URDF child link and carries that link's incoming URDF joint.</li>
+<li><code>preRotation</code> is set to the URDF joint origin rotation only in this direct case, so the imported local frame stays equal to the URDF child link frame.</li>
+<li>For a revolute or continuous joint with an arbitrary axis, the loader inserts an internal axis-aligned helper node followed by a fixed child-link node. The helper carries the single rotation DOF, and the fixed child-link node applies the inverse alignment.</li>
 <li>This keeps child-link-authored data directly compatible with the imported skeleton.</li>
 </ul>
 <p><b>Consequence for DOF mapping:</b></p><ul>
 <li>DOFs are mapped onto the matching Momentum principal axis inside the preserved link frame. For example, a revolute joint with axis <code>(0,0,1)</code> maps to <code>rz</code>.</li>
+<li>A revolute or continuous joint with a non-principal axis maps its model parameter to the generated helper node's <code>rx</code> parameter. The helper-frame split makes the child link's transform exactly match the URDF transform for finite rotations about that axis.</li>
 <li>The exposed model parameter preserves the URDF joint scalar coordinate. If the URDF axis points along <code>-X</code>, <code>-Y</code>, or <code>-Z</code>, the parameter transform therefore carries a <code>-1</code> coefficient into the corresponding local Momentum principal axis.</li>
 <li>In other words, under this link-preserving convention the exposed model parameter is not always numerically equal to the local positive-axis <code>rx</code>/<code>ry</code>/<code>rz</code> entry used by Momentum FK. For negative-axis joints, a positive model parameter produces a negative local principal-axis rotation.</li>
-<li>Because the model parameter stays in URDF joint coordinates, revolute and prismatic limits and mimic relations remain in the same coordinate as the imported model parameter.</li>
-<li>We do not bake an extra axis-alignment rotation into <code>preRotation</code>. Doing so would make the imported local frame differ from the URDF child link frame, and every child-link- authored quantity would need frame conversion.</li>
+<li>Prismatic joints with arbitrary axes map one model parameter to the parent-frame translation direction implied by the URDF joint origin rotation and axis.</li>
+<li>Planar joints still require a principal-axis plane normal (±X, ±Y, ±Z); a non-principal planar axis is rejected. The arbitrary-axis helper-node split is currently implemented only for revolute and continuous joints.</li>
+<li>Because revolute model parameters stay in URDF joint coordinates and prismatic model parameters keep Momentum's centimeter convention, limits and mimic relations remain in the same coordinate as the imported model parameter.</li>
+<li>We do not leave an extra axis-alignment rotation on the child-link node. Doing so would make the imported local frame differ from the URDF child link frame, and every child-link- authored quantity would need frame conversion.</li>
 </ul>
-<p><b>Limitation:</b> Only principal axes (±X, ±Y, ±Z) are supported. Non-principal axes (e.g., <code>(0.707, 0, 0.707)</code>) would require an additional axis-alignment frame or a more general joint representation, so the loader rejects them.</p>
 <p><b>Units:</b> URDF uses meters; Momentum uses centimeters. All positions are converted automatically. </p>
 
 <p class="definition">Definition in file <a class="el" href="urdf__io_8h_source.html">urdf_io.h</a>.</p>
@@ -158,7 +161,7 @@ URDF-to-Momentum Frame Convention</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_4297f711d4568e603196250a862d58ff.html">urdf</a></li><li class="navelem"><a class="el" href="urdf__io_8h.html">urdf_io.h</a></li>
-    <li class="footer">Generated on Thu Jun 4 2026 07:59:48 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Jun 4 2026 20:09:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

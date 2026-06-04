@@ -210,10 +210,10 @@ $(document).ready(function(){initNavTree('blend__shape_8cpp_source.html',''); in
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
 <div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="structmomentum_1_1BlendShape.html#a966d1e4907c357425b5bbfb558cfff06">  103</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="structmomentum_1_1BlendShape.html#a966d1e4907c357425b5bbfb558cfff06">BlendShape::setShapeVector</a>(</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> index,</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_variable" href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a>,</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">momentum::span&lt;const Vector3f&gt;</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shape</a>,</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    std::string_view <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>) {</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <a class="code hl_function" href="structmomentum_1_1BlendShapeBase.html#ae06b5bf913e17c86a262018a402056ba">BlendShapeBase::setShapeVector</a>(index, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shape</a>, <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <a class="code hl_function" href="structmomentum_1_1BlendShapeBase.html#ae06b5bf913e17c86a262018a402056ba">BlendShapeBase::setShapeVector</a>(<a class="code hl_variable" href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a>, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shape</a>, <a class="code hl_variable" href="bvh__io_8cpp.html#a9b45b3e13bd9167aab02e17e08916231">name</a>);</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="comment">// shapeVectors_ has changed, so the cached SVD used by estimateCoefficients</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="comment">// must be recomputed on next use.</span></div>
@@ -271,13 +271,14 @@ $(document).ready(function(){initNavTree('blend__shape_8cpp_source.html',''); in
 <div class="ttc" id="astructmomentum_1_1BlendShape_html_acbccac9bca3d418556f8bb5fdedf329d"><div class="ttname"><a href="structmomentum_1_1BlendShape.html#acbccac9bca3d418556f8bb5fdedf329d">momentum::BlendShape::getFactorizationValid</a></div><div class="ttdeci">bool getFactorizationValid() const</div><div class="ttdoc">Whether SVD factorization is up-to-date.</div><div class="ttdef"><b>Definition</b> <a href="blend__shape_8h_source.html#l00041">blend_shape.h:41</a></div></div>
 <div class="ttc" id="astructmomentum_1_1BlendShape_html_afcc6cf322644c9aabc2e8b73abb956d0"><div class="ttname"><a href="structmomentum_1_1BlendShape.html#afcc6cf322644c9aabc2e8b73abb956d0">momentum::BlendShape::getBaseShape</a></div><div class="ttdeci">const std::vector&lt; Vector3f &gt; &amp; getBaseShape() const</div><div class="ttdef"><b>Definition</b> <a href="blend__shape_8h_source.html#l00036">blend_shape.h:36</a></div></div>
 <div class="ttc" id="astructmomentum_1_1BlendWeightsT_html"><div class="ttname"><a href="structmomentum_1_1BlendWeightsT.html">momentum::BlendWeightsT</a></div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00109">types.h:109</a></div></div>
+<div class="ttc" id="aurdf__io_8cpp_html_a750b5d744c39a06bfb13e6eb010e35d0"><div class="ttname"><a href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a></div><div class="ttdeci">int index</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00147">urdf_io.cpp:147</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="blend__shape_8cpp.html">blend_shape.cpp</a></li>
-    <li class="footer">Generated on Thu Jun 4 2026 07:59:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Jun 4 2026 20:09:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

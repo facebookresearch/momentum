@@ -8,9 +8,9 @@ var searchData=
   ['jointindices_5',['jointIndices',['../structmomentum_1_1CenterOfMassConstraintT.html#abb6ec135c6782ed4cd8be5aaa8f24988',1,'momentum::CenterOfMassConstraintT']]],
   ['jointmap_6',['jointmap',['../structmomentum_1_1Character.html#adf07339ad064d25b95247c032df061b9',1,'momentum::Character::jointMap'],['../structmomentum_1_1PoseShape.html#ad77da1f82b96f09c530ef56e4a59a581',1,'momentum::PoseShape::jointMap']]],
   ['jointname_7',['jointname',['../structmomentum_1_1JointPhysicalProperties.html#a93e696ba9080521f9e52f7460c55e9be',1,'momentum::JointPhysicalProperties::jointName'],['../structmomentum_1_1GloveSensorObservation.html#a314822341f651ca89156b229548075ab',1,'momentum::GloveSensorObservation::jointName']]],
-  ['jointparameter_8',['jointParameter',['../structmomentum_1_1LimitMinMaxJoint.html#a69ba015f06d60b5aeeb5d266c876d458',1,'momentum::LimitMinMaxJoint']]],
-  ['jointparameters_9',['jointParameters',['../structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2',1,'momentum::SkeletonStateT']]],
-  ['jointparamsbaseindex_10',['jointParamsBaseIndex',['../urdf__io_8cpp.html#a0b76385c81b1a449cdd16587aa940852',1,'urdf_io.cpp']]],
+  ['jointparamcoefficients_8',['jointParamCoefficients',['../urdf__io_8cpp.html#a45afae3c9e155fb55e54161244b4fad0',1,'urdf_io.cpp']]],
+  ['jointparameter_9',['jointParameter',['../structmomentum_1_1LimitMinMaxJoint.html#a69ba015f06d60b5aeeb5d266c876d458',1,'momentum::LimitMinMaxJoint']]],
+  ['jointparameters_10',['jointParameters',['../structmomentum_1_1SkeletonStateT.html#a637a6efeab4a26312e8b81afa3ffc2a2',1,'momentum::SkeletonStateT']]],
   ['joints_11',['joints',['../structmomentum_1_1SkeletonT.html#a88a0732a2701920900c3bf2b25650f56',1,'momentum::SkeletonT::joints'],['../bvh__io_8cpp.html#a09542a239e8fba4a7a66c12005ba9452',1,'joints:&#160;bvh_io.cpp']]],
   ['jointstate_12',['jointState',['../structmomentum_1_1SkeletonStateT.html#a946ea0259e7a1b272ef5afcac8ae5b37',1,'momentum::SkeletonStateT']]],
   ['jointtonodemap_13',['jointToNodeMap',['../structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html#afd8e0b93602d325ae75c0be8a9104085',1,'momentum::fbx_internal::SkeletonNodeResult']]]

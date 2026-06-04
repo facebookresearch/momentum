@@ -12,7 +12,8 @@ var searchData=
   ['animationindices_9',['animationIndices',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a145b0e64fa857b7dfbf9420e8a49a9a4',1,'momentum::GltfBuilder::Impl::CharacterData']]],
   ['animcurves_10',['animCurves',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a79df6142e3d6b140f18225314ac1b691',1,'momentum::fbx_internal::JointCurveSetup']]],
   ['animcurvesindex_11',['animCurvesIndex',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a116930f94fb338b46866a9cfc76e2e06',1,'momentum::fbx_internal::JointCurveSetup']]],
-  ['attachedtoskin_12',['attachedToSkin',['../structmomentum_1_1Locator.html#ac55cd892e7a7ab55ee94d9739b2b8ad4',1,'momentum::Locator']]],
-  ['awgt_13',['awgt',['../state__sequence__error__function_8cpp.html#a9cfa21bfd1e2366a12159f2c4e70e05c',1,'state_sequence_error_function.cpp']]],
-  ['axisidx_14',['axisIdx',['../urdf__io_8cpp.html#a0e2b7f200623cc5b9c40e295cc559e24',1,'urdf_io.cpp']]]
+  ['arbitraryaxisframerotation_12',['arbitraryAxisFrameRotation',['../urdf__io_8cpp.html#af338074f59677600123cc11ea7a1c121',1,'urdf_io.cpp']]],
+  ['attachedtoskin_13',['attachedToSkin',['../structmomentum_1_1Locator.html#ac55cd892e7a7ab55ee94d9739b2b8ad4',1,'momentum::Locator']]],
+  ['awgt_14',['awgt',['../state__sequence__error__function_8cpp.html#a9cfa21bfd1e2366a12159f2c4e70e05c',1,'state_sequence_error_function.cpp']]],
+  ['axisjointid_15',['axisJointId',['../urdf__io_8cpp.html#a645d5b68956f520815c99ebfbc3a3429',1,'urdf_io.cpp']]]
 ];

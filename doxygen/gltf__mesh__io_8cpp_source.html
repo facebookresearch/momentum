@@ -151,8 +151,8 @@ $(document).ready(function(){initNavTree('gltf__mesh__io_8cpp_source.html',''); 
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shortIndices</a> = <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">copyAccessorBuffer&lt;uint16_t&gt;</a>(model, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">primitive</a>.indices);</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  indices.reserve(<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shortIndices</a>.size());</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> index : <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shortIndices</a>) {</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    indices.push_back(index);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_variable" href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a> : <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">shortIndices</a>) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    indices.push_back(<a class="code hl_variable" href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a>);</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  }</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordflow">return</span> indices;</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
@@ -698,13 +698,14 @@ $(document).ready(function(){initNavTree('gltf__mesh__io_8cpp_source.html',''); 
 <div class="ttc" id="anamespacemomentum_html_ae1add95d476229cc7fb475a62dfe8b9d"><div class="ttname"><a href="namespacemomentum.html#ae1add95d476229cc7fb475a62dfe8b9d">momentum::addMesh</a></div><div class="ttdeci">size_t addMesh(const fx::gltf::Document &amp;model, const fx::gltf::Primitive &amp;primitive, Mesh_u &amp;mesh)</div><div class="ttdoc">Add mesh data from a glTF primitive.</div><div class="ttdef"><b>Definition</b> <a href="gltf__mesh__io_8cpp_source.html#l00224">gltf_mesh_io.cpp:224</a></div></div>
 <div class="ttc" id="astate__sequence__error__function_8cpp_html_a854dddca27d23e617c4b3bb741b1c88c"><div class="ttname"><a href="state__sequence__error__function_8cpp.html#a854dddca27d23e617c4b3bb741b1c88c">jointIndex</a></div><div class="ttdeci">size_t jointIndex</div><div class="ttdef"><b>Definition</b> <a href="state__sequence__error__function_8cpp_source.html#l00221">state_sequence_error_function.cpp:221</a></div></div>
 <div class="ttc" id="atexture__classification_8cpp_html_a48d9522e58fa05906c6dba23e5745a72"><div class="ttname"><a href="texture__classification_8cpp.html#a48d9522e58fa05906c6dba23e5745a72">v</a></div><div class="ttdeci">float v</div><div class="ttdef"><b>Definition</b> <a href="texture__classification_8cpp_source.html#l00025">texture_classification.cpp:25</a></div></div>
+<div class="ttc" id="aurdf__io_8cpp_html_a750b5d744c39a06bfb13e6eb010e35d0"><div class="ttname"><a href="urdf__io_8cpp.html#a750b5d744c39a06bfb13e6eb010e35d0">index</a></div><div class="ttdeci">int index</div><div class="ttdef"><b>Definition</b> <a href="urdf__io_8cpp_source.html#l00147">urdf_io.cpp:147</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_c2f13be7e03d9233fc5bd49f0a0b157c.html">gltf</a></li><li class="navelem"><a class="el" href="gltf__mesh__io_8cpp.html">gltf_mesh_io.cpp</a></li>
-    <li class="footer">Generated on Thu Jun 4 2026 07:59:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Thu Jun 4 2026 20:09:09 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
