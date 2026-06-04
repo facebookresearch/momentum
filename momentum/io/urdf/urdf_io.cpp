@@ -12,6 +12,7 @@
 #include "momentum/common/log.h"
 #include "momentum/math/constants.h"
 
+#include <fmt/format.h>
 #include <urdf_model/link.h>
 #include <urdf_model/model.h>
 #include <urdf_model/pose.h>
@@ -19,10 +20,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <optional>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace momentum {
 
@@ -39,9 +42,7 @@ struct MimicData {
   std::string mimickedJointName; // URDF joint name to mimic
   float multiplier{};
   float offset{}; // radians for revolute, meters for prismatic
-  Eigen::Index jointParamsBaseIndex{}; // this joint's parameter base index
-  int axisIdx{}; // principal axis index (0=X, 1=Y, 2=Z)
-  float sign{}; // axis sign (+1/-1)
+  std::vector<std::pair<Eigen::Index, float>> jointParamCoefficients;
   bool isRotation{}; // true for revolute/continuous, false for prismatic
 };
 
@@ -142,44 +143,90 @@ void addPhysicalPropertiesForUrdfLink(
   return "UNKNOWN";
 }
 
-/// Returns the principal axis index (0=X, 1=Y, 2=Z) and sign (+1/-1) for a URDF axis vector.
-///
-/// The imported Momentum node represents the child link carrying its incoming URDF joint. Since
-/// the local frame is kept equal to the URDF child link frame, we do not spend preRotation on
-/// aligning arbitrary URDF axes to a canonical axis. Instead, we only accept URDF axes already
-/// aligned with a principal axis and map the DOF onto the matching Momentum parameter.
-///
-/// For negative axes (e.g., (0,0,-1)), the sign tracks how the URDF scalar joint coordinate maps
-/// into the preserved child-link frame's local principal-axis parameter. The imported model
-/// parameter itself stays equal to the URDF joint scalar, so limits remain in the same coordinate.
-/// This also means the exposed model parameter is not always numerically equal to the local
-/// positive-axis rx/ry/rz slot used by Momentum FK; for a negative axis, the local slot receives
-/// the negated value through the parameter transform.
-///
-/// @return A pair of (axis index, sign): axis index 0=X, 1=Y, 2=Z; sign is +1 or -1.
-/// @throws If the axis is not aligned with a principal axis (e.g., (0.707, 0, 0.707)).
-[[nodiscard]] std::pair<int, float> getPrincipalAxis(const urdf::Vector3& axis) {
-  const auto ax = static_cast<float>(axis.x);
-  const auto ay = static_cast<float>(axis.y);
-  const auto az = static_cast<float>(axis.z);
+struct PrincipalAxis {
+  int index{}; // principal axis index (0=X, 1=Y, 2=Z)
+  float sign{}; // axis sign (+1/-1)
+};
+
+struct JointDofMapping {
+  std::vector<std::pair<Eigen::Index, float>> jointParamCoefficients;
+  bool isRotation{};
+};
+
+struct JointFrameData {
+  Eigen::Index modelParamsBaseIndex{};
+  Eigen::Index axisJointId{};
+  Eigen::Index linkJointId{};
+  Eigen::Index motionJointParamsBaseIndex{};
+  Quaternionf originRotation = Quaternionf::Identity();
+  Vector3f originTranslation = Vector3f::Zero();
+  // For a revolute/continuous joint whose axis is a principal axis, the resolved axis is cached
+  // here so the DOF mapping does not recompute it. Null for arbitrary axes (which use
+  // arbitraryAxisFrameRotation instead) and for non-rotational joints.
+  std::optional<PrincipalAxis> principalRotationAxis;
+  std::optional<Quaternionf> arbitraryAxisFrameRotation;
+
+  [[nodiscard]] bool hasArbitraryRotationAxis() const {
+    return arbitraryAxisFrameRotation.has_value();
+  }
+};
+
+[[nodiscard]] Vector3f normalizedAxis(const urdf::Vector3& axis, std::string_view jointName) {
+  const Vector3f result{
+      static_cast<float>(axis.x), static_cast<float>(axis.y), static_cast<float>(axis.z)};
+  MT_THROW_IF(
+      !result.allFinite(),
+      "Joint '{}' has invalid non-finite axis ({}, {}, {}).",
+      jointName,
+      result.x(),
+      result.y(),
+      result.z());
+  const float norm = result.norm();
+  MT_THROW_IF(
+      norm < 1e-8f,
+      "Joint '{}' has invalid zero-length axis ({}, {}, {}).",
+      jointName,
+      result.x(),
+      result.y(),
+      result.z());
+  return result / norm;
+}
+
+[[nodiscard]] std::optional<PrincipalAxis> getPrincipalAxis(const Vector3f& axis) {
   constexpr float kTol = 1e-4f;
 
+  const float ax = axis.x();
+  const float ay = axis.y();
+  const float az = axis.z();
   if (std::abs(std::abs(ax) - 1.0f) < kTol && std::abs(ay) < kTol && std::abs(az) < kTol) {
-    return {0, ax > 0 ? 1.0f : -1.0f};
+    return PrincipalAxis{0, ax > 0 ? 1.0f : -1.0f};
   }
   if (std::abs(ax) < kTol && std::abs(std::abs(ay) - 1.0f) < kTol && std::abs(az) < kTol) {
-    return {1, ay > 0 ? 1.0f : -1.0f};
+    return PrincipalAxis{1, ay > 0 ? 1.0f : -1.0f};
   }
   if (std::abs(ax) < kTol && std::abs(ay) < kTol && std::abs(std::abs(az) - 1.0f) < kTol) {
-    return {2, az > 0 ? 1.0f : -1.0f};
+    return PrincipalAxis{2, az > 0 ? 1.0f : -1.0f};
+  }
+
+  return std::nullopt;
+}
+
+[[nodiscard]] PrincipalAxis requirePrincipalAxis(
+    const urdf::Vector3& axis,
+    std::string_view jointName) {
+  const Vector3f normalized = normalizedAxis(axis, jointName);
+  const auto principalAxis = getPrincipalAxis(normalized);
+  if (principalAxis) {
+    return *principalAxis;
   }
 
   MT_THROW(
-      "Non-principal joint axis ({}, {}, {}) is not supported. "
-      "Only axes aligned with X, Y, or Z are supported.",
-      ax,
-      ay,
-      az);
+      "Joint '{}' has non-principal planar axis ({}, {}, {}). "
+      "Only axes aligned with X, Y, or Z are supported for planar joints.",
+      jointName,
+      normalized.x(),
+      normalized.y(),
+      normalized.z());
 }
 
 /// Loads a single mesh from a URDF visual geometry element.
@@ -293,16 +340,321 @@ std::optional<TaperedCapsule> loadCollisionCapsule(
 constexpr std::array<const char*, 3> kTranslationNames = {"tx", "ty", "tz"};
 constexpr std::array<const char*, 3> kRotationNames = {"rx", "ry", "rz"};
 
+void addModelDof(
+    ParsingData& data,
+    const std::string& urdfJointName,
+    const JointDofMapping& mapping,
+    Eigen::Index modelParamsBaseIndex) {
+  data.parameterTransform.name.push_back(urdfJointName);
+  for (const auto& [jointParamIndex, coefficient] : mapping.jointParamCoefficients) {
+    data.triplets.emplace_back(jointParamIndex, modelParamsBaseIndex, coefficient);
+  }
+  data.urdfJointNameToModelParamIdx[urdfJointName] = modelParamsBaseIndex;
+  data.totalDoFs += 1;
+}
+
+void addMimicDof(ParsingData& data, const urdf::Joint& urdfJoint, const JointDofMapping& mapping) {
+  MimicData mimic;
+  mimic.mimickedJointName = urdfJoint.mimic->joint_name;
+  mimic.multiplier = static_cast<float>(urdfJoint.mimic->multiplier);
+  mimic.offset = static_cast<float>(urdfJoint.mimic->offset);
+  mimic.jointParamCoefficients = mapping.jointParamCoefficients;
+  mimic.isRotation = mapping.isRotation;
+  data.mimicJoints.push_back(std::move(mimic));
+}
+
+[[nodiscard]] JointDofMapping rotationDofMapping(
+    Eigen::Index jointParamsBaseIndex,
+    const PrincipalAxis& axis) {
+  JointDofMapping result;
+  result.jointParamCoefficients.emplace_back(jointParamsBaseIndex + RX + axis.index, axis.sign);
+  result.isRotation = true;
+  return result;
+}
+
+[[nodiscard]] JointDofMapping prismaticDofMapping(
+    Eigen::Index jointParamsBaseIndex,
+    const Vector3f& axisInParentFrame) {
+  JointDofMapping result;
+  result.isRotation = false;
+  constexpr float kTol = 1e-6f;
+  for (int index = 0; index < 3; ++index) {
+    if (std::abs(axisInParentFrame[index]) > kTol) {
+      result.jointParamCoefficients.emplace_back(
+          jointParamsBaseIndex + index, axisInParentFrame[index]);
+    }
+  }
+  return result;
+}
+
+[[nodiscard]] bool isRevoluteLike(const urdf::Joint& urdfJoint) {
+  return urdfJoint.type == urdf::Joint::REVOLUTE || urdfJoint.type == urdf::Joint::CONTINUOUS;
+}
+
+[[nodiscard]] JointFrameData makeJointFrameData(
+    const ParsingData& data,
+    const urdf::Joint* urdfJoint) {
+  JointFrameData result;
+  result.modelParamsBaseIndex = data.totalDoFs;
+  result.axisJointId = data.skeleton.joints.size();
+
+  const urdf::Pose* urdfPose =
+      urdfJoint != nullptr ? &urdfJoint->parent_to_joint_origin_transform : nullptr;
+  result.originRotation = urdfPose != nullptr ? toMomentumQuaternion<float>(urdfPose->rotation)
+                                              : Quaternionf::Identity();
+  result.originTranslation = urdfPose != nullptr
+      ? (toMomentumVector3<float>(urdfPose->position) * toCm<float>()).eval()
+      : Vector3f::Zero();
+
+  if (urdfJoint != nullptr && isRevoluteLike(*urdfJoint)) {
+    const Vector3f axis = normalizedAxis(urdfJoint->axis, urdfJoint->name);
+    result.principalRotationAxis = getPrincipalAxis(axis);
+    if (!result.principalRotationAxis) {
+      result.arbitraryAxisFrameRotation =
+          Quaternionf::FromTwoVectors(Vector3f::UnitX(), axis).normalized();
+    }
+  }
+
+  result.linkJointId = result.axisJointId + (result.hasArbitraryRotationAxis() ? 1 : 0);
+  // The motion DOF always lands on the first node this joint pushes: the axis-aligned helper
+  // when present, otherwise the link node — both share the same index (axisJointId).
+  result.motionJointParamsBaseIndex = result.axisJointId * kParametersPerJoint;
+  return result;
+}
+
+void addModelOrMimicDof(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    const JointDofMapping& mapping,
+    Eigen::Index modelParamsBaseIndex) {
+  if (urdfJoint.mimic != nullptr) {
+    addMimicDof(data, urdfJoint, mapping);
+  } else {
+    addModelDof(data, urdfJoint.name, mapping, modelParamsBaseIndex);
+  }
+}
+
+void addPrismaticJointDof(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    const JointFrameData& frame) {
+  const Vector3f axis = normalizedAxis(urdfJoint.axis, urdfJoint.name);
+  const JointDofMapping mapping =
+      prismaticDofMapping(frame.motionJointParamsBaseIndex, frame.originRotation * axis);
+  addModelOrMimicDof(data, urdfJoint, mapping, frame.modelParamsBaseIndex);
+}
+
+void addRevoluteJointDof(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    const JointFrameData& frame) {
+  JointDofMapping mapping;
+  if (frame.principalRotationAxis) {
+    mapping = rotationDofMapping(frame.motionJointParamsBaseIndex, *frame.principalRotationAxis);
+  } else {
+    // Arbitrary axis: the inserted axis-aligned helper node carries a single rotation about its
+    // local X axis.
+    mapping.jointParamCoefficients.emplace_back(frame.motionJointParamsBaseIndex + RX, 1.0f);
+    mapping.isRotation = true;
+  }
+
+  addModelOrMimicDof(data, urdfJoint, mapping, frame.modelParamsBaseIndex);
+}
+
+void addFloatingJointDofs(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    const JointFrameData& frame) {
+  // Floating joints have 6 DOFs (3 translation, then 3 rotation); use the URDF joint name with
+  // axis suffixes. Translation parameters use a 10x scaling factor so that a unit change in
+  // model parameter space produces 10 cm of translation. This makes translation easier to
+  // change relative to rotation in optimization.
+  constexpr float kFloatingTranslationScale = 10.0f;
+  const auto& jn = urdfJoint.name;
+  for (int index = 0; index < 3; ++index) {
+    data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kTranslationNames[index]));
+    data.triplets.emplace_back(
+        frame.motionJointParamsBaseIndex + TX + index,
+        frame.modelParamsBaseIndex + index,
+        kFloatingTranslationScale);
+  }
+  for (int index = 0; index < 3; ++index) {
+    data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kRotationNames[index]));
+    data.triplets.emplace_back(
+        frame.motionJointParamsBaseIndex + RX + index,
+        frame.modelParamsBaseIndex + 3 + index,
+        1.0f);
+  }
+  data.totalDoFs += 6;
+}
+
+void addPlanarJointDofs(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    const JointFrameData& frame) {
+  // The axis defines the plane normal. DOFs are translation along the two in-plane
+  // axes and rotation around the normal.
+  const int normalIdx = requirePrincipalAxis(urdfJoint.axis, urdfJoint.name).index;
+  const int planeAxis0 = (normalIdx + 1) % 3;
+  const int planeAxis1 = (normalIdx + 2) % 3;
+  const auto& jn = urdfJoint.name;
+  data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kTranslationNames[planeAxis0]));
+  data.triplets.emplace_back(
+      frame.motionJointParamsBaseIndex + planeAxis0, frame.modelParamsBaseIndex + 0, 1.0f);
+  data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kTranslationNames[planeAxis1]));
+  data.triplets.emplace_back(
+      frame.motionJointParamsBaseIndex + planeAxis1, frame.modelParamsBaseIndex + 1, 1.0f);
+  data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kRotationNames[normalIdx]));
+  data.triplets.emplace_back(
+      frame.motionJointParamsBaseIndex + RX + normalIdx, frame.modelParamsBaseIndex + 2, 1.0f);
+  data.totalDoFs += 3;
+}
+
+void addJointDofs(ParsingData& data, const urdf::Joint& urdfJoint, const JointFrameData& frame) {
+  //---------------------------
+  // Parse Parameter transform
+  //---------------------------
+  //
+  // URDF expresses motion on a joint between links, but attached data is authored in the child
+  // link frame. Our imported Momentum node therefore keeps the child link frame as its local
+  // frame whenever the URDF axis already matches a Momentum principal axis. For arbitrary
+  // revolute axes, we insert an internal axis-aligned helper followed by a fixed child-link node:
+  //   parent -> origin * axisFrame -> revolute X(q) -> axisFrame^-1 -> child link
+  // so the composite transform is exactly origin * Rot(axis, q) while the visible child-link
+  // node remains in the URDF child-link frame.
+  //
+  // Revolute model parameters stay in the URDF scalar coordinate. Prismatic parameters keep the
+  // existing Momentum convention of centimeters. Negative principal axes, arbitrary prismatic
+  // direction vectors, and mimic offsets are represented by coefficients in the parameter
+  // transform rather than by changing the underlying joint frame.
+
+  switch (urdfJoint.type) {
+    case urdf::Joint::PRISMATIC: {
+      addPrismaticJointDof(data, urdfJoint, frame);
+      break;
+    }
+    case urdf::Joint::REVOLUTE:
+    case urdf::Joint::CONTINUOUS: {
+      addRevoluteJointDof(data, urdfJoint, frame);
+      break;
+    }
+    case urdf::Joint::FLOATING: {
+      addFloatingJointDofs(data, urdfJoint, frame);
+      break;
+    }
+    case urdf::Joint::PLANAR: {
+      addPlanarJointDofs(data, urdfJoint, frame);
+      break;
+    }
+    case urdf::Joint::FIXED: {
+      // No degrees of freedom
+      break;
+    }
+    case urdf::Joint::UNKNOWN: {
+      MT_THROW("Unsupported joint type: {}", toString(urdfJoint.type));
+    }
+  }
+}
+
+void addJointLimits(
+    ParsingData& data,
+    const urdf::Joint& urdfJoint,
+    Eigen::Index modelParamsBaseIndex) {
+  // Mimic joints are driven by the mimicked joint's parameter, so their limits don't
+  // correspond to an independent model parameter.
+  if (urdfJoint.mimic != nullptr || !urdfJoint.limits) {
+    return;
+  }
+
+  switch (urdfJoint.type) {
+    case urdf::Joint::REVOLUTE: {
+      ParameterLimit jointLimits;
+      jointLimits.type = MinMax;
+      jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
+      jointLimits.data.minMax.limits[0] = urdfJoint.limits->lower; // rad
+      jointLimits.data.minMax.limits[1] = urdfJoint.limits->upper;
+      jointLimits.weight = 1.0f;
+      data.limits.push_back(jointLimits);
+      break;
+    }
+    case urdf::Joint::PRISMATIC: {
+      ParameterLimit jointLimits;
+      jointLimits.type = MinMax;
+      jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
+      jointLimits.data.minMax.limits[0] = toCm<float>(urdfJoint.limits->lower);
+      jointLimits.data.minMax.limits[1] = toCm<float>(urdfJoint.limits->upper);
+      jointLimits.weight = 1.0f;
+      data.limits.push_back(jointLimits);
+      break;
+    }
+    case urdf::Joint::UNKNOWN:
+    case urdf::Joint::CONTINUOUS:
+    case urdf::Joint::FLOATING:
+    case urdf::Joint::PLANAR:
+    case urdf::Joint::FIXED: {
+      // No independent min/max parameter limit to add.
+      break;
+    }
+  }
+}
+
+void appendSkeletonJointsForUrdfLink(
+    ParsingData& data,
+    size_t parentJointId,
+    const urdf::Link& urdfLink,
+    const urdf::Joint* urdfJoint,
+    const JointFrameData& frame) {
+  if (frame.hasArbitraryRotationAxis()) {
+    MT_THROW_IF(urdfJoint == nullptr, "Internal URDF axis node requires a URDF joint.");
+    Joint axisJoint;
+    axisJoint.name = fmt::format("{}_urdf_axis", urdfJoint->name);
+    axisJoint.parent = parentJointId;
+    axisJoint.preRotation = frame.originRotation * *frame.arbitraryAxisFrameRotation;
+    axisJoint.translationOffset = frame.originTranslation;
+    data.skeleton.joints.push_back(axisJoint);
+  }
+
+  Joint linkJoint;
+  linkJoint.name = urdfLink.name;
+  linkJoint.parent =
+      frame.hasArbitraryRotationAxis() ? static_cast<size_t>(frame.axisJointId) : parentJointId;
+  linkJoint.preRotation = frame.hasArbitraryRotationAxis()
+      ? frame.arbitraryAxisFrameRotation->inverse()
+      : frame.originRotation;
+  linkJoint.translationOffset =
+      frame.hasArbitraryRotationAxis() ? Vector3f::Zero() : frame.originTranslation;
+  data.skeleton.joints.push_back(linkJoint);
+}
+
+void collectLinkVisuals(ParsingData& data, const urdf::Link& urdfLink, size_t linkJointId) {
+  if (urdfLink.visual_array.empty()) {
+    return;
+  }
+
+  LinkVisualData visualData;
+  visualData.jointIndex = linkJointId;
+  visualData.visuals = urdfLink.visual_array;
+  data.linkVisuals.push_back(std::move(visualData));
+}
+
+void collectCollisionGeometry(ParsingData& data, const urdf::Link& urdfLink, size_t linkJointId) {
+  for (const auto& collision : urdfLink.collision_array) {
+    if (!collision) {
+      MT_LOGW("Ignoring null URDF collision on link '{}'.", urdfLink.name);
+      continue;
+    }
+    auto capsule = loadCollisionCapsule(*collision, urdfLink.name, linkJointId);
+    if (capsule) {
+      data.collision.push_back(*capsule);
+    }
+  }
+}
+
 bool loadUrdfSkeletonRecursive(
     ParsingData& data,
     size_t parentJointId,
-    const urdf::ModelInterface* urdfModel,
     const urdf::Link* urdfLink) {
   MT_THROW_IF(urdfLink == nullptr, "URDF link is null.");
-
-  //-------------
-  // Parse joint
-  //-------------
 
   auto* urdfJoint = urdfLink->parent_joint.get();
   MT_THROW_IF(
@@ -310,212 +662,21 @@ bool loadUrdfSkeletonRecursive(
       "URDF parent joint is null for a non root link ({}).",
       urdfLink->name);
 
-  Joint joint;
-  // The imported Momentum node is identified by the child link. It stores the incoming URDF
-  // joint that moves that link, rather than creating a separate "joint frame" node.
-  joint.name = urdfLink->name;
-  joint.parent = parentJointId;
-
-  const Eigen::Index jointId = data.skeleton.joints.size();
-  const Eigen::Index jointParamsBaseIndex = jointId * kParametersPerJoint;
-  const Eigen::Index modelParamsBaseIndex = data.totalDoFs;
-
-  //---------------------------
-  // Parse Parameter transform
-  //---------------------------
-  //
-  // URDF expresses motion on a joint between links, but attached data is authored in the child
-  // link frame. Our imported Momentum node therefore keeps the child link frame as its local
-  // frame and stores the incoming URDF joint's DOF on that node. We do not introduce a separate
-  // internal axis-alignment frame.
-  //
-  // As a result, we map the URDF DOF directly to the corresponding principal-axis parameter
-  // (rx/ry/rz for revolute, tx/ty/tz for prismatic) inside the preserved link frame. For
-  // negative URDF axes, the parameter transform carries a negative coefficient into the local
-  // principal axis so the imported model parameter remains the URDF joint scalar coordinate
-  // rather than the local positive-axis rotation used internally by Momentum FK.
-
+  const JointFrameData frame = makeJointFrameData(data, urdfJoint);
   if (urdfJoint != nullptr) {
-    // Check if this joint mimics another joint. Mimic joints don't create their own model
-    // parameter — they reuse the mimicked joint's parameter with a multiplier and offset.
-    const bool isMimic = urdfJoint->mimic != nullptr;
-
-    switch (urdfJoint->type) {
-      case urdf::Joint::PRISMATIC: {
-        const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
-        if (isMimic) {
-          MimicData mimic;
-          mimic.mimickedJointName = urdfJoint->mimic->joint_name;
-          mimic.multiplier = static_cast<float>(urdfJoint->mimic->multiplier);
-          mimic.offset = static_cast<float>(urdfJoint->mimic->offset);
-          mimic.jointParamsBaseIndex = jointParamsBaseIndex;
-          mimic.axisIdx = axisIdx;
-          mimic.sign = sign;
-          mimic.isRotation = false;
-          data.mimicJoints.push_back(mimic);
-        } else {
-          data.parameterTransform.name.push_back(urdfJoint->name);
-          data.triplets.emplace_back(jointParamsBaseIndex + axisIdx, modelParamsBaseIndex, sign);
-          data.urdfJointNameToModelParamIdx[urdfJoint->name] = modelParamsBaseIndex;
-          data.totalDoFs += 1;
-        }
-        break;
-      }
-      case urdf::Joint::REVOLUTE:
-      case urdf::Joint::CONTINUOUS: {
-        const auto [axisIdx, sign] = getPrincipalAxis(urdfJoint->axis);
-        if (isMimic) {
-          MimicData mimic;
-          mimic.mimickedJointName = urdfJoint->mimic->joint_name;
-          mimic.multiplier = static_cast<float>(urdfJoint->mimic->multiplier);
-          mimic.offset = static_cast<float>(urdfJoint->mimic->offset);
-          mimic.jointParamsBaseIndex = jointParamsBaseIndex;
-          mimic.axisIdx = axisIdx;
-          mimic.sign = sign;
-          mimic.isRotation = true;
-          data.mimicJoints.push_back(mimic);
-        } else {
-          data.parameterTransform.name.push_back(urdfJoint->name);
-          data.triplets.emplace_back(
-              jointParamsBaseIndex + 3 + axisIdx, modelParamsBaseIndex, sign);
-          data.urdfJointNameToModelParamIdx[urdfJoint->name] = modelParamsBaseIndex;
-          data.totalDoFs += 1;
-        }
-        break;
-      }
-      case urdf::Joint::FLOATING: {
-        // Floating joints have 6 DOFs; use the URDF joint name with axis suffixes.
-        // Translation parameters use a 10x scaling factor so that a unit change in
-        // model parameter space produces 10 cm of translation. This makes translation
-        // easier to change relative to rotation in optimization.
-        constexpr float kFloatingTranslationScale = 10.0f;
-        const auto& jn = urdfJoint->name;
-        data.parameterTransform.name.push_back(fmt::format("{}_tx", jn));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + 0, modelParamsBaseIndex + 0, kFloatingTranslationScale);
-        data.parameterTransform.name.push_back(fmt::format("{}_ty", jn));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + 1, modelParamsBaseIndex + 1, kFloatingTranslationScale);
-        data.parameterTransform.name.push_back(fmt::format("{}_tz", jn));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + 2, modelParamsBaseIndex + 2, kFloatingTranslationScale);
-        data.parameterTransform.name.push_back(fmt::format("{}_rx", jn));
-        data.triplets.emplace_back(jointParamsBaseIndex + 3, modelParamsBaseIndex + 3, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("{}_ry", jn));
-        data.triplets.emplace_back(jointParamsBaseIndex + 4, modelParamsBaseIndex + 4, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("{}_rz", jn));
-        data.triplets.emplace_back(jointParamsBaseIndex + 5, modelParamsBaseIndex + 5, 1.0f);
-        data.totalDoFs += 6;
-        break;
-      }
-      case urdf::Joint::PLANAR: {
-        // The axis defines the plane normal. DOFs are translation along the two in-plane
-        // axes and rotation around the normal.
-        const int normalIdx = getPrincipalAxis(urdfJoint->axis).first;
-        const int planeAxis0 = (normalIdx + 1) % 3;
-        const int planeAxis1 = (normalIdx + 2) % 3;
-        const auto& jn = urdfJoint->name;
-        data.parameterTransform.name.push_back(
-            fmt::format("{}_{}", jn, kTranslationNames[planeAxis0]));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + planeAxis0, modelParamsBaseIndex + 0, 1.0f);
-        data.parameterTransform.name.push_back(
-            fmt::format("{}_{}", jn, kTranslationNames[planeAxis1]));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + planeAxis1, modelParamsBaseIndex + 1, 1.0f);
-        data.parameterTransform.name.push_back(fmt::format("{}_{}", jn, kRotationNames[normalIdx]));
-        data.triplets.emplace_back(
-            jointParamsBaseIndex + 3 + normalIdx, modelParamsBaseIndex + 2, 1.0f);
-        data.totalDoFs += 3;
-        break;
-      }
-      case urdf::Joint::FIXED: {
-        // No degrees of freedom
-        break;
-      }
-      default: {
-        MT_THROW("Unsupported joint type: {}", toString(urdfJoint->type));
-      }
-    }
-
-    // Parse joint limits (required only for non-mimic revolute and prismatic joints).
-    // Mimic joints are driven by the mimicked joint's parameter, so their limits don't
-    // correspond to an independent model parameter.
-    if (!isMimic && urdfJoint->limits) {
-      auto urdfJointLimits = urdfJoint->limits;
-      switch (urdfJoint->type) {
-        case urdf::Joint::REVOLUTE: {
-          ParameterLimit jointLimits;
-          jointLimits.type = MinMax;
-          jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          jointLimits.data.minMax.limits[0] = urdfJointLimits->lower; // rad
-          jointLimits.data.minMax.limits[1] = urdfJointLimits->upper;
-          jointLimits.weight = 1.0f;
-          data.limits.push_back(jointLimits);
-          break;
-        }
-        case urdf::Joint::PRISMATIC: {
-          ParameterLimit jointLimits;
-          jointLimits.type = MinMax;
-          jointLimits.data.minMax.parameterIndex = modelParamsBaseIndex;
-          jointLimits.data.minMax.limits[0] = toCm<float>(urdfJointLimits->lower);
-          jointLimits.data.minMax.limits[1] = toCm<float>(urdfJointLimits->upper);
-          jointLimits.weight = 1.0f;
-          data.limits.push_back(jointLimits);
-          break;
-        }
-        default: {
-          // Do nothing
-          break;
-        }
-      }
-    }
+    addJointDofs(data, *urdfJoint, frame);
+    addJointLimits(data, *urdfJoint, frame.modelParamsBaseIndex);
   }
 
-  // Set Joint Offset
-  //
-  // The preRotation is simply the URDF joint origin rotation — the transform from the parent
-  // link frame to the child link frame at bind pose. No extra axis-alignment rotation is baked
-  // in, because the imported Momentum node is meant to coincide with the URDF child link frame.
-  //
-  // If we axis-aligned the local frame here, every quantity authored in the child link frame
-  // (visuals, collisions, inertials, descendant joint origins, external animation data) would
-  // need an additional frame conversion.
-  if (urdfJoint != nullptr) {
-    const urdf::Pose& urdfPose = urdfJoint->parent_to_joint_origin_transform;
-    joint.preRotation = toMomentumQuaternion<float>(urdfPose.rotation);
-    joint.translationOffset = toMomentumVector3<float>(urdfPose.position) * toCm<float>();
-  } else {
-    joint.preRotation = Quaternionf::Identity();
-    joint.translationOffset.setZero();
-  }
-
-  data.skeleton.joints.push_back(joint);
+  appendSkeletonJointsForUrdfLink(data, parentJointId, *urdfLink, urdfJoint, frame);
   addPhysicalPropertiesForUrdfLink(
-      data.physicalProperties, *urdfLink, static_cast<size_t>(jointId));
+      data.physicalProperties, *urdfLink, static_cast<size_t>(frame.linkJointId));
 
-  // Collect visual elements for mesh loading
-  if (!urdfLink->visual_array.empty()) {
-    LinkVisualData visualData;
-    visualData.jointIndex = static_cast<size_t>(jointId);
-    visualData.visuals = urdfLink->visual_array;
-    data.linkVisuals.push_back(std::move(visualData));
-  }
+  collectLinkVisuals(data, *urdfLink, static_cast<size_t>(frame.linkJointId));
+  collectCollisionGeometry(data, *urdfLink, static_cast<size_t>(frame.linkJointId));
 
-  for (const auto& collision : urdfLink->collision_array) {
-    if (!collision) {
-      MT_LOGW("Ignoring null URDF collision on link '{}'.", urdfLink->name);
-      continue;
-    }
-    auto capsule = loadCollisionCapsule(*collision, urdfLink->name, static_cast<size_t>(jointId));
-    if (capsule) {
-      data.collision.push_back(*capsule);
-    }
-  }
-
-  // Continue parsing child links and joints
   for (const auto& childLink : urdfLink->child_links) {
-    if (!loadUrdfSkeletonRecursive(data, jointId, urdfModel, childLink.get())) {
+    if (!loadUrdfSkeletonRecursive(data, static_cast<size_t>(frame.linkJointId), childLink.get())) {
       return false;
     }
   }
@@ -533,18 +694,12 @@ void resolveMimicJoints(ParsingData& data) {
       continue;
     }
     const Eigen::Index mimickedModelParamIdx = it->second;
-    const float coefficient = mimic.sign * mimic.multiplier;
+    const float offset = mimic.isRotation ? mimic.offset : toCm<float>(mimic.offset);
 
-    if (mimic.isRotation) {
+    for (const auto& [jointParamIndex, coefficient] : mimic.jointParamCoefficients) {
       data.triplets.emplace_back(
-          mimic.jointParamsBaseIndex + 3 + mimic.axisIdx, mimickedModelParamIdx, coefficient);
-      data.parameterTransform.offsets[mimic.jointParamsBaseIndex + 3 + mimic.axisIdx] =
-          mimic.sign * mimic.offset;
-    } else {
-      data.triplets.emplace_back(
-          mimic.jointParamsBaseIndex + mimic.axisIdx, mimickedModelParamIdx, coefficient);
-      data.parameterTransform.offsets[mimic.jointParamsBaseIndex + mimic.axisIdx] =
-          mimic.sign * toCm<float>(mimic.offset);
+          jointParamIndex, mimickedModelParamIdx, coefficient * mimic.multiplier);
+      data.parameterTransform.offsets[jointParamIndex] = coefficient * offset;
     }
   }
 }
@@ -680,7 +835,7 @@ Character loadUrdfCharacterFromUrdfModel(
     root = root->child_links[0].get();
   }
 
-  if (!loadUrdfSkeletonRecursive(data, kInvalidIndex, urdfModel.get(), root)) {
+  if (!loadUrdfSkeletonRecursive(data, kInvalidIndex, root)) {
     MT_THROW("Failed to parse URDF.");
   }
 
