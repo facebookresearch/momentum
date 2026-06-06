@@ -15,8 +15,9 @@ include(GNUInstallDirs)
 
 find_package(drjit CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
-if(DEFINED Eigen3_VERSION AND Eigen3_VERSION VERSION_LESS 3.4.0)
-  message(FATAL_ERROR "axel requires Eigen 3.4.0 or newer; found ${Eigen3_VERSION}")
+if(DEFINED Eigen3_VERSION AND
+   (Eigen3_VERSION VERSION_LESS 5.0.0 OR Eigen3_VERSION VERSION_GREATER_EQUAL 5.1.0))
+  message(FATAL_ERROR "axel requires Eigen 5.0.x; found ${Eigen3_VERSION}")
 endif()
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(Dispenso CONFIG REQUIRED)

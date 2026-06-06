@@ -9,9 +9,10 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(drjit CONFIG)
 find_dependency(Eigen3 CONFIG)
-if(DEFINED Eigen3_VERSION AND Eigen3_VERSION VERSION_LESS 3.4.0)
+if(DEFINED Eigen3_VERSION AND
+   (Eigen3_VERSION VERSION_LESS 5.0.0 OR Eigen3_VERSION VERSION_GREATER_EQUAL 5.1.0))
   set(@PROJECT_NAME@_FOUND FALSE)
-  set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "axel requires Eigen 3.4.0 or newer; found ${Eigen3_VERSION}")
+  set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "axel requires Eigen 5.0.x; found ${Eigen3_VERSION}")
   return()
 endif()
 find_dependency(Microsoft.GSL CONFIG)
