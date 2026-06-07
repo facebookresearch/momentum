@@ -75,14 +75,11 @@ class ColumnIndexedMatrix {
   /// Computes `this->transpose() * b`, returning a vector of length `cols()`.
   /// @param b Vector with `rows()` entries.
   /// @return Vector with `cols()` entries; entry @c i equals `view.col(i).dot(b)`.
-  // TODO: When `useColumnIndices_` is true, the loop reads `mat_.col(iCol)` instead of
-  //   `mat_.col(columnIndices_[iCol])`. This silently ignores the remap and returns the
-  //   wrong values whenever `colIndices` is a non-identity permutation/subset.
   [[nodiscard]] VectorType transpose_times(Eigen::Ref<VectorType> b) const {
     if (useColumnIndices_) {
       VectorType result(columnIndices_.size());
       for (Eigen::Index iCol = 0; iCol < (Eigen::Index)columnIndices_.size(); ++iCol) {
-        result[iCol] = mat_.col(iCol).dot(b);
+        result[iCol] = mat_.col(columnIndices_[iCol]).dot(b);
       }
       return result;
     } else {
