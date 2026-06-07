@@ -7,9 +7,57 @@
 
 #include "momentum/common/progress_bar.h"
 
+#include <cstdlib>
+#include <optional>
+#include <string>
+
 #include <gtest/gtest.h>
 
 using namespace momentum;
+
+namespace {
+
+class ScopedEnvVar {
+ public:
+  explicit ScopedEnvVar(const char* name) : name_(name) {
+    if (const char* value = std::getenv(name_.c_str())) {
+      previousValue_ = value;
+    }
+  }
+
+  ~ScopedEnvVar() {
+    if (previousValue_) {
+      set(*previousValue_);
+    } else {
+      unset();
+    }
+  }
+
+  void set(const std::string& value) const {
+#ifdef _WIN32
+    _putenv_s(name_.c_str(), value.c_str());
+#else
+    setenv(name_.c_str(), value.c_str(), 1);
+#endif
+  }
+
+  void unset() const {
+#ifdef _WIN32
+    _putenv_s(name_.c_str(), "");
+#else
+    unsetenv(name_.c_str());
+#endif
+  }
+
+  ScopedEnvVar(const ScopedEnvVar&) = delete;
+  ScopedEnvVar& operator=(const ScopedEnvVar&) = delete;
+
+ private:
+  std::string name_;
+  std::optional<std::string> previousValue_;
+};
+
+} // namespace
 
 TEST(ProgressBarTest, Constructor) {
   // Test with different prefixes and operation counts
@@ -28,6 +76,17 @@ TEST(ProgressBarTest, Constructor) {
 
   // Note: We don't test with negative operations since size_t is unsigned
   // and the underlying indicators library uses size_t
+}
+
+TEST(ProgressBarTest, InvalidLocaleEnvironmentDoesNotThrow) {
+  ScopedEnvVar lcAll("LC_ALL");
+  lcAll.set("invalid_locale_name");
+
+  ProgressBar bar("Invalid Locale", 2);
+  EXPECT_EQ(bar.getCurrentProgress(), 0);
+
+  EXPECT_NO_THROW(bar.increment());
+  EXPECT_EQ(bar.getCurrentProgress(), 1);
 }
 
 TEST(ProgressBarTest, Increment) {
