@@ -7,50 +7,57 @@
 # Find dependencies
 #===============================================================================
 
+if(NOT DEFINED MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  set(MOMENTUM_BUILD_TORCH_EXTENSIONS ON)
+endif()
+
 if(NOT DEFINED ENV{CONDA_PREFIX})
   message(STATUS
     "CONDA_PREFIX is not set. Building without Conda/Pixi environment."
   )
 endif()
 
-# Determine torch base path based on build environment and platform
-# Use CONDA_PREFIX for Unix conda-build, use site-packages for PyPI or Windows
-if(DEFINED ENV{CONDA_BUILD} AND NOT WIN32)
-  # Unix conda-build - use CONDA_PREFIX
-  set(libtorch_base_path $ENV{CONDA_PREFIX})
-else()
-  # Windows or PyPI - use site-packages/torch
-  if(NOT DEFINED Python3_SITELIB)
-    execute_process(
-      COMMAND "${Python3_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_path('purelib'))"
-      OUTPUT_VARIABLE Python3_SITELIB
-      OUTPUT_STRIP_TRAILING_WHITESPACE
+if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  # Determine torch base path based on build environment and platform
+  # Use CONDA_PREFIX for Unix conda-build, use site-packages for PyPI or Windows
+  if(DEFINED ENV{CONDA_BUILD} AND NOT WIN32)
+    # Unix conda-build - use CONDA_PREFIX
+    set(libtorch_base_path $ENV{CONDA_PREFIX})
+  else()
+    # Windows or PyPI - use site-packages/torch
+    if(NOT DEFINED Python3_SITELIB)
+      execute_process(
+        COMMAND "${Python3_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_path('purelib'))"
+        OUTPUT_VARIABLE Python3_SITELIB
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    endif()
+    set(libtorch_base_path ${Python3_SITELIB}/torch)
+  endif()
+
+  if(NOT EXISTS "${libtorch_base_path}")
+    message(FATAL_ERROR
+      "PyTorch not found in the expected location: ${libtorch_base_path}.\n"
+      "Please ensure PyTorch is installed in your Conda/Pixi environment, "
+      "or configure with -DMOMENTUM_BUILD_TORCH_EXTENSIONS=OFF."
     )
   endif()
-  set(libtorch_base_path ${Python3_SITELIB}/torch)
-endif()
 
-if(NOT EXISTS "${libtorch_base_path}")
-  message(FATAL_ERROR
-    "PyTorch not found in the expected location: ${libtorch_base_path}.\n"
-    "Please ensure PyTorch is installed in your Conda/Pixi environment."
+  # Try both locations for CMake files (conda and PyPI have different structures)
+  find_package(ATen CONFIG REQUIRED HINTS
+    ${libtorch_base_path}/share/cmake/ATen
+    ${libtorch_base_path}
+  )
+  find_package(Torch CONFIG REQUIRED HINTS
+    ${libtorch_base_path}/share/cmake/Torch
+    ${libtorch_base_path}
+  )
+  find_library(torch_python
+    NAMES torch_python
+    HINTS ${libtorch_base_path}/lib/
+    REQUIRED
   )
 endif()
-
-# Try both locations for CMake files (conda and PyPI have different structures)
-find_package(ATen CONFIG REQUIRED HINTS
-  ${libtorch_base_path}/share/cmake/ATen
-  ${libtorch_base_path}
-)
-find_package(Torch CONFIG REQUIRED HINTS
-  ${libtorch_base_path}/share/cmake/Torch
-  ${libtorch_base_path}
-)
-find_library(torch_python
-  NAMES torch_python
-  HINTS ${libtorch_base_path}/lib/
-  REQUIRED
-)
 
 #===============================================================================
 # Find build dependencies
@@ -74,36 +81,38 @@ endif()
 # Build PyMomentum
 #===============================================================================
 
-# TorchBridge INTERFACE library for OSS builds
-set(TORCH_BRIDGE_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/torch_bridge_include)
-file(MAKE_DIRECTORY ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/oss/torch_bridge.h.in
-  ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum/torch_bridge.h
-  COPYONLY
-)
+if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  # TorchBridge INTERFACE library for OSS builds
+  set(TORCH_BRIDGE_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/torch_bridge_include)
+  file(MAKE_DIRECTORY ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/oss/torch_bridge.h.in
+    ${TORCH_BRIDGE_INCLUDE_DIR}/pymomentum/torch_bridge.h
+    COPYONLY
+  )
 
-add_library(torch_bridge INTERFACE)
-target_include_directories(torch_bridge INTERFACE ${TORCH_BRIDGE_INCLUDE_DIR})
+  add_library(torch_bridge INTERFACE)
+  target_include_directories(torch_bridge INTERFACE ${TORCH_BRIDGE_INCLUDE_DIR})
 
-mt_library(
-  NAME tensor_utility
-  PYMOMENTUM_HEADERS_VARS tensor_utility_public_headers
-  PYMOMENTUM_SOURCES_VARS tensor_utility_sources
-  PUBLIC_INCLUDE_DIRECTORIES
-    ${Python3_INCLUDE_DIRS}
-    ${TORCH_INCLUDE_DIRS}
-  PUBLIC_LINK_LIBRARIES
-    Eigen3::Eigen
-    pybind11::pybind11_headers
-    Python3::Module
-    ${TORCH_LIBRARIES}
-  PRIVATE_LINK_LIBRARIES
-    momentum
-  PUBLIC_COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
-  NO_INSTALL
-)
+  mt_library(
+    NAME tensor_utility
+    PYMOMENTUM_HEADERS_VARS tensor_utility_public_headers
+    PYMOMENTUM_SOURCES_VARS tensor_utility_sources
+    PUBLIC_INCLUDE_DIRECTORIES
+      ${Python3_INCLUDE_DIRS}
+      ${TORCH_INCLUDE_DIRS}
+    PUBLIC_LINK_LIBRARIES
+      Eigen3::Eigen
+      pybind11::pybind11_headers
+      Python3::Module
+      ${TORCH_LIBRARIES}
+    PRIVATE_LINK_LIBRARIES
+      momentum
+    PUBLIC_COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+    NO_INSTALL
+  )
+endif()
 
 mt_library(
   NAME python_utility
@@ -132,55 +141,57 @@ mt_library(
   NO_INSTALL
 )
 
-mt_library(
-  NAME tensor_momentum
-  PYMOMENTUM_HEADERS_VARS tensor_momentum_public_headers
-  PYMOMENTUM_SOURCES_VARS tensor_momentum_sources
-  PUBLIC_INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-  PRIVATE_INCLUDE_DIRECTORIES
-    ${TORCH_INCLUDE_DIRS}
-  PUBLIC_LINK_LIBRARIES
-    momentum
-    diff_ik
-    torch_bridge
-    ${ATEN_LIBRARIES}
-    pybind11::pybind11
-  PRIVATE_LINK_LIBRARIES
-    axel
-    python_utility
-    tensor_utility
-    Ceres::ceres
-    Dispenso::dispenso
-    Eigen3::Eigen
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  PUBLIC_COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
-  NO_INSTALL
-)
+if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  mt_library(
+    NAME tensor_momentum
+    PYMOMENTUM_HEADERS_VARS tensor_momentum_public_headers
+    PYMOMENTUM_SOURCES_VARS tensor_momentum_sources
+    PUBLIC_INCLUDE_DIRECTORIES
+      ${ATEN_INCLUDE_DIR}
+    PRIVATE_INCLUDE_DIRECTORIES
+      ${TORCH_INCLUDE_DIRS}
+    PUBLIC_LINK_LIBRARIES
+      momentum
+      diff_ik
+      torch_bridge
+      ${ATEN_LIBRARIES}
+      pybind11::pybind11
+    PRIVATE_LINK_LIBRARIES
+      axel
+      python_utility
+      tensor_utility
+      Ceres::ceres
+      Dispenso::dispenso
+      Eigen3::Eigen
+      ${TORCH_LIBRARIES}
+      ${torch_python}
+    PUBLIC_COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+    NO_INSTALL
+  )
 
-mt_library(
-  NAME tensor_ik
-  PYMOMENTUM_HEADERS_VARS tensor_ik_public_headers
-  PYMOMENTUM_SOURCES_VARS tensor_ik_sources
-  PUBLIC_INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
-  PUBLIC_LINK_LIBRARIES
-    momentum
-    diff_ik
-    ${ATEN_LIBRARIES}
-  PRIVATE_LINK_LIBRARIES
-    tensor_utility
-    Dispenso::dispenso
-    Eigen3::Eigen
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  PUBLIC_COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
-  NO_INSTALL
-)
+  mt_library(
+    NAME tensor_ik
+    PYMOMENTUM_HEADERS_VARS tensor_ik_public_headers
+    PYMOMENTUM_SOURCES_VARS tensor_ik_sources
+    PUBLIC_INCLUDE_DIRECTORIES
+      ${ATEN_INCLUDE_DIR}
+      ${TORCH_INCLUDE_DIRS}
+    PUBLIC_LINK_LIBRARIES
+      momentum
+      diff_ik
+      ${ATEN_LIBRARIES}
+    PRIVATE_LINK_LIBRARIES
+      tensor_utility
+      Dispenso::dispenso
+      Eigen3::Eigen
+      ${TORCH_LIBRARIES}
+      ${torch_python}
+    PUBLIC_COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+    NO_INSTALL
+  )
+endif()
 
 mt_python_binding(
   NAME geometry
@@ -222,49 +233,51 @@ mt_python_binding(
     math
 )
 
-mt_python_binding(
-  NAME diff_geometry
-  PYMOMENTUM_HEADERS_VARS diff_geometry_public_headers
-  PYMOMENTUM_SOURCES_VARS diff_geometry_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
-  LINK_LIBRARIES
-    character
-    tensor_momentum
-    tensor_utility
-    torch_bridge
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
-)
+if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  mt_python_binding(
+    NAME diff_geometry
+    PYMOMENTUM_HEADERS_VARS diff_geometry_public_headers
+    PYMOMENTUM_SOURCES_VARS diff_geometry_sources
+    INCLUDE_DIRECTORIES
+      ${ATEN_INCLUDE_DIR}
+      ${TORCH_INCLUDE_DIRS}
+    LINK_LIBRARIES
+      character
+      tensor_momentum
+      tensor_utility
+      torch_bridge
+      ${ATEN_LIBRARIES}
+      ${TORCH_LIBRARIES}
+      ${torch_python}
+    COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+  )
 
-# Use 'pymomentum_solver' to avoid conflicts with the solver module
-mt_python_binding(
-  NAME pymomentum_solver
-  MODULE_NAME solver
-  PYMOMENTUM_HEADERS_VARS solver_public_headers
-  PYMOMENTUM_SOURCES_VARS solver_sources
-  INCLUDE_DIRECTORIES
-    ${ATEN_INCLUDE_DIR}
-    ${TORCH_INCLUDE_DIRS}
-  LINK_LIBRARIES
-    character_solver
-    math
-    skeleton
-    python_utility
-    tensor_ik
-    tensor_momentum
-    tensor_utility
-    torch_bridge
-    ${ATEN_LIBRARIES}
-    ${TORCH_LIBRARIES}
-    ${torch_python}
-  COMPILE_OPTIONS
-    ${TORCH_CXX_FLAGS}
-)
+  # Use 'pymomentum_solver' to avoid conflicts with the solver module
+  mt_python_binding(
+    NAME pymomentum_solver
+    MODULE_NAME solver
+    PYMOMENTUM_HEADERS_VARS solver_public_headers
+    PYMOMENTUM_SOURCES_VARS solver_sources
+    INCLUDE_DIRECTORIES
+      ${ATEN_INCLUDE_DIR}
+      ${TORCH_INCLUDE_DIRS}
+    LINK_LIBRARIES
+      character_solver
+      math
+      skeleton
+      python_utility
+      tensor_ik
+      tensor_momentum
+      tensor_utility
+      torch_bridge
+      ${ATEN_LIBRARIES}
+      ${TORCH_LIBRARIES}
+      ${torch_python}
+    COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+  )
+endif()
 
 mt_python_binding(
   NAME solver2
@@ -426,23 +439,25 @@ if(MOMENTUM_BUILD_TESTING)
     endif()
   endif()
 
-  mt_test(
-    NAME tensor_utility_test
-    PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
-    LINK_LIBRARIES
-      tensor_utility
-      Python3::Python
-  )
+  if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
+    mt_test(
+      NAME tensor_utility_test
+      PYMOMENTUM_SOURCES_VARS tensor_utility_test_sources
+      LINK_LIBRARIES
+        tensor_utility
+        Python3::Python
+    )
 
-  mt_test(
-    NAME tensor_ik_test
-    PYMOMENTUM_SOURCES_VARS tensor_ik_test_sources
-    LINK_LIBRARIES
-      character_test_helpers
-      tensor_ik
-      tensor_utility
-      Python3::Python
-  )
+    mt_test(
+      NAME tensor_ik_test
+      PYMOMENTUM_SOURCES_VARS tensor_ik_test_sources
+      LINK_LIBRARIES
+        character_test_helpers
+        tensor_ik
+        tensor_utility
+        Python3::Python
+    )
+  endif()
 endif()
 
 #===============================================================================

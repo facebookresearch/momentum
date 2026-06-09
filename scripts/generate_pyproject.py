@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Generate pyproject-pypi-cpu-py{VER}.toml from template.
+"""Generate PyPI pyproject.toml files from the shared template.
 
 PyTorch version defaults can be customized via command-line arguments.
 For Python 3.14+, add new arguments following the pattern:
@@ -71,6 +71,7 @@ def main():
     # Setup Jinja2
     template_dir = Path(__file__).parent.parent
     output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     env = Environment(
         loader=FileSystemLoader(template_dir),
         trim_blocks=True,
@@ -80,48 +81,58 @@ def main():
     template = env.get_template("pyproject-pypi.toml.j2")
 
     # Common template variables
-    common_vars = dict(
-        torch_min_py312=args.torch_min_py312,
-        torch_max_py312=args.torch_max_py312,
-        torch_min_py313=args.torch_min_py313,
-        torch_max_py313=args.torch_max_py313,
-        torch_min_py312_macos=args.torch_min_py312_macos,
-        torch_max_py312_macos=args.torch_max_py312_macos,
-        torch_min_py313_macos=args.torch_min_py313_macos,
-        torch_max_py313_macos=args.torch_max_py313_macos,
-    )
+    common_vars = {
+        "torch_min_py312": args.torch_min_py312,
+        "torch_max_py312": args.torch_max_py312,
+        "torch_min_py313": args.torch_min_py313,
+        "torch_max_py313": args.torch_max_py313,
+        "torch_min_py312_macos": args.torch_min_py312_macos,
+        "torch_max_py312_macos": args.torch_max_py312_macos,
+        "torch_min_py313_macos": args.torch_min_py313_macos,
+        "torch_max_py313_macos": args.torch_max_py313_macos,
+    }
 
-    # Generate CPU configs for each Python version
-    for py_ver in ["312", "313"]:
-        py_ver_min = f"3.{py_ver[1:]}"
-        py_ver_max = f"3.{int(py_ver[1:]) + 1}"
-        cpu_config = template.render(
-            variant="cpu",
-            description_suffix="CPU-only version for Linux, macOS Intel, and macOS ARM",
-            python_version_min=py_ver_min,
-            python_version_max=py_ver_max,
-            **common_vars,
-        )
-        (output_dir / f"pyproject-pypi-cpu-py{py_ver}.toml").write_text(cpu_config)
-        print(
-            f"Generated pyproject-pypi-cpu-py{py_ver}.toml (requires-python: >={py_ver_min},<{py_ver_max})"
-        )
+    variants = [
+        {
+            "tag": "core",
+            "distribution_name": "pymomentum-core",
+            "description_suffix": "core package without Torch C++ extensions",
+            "build_torch_extensions": False,
+            "wheel_libs_dir": "pymomentum_core.libs",
+        },
+        {
+            "tag": "cpu",
+            "distribution_name": "pymomentum-cpu",
+            "description_suffix": "Torch C++ extension package linked against CPU PyTorch",
+            "build_torch_extensions": True,
+            "wheel_libs_dir": "pymomentum_cpu.libs",
+        },
+        {
+            "tag": "gpu",
+            "distribution_name": "pymomentum-gpu",
+            "description_suffix": "Torch C++ extension package linked against CUDA PyTorch",
+            "build_torch_extensions": True,
+            "wheel_libs_dir": "pymomentum_gpu.libs",
+        },
+    ]
 
-    # Generate GPU configs for each Python version
-    for py_ver in ["312", "313"]:
-        py_ver_min = f"3.{py_ver[1:]}"
-        py_ver_max = f"3.{int(py_ver[1:]) + 1}"
-        gpu_config = template.render(
-            variant="gpu",
-            description_suffix="GPU (CUDA) version for Linux and Windows",
-            python_version_min=py_ver_min,
-            python_version_max=py_ver_max,
-            **common_vars,
-        )
-        (output_dir / f"pyproject-pypi-gpu-py{py_ver}.toml").write_text(gpu_config)
-        print(
-            f"Generated pyproject-pypi-gpu-py{py_ver}.toml (requires-python: >={py_ver_min},<{py_ver_max})"
-        )
+    for variant in variants:
+        for py_ver in ["312", "313"]:
+            py_ver_min = f"3.{py_ver[1:]}"
+            py_ver_max = f"3.{int(py_ver[1:]) + 1}"
+            config = template.render(
+                python_version_min=py_ver_min,
+                python_version_max=py_ver_max,
+                **variant,
+                **common_vars,
+            )
+            output_path = (
+                output_dir / f"pyproject-pypi-{variant['tag']}-py{py_ver}.toml"
+            )
+            output_path.write_text(config)
+            print(
+                f"Generated {output_path.name} (requires-python: >={py_ver_min},<{py_ver_max})"
+            )
 
 
 if __name__ == "__main__":
