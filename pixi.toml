@@ -425,11 +425,16 @@ cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 
 [target.win-64.tasks]
+# Leave the CMake generator to CMAKE_GENERATOR/default selection. CI can set
+# CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations. Clear
+# CMAKE_GENERATOR_INSTANCE, CMAKE_GENERATOR_PLATFORM, and
+# CMAKE_GENERATOR_TOOLSET because Ninja rejects the Visual Studio-specific
+# values that Windows compiler activation may otherwise provide.
 config = { cmd = """
     cmake \
         -S . \
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
-        -G 'Visual Studio 17 2022' \
+        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -443,7 +448,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { BUILD_SHARED_LIBS = "ON", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+    """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
     "config",
 ] }
@@ -507,7 +512,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
     -DBUILD_SHARED_LIBS=OFF
-""", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
+""", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 # TODO: Remove test_lighting skip once stack overflow issue on Windows is resolved (currently causes crash with CMake build)
 test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
@@ -520,7 +525,7 @@ test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_mo
 wheel_build = { cmd = """
     python scripts/generate_pyproject.py && \
     python scripts/build_pypi_wheel.py
-""", description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
+""", env = { CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "" }, description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 # Repair wheel using delvewheel - variant-aware (bundles DLLs for standalone distribution)
 wheel_repair = { cmd = """
