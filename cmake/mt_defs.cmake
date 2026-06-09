@@ -552,19 +552,24 @@ function(mt_python_binding)
     OUTPUT_NAME "${_ARG_MODULE_NAME}"
   )
 
-  # Set RPATH for PyPI wheels to find torch libraries
-  # Directory structure: site-packages/pymomentum/*.so needs site-packages/torch/lib/
-  # Skip for conda builds - conda packages have proper library paths already
-  if(NOT DEFINED ENV{CONDA_BUILD})
-    set_target_properties(${_ARG_NAME} PROPERTIES
-      # $ORIGIN = site-packages/pymomentum/
-      # $ORIGIN/../torch/lib = site-packages/torch/lib/
-      INSTALL_RPATH "$ORIGIN/../torch/lib"
-      # Build with install RPATH so it's set immediately
-      BUILD_WITH_INSTALL_RPATH TRUE
-      # Don't add link-time library paths to RPATH
-      INSTALL_RPATH_USE_LINK_PATH FALSE
-    )
+  # Set RPATH for PyPI wheels to find torch libraries when building the
+  # Torch-C++ extension package. Conda packages have proper library paths already.
+  if(MOMENTUM_BUILD_TORCH_EXTENSIONS AND NOT DEFINED ENV{CONDA_BUILD})
+    if(APPLE)
+      set(_torch_rpath "@loader_path/../torch/lib")
+    elseif(UNIX)
+      set(_torch_rpath "$ORIGIN/../torch/lib")
+    endif()
+    if(_torch_rpath)
+      set_target_properties(${_ARG_NAME} PROPERTIES
+        # Extension modules live under site-packages/pymomentum/.
+        INSTALL_RPATH "${_torch_rpath}"
+        # Build with install RPATH so it's set immediately
+        BUILD_WITH_INSTALL_RPATH TRUE
+        # Don't add link-time library paths to RPATH
+        INSTALL_RPATH_USE_LINK_PATH FALSE
+      )
+    endif()
   endif()
 
   if(NOT ${_ARG_NO_INSTALL})
