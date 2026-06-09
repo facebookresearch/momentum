@@ -177,16 +177,17 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 # ==================
 # PyPI Publishing
 # ==================
-# All wheel tasks are variant-aware via PYMOMENTUM_VARIANT env var (defaults to "cpu").
+# All wheel tasks are variant-aware via PYMOMENTUM_VARIANT env var (defaults to "core").
+# These tasks only build PyPI distributions; Conda/Pixi package splitting belongs in the conda-forge feedstock.
 # Usage:
-#   CPU: pixi run -e py312 wheel_build
+#   Core: pixi run -e py312 wheel_build
+#   CPU: PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_build
 #   GPU: PYMOMENTUM_VARIANT=gpu pixi run -e py312 wheel_build
-#   GPU (Linux cibuildwheel): pixi run -e gpu-wheel-build-py312 wheel_build
 
-# Generate pyproject-pypi-{cpu,gpu}-py{ver}.toml from template
+# Generate pyproject-pypi-{core,cpu,gpu}-py{ver}.toml from template
 # This task is mainly for CI. For local use, run directly:
 #   python scripts/generate_pyproject.py --torch-min-py312 X.X --torch-max-py312 X.X --torch-min-py313 Y.Y --torch-max-py313 Y.Y
-generate_pyproject = { cmd = "python scripts/generate_pyproject.py", description = "Generate pyproject-pypi-{cpu,gpu}-py{ver}.toml from template (uses defaults from script)" }
+generate_pyproject = { cmd = "python scripts/generate_pyproject.py", description = "Generate PyPI pyproject.toml files from template (uses defaults from script)" }
 
 # Clean wheel build artifacts
 wheel_clean = { cmd = """
@@ -196,8 +197,7 @@ wheel_clean = { cmd = """
 
 # Check wheel files with twine (variant-aware)
 wheel_check = { cmd = """
-    python -c "import os; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); print(f'Checking {variant} wheels...')" && \
-    twine check dist/pymomentum_*.whl
+    python -c "import glob, os, subprocess, sys; aliases = {'base': 'core', 'torch_cpu': 'cpu', 'torch_gpu': 'gpu'}; variant = aliases.get(os.environ.get('PYMOMENTUM_VARIANT', 'core'), os.environ.get('PYMOMENTUM_VARIANT', 'core')); patterns = {'core': 'dist/pymomentum_core-*.whl', 'cpu': 'dist/pymomentum_cpu-*.whl', 'gpu': 'dist/pymomentum_gpu-*.whl'}; pattern = patterns[variant]; wheels = glob.glob(pattern); print(f'Checking {variant} wheels: {wheels}'); sys.exit(1 if not wheels else subprocess.call(['twine', 'check'] + wheels))"
 """, depends-on = [
     "wheel_build",
 ], description = "Check wheel files with twine" }
@@ -208,29 +208,27 @@ wheel_test = { cmd = "python scripts/test_wheel.py", depends-on = [
 ], description = "Test wheel imports in a clean virtual environment using uv" }
 
 # Publish to TestPyPI for testing (variant-aware)
-wheel_publish_testpypi = { cmd = "twine upload --repository testpypi --skip-existing dist/pymomentum_*.whl", depends-on = [
+wheel_publish_testpypi = { cmd = "python -c \"import glob, os, subprocess, sys; aliases = {'base': 'core', 'torch_cpu': 'cpu', 'torch_gpu': 'gpu'}; variant = aliases.get(os.environ.get('PYMOMENTUM_VARIANT', 'core'), os.environ.get('PYMOMENTUM_VARIANT', 'core')); patterns = {'core': 'dist/pymomentum_core-*.whl', 'cpu': 'dist/pymomentum_cpu-*.whl', 'gpu': 'dist/pymomentum_gpu-*.whl'}; pattern = patterns[variant]; wheels = glob.glob(pattern); print(f'Publishing {variant} wheels to TestPyPI: {wheels}'); sys.exit(1 if not wheels else subprocess.call(['twine', 'upload', '--repository', 'testpypi', '--skip-existing'] + wheels))\"", depends-on = [
     "wheel_check",
     "wheel_test",
 ], description = "Publish to TestPyPI for testing" }
 
-# Variant-aware wheel build (PYMOMENTUM_VARIANT defaults to "cpu")
+# Variant-aware wheel build (PYMOMENTUM_VARIANT defaults to "core")
 wheel_build = { cmd = """
-    python -c "import sys, os, shutil; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); src = f'pyproject-pypi-{variant}-py{py_ver}.toml'; print(f'Using {src} for {variant} build'); shutil.copy(src, 'pyproject.toml')" && \
-    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
-    python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
+    python scripts/build_pypi_wheel.py
 """, depends-on = [
     "generate_pyproject",
-], description = "Build wheel for current Python version (set PYMOMENTUM_VARIANT=gpu for GPU)" }
+], description = "Build wheel for current Python version (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair is handled by platform-specific tasks'", description = "Repair wheel (platform-specific, see target.*.tasks)" }
 
-# Variant-aware publish (PYMOMENTUM_VARIANT defaults to "cpu")
+# Variant-aware publish (PYMOMENTUM_VARIANT defaults to "core")
 wheel_publish = { cmd = """
-    python -c "import os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); repo = f'pymomentum-{variant}'; glob = f'dist/pymomentum_{variant}-*.whl'; print(f'Publishing {glob} to {repo}'); sys.exit(subprocess.call(['twine', 'upload', '--repository', repo] + __import__('glob').glob(glob)))"
+    python -c "import glob, os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'core'); variant = {'base': 'core', 'torch_cpu': 'cpu', 'torch_gpu': 'gpu'}.get(variant, variant); repos = {'core': 'pymomentum-core', 'cpu': 'pymomentum-cpu', 'gpu': 'pymomentum-gpu'}; patterns = {'core': 'dist/pymomentum_core-*.whl', 'cpu': 'dist/pymomentum_cpu-*.whl', 'gpu': 'dist/pymomentum_gpu-*.whl'}; repo = repos[variant]; pattern = patterns[variant]; wheels = glob.glob(pattern); print(f'Publishing {pattern} to {repo}'); sys.exit(1 if not wheels else subprocess.call(['twine', 'upload', '--repository', repo] + wheels))"
 """, depends-on = [
     "wheel_check",
     "wheel_test",
-], description = "Publish wheels to PyPI (set PYMOMENTUM_VARIANT=gpu for GPU)" }
+], description = "Publish wheels to PyPI (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 #===========
 # linux-64
@@ -248,8 +246,8 @@ twine = ">=6.1.0,<7"  # not available on linux-aarch64
 [target.linux-64.tasks]
 # Linux variant-aware wheel build uses cibuildwheel to produce manylinux_2_28 wheels
 # Auto-detects container engine: respects CIBW_CONTAINER_ENGINE if set, otherwise detects docker/podman
-# Set PYMOMENTUM_VARIANT=gpu for GPU builds (defaults to "cpu")
-wheel_build = { cmd = '''bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-cpu} && PY_VER=$(python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))") && echo "Building $VARIANT wheel for Python $PY_VER" && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && CIBW_BUILD="cp${PY_VER}-manylinux_x86_64" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo "Wheels created:" && ls -la dist/' ''', description = "Build wheel using cibuildwheel (set PYMOMENTUM_VARIANT=gpu for GPU)" }
+# Set PYMOMENTUM_VARIANT=cpu or gpu for Torch extension builds.
+wheel_build = { cmd = '''bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-core} && if [ "$VARIANT" = base ]; then VARIANT=core; elif [ "$VARIANT" = torch_cpu ]; then VARIANT=cpu; elif [ "$VARIANT" = torch_gpu ]; then VARIANT=gpu; fi && PY_VER=$(python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))") && echo "Building $VARIANT wheel for Python $PY_VER" && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && CIBW_BUILD="cp${PY_VER}-manylinux_x86_64" PYMOMENTUM_VARIANT="$VARIANT" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo "Wheels created:" && ls -la dist/' ''', description = "Build wheel using cibuildwheel (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op on Linux)" }
 
@@ -384,6 +382,10 @@ doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_
 open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
     "doc_py",
 ] }
+wheel_repair = { cmd = """
+    python -m pip install "delocate>=0.13,<0.14" && \
+    python scripts/repair_macos_wheel.py
+""", description = "Repair macOS wheel using delocate (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 #============
 # osx-arm64
@@ -423,11 +425,16 @@ cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 
 [target.win-64.tasks]
+# Leave the CMake generator to CMAKE_GENERATOR/default selection. CI can set
+# CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations. Clear
+# CMAKE_GENERATOR_INSTANCE, CMAKE_GENERATOR_PLATFORM, and
+# CMAKE_GENERATOR_TOOLSET because Ninja rejects the Visual Studio-specific
+# values that Windows compiler activation may otherwise provide.
 config = { cmd = """
     cmake \
         -S . \
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
-        -G 'Visual Studio 17 2022' \
+        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
@@ -441,7 +448,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { BUILD_SHARED_LIBS = "ON", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+    """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
     "config",
 ] }
@@ -505,7 +512,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
     -DBUILD_SHARED_LIBS=OFF
-""", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
+""", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 # TODO: Remove test_lighting skip once stack overflow issue on Windows is resolved (currently causes crash with CMake build)
 test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
@@ -514,19 +521,17 @@ test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_mo
 
 # Windows variant-aware wheel build using pip wheel + delvewheel
 # Note: Windows doesn't use cibuildwheel because conda-forge provides all dependencies
-# Set PYMOMENTUM_VARIANT=gpu for GPU builds (defaults to "cpu")
+# Set PYMOMENTUM_VARIANT=cpu or gpu for Torch extension builds.
 wheel_build = { cmd = """
     python scripts/generate_pyproject.py && \
-    python -c "import sys, os, shutil; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); py_ver = str(sys.version_info.major) + str(sys.version_info.minor); os.makedirs('.tmp', exist_ok=True); shutil.copy('pyproject.toml', '.tmp/pyproject-backup.toml'); src = f'pyproject-pypi-{variant}-py{py_ver}.toml'; print(f'Using {src} for {variant} build'); shutil.copy(src, 'pyproject.toml')" && \
-    pip wheel . --no-deps --no-build-isolation --wheel-dir=dist && \
-    python -c "import shutil; shutil.move('.tmp/pyproject-backup.toml', 'pyproject.toml')"
-""", description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=gpu for GPU)" }
+    python scripts/build_pypi_wheel.py
+""", env = { CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "" }, description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 # Repair wheel using delvewheel - variant-aware (bundles DLLs for standalone distribution)
 wheel_repair = { cmd = """
-    python -c "import glob, os; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); wheels = glob.glob(f'dist/pymomentum_{variant}-*.whl'); print(f'Found {variant} wheels: {wheels}'); exit(0 if wheels else 1)" && \
-    python -c "import glob, os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'cpu'); wheels = glob.glob(f'dist/pymomentum_{variant}-*.whl'); sys.exit(subprocess.call(['python', '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist'] + wheels))"
-""", description = "Repair Windows wheel using delvewheel (set PYMOMENTUM_VARIANT=gpu for GPU)" }
+    python -c "import glob, os; variant = os.environ.get('PYMOMENTUM_VARIANT', 'core'); variant = {'base': 'core', 'torch_cpu': 'cpu', 'torch_gpu': 'gpu'}.get(variant, variant); patterns = {'core': 'dist/pymomentum_core-*.whl', 'cpu': 'dist/pymomentum_cpu-*.whl', 'gpu': 'dist/pymomentum_gpu-*.whl'}; wheels = glob.glob(patterns[variant]); print(f'Found {variant} wheels: {wheels}'); exit(0 if wheels else 1)" && \
+    python -c "import glob, os, subprocess, sys; variant = os.environ.get('PYMOMENTUM_VARIANT', 'core'); variant = {'base': 'core', 'torch_cpu': 'cpu', 'torch_gpu': 'gpu'}.get(variant, variant); patterns = {'core': 'dist/pymomentum_core-*.whl', 'cpu': 'dist/pymomentum_cpu-*.whl', 'gpu': 'dist/pymomentum_gpu-*.whl'}; wheels = glob.glob(patterns[variant]); command = ['python', '-m', 'delvewheel', 'repair', '--wheel-dir', 'dist']; command += ['--exclude', 'torch.dll;torch_cpu.dll;torch_cuda.dll;torch_cuda_linalg.dll;torch_python.dll;torch_global_deps.dll;c10.dll;c10_cuda.dll;caffe2_nvrtc.dll'] if variant != 'core' else []; sys.exit(subprocess.call(command + wheels))"
+""", description = "Repair Windows wheel using delvewheel (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 #==============
 # Feature: CPU
@@ -564,7 +569,7 @@ librerun-sdk = ">=0.23.3,<0.24"
 # Kept as its own feature for symmetry with rerun-latest/rerun-legacy and to
 # make future version pinning easier.
 # End users installing from PyPI keep viser optional via the
-# `pymomentum-cpu[viser]` extra in pyproject-pypi.toml.j2.
+# `pymomentum-core[viser]` extra in pyproject-pypi.toml.j2.
 #==============
 
 [feature.viser]
@@ -648,36 +653,36 @@ platforms = ["linux-64"]
 dependencies = { python = "3.12.*" }
 
 [feature.gpu-wheel-build-py312.tasks]
-# GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu
-wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && PY_VER=312 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp312-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
+# Torch GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu.
+wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && case \"$VARIANT\" in base) VARIANT=core ;; torch_cpu) VARIANT=cpu ;; torch_gpu) VARIANT=gpu ;; esac && PY_VER=312 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && PYMOMENTUM_VARIANT=\"$VARIANT\" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp312-manylinux_x86_64" }, description = "Build Torch GPU wheel using cibuildwheel (auto-detects docker/podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+wheel_check = { cmd = "twine check dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_build",
 ], description = "Check wheel files with twine" }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
-], description = "Publish GPU wheels to PyPI" }
+], description = "Publish Torch GPU wheels to PyPI" }
 
 [feature.gpu-wheel-build-py313]
 platforms = ["linux-64"]
 dependencies = { python = "3.13.*" }
 
 [feature.gpu-wheel-build-py313.tasks]
-# GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu
-wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && PY_VER=313 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp313-manylinux_x86_64" }, description = "Build GPU wheel using cibuildwheel (auto-detects docker/podman)" }
+# Torch GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu.
+wheel_build = { cmd = "bash -c 'source scripts/detect_container_engine.sh && VARIANT=${PYMOMENTUM_VARIANT:-gpu} && case \"$VARIANT\" in base) VARIANT=core ;; torch_cpu) VARIANT=cpu ;; torch_gpu) VARIANT=gpu ;; esac && PY_VER=313 && echo Building $VARIANT wheel for Python $PY_VER && python scripts/generate_pyproject.py && (rm -rf build/cp* 2>/dev/null || true) && cp pyproject.toml /tmp/pyproject-backup.toml && cp pyproject-pypi-${VARIANT}-py${PY_VER}.toml pyproject.toml && PYMOMENTUM_VARIANT=\"$VARIANT\" cibuildwheel --platform linux --output-dir dist . ; cp /tmp/pyproject-backup.toml pyproject.toml && rm /tmp/pyproject-backup.toml && echo Wheels created: && ls -la dist/'", env = { PYMOMENTUM_VARIANT = "gpu", CIBW_BUILD = "cp313-manylinux_x86_64" }, description = "Build Torch GPU wheel using cibuildwheel (auto-detects docker/podman)" }
 
 wheel_repair = { cmd = "echo 'wheel_repair: cibuildwheel already handled repair in wheel_build'", description = "Repair handled by cibuildwheel (no-op)" }
 
-wheel_check = { cmd = "twine check dist/pymomentum_*.whl", depends-on = [
+wheel_check = { cmd = "twine check dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_build",
 ], description = "Check wheel files with twine" }
 
 wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentum_gpu-*.whl", depends-on = [
     "wheel_check",
-], description = "Publish GPU wheels to PyPI" }
+], description = "Publish Torch GPU wheels to PyPI" }
 
 #==============
 # Environments
