@@ -535,7 +535,7 @@ void rasterizeMeshImp(
     lights_eye.emplace_back();
   }
 
-  const SimdCamera cameraSimd(camera, std::move(modelMatrix), std::move(imageOffset));
+  const SimdCamera cameraSimd(camera, modelMatrix, imageOffset);
   checkBuffers(
       cameraSimd, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 
@@ -727,7 +727,7 @@ void rasterizeSplatsImp(
     lights_eye.emplace_back();
   }
 
-  const SimdCamera cameraSimd(camera, std::move(modelMatrix), std::move(imageOffset));
+  const SimdCamera cameraSimd(camera, modelMatrix, imageOffset);
   checkBuffers(cameraSimd, zBuffer, rgbBuffer, {}, {}, {});
 
   const int32_t imageWidth = cameraSimd.imageWidth();
