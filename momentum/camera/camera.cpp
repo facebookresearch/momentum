@@ -310,9 +310,8 @@ std::pair<Vector3P<T>, typename Packet<T>::MaskType> OpenCVIntrinsicsModelT<T>::
 
   const auto& dp = distortionParams_;
 
-  Packet<T> radialDistortion = T(1) +
-      (rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
-          (T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
+  Packet<T> radialDistortion = (T(1) + rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
+      (T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
 
   Packet<T> xpp =
       xp * radialDistortion + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * drjit::square(xp));
@@ -338,9 +337,8 @@ std::pair<Eigen::Vector3<T>, bool> OpenCVIntrinsicsModelT<T>::project(
 
   const auto& dp = distortionParams_;
 
-  T radialDistortion = T(1) +
-      (rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
-          (T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
+  T radialDistortion = (T(1) + rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
+      (T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
 
   T xpp = xp * radialDistortion + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * xp * xp);
   T ypp = yp * radialDistortion + dp.p1 * (rsqr + T(2) * yp * yp) + T(2) * dp.p2 * xp * yp;
@@ -371,7 +369,8 @@ OpenCVIntrinsicsModelT<T>::projectJacobian(const Eigen::Vector3<T>& point) const
 
   const auto& dp = distortionParams_;
 
-  // Radial factor = num/den, where num and den are even-degree polynomials in r.
+  // Radial factor = num/den, where num and den are even-degree polynomials in r
+  // (OpenCV rational model: (1 + k1 r^2 + k2 r^4 + k3 r^6) / (1 + k4 r^2 + k5 r^4 + k6 r^6)).
   const T radial_num = T(1) + rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3));
   const T radial_den = T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6));
   const T radial_factor = radial_num / radial_den;
@@ -621,12 +620,13 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
 
   const auto& dp = distortionParams_;
 
-  // radial_factor = 1 + A/B, where
+  // radial_factor = (1 + A)/B, where
   //   A = rsqr * (k1 + rsqr * (k2 + rsqr * k3))
   //   B = 1 + rsqr * (k4 + rsqr * (k5 + rsqr * k6))
+  // (OpenCV rational model: (1 + k1 r^2 + k2 r^4 + k3 r^6) / (1 + k4 r^2 + k5 r^4 + k6 r^6)).
   const T A = rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3));
   const T B = T(1) + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6));
-  const T radial_factor = T(1) + A / B;
+  const T radial_factor = (T(1) + A) / B;
 
   const T xpp = xp * radial_factor + T(2) * dp.p1 * xp * yp + dp.p2 * (rsqr + T(2) * xp * xp);
   const T ypp = yp * radial_factor + dp.p1 * (rsqr + T(2) * yp * yp) + T(2) * dp.p2 * xp * yp;
@@ -648,19 +648,20 @@ OpenCVIntrinsicsModelT<T>::projectIntrinsicsJacobian(const Eigen::Vector3<T>& po
   // For radial coefficients k_i, only radial_factor depends on them, so
   //   d(xpp)/dk_i = xp * d(radial_factor)/dk_i, similarly for ypp.
   //
-  // Numerator coefficients (k1, k2, k3): d(A/B)/dk_i = (dA/dk_i) / B with
+  // Numerator coefficients (k1, k2, k3): d((1+A)/B)/dk_i = (dA/dk_i) / B with
   //   dA/dk1 = rsqr, dA/dk2 = rsqr^2, dA/dk3 = rsqr^3.
-  // Denominator coefficients (k4, k5, k6): d(A/B)/dk_i = -A * (dB/dk_i) / B^2 with
+  // Denominator coefficients (k4, k5, k6): d((1+A)/B)/dk_i = -(1+A) * (dB/dk_i) / B^2 with
   //   dB/dk4 = rsqr, dB/dk5 = rsqr^2, dB/dk6 = rsqr^3.
+  const T onePlusA = T(1) + A;
   const T B_sq = B * B;
   const T rsqr2 = rsqr * rsqr;
   const T rsqr3 = rsqr2 * rsqr;
   const T drf_dk1 = rsqr / B;
   const T drf_dk2 = rsqr2 / B;
   const T drf_dk3 = rsqr3 / B;
-  const T drf_dk4 = -A * rsqr / B_sq;
-  const T drf_dk5 = -A * rsqr2 / B_sq;
-  const T drf_dk6 = -A * rsqr3 / B_sq;
+  const T drf_dk4 = -onePlusA * rsqr / B_sq;
+  const T drf_dk5 = -onePlusA * rsqr2 / B_sq;
+  const T drf_dk6 = -onePlusA * rsqr3 / B_sq;
 
   jacobian(0, 4) = fx_ * xp * drf_dk1;
   jacobian(1, 4) = fy_ * yp * drf_dk1;

@@ -2096,3 +2096,200 @@ TEST_F(OpenCVFisheyeCameraTest, FisheyeSimdProjectOutsideFOV) {
   auto [projectedOutside, validMaskOutside] = clone->project(simdOutside);
   EXPECT_FALSE(validMaskOutside[0]) << "Point outside FOV should be invalid";
 }
+
+namespace {
+// Independent reference for the OpenCV rational forward projection, in the correct
+// (1+A)/B form. Kept separate from camera.cpp so the test fails if production code
+// regresses to the incorrect 1 + A/B form.
+Eigen::Vector2d openCVRationalReferenceProjection(
+    const Eigen::Vector3d& point,
+    double fx,
+    double fy,
+    double cx,
+    double cy,
+    const OpenCVDistortionParametersT<double>& dp) {
+  const double invZ = 1.0 / point.z();
+  const double xp = point.x() * invZ;
+  const double yp = point.y() * invZ;
+  const double rsqr = xp * xp + yp * yp;
+
+  const double radial = (1.0 + rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3))) /
+      (1.0 + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6)));
+
+  const double xpp = xp * radial + 2.0 * dp.p1 * xp * yp + dp.p2 * (rsqr + 2.0 * xp * xp);
+  const double ypp = yp * radial + dp.p1 * (rsqr + 2.0 * yp * yp) + 2.0 * dp.p2 * xp * yp;
+
+  return {fx * xpp + cx, fy * ypp + cy};
+}
+
+// The incorrect 1 + A/B form. Used only to assert that the chosen test points actually
+// discriminate the two forms (i.e. that the denominator terms matter for these points).
+Eigen::Vector2d openCVRationalWrongReferenceProjection(
+    const Eigen::Vector3d& point,
+    double fx,
+    double fy,
+    double cx,
+    double cy,
+    const OpenCVDistortionParametersT<double>& dp) {
+  const double invZ = 1.0 / point.z();
+  const double xp = point.x() * invZ;
+  const double yp = point.y() * invZ;
+  const double rsqr = xp * xp + yp * yp;
+
+  const double a = rsqr * (dp.k1 + rsqr * (dp.k2 + rsqr * dp.k3));
+  const double b = 1.0 + rsqr * (dp.k4 + rsqr * (dp.k5 + rsqr * dp.k6));
+  const double radial = 1.0 + a / b;
+
+  const double xpp = xp * radial + 2.0 * dp.p1 * xp * yp + dp.p2 * (rsqr + 2.0 * xp * xp);
+  const double ypp = yp * radial + dp.p1 * (rsqr + 2.0 * yp * yp) + 2.0 * dp.p2 * xp * yp;
+
+  return {fx * xpp + cx, fy * ypp + cy};
+}
+
+OpenCVDistortionParametersT<double> rationalDenominatorDistortion() {
+  OpenCVDistortionParametersT<double> dp;
+  dp.k1 = 0.12;
+  dp.k2 = -0.015;
+  dp.k3 = 0.001;
+  dp.k4 = 0.045;
+  dp.k5 = -0.004;
+  dp.k6 = 0.0006;
+  dp.p1 = 0.0003;
+  dp.p2 = -0.0002;
+  return dp;
+}
+} // namespace
+
+// Verify that every forward-projection code path agrees with each other AND with an
+// independent (1+A)/B reference when the rational denominator (k4,k5,k6) is non-zero.
+// This is the configuration that distinguishes the correct (1+A)/B model from the
+// incorrect 1+A/B model; tests with a zero denominator cannot catch that regression.
+TEST_F(CameraTest, OpenCVRationalForwardProjectionAllVariantsCorrect) {
+  const OpenCVDistortionParametersT<double> dp = rationalDenominatorDistortion();
+
+  const double fx = 520.0;
+  const double fy = 510.0;
+  const double cx = 320.0;
+  const double cy = 240.0;
+  const auto intrinsics = std::make_shared<OpenCVIntrinsicsModeld>(640, 480, fx, fy, cx, cy, dp);
+
+  const std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.4, 0.2, 2.0),
+      Eigen::Vector3d(-0.5, 0.35, 2.5),
+      Eigen::Vector3d(0.9, -0.45, 3.0),
+      Eigen::Vector3d(0.0, 0.0, 1.0),
+  };
+
+  const double tolerance = 1e-9;
+
+  for (const auto& point : testPoints) {
+    const Eigen::Vector2d reference = openCVRationalReferenceProjection(point, fx, fy, cx, cy, dp);
+
+    // Sanity check: for off-axis points the (1+A)/B and 1+A/B forms must differ
+    // meaningfully, otherwise the test would not actually exercise the fix. The
+    // on-axis point (rsqr == 0) makes both forms identical, so skip it there.
+    if (point.head<2>().squaredNorm() > 0.0) {
+      const Eigen::Vector2d wrongReference =
+          openCVRationalWrongReferenceProjection(point, fx, fy, cx, cy, dp);
+      EXPECT_GT((reference - wrongReference).norm(), 1e-3)
+          << "Test point does not discriminate (1+A)/B from 1+A/B";
+    }
+
+    // Variant 1: SIMD/packet project()
+    using PacketT = Packet<double>;
+    Vector3P<double> widePoint(PacketT(point.x()), PacketT(point.y()), PacketT(point.z()));
+    auto [packetProjected, packetMask] = intrinsics->project(widePoint);
+    ASSERT_TRUE(packetMask[0]);
+    EXPECT_NEAR(packetProjected.x()[0], reference.x(), tolerance) << "packet project u";
+    EXPECT_NEAR(packetProjected.y()[0], reference.y(), tolerance) << "packet project v";
+
+    // Variant 2: scalar project()
+    auto [scalarProjected, scalarValid] = intrinsics->project(point);
+    ASSERT_TRUE(scalarValid);
+    EXPECT_NEAR(scalarProjected.x(), reference.x(), tolerance) << "scalar project u";
+    EXPECT_NEAR(scalarProjected.y(), reference.y(), tolerance) << "scalar project v";
+
+    // Variant 3: projectJacobian() projected point
+    auto [jacProjected, jac3x3, jacValid] = intrinsics->projectJacobian(point);
+    ASSERT_TRUE(jacValid);
+    EXPECT_NEAR(jacProjected.x(), reference.x(), tolerance) << "projectJacobian u";
+    EXPECT_NEAR(jacProjected.y(), reference.y(), tolerance) << "projectJacobian v";
+
+    // Variant 4: projectIntrinsicsJacobian() projected point
+    auto [intrinsicsJacProjected, jac3x14, intrinsicsJacValid] =
+        intrinsics->projectIntrinsicsJacobian(point);
+    ASSERT_TRUE(intrinsicsJacValid);
+    EXPECT_NEAR(intrinsicsJacProjected.x(), reference.x(), tolerance)
+        << "projectIntrinsicsJacobian u";
+    EXPECT_NEAR(intrinsicsJacProjected.y(), reference.y(), tolerance)
+        << "projectIntrinsicsJacobian v";
+  }
+}
+
+// Finite-difference validation of projectIntrinsicsJacobian() with a non-zero rational
+// denominator. The k4/k5/k6 derivative terms are only exercised when the denominator is
+// non-trivial; this guards the (1+A)/B intrinsics Jacobian against regressions in those
+// columns (the on-axis/zero-denominator tests cannot).
+TEST_F(CameraTest, OpenCVIntrinsicsJacobianValidationWithDenominatorDistortion) {
+  const OpenCVDistortionParametersT<double> dp = rationalDenominatorDistortion();
+  const auto intrinsics =
+      std::make_shared<OpenCVIntrinsicsModeld>(640, 480, 520.0, 510.0, 320.0, 240.0, dp);
+
+  const std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.4, 0.2, 2.0),
+      Eigen::Vector3d(-0.5, 0.35, 2.5),
+      Eigen::Vector3d(0.9, -0.45, 3.0),
+  };
+
+  const double epsilon = 1e-8;
+  const double tolerance = 1e-4;
+
+  for (const auto& point : testPoints) {
+    auto [projectedPoint, analyticalJacobian, isValid] =
+        intrinsics->projectIntrinsicsJacobian(point);
+    ASSERT_TRUE(isValid);
+
+    Eigen::MatrixXd finiteDiffJacobian(3, 14);
+
+    auto baseParams = intrinsics->getIntrinsicParameters();
+    auto [baseProjected, baseValid] = intrinsics->project(point);
+    ASSERT_TRUE(baseValid);
+
+    for (int i = 0; i < 14; ++i) {
+      auto cloned = intrinsics->clone();
+      Eigen::VectorXd perturbedParams = baseParams;
+      perturbedParams(i) += epsilon;
+      cloned->setIntrinsicParameters(perturbedParams);
+
+      auto [perturbedProjected, perturbedValid] = cloned->project(point);
+      ASSERT_TRUE(perturbedValid);
+
+      finiteDiffJacobian.col(i) = (perturbedProjected - baseProjected) / epsilon;
+    }
+
+    for (int row = 0; row < 2; ++row) { // Only check u and v rows
+      for (int col = 0; col < 14; ++col) {
+        EXPECT_NEAR(analyticalJacobian(row, col), finiteDiffJacobian(row, col), tolerance)
+            << "OpenCV rational intrinsics Jacobian mismatch at (" << row << "," << col
+            << ") for point (" << point.x() << "," << point.y() << "," << point.z() << ")";
+      }
+    }
+  }
+}
+
+// projectJacobian()/project() self-consistency with a non-zero rational denominator.
+// (Relocated here from the CUDA backend commit: it is a CPU-only test.)
+TEST_F(CameraTest, OpenCVRationalProjectJacobianConsistencyWithDenominatorDistortion) {
+  const OpenCVDistortionParametersT<double> distortionParams = rationalDenominatorDistortion();
+
+  const auto intrinsics = std::make_shared<OpenCVIntrinsicsModeld>(
+      640, 480, 520.0, 510.0, 320.0, 240.0, distortionParams);
+  const std::vector<Eigen::Vector3d> testPoints = {
+      Eigen::Vector3d(0.4, 0.2, 2.0),
+      Eigen::Vector3d(-0.5, 0.35, 2.5),
+      Eigen::Vector3d(0.9, -0.45, 3.0),
+  };
+
+  testIntrinsicsJacobianComprehensive(
+      intrinsics, "OpenCVRationalDenominatorDouble", testPoints, 1e-4, 1e-6);
+}
