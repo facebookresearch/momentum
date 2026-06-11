@@ -141,15 +141,23 @@ void addErrorFunctions(py::module_& m) {
             return fmt::format("LimitErrorFunction(weight={})", self.getWeight());
           })
       .def(
-          py::init<>([](const mm::Character& character, float weight) {
+          py::init<>([](const mm::Character& character, float alpha, float c, float weight) {
             validateWeight(weight, "weight");
-            auto result = std::make_shared<mm::LimitErrorFunction>(character);
+            auto result = std::make_shared<mm::LimitErrorFunction>(character, alpha, c);
             result->setWeight(weight);
             return result;
           }),
           py::keep_alive<1, 2>(),
+          R"(Construct a :class:`LimitErrorFunction` for the given character.
+
+              :param character: The character to use.
+              :param alpha: Shape parameter for the generalized loss; 2 is squared L2/quadratic, 1 is pseudo-Huber, and 0 is Cauchy/Lorentzian.
+              :param c: Positive scale parameter controlling where residuals transition from near-quadratic to robust behavior.
+              :param weight: The weight applied to the error function.)",
           py::arg("character"),
           py::kw_only(),
+          py::arg("alpha") = 2.0f,
+          py::arg("c") = 1.0f,
           py::arg("weight") = 1.0f);
 
   py::class_<
