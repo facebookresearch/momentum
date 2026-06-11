@@ -16,6 +16,8 @@
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/character_solver/error_function_helpers.h"
 
+#include <cfloat>
+
 using namespace momentum;
 
 using Types = testing::Types<float, double>;

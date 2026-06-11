@@ -369,6 +369,7 @@ character_solver_test_sources = [
     "test/character_solver/joint_to_joint_distance_error_function_test.cpp",
     "test/character_solver/joint_to_joint_orientation_error_function_test.cpp",
     "test/character_solver/joint_to_joint_position_error_function_test.cpp",
+    "test/character_solver/limit_error_function_loss_test.cpp",
     "test/character_solver/limit_error_function_test.cpp",
     "test/character_solver/normal_error_function_test.cpp",
     "test/character_solver/orientation_error_function_test.cpp",

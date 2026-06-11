@@ -119,6 +119,29 @@ class TestSolver(unittest.TestCase):
             pym_solver2.LimitErrorFunction(character2),
         )
 
+    def test_limit_error_generalized_loss(self) -> None:
+        """LimitErrorFunction's generalized-loss alpha/c parameters change the penalty."""
+
+        character = pym_test_utils.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+
+        # The test character has a MinMax limit on parameter 0; drive it well past the bound so the
+        # limit is violated and the loss shape actually matters.
+        model_params = np.zeros(n_params, dtype=np.float32)
+        model_params[0] = 1.0
+
+        # The default constructor uses an L2 loss; alpha/c select a different generalized loss
+        # (here Cauchy), which downweights the large violation relative to L2.
+        l2_limit = pym_solver2.LimitErrorFunction(character)
+        cauchy_limit = pym_solver2.LimitErrorFunction(character, alpha=0.0, c=2.0)
+
+        l2_error = l2_limit.get_error(model_params)
+        cauchy_error = cauchy_limit.get_error(model_params)
+
+        self.assertGreater(l2_error, 0.0)
+        self.assertGreater(cauchy_error, 0.0)
+        self.assertLess(cauchy_error, l2_error)
+
     def test_get_gradient_and_jacobian(self) -> None:
         """Test that get_gradient and get_jacobian do something reasonable for error functions."""
 
