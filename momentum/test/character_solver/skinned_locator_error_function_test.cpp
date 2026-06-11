@@ -142,8 +142,6 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, SkinnedLocatorTriangle_SlidingConstraint
   const Eigen::Vector3i initialTriIndices = mesh.faces[initialTriIdx];
   const Eigen::Vector3i candidateTri1Indices = mesh.faces[candidateTriIdx1];
   const Eigen::Vector3i candidateTri2Indices = mesh.faces[candidateTriIdx2];
-  const Eigen::Vector3i excludedTriIndices = mesh.faces[excludedTriIdx];
-
   // Create constraint with candidate triangles
   SkinnedLocatorTriangleConstraintT<T> constraint;
   constraint.locatorIndex = 0;
