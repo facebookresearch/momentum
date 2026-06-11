@@ -9,6 +9,7 @@ import unittest
 
 import numpy as np
 import numpy.typing as npt
+import pymomentum.camera as pym_camera  # @manual=:camera
 import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.quaternion_np as pym_quaternion
@@ -85,7 +86,7 @@ class TestSolver(unittest.TestCase):
         # make sure it's deterministic:
         per_iter_errors_prev = solver.per_iteration_errors
         model_params_final = solver.solve(model_params_init)
-        assert solver.per_iteration_errors == per_iter_errors_prev
+        self.assertEqual(solver.per_iteration_errors, per_iter_errors_prev)
 
         # delete constraints and ensure they're empty
         pos_error.clear_constraints()
@@ -1255,8 +1256,6 @@ class TestSolver(unittest.TestCase):
 
     def test_camera_projection_constraint(self) -> None:
         """Test CameraProjectionErrorFunction moves a joint to match a target 2D pixel."""
-        import pymomentum.camera as pym_camera
-
         # Create a test character
         character = pym_test_utils.create_test_character(num_joints=4)
         n_params = character.parameter_transform.size
@@ -2957,8 +2956,6 @@ class TestSolver(unittest.TestCase):
 
     def test_add_camera_intrinsics_parameters(self) -> None:
         """Test adding camera intrinsics parameters for multiple cameras."""
-        import pymomentum.camera as pym_camera
-
         character = pym_test_utils.create_test_character(num_joints=4)
         orig_n_params = character.parameter_transform.size
 
@@ -3007,8 +3004,6 @@ class TestSolver(unittest.TestCase):
 
     def test_extract_and_set_camera_intrinsics(self) -> None:
         """Test round-tripping intrinsics values through model parameters."""
-        import pymomentum.camera as pym_camera
-
         character = pym_test_utils.create_test_character(num_joints=4)
 
         cam = pym_camera.PinholeIntrinsicsModel(
@@ -3045,8 +3040,6 @@ class TestSolver(unittest.TestCase):
 
     def test_batched_camera_intrinsics(self) -> None:
         """Test extract/set camera intrinsics with batched (2D) model parameters."""
-        import pymomentum.camera as pym_camera
-
         character = pym_test_utils.create_test_character(num_joints=4)
 
         cam = pym_camera.PinholeIntrinsicsModel(
