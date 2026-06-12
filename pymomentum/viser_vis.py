@@ -367,6 +367,33 @@ def add_floor(
     )
 
 
+def update_mesh_vertices(
+    mesh_handle: Any,
+    wireframe_handle: Any | None,
+    vertices: np.ndarray,
+    *,
+    scale: float = CM_TO_M,
+) -> None:
+    """Update vertex positions of existing mesh handles from a vertex array.
+
+    :param mesh_handle: The solid mesh handle from :func:`add_mesh`.
+    :param wireframe_handle: The wireframe handle from :func:`add_mesh`.
+    :param vertices: The new vertex positions.
+    :param scale: Unit conversion factor.  Defaults to :data:`CM_TO_M`.
+    """
+    if scale == 1.0:
+        vertices = np.ascontiguousarray(vertices, dtype=np.float32)
+    else:
+        vertices = np.asarray(vertices, dtype=np.float32) * scale
+    if isinstance(mesh_handle, list):
+        for part in mesh_handle:
+            part.handle.vertices = vertices[part.vertex_indices]
+    else:
+        mesh_handle.vertices = vertices
+    if wireframe_handle is not None:
+        wireframe_handle.vertices = vertices
+
+
 def update_mesh(
     mesh_handle: Any,
     wireframe_handle: Any | None,
@@ -381,14 +408,7 @@ def update_mesh(
     :param mesh: The new posed mesh.
     :param scale: Unit conversion factor.  Defaults to :data:`CM_TO_M`.
     """
-    vertices = np.asarray(mesh.vertices, dtype=np.float32) * scale
-    if isinstance(mesh_handle, list):
-        for part in mesh_handle:
-            part.handle.vertices = vertices[part.vertex_indices]
-    else:
-        mesh_handle.vertices = vertices
-    if wireframe_handle is not None:
-        wireframe_handle.vertices = vertices
+    update_mesh_vertices(mesh_handle, wireframe_handle, mesh.vertices, scale=scale)
 
 
 def _max_nonzero_skin_influences(
@@ -592,14 +612,47 @@ def update_skinned_mesh(
     :param skel_state: Skeleton state array of shape ``(n_joints, 8)``.
     :param scale: Unit conversion factor for bone translations.
     """
+    positions = skel_state[:, :3] * scale
+    wxyzs = np.empty((skel_state.shape[0], 4), dtype=np.float32)
+    wxyzs[:, 0] = skel_state[:, 6]
+    wxyzs[:, 1:] = skel_state[:, 3:6]
+    update_skinned_mesh_transforms(skinned_mesh_handle, positions, wxyzs)
+
+
+def update_skinned_mesh_transforms(
+    skinned_mesh_handle: Any,
+    positions: np.ndarray,
+    wxyzs: np.ndarray,
+) -> None:
+    """Update a skinned mesh from precomputed bone transforms.
+
+    :param skinned_mesh_handle: The handle returned by :func:`add_skinned_mesh`.
+        This may be a list of uniformly colored skinned submesh handles.
+    :param positions: Bone positions with shape ``(n_joints, 3)`` in scene units.
+    :param wxyzs: Bone orientations with shape ``(n_joints, 4)`` in Viser's
+        ``wxyz`` quaternion order.
+    """
+    positions = np.asarray(positions, dtype=np.float32)
+    wxyzs = np.asarray(wxyzs, dtype=np.float32)
+    if positions.ndim != 2 or positions.shape[1] != 3:
+        raise ValueError(
+            "update_skinned_mesh_transforms() expected positions with shape "
+            f"(n_joints, 3); got {positions.shape}"
+        )
+    if wxyzs.shape != (positions.shape[0], 4):
+        raise ValueError(
+            "update_skinned_mesh_transforms() expected wxyzs with shape "
+            f"({positions.shape[0]}, 4); got {wxyzs.shape}"
+        )
+
     handles = _skinned_mesh_handles(skinned_mesh_handle)
     if not handles:
-        raise ValueError("update_skinned_mesh() requires skinned mesh handle(s)")
+        raise ValueError(
+            "update_skinned_mesh_transforms() requires skinned mesh handle(s)"
+        )
 
-    positions = skel_state[:, :3].astype(np.float64) * scale
-    wxyzs = _xyzw_to_wxyz(skel_state[:, 3:7])
     for handle in handles:
-        _update_skinned_mesh_handle(handle, positions, wxyzs, skel_state.shape[0])
+        _update_skinned_mesh_handle(handle, positions, wxyzs, positions.shape[0])
 
 
 def _update_skinned_mesh_handle(
@@ -625,16 +678,28 @@ def _build_bone_segments(
     scale: float = 1.0,
 ) -> np.ndarray | None:
     """Build an (N, 2, 3) array of bone line segments from parent-child joints."""
-    joint_parents: list[int] = list(character.skeleton.joint_parents)
-    n_joints = len(joint_parents)
-    segments: list[list[np.ndarray]] = []
-    for i in range(n_joints):
-        parent_idx = joint_parents[i]
-        if 0 <= parent_idx < n_joints:
-            segments.append([skel_state[parent_idx, :3], skel_state[i, :3]])
-    if not segments:
+    positions = np.asarray(skel_state[:, :3] * scale, dtype=np.float32)
+    return _build_bone_segments_from_positions(character, positions)
+
+
+def _build_bone_segments_from_positions(
+    character: Character,
+    positions: np.ndarray,
+) -> np.ndarray | None:
+    """Build bone line segments from scene-space joint positions."""
+    joint_parents = np.asarray(character.skeleton.joint_parents, dtype=np.intp)
+    child_indices = np.arange(joint_parents.shape[0], dtype=np.intp)
+    valid = (joint_parents >= 0) & (joint_parents < joint_parents.shape[0])
+    if not np.any(valid):
         return None
-    return np.array(segments, dtype=np.float32) * scale
+    segments = np.stack(
+        (
+            positions[joint_parents[valid]],
+            positions[child_indices[valid]],
+        ),
+        axis=1,
+    )
+    return np.asarray(segments, dtype=np.float32)
 
 
 def _wxyz_from_z_axis(direction: np.ndarray) -> np.ndarray:
@@ -1111,17 +1176,83 @@ def update_joints(
     :param scale: Unit conversion factor.  Defaults to :data:`CM_TO_M`.
     """
     joint_names: list[str] = character.skeleton.joint_names
+    positions = skel_state[:, :3] * scale
+    wxyzs = np.empty((skel_state.shape[0], 4), dtype=np.float32)
+    wxyzs[:, 0] = skel_state[:, 6]
+    wxyzs[:, 1:] = skel_state[:, 3:6]
     for i, name in enumerate(joint_names):
         handle = handles.get(name)
         if handle is None:
             continue
-        handle.position = skel_state[i, :3].astype(np.float64) * scale
-        handle.wxyz = _xyzw_to_wxyz(skel_state[i, 3:7])
+        handle.position = positions[i]
+        handle.wxyz = wxyzs[i]
 
     if bones_handle is not None:
-        segments = _build_bone_segments(character, skel_state, scale=scale)
+        segments = _build_bone_segments_from_positions(
+            character, positions.astype(np.float32, copy=False)
+        )
         if segments is not None:
             bones_handle.points = segments
+
+
+def update_joints_transforms(
+    handles: dict[str, Any],
+    bones_handle: Any | None,
+    character: Character,
+    positions: np.ndarray,
+    wxyzs: np.ndarray,
+    bone_segments: np.ndarray | None = None,
+) -> None:
+    """Update joint frames from precomputed scene-space transforms.
+
+    :param handles: The joint handle dict returned by :func:`add_joints`.
+    :param bones_handle: The bones handle returned by :func:`add_joints`.
+    :param character: The character whose skeleton is being updated.
+    :param positions: Joint positions with shape ``(n_joints, 3)`` in scene units.
+    :param wxyzs: Joint orientations with shape ``(n_joints, 4)`` in Viser's
+        ``wxyz`` quaternion order.
+    :param bone_segments: Optional precomputed bone line segments with shape
+        ``(n_bones, 2, 3)`` in scene units.
+    """
+    positions = np.asarray(positions, dtype=np.float32)
+    wxyzs = np.asarray(wxyzs, dtype=np.float32)
+    joint_names: list[str] = character.skeleton.joint_names
+    if positions.shape != (len(joint_names), 3):
+        raise ValueError(
+            "update_joints_transforms() expected positions with shape "
+            f"({len(joint_names)}, 3); got {positions.shape}"
+        )
+    if wxyzs.shape != (len(joint_names), 4):
+        raise ValueError(
+            "update_joints_transforms() expected wxyzs with shape "
+            f"({len(joint_names)}, 4); got {wxyzs.shape}"
+        )
+    segments: np.ndarray | None = None
+    if bone_segments is not None:
+        segments = np.asarray(bone_segments, dtype=np.float32)
+        parent_indices = np.asarray(character.skeleton.joint_parents, dtype=np.intp)
+        n_bones = int(
+            np.count_nonzero(
+                (parent_indices >= 0) & (parent_indices < parent_indices.shape[0])
+            )
+        )
+        if segments.shape != (n_bones, 2, 3):
+            raise ValueError(
+                "update_joints_transforms() expected bone_segments with shape "
+                f"({n_bones}, 2, 3); got {segments.shape}"
+            )
+    elif bones_handle is not None:
+        segments = _build_bone_segments_from_positions(character, positions)
+
+    for i, name in enumerate(joint_names):
+        handle = handles.get(name)
+        if handle is None:
+            continue
+        handle.position = positions[i]
+        handle.wxyz = wxyzs[i]
+
+    if bones_handle is not None and segments is not None:
+        bones_handle.points = segments
 
 
 def add_character(
