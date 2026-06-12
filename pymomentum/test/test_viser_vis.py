@@ -49,8 +49,10 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
         update_character,
         update_collision_geometry,
         update_joints,
+        update_joints_transforms,
         update_mesh,
         update_skinned_mesh,
+        update_skinned_mesh_transforms,
     )
 
     class TestViserVis(unittest.TestCase):
@@ -223,6 +225,62 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                     atol=1e-5,
                 )
 
+            positions = np.asarray(moved[:, :3] * 2.0, dtype=np.float32)
+            wxyzs = np.empty((moved.shape[0], 4), dtype=np.float32)
+            wxyzs[:, 0] = moved[:, 6]
+            wxyzs[:, 1:] = moved[:, 3:6]
+            expected_segments: list[list[np.ndarray]] = []
+            for child, parent in enumerate(character.skeleton.joint_parents):
+                parent_index = int(parent)
+                if 0 <= parent_index < positions.shape[0]:
+                    expected_segments.append(
+                        [positions[parent_index], positions[child]]
+                    )
+            bone_segments = np.asarray(expected_segments, dtype=np.float32)
+            update_joints_transforms(
+                handles,
+                bones_handle,
+                character,
+                positions,
+                wxyzs,
+                bone_segments,
+            )
+            for i, name in enumerate(character.skeleton.joint_names):
+                np.testing.assert_allclose(
+                    np.asarray(handles[name].position),
+                    positions[i],
+                    atol=1e-5,
+                )
+                np.testing.assert_allclose(
+                    np.asarray(handles[name].wxyz),
+                    wxyzs[i],
+                    atol=1e-5,
+                )
+            np.testing.assert_allclose(
+                np.asarray(bones_handle.points), bone_segments, atol=1e-5
+            )
+
+            inferred_positions = np.asarray(moved[:, :3] * 3.0, dtype=np.float32)
+            update_joints_transforms(
+                handles,
+                bones_handle,
+                character,
+                inferred_positions,
+                wxyzs,
+            )
+            expected_inferred_segments = []
+            for child, parent in enumerate(character.skeleton.joint_parents):
+                parent_index = int(parent)
+                if 0 <= parent_index < inferred_positions.shape[0]:
+                    expected_inferred_segments.append(
+                        [inferred_positions[parent_index], inferred_positions[child]]
+                    )
+            np.testing.assert_allclose(
+                np.asarray(bones_handle.points),
+                np.asarray(expected_inferred_segments, dtype=np.float32),
+                atol=1e-5,
+            )
+
             for h in handles.values():
                 h.remove()
             bones_handle.remove()
@@ -266,6 +324,29 @@ if _HAS_VISER:  # noqa: C901 — gating block intentionally wraps the whole suit
                 np.testing.assert_allclose(
                     np.asarray(bone.position),
                     moved[i, :3] * scale,
+                    atol=1e-5,
+                )
+
+            direct_positions = np.asarray(
+                moved[:, :3] * (scale + 1.0), dtype=np.float32
+            )
+            direct_wxyzs = np.empty((moved.shape[0], 4), dtype=np.float32)
+            direct_wxyzs[:, 0] = moved[:, 6]
+            direct_wxyzs[:, 1:] = moved[:, 3:6]
+            update_skinned_mesh_transforms(
+                skinned_handle,
+                direct_positions,
+                direct_wxyzs,
+            )
+            for i, bone in enumerate(skinned_handle.bones[: character.skeleton.size]):
+                np.testing.assert_allclose(
+                    np.asarray(bone.position),
+                    direct_positions[i],
+                    atol=1e-5,
+                )
+                np.testing.assert_allclose(
+                    np.asarray(bone.wxyz),
+                    direct_wxyzs[i],
                     atol=1e-5,
                 )
 
