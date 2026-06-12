@@ -297,28 +297,10 @@ std::optional<Mesh> loadVisualMesh(
   }
 }
 
-std::optional<TaperedCapsule> loadCollisionCapsule(
-    const urdf::Collision& collision,
-    std::string_view linkName,
+[[nodiscard]] TaperedCapsule loadCollisionCapsule(
+    const urdf::Cylinder& cylinder,
+    const TransformT<float>& collisionOrigin,
     size_t jointIndex) {
-  if (!collision.geometry) {
-    MT_LOGW("Ignoring URDF collision on link '{}' because it has no geometry.", linkName);
-    return std::nullopt;
-  }
-
-  const auto& geometry = *collision.geometry;
-  if (geometry.type != urdf::Geometry::CYLINDER) {
-    MT_LOGW(
-        "Ignoring unsupported URDF collision geometry '{}' on link '{}'. "
-        "Only cylinder collision geometry can be imported as Momentum tapered capsules.",
-        toString(geometry),
-        linkName);
-    return std::nullopt;
-  }
-
-  const auto& cylinder = dynamic_cast<const urdf::Cylinder&>(geometry);
-  const auto collisionOrigin = toMomentumTransform<float>(collision.origin);
-
   // Convention conversion: URDF cylinders are centered at the origin with their axis along
   // +Z, while Momentum TaperedCapsules start at the origin with their axis along +X.
   //   - Rotation: compose the URDF collision origin rotation with a UnitX→UnitZ rotation so the
@@ -333,8 +315,80 @@ std::optional<TaperedCapsule> loadCollisionCapsule(
       Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitZ());
   capsule.transformation.translation = collisionOrigin.translation * toCm<float>() +
       collisionOrigin.rotation * Eigen::Vector3f(0.0f, 0.0f, -0.5f * capsule.length);
-
   return capsule;
+}
+
+[[nodiscard]] CollisionEllipsoid loadCollisionSphere(
+    const urdf::Sphere& sphere,
+    const TransformT<float>& collisionOrigin,
+    size_t jointIndex) {
+  // A URDF sphere has a single radius and is centered at the collision origin. It maps directly to
+  // a Momentum ellipsoid with equal radii along all three local axes (a sphere is the special case
+  // of an ellipsoid). The collision origin becomes the ellipsoid center and orientation.
+  CollisionEllipsoid ellipsoid;
+  ellipsoid.parent = jointIndex;
+  ellipsoid.radii = Eigen::Vector3f::Constant(static_cast<float>(sphere.radius) * toCm<float>());
+  ellipsoid.transformation.rotation = collisionOrigin.rotation;
+  ellipsoid.transformation.translation = collisionOrigin.translation * toCm<float>();
+  return ellipsoid;
+}
+
+[[nodiscard]] CollisionBox loadCollisionBox(
+    const urdf::Box& box,
+    const TransformT<float>& collisionOrigin,
+    size_t jointIndex) {
+  // A URDF box is centered at the collision origin with full extents box.dim along its local axes,
+  // whereas a Momentum box stores half extents. The collision origin becomes the box center and
+  // orientation.
+  CollisionBox collisionBox;
+  collisionBox.parent = jointIndex;
+  collisionBox.halfExtents = Eigen::Vector3f(
+                                 static_cast<float>(box.dim.x),
+                                 static_cast<float>(box.dim.y),
+                                 static_cast<float>(box.dim.z)) *
+      (0.5f * toCm<float>());
+  collisionBox.transformation.rotation = collisionOrigin.rotation;
+  collisionBox.transformation.translation = collisionOrigin.translation * toCm<float>();
+  return collisionBox;
+}
+
+/// Imports a single URDF collision geometry as a Momentum collision primitive.
+///
+/// URDF cylinders become tapered capsules, spheres become ellipsoids with equal radii, and boxes
+/// become boxes. Mesh collision geometry is not supported and is skipped with a warning.
+[[nodiscard]] std::optional<CollisionPrimitive> loadCollisionPrimitive(
+    const urdf::Collision& collision,
+    std::string_view linkName,
+    size_t jointIndex) {
+  if (!collision.geometry) {
+    MT_LOGW("Ignoring URDF collision on link '{}' because it has no geometry.", linkName);
+    return std::nullopt;
+  }
+
+  const auto& geometry = *collision.geometry;
+  const auto collisionOrigin = toMomentumTransform<float>(collision.origin);
+
+  switch (geometry.type) {
+    case urdf::Geometry::CYLINDER:
+      return CollisionPrimitive(loadCollisionCapsule(
+          dynamic_cast<const urdf::Cylinder&>(geometry), collisionOrigin, jointIndex));
+    case urdf::Geometry::SPHERE:
+      return CollisionPrimitive(loadCollisionSphere(
+          dynamic_cast<const urdf::Sphere&>(geometry), collisionOrigin, jointIndex));
+    case urdf::Geometry::BOX:
+      return CollisionPrimitive(
+          loadCollisionBox(dynamic_cast<const urdf::Box&>(geometry), collisionOrigin, jointIndex));
+    case urdf::Geometry::MESH:
+      MT_LOGW(
+          "Ignoring unsupported URDF mesh collision geometry on link '{}'. Only cylinder, sphere, "
+          "and box collision geometry can be imported.",
+          linkName);
+      return std::nullopt;
+  }
+
+  MT_LOGW(
+      "Ignoring unknown URDF collision geometry '{}' on link '{}'.", toString(geometry), linkName);
+  return std::nullopt;
 }
 
 constexpr std::array<const char*, 3> kTranslationNames = {"tx", "ty", "tz"};
@@ -643,9 +697,9 @@ void collectCollisionGeometry(ParsingData& data, const urdf::Link& urdfLink, siz
       MT_LOGW("Ignoring null URDF collision on link '{}'.", urdfLink.name);
       continue;
     }
-    auto capsule = loadCollisionCapsule(*collision, urdfLink.name, linkJointId);
-    if (capsule) {
-      data.collision.push_back(*capsule);
+    auto primitive = loadCollisionPrimitive(*collision, urdfLink.name, linkJointId);
+    if (primitive) {
+      data.collision.push_back(*primitive);
     }
   }
 }
