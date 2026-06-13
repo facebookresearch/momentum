@@ -88,7 +88,13 @@ double ModelParametersErrorFunctionT<T>::getGradient(
 
 template <typename T>
 size_t ModelParametersErrorFunctionT<T>::getJacobianSize() const {
-  return (targetWeights_.array() > T(0)).count();
+  size_t count = 0;
+  for (Eigen::Index i = 0; i < targetWeights_.size(); ++i) {
+    if (this->enabledParameters_.test(i) && targetWeights_(i) > T(0)) {
+      ++count;
+    }
+  }
+  return count;
 }
 
 template <typename T>

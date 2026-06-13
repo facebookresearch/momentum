@@ -13,6 +13,7 @@
 #include "momentum/character_solver/skeleton_derivative.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
+#include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
 
 namespace momentum {
@@ -149,7 +150,7 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateJacobian(
   const T actualDistance = diff.norm();
 
   // Handle degenerate case where vertices are at the same position
-  if (actualDistance == T(0)) {
+  if (actualDistance < Eps<T>(1e-8f, 1e-14)) {
     residual = T(0);
     return T(0); // No meaningful jacobian when distance is zero
   }
@@ -201,7 +202,7 @@ double VertexVertexDistanceErrorFunctionT<T>::calculateGradient(
   const T actualDistance = diff.norm();
 
   // Handle degenerate case where vertices are at the same position
-  if (actualDistance == T(0)) {
+  if (actualDistance < Eps<T>(1e-8f, 1e-14)) {
     return T(0); // No meaningful gradient when distance is zero
   }
 
