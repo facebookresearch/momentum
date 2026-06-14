@@ -159,7 +159,7 @@ if(MOMENTUM_BUILD_RERUN)
   else()
     include(FetchContent)
     FetchContent_Declare(rerun_sdk
-      URL https://github.com/rerun-io/rerun/releases/download/0.28.2/rerun_cpp_sdk.zip
+      URL https://github.com/rerun-io/rerun/releases/download/0.31.3/rerun_cpp_sdk.zip
     )
     FetchContent_MakeAvailable(rerun_sdk)
   endif()
