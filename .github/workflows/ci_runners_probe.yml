@@ -1,0 +1,424 @@
+name: CI Runners Probe
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/ci_runners_probe.yml"
+  workflow_dispatch:
+    inputs:
+      install_pixi_environment:
+        description: "Install the matching pixi environment and probe its selected toolchain"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: probe-${{ matrix.runner }}-${{ matrix.pixi_env }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            pixi_env: py312
+            conda_override_cuda: ""
+          - runner: 2-core-ubuntu-arm
+            pixi_env: py312
+            conda_override_cuda: ""
+          - runner: 4-core-ubuntu-gpu-t4
+            pixi_env: py312-cuda129
+            conda_override_cuda: "12"
+          - runner: macos-latest
+            pixi_env: py312
+            conda_override_cuda: ""
+          - runner: macos-14
+            pixi_env: py312
+            conda_override_cuda: ""
+          - runner: windows-latest
+            pixi_env: py312
+            conda_override_cuda: ""
+          - runner: 4-core-windows-gpu-t4
+            pixi_env: py312-cuda129
+            conda_override_cuda: "12"
+    env:
+      PROBE_PIXI_ENV: ${{ matrix.pixi_env }}
+      CONDA_OVERRIDE_CUDA: ${{ matrix.conda_override_cuda }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Probe base Windows image
+        if: ${{ runner.os == 'Windows' }}
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          function Write-Group($Name, [scriptblock]$Body) {
+            Write-Host "::group::$Name"
+            & $Body
+            Write-Host "::endgroup::"
+          }
+
+          function New-CMakeProbeProject($Root) {
+            $src = Join-Path $Root "src"
+            New-Item -ItemType Directory -Force -Path $src | Out-Null
+            @(
+              "cmake_minimum_required(VERSION 3.20)"
+              "project(WindowsToolchainProbe LANGUAGES C CXX)"
+              'message(STATUS "probe:CMAKE_GENERATOR=${CMAKE_GENERATOR}")'
+              'message(STATUS "probe:CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")'
+              'message(STATUS "probe:CMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")'
+            ) | Set-Content -Path (Join-Path $src "CMakeLists.txt") -Encoding utf8
+            "int main() { return 0; }" | Set-Content -Path (Join-Path $src "main.cpp") -Encoding utf8
+            return $src
+          }
+
+          function Invoke-CMakeProbe($Src, $BuildRoot, $Generator) {
+            $build = Join-Path $BuildRoot ($Generator -replace "[^A-Za-z0-9]+", "-")
+            Write-Group "CMake configure: $Generator" {
+              & cmake -S $Src -B $build -G $Generator
+              Write-Host "exit=$LASTEXITCODE"
+            }
+          }
+
+          Write-Group "Runner context" {
+            Write-Host "github.runner.os=${{ runner.os }}"
+            Write-Host "github.runner.arch=${{ runner.arch }}"
+            Write-Host "RUNNER_NAME=$env:RUNNER_NAME"
+            Write-Host "RUNNER_OS=$env:RUNNER_OS"
+            Write-Host "RUNNER_ARCH=$env:RUNNER_ARCH"
+            Write-Host "ImageOS=$env:ImageOS"
+            Write-Host "ImageVersion=$env:ImageVersion"
+            Write-Host "PROCESSOR_ARCHITECTURE=$env:PROCESSOR_ARCHITECTURE"
+            Write-Host "NUMBER_OF_PROCESSORS=$env:NUMBER_OF_PROCESSORS"
+            where.exe powershell
+            where.exe pwsh
+            systeminfo | Select-String -Pattern "^OS Name", "^OS Version", "^System Type", "^Processor"
+          }
+
+          Write-Group "CUDA and GPU context" {
+            Write-Host "CONDA_OVERRIDE_CUDA=$env:CONDA_OVERRIDE_CUDA"
+            Write-Host "CUDA_PATH=$env:CUDA_PATH"
+            where.exe nvidia-smi
+            nvidia-smi
+            where.exe nvcc
+            nvcc --version
+          }
+
+          Write-Group "Visual Studio discovery" {
+            $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+            if (Test-Path $vswhere) {
+              Write-Host "vswhere=$vswhere"
+              & $vswhere -all -products * -format json
+              $installPaths = & $vswhere -all -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+              foreach ($installPath in $installPaths) {
+                Write-Host "VC install path: $installPath"
+                $toolsRoot = Join-Path $installPath "VC\Tools\MSVC"
+                if (Test-Path $toolsRoot) {
+                  Get-ChildItem $toolsRoot -Directory | Sort-Object Name -Descending | ForEach-Object {
+                    Write-Host "MSVC toolset: $($_.FullName)"
+                  }
+                }
+
+                $vcvars = Join-Path $installPath "VC\Auxiliary\Build\vcvars64.bat"
+                if (Test-Path $vcvars) {
+                  Write-Host "vcvars64=$vcvars"
+                  & cmd /c "`"$vcvars`" >nul && where cl && cl /Bv"
+                }
+              }
+            } else {
+              Write-Warning "vswhere was not found at $vswhere"
+            }
+
+            where.exe cl
+            cl /Bv
+          }
+
+          Write-Group "CMake and generator discovery" {
+            where.exe cmake
+            cmake --version
+            $capabilities = (& cmake -E capabilities) -join "`n"
+            $capabilities | ConvertFrom-Json | Select-Object -ExpandProperty generators | Where-Object {
+              $_.name -like "*Visual Studio*" -or $_.name -eq "Ninja"
+            } | ForEach-Object {
+              Write-Host ("generator={0}; platformSupport={1}; toolsetSupport={2}" -f $_.name, $_.platformSupport, $_.toolsetSupport)
+            }
+          }
+
+          $probeRoot = Join-Path $env:RUNNER_TEMP "base-cmake-toolchain-probe"
+          $probeSrc = New-CMakeProbeProject $probeRoot
+          foreach ($generator in @("Visual Studio 18 2026", "Visual Studio 17 2022", "Ninja")) {
+            Invoke-CMakeProbe $probeSrc $probeRoot $generator
+          }
+
+          exit 0
+
+      - name: Probe base Unix image
+        if: ${{ runner.os != 'Windows' }}
+        shell: bash
+        run: |
+          set +e
+
+          write_group() {
+            local name="$1"
+            shift
+            echo "::group::$name"
+            "$@"
+            local status=$?
+            echo "exit=$status"
+            echo "::endgroup::"
+            return 0
+          }
+
+          new_cmake_probe_project() {
+            local root="$1"
+            local src="$root/src"
+            mkdir -p "$src"
+            cat > "$src/CMakeLists.txt" <<'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(UnixToolchainProbe LANGUAGES C CXX)
+          message(STATUS "probe:CMAKE_GENERATOR=${CMAKE_GENERATOR}")
+          message(STATUS "probe:CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
+          message(STATUS "probe:CMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+          EOF
+            printf 'int main() { return 0; }\n' > "$src/main.cpp"
+            echo "$src"
+          }
+
+          invoke_cmake_probe() {
+            local src="$1"
+            local build_root="$2"
+            local generator="$3"
+            local build="$build_root/${generator//[^A-Za-z0-9]/-}"
+            write_group "CMake configure: $generator" cmake -S "$src" -B "$build" -G "$generator"
+          }
+
+          echo "::group::Runner context"
+          echo "github.runner.os=${{ runner.os }}"
+          echo "github.runner.arch=${{ runner.arch }}"
+          echo "RUNNER_NAME=$RUNNER_NAME"
+          echo "RUNNER_OS=$RUNNER_OS"
+          echo "RUNNER_ARCH=$RUNNER_ARCH"
+          echo "ImageOS=$ImageOS"
+          echo "ImageVersion=$ImageVersion"
+          uname -a
+          command -v sw_vers >/dev/null 2>&1 && sw_vers
+          test -f /etc/os-release && cat /etc/os-release
+          command -v lscpu >/dev/null 2>&1 && lscpu
+          command -v sysctl >/dev/null 2>&1 && sysctl -n machdep.cpu.brand_string
+          echo "::endgroup::"
+
+          echo "::group::CUDA and GPU context"
+          echo "CONDA_OVERRIDE_CUDA=$CONDA_OVERRIDE_CUDA"
+          echo "CUDA_HOME=$CUDA_HOME"
+          echo "CUDA_PATH=$CUDA_PATH"
+          command -v nvidia-smi
+          nvidia-smi
+          command -v nvcc
+          nvcc --version
+          echo "::endgroup::"
+
+          echo "::group::Compiler discovery"
+          for tool in cc c++ clang clang++ gcc g++ cmake ninja; do
+            command -v "$tool"
+            "$tool" --version
+          done
+          echo "::endgroup::"
+
+          echo "::group::CMake and generator discovery"
+          cmake --version
+          cmake -E capabilities
+          echo "::endgroup::"
+
+          probe_root="$RUNNER_TEMP/base-cmake-toolchain-probe"
+          probe_src="$(new_cmake_probe_project "$probe_root")"
+          for generator in "Ninja" "Unix Makefiles"; do
+            invoke_cmake_probe "$probe_src" "$probe_root" "$generator"
+          done
+
+          exit 0
+
+      - name: Set up pixi
+        if: ${{ inputs.install_pixi_environment }}
+        uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.5
+        with:
+          pixi-version: latest
+          cache: false
+          run-install: false
+
+      - name: Probe pixi environment
+        if: ${{ inputs.install_pixi_environment && runner.os == 'Windows' }}
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Continue"
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          function Write-Group($Name, [scriptblock]$Body) {
+            Write-Host "::group::$Name"
+            & $Body
+            Write-Host "::endgroup::"
+          }
+
+          function New-CMakeProbeProject($Root) {
+            $src = Join-Path $Root "src"
+            New-Item -ItemType Directory -Force -Path $src | Out-Null
+            @(
+              "cmake_minimum_required(VERSION 3.20)"
+              "project(WindowsPixiToolchainProbe LANGUAGES C CXX)"
+              'message(STATUS "probe:CMAKE_GENERATOR=${CMAKE_GENERATOR}")'
+              'message(STATUS "probe:CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")'
+              'message(STATUS "probe:CMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")'
+              'message(STATUS "probe:CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")'
+            ) | Set-Content -Path (Join-Path $src "CMakeLists.txt") -Encoding utf8
+            "int main() { return 0; }" | Set-Content -Path (Join-Path $src "main.cpp") -Encoding utf8
+            return $src
+          }
+
+          function Invoke-PixiCMakeProbe($Src, $BuildRoot, $Generator) {
+            $build = Join-Path $BuildRoot ($Generator -replace "[^A-Za-z0-9]+", "-")
+            Write-Group "pixi CMake configure: $Generator" {
+              & pixi run -e $env:PROBE_PIXI_ENV cmake -S $Src -B $build -G $Generator
+              Write-Host "exit=$LASTEXITCODE"
+            }
+          }
+
+          Write-Group "pixi install" {
+            pixi --version
+            pixi info
+            $installed = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              Write-Host "pixi install attempt $attempt/3 for $env:PROBE_PIXI_ENV"
+              pixi install -e $env:PROBE_PIXI_ENV --locked
+              if ($LASTEXITCODE -eq 0) {
+                $installed = $true
+                break
+              }
+              if ($attempt -lt 3) {
+                Start-Sleep -Seconds 30
+              }
+            }
+            if (-not $installed) {
+              Write-Warning "pixi install failed for $env:PROBE_PIXI_ENV; skipping pixi activation probe"
+              exit 0
+            }
+          }
+
+          Write-Group "pixi package selection" {
+            pixi list -e $env:PROBE_PIXI_ENV | Select-String -Pattern "^(vs|vc|cmake|ninja|cuda|pytorch|python)\b|visual|msvc"
+          }
+
+          Write-Group "pixi activated tools" {
+            pixi run -e $env:PROBE_PIXI_ENV python -c "import os, shutil; keys = ['CONDA_PREFIX', 'PIXI_ENVIRONMENT_NAME', 'CMAKE_GENERATOR', 'CMAKE_ARGS', 'CONDA_OVERRIDE_CUDA', 'CUDA_PATH', 'VCToolsInstallDir', 'VSINSTALLDIR']; [print(f'{key}={os.environ.get(key)}') for key in keys]; [print(f'{tool}={shutil.which(tool)}') for tool in ['cmake', 'ninja', 'cl', 'nvcc', 'python']]"
+            pixi run -e $env:PROBE_PIXI_ENV cmake --version
+            pixi run -e $env:PROBE_PIXI_ENV cmake -E capabilities
+            pixi run -e $env:PROBE_PIXI_ENV cmd /c "where cl && cl /Bv"
+            pixi run -e $env:PROBE_PIXI_ENV cmd /c "where nvcc && nvcc --version"
+          }
+
+          $probeRoot = Join-Path $env:RUNNER_TEMP "pixi-cmake-toolchain-probe"
+          $probeSrc = New-CMakeProbeProject $probeRoot
+          foreach ($generator in @("Visual Studio 18 2026", "Visual Studio 17 2022", "Ninja")) {
+            Invoke-PixiCMakeProbe $probeSrc $probeRoot $generator
+          }
+
+          exit 0
+
+      - name: Probe pixi environment (Unix)
+        if: ${{ inputs.install_pixi_environment && runner.os != 'Windows' }}
+        shell: bash
+        run: |
+          set +e
+
+          write_group() {
+            local name="$1"
+            shift
+            echo "::group::$name"
+            "$@"
+            local status=$?
+            echo "exit=$status"
+            echo "::endgroup::"
+            return 0
+          }
+
+          new_cmake_probe_project() {
+            local root="$1"
+            local src="$root/src"
+            mkdir -p "$src"
+            cat > "$src/CMakeLists.txt" <<'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(UnixPixiToolchainProbe LANGUAGES C CXX)
+          message(STATUS "probe:CMAKE_GENERATOR=${CMAKE_GENERATOR}")
+          message(STATUS "probe:CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
+          message(STATUS "probe:CMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
+          message(STATUS "probe:CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+          EOF
+            printf 'int main() { return 0; }\n' > "$src/main.cpp"
+            echo "$src"
+          }
+
+          invoke_pixi_cmake_probe() {
+            local src="$1"
+            local build_root="$2"
+            local generator="$3"
+            local build="$build_root/${generator//[^A-Za-z0-9]/-}"
+            write_group "pixi CMake configure: $generator" pixi run -e "$PROBE_PIXI_ENV" cmake -S "$src" -B "$build" -G "$generator"
+          }
+
+          echo "::group::pixi install"
+          pixi --version
+          pixi info
+          installed=false
+          for attempt in 1 2 3; do
+            echo "pixi install attempt $attempt/3 for $PROBE_PIXI_ENV"
+            pixi install -e "$PROBE_PIXI_ENV" --locked
+            if [[ "$?" == "0" ]]; then
+              installed=true
+              break
+            fi
+            if [[ "$attempt" != "3" ]]; then
+              sleep 30
+            fi
+          done
+          if [[ "$installed" != "true" ]]; then
+            echo "pixi install failed for $PROBE_PIXI_ENV; skipping pixi activation probe"
+            echo "::endgroup::"
+            exit 0
+          fi
+          echo "::endgroup::"
+
+          echo "::group::pixi package selection"
+          pixi list -e "$PROBE_PIXI_ENV" | grep -E '^(cc|cxx|clang|gcc|gxx|cmake|ninja|cuda|pytorch|python|blas|blis|libblas)\b|visual|msvc' || true
+          echo "::endgroup::"
+
+          echo "::group::pixi activated tools"
+          pixi run -e "$PROBE_PIXI_ENV" python -c "import os, shutil; keys = ['CONDA_PREFIX', 'PIXI_ENVIRONMENT_NAME', 'CMAKE_GENERATOR', 'CMAKE_ARGS', 'CONDA_OVERRIDE_CUDA', 'CUDA_HOME', 'CUDA_PATH']; [print(f'{key}={os.environ.get(key)}') for key in keys]; [print(f'{tool}={shutil.which(tool)}') for tool in ['cmake', 'ninja', 'cc', 'c++', 'clang', 'clang++', 'gcc', 'g++', 'nvcc', 'python']]"
+          pixi run -e "$PROBE_PIXI_ENV" cmake --version
+          pixi run -e "$PROBE_PIXI_ENV" cmake -E capabilities
+          pixi run -e "$PROBE_PIXI_ENV" sh -c "command -v nvcc && nvcc --version"
+          echo "::endgroup::"
+
+          probe_root="$RUNNER_TEMP/pixi-cmake-toolchain-probe"
+          probe_src="$(new_cmake_probe_project "$probe_root")"
+          for generator in "Ninja" "Unix Makefiles"; do
+            invoke_pixi_cmake_probe "$probe_src" "$probe_root" "$generator"
+          done
+
+          exit 0
