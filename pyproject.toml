@@ -19,11 +19,13 @@ Homepage = "https://github.com/facebookresearch/momentum"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
+cmake.version = ">=4.3.0"
 cmake.args = [
     "-DBUILD_SHARED_LIBS=OFF",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
+    "-DMOMENTUM_BUILD_RERUN=OFF",
 ]
 minimum-version = "0.10"
 sdist.exclude = [
@@ -41,8 +43,9 @@ wheel.exclude = ["geometry_test_helper.*"]
 if.platform-system = "^win32"
 cmake.args = [
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 17 2022",
+    "-G Visual Studio 18 2026",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
+    "-DMOMENTUM_BUILD_RERUN=OFF",
 ]
