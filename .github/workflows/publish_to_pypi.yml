@@ -74,11 +74,46 @@ jobs:
           cp pyproject-pypi-${{ matrix.package-variant }}-py312.toml pyproject.toml
           sed -i 's/requires-python = ">=3.12,<3.13"/requires-python = ">=3.12"/' pyproject.toml
 
+      - name: Restore ccache (Linux)
+        id: ccache_restore
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .ccache
+          key: ${{ github.workflow }}-linux-${{ matrix.package-variant }}-${{ hashFiles('pixi.lock', 'pyproject-pypi.toml.j2', 'CMakeLists.txt', 'cmake/**', 'momentum/**', 'pymomentum/**', 'axel/**') }}
+          restore-keys: |
+            ${{ github.workflow }}-linux-${{ matrix.package-variant }}-
+            ${{ github.workflow }}-linux-
+
+      - name: Prepare ccache mount (Linux)
+        run: mkdir -p .ccache
+
       - name: Build wheels
         uses: pypa/cibuildwheel@f03ac7617d6cff873ccf24cc0d567ef5ba5a9e6d # v3.4.1
         env:
           PYMOMENTUM_VARIANT: ${{ matrix.package-variant }}
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
+          CIBW_CONTAINER_ENGINE: "docker; create_args: --volume=${{ github.workspace }}/.ccache:/ccache"
+
+      - name: Prepare ccache for save (Linux)
+        id: ccache_save
+        run: |
+          if [ ! -d .ccache ] || [ -z "$(ls -A .ccache 2>/dev/null)" ]; then
+            echo "::warning::.ccache was not populated by cibuildwheel; no Linux compiler cache will be saved"
+            echo "cacheable=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # cibuildwheel's manylinux container runs as root, so make the cache
+          # readable by the post-job actions/cache save step on the host.
+          sudo chown -R "$(id -u):$(id -g)" .ccache
+          du -sh .ccache
+          echo "cacheable=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save ccache (Linux)
+        if: steps.ccache_save.outputs.cacheable == 'true' && steps.ccache_restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .ccache
+          key: ${{ steps.ccache_restore.outputs.cache-primary-key }}
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
@@ -94,6 +129,8 @@ jobs:
     env:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: "utf-8"
+      SCCACHE_CACHE_SIZE: "2G"
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
     strategy:
       fail-fast: true
       matrix:
@@ -128,17 +165,40 @@ jobs:
           fetch-depth: 0  # Fetch full history for setuptools_scm version detection
           fetch-tags: true  # Ensure all tags are fetched
 
+      - name: Restore sccache (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .sccache
+          key: ${{ github.workflow }}-${{ matrix.os }}-sccache-${{ matrix.package-variant }}-py${{ matrix.python-version }}-${{ hashFiles('pixi.lock', 'pyproject-pypi.toml.j2', 'CMakeLists.txt', 'cmake/**', 'momentum/**', 'pymomentum/**', 'axel/**') }}
+          restore-keys: |
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-${{ matrix.package-variant }}-py${{ matrix.python-version }}-
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-${{ matrix.package-variant }}-
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-
+
       # ccache for macOS
       - name: Set up ccache (macOS)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'macOS'
         uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
         with:
-          key: ${{ github.workflow }}-${{ matrix.os }}-py${{ matrix.python-version }}
+          key: ${{ github.workflow }}-${{ matrix.package-variant }}-${{ matrix.os }}-py${{ matrix.python-version }}
+          # ccache-action appends a timestamp when saving; restore keys are the timestamp-free prefixes.
+          restore-keys: |
+            ${{ github.workflow }}-${{ matrix.package-variant }}-${{ matrix.os }}-py${{ matrix.python-version }}
+          max-size: 2G
 
       # sccache for Windows
       - name: Set up sccache (Windows)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
         uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+
+      - name: Use Ninja for sccache (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        run: |
+          echo "CMAKE_GENERATOR=Ninja" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_INSTANCE=" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_PLATFORM=" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_TOOLSET=" >> $env:GITHUB_ENV
 
       - name: Set up pixi
         if: steps.should_run.outputs.run == 'true'
@@ -165,7 +225,6 @@ jobs:
           # Enable compiler caching: ccache on macOS, sccache on Windows
           CMAKE_C_COMPILER_LAUNCHER: ${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
           CMAKE_CXX_COMPILER_LAUNCHER: ${{ runner.os == 'Windows' && 'sccache' || 'ccache' }}
-          SCCACHE_GHA_ENABLED: ${{ runner.os == 'Windows' && 'true' || '' }}
 
       # Repair wheel on macOS/Windows to bundle non-Python shared libraries
       - name: Repair wheel (macOS/Windows)
@@ -199,6 +258,8 @@ jobs:
     env:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: "utf-8"
+      SCCACHE_CACHE_SIZE: "2G"
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
     strategy:
       fail-fast: true
       matrix:
@@ -229,9 +290,28 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Restore sccache (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .sccache
+          key: ${{ github.workflow }}-${{ matrix.os }}-sccache-gpu-py${{ matrix.python-version }}-${{ hashFiles('pixi.lock', 'pyproject-pypi.toml.j2', 'CMakeLists.txt', 'cmake/**', 'momentum/**', 'pymomentum/**', 'axel/**') }}
+          restore-keys: |
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-gpu-py${{ matrix.python-version }}-
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-gpu-
+            ${{ github.workflow }}-${{ matrix.os }}-sccache-
+
       - name: Set up sccache (Windows)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
         uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+
+      - name: Use Ninja for sccache (Windows)
+        if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
+        run: |
+          echo "CMAKE_GENERATOR=Ninja" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_INSTANCE=" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_PLATFORM=" >> $env:GITHUB_ENV
+          echo "CMAKE_GENERATOR_TOOLSET=" >> $env:GITHUB_ENV
 
       - name: Setup CUDA
         if: steps.should_run.outputs.run == 'true' && runner.os == 'Windows'
@@ -260,7 +340,6 @@ jobs:
           PYMOMENTUM_VARIANT: gpu
           CMAKE_C_COMPILER_LAUNCHER: sccache
           CMAKE_CXX_COMPILER_LAUNCHER: sccache
-          SCCACHE_GHA_ENABLED: "true"
 
       # Repair GPU wheel on Windows using variant-aware pixi task
       - name: Repair wheel (Windows)
@@ -327,11 +406,46 @@ jobs:
           cp pyproject-pypi-gpu-py312.toml pyproject.toml
           sed -i 's/requires-python = ">=3.12,<3.13"/requires-python = ">=3.12"/' pyproject.toml
 
+      - name: Restore ccache (Linux)
+        id: ccache_restore
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .ccache
+          key: ${{ github.workflow }}-linux-gpu-${{ hashFiles('pixi.lock', 'pyproject-pypi.toml.j2', 'CMakeLists.txt', 'cmake/**', 'momentum/**', 'pymomentum/**', 'axel/**') }}
+          restore-keys: |
+            ${{ github.workflow }}-linux-gpu-
+            ${{ github.workflow }}-linux-
+
+      - name: Prepare ccache mount (Linux)
+        run: mkdir -p .ccache
+
       - name: Build wheels
         uses: pypa/cibuildwheel@f03ac7617d6cff873ccf24cc0d567ef5ba5a9e6d # v3.4.1
         env:
           PYMOMENTUM_VARIANT: gpu
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
+          CIBW_CONTAINER_ENGINE: "docker; create_args: --volume=${{ github.workspace }}/.ccache:/ccache"
+
+      - name: Prepare ccache for save (Linux)
+        id: ccache_save
+        run: |
+          if [ ! -d .ccache ] || [ -z "$(ls -A .ccache 2>/dev/null)" ]; then
+            echo "::warning::.ccache was not populated by cibuildwheel; no Linux compiler cache will be saved"
+            echo "cacheable=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # cibuildwheel's manylinux container runs as root, so make the cache
+          # readable by the post-job actions/cache save step on the host.
+          sudo chown -R "$(id -u):$(id -g)" .ccache
+          du -sh .ccache
+          echo "cacheable=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save ccache (Linux)
+        if: steps.ccache_save.outputs.cacheable == 'true' && steps.ccache_restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: .ccache
+          key: ${{ steps.ccache_restore.outputs.cache-primary-key }}
 
       - name: Verify GPU wheel names
         run: |
