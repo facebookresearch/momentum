@@ -83,7 +83,7 @@ class PlaneErrorFunctionT : public JointErrorFunctionT<T, PlaneDataT<T>, 1> {
 
   /// Default constant weight in MarkerErrorFunction. This can be used for backwards compatibility
   /// in setWeight().
-  static constexpr T kLegacyWeight = 1e-4f;
+  static constexpr T kLegacyWeight = 1e-4;
 
  protected:
   void evalFunction(

@@ -60,7 +60,7 @@ class NormalErrorFunctionT : public JointErrorFunctionT<T, NormalDataT<T>, 1, 2,
 
   /// Default constant weight in MarkerErrorFunction. This can be used for backwards compatibility
   /// in setWeight().
-  static constexpr T kLegacyWeight = 1e-4f;
+  static constexpr T kLegacyWeight = 1e-4;
 
  protected:
   void evalFunction(

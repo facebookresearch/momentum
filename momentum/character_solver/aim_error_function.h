@@ -62,7 +62,7 @@ class AimDistErrorFunctionT : public JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1
 
   /// Default constant weight in MarkerErrorFunction (same as fixed axis). This can be used for
   /// backwards compatibility in setWeight().
-  static constexpr T kLegacyWeight = 1e-1f;
+  static constexpr T kLegacyWeight = 1e-1;
 
  protected:
   void evalFunction(
@@ -101,7 +101,7 @@ class AimDirErrorFunctionT : public JointErrorFunctionT<T, AimDataT<T>, 3, 2, 1>
 
   /// Default constant weight in MarkerErrorFunction (same as fixed axis). This can be used for
   /// backwards compatibility in setWeight().
-  static constexpr T kLegacyWeight = 1e-1f;
+  static constexpr T kLegacyWeight = 1e-1;
 
  protected:
   void evalFunction(

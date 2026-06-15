@@ -114,7 +114,7 @@ class JointToJointDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
   }
 
   /// Default weight for distance constraints.
-  static constexpr T kDistanceWeight = 1e-2f;
+  static constexpr T kDistanceWeight = 1e-2;
 
  private:
   std::vector<JointToJointDistanceConstraintT<T>> constraints_;

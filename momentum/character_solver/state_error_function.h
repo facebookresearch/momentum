@@ -112,8 +112,8 @@ class StateErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
  public:
   // weights for the error functions
-  static constexpr T kPositionWeight = 1e-3f;
-  static constexpr T kOrientationWeight = 1e+0f;
+  static constexpr T kPositionWeight = 1e-3;
+  static constexpr T kOrientationWeight = 1e+0;
 };
 
 } // namespace momentum
