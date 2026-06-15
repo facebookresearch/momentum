@@ -88,7 +88,7 @@ jobs:
         run: mkdir -p .ccache
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@f03ac7617d6cff873ccf24cc0d567ef5ba5a9e6d # v3.4.1
+        uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v3.4.1
         env:
           PYMOMENTUM_VARIANT: ${{ matrix.package-variant }}
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
@@ -420,7 +420,7 @@ jobs:
         run: mkdir -p .ccache
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@f03ac7617d6cff873ccf24cc0d567ef5ba5a9e6d # v3.4.1
+        uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v3.4.1
         env:
           PYMOMENTUM_VARIANT: gpu
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
