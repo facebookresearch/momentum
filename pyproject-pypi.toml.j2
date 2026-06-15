@@ -35,7 +35,8 @@
 {#- Windows non-GPU args for core and CPU wheels -#}
 {%- macro cmake_windows_cpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 18 2026",
+    # The generator is selected by the build environment. Windows CI sets
+    # CMAKE_GENERATOR=Ninja so sccache can intercept compiler invocations.
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_TORCH_EXTENSIONS={{ 'ON' if build_torch_extensions else 'OFF' }}",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
@@ -51,7 +52,9 @@
 {#- Windows GPU-specific args (same as CPU; GPU only changes the PyTorch variant linked) -#}
 {%- macro cmake_windows_gpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 18 2026",
+    # The generator is selected by the build environment. Windows CI sets
+    # CMAKE_GENERATOR=Ninja so CUDA builds do not require Visual Studio's CUDA
+    # MSBuild integration.
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_TORCH_EXTENSIONS={{ 'ON' if build_torch_extensions else 'OFF' }}",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
