@@ -112,6 +112,63 @@ class TestQuaternionNumpy(unittest.TestCase):
             "Matrix rotation should match quaternion rotation",
         )
 
+    def test_angular_distance(self) -> None:
+        # Identical orientations -> zero angle.
+        q = generateRandomQuats(5)
+        self.assertTrue(
+            np.allclose(quaternion.angular_distance(q, q), 0.0, atol=1e-6),
+            "Angle between identical orientations should be zero.",
+        )
+
+        ident = np.array([[0.0, 0.0, 0.0, 1.0]])
+        # Identity vs a 90-degree rotation about X -> pi/2.
+        q90 = quaternion.euler_xyz_to_quaternion(np.array([[0.5 * math.pi, 0.0, 0.0]]))
+        self.assertTrue(
+            np.allclose(
+                quaternion.angular_distance(ident, q90), 0.5 * math.pi, atol=1e-5
+            ),
+            "Identity vs 90deg-about-X should be pi/2 radians.",
+        )
+        # Antipodal quaternions (q and -q) represent the same orientation, so the
+        # angle is zero -- this exercises the abs() on the scalar part (without it
+        # the result would be 2*pi).
+        q_anti = generateRandomQuats(5)
+        self.assertTrue(
+            np.allclose(quaternion.angular_distance(q_anti, -q_anti), 0.0, atol=1e-6),
+            "Antipodal quaternions (q and -q) should have zero angular distance.",
+        )
+
+        # A 180-degree rotation is exactly pi.
+        q180 = quaternion.euler_xyz_to_quaternion(np.array([[math.pi, 0.0, 0.0]]))
+        self.assertTrue(
+            np.allclose(quaternion.angular_distance(ident, q180), math.pi, atol=1e-5),
+            "180deg-about-X should be pi radians.",
+        )
+
+        # Shorter arc: a 270-degree rotation is reported as pi/2 (stays in [0, pi]).
+        q270 = quaternion.euler_xyz_to_quaternion(np.array([[1.5 * math.pi, 0.0, 0.0]]))
+        self.assertTrue(
+            np.allclose(
+                quaternion.angular_distance(ident, q270), 0.5 * math.pi, atol=1e-5
+            ),
+            "Angle should take the shorter arc and stay within [0, pi].",
+        )
+
+        # Symmetry, output shape, and agreement with an independent arccos reference.
+        rng = np.random.default_rng(1)
+        q0 = quaternion.normalize(rng.normal(size=(7, 4)))
+        q1 = quaternion.normalize(rng.normal(size=(7, 4)))
+        d01 = quaternion.angular_distance(q0, q1)
+        d10 = quaternion.angular_distance(q1, q0)
+        self.assertEqual(d01.shape, (7,))
+        self.assertTrue(np.allclose(d01, d10, atol=1e-6), "Distance is symmetric.")
+        dot = np.abs(np.sum(q0 * q1, axis=-1))
+        ref = 2.0 * np.arccos(np.clip(dot, -1.0, 1.0))
+        self.assertTrue(
+            np.allclose(d01, ref, atol=1e-5),
+            "Should match the 2*arccos(|dot|) reference.",
+        )
+
     def test_blend_same(self) -> None:
         nMat = 5
         q = generateRandomQuats(nMat)
