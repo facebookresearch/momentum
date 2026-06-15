@@ -94,7 +94,20 @@ double ModelParametersSequenceErrorFunctionT<T>::getGradient(
 
 template <typename T>
 size_t ModelParametersSequenceErrorFunctionT<T>::getJacobianSize() const {
-  return (targetWeights_.array() > 0).count();
+  // Count only parameters that are both enabled and positively weighted, matching the row-emission
+  // condition in getGradient()/getJacobian() so getJacobianSize() stays consistent with usedRows
+  // when a caller disables parameters via setEnabledParameters().
+  const auto np = gsl::narrow_cast<Eigen::Index>(this->parameterTransform_.numAllModelParameters());
+  if (targetWeights_.size() != np) {
+    return 0;
+  }
+  size_t count = 0;
+  for (Eigen::Index i = 0; i < np; ++i) {
+    if (this->enabledParameters_.test(i) && targetWeights_(i) > 0) {
+      ++count;
+    }
+  }
+  return count;
 }
 
 template <typename T>
