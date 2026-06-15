@@ -4,6 +4,7 @@
 {%- macro cmake_base_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_TORCH_EXTENSIONS={{ 'ON' if build_torch_extensions else 'OFF' }}",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RERUN=OFF",
@@ -31,16 +32,19 @@
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 {%- endmacro %}
 
-{#- Windows CPU-specific args (Visual Studio generator for CPU builds) -#}
+{#- Windows non-GPU args for core and CPU wheels -#}
 {%- macro cmake_windows_cpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
     "-G Visual Studio 18 2026",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_TORCH_EXTENSIONS={{ 'ON' if build_torch_extensions else 'OFF' }}",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RERUN=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    # Use bundled pybind11 to avoid conda-forge pybind11NewTools requiring
+    # python_add_library before scikit-build-core has enabled that command.
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {%- endmacro %}
 
@@ -49,16 +53,19 @@
     "-DBUILD_SHARED_LIBS=OFF",
     "-G Visual Studio 18 2026",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
+    "-DMOMENTUM_BUILD_TORCH_EXTENSIONS={{ 'ON' if build_torch_extensions else 'OFF' }}",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
     "-DMOMENTUM_BUILD_RERUN=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
+    # Use bundled pybind11 to avoid conda-forge pybind11NewTools requiring
+    # python_add_library before scikit-build-core has enabled that command.
+    "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {%- endmacro %}
 
 
-{#- Common cibuildwheel before-all script for Linux (CPU builds) -#}
+{#- Common cibuildwheel before-all script for Linux builds -#}
 {%- macro cibw_linux_before_all() %}
 # Install zip for wheel repacking (manylinux containers don't include it by default)
 yum install -y zip
@@ -92,7 +99,7 @@ requires = ["scikit-build-core", "pybind11", "setuptools-scm"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pymomentum-{{ variant }}"
+name = "{{ distribution_name }}"
 dynamic = ["version"]
 description = "A library providing foundational algorithms for human kinematic motion and numerical optimization solvers to apply human motion in various applications ({{ description_suffix }})"
 readme = "README.md"
@@ -112,7 +119,9 @@ keywords = [
     "motion-capture",
     "character-animation",
     "robotics",
-    "cpu",
+{% if build_torch_extensions %}
+    "torch",
+{% endif %}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -135,11 +144,11 @@ classifiers = [
 dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.7.0",
+{% if build_torch_extensions and tag != "gpu" %}
     # PyTorch version constraints - platform and Python version specific
-    # Linux: Support latest PyTorch with CUDA
-    # macOS: Limited to older PyTorch versions (CPU only)
-    # CPU package for Linux and macOS ARM64 (Apple Silicon only - Intel Macs not supported)
-    # Linux uses latest PyTorch
+    # Torch extension packages link against libtorch and must use a matching PyTorch version.
+    # The GPU package is intentionally excluded here because wheel metadata cannot
+    # encode PyTorch's CUDA wheel index. Users must install CUDA PyTorch first.
     "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Linux' and python_version == '3.12'",
     "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Linux' and python_version == '3.13'",
     # macOS ARM64 (Apple Silicon) - PyTorch 2.8+ available
@@ -148,12 +157,22 @@ dependencies = [
     # Windows
     "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}; platform_system == 'Windows' and python_version == '3.12'",
     "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}; platform_system == 'Windows' and python_version == '3.13'",
+{% elif tag == "gpu" %}
+    # `pymomentum-gpu` requires CUDA PyTorch from https://download.pytorch.org/whl/cu129.
+    # PyPI dependency metadata cannot require a custom package index, so the
+    # supported install path documents PyTorch as an explicit prerequisite.
+{% endif %}
 ]
 
 # Opt-in extras. Visualization stacks are large and have transitive deps
-# users may not want; keep them out of the base install.
-# Install with: pip install pymomentum-cpu[viser]
+# users may not want; keep them out of the default install.
 [project.optional-dependencies]
+{% if not build_torch_extensions %}
+# Pure-Python torch helpers do not require the Torch C++ ABI. Install this extra
+# when using pymomentum.quaternion, pymomentum.skel_state, pymomentum.trs, or
+# pymomentum.torch.* from the core package.
+torch = ["torch>=1.13"]
+{% endif %}
 viser = ["viser>=1.0.24,<2"]
 
 [project.urls]
@@ -183,7 +202,7 @@ sdist.exclude = [
     "dist/",
     "*.lock",
 ]
-wheel.exclude = ["geometry_test_helper.*"]
+wheel.exclude = ["geometry_test_utils.*"]
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^darwin"
@@ -202,7 +221,7 @@ cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 cmake.args = [
-{% if variant == "gpu" %}
+{% if tag == "gpu" %}
 {{ cmake_windows_gpu_args() }}
 {% else %}
 {{ cmake_windows_cpu_args() }}
@@ -226,17 +245,26 @@ build-verbosity = 3
 skip = "pp* *-musllinux* *-win*"
 archs = ["auto64"]
 manylinux-x86_64-image = "manylinux_2_28"
+{% if build_torch_extensions %}
 # Disable build isolation so PyTorch installed by before-build is available for CMake
 build-frontend = { name = "pip", args = ["--no-build-isolation"] }
+{% endif %}
 
 # Common
-# PYMOMENTUM_VARIANT env var controls the build variant (cpu or gpu).
+# PYMOMENTUM_VARIANT env var controls the package variant.
 # Set via [tool.cibuildwheel.linux.environment] or CI workflow env.
 before-build = """
 set -e  # Exit on error
 
 VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
-VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
+VARIANT="${PYMOMENTUM_VARIANT:-core}"
+case "$VARIANT" in
+  base) VARIANT="core" ;;
+  torch_cpu) VARIANT="cpu" ;;
+  torch_gpu) VARIANT="gpu" ;;
+  cpu) VARIANT="cpu" ;;
+  gpu) VARIANT="gpu" ;;
+esac
 echo "Building for Python $VER, variant=$VARIANT"
 
 # Copy the Python-version-specific pyproject.toml for the correct variant
@@ -253,48 +281,60 @@ fi
 echo "Upgrading pip..."
 python -m pip install --upgrade pip
 
-# Install build dependencies (required when using --no-build-isolation)
-# These are from [build-system].requires in pyproject.toml
+# Install build dependencies from [build-system].requires in pyproject.toml.
+# Torch extension wheels use --no-build-isolation, and installing these
+# explicitly is harmless for the core wheel.
 echo "Installing build dependencies..."
 python -m pip install scikit-build-core pybind11 setuptools-scm
 
-# Install PyTorch (needed at build time to link against libtorch)
-# CPU builds use the cpu index; GPU builds use the CUDA 12.9 index
-if [ "$VARIANT" = "gpu" ]; then
-  TORCH_INDEX="https://download.pytorch.org/whl/cu129"
-else
-  TORCH_INDEX="https://download.pytorch.org/whl/cpu"
-fi
-echo "Installing PyTorch for build (variant=$VARIANT, index=$TORCH_INDEX)..."
-if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
-elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
-else
-  echo "Unsupported Python version: $VER"
-  exit 1
-fi
+if [ "$VARIANT" != "core" ]; then
+  # Install PyTorch (needed at build time to link against libtorch).
+  # Torch CPU builds use the cpu index; Torch GPU builds use the CUDA 12.9 index.
+  if [ "$VARIANT" = "gpu" ]; then
+    TORCH_INDEX="https://download.pytorch.org/whl/cu129"
+  else
+    TORCH_INDEX="https://download.pytorch.org/whl/cpu"
+  fi
+  echo "Installing PyTorch for build (variant=$VARIANT, index=$TORCH_INDEX)..."
+  if [ "$VER" = "312" ]; then
+    python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
+  elif [ "$VER" = "313" ]; then
+    python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
+  else
+    echo "Unsupported Python version: $VER"
+    exit 1
+  fi
 
-# Verify torch is installed correctly
-# Temporarily clear LD_LIBRARY_PATH to avoid loading pixi env's libtorch_python.so
-# (built for a different Python version) instead of the pip-installed one
-echo "Verifying PyTorch installation..."
-LD_LIBRARY_PATH="" python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
+  # Verify torch is installed correctly.
+  # Temporarily clear LD_LIBRARY_PATH to avoid loading pixi env's libtorch_python.so
+  # (built for a different Python version) instead of the pip-installed one.
+  echo "Verifying PyTorch installation..."
+  LD_LIBRARY_PATH="" python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
+fi
 """
 test-command = "python -c \"import pymomentum\""
 test-requires = ["numpy", "scipy"]
 before-test = """
-VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
-if [ "$VARIANT" = "gpu" ]; then
-  TORCH_INDEX="https://download.pytorch.org/whl/cu129"
-else
-  TORCH_INDEX="https://download.pytorch.org/whl/cpu"
-fi
-VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
-if [ "$VER" = "312" ]; then
-  python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
-elif [ "$VER" = "313" ]; then
-  python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
+VARIANT="${PYMOMENTUM_VARIANT:-core}"
+case "$VARIANT" in
+  base) VARIANT="core" ;;
+  torch_cpu) VARIANT="cpu" ;;
+  torch_gpu) VARIANT="gpu" ;;
+  cpu) VARIANT="cpu" ;;
+  gpu) VARIANT="gpu" ;;
+esac
+if [ "$VARIANT" != "core" ]; then
+  if [ "$VARIANT" = "gpu" ]; then
+    TORCH_INDEX="https://download.pytorch.org/whl/cu129"
+  else
+    TORCH_INDEX="https://download.pytorch.org/whl/cpu"
+  fi
+  VER=$(python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')")
+  if [ "$VER" = "312" ]; then
+    python -m pip install "torch>={{ torch_min_py312 }},<{{ torch_max_py312 }}" --index-url "$TORCH_INDEX"
+  elif [ "$VER" = "313" ]; then
+    python -m pip install "torch>={{ torch_min_py313 }},<{{ torch_max_py313 }}" --index-url "$TORCH_INDEX"
+  fi
 fi
 """
 
@@ -313,7 +353,7 @@ environment = { PATH = "$HOME/.pixi/bin:$PATH", CMAKE_PREFIX_PATH = "/tmp/build_
 environment-pass = ["PYMOMENTUM_VARIANT"]
 repair-wheel-command = """
 # Manual wheel repair for Linux builds (no auditwheel).
-# Supports both CPU and GPU variants via PYMOMENTUM_VARIANT env var.
+# Supports all package variants via the generated distribution-specific .libs directory.
 #
 # auditwheel cannot be used here because:
 # - manylinux_2_28 policy rejects our libs (too-recent GLIBCXX symbols)
@@ -332,9 +372,8 @@ echo '=== Unpacking wheel ==='
 cd $WORK
 unzip -q {wheel}
 
-# Find or create the .libs directory (variant-aware)
-VARIANT="${PYMOMENTUM_VARIANT:-cpu}"
-LIBS_DIR="pymomentum_${VARIANT}.libs"
+# Find or create the .libs directory for this distribution.
+LIBS_DIR="{{ wheel_libs_dir }}"
 mkdir -p "$LIBS_DIR"
 
 # Recursively collect and bundle shared library dependencies
@@ -457,6 +496,9 @@ find . -name '*.so*' -type f | while read so_file; do
     SO_DIR=$(dirname "$so_file")
     REL_PATH=$(python3 -c "import os.path; print(os.path.relpath('$LIBS_DIR', '$SO_DIR'))")
     RPATH_VAL='$ORIGIN/'"$REL_PATH"
+    {% if build_torch_extensions %}
+    RPATH_VAL="$RPATH_VAL:"'$ORIGIN/../torch/lib'
+    {% endif %}
     patchelf --force-rpath --set-rpath "$RPATH_VAL" "$so_file" 2>/dev/null || true
 done
 
