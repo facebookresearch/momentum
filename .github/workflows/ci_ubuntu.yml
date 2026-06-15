@@ -31,9 +31,32 @@ jobs:
         mode: [""]
     env:
       MOMENTUM_ENABLE_SIMD: ${{ matrix.simd }}
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_EXTRAFILES: /tmp/native-cpu.txt
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Record native CPU for ccache
+        run: |
+          lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: ${{ github.workflow }}-cpp-ubuntu-simd-${{ matrix.simd }}-${{ matrix.mode == '' && 'opt' || 'dev' }}
+          # ccache-action appends a timestamp when saving; restore keys are the timestamp-free prefixes.
+          # Keep SIMD and build mode in the cache key. Native CPU information
+          # belongs in CCACHE_EXTRAFILES so one archive can contain entries for
+          # multiple GitHub runner CPU variants while ccache still rejects
+          # objects built for a different -march=native expansion.
+          restore-keys: |
+            ${{ github.workflow }}-cpp-ubuntu-simd-${{ matrix.simd }}-${{ matrix.mode == '' && 'opt' || 'dev' }}
+          max-size: 2G
+
+      - name: Reset ccache stats
+        run: ccache --zero-stats
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.5
@@ -61,12 +84,40 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           pixi run cmake --build momentum/examples/hello_world/build
 
+      - name: Print ccache stats
+        if: always()
+        run: ccache --show-stats --verbose
+
   pymomentum:
     name: py-py312-ubuntu
     runs-on: ubuntu-latest
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_EXTRAFILES: /tmp/native-cpu.txt
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Record native CPU for ccache
+        run: |
+          lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: ${{ github.workflow }}-py312-ubuntu
+          # ccache-action appends a timestamp when saving; restore keys are the
+          # timestamp-free prefixes. Native CPU information belongs in
+          # CCACHE_EXTRAFILES so one archive can contain entries for multiple
+          # GitHub runner CPU variants while ccache still rejects objects built
+          # for a different -march=native expansion.
+          restore-keys: |
+            ${{ github.workflow }}-py312-ubuntu
+          max-size: 2G
+
+      - name: Reset ccache stats
+        run: ccache --zero-stats
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.5
@@ -88,3 +139,7 @@ jobs:
           name: python-api-doc
           path: build/python_api_doc
           retention-days: 7
+
+      - name: Print ccache stats
+        if: always()
+        run: ccache --show-stats --verbose
