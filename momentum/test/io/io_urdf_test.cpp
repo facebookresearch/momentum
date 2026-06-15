@@ -493,12 +493,6 @@ TEST(IoUrdfTest, LoadUrdfWithCollisionCapsules) {
             <cylinder radius="0.01" length="0.1"/>
           </geometry>
         </collision>
-        <collision name="unsupported_box">
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <geometry>
-            <box size="0.1 0.1 0.1"/>
-          </geometry>
-        </collision>
       </link>
       <joint name="fixed_joint" type="fixed">
         <parent link="base_link"/>
@@ -535,18 +529,18 @@ TEST(IoUrdfTest, LoadUrdfWithCollisionCapsules) {
       Eigen::Vector3f(0.0f, 0.0f, 10.0f));
 }
 
-TEST(IoUrdfTest, LoadUrdfSkipsUnsupportedCollisionGeometries) {
+TEST(IoUrdfTest, LoadUrdfImportsPrimitiveCollisionAndSkipsMesh) {
   const std::string urdfContent = R"(
     <?xml version="1.0"?>
-    <robot name="unsupported_collision_robot">
+    <robot name="primitive_collision_robot">
       <link name="base_link">
-        <collision name="unsupported_box">
+        <collision name="box_collision">
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry>
             <box size="0.1 0.1 0.1"/>
           </geometry>
         </collision>
-        <collision name="unsupported_sphere">
+        <collision name="sphere_collision">
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry>
             <sphere radius="0.05"/>
@@ -558,7 +552,7 @@ TEST(IoUrdfTest, LoadUrdfSkipsUnsupportedCollisionGeometries) {
             <mesh filename="missing.stl"/>
           </geometry>
         </collision>
-        <collision name="supported_cylinder">
+        <collision name="cylinder_collision">
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry>
             <cylinder radius="0.02" length="0.1"/>
@@ -571,11 +565,70 @@ TEST(IoUrdfTest, LoadUrdfSkipsUnsupportedCollisionGeometries) {
   const auto bytes = std::as_bytes(std::span(urdfContent));
   const auto character = loadUrdfCharacter(bytes);
 
-  // Only the cylinder is imported; box, sphere, and mesh collisions are skipped with warnings.
+  // Box, sphere, and cylinder collisions are imported in declaration order; only the mesh
+  // collision is skipped with a warning.
   ASSERT_NE(character.collision, nullptr);
-  ASSERT_EQ(character.collision->size(), 1);
-  EXPECT_FLOAT_EQ(character.collision->at(0).length, 10.0f);
-  EXPECT_TRUE(character.collision->at(0).radius.isApprox(Eigen::Vector2f::Constant(2.0f)));
+  ASSERT_EQ(character.collision->size(), 3);
+  EXPECT_TRUE(character.collision->at(0).isBox());
+  EXPECT_TRUE(character.collision->at(1).isEllipsoid());
+  EXPECT_TRUE(character.collision->at(2).isTaperedCapsule());
+}
+
+TEST(IoUrdfTest, LoadUrdfWithCollisionSphereAndBox) {
+  const std::string urdfContent = R"(
+    <?xml version="1.0"?>
+    <robot name="sphere_box_collision_robot">
+      <link name="base_link">
+        <collision name="base_sphere">
+          <origin xyz="0.01 0.02 0.03" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="0.05"/>
+          </geometry>
+        </collision>
+      </link>
+      <link name="child_link">
+        <collision name="child_box">
+          <origin xyz="0.04 0.05 0.06" rpy="0 0 1.57079632679"/>
+          <geometry>
+            <box size="0.1 0.2 0.3"/>
+          </geometry>
+        </collision>
+      </link>
+      <joint name="fixed_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="child_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </joint>
+    </robot>
+  )";
+
+  const auto bytes = std::as_bytes(std::span(urdfContent));
+  const auto character = loadUrdfCharacter(bytes);
+
+  ASSERT_NE(character.collision, nullptr);
+  ASSERT_EQ(character.collision->size(), 2);
+
+  // A URDF sphere is imported as an ellipsoid with equal radii (meters -> centimeters), centered
+  // at the collision origin.
+  const auto& sphere = character.collision->at(0);
+  ASSERT_TRUE(sphere.isEllipsoid());
+  EXPECT_EQ(sphere.parent, 0);
+  const CollisionEllipsoid ellipsoid = sphere.toEllipsoid();
+  expectVectorNear(ellipsoid.radii, Eigen::Vector3f::Constant(5.0f));
+  expectVectorNear(ellipsoid.transformation.translation, Eigen::Vector3f(1.0f, 2.0f, 3.0f));
+  expectQuaternionNear(ellipsoid.transformation.rotation, Eigen::Quaternionf::Identity());
+
+  // A URDF box is imported with half extents (full extents / 2, meters -> centimeters) and keeps
+  // the collision origin's rotation.
+  const auto& box = character.collision->at(1);
+  ASSERT_TRUE(box.isBox());
+  EXPECT_EQ(box.parent, 1);
+  const CollisionBox collisionBox = box.toBox();
+  expectVectorNear(collisionBox.halfExtents, Eigen::Vector3f(5.0f, 10.0f, 15.0f));
+  expectVectorNear(collisionBox.transformation.translation, Eigen::Vector3f(4.0f, 5.0f, 6.0f));
+  const Eigen::Quaternionf expectedBoxRotation(
+      Eigen::AngleAxisf(pi<float>() / 2.0f, Eigen::Vector3f::UnitZ()));
+  expectQuaternionNear(collisionBox.transformation.rotation, expectedBoxRotation);
 }
 
 TEST(IoUrdfTest, LoadUrdfWithSphereVisual) {
