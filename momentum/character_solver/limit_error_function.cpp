@@ -20,11 +20,20 @@ namespace {
 
 constexpr float kPositionWeight = 1e-4f;
 
-template <typename T>
+// Each constraint contributes `w * loss(s)` where `s` is the raw squared residual and `w` is the
+// product of the weighting terms. The helpers below are templated on whether the loss is a plain
+// L2 loss:
+//   - IsL2 == true:  the squared error is used directly. `invC2` (the loss scale, 1 for the default
+//     c = 1) is folded into the surrounding weight by the caller, so these helpers do no
+//     loss-function calls at all and match the original hand-optimized quadratic penalty.
+//   - IsL2 == false: the squared error is transformed by GeneralizedLossT::value/deriv.
+
+template <typename T, bool IsL2>
 T computeMinMaxError(
     const LimitMinMax& data,
     const ModelParametersT<T>& params,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters) {
   if (!enabledParameters.test(data.parameterIndex)) {
     return T(0);
@@ -32,20 +41,31 @@ T computeMinMaxError(
   T error = T(0);
   if (params(data.parameterIndex) < data.limits[0]) {
     const T val = data.limits[0] - params(data.parameterIndex);
-    error = val * val * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = limitWeight * sqrError;
+    } else {
+      error = limitWeight * loss.value(sqrError);
+    }
   }
   if (params(data.parameterIndex) > data.limits[1]) {
     const T val = data.limits[1] - params(data.parameterIndex);
-    error = val * val * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = limitWeight * sqrError;
+    } else {
+      error = limitWeight * loss.value(sqrError);
+    }
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeMinMaxJointError(
     const LimitMinMaxJoint& data,
     const SkeletonStateT<T>& state,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams) {
   const size_t parameterIndex = data.jointIndex * kParametersPerJoint + data.jointParameter;
   MT_CHECK(parameterIndex < static_cast<size_t>(state.jointParameters.size()));
@@ -55,20 +75,31 @@ T computeMinMaxJointError(
   T error = T(0);
   if (state.jointParameters(parameterIndex) < data.limits[0]) {
     const T val = data.limits[0] - state.jointParameters[parameterIndex];
-    error = val * val * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = limitWeight * sqrError;
+    } else {
+      error = limitWeight * loss.value(sqrError);
+    }
   }
   if (state.jointParameters(parameterIndex) > data.limits[1]) {
     const T val = data.limits[1] - state.jointParameters[parameterIndex];
-    error = val * val * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = limitWeight * sqrError;
+    } else {
+      error = limitWeight * loss.value(sqrError);
+    }
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearError(
     const LimitLinear& data,
     const ModelParametersT<T>& params,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters) {
   MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
   MT_CHECK(data.targetIndex < static_cast<size_t>(params.size()));
@@ -78,14 +109,20 @@ T computeLinearError(
   }
   const T residual =
       params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-  return residual * residual * limitWeight;
+  const T sqrError = residual * residual;
+  if constexpr (IsL2) {
+    return limitWeight * sqrError;
+  } else {
+    return limitWeight * loss.value(sqrError);
+  }
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearJointError(
     const LimitLinearJoint& data,
     const SkeletonStateT<T>& state,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams) {
   const size_t referenceParameterIndex =
       data.referenceJointIndex * kParametersPerJoint + data.referenceJointParameter;
@@ -99,14 +136,20 @@ T computeLinearJointError(
   }
   const T residual = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
       state.jointParameters(referenceParameterIndex);
-  return residual * residual * limitWeight;
+  const T sqrError = residual * residual;
+  if constexpr (IsL2) {
+    return limitWeight * sqrError;
+  } else {
+    return limitWeight * loss.value(sqrError);
+  }
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeHalfPlaneError(
     const LimitHalfPlane& data,
     const ModelParametersT<T>& params,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters) {
   MT_CHECK(data.param1 < static_cast<size_t>(params.size()));
   MT_CHECK(data.param2 < static_cast<size_t>(params.size()));
@@ -116,13 +159,22 @@ T computeHalfPlaneError(
   const Eigen::Vector2<T> p(params(data.param1), params(data.param2));
   const T residual = p.dot(data.normal.template cast<T>()) - data.offset;
   if (residual < 0) {
-    return residual * residual * limitWeight;
+    const T sqrError = residual * residual;
+    if constexpr (IsL2) {
+      return limitWeight * sqrError;
+    } else {
+      return limitWeight * loss.value(sqrError);
+    }
   }
   return T(0);
 }
 
-template <typename T>
-T computeEllipsoidError(const LimitEllipsoid& ct, const SkeletonStateT<T>& state, T limitWeight) {
+template <typename T, bool IsL2>
+T computeEllipsoidError(
+    const LimitEllipsoid& ct,
+    const SkeletonStateT<T>& state,
+    T limitWeight,
+    const GeneralizedLossT<T>& loss) {
   const Eigen::Vector3<T> position =
       state.jointState[ct.parent].transform * ct.offset.template cast<T>();
   const Eigen::Vector3<T> localPosition =
@@ -132,15 +184,21 @@ T computeEllipsoidError(const LimitEllipsoid& ct, const SkeletonStateT<T>& state
   const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
   const Eigen::Vector3<T> diff =
       position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
-  return diff.squaredNorm() * T(kPositionWeight) * limitWeight;
+  const T sqrError = diff.squaredNorm();
+  if constexpr (IsL2) {
+    return T(kPositionWeight) * limitWeight * sqrError;
+  } else {
+    return T(kPositionWeight) * limitWeight * loss.value(sqrError);
+  }
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeMinMaxGradient(
     const LimitMinMax& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::VectorX<T>> gradient) {
   if (!enabledParameters.test(data.parameterIndex)) {
@@ -149,23 +207,36 @@ T computeMinMaxGradient(
   T error = T(0);
   if (params(data.parameterIndex) < data.limits[0]) {
     const T val = params(data.parameterIndex) - data.limits[0];
-    error = val * val * tWeight * limitWeight;
-    gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = tWeight * limitWeight * sqrError;
+      gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+    } else {
+      error = tWeight * limitWeight * loss.value(sqrError);
+      gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight * loss.deriv(sqrError);
+    }
   }
   if (params(data.parameterIndex) > data.limits[1]) {
     const T val = params(data.parameterIndex) - data.limits[1];
-    error = val * val * tWeight * limitWeight;
-    gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      error = tWeight * limitWeight * sqrError;
+      gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight;
+    } else {
+      error = tWeight * limitWeight * loss.value(sqrError);
+      gradient[data.parameterIndex] += T(2) * val * tWeight * limitWeight * loss.deriv(sqrError);
+    }
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeMinMaxJointGradient(
     const LimitMinMaxJoint& data,
     const SkeletonStateT<T>& state,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const ParameterTransform& parameterTransform,
     Ref<Eigen::VectorX<T>> gradient) {
@@ -178,25 +249,40 @@ T computeMinMaxJointGradient(
   T error = T(0);
   if (state.jointParameters(parameterIndex) < data.limits[0]) {
     const T val = state.jointParameters[parameterIndex] - data.limits[0];
-    error = val * val * tWeight * limitWeight;
-    const T jGrad = T(2) * val * tWeight * limitWeight;
+    const T sqrError = val * val;
+    T jGrad;
+    if constexpr (IsL2) {
+      error = tWeight * limitWeight * sqrError;
+      jGrad = T(2) * val * tWeight * limitWeight;
+    } else {
+      error = tWeight * limitWeight * loss.value(sqrError);
+      jGrad = T(2) * val * tWeight * limitWeight * loss.deriv(sqrError);
+    }
     gradient_jointParams_to_modelParams(jGrad, parameterIndex, parameterTransform, gradient);
   }
   if (state.jointParameters(parameterIndex) > data.limits[1]) {
     const T val = state.jointParameters[parameterIndex] - data.limits[1];
-    error = val * val * tWeight * limitWeight;
-    const T jGrad = T(2) * val * tWeight * limitWeight;
+    const T sqrError = val * val;
+    T jGrad;
+    if constexpr (IsL2) {
+      error = tWeight * limitWeight * sqrError;
+      jGrad = T(2) * val * tWeight * limitWeight;
+    } else {
+      error = tWeight * limitWeight * loss.value(sqrError);
+      jGrad = T(2) * val * tWeight * limitWeight * loss.deriv(sqrError);
+    }
     gradient_jointParams_to_modelParams(jGrad, parameterIndex, parameterTransform, gradient);
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearGradient(
     const LimitLinear& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::VectorX<T>> gradient) {
   MT_CHECK(data.referenceIndex < static_cast<size_t>(params.size()));
@@ -206,22 +292,32 @@ T computeLinearGradient(
   }
   const T residual =
       params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-  const T error = residual * residual * limitWeight * tWeight;
+  const T sqrError = residual * residual;
+  T error;
+  T gradScale;
+  if constexpr (IsL2) {
+    error = limitWeight * tWeight * sqrError;
+    gradScale = T(2) * residual * limitWeight * tWeight;
+  } else {
+    error = limitWeight * tWeight * loss.value(sqrError);
+    gradScale = T(2) * residual * limitWeight * tWeight * loss.deriv(sqrError);
+  }
   if (enabledParameters.test(data.targetIndex)) {
-    gradient[data.targetIndex] += T(2) * residual * T(data.scale) * limitWeight * tWeight;
+    gradient[data.targetIndex] += gradScale * T(data.scale);
   }
   if (enabledParameters.test(data.referenceIndex)) {
-    gradient[data.referenceIndex] -= T(2) * residual * limitWeight * tWeight;
+    gradient[data.referenceIndex] -= gradScale;
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearJointGradient(
     const LimitLinearJoint& data,
     const SkeletonStateT<T>& state,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const ParameterTransform& parameterTransform,
     Ref<Eigen::VectorX<T>> gradient) {
@@ -239,25 +335,35 @@ T computeLinearJointGradient(
 
   const T residual = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
       state.jointParameters(referenceParameterIndex);
-  const T error = residual * residual * limitWeight * tWeight;
+  const T sqrError = residual * residual;
+  T error;
+  T gradScale;
+  if constexpr (IsL2) {
+    error = limitWeight * tWeight * sqrError;
+    gradScale = T(2) * residual * limitWeight * tWeight;
+  } else {
+    error = limitWeight * tWeight * loss.value(sqrError);
+    gradScale = T(2) * residual * limitWeight * tWeight * loss.deriv(sqrError);
+  }
 
-  const T targetGrad = T(2) * residual * T(data.scale) * limitWeight * tWeight;
+  const T targetGrad = gradScale * T(data.scale);
   gradient_jointParams_to_modelParams(
       targetGrad, targetParameterIndex, parameterTransform, gradient);
 
-  const T referenceGrad = T(-2) * residual * limitWeight * tWeight;
+  const T referenceGrad = -gradScale;
   gradient_jointParams_to_modelParams(
       referenceGrad, referenceParameterIndex, parameterTransform, gradient);
 
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeHalfPlaneGradient(
     const LimitHalfPlane& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::VectorX<T>> gradient) {
   if (!enabledParameters.test(data.param1) && !enabledParameters.test(data.param2)) {
@@ -268,22 +374,32 @@ T computeHalfPlaneGradient(
   if (residual >= T(0)) {
     return T(0);
   }
-  const T error = residual * residual * limitWeight * tWeight;
+  const T sqrError = residual * residual;
+  T error;
+  T gradScale;
+  if constexpr (IsL2) {
+    error = limitWeight * tWeight * sqrError;
+    gradScale = T(2) * residual * limitWeight * tWeight;
+  } else {
+    error = limitWeight * tWeight * loss.value(sqrError);
+    gradScale = T(2) * residual * limitWeight * tWeight * loss.deriv(sqrError);
+  }
   if (enabledParameters.test(data.param1)) {
-    gradient[data.param1] += T(2) * residual * T(data.normal[0]) * limitWeight * tWeight;
+    gradient[data.param1] += gradScale * T(data.normal[0]);
   }
   if (enabledParameters.test(data.param2)) {
-    gradient[data.param2] += T(2) * residual * T(data.normal[1]) * limitWeight * tWeight;
+    gradient[data.param2] += gradScale * T(data.normal[1]);
   }
   return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeEllipsoidGradient(
     const LimitEllipsoid& ct,
     const SkeletonStateT<T>& state,
     T tWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform,
@@ -297,7 +413,17 @@ T computeEllipsoidGradient(
   const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
   const Eigen::Vector3<T> diff =
       position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
-  const T wgt = T(2) * T(kPositionWeight) * limitWeight * tWeight;
+  const T sqrError = diff.squaredNorm();
+
+  // wgt is the gradient scale: d(w * loss(s))/dq has the factor 2 * w * loss'(s), with
+  // w = kPositionWeight * limitWeight * tWeight. For L2, loss'(s) is folded into tWeight by the
+  // caller.
+  T wgt;
+  if constexpr (IsL2) {
+    wgt = T(2) * T(kPositionWeight) * limitWeight * tWeight;
+  } else {
+    wgt = T(2) * T(kPositionWeight) * limitWeight * tWeight * loss.deriv(sqrError);
+  }
 
   size_t jointIndex = ct.parent;
   while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
@@ -323,16 +449,21 @@ T computeEllipsoidGradient(
     jointIndex = skeleton.joints[jointIndex].parent;
   }
 
-  return diff.squaredNorm() * T(kPositionWeight) * tWeight * limitWeight;
+  if constexpr (IsL2) {
+    return T(kPositionWeight) * limitWeight * tWeight * sqrError;
+  } else {
+    return T(kPositionWeight) * limitWeight * tWeight * loss.value(sqrError);
+  }
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeMinMaxJacobian(
     const LimitMinMax& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
     T wgt,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::MatrixX<T>> jacobian,
     Ref<Eigen::VectorX<T>> residual,
@@ -342,26 +473,43 @@ T computeMinMaxJacobian(
   }
   if (params(data.parameterIndex) < data.limits[0]) {
     const T val = params(data.parameterIndex) - data.limits[0];
-    jacobian(row, data.parameterIndex) = wgt;
-    residual(row) = val * wgt;
-    return val * val * limitWeight * tWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      jacobian(row, data.parameterIndex) = wgt;
+      residual(row) = val * wgt;
+      return tWeight * limitWeight * sqrError;
+    } else {
+      const T wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+      jacobian(row, data.parameterIndex) = wgtLoss;
+      residual(row) = val * wgtLoss;
+      return tWeight * limitWeight * loss.value(sqrError);
+    }
   }
   if (params(data.parameterIndex) > data.limits[1]) {
     const T val = params(data.parameterIndex) - data.limits[1];
-    jacobian(row, data.parameterIndex) = wgt;
-    residual(row) = val * wgt;
-    return val * val * limitWeight * tWeight;
+    const T sqrError = val * val;
+    if constexpr (IsL2) {
+      jacobian(row, data.parameterIndex) = wgt;
+      residual(row) = val * wgt;
+      return tWeight * limitWeight * sqrError;
+    } else {
+      const T wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+      jacobian(row, data.parameterIndex) = wgtLoss;
+      residual(row) = val * wgtLoss;
+      return tWeight * limitWeight * loss.value(sqrError);
+    }
   }
   return T(0);
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeMinMaxJointJacobian(
     const LimitMinMaxJoint& data,
     const SkeletonStateT<T>& state,
     T tWeight,
     T limitWeight,
     T wgt,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const ParameterTransform& parameterTransform,
     Ref<Eigen::MatrixX<T>> jacobian,
@@ -374,28 +522,49 @@ T computeMinMaxJointJacobian(
   }
   if (state.jointParameters(jointIndex) < data.limits[0]) {
     const T val = state.jointParameters[jointIndex] - data.limits[0];
+    const T sqrError = val * val;
+    T wgtLoss;
+    T error;
+    if constexpr (IsL2) {
+      wgtLoss = wgt;
+      error = tWeight * limitWeight * sqrError;
+    } else {
+      wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+      error = tWeight * limitWeight * loss.value(sqrError);
+    }
     jacobian_jointParams_to_modelParams(
-        wgt, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
-    residual(row) = val * wgt;
-    return val * val * limitWeight * tWeight;
+        wgtLoss, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
+    residual(row) = val * wgtLoss;
+    return error;
   }
   if (state.jointParameters(jointIndex) > data.limits[1]) {
     const T val = state.jointParameters[jointIndex] - data.limits[1];
+    const T sqrError = val * val;
+    T wgtLoss;
+    T error;
+    if constexpr (IsL2) {
+      wgtLoss = wgt;
+      error = tWeight * limitWeight * sqrError;
+    } else {
+      wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+      error = tWeight * limitWeight * loss.value(sqrError);
+    }
     jacobian_jointParams_to_modelParams(
-        wgt, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
-    residual(row) = val * wgt;
-    return val * val * limitWeight * tWeight;
+        wgtLoss, Eigen::Index(jointIndex), Eigen::Index(row), parameterTransform, jacobian);
+    residual(row) = val * wgtLoss;
+    return error;
   }
   return T(0);
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearJacobian(
     const LimitLinear& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
     T wgt,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::MatrixX<T>> jacobian,
     Ref<Eigen::VectorX<T>> residual,
@@ -408,23 +577,34 @@ T computeLinearJacobian(
     return T(0);
   }
   const T res = params(data.targetIndex) * data.scale - data.offset - params(data.referenceIndex);
-  residual(row) = res * wgt;
+  const T sqrError = res * res;
+  T wgtLoss;
+  T error;
+  if constexpr (IsL2) {
+    wgtLoss = wgt;
+    error = tWeight * limitWeight * sqrError;
+  } else {
+    wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+    error = tWeight * limitWeight * loss.value(sqrError);
+  }
+  residual(row) = res * wgtLoss;
   if (enabledParameters.test(data.targetIndex)) {
-    jacobian(row, data.targetIndex) = T(data.scale) * wgt;
+    jacobian(row, data.targetIndex) = T(data.scale) * wgtLoss;
   }
   if (enabledParameters.test(data.referenceIndex)) {
-    jacobian(row, data.referenceIndex) = -wgt;
+    jacobian(row, data.referenceIndex) = -wgtLoss;
   }
-  return res * res * limitWeight * tWeight;
+  return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeLinearJointJacobian(
     const LimitLinearJoint& data,
     const SkeletonStateT<T>& state,
     T tWeight,
     T limitWeight,
     T wgt,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const ParameterTransform& parameterTransform,
     Ref<Eigen::MatrixX<T>> jacobian,
@@ -444,11 +624,21 @@ T computeLinearJointJacobian(
 
   const T res = state.jointParameters(targetParameterIndex) * data.scale - data.offset -
       state.jointParameters(referenceParameterIndex);
-  residual(row) = res * wgt;
+  const T sqrError = res * res;
+  T wgtLoss;
+  T error;
+  if constexpr (IsL2) {
+    wgtLoss = wgt;
+    error = tWeight * limitWeight * sqrError;
+  } else {
+    wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+    error = tWeight * limitWeight * loss.value(sqrError);
+  }
+  residual(row) = res * wgtLoss;
 
   if (activeJointParams[targetParameterIndex]) {
     jacobian_jointParams_to_modelParams(
-        T(data.scale) * wgt,
+        T(data.scale) * wgtLoss,
         Eigen::Index(targetParameterIndex),
         Eigen::Index(row),
         parameterTransform,
@@ -456,22 +646,23 @@ T computeLinearJointJacobian(
   }
   if (activeJointParams[referenceParameterIndex]) {
     jacobian_jointParams_to_modelParams(
-        -wgt,
+        -wgtLoss,
         Eigen::Index(referenceParameterIndex),
         Eigen::Index(row),
         parameterTransform,
         jacobian);
   }
-  return res * res * limitWeight * tWeight;
+  return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeHalfPlaneJacobian(
     const LimitHalfPlane& data,
     const ModelParametersT<T>& params,
     T tWeight,
     T limitWeight,
     T wgt,
+    const GeneralizedLossT<T>& loss,
     const ParameterSet& enabledParameters,
     Ref<Eigen::MatrixX<T>> jacobian,
     Ref<Eigen::VectorX<T>> residual,
@@ -487,23 +678,34 @@ T computeHalfPlaneJacobian(
   if (res >= T(0)) {
     return T(0);
   }
-  residual(row) = res * wgt;
+  const T sqrError = res * res;
+  T wgtLoss;
+  T error;
+  if constexpr (IsL2) {
+    wgtLoss = wgt;
+    error = tWeight * limitWeight * sqrError;
+  } else {
+    wgtLoss = std::sqrt(tWeight * limitWeight * loss.deriv(sqrError));
+    error = tWeight * limitWeight * loss.value(sqrError);
+  }
+  residual(row) = res * wgtLoss;
   if (enabledParameters.test(data.param1)) {
-    jacobian(row, data.param1) = T(data.normal[0]) * wgt;
+    jacobian(row, data.param1) = T(data.normal[0]) * wgtLoss;
   }
   if (enabledParameters.test(data.param2)) {
-    jacobian(row, data.param2) = T(data.normal[1]) * wgt;
+    jacobian(row, data.param2) = T(data.normal[1]) * wgtLoss;
   }
-  return res * res * limitWeight * tWeight;
+  return error;
 }
 
-template <typename T>
+template <typename T, bool IsL2>
 T computeEllipsoidJacobian(
     const LimitEllipsoid& ct,
     const ModelParametersT<T>& params,
     const SkeletonStateT<T>& state,
     T totalWeight,
     T limitWeight,
+    const GeneralizedLossT<T>& loss,
     const Eigen::VectorX<bool>& activeJointParams,
     const Skeleton& skeleton,
     const ParameterTransform& parameterTransform,
@@ -519,13 +721,21 @@ T computeEllipsoidJacobian(
   const Eigen::Vector3<T> projectedPosition = ct.ellipsoid.template cast<T>() * normalizedPosition;
   const Eigen::Vector3<T> diff =
       position - state.jointState[ct.ellipsoidParent].transform * projectedPosition;
+  const T sqrError = diff.squaredNorm();
 
   Eigen::Ref<Eigen::MatrixX<T>> jac = jacobian.block(row, 0, 3, params.size());
   Eigen::Ref<Eigen::VectorX<T>> res = residual.middleRows(row, 3);
   MT_CHECK(jac.cols() == static_cast<Eigen::Index>(parameterTransform.transform.cols()));
   MT_CHECK(jac.rows() == 3);
 
-  const T jwgt = std::sqrt(totalWeight * T(kPositionWeight) * limitWeight);
+  // jwgt is the residual/Jacobian scale sqrt(w * loss'(s)), with w = totalWeight * kPositionWeight
+  // * limitWeight. For L2, loss'(s) is folded into totalWeight by the caller.
+  T jwgt;
+  if constexpr (IsL2) {
+    jwgt = std::sqrt(totalWeight * T(kPositionWeight) * limitWeight);
+  } else {
+    jwgt = std::sqrt(totalWeight * T(kPositionWeight) * limitWeight * loss.deriv(sqrError));
+  }
 
   size_t jointIndex = ct.parent;
   while (jointIndex != ct.ellipsoidParent && jointIndex != kInvalidIndex) {
@@ -567,7 +777,11 @@ T computeEllipsoidJacobian(
   }
 
   res = diff * jwgt;
-  return jwgt * jwgt * diff.squaredNorm();
+  if constexpr (IsL2) {
+    return totalWeight * T(kPositionWeight) * limitWeight * sqrError;
+  } else {
+    return totalWeight * T(kPositionWeight) * limitWeight * loss.value(sqrError);
+  }
 }
 
 } // namespace
@@ -576,19 +790,81 @@ template <typename T>
 LimitErrorFunctionT<T>::LimitErrorFunctionT(
     const Skeleton& skel,
     const ParameterTransform& pt,
-    const ParameterLimits& pl)
-    : SkeletonErrorFunctionT<T>(skel, pt), limits_(pl) {}
+    const ParameterLimits& pl,
+    const T& lossAlpha,
+    const T& lossC)
+    : SkeletonErrorFunctionT<T>(skel, pt), limits_(pl), loss_(lossAlpha, lossC) {}
 
 template <typename T>
-LimitErrorFunctionT<T>::LimitErrorFunctionT(const Character& character)
+LimitErrorFunctionT<T>::LimitErrorFunctionT(
+    const Character& character,
+    const T& lossAlpha,
+    const T& lossC)
     : LimitErrorFunctionT(
           character.skeleton,
           character.parameterTransform,
-          character.parameterLimits) {}
+          character.parameterLimits,
+          lossAlpha,
+          lossC) {}
 
 template <typename T>
-LimitErrorFunctionT<T>::LimitErrorFunctionT(const Character& character, const ParameterLimits& pl)
-    : LimitErrorFunctionT(character.skeleton, character.parameterTransform, pl) {}
+LimitErrorFunctionT<T>::LimitErrorFunctionT(
+    const Character& character,
+    const ParameterLimits& pl,
+    const T& lossAlpha,
+    const T& lossC)
+    : LimitErrorFunctionT(character.skeleton, character.parameterTransform, pl, lossAlpha, lossC) {}
+
+template <typename T>
+template <bool IsL2>
+[[nodiscard]] double LimitErrorFunctionT<T>::getErrorImpl(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state) const {
+  double error = 0.0;
+
+  for (const auto& limit : limits_) {
+    const T limitWeight = T(limit.weight);
+    switch (limit.type) {
+      case MinMax:
+        error += computeMinMaxError<T, IsL2>(
+            limit.data.minMax, params, limitWeight, loss_, this->enabledParameters_);
+        break;
+      case MinMaxJoint:
+        error += computeMinMaxJointError<T, IsL2>(
+            limit.data.minMaxJoint, state, limitWeight, loss_, this->activeJointParams_);
+        break;
+      case MinMaxJointPassive:
+        break;
+      case Linear:
+        error += computeLinearError<T, IsL2>(
+            limit.data.linear, params, limitWeight, loss_, this->enabledParameters_);
+        break;
+      case LinearJoint:
+        error += computeLinearJointError<T, IsL2>(
+            limit.data.linearJoint, state, limitWeight, loss_, this->activeJointParams_);
+        break;
+      case HalfPlane:
+        error += computeHalfPlaneError<T, IsL2>(
+            limit.data.halfPlane, params, limitWeight, loss_, this->enabledParameters_);
+        break;
+      case Ellipsoid:
+        error += computeEllipsoidError<T, IsL2>(limit.data.ellipsoid, state, limitWeight, loss_);
+        break;
+      case LimitTypeCount:
+      default:
+        MT_THROW("Unknown parameter type for joint limit");
+        break;
+    }
+  }
+
+  // For an L2 loss the per-limit terms above are raw squared residuals; the loss scale 1/c^2 is
+  // applied once here. For a non-L2 loss it is already baked into loss_.value().
+  if constexpr (IsL2) {
+    return error * kLimitWeight * this->weight_ * loss_.invC2();
+  } else {
+    return error * kLimitWeight * this->weight_;
+  }
+}
 
 template <typename T>
 double LimitErrorFunctionT<T>::getError(
@@ -601,43 +877,102 @@ double LimitErrorFunctionT<T>::getError(
       state.jointParameters.size() ==
       gsl::narrow<Eigen::Index>(this->skeleton_.joints.size() * kParametersPerJoint));
 
+  return loss_.isL2() ? getErrorImpl<true>(params, state) : getErrorImpl<false>(params, state);
+}
+
+template <typename T>
+template <bool IsL2>
+[[nodiscard]] double LimitErrorFunctionT<T>::getGradientImpl(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    Ref<Eigen::VectorX<T>> gradient) const {
+  const auto& parameterTransform = this->parameterTransform_;
   double error = 0.0;
+
+  // tWeight folds in the loss scale 1/c^2 for the L2 path so the per-constraint code below needs no
+  // loss-function calls.
+  T tWeight = kLimitWeight * this->weight_;
+  if constexpr (IsL2) {
+    tWeight *= loss_.invC2();
+  }
 
   for (const auto& limit : limits_) {
     const T limitWeight = T(limit.weight);
     switch (limit.type) {
       case MinMax:
-        error +=
-            computeMinMaxError(limit.data.minMax, params, limitWeight, this->enabledParameters_);
+        error += computeMinMaxGradient<T, IsL2>(
+            limit.data.minMax,
+            params,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->enabledParameters_,
+            gradient);
         break;
       case MinMaxJoint:
-        error += computeMinMaxJointError(
-            limit.data.minMaxJoint, state, limitWeight, this->activeJointParams_);
+        error += computeMinMaxJointGradient<T, IsL2>(
+            limit.data.minMaxJoint,
+            state,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->activeJointParams_,
+            parameterTransform,
+            gradient);
         break;
       case MinMaxJointPassive:
         break;
       case Linear:
-        error +=
-            computeLinearError(limit.data.linear, params, limitWeight, this->enabledParameters_);
+        error += computeLinearGradient<T, IsL2>(
+            limit.data.linear,
+            params,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->enabledParameters_,
+            gradient);
         break;
       case LinearJoint:
-        error += computeLinearJointError(
-            limit.data.linearJoint, state, limitWeight, this->activeJointParams_);
+        error += computeLinearJointGradient<T, IsL2>(
+            limit.data.linearJoint,
+            state,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->activeJointParams_,
+            parameterTransform,
+            gradient);
         break;
       case HalfPlane:
-        error += computeHalfPlaneError(
-            limit.data.halfPlane, params, limitWeight, this->enabledParameters_);
+        error += computeHalfPlaneGradient<T, IsL2>(
+            limit.data.halfPlane,
+            params,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->enabledParameters_,
+            gradient);
         break;
       case Ellipsoid:
-        error += computeEllipsoidError(limit.data.ellipsoid, state, limitWeight);
+        error += computeEllipsoidGradient<T, IsL2>(
+            limit.data.ellipsoid,
+            state,
+            tWeight,
+            limitWeight,
+            loss_,
+            this->activeJointParams_,
+            this->skeleton_,
+            parameterTransform,
+            gradient);
         break;
+      case LimitTypeCount:
       default:
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }
   }
 
-  return error * kLimitWeight * this->weight_;
+  return error;
 }
 
 template <typename T>
@@ -648,64 +983,140 @@ double LimitErrorFunctionT<T>::getGradient(
     Ref<Eigen::VectorX<T>> gradient) {
   MT_PROFILE_FUNCTION();
 
+  return loss_.isL2() ? getGradientImpl<true>(params, state, gradient)
+                      : getGradientImpl<false>(params, state, gradient);
+}
+
+template <typename T>
+template <bool IsL2>
+double LimitErrorFunctionT<T>::getJacobianImpl(
+    const ModelParametersT<T>& params,
+    const SkeletonStateT<T>& state,
+    Ref<Eigen::MatrixX<T>> jacobian,
+    Ref<Eigen::VectorX<T>> residual,
+    int& usedRows) const {
   const auto& parameterTransform = this->parameterTransform_;
   double error = 0.0;
-  const T tWeight = kLimitWeight * this->weight_;
 
+  // tWeight folds in the loss scale 1/c^2 for the L2 path. The Jacobian weight sqrt(tWeight *
+  // limitWeight) is then a constant per limit (it does not depend on the residual), so it is
+  // computed once here rather than inside the per-constraint helpers. This matches the original
+  // L2-only implementation; the non-L2 path cannot do this because its weight depends on the
+  // per-constraint residual via loss'(s).
+  T tWeight = kLimitWeight * this->weight_;
+  if constexpr (IsL2) {
+    tWeight *= loss_.invC2();
+  }
+
+  jacobian.setZero();
+  residual.setZero();
+
+  int count = 0;
   for (const auto& limit : limits_) {
     const T limitWeight = T(limit.weight);
+    T wgt = T(0);
+    if constexpr (IsL2) {
+      wgt = std::sqrt(tWeight * limitWeight);
+    }
     switch (limit.type) {
       case MinMax:
-        error += computeMinMaxGradient(
-            limit.data.minMax, params, tWeight, limitWeight, this->enabledParameters_, gradient);
+        error += computeMinMaxJacobian<T, IsL2>(
+            limit.data.minMax,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            loss_,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
+        count++;
         break;
       case MinMaxJoint:
-        error += computeMinMaxJointGradient(
+        error += computeMinMaxJointJacobian<T, IsL2>(
             limit.data.minMaxJoint,
             state,
             tWeight,
             limitWeight,
+            wgt,
+            loss_,
             this->activeJointParams_,
             parameterTransform,
-            gradient);
+            jacobian,
+            residual,
+            count);
+        count++;
         break;
       case MinMaxJointPassive:
         break;
       case Linear:
-        error += computeLinearGradient(
-            limit.data.linear, params, tWeight, limitWeight, this->enabledParameters_, gradient);
+        error += computeLinearJacobian<T, IsL2>(
+            limit.data.linear,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            loss_,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
+        count++;
         break;
       case LinearJoint:
-        error += computeLinearJointGradient(
+        error += computeLinearJointJacobian<T, IsL2>(
             limit.data.linearJoint,
             state,
             tWeight,
             limitWeight,
+            wgt,
+            loss_,
             this->activeJointParams_,
             parameterTransform,
-            gradient);
+            jacobian,
+            residual,
+            count);
+        count++;
         break;
       case HalfPlane:
-        error += computeHalfPlaneGradient(
-            limit.data.halfPlane, params, tWeight, limitWeight, this->enabledParameters_, gradient);
+        error += computeHalfPlaneJacobian<T, IsL2>(
+            limit.data.halfPlane,
+            params,
+            tWeight,
+            limitWeight,
+            wgt,
+            loss_,
+            this->enabledParameters_,
+            jacobian,
+            residual,
+            count);
+        count++;
         break;
       case Ellipsoid:
-        error += computeEllipsoidGradient(
+        error += computeEllipsoidJacobian<T, IsL2>(
             limit.data.ellipsoid,
+            params,
             state,
             tWeight,
             limitWeight,
+            loss_,
             this->activeJointParams_,
             this->skeleton_,
             parameterTransform,
-            gradient);
+            jacobian,
+            residual,
+            count);
+        count += 3;
         break;
+      case LimitTypeCount:
       default:
         MT_THROW("Unknown parameter type for joint limit");
         break;
     }
   }
 
+  usedRows = count;
   return error;
 }
 
@@ -719,110 +1130,8 @@ double LimitErrorFunctionT<T>::getJacobian(
     int& usedRows) {
   MT_PROFILE_FUNCTION();
 
-  const auto& parameterTransform = this->parameterTransform_;
-  double error = 0.0;
-  const T tWeight = kLimitWeight * this->weight_;
-
-  jacobian.setZero();
-  residual.setZero();
-
-  int count = 0;
-  for (const auto& limit : limits_) {
-    const T limitWeight = T(limit.weight);
-    const T wgt = std::sqrt(T(kLimitWeight) * this->weight_ * limitWeight);
-    switch (limit.type) {
-      case MinMax:
-        error += computeMinMaxJacobian(
-            limit.data.minMax,
-            params,
-            tWeight,
-            limitWeight,
-            wgt,
-            this->enabledParameters_,
-            jacobian,
-            residual,
-            count);
-        count++;
-        break;
-      case MinMaxJoint:
-        error += computeMinMaxJointJacobian(
-            limit.data.minMaxJoint,
-            state,
-            tWeight,
-            limitWeight,
-            wgt,
-            this->activeJointParams_,
-            parameterTransform,
-            jacobian,
-            residual,
-            count);
-        count++;
-        break;
-      case MinMaxJointPassive:
-        break;
-      case Linear:
-        error += computeLinearJacobian(
-            limit.data.linear,
-            params,
-            tWeight,
-            limitWeight,
-            wgt,
-            this->enabledParameters_,
-            jacobian,
-            residual,
-            count);
-        count++;
-        break;
-      case LinearJoint:
-        error += computeLinearJointJacobian(
-            limit.data.linearJoint,
-            state,
-            tWeight,
-            limitWeight,
-            wgt,
-            this->activeJointParams_,
-            parameterTransform,
-            jacobian,
-            residual,
-            count);
-        count++;
-        break;
-      case HalfPlane:
-        error += computeHalfPlaneJacobian(
-            limit.data.halfPlane,
-            params,
-            tWeight,
-            limitWeight,
-            wgt,
-            this->enabledParameters_,
-            jacobian,
-            residual,
-            count);
-        count++;
-        break;
-      case Ellipsoid:
-        error += computeEllipsoidJacobian(
-            limit.data.ellipsoid,
-            params,
-            state,
-            tWeight,
-            limitWeight,
-            this->activeJointParams_,
-            this->skeleton_,
-            parameterTransform,
-            jacobian,
-            residual,
-            count);
-        count += 3;
-        break;
-      default:
-        MT_THROW("Unknown parameter type for joint limit");
-        break;
-    }
-  }
-
-  usedRows = count;
-  return error;
+  return loss_.isL2() ? getJacobianImpl<true>(params, state, jacobian, residual, usedRows)
+                      : getJacobianImpl<false>(params, state, jacobian, residual, usedRows);
 }
 
 template <typename T>
@@ -842,6 +1151,7 @@ size_t LimitErrorFunctionT<T>::getJacobianSize() const {
       case Ellipsoid:
         count += 3;
         break;
+      case LimitTypeCount:
       default:
         MT_THROW("Unknown parameter type for joint limit");
         break;
