@@ -73,11 +73,40 @@ jobs:
             sleep 30
           done
 
+      - name: Check CUDA runtime
+        run: |
+          pixi run -e py312-cuda129 python -c "import torch; assert torch.version.cuda is not None, 'CUDA PyTorch is required'; assert torch.cuda.is_available(), 'A visible CUDA device is required'; device = torch.device('cuda'); torch.empty((), device=device); print(f'CUDA device: {torch.cuda.get_device_name(device)}')"
+
       - name: Build and test PyMomentum (GPU)
         # With standalone mdspan (no Kokkos runtime), nvcc_wrapper is no longer
         # used, so Ninja works without module scanning issues.
         run: |
           pixi run -e py312-cuda129 test_py
+
+      - name: Check PyMomentum CUDA tensor path
+        run: |
+          pixi run -e py312-cuda129 python - <<'PY'
+          import torch
+          import pymomentum.diff_geometry as diff_geometry
+
+          device = torch.device("cuda")
+          vertices = torch.tensor(
+              [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 1.0]],
+              device=device,
+              dtype=torch.float32,
+          )
+          triangles = torch.tensor([[0, 1, 2]], device=device, dtype=torch.long)
+          normals = diff_geometry.compute_vertex_normals(vertices, triangles)
+          torch.cuda.synchronize()
+          assert normals.is_cuda
+          torch.testing.assert_close(
+              normals,
+              torch.tensor([[1.0, 0.0, 0.0]] * 3, device=device, dtype=torch.float32),
+              atol=1e-6,
+              rtol=1e-6,
+          )
+          print("PyMomentum CUDA tensor path passed")
+          PY
 
   pymomentum-windows-gpu:
     # Disabled: 4-core-windows-gpu-t4 is still a partner Windows Server 2022
@@ -103,6 +132,10 @@ jobs:
         with:
           environments: py312-cuda129
           cache: true
+
+      - name: Check CUDA runtime
+        run: |
+          pixi run -e py312-cuda129 python -c "import torch; assert torch.version.cuda is not None, 'CUDA PyTorch is required'; assert torch.cuda.is_available(), 'A visible CUDA device is required'; device = torch.device('cuda'); torch.empty((), device=device); print(f'CUDA device: {torch.cuda.get_device_name(device)}')"
 
       - name: Build PyMomentum (GPU)
         # Set CMake args after pixi activation to bypass conda env overrides.
