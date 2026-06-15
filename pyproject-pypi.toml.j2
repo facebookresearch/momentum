@@ -6,6 +6,7 @@
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RERUN=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
 {%- endmacro %}
 
@@ -13,7 +14,6 @@
 {%- macro cmake_linux_args() %}
 {{ cmake_base_args() }}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     # Use bundled pybind11 to avoid CMake FindPython Development.Module requirement
     # The pixi environment's pybind11 uses pybind11NewTools which requires python3_add_library
     # from CMake's FindPython, but manylinux Python only has Interpreter component
@@ -28,19 +28,18 @@
 {%- macro cmake_macos_args() %}
 {{ cmake_base_args() }}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
 {%- endmacro %}
 
 {#- Windows CPU-specific args (Visual Studio generator for CPU builds) -#}
 {%- macro cmake_windows_cpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 17 2022",
+    "-G Visual Studio 18 2026",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RERUN=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {%- endmacro %}
@@ -48,12 +47,12 @@
 {#- Windows GPU-specific args (same as CPU; GPU only changes the PyTorch variant linked) -#}
 {%- macro cmake_windows_gpu_args() %}
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 17 2022",
+    "-G Visual Studio 18 2026",
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=OFF",
+    "-DMOMENTUM_BUILD_RERUN=OFF",
     "-DMOMENTUM_ENABLE_SIMD=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
 {%- endmacro %}
@@ -166,12 +165,11 @@ Changelog = "https://github.com/facebookresearch/momentum/releases"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
+cmake.version = ">=4.3.0"
 cmake.args = [
 {{ cmake_base_args() }}
     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-    "-DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=OFF",
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=ON",
-    "-DCMAKE_DISABLE_FIND_PACKAGE_Arrow=ON",
 ]
 # Read CMAKE_PREFIX_PATH from environment variable
 # This is needed for cibuildwheel where pixi installs deps to a custom location

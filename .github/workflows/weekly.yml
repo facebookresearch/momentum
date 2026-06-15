@@ -80,10 +80,10 @@ jobs:
           pixi run -e py312-cuda129 test_py
 
   pymomentum-windows-gpu:
-    # Disabled: 4-core-windows-gpu-t4 runner has Visual Studio 2019 but conda
-    # py312-cuda129 environment requires VS 2022 (PyTorch headers use AVX-512
-    # flags unsupported by MSVC 14.29, and rerun SDK uses C++ features not
-    # available in VS 2019). Re-enable when a GPU runner with VS 2022 is available.
+    # Disabled: 4-core-windows-gpu-t4 is still a partner Windows Server 2022
+    # image with Visual Studio 2019, CUDA 11.4, and no usable NVIDIA driver in
+    # the runner probe. Re-enable after the GPU image has a supported compiler,
+    # CUDA toolkit, and driver for the py312-cuda129 environment.
     if: false
     name: weekly-py-py312-cuda129-win-gpu
     runs-on: 4-core-windows-gpu-t4
@@ -105,9 +105,8 @@ jobs:
           cache: true
 
       - name: Build PyMomentum (GPU)
-        # GPU runner has no Visual Studio. Set CMAKE_ARGS (space-separated,
-        # documented by scikit-build-core) via Python os.environ AFTER pixi
-        # activation to bypass conda env overrides.
+        # Set CMake args after pixi activation to bypass conda env overrides.
+        shell: powershell
         run: |
           pixi run -e py312-cuda129 python -c "
           import os, subprocess, sys
@@ -116,6 +115,7 @@ jobs:
           "
 
       - name: Test PyMomentum (GPU)
+        shell: powershell
         run: |
           pixi run -e py312-cuda129 python -c "
           import os, subprocess, sys
