@@ -130,6 +130,30 @@ def inverse(q: NDArray) -> NDArray:
     return conjugate(q) / np.maximum((q * q).sum(axis=-1, keepdims=True), 1e-7)
 
 
+def angular_distance(q0: NDArray, q1: NDArray) -> NDArray:
+    """
+    Compute the geodesic angle, in radians, between two orientations.
+
+    Returns the rotation angle of the relative rotation ``q0^{-1} * q1`` along
+    the shorter arc, so the result lies in ``[0, pi]``. Uses the numerically
+    robust ``2 * atan2(|vec|, |w|)`` form rather than ``arccos``, which loses
+    precision for small angles. Inputs are assumed normalized. Convert to
+    degrees with :func:`numpy.degrees` if needed.
+
+    Vectorized over leading dimensions: for inputs of shape ``[..., 4]`` the
+    result has shape ``[...]``.
+
+    :param q0: A normalized quaternion ((x, y, z), w)).
+    :param q1: A normalized quaternion ((x, y, z), w)).
+    :return: The angle between ``q0`` and ``q1`` in radians.
+    """
+    check(q0)
+    check(q1)
+    rel = multiply_assume_normalized(conjugate(q0), q1)
+    vec_norm = np.linalg.norm(rel[..., 0:3], axis=-1)
+    return 2.0 * np.arctan2(vec_norm, np.abs(rel[..., 3]))
+
+
 def align_z_with(direction: NDArray) -> NDArray:
     """
     Return an xyzw quaternion that rotates the +Z axis onto *direction*.
