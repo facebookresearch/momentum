@@ -392,7 +392,6 @@ character_solver_test_sources = [
 character_solver_simd_public_headers = [
     "character_solver_simd/fwd.h",
     "character_solver_simd/simd_aim_error_function.h",
-    "character_solver_simd/simd_collision_error_function.h",
     "character_solver_simd/simd_constraints_base.h",
     "character_solver_simd/simd_distance_error_function.h",
     "character_solver_simd/simd_fixed_axis_error_function.h",
@@ -408,7 +407,6 @@ character_solver_simd_public_headers = [
 
 character_solver_simd_sources = [
     "character_solver_simd/simd_aim_error_function.cpp",
-    "character_solver_simd/simd_collision_error_function.cpp",
     "character_solver_simd/simd_distance_error_function.cpp",
     "character_solver_simd/simd_fixed_axis_error_function.cpp",
     "character_solver_simd/simd_joint_to_joint_distance_error_function.cpp",
@@ -422,7 +420,6 @@ character_solver_simd_sources = [
 
 character_solver_simd_test_sources = [
     "test/character_solver_simd/simd_aim_error_function_test.cpp",
-    "test/character_solver_simd/simd_collision_error_function_test.cpp",
     "test/character_solver_simd/simd_distance_error_function_test.cpp",
     "test/character_solver_simd/simd_fixed_axis_error_function_test.cpp",
     "test/character_solver_simd/simd_joint_to_joint_distance_error_function_test.cpp",

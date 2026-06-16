@@ -109,7 +109,6 @@ template_classes = [
     "PoseTransformSolver",
     "PositionErrorFunction",
     "ProjectionErrorFunction",
-    "SimdCollisionErrorFunction",
     "SkeletonDerivative",
     "SkeletonErrorFunction",
     "SkeletonSolverFunction",
@@ -150,9 +149,7 @@ classes = [
     "SimdProjectionErrorFunction",
     "SimdStateErrorFunction",
 ]
-template_classes = [
-    "SimdCollisionErrorFunction",
-]
+template_classes = []
 
 [[fwd]]
 subdirectory = "character_sequence_solver"

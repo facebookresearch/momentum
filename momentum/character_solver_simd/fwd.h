@@ -197,23 +197,4 @@ using SimdStateErrorFunction_const_p = ::std::shared_ptr<const SimdStateErrorFun
 using SimdStateErrorFunction_const_u = ::std::unique_ptr<const SimdStateErrorFunction>;
 using SimdStateErrorFunction_const_w = ::std::weak_ptr<const SimdStateErrorFunction>;
 
-template <typename T>
-class SimdCollisionErrorFunctionT;
-using SimdCollisionErrorFunction = SimdCollisionErrorFunctionT<float>;
-using SimdCollisionErrorFunctiond = SimdCollisionErrorFunctionT<double>;
-
-using SimdCollisionErrorFunction_p = ::std::shared_ptr<SimdCollisionErrorFunction>;
-using SimdCollisionErrorFunction_u = ::std::unique_ptr<SimdCollisionErrorFunction>;
-using SimdCollisionErrorFunction_w = ::std::weak_ptr<SimdCollisionErrorFunction>;
-using SimdCollisionErrorFunction_const_p = ::std::shared_ptr<const SimdCollisionErrorFunction>;
-using SimdCollisionErrorFunction_const_u = ::std::unique_ptr<const SimdCollisionErrorFunction>;
-using SimdCollisionErrorFunction_const_w = ::std::weak_ptr<const SimdCollisionErrorFunction>;
-
-using SimdCollisionErrorFunctiond_p = ::std::shared_ptr<SimdCollisionErrorFunctiond>;
-using SimdCollisionErrorFunctiond_u = ::std::unique_ptr<SimdCollisionErrorFunctiond>;
-using SimdCollisionErrorFunctiond_w = ::std::weak_ptr<SimdCollisionErrorFunctiond>;
-using SimdCollisionErrorFunctiond_const_p = ::std::shared_ptr<const SimdCollisionErrorFunctiond>;
-using SimdCollisionErrorFunctiond_const_u = ::std::unique_ptr<const SimdCollisionErrorFunctiond>;
-using SimdCollisionErrorFunctiond_const_w = ::std::weak_ptr<const SimdCollisionErrorFunctiond>;
-
 } // namespace momentum
