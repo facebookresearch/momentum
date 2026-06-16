@@ -425,13 +425,12 @@ cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 
 [target.win-64.tasks]
-# Use the current Visual Studio generator for native C++ pixi builds on Windows.
-# Clear generator metadata that may be inherited from CI environment overrides.
+# Let CMake use its default generator unless CMAKE_GENERATOR is set. Windows CI
+# sets CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations.
 config = { cmd = """
     cmake \
         -S . \
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
-        -G 'Visual Studio 18 2026' \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
