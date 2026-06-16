@@ -43,7 +43,8 @@ wheel.exclude = ["geometry_test_helper.*"]
 if.platform-system = "^win32"
 cmake.args = [
     "-DBUILD_SHARED_LIBS=OFF",
-    "-G Visual Studio 18 2026",
+    # Honor CMAKE_GENERATOR from the build environment. Windows CI sets Ninja
+    # so sccache can wrap compiler invocations.
     "-DMOMENTUM_BUILD_PYMOMENTUM=ON",
     "-DMOMENTUM_BUILD_EXAMPLES=OFF",
     "-DMOMENTUM_BUILD_TESTING=ON",
