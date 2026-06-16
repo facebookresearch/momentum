@@ -807,4 +807,186 @@ TEST_F(MeshToSdfTest, InPlaceOverload_MatchesReturnOverload) {
   }
 }
 
+TEST_F(MeshToSdfTest, FloodFillExteriorNegatesInteriorVoids) {
+  // Create a simple SDF with an artificial interior void:
+  // A 6x6x6 grid where the boundary is positive (outside) and the center has
+  // a pocket of positive values surrounded by negative values (interior void).
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(5.0f, 5.0f, 5.0f));
+  const Eigen::Vector3<Index> resolution(6, 6, 6);
+  SignedDistanceField<float> sdf(bounds, resolution, 1.0f); // All positive (outside)
+
+  // Create a negative shell (inside) from grid indices 1-4 in each axis
+  for (Index i = 1; i <= 4; ++i) {
+    for (Index j = 1; j <= 4; ++j) {
+      for (Index k = 1; k <= 4; ++k) {
+        sdf.set(i, j, k, -1.0f);
+      }
+    }
+  }
+
+  // Create an interior void: positive pocket at center (grid 2-3)
+  for (Index i = 2; i <= 3; ++i) {
+    for (Index j = 2; j <= 3; ++j) {
+      for (Index k = 2; k <= 3; ++k) {
+        sdf.set(i, j, k, 0.5f);
+      }
+    }
+  }
+
+  // Before flood fill: center voxels are positive
+  EXPECT_GT(sdf.at(2, 2, 2), 0.0f);
+  EXPECT_GT(sdf.at(3, 3, 3), 0.0f);
+
+  // Boundary voxels should remain positive (they're connected to exterior)
+  EXPECT_GT(sdf.at(0, 0, 0), 0.0f);
+
+  floodFillExterior(sdf);
+
+  // After flood fill: interior void voxels should be negated
+  EXPECT_LT(sdf.at(2, 2, 2), 0.0f);
+  EXPECT_LT(sdf.at(3, 3, 3), 0.0f);
+
+  // Boundary positive voxels remain positive (connected to true exterior)
+  EXPECT_GT(sdf.at(0, 0, 0), 0.0f);
+  EXPECT_GT(sdf.at(5, 5, 5), 0.0f);
+
+  // Negative voxels remain negative (unaffected)
+  EXPECT_LT(sdf.at(1, 1, 1), 0.0f);
+}
+
+TEST_F(MeshToSdfTest, FloodFillExteriorNoVoidsIsNoOp) {
+  // A simple SDF with no interior voids should be unchanged
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(3.0f, 3.0f, 3.0f));
+  const Eigen::Vector3<Index> resolution(4, 4, 4);
+  SignedDistanceField<float> sdf(bounds, resolution, 1.0f); // All positive
+
+  // Make center negative (no voids, just a proper inside region)
+  sdf.set(1, 1, 1, -1.0f);
+  sdf.set(2, 2, 2, -1.0f);
+
+  // Copy original data
+  auto originalData = sdf.data();
+
+  floodFillExterior(sdf);
+
+  // Data should be unchanged since all positive voxels are boundary-connected
+  EXPECT_EQ(sdf.data(), originalData);
+}
+
+TEST_F(MeshToSdfTest, CloseInteriorFillsOpenPocketFloodFillCannot) {
+  // A 5x5x5 negative block with a 1-voxel-wide slot carved from one face into
+  // its center. The slot stays positive and is connected to the exterior, so a
+  // flood fill cannot reach-and-fill it, but a morphological close bridges it.
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(6.0f, 6.0f, 6.0f));
+  const Eigen::Vector3<Index> resolution(7, 7, 7);
+  SignedDistanceField<float> sdf(bounds, resolution, 1.0f); // outside
+
+  for (Index i = 1; i <= 5; ++i) {
+    for (Index j = 1; j <= 5; ++j) {
+      for (Index k = 1; k <= 5; ++k) {
+        sdf.set(i, j, k, -1.0f);
+      }
+    }
+  }
+  // Carve an open slot along -j at column (i=3, k=3): positive, opening at j=0.
+  for (Index j = 1; j <= 3; ++j) {
+    sdf.set(3, j, 3, 0.5f);
+  }
+
+  // Flood fill cannot close the slot: it is reachable from the j=0 face.
+  SignedDistanceField<float> sdfFlood = sdf;
+  floodFillExterior(sdfFlood);
+  EXPECT_GT(sdfFlood.at(3, 3, 3), 0.0f) << "open slot must remain exterior under flood fill";
+
+  // Closing bridges the 1-voxel slot at depth.
+  closeInterior(sdf, 1);
+  EXPECT_LT(sdf.at(3, 3, 3), 0.0f) << "closing must fill the deep slot voxel";
+  // Original interior stays interior; true exterior stays exterior.
+  EXPECT_LT(sdf.at(2, 2, 2), 0.0f);
+  EXPECT_GT(sdf.at(0, 0, 0), 0.0f);
+}
+
+TEST_F(MeshToSdfTest, CloseInteriorIsNoOpOnSolidBlock) {
+  // Closing a solid convex interior region adds nothing (it is extensive and the
+  // dilate/erode round-trip restores a pocket-free block).
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(5.0f, 5.0f, 5.0f));
+  const Eigen::Vector3<Index> resolution(6, 6, 6);
+  SignedDistanceField<float> sdf(bounds, resolution, 1.0f);
+  for (Index i = 1; i <= 4; ++i) {
+    for (Index j = 1; j <= 4; ++j) {
+      for (Index k = 1; k <= 4; ++k) {
+        sdf.set(i, j, k, -1.0f);
+      }
+    }
+  }
+
+  const auto originalData = sdf.data();
+  closeInterior(sdf, 1);
+  EXPECT_EQ(sdf.data(), originalData);
+}
+
+TEST_F(MeshToSdfTest, OpenInteriorRemovesIsolatedSpeckButKeepsSolid) {
+  // A solid interior block plus one isolated interior speck floating in free
+  // space. Opening should remove the speck while preserving the block.
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(7.0f, 7.0f, 7.0f));
+  const Eigen::Vector3<Index> resolution(8, 8, 8);
+  SignedDistanceField<float> sdf(bounds, resolution, 1.0f);
+  for (Index i = 1; i <= 4; ++i) {
+    for (Index j = 1; j <= 4; ++j) {
+      for (Index k = 1; k <= 4; ++k) {
+        sdf.set(i, j, k, -1.0f);
+      }
+    }
+  }
+  sdf.set(6, 6, 6, -1.0f); // isolated interior speck
+
+  openInterior(sdf, 1);
+
+  EXPECT_GT(sdf.at(6, 6, 6), 0.0f) << "isolated speck must be removed";
+  EXPECT_LT(sdf.at(2, 2, 2), 0.0f) << "solid block interior must survive";
+}
+
+TEST_F(MeshToSdfTest, PublicApplySignsToDistanceField) {
+  // Create an unsigned SDF from the cube mesh
+  const BoundingBox<float> bounds(
+      Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f));
+  const Eigen::Vector3<Index> resolution(8, 8, 8);
+
+  MeshToSdfConfig<float> config;
+  config.signMethod = SignMethod::RayCasting;
+  auto sdf = meshToSdf<float>(
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      bounds,
+      resolution,
+      config);
+
+  // Center should be negative (inside the cube)
+  EXPECT_LT(sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f)), 0.0f);
+
+  // Now make all values positive (unsigned) and re-apply signs using public API
+  auto& data = sdf.data();
+  for (auto& v : data) {
+    v = std::abs(v);
+  }
+
+  // Center should now be positive (unsigned)
+  EXPECT_GT(sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f)), 0.0f);
+
+  // Re-apply signs using public API
+  applySignsToDistanceField<float>(
+      sdf,
+      std::span<const Eigen::Vector3f>(cubeVertices),
+      std::span<const Eigen::Vector3i>(cubeFaces),
+      SignMethod::RayCasting);
+
+  // Center should be negative again
+  EXPECT_LT(sdf.sample(Eigen::Vector3f(0.0f, 0.0f, 0.0f)), 0.0f);
+}
+
 } // namespace axel

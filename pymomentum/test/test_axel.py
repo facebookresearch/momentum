@@ -769,23 +769,24 @@ class TestAxel(unittest.TestCase):
 
         vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
 
-        if len(vertices) > 0:
-            # Check vertex bounds - should be within SDF bounds
-            vertex_min = np.min(vertices, axis=0)
-            vertex_max = np.max(vertices, axis=0)
-            bounds_min = sdf.bounds.min
-            bounds_max = sdf.bounds.max
+        self.assertGreater(len(vertices), 0, "Expected vertices from dual contouring")
 
-            # Vertices should be within SDF bounds (with small tolerance)
-            tolerance = 0.1
-            self.assertTrue(
-                np.all(vertex_min >= bounds_min - tolerance),
-                f"Some vertices are below bounds: {vertex_min} vs {bounds_min}",
-            )
-            self.assertTrue(
-                np.all(vertex_max <= bounds_max + tolerance),
-                f"Some vertices are above bounds: {vertex_max} vs {bounds_max}",
-            )
+        # Check vertex bounds - should be within SDF bounds
+        vertex_min = np.min(vertices, axis=0)
+        vertex_max = np.max(vertices, axis=0)
+        bounds_min = sdf.bounds.min
+        bounds_max = sdf.bounds.max
+
+        # Vertices should be within SDF bounds (with small tolerance)
+        tolerance = 0.1
+        self.assertTrue(
+            np.all(vertex_min >= bounds_min - tolerance),
+            f"Some vertices are below bounds: {vertex_min} vs {bounds_min}",
+        )
+        self.assertTrue(
+            np.all(vertex_max <= bounds_max + tolerance),
+            f"Some vertices are above bounds: {vertex_max} vs {bounds_max}",
+        )
 
     def test_dual_contouring_quad_indices(self):
         """Test that quad indices are valid."""
@@ -793,19 +794,20 @@ class TestAxel(unittest.TestCase):
 
         vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
 
-        if len(quads) > 0:
-            # Check quad index bounds
-            max_vertex_index = np.max(quads)
-            min_vertex_index = np.min(quads)
+        self.assertGreater(len(quads), 0, "Expected quads from dual contouring")
 
-            self.assertGreaterEqual(
-                min_vertex_index, 0, "Quad indices should be non-negative"
-            )
-            self.assertLess(
-                max_vertex_index,
-                len(vertices),
-                "Quad indices should be within vertex array bounds",
-            )
+        # Check quad index bounds
+        max_vertex_index = np.max(quads)
+        min_vertex_index = np.min(quads)
+
+        self.assertGreaterEqual(
+            min_vertex_index, 0, "Quad indices should be non-negative"
+        )
+        self.assertLess(
+            max_vertex_index,
+            len(vertices),
+            "Quad indices should be within vertex array bounds",
+        )
 
     def test_dual_contouring_different_resolutions(self):
         """Test dual contouring with different grid resolutions."""
@@ -939,24 +941,25 @@ class TestAxel(unittest.TestCase):
 
         vertices, normals, quads = axel.dual_contouring(sdf, isovalue=0.0)
 
-        if len(vertices) > 0:
-            # Check distances from origin - should be roughly around the sphere radius
-            distances = np.linalg.norm(vertices, axis=1)
-            mean_distance = np.mean(distances)
+        self.assertGreater(len(vertices), 0, "Expected vertices from dual contouring")
 
-            # Since we're using surface positioning now, vertices should be much closer to the sphere
-            tolerance = 0.2  # Tighter tolerance since we push vertices to surface
+        # Check distances from origin - should be roughly around the sphere radius
+        distances = np.linalg.norm(vertices, axis=1)
+        mean_distance = np.mean(distances)
 
-            self.assertGreater(
-                mean_distance,
-                radius - tolerance,
-                f"Mean distance {mean_distance:.3f} too far inside sphere",
-            )
-            self.assertLess(
-                mean_distance,
-                radius + tolerance,
-                f"Mean distance {mean_distance:.3f} too far outside sphere",
-            )
+        # Since we're using surface positioning now, vertices should be much closer to the sphere
+        tolerance = 0.2  # Tighter tolerance since we push vertices to surface
+
+        self.assertGreater(
+            mean_distance,
+            radius - tolerance,
+            f"Mean distance {mean_distance:.3f} too far inside sphere",
+        )
+        self.assertLess(
+            mean_distance,
+            radius + tolerance,
+            f"Mean distance {mean_distance:.3f} too far outside sphere",
+        )
 
     def test_smooth_mesh_laplacian(self):
         """Test basic mesh smoothing functionality."""
@@ -1435,6 +1438,167 @@ class TestAxel(unittest.TestCase):
         """Test that loading from a nonexistent file raises RuntimeError."""
         with self.assertRaises(RuntimeError):
             axel.load_sdf_from_msgpack("/nonexistent/path/sdf.msgpack")
+
+    def test_offset_shifts_values(self):
+        """Test that offset() subtracts delta from all voxel values."""
+        min_corner = np.array([-1.0, -1.0, -1.0])
+        max_corner = np.array([1.0, 1.0, 1.0])
+        bbox = axel.BoundingBox(min_corner, max_corner)
+        resolution = np.array([4, 4, 4], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bbox, resolution, 2.0)
+
+        sdf.offset(0.5)
+
+        data = np.array(sdf)
+        np.testing.assert_array_almost_equal(data, np.full((4, 4, 4), 1.5))
+
+    def test_offset_negative(self):
+        """Test that negative offset adds to values."""
+        min_corner = np.array([-1.0, -1.0, -1.0])
+        max_corner = np.array([1.0, 1.0, 1.0])
+        bbox = axel.BoundingBox(min_corner, max_corner)
+        resolution = np.array([4, 4, 4], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bbox, resolution, 1.0)
+
+        sdf.offset(-0.5)
+
+        data = np.array(sdf)
+        np.testing.assert_array_almost_equal(data, np.full((4, 4, 4), 1.5))
+
+    def test_flood_fill_exterior_negates_voids(self):
+        """Test that flood_fill_exterior negates interior void voxels."""
+        min_corner = np.array([0.0, 0.0, 0.0])
+        max_corner = np.array([5.0, 5.0, 5.0])
+        bbox = axel.BoundingBox(min_corner, max_corner)
+        resolution = np.array([6, 6, 6], dtype=np.int32)
+
+        # Start with all positive (outside)
+        sdf = axel.SignedDistanceField(bbox, resolution, 1.0)
+
+        # Create negative shell (inside) around center
+        data = np.array(sdf, copy=False)
+        data[1:5, 1:5, 1:5] = -1.0
+        # Interior void (positive pocket surrounded by negative)
+        data[2:4, 2:4, 2:4] = 0.5
+
+        # Before: interior void is positive
+        self.assertGreater(data[2, 2, 2], 0.0)
+
+        axel.flood_fill_exterior(sdf)
+
+        result = np.array(sdf)
+        # Interior void voxels should now be negative
+        self.assertLess(result[2, 2, 2], 0.0)
+        self.assertLess(result[3, 3, 3], 0.0)
+        # Boundary positive voxels remain positive
+        self.assertGreater(result[0, 0, 0], 0.0)
+        self.assertGreater(result[5, 5, 5], 0.0)
+
+    def test_flood_fill_exterior_no_voids_is_noop(self):
+        """Test that flood_fill_exterior is a no-op when there are no voids."""
+        min_corner = np.array([0.0, 0.0, 0.0])
+        max_corner = np.array([3.0, 3.0, 3.0])
+        bbox = axel.BoundingBox(min_corner, max_corner)
+        resolution = np.array([4, 4, 4], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bbox, resolution, 1.0)
+
+        original_data = np.array(sdf).copy()
+        axel.flood_fill_exterior(sdf)
+        np.testing.assert_array_equal(np.array(sdf), original_data)
+
+    def test_close_interior_fills_open_pocket(self):
+        """close_interior bridges an open slot that flood_fill_exterior cannot."""
+        bbox = axel.BoundingBox(np.array([0.0, 0.0, 0.0]), np.array([6.0, 6.0, 6.0]))
+        resolution = np.array([7, 7, 7], dtype=np.int32)
+
+        def make_sdf() -> axel.SignedDistanceField:
+            sdf = axel.SignedDistanceField(bbox, resolution, 1.0)
+            data = np.array(sdf, copy=False)
+            data[1:6, 1:6, 1:6] = -1.0  # solid interior block
+            data[3, 1:4, 3] = 0.5  # open slot carved from the j=0 face to center
+            return sdf
+
+        # Flood fill leaves the slot positive (it is reachable from the face).
+        sdf_flood = make_sdf()
+        axel.flood_fill_exterior(sdf_flood)
+        self.assertGreater(np.array(sdf_flood)[3, 3, 3], 0.0)
+
+        # Closing fills the deep slot voxel while preserving exterior/interior.
+        sdf_close = make_sdf()
+        axel.close_interior(sdf_close, iterations=1)
+        result = np.array(sdf_close)
+        self.assertLess(result[3, 3, 3], 0.0)
+        self.assertLess(result[2, 2, 2], 0.0)
+        self.assertGreater(result[0, 0, 0], 0.0)
+
+    def test_open_interior_removes_isolated_speck(self):
+        """open_interior drops an isolated interior speck but keeps the solid."""
+        bbox = axel.BoundingBox(np.array([0.0, 0.0, 0.0]), np.array([7.0, 7.0, 7.0]))
+        resolution = np.array([8, 8, 8], dtype=np.int32)
+        sdf = axel.SignedDistanceField(bbox, resolution, 1.0)
+        data = np.array(sdf, copy=False)
+        data[1:5, 1:5, 1:5] = -1.0  # solid block
+        data[6, 6, 6] = -1.0  # isolated speck
+
+        axel.open_interior(sdf, iterations=1)
+
+        result = np.array(sdf)
+        self.assertGreater(result[6, 6, 6], 0.0)
+        self.assertLess(result[2, 2, 2], 0.0)
+
+    def test_apply_signs(self):
+        """Test that apply_signs correctly signs an unsigned SDF."""
+        # Create a cube mesh
+        vertices = np.array(
+            [
+                [-0.5, -0.5, -0.5],
+                [0.5, -0.5, -0.5],
+                [0.5, 0.5, -0.5],
+                [-0.5, 0.5, -0.5],
+                [-0.5, -0.5, 0.5],
+                [0.5, -0.5, 0.5],
+                [0.5, 0.5, 0.5],
+                [-0.5, 0.5, 0.5],
+            ],
+            dtype=np.float32,
+        )
+        triangles = np.array(
+            [
+                [0, 1, 2],
+                [0, 2, 3],
+                [4, 7, 6],
+                [4, 6, 5],
+                [0, 4, 5],
+                [0, 5, 1],
+                [2, 6, 7],
+                [2, 7, 3],
+                [0, 3, 7],
+                [0, 7, 4],
+                [1, 5, 6],
+                [1, 6, 2],
+            ],
+            dtype=np.int32,
+        )
+
+        # Create signed SDF first
+        sdf = axel.mesh_to_sdf(vertices, triangles, voxel_size=0.2)
+
+        # Center should be negative (inside)
+        center_val = sdf.sample(np.array([0.0, 0.0, 0.0]))
+        self.assertLess(center_val, 0.0)
+
+        # Make all values positive (unsigned)
+        data = np.array(sdf, copy=False)
+        np.abs(data, out=data)
+
+        # Center should now be positive
+        self.assertGreater(sdf.sample(np.array([0.0, 0.0, 0.0])), 0.0)
+
+        # Re-apply signs
+        axel.apply_signs(sdf, vertices, triangles)
+
+        # Center should be negative again
+        self.assertLess(sdf.sample(np.array([0.0, 0.0, 0.0])), 0.0)
 
 
 if __name__ == "__main__":

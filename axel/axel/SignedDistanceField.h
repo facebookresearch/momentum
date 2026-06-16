@@ -224,6 +224,14 @@ class SignedDistanceField {
   void fill(Scalar value);
 
   /**
+   * Offset the SDF by subtracting delta from all voxel values.
+   * Positive delta grows the inside region (shifts zero-crossing outward).
+   *
+   * @param delta Amount to subtract from all values
+   */
+  void offset(Scalar delta);
+
+  /**
    * Clear the SDF and reset it to zero values.
    */
   void clear();

@@ -15,6 +15,7 @@
 #include <memory>
 #include <numbers>
 #include <random>
+#include <tuple>
 #include <unordered_map>
 
 #ifndef AXEL_NO_DISPENSO
@@ -22,6 +23,7 @@
 #endif
 
 #include "axel/BoundingBox.h"
+#include "axel/Checks.h"
 #include "axel/Ray.h"
 #include "axel/TriBvh.h"
 #include "axel/common/Constants.h"
@@ -135,7 +137,7 @@ void meshToSdfImpl(
   if (config.verbose) {
     std::cout << "Step 3: Applying signs..." << std::endl;
   }
-  applySignsToDistanceField(sdf, vertices, triangles, config.signMethod);
+  detail::applySignsToDistanceField(sdf, vertices, triangles, config.signMethod);
   if (config.verbose) {
     std::cout << "Signs applied" << std::endl;
   }
@@ -824,6 +826,235 @@ BoundingBox<ScalarType> computeMeshBounds(std::span<const Eigen::Vector3<ScalarT
 } // namespace detail
 
 // ================================================================================================
+// PUBLIC API: applySignsToDistanceField
+// ================================================================================================
+
+template <typename ScalarType>
+void applySignsToDistanceField(
+    SignedDistanceField<ScalarType>& sdf,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
+    SignMethod signMethod) {
+  detail::applySignsToDistanceField(sdf, vertices, triangles, signMethod);
+}
+
+namespace {
+
+// Offsets of the 6 face-adjacent neighbors in a voxel grid, shared by the
+// flood-fill and morphological passes below.
+constexpr std::array<std::array<Index, 3>, 6> kFaceNeighborOffsets = {
+    {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}}};
+
+} // namespace
+
+// ================================================================================================
+// PUBLIC API: floodFillExterior
+// ================================================================================================
+
+template <typename ScalarType>
+void floodFillExterior(SignedDistanceField<ScalarType>& sdf) {
+  const auto& resolution = sdf.resolution();
+  const Index nx = resolution.x();
+  const Index ny = resolution.y();
+  const Index nz = resolution.z();
+  const size_t totalVoxels = sdf.totalVoxels();
+
+  auto& data = sdf.data();
+  std::vector<bool> visited(totalVoxels, false);
+  std::queue<std::tuple<Index, Index, Index>> queue;
+
+  auto linearIdx = [&](Index i, Index j, Index k) -> size_t {
+    return static_cast<size_t>(k) * nx * ny + static_cast<size_t>(j) * nx + static_cast<size_t>(i);
+  };
+
+  // Seed from all 6 boundary faces
+  auto trySeed = [&](Index i, Index j, Index k) {
+    const size_t idx = linearIdx(i, j, k);
+    if (!visited[idx] && data[idx] >= ScalarType{0}) {
+      visited[idx] = true;
+      queue.push({i, j, k});
+    }
+  };
+
+  // Z faces (k=0 and k=nz-1)
+  for (Index i = 0; i < nx; ++i) {
+    for (Index j = 0; j < ny; ++j) {
+      trySeed(i, j, 0);
+      if (nz > 1) {
+        trySeed(i, j, nz - 1);
+      }
+    }
+  }
+  // Y faces (j=0 and j=ny-1)
+  for (Index i = 0; i < nx; ++i) {
+    for (Index k = 0; k < nz; ++k) {
+      trySeed(i, 0, k);
+      if (ny > 1) {
+        trySeed(i, ny - 1, k);
+      }
+    }
+  }
+  // X faces (i=0 and i=nx-1)
+  for (Index j = 0; j < ny; ++j) {
+    for (Index k = 0; k < nz; ++k) {
+      trySeed(0, j, k);
+      if (nx > 1) {
+        trySeed(nx - 1, j, k);
+      }
+    }
+  }
+
+  // BFS through 6-connected neighbors with value >= 0
+  while (!queue.empty()) {
+    const auto [ci, cj, ck] = queue.front();
+    queue.pop();
+
+    for (const auto& offset : kFaceNeighborOffsets) {
+      const Index ni = ci + offset[0];
+      const Index nj = cj + offset[1];
+      const Index nk = ck + offset[2];
+
+      if (sdf.isValidIndex(ni, nj, nk)) {
+        const size_t nIdx = linearIdx(ni, nj, nk);
+        if (!visited[nIdx] && data[nIdx] >= ScalarType{0}) {
+          visited[nIdx] = true;
+          queue.push({ni, nj, nk});
+        }
+      }
+    }
+  }
+
+  // Negate unreached positive voxels (interior voids)
+  for (size_t idx = 0; idx < totalVoxels; ++idx) {
+    if (!visited[idx] && data[idx] >= ScalarType{0}) {
+      data[idx] = -data[idx];
+    }
+  }
+}
+
+// ================================================================================================
+// PUBLIC API: closeInterior
+// ================================================================================================
+
+namespace {
+
+/**
+ * One pass of 6-connected binary dilation/erosion over a flat (k-major) mask.
+ *
+ * For dilation a voxel is set when itself or any face neighbor is set; for erosion
+ * a voxel stays set only when itself and all face neighbors are set. Out-of-grid
+ * neighbors are treated as unset (grid faces act as exterior), so erosion may
+ * nibble the boundary — harmless here since the object interior is padded away
+ * from the grid faces.
+ */
+void morphologicalPass(
+    std::span<const char> in,
+    std::span<char> out,
+    Index nx,
+    Index ny,
+    Index nz,
+    bool dilate) {
+  const size_t totalVoxels =
+      static_cast<size_t>(nx) * static_cast<size_t>(ny) * static_cast<size_t>(nz);
+  XR_CHECK(
+      in.size() == totalVoxels && out.size() == totalVoxels,
+      "morphologicalPass requires in/out spans sized to the voxel grid");
+  auto idxOf = [&](Index i, Index j, Index k) -> size_t {
+    return static_cast<size_t>(k) * nx * ny + static_cast<size_t>(j) * nx + static_cast<size_t>(i);
+  };
+
+  for (Index k = 0; k < nz; ++k) {
+    for (Index j = 0; j < ny; ++j) {
+      for (Index i = 0; i < nx; ++i) {
+        const size_t idx = idxOf(i, j, k);
+        // Dilation keeps any set voxel set; erosion keeps any unset voxel unset.
+        if (in[idx] == (dilate ? 1 : 0)) {
+          out[idx] = in[idx];
+          continue;
+        }
+        bool result = !dilate; // erosion assumes set until a neighbor disproves
+        for (const auto& off : kFaceNeighborOffsets) {
+          const Index ni = i + off[0];
+          const Index nj = j + off[1];
+          const Index nk = k + off[2];
+          const bool inBounds = ni >= 0 && ni < nx && nj >= 0 && nj < ny && nk >= 0 && nk < nz;
+          const bool neighborSet = inBounds && in[idxOf(ni, nj, nk)] != 0;
+          if (dilate && neighborSet) {
+            result = true;
+            break;
+          }
+          if (!dilate && !neighborSet) {
+            result = false;
+            break;
+          }
+        }
+        out[idx] = result ? 1 : 0;
+      }
+    }
+  }
+}
+
+/**
+ * Shared body for closeInterior / openInterior.
+ *
+ * Builds an interior mask from the SDF sign, runs `iterations` passes of one
+ * morphological op followed by `iterations` passes of its inverse, then flips
+ * the sign of every voxel whose new interior classification disagrees with its
+ * current sign. `firstDilate == true` performs a closing (dilate then erode);
+ * `false` performs an opening (erode then dilate).
+ */
+template <typename ScalarType>
+void morphInterior(SignedDistanceField<ScalarType>& sdf, int iterations, bool firstDilate) {
+  if (iterations <= 0) {
+    return;
+  }
+
+  const auto& resolution = sdf.resolution();
+  const Index nx = resolution.x();
+  const Index ny = resolution.y();
+  const Index nz = resolution.z();
+  const size_t totalVoxels = sdf.totalVoxels();
+
+  auto& data = sdf.data();
+  std::vector<char> mask(totalVoxels);
+  for (size_t idx = 0; idx < totalVoxels; ++idx) {
+    mask[idx] = data[idx] < ScalarType{0} ? 1 : 0;
+  }
+
+  std::vector<char> scratch(totalVoxels);
+  for (int pass = 0; pass < iterations; ++pass) {
+    morphologicalPass(mask, scratch, nx, ny, nz, /*dilate=*/firstDilate);
+    mask.swap(scratch);
+  }
+  for (int pass = 0; pass < iterations; ++pass) {
+    morphologicalPass(mask, scratch, nx, ny, nz, /*dilate=*/!firstDilate);
+    mask.swap(scratch);
+  }
+
+  // Flip the sign wherever the new interior mask disagrees with the current
+  // sign. Closing is extensive (only sets mask where data >= 0) and opening is
+  // anti-extensive (only clears mask where data < 0), so both reduce to this
+  // single disagreement predicate.
+  for (size_t idx = 0; idx < totalVoxels; ++idx) {
+    if ((mask[idx] != 0) != (data[idx] < ScalarType{0})) {
+      data[idx] = -data[idx];
+    }
+  }
+}
+
+} // namespace
+
+template <typename ScalarType>
+void closeInterior(SignedDistanceField<ScalarType>& sdf, int iterations) {
+  morphInterior(sdf, iterations, /*firstDilate=*/true);
+}
+
+template <typename ScalarType>
+void openInterior(SignedDistanceField<ScalarType>& sdf, int iterations) {
+  morphInterior(sdf, iterations, /*firstDilate=*/false);
+}
+
+// ================================================================================================
 // EXPLICIT INSTANTIATIONS
 // ================================================================================================
 
@@ -916,5 +1147,30 @@ template BoundingBox<float> computeMeshBounds<float>(std::span<const Eigen::Vect
 template BoundingBox<double> computeMeshBounds<double>(std::span<const Eigen::Vector3<double>>);
 
 } // namespace detail
+
+// Public API explicit instantiations
+template void applySignsToDistanceField<float>(
+    SignedDistanceField<float>&,
+    std::span<const Eigen::Vector3<float>>,
+    std::span<const Eigen::Vector3i>,
+    SignMethod);
+
+template void applySignsToDistanceField<double>(
+    SignedDistanceField<double>&,
+    std::span<const Eigen::Vector3<double>>,
+    std::span<const Eigen::Vector3i>,
+    SignMethod);
+
+template void floodFillExterior<float>(SignedDistanceField<float>&);
+
+template void floodFillExterior<double>(SignedDistanceField<double>&);
+
+template void closeInterior<float>(SignedDistanceField<float>&, int);
+
+template void closeInterior<double>(SignedDistanceField<double>&, int);
+
+template void openInterior<float>(SignedDistanceField<float>&, int);
+
+template void openInterior<double>(SignedDistanceField<double>&, int);
 
 } // namespace axel

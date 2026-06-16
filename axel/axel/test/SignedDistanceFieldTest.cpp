@@ -590,4 +590,38 @@ TEST_F(SignedDistanceFieldTest, SampleWithGradientConsistency) {
   }
 }
 
+TEST_F(SignedDistanceFieldTest, OffsetShiftsZeroCrossing) {
+  // Create a sphere SDF with radius 1.0
+  auto sdf = SignedDistanceFieldf::createSphere(1.0f, Eigen::Vector3<Index>(16, 16, 16));
+
+  // Sample at a point on the original surface
+  const Eigen::Vector3f surfacePoint(1.0f, 0.0f, 0.0f);
+  EXPECT_NEAR(sdf.sample(surfacePoint), 0.0f, 0.15f);
+
+  // Offset by 0.2 (grow inside): zero-crossing should move outward
+  sdf.offset(0.2f);
+
+  // Point that was on surface is now inside (negative)
+  EXPECT_LT(sdf.sample(surfacePoint), 0.0f);
+
+  // Point at radius 1.2 should now be near zero-crossing
+  const Eigen::Vector3f newSurfacePoint(1.2f, 0.0f, 0.0f);
+  EXPECT_NEAR(sdf.sample(newSurfacePoint), 0.0f, 0.15f);
+}
+
+TEST_F(SignedDistanceFieldTest, OffsetNegativeShrinks) {
+  auto sdf = SignedDistanceFieldf::createSphere(1.0f, Eigen::Vector3<Index>(16, 16, 16));
+
+  // Offset by -0.2 (shrink inside): zero-crossing should move inward
+  sdf.offset(-0.2f);
+
+  // Point at radius 1.0 is now outside (positive)
+  const Eigen::Vector3f originalSurface(1.0f, 0.0f, 0.0f);
+  EXPECT_GT(sdf.sample(originalSurface), 0.0f);
+
+  // Point at radius 0.8 should now be near zero-crossing
+  const Eigen::Vector3f newSurface(0.8f, 0.0f, 0.0f);
+  EXPECT_NEAR(sdf.sample(newSurface), 0.0f, 0.15f);
+}
+
 } // namespace axel

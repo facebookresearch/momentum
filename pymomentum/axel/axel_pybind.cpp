@@ -418,6 +418,16 @@ More efficient than calling sample() and gradient() separately.
 
 :param value: The value to fill with.)",
           py::arg("value"))
+      .def(
+          "offset",
+          &axel::SignedDistanceField<float>::offset,
+          R"(Offset the SDF by subtracting delta from all voxel values.
+
+Positive delta grows the inside region (shifts zero-crossing outward).
+Negative delta shrinks the inside region (shifts zero-crossing inward).
+
+:param delta: Amount to subtract from all values.)",
+          py::arg("delta"))
       .def_buffer([](axel::SignedDistanceField<float>& self) -> py::buffer_info {
         const auto& res = self.resolution();
         auto& data = self.data();
@@ -1135,6 +1145,105 @@ Example usage::
       py::arg("vertex_mask") = py::array_t<bool>(),
       py::arg("iterations") = 1,
       py::arg("step") = 0.5f);
+
+  // Bind apply_signs_to_distance_field function
+  m.def(
+      "apply_signs",
+      [](axel::SignedDistanceField<float>& sdf,
+         const py::array_t<float>& vertices,
+         const py::array_t<int>& triangles,
+         axel::SignMethod signMethod) {
+        // Validate input arrays
+        validatePositionArray(vertices, "vertices");
+        validateTriangleIndexArray(triangles, "triangles", vertices.shape(0));
+
+        const auto vertexVector = arrayToEigenVectors<float, 3>(vertices, "vertices");
+        const auto triangleVector = arrayToEigenVectors<int, 3>(triangles, "triangles");
+
+        {
+          py::gil_scoped_release release;
+          axel::applySignsToDistanceField<float>(
+              sdf,
+              std::span<const Eigen::Vector3f>(vertexVector),
+              std::span<const Eigen::Vector3i>(triangleVector),
+              signMethod);
+        }
+      },
+      R"(Apply signs to an existing (unsigned) distance field based on inside/outside classification.
+
+This is the sign determination step from the mesh_to_sdf pipeline, exposed for cases
+where you need to re-sign an SDF with a different method without recomputing distances.
+
+:param sdf: Distance field to apply signs to (modified in place).
+:param vertices: Mesh vertex positions as 2D array of shape (N, 3).
+:param triangles: Mesh triangle indices as 2D array of shape (M, 3).
+:param sign_method: Method for inside/outside classification (default: RayCasting).)",
+      py::arg("sdf"),
+      py::arg("vertices"),
+      py::arg("triangles"),
+      py::arg("sign_method") = axel::SignMethod::RayCasting);
+
+  // Bind flood_fill_exterior function
+  m.def(
+      "flood_fill_exterior",
+      [](axel::SignedDistanceField<float>& sdf) {
+        py::gil_scoped_release release;
+        axel::floodFillExterior<float>(sdf);
+      },
+      R"(Fill interior voids in an SDF using boundary-seeded flood fill.
+
+Identifies connected exterior regions by flood-filling from boundary voxels (faces
+of the grid) through 6-connected neighbors with value >= 0. Any voxel with value >= 0
+not reached by the flood fill is considered an interior void and has its value negated.
+
+:param sdf: Signed distance field to modify in place.)",
+      py::arg("sdf"));
+
+  // Bind close_interior function
+  m.def(
+      "close_interior",
+      [](axel::SignedDistanceField<float>& sdf, int iterations) {
+        py::gil_scoped_release release;
+        axel::closeInterior<float>(sdf, iterations);
+      },
+      R"(Morphologically close the interior region of an SDF.
+
+Treats voxels with value < 0 as interior and performs a binary morphological closing
+(``iterations`` dilations followed by ``iterations`` erosions) of that region using a
+6-connected structuring element. Newly-interior voxels have their value negated.
+
+Unlike :func:`flood_fill_exterior`, which only fixes fully enclosed voids, closing also
+bridges thin interior regions misclassified as exterior even when they stay connected to
+the outside (e.g. an open grip cavity). Closing is extensive, so it only adds interior
+voxels.
+
+:param sdf: Signed distance field to modify in place.
+:param iterations: Number of dilation/erosion passes (closing radius in voxels).)",
+      py::arg("sdf"),
+      py::arg("iterations") = 1);
+
+  // Bind open_interior function
+  m.def(
+      "open_interior",
+      [](axel::SignedDistanceField<float>& sdf, int iterations) {
+        py::gil_scoped_release release;
+        axel::openInterior<float>(sdf, iterations);
+      },
+      R"(Morphologically open the interior region of an SDF.
+
+Treats voxels with value < 0 as interior and performs a binary morphological opening
+(``iterations`` erosions followed by ``iterations`` dilations) using a 6-connected
+structuring element. This removes isolated interior specks and protrusions thinner than
+``iterations`` voxels (e.g. spurious single voxels the sign step marks interior in free
+space). Removed voxels have their value flipped positive.
+
+Opening is anti-extensive, so it only removes interior voxels. Apply it after
+:func:`close_interior` / :func:`flood_fill_exterior` to despeckle the result.
+
+:param sdf: Signed distance field to modify in place.
+:param iterations: Number of erosion/dilation passes (opening radius in voxels).)",
+      py::arg("sdf"),
+      py::arg("iterations") = 1);
 
   // SDF serialization
   m.def(
