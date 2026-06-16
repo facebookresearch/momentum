@@ -1,0 +1,31 @@
+name: 'Setup Windows sccache'
+description: 'Restore Windows sccache storage, install sccache, and select Ninja for CMake'
+
+inputs:
+  cache-key:
+    description: 'Primary actions/cache key for the sccache directory'
+    required: true
+  restore-keys:
+    description: 'Newline-delimited actions/cache restore key prefixes'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache sccache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: .sccache
+        key: ${{ inputs.cache-key }}
+        restore-keys: ${{ inputs.restore-keys }}
+
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+
+    - name: Use Ninja for sccache
+      shell: pwsh
+      run: |
+        echo "CMAKE_GENERATOR=Ninja" >> $env:GITHUB_ENV
+        echo "CMAKE_GENERATOR_INSTANCE=" >> $env:GITHUB_ENV
+        echo "CMAKE_GENERATOR_PLATFORM=" >> $env:GITHUB_ENV
+        echo "CMAKE_GENERATOR_TOOLSET=" >> $env:GITHUB_ENV
