@@ -107,11 +107,11 @@ TYPED_TEST(KdTreeTest, EigenMatrixDetection) {
 
   // Check that block expressions that results in vectors have valid memory layout.
   // E.g. a row vector block from a column-major matrix cannot be used before materialization.
-  const Eigen::Matrix<T, 3, 3, Eigen::RowMajor> rm;
+  const Eigen::Matrix<T, 3, 3, Eigen::RowMajor> rm{};
   EXPECT_TRUE((detail::IsContiguousEigenVectorBaseWithLength<decltype(rm.row(0)), 3>));
   EXPECT_FALSE((detail::IsContiguousEigenVectorBaseWithLength<decltype(rm.col(0)), 3>));
 
-  const Eigen::Matrix<T, 3, 3, Eigen::ColMajor> cm;
+  const Eigen::Matrix<T, 3, 3, Eigen::ColMajor> cm{};
   EXPECT_FALSE((detail::IsContiguousEigenVectorBaseWithLength<decltype(cm.row(0)), 3>));
   EXPECT_TRUE((detail::IsContiguousEigenVectorBaseWithLength<decltype(cm.col(0)), 3>));
 
