@@ -110,31 +110,20 @@ void CollisionErrorFunctionT<T>::accumulateGradientAlongChain(
     size_t stopJoint,
     Ref<VectorX<T>> gradient,
     T scaleCorrection) const {
-  size_t jointIndex = startJoint;
-  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Vector3<T> posd = position - jointState.translation();
-
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        const T val = direction.dot(jointState.getTranslationDerivative(d)) * weight;
+  accumulateChainDerivatives<T>(
+      state,
+      this->skeleton_,
+      this->activeJointParams_,
+      position,
+      direction,
+      weight,
+      startJoint,
+      stopJoint,
+      scaleCorrection,
+      [&](T value, size_t jointParamIndex) {
         gradient_jointParams_to_modelParams(
-            val, paramIndex + d, this->parameterTransform_, gradient);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * weight;
-        gradient_jointParams_to_modelParams(
-            val, paramIndex + 3 + d, this->parameterTransform_, gradient);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * weight;
-      gradient_jointParams_to_modelParams(val, paramIndex + 6, this->parameterTransform_, gradient);
-    }
-
-    jointIndex = this->skeleton_.joints[jointIndex].parent;
-  }
+            value, jointParamIndex, this->parameterTransform_, gradient);
+      });
 }
 
 template <typename T>
@@ -148,32 +137,20 @@ void CollisionErrorFunctionT<T>::accumulateJacobianAlongChain(
     Ref<MatrixX<T>> jacobian,
     int row,
     T scaleCorrection) const {
-  size_t jointIndex = startJoint;
-  while (jointIndex != kInvalidIndex && jointIndex != stopJoint) {
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Vector3<T> posd = position - jointState.translation();
-
-    for (size_t d = 0; d < 3; d++) {
-      if (this->activeJointParams_[paramIndex + d]) {
-        const T val = direction.dot(jointState.getTranslationDerivative(d)) * factor;
+  accumulateChainDerivatives<T>(
+      state,
+      this->skeleton_,
+      this->activeJointParams_,
+      position,
+      direction,
+      factor,
+      startJoint,
+      stopJoint,
+      scaleCorrection,
+      [&](T value, size_t jointParamIndex) {
         jacobian_jointParams_to_modelParams(
-            val, paramIndex + d, row, this->parameterTransform_, jacobian);
-      }
-      if (this->activeJointParams_[paramIndex + 3 + d]) {
-        const T val = direction.dot(jointState.getRotationDerivative(d, posd)) * factor;
-        jacobian_jointParams_to_modelParams(
-            val, paramIndex + 3 + d, row, this->parameterTransform_, jacobian);
-      }
-    }
-    if (this->activeJointParams_[paramIndex + 6]) {
-      const T val = (direction.dot(jointState.getScaleDerivative(posd)) + scaleCorrection) * factor;
-      jacobian_jointParams_to_modelParams(
-          val, paramIndex + 6, row, this->parameterTransform_, jacobian);
-    }
-
-    jointIndex = this->skeleton_.joints[jointIndex].parent;
-  }
+            value, jointParamIndex, row, this->parameterTransform_, jacobian);
+      });
 }
 
 template <typename T>
