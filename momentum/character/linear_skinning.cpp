@@ -196,7 +196,7 @@ void applySSD(
   options.minItemsPerChunk = 1024u;
 
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
+      dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAdaptive),
       [&](const size_t rangeBegin, const size_t rangeEnd) {
         for (size_t i = rangeBegin; i != rangeEnd; i++) {
           const Vector3<T>& pos = mesh.vertices[i];
