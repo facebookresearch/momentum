@@ -109,7 +109,7 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
   std::vector<ProjectionConstraintDataT<T>> constraints_;
 
   // Projection error is roughly in radians, so a value near 1 is reasonable here:
-  static constexpr T kProjectionWeight = 1.0f;
+  static constexpr T kProjectionWeight = 1.0;
 
   // Ignore projection constraints involving joints closer than this distance.
   // Prevents divide-by-zero in the projection matrix and bad behavior close to

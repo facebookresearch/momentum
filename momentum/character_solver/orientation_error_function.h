@@ -60,7 +60,7 @@ class OrientationErrorFunctionT : public JointErrorFunctionT<T, OrientationDataT
 
   /// Default constant weight in MarkerErrorFunction. This can be used for backwards compatibility
   /// in setWeight().
-  static constexpr T kLegacyWeight = 1e-1f;
+  static constexpr T kLegacyWeight = 1e-1;
 
  protected:
   void evalFunction(

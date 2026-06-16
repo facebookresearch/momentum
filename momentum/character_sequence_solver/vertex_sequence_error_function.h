@@ -97,7 +97,7 @@ class VertexSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
     return character_;
   }
 
-  static constexpr T kVelocityWeight = 1e-3f;
+  static constexpr T kVelocityWeight = 1e-3;
 
  private:
   /// Calculate gradient for a single vertex velocity constraint.

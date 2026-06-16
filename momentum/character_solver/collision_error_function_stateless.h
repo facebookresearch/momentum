@@ -116,7 +116,7 @@ class CollisionErrorFunctionStatelessT : public SkeletonErrorFunctionT<T> {
   CollisionGeometryStateT<T> collisionState;
 
   // weights for the error functions
-  static constexpr T kCollisionWeight = 5e-3f;
+  static constexpr T kCollisionWeight = 5e-3;
 };
 
 } // namespace momentum
