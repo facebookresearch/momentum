@@ -32,31 +32,44 @@ numerical optimization solvers to apply human motion in various applications.
 
 Pre-built binaries are available for Windows, macOS, and Linux:
 
+Install full conda/pixi packages -- recommended
 ```bash
-# Python (Conda/Pixi) - Recommended
-pixi add pymomentum             # Auto-detects GPU/CPU
+# Install full python package from pixi, including modules with cpp torch dependencies
+pixi add pymomentum
+
+# Install full python package from conda, including modules with cpp torch dependencies
 conda install -c conda-forge pymomentum
 
-# C++ (Conda/Pixi)
+# Install cpp momentum package from pixi, including modules with cpp torch dependencies
 pixi add momentum-cpp
-conda install -c conda-forge momentum-cpp
 
-# Python (PyPI) - Experimental ⚠️
-pip install pymomentum-cpu      # CPU version
-pip install pymomentum-gpu      # GPU version with CUDA
+# Install cpp momentum package from conda, including modules with cpp torch dependencies
+conda install -c conda-forge momentum-cpp
 ```
+
+Install PyPI wheels -- these are experimental ⚠️
+```bash
+# Install core package with NumPy/SciPy and PyTorch dependencies, but no Torch C++ extension modules
+pip install pymomentum-core
+
+# Install core package with optional visualization helpers
+pip install "pymomentum-core[viser,rerun]"
+
+# Install full package including diff_geometry and differentiable solver modules, linked against CPU PyTorch
+pip install pymomentum-cpu
+
+# Install full package including diff_geometry and differentiable solver modules, linked against CUDA PyTorch
+pip install "torch>=2.8,<2.9" --index-url https://download.pytorch.org/whl/cu129
+pip install pymomentum-gpu
+```
+
+Conda/Pixi currently publish the full PyMomentum package. Use the PyPI core package (since release v0.1.111) when you need a Python install without the Torch C++ extension dependency.
+
+Install exactly one PyPI package for a given environment. The `pymomentum-core` package includes the NumPy/SciPy modules `geometry`, `solver2`, `marker_tracking`, `axel`, `camera`, and `renderer`, plus the torch-backed Python helper modules `torch`. The `pymomentum-cpu` and `pymomentum-gpu` packages provide differentiable optimization modules `diff_geometry` and `solver`, but they must match a supported PyTorch C++ ABI and therefore have stricter PyTorch version constraints.
 
 > ⚠️ **PyPI support is experimental.** For the most stable experience, we recommend using Conda or Pixi.
 
 **📦 Browse packages:** [conda-forge](https://anaconda.org/conda-forge/momentum) • [prefix.dev](https://prefix.dev/channels/conda-forge/packages/momentum) • [PyPI](https://pypi.org/search/?q=pymomentum)
-
-### Quick Example
-
-```bash
-# Install and run
-conda install -c conda-forge pymomentum
-python -c "import pymomentum.geometry as geom; print(dir(geom))"
-```
 
 ### Building from Source
 
