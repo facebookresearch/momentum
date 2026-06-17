@@ -103,6 +103,7 @@ template_classes = [
     "NormalErrorFunction",
     "OrientationErrorFunction",
     "OrientationRotDiffErrorFunction",
+    "PlaneCollisionErrorFunction",
     "PlaneErrorFunction",
     "PointTriangleVertexErrorFunction",
     "PosePriorErrorFunction",
