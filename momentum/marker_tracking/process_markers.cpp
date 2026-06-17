@@ -22,10 +22,17 @@ namespace momentum {
 
 namespace {
 
-/// Validate that glove data frame count matches marker data and return the
-/// subspan corresponding to [firstFrame, lastFrame).
+/// Validate glove data and return the subspan corresponding to
+/// [firstFrame, lastFrame).
+///
+/// Checks that the glove frame count matches the marker data, then validates
+/// each observation in the [firstFrame, lastFrame) window: rejects empty or
+/// unknown joint names, non-finite positions/orientations, and zero-norm
+/// (degenerate) orientations. Observations outside the window are not validated
+/// since they are sliced away and never used downstream.
 std::span<const GloveFrameData> validateAndSliceGloveData(
     std::span<const GloveFrameData> gloveData,
+    const Character& character,
     size_t markerFrames,
     size_t firstFrame,
     size_t lastFrame,
@@ -39,7 +46,59 @@ std::span<const GloveFrameData> validateAndSliceGloveData(
       label,
       gloveData.size(),
       markerFrames);
+  // Validate only the [firstFrame, lastFrame) window that is actually consumed
+  // downstream; frames outside the range are sliced away and never used, so a
+  // bad observation in an excluded frame should not abort the solve.
+  for (size_t frameIndex = firstFrame; frameIndex < lastFrame; ++frameIndex) {
+    const auto& frame = gloveData[frameIndex];
+    for (size_t obsIndex = 0; obsIndex < frame.size(); ++obsIndex) {
+      const auto& obs = frame[obsIndex];
+      if (!obs.valid) {
+        continue;
+      }
+      MT_THROW_IF(
+          obs.jointName.empty(),
+          "{} glove observation has empty joint name at frame {}, observation {}",
+          label,
+          frameIndex,
+          obsIndex);
+      MT_THROW_IF(
+          character.skeleton.getJointIdByName(obs.jointName) == kInvalidIndex,
+          "{} glove observation uses unknown joint '{}' at frame {}, observation {}",
+          label,
+          obs.jointName,
+          frameIndex,
+          obsIndex);
+      MT_THROW_IF(
+          !obs.position.allFinite(),
+          "{} glove observation '{}' has non-finite position at frame {}, observation {}",
+          label,
+          obs.jointName,
+          frameIndex,
+          obsIndex);
+      MT_THROW_IF(
+          !obs.orientation.coeffs().allFinite(),
+          "{} glove observation '{}' has non-finite orientation at frame {}, observation {}",
+          label,
+          obs.jointName,
+          frameIndex,
+          obsIndex);
+      MT_THROW_IF(
+          obs.orientation.norm() <= 1e-6f,
+          "{} glove observation '{}' has zero orientation at frame {}, observation {}",
+          label,
+          obs.jointName,
+          frameIndex,
+          obsIndex);
+    }
+  }
   return gloveData.subspan(firstFrame, lastFrame - firstFrame);
+}
+
+bool hasAnyGloveData(
+    std::span<const GloveFrameData> leftGloveData,
+    std::span<const GloveFrameData> rightGloveData) {
+  return !leftGloveData.empty() || !rightGloveData.empty();
 }
 
 /// Slice camera keypoint data to match the [firstFrame, lastFrame) range.
@@ -100,10 +159,17 @@ void calibrateMarkers(
       firstFrame,
       maxFrames);
 
-  const auto leftGloveSlice =
-      validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
-  const auto rightGloveSlice =
-      validateAndSliceGloveData(rightGloveData, markerData.size(), firstFrame, lastFrame, "Right");
+  // Check the glove_config precondition before validating observations, so the
+  // specific "glove_config must be provided" error fires instead of a vaguer
+  // "unknown joint" error when the missing config would have added the joints.
+  MT_THROW_IF(
+      hasAnyGloveData(leftGloveData, rightGloveData) && !gloveConfig,
+      "glove_config must be provided when left_glove_data or right_glove_data is non-empty.");
+
+  const auto leftGloveSlice = validateAndSliceGloveData(
+      leftGloveData, character, markerData.size(), firstFrame, lastFrame, "Left");
+  const auto rightGloveSlice = validateAndSliceGloveData(
+      rightGloveData, character, markerData.size(), firstFrame, lastFrame, "Right");
 
   MT_CHECK(
       !(calibrationConfig.globalScaleOnly & calibrationConfig.locatorsOnly),
@@ -161,10 +227,17 @@ Eigen::MatrixXf processMarkers(
       firstFrame,
       maxFrames);
 
-  const auto leftGloveSlice =
-      validateAndSliceGloveData(leftGloveData, markerData.size(), firstFrame, lastFrame, "Left");
-  const auto rightGloveSlice =
-      validateAndSliceGloveData(rightGloveData, markerData.size(), firstFrame, lastFrame, "Right");
+  // Check the glove_config precondition before validating observations, so the
+  // specific "glove_config must be provided" error fires instead of a vaguer
+  // "unknown joint" error when the missing config would have added the joints.
+  MT_THROW_IF(
+      hasAnyGloveData(leftGloveData, rightGloveData) && !gloveConfig,
+      "glove_config must be provided when left_glove_data or right_glove_data is non-empty.");
+
+  const auto leftGloveSlice = validateAndSliceGloveData(
+      leftGloveData, character, markerData.size(), firstFrame, lastFrame, "Left");
+  const auto rightGloveSlice = validateAndSliceGloveData(
+      rightGloveData, character, markerData.size(), firstFrame, lastFrame, "Right");
 
   const auto slicedKeypointData =
       sliceCameraKeypointData(cameraKeypointData, firstFrame, lastFrame);

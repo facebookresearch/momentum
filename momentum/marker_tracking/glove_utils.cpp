@@ -33,12 +33,15 @@ Character addGloveBones(
     const GloveConfig& cfg,
     const std::array<GloveOffset, 2>& offsets,
     const std::string& prefix) {
+  MT_THROW_IF(prefix.empty(), "addGloveBones: prefix must not be empty.");
   auto& newSkel = character.skeleton;
   auto& newTransform = character.parameterTransform;
   auto& newInvBindPose = character.inverseBindPose;
 
   for (size_t hand = 0; hand < 2; ++hand) {
     const auto& wristName = cfg.wristJointNames[hand];
+    MT_THROW_IF(
+        wristName.empty(), "addGloveBones: wrist joint name for hand {} must not be empty.", hand);
 
     const size_t wristIdx = newSkel.getJointIdByName(wristName);
     if (wristIdx == kInvalidIndex) {
@@ -91,6 +94,7 @@ Character addGloveCalibrationParameters(
     Character character,
     const GloveConfig& cfg,
     const std::string& prefix) {
+  MT_THROW_IF(prefix.empty(), "addGloveCalibrationParameters: prefix must not be empty.");
   auto& newSkel = character.skeleton;
   auto& newTransform = character.parameterTransform;
 
@@ -103,6 +107,10 @@ Character addGloveCalibrationParameters(
   static const std::array<size_t, 6> dofIndices{TX, TY, TZ, RX, RY, RZ};
 
   for (size_t hand = 0; hand < 2; ++hand) {
+    MT_THROW_IF(
+        cfg.wristJointNames[hand].empty(),
+        "addGloveCalibrationParameters: wrist joint name for hand {} must not be empty.",
+        hand);
     const std::string gloveBoneName = prefix + cfg.wristJointNames[hand];
     const size_t jointIdx = newSkel.getJointIdByName(gloveBoneName);
     if (jointIdx == kInvalidIndex) {
