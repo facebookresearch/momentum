@@ -292,6 +292,7 @@ character_solver_public_headers = [
     "character_solver/position_error_function.h",
     "character_solver/projection_error_function.h",
     "character_solver/sdf_collision_error_function.h",
+    "character_solver/sdf_collision_utility.h",
     "character_solver/skeleton_derivative.h",
     "character_solver/skeleton_error_function.h",
     "character_solver/skeleton_solver_function.h",

@@ -13,8 +13,8 @@
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
-#include <momentum/character_solver/error_function_utils.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/character_solver/sdf_collision_utility.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 #include <momentum/character_solver/skinning_weight_iterator.h>
 #include <momentum/common/checks.h>
@@ -26,8 +26,8 @@
 #include <axel/BoundingBox.h>
 
 #include <algorithm>
-#include <map>
 #include <memory>
+#include <span>
 #include <unordered_set>
 #include <vector>
 
@@ -219,34 +219,12 @@ using SDFCollisionErrorFunctiond = SDFCollisionErrorFunctionT<double>;
 // ============================================================================
 // Template implementation
 // ============================================================================
-
-namespace detail_sdf_collision {
-
-inline size_t findCommonAncestorForVertex(
-    const SkinWeights& skinWeights,
-    const Skeleton& skeleton,
-    size_t vertexIndex,
-    size_t sdfParent) {
-  if (sdfParent == kInvalidIndex) {
-    return kInvalidIndex;
-  }
-  size_t minSkinnedJoint = kInvalidIndex;
-  for (uint32_t k = 0; k < kMaxSkinJoints; ++k) {
-    const auto w = skinWeights.weight(vertexIndex, k);
-    if (w > 0) {
-      const auto joint = skinWeights.index(vertexIndex, k);
-      if (minSkinnedJoint == kInvalidIndex || joint < minSkinnedJoint) {
-        minSkinnedJoint = joint;
-      }
-    }
-  }
-  if (minSkinnedJoint == kInvalidIndex) {
-    return kInvalidIndex;
-  }
-  return skeleton.commonAncestor(minSkinnedJoint, sdfParent);
-}
-
-} // namespace detail_sdf_collision
+//
+// Shared, stateless helpers (collider transforms, bounding boxes, joint chain-rule accumulation,
+// common-ancestor lookup) live in the `detail_sdf_collision` namespace in sdf_collision_utility.h
+// so they can be reused by the cross-frame (sequence) collision error functions. The member
+// functions below forward to those helpers, supplying this error function's skeleton, parameter
+// transform, active joints, and collider list.
 
 template <typename T, typename SdfColliderType>
 SDFCollisionErrorFunctionT<T, SdfColliderType>::SDFCollisionErrorFunctionT(
@@ -427,16 +405,8 @@ template <typename T, typename SdfColliderType>
 TransformT<T> SDFCollisionErrorFunctionT<T, SdfColliderType>::computeWorldToColliderTransform(
     size_t sdfColliderIndex,
     const SkeletonStateT<T>& state) const {
-  const auto& collider = sdfColliders_[sdfColliderIndex];
-  TransformT<T> parentTransform;
-  const auto parentJoint = collider.parentJoint();
-  if (parentJoint != kInvalidIndex) {
-    MT_CHECK(parentJoint < state.jointState.size(), "Invalid parent joint index: {}", parentJoint);
-    parentTransform = state.jointState[parentJoint].transform;
-  }
-  auto colliderWorldTransform =
-      parentTransform * collider.localToParentTransform().template cast<T>();
-  return colliderWorldTransform.inverse();
+  return detail_sdf_collision::computeWorldToColliderTransform(
+      sdfColliders_[sdfColliderIndex], state);
 }
 
 template <typename T, typename SdfColliderType>
@@ -496,29 +466,14 @@ void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateJointGradient(
     const Eigen::Vector3<T>& posd,
     const Eigen::Vector3<T>& direction,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  for (size_t d = 0; d < 3; d++) {
-    if (this->activeJointParams_[paramIndex + d]) {
-      gradient_jointParams_to_modelParams(
-          direction.dot(jointState.getTranslationDerivative(d)),
-          paramIndex + d,
-          this->parameterTransform_,
-          gradient);
-    }
-    if (this->activeJointParams_[paramIndex + 3 + d]) {
-      gradient_jointParams_to_modelParams(
-          direction.dot(jointState.getRotationDerivative(d, posd)),
-          paramIndex + 3 + d,
-          this->parameterTransform_,
-          gradient);
-    }
-  }
-  if (this->activeJointParams_[paramIndex + 6]) {
-    gradient_jointParams_to_modelParams(
-        direction.dot(jointState.getScaleDerivative(posd)),
-        paramIndex + 6,
-        this->parameterTransform_,
-        gradient);
-  }
+  detail_sdf_collision::accumulateJointGradient(
+      jointState,
+      paramIndex,
+      posd,
+      direction,
+      this->activeJointParams_,
+      this->parameterTransform_,
+      gradient);
 }
 
 template <typename T, typename SdfColliderType>
@@ -528,29 +483,14 @@ void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateJointJacobian(
     const Eigen::Vector3<T>& posd,
     const Eigen::Vector3<T>& direction,
     Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const {
-  for (size_t d = 0; d < 3; d++) {
-    if (this->activeJointParams_[paramIndex + d]) {
-      jacobian_jointParams_to_modelParams<T>(
-          direction.dot(jointState.getTranslationDerivative(d)),
-          paramIndex + d,
-          this->parameterTransform_,
-          jacobianRow);
-    }
-    if (this->activeJointParams_[paramIndex + 3 + d]) {
-      jacobian_jointParams_to_modelParams<T>(
-          direction.dot(jointState.getRotationDerivative(d, posd)),
-          paramIndex + 3 + d,
-          this->parameterTransform_,
-          jacobianRow);
-    }
-  }
-  if (this->activeJointParams_[paramIndex + 6]) {
-    jacobian_jointParams_to_modelParams<T>(
-        direction.dot(jointState.getScaleDerivative(posd)),
-        paramIndex + 6,
-        this->parameterTransform_,
-        jacobianRow);
-  }
+  detail_sdf_collision::accumulateJointJacobian(
+      jointState,
+      paramIndex,
+      posd,
+      direction,
+      this->activeJointParams_,
+      this->parameterTransform_,
+      jacobianRow);
 }
 
 template <typename T, typename SdfColliderType>
@@ -561,14 +501,16 @@ void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateColliderHierarchy
     const Eigen::Vector3<T>& sdfSurfacePoint,
     const Eigen::Vector3<T>& direction,
     Eigen::Ref<Eigen::VectorX<T>> gradient) const {
-  size_t jointIndex = colliderParent;
-  while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = sdfSurfacePoint - jointState.translation();
-    accumulateJointGradient(jointState, paramIndex, posd, direction, gradient);
-    jointIndex = this->skeleton_.joints[jointIndex].parent;
-  }
+  detail_sdf_collision::accumulateColliderHierarchyGradient(
+      state,
+      colliderParent,
+      commonAncestor,
+      sdfSurfacePoint,
+      direction,
+      this->skeleton_,
+      this->activeJointParams_,
+      this->parameterTransform_,
+      gradient);
 }
 
 template <typename T, typename SdfColliderType>
@@ -579,14 +521,16 @@ void SDFCollisionErrorFunctionT<T, SdfColliderType>::accumulateColliderHierarchy
     const Eigen::Vector3<T>& sdfSurfacePoint,
     const Eigen::Vector3<T>& direction,
     Eigen::Ref<Eigen::MatrixX<T>> jacobianRow) const {
-  size_t jointIndex = colliderParent;
-  while (jointIndex != kInvalidIndex && jointIndex != commonAncestor) {
-    const auto& jointState = state.jointState[jointIndex];
-    const size_t paramIndex = jointIndex * kParametersPerJoint;
-    const Eigen::Vector3<T> posd = sdfSurfacePoint - jointState.translation();
-    accumulateJointJacobian(jointState, paramIndex, posd, direction, jacobianRow);
-    jointIndex = this->skeleton_.joints[jointIndex].parent;
-  }
+  detail_sdf_collision::accumulateColliderHierarchyJacobian(
+      state,
+      colliderParent,
+      commonAncestor,
+      sdfSurfacePoint,
+      direction,
+      this->skeleton_,
+      this->activeJointParams_,
+      this->parameterTransform_,
+      jacobianRow);
 }
 
 template <typename T, typename SdfColliderType>
@@ -832,17 +776,8 @@ axel::BoundingBox<T> SDFCollisionErrorFunctionT<T, SdfColliderType>::computeBone
     size_t boneIndex,
     const MeshT<T>& posedMesh) const {
   const auto& range = boneVertexRanges_[boneIndex];
-  if (range.empty()) {
-    return axel::BoundingBox<T>();
-  }
-  const size_t firstVertexIndex = activeVertexIndices_[range.start];
-  const auto& firstPos = posedMesh.vertices[firstVertexIndex];
-  axel::BoundingBox<T> bbox(firstPos, T(0));
-  for (size_t i = range.start + 1; i < range.end; ++i) {
-    const size_t vertexIndex = activeVertexIndices_[i];
-    bbox.extend(posedMesh.vertices[vertexIndex]);
-  }
-  return bbox;
+  return detail_sdf_collision::computeBoneBoundingBox<T>(
+      std::span<const size_t>(activeVertexIndices_).subspan(range.start, range.size()), posedMesh);
 }
 
 template <typename T, typename SdfColliderType>
@@ -850,41 +785,8 @@ axel::BoundingBox<T>
 SDFCollisionErrorFunctionT<T, SdfColliderType>::computeColliderWorldBoundingBox(
     size_t sdfColliderIndex,
     const SkeletonStateT<T>& state) const {
-  const auto& collider = sdfColliders_[sdfColliderIndex];
-  if (!collider.isValid()) {
-    return axel::BoundingBox<T>();
-  }
-
-  TransformT<T> colliderWorldTransform;
-  const auto parentJoint = collider.parentJoint();
-  if (parentJoint == kInvalidIndex) {
-    colliderWorldTransform = collider.localToParentTransform().template cast<T>();
-  } else {
-    MT_CHECK(parentJoint < state.jointState.size(), "Invalid parent joint index: {}", parentJoint);
-    colliderWorldTransform = state.jointState[parentJoint].transform *
-        collider.localToParentTransform().template cast<T>();
-  }
-
-  const auto& localBounds = collider.bounds();
-  const auto& minCorner = localBounds.min();
-  const auto& maxCorner = localBounds.max();
-
-  std::array<Eigen::Vector3<T>, 8> corners = {
-      {{minCorner.x(), minCorner.y(), minCorner.z()},
-       {maxCorner.x(), minCorner.y(), minCorner.z()},
-       {minCorner.x(), maxCorner.y(), minCorner.z()},
-       {maxCorner.x(), maxCorner.y(), minCorner.z()},
-       {minCorner.x(), minCorner.y(), maxCorner.z()},
-       {maxCorner.x(), minCorner.y(), maxCorner.z()},
-       {minCorner.x(), maxCorner.y(), maxCorner.z()},
-       {maxCorner.x(), maxCorner.y(), maxCorner.z()}}};
-
-  const auto firstWorldCorner = colliderWorldTransform * corners[0];
-  axel::BoundingBox<T> worldBounds(firstWorldCorner, T(0));
-  for (size_t i = 1; i < corners.size(); ++i) {
-    worldBounds.extend(colliderWorldTransform * corners[i]);
-  }
-  return worldBounds;
+  return detail_sdf_collision::computeColliderWorldBoundingBox(
+      sdfColliders_[sdfColliderIndex], state);
 }
 
 } // namespace momentum
