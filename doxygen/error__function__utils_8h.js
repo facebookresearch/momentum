@@ -1,5 +1,6 @@
 var error__function__utils_8h =
 [
+    [ "accumulateChainDerivatives", "error__function__utils_8h.html#a6c3c8fe0e04599ba6b96743c6a302399", null ],
     [ "gradient_jointParams_to_modelParams", "error__function__utils_8h.html#a92d44f080ae9342a02e1652c03f66a74", null ],
     [ "jacobian_jointParams_to_modelParams", "error__function__utils_8h.html#a58976f70181d218f1b771f9756c74a8c", null ],
     [ "jacobian_jointParams_to_modelParams", "error__function__utils_8h.html#a1f9f092de71f3a7ec6835ce10ed5cbe4", null ],

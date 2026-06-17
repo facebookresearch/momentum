@@ -94,6 +94,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.gradient"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.gradient()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.grid_to_world"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.grid_to_world()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.is_valid_index"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.is_valid_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.offset"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.offset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.parent_joint"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.parent_joint</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.resolution"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.resolution</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField.sample"><code class="docutils literal notranslate"><span class="pre">SignedDistanceField.sample()</span></code></a></li>
@@ -115,11 +116,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.axel.TriBvh.primitive_count"><code class="docutils literal notranslate"><span class="pre">TriBvh.primitive_count</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.apply_signs"><code class="docutils literal notranslate"><span class="pre">apply_signs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.close_interior"><code class="docutils literal notranslate"><span class="pre">close_interior()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.fill_holes"><code class="docutils literal notranslate"><span class="pre">fill_holes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.flood_fill_exterior"><code class="docutils literal notranslate"><span class="pre">flood_fill_exterior()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.load_sdf_from_msgpack"><code class="docutils literal notranslate"><span class="pre">load_sdf_from_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.load_sdfs_from_msgpack"><code class="docutils literal notranslate"><span class="pre">load_sdfs_from_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.mesh_to_sdf"><code class="docutils literal notranslate"><span class="pre">mesh_to_sdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.open_interior"><code class="docutils literal notranslate"><span class="pre">open_interior()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.save_sdf_to_msgpack"><code class="docutils literal notranslate"><span class="pre">save_sdf_to_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.save_sdfs_to_msgpack"><code class="docutils literal notranslate"><span class="pre">save_sdfs_to_msgpack()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.axel.smooth_mesh_laplacian"><code class="docutils literal notranslate"><span class="pre">smooth_mesh_laplacian()</span></code></a></li>
@@ -553,6 +558,19 @@ both C-contiguous and Fortran-contiguous memory layouts.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.axel.SignedDistanceField.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.SignedDistanceField.offset" title="Link to this definition"></a></dt>
+<dd><p>Offset the SDF by subtracting delta from all voxel values.</p>
+<p>Positive delta grows the inside region (shifts zero-crossing outward).
+Negative delta shrinks the inside region (shifts zero-crossing inward).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>delta</strong> – Amount to subtract from all values.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.axel.SignedDistanceField.parent_joint">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_joint</span></span><a class="headerlink" href="#pymomentum.axel.SignedDistanceField.parent_joint" title="Link to this definition"></a></dt>
@@ -810,6 +828,45 @@ If not provided, uses default maximum distance.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.apply_signs">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">apply_signs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">sdf:</span> <span class="pre">pymomentum.axel.SignedDistanceField,</span> <span class="pre">vertices:</span> <span class="pre">numpy.ndarray[numpy.float32],</span> <span class="pre">triangles:</span> <span class="pre">numpy.ndarray[numpy.int32],</span> <span class="pre">sign_method:</span> <span class="pre">pymomentum.axel.SignMethod</span> <span class="pre">=</span> <span class="pre">&lt;SignMethod.RayCasting:</span> <span class="pre">0&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.apply_signs" title="Link to this definition"></a></dt>
+<dd><p>Apply signs to an existing (unsigned) distance field based on inside/outside classification.</p>
+<p>This is the sign determination step from the mesh_to_sdf pipeline, exposed for cases
+where you need to re-sign an SDF with a different method without recomputing distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> – Distance field to apply signs to (modified in place).</p></li>
+<li><p><strong>vertices</strong> – Mesh vertex positions as 2D array of shape (N, 3).</p></li>
+<li><p><strong>triangles</strong> – Mesh triangle indices as 2D array of shape (M, 3).</p></li>
+<li><p><strong>sign_method</strong> – Method for inside/outside classification (default: RayCasting).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.close_interior">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">close_interior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.close_interior" title="Link to this definition"></a></dt>
+<dd><p>Morphologically close the interior region of an SDF.</p>
+<p>Treats voxels with value &lt; 0 as interior and performs a binary morphological closing
+(<code class="docutils literal notranslate"><span class="pre">iterations</span></code> dilations followed by <code class="docutils literal notranslate"><span class="pre">iterations</span></code> erosions) of that region using a
+6-connected structuring element. Newly-interior voxels have their value negated.</p>
+<p>Unlike <a class="reference internal" href="#pymomentum.axel.flood_fill_exterior" title="pymomentum.axel.flood_fill_exterior"><code class="xref py py-func docutils literal notranslate"><span class="pre">flood_fill_exterior()</span></code></a>, which only fixes fully enclosed voids, closing also
+bridges thin interior regions misclassified as exterior even when they stay connected to
+the outside (e.g. an open grip cavity). Closing is extensive, so it only adds interior
+voxels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> – Signed distance field to modify in place.</p></li>
+<li><p><strong>iterations</strong> – Number of dilation/erosion passes (closing radius in voxels).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.axel.dual_contouring">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isovalue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangulate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.axel.dual_contouring" title="Link to this definition"></a></dt>
 <dd><p>Extract an isosurface from a signed distance field using dual contouring.</p>
@@ -926,6 +983,20 @@ Ignored for other methods.</p></li>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filled mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.flood_fill_exterior">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">flood_fill_exterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.flood_fill_exterior" title="Link to this definition"></a></dt>
+<dd><p>Fill interior voids in an SDF using boundary-seeded flood fill.</p>
+<p>Identifies connected exterior regions by flood-filling from boundary voxels (faces
+of the grid) through 6-connected neighbors with value &gt;= 0. Any voxel with value &gt;= 0
+not reached by the flood fill is considered an interior void and has its value negated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf</strong> – Signed distance field to modify in place.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1126,6 +1197,27 @@ but the same grid layout.</p>
 <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">sdf</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.axel.open_interior">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.axel.</span></span><span class="sig-name descname"><span class="pre">open_interior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.axel.SignedDistanceField" title="pymomentum.axel.SignedDistanceField"><span class="pre">pymomentum.axel.SignedDistanceField</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.axel.open_interior" title="Link to this definition"></a></dt>
+<dd><p>Morphologically open the interior region of an SDF.</p>
+<p>Treats voxels with value &lt; 0 as interior and performs a binary morphological opening
+(<code class="docutils literal notranslate"><span class="pre">iterations</span></code> erosions followed by <code class="docutils literal notranslate"><span class="pre">iterations</span></code> dilations) using a 6-connected
+structuring element. This removes isolated interior specks and protrusions thinner than
+<code class="docutils literal notranslate"><span class="pre">iterations</span></code> voxels (e.g. spurious single voxels the sign step marks interior in free
+space). Removed voxels have their value flipped positive.</p>
+<p>Opening is anti-extensive, so it only removes interior voxels. Apply it after
+<a class="reference internal" href="#pymomentum.axel.close_interior" title="pymomentum.axel.close_interior"><code class="xref py py-func docutils literal notranslate"><span class="pre">close_interior()</span></code></a> / <a class="reference internal" href="#pymomentum.axel.flood_fill_exterior" title="pymomentum.axel.flood_fill_exterior"><code class="xref py py-func docutils literal notranslate"><span class="pre">flood_fill_exterior()</span></code></a> to despeckle the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> – Signed distance field to modify in place.</p></li>
+<li><p><strong>iterations</strong> – Number of erosion/dilation passes (opening radius in voxels).</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

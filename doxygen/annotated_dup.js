@@ -172,7 +172,6 @@ var annotated_dup =
       [ "SequenceSolverOptions", "structmomentum_1_1SequenceSolverOptions.html", "structmomentum_1_1SequenceSolverOptions" ],
       [ "SequenceSolverOptionsBase", "structmomentum_1_1SequenceSolverOptionsBase.html", "structmomentum_1_1SequenceSolverOptionsBase" ],
       [ "SequenceSolverT", "classmomentum_1_1SequenceSolverT.html", "classmomentum_1_1SequenceSolverT" ],
-      [ "SimdCollisionErrorFunctionT", "classmomentum_1_1SimdCollisionErrorFunctionT.html", null ],
       [ "SimdGeneralizedLossT", "classmomentum_1_1SimdGeneralizedLossT.html", "classmomentum_1_1SimdGeneralizedLossT" ],
       [ "SkeletonDerivativeT", "classmomentum_1_1SkeletonDerivativeT.html", "classmomentum_1_1SkeletonDerivativeT" ],
       [ "SkeletonErrorFunctionT", "classmomentum_1_1SkeletonErrorFunctionT.html", "classmomentum_1_1SkeletonErrorFunctionT" ],

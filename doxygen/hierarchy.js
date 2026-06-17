@@ -161,7 +161,6 @@ var hierarchy =
       [ "momentum::VelocityMagnitudeSequenceErrorFunctionT< T >", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html", null ],
       [ "momentum::VertexSequenceErrorFunctionT< T >", "classmomentum_1_1VertexSequenceErrorFunctionT.html", null ]
     ] ],
-    [ "momentum::SimdCollisionErrorFunctionT< T >", "classmomentum_1_1SimdCollisionErrorFunctionT.html", null ],
     [ "momentum::SkeletonDerivativeT< T >", "classmomentum_1_1SkeletonDerivativeT.html", null ],
     [ "momentum::SkeletonErrorFunctionT< T >", "classmomentum_1_1SkeletonErrorFunctionT.html", [
       [ "momentum::JointErrorFunctionT< T, AimDataT< T >, 3, 2, 1 >", "classmomentum_1_1JointErrorFunctionT.html", [
