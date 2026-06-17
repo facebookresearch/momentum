@@ -6,6 +6,7 @@
 # pyre-strict
 
 import unittest
+from unittest import mock
 
 import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.torch.character as pym_character
@@ -44,8 +45,42 @@ class TritonFKBackendTest(unittest.TestCase):
         )
 
         device = _cuda_device()
+        cuda_tensor = cpu_tensor.to(device)
         self.assertEqual(
-            backend_selection.resolve_backend("auto", cpu_tensor.to(device)), "triton"
+            backend_selection.resolve_backend("auto", cuda_tensor), "triton"
+        )
+
+        # Under torch.jit.trace (e.g. model export) Triton is not traceable, so
+        # even a CUDA float32 tensor (and an explicit "triton" request) must fall
+        # back to the pure-torch path.
+        with mock.patch("torch.jit.is_tracing", return_value=True):
+            self.assertEqual(
+                backend_selection.resolve_backend("auto", cuda_tensor), "torch"
+            )
+            self.assertEqual(
+                backend_selection.resolve_backend("triton", cuda_tensor), "torch"
+            )
+
+    def test_force_backend_override(self) -> None:
+        # Exporters run an eager warm-up forward before tracing; is_tracing() is
+        # False there, so a CUDA float32 tensor would otherwise pick Triton (which
+        # then can't be traced). force_backend pins the backend across the whole
+        # export regardless of device/dtype/explicit request.
+        device = _cuda_device()
+        cuda_tensor = torch.empty((1,), dtype=torch.float32, device=device)
+        self.assertEqual(
+            backend_selection.resolve_backend("auto", cuda_tensor), "triton"
+        )
+        with backend_selection.force_backend("torch"):
+            self.assertEqual(
+                backend_selection.resolve_backend("auto", cuda_tensor), "torch"
+            )
+            self.assertEqual(
+                backend_selection.resolve_backend("triton", cuda_tensor), "torch"
+            )
+        # Override is cleared on exit -> back to Triton for CUDA float32.
+        self.assertEqual(
+            backend_selection.resolve_backend("auto", cuda_tensor), "triton"
         )
 
     def test_fk_matches_torch(self) -> None:
