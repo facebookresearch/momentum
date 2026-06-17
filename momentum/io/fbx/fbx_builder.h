@@ -11,6 +11,7 @@
 #include <momentum/character/marker.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/io/file_save_options.h>
+#include <momentum/math/mesh.h>
 #include <momentum/math/types.h>
 
 #include <span>
@@ -112,6 +113,26 @@ class FbxBuilder final {
       const std::string& name,
       float fps,
       const MatrixXf& jointParams);
+
+  /// Add an animated mesh from a Mesh object (no Character needed).
+  ///
+  /// Creates a standalone mesh node and animates its transform from joint
+  /// parameters. The joint params follow momentum convention: 7 values per
+  /// joint (tx, ty, tz, rx, ry, rz, sc). Only the first joint's parameters
+  /// are used (root transform).
+  ///
+  /// @param mesh The mesh geometry.
+  /// @param name Name for the mesh node.
+  /// @param fps Animation frame rate in frames per second.
+  /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  /// @param translationOffset Rest-pose translation offset added to the
+  ///   translation channels (defaults to zero).
+  void addAnimatedMesh(
+      const Mesh& mesh,
+      const std::string& name,
+      float fps,
+      const MatrixXf& jointParams,
+      const Vector3f& translationOffset = Vector3f::Zero());
 
   /// Add a marker sequence to the scene.
   ///

@@ -281,79 +281,70 @@ void FbxBuilder::addAnimatedMesh(
     const std::string& name,
     float fps,
     const MatrixXf& jointParams) {
+  MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
+  addAnimatedMesh(
+      *character.mesh,
+      name,
+      fps,
+      jointParams,
+      character.skeleton.joints.empty() ? Vector3f::Zero()
+                                        : character.skeleton.joints[0].translationOffset);
+}
+
+void FbxBuilder::addAnimatedMesh(
+    const Mesh& mesh,
+    const std::string& name,
+    float fps,
+    const MatrixXf& jointParams,
+    const Vector3f& translationOffset) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
-  MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
-  MT_THROW_IF(character.skeleton.joints.empty(), "Character skeleton has no joints");
   MT_THROW_IF(jointParams.cols() == 0, "jointParams is empty");
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
   // Create mesh node directly under scene root (no skeleton)
-  const auto numVertices = static_cast<int>(character.mesh->vertices.size());
+  const auto numVertices = static_cast<int>(mesh.vertices.size());
   ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, name.c_str());
   ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, (name + "_geo").c_str());
   lMesh->SetControlPointCount(numVertices);
   lMesh->InitNormals(numVertices);
   for (int i = 0; i < numVertices; i++) {
     lMesh->SetControlPointAt(
-        FbxVector4(
-            character.mesh->vertices[i].x(),
-            character.mesh->vertices[i].y(),
-            character.mesh->vertices[i].z()),
-        FbxVector4(
-            character.mesh->normals[i].x(),
-            character.mesh->normals[i].y(),
-            character.mesh->normals[i].z()),
+        FbxVector4(mesh.vertices[i].x(), mesh.vertices[i].y(), mesh.vertices[i].z()),
+        FbxVector4(mesh.normals[i].x(), mesh.normals[i].y(), mesh.normals[i].z()),
         i);
   }
-  writePolygonsToFbxMesh(*character.mesh, lMesh);
+  writePolygonsToFbxMesh(mesh, lMesh);
   lMesh->BuildMeshEdgeArray();
   meshNode->SetNodeAttribute(lMesh);
 
-  if (!character.mesh->texcoords.empty()) {
+  if (!mesh.texcoords.empty()) {
     const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
     lMesh->InitTextureUV(0, uvType);
     lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-    for (const auto& texcoords : character.mesh->texcoords) {
+    for (const auto& texcoords : mesh.texcoords) {
       lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
     }
-    writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
+    writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
   }
 
   root->AddChild(meshNode);
 
   // Animate the mesh node's transform using the root joint parameters.
-  // Joint params layout per joint: tx, ty, tz, rx, ry, rz, sx, sy, sz.
   setFrameRate(impl_->scene, fps);
   auto [animStack, animBaseLayer] =
       getOrCreateAnimStackAndLayer(impl_->scene, "Skeleton Animation Stack");
 
-  meshNode->LclTranslation.GetCurveNode(true);
-  meshNode->LclRotation.GetCurveNode(true);
-  meshNode->LclScaling.GetCurveNode(true);
-
-  // Create all 9 curves for the root joint transform
-  std::array<::fbxsdk::FbxAnimCurve*, 9> curves = {
-      meshNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true),
-      meshNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true),
-      meshNode->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true),
-      meshNode->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true),
-      meshNode->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true),
-      meshNode->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true),
-      meshNode->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true),
-      meshNode->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true),
-      meshNode->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true),
-  };
-
   // jointParams is (nJointParams x nFrames) in C++ convention.
-  // FBX curves use 9 channels (tx,ty,tz,rx,ry,rz,sx,sy,sz); momentum uses 7
-  // (uniform scale maps to all three scale channels via jointParamToFbx).
-  const auto nFrames = jointParams.cols();
-  const auto& rootJoint = character.skeleton.joints[0];
+  // FBX uses 9 channels; momentum uses 7 (uniform scale maps to all three).
+  Joint rootJoint;
+  rootJoint.translationOffset = translationOffset;
 
-  // Set static default transform, then only animate channels that vary
+  const auto nFrames = jointParams.cols();
+
+  // Set static default transform (used for constant channels)
   FbxDouble3 staticTrans(
       jointParamToFbx(jointParams(0, 0), 0, rootJoint),
       jointParamToFbx(jointParams(1, 0), 1, rootJoint),
@@ -368,6 +359,19 @@ void FbxBuilder::addAnimatedMesh(
   const float staticScale = jointParamToFbx(jointParams(scaleRow, 0), 6, rootJoint);
   meshNode->LclScaling.Set(FbxDouble3(staticScale, staticScale, staticScale));
 
+  // Only create curve nodes and curves for non-constant channels to avoid
+  // empty curves overriding the static property values in DCC tools.
+  const std::array<::fbxsdk::FbxProperty*, 3> properties = {
+      &meshNode->LclTranslation,
+      &meshNode->LclRotation,
+      &meshNode->LclScaling,
+  };
+  const std::array<const char*, 3> components = {
+      FBXSDK_CURVENODE_COMPONENT_X,
+      FBXSDK_CURVENODE_COMPONENT_Y,
+      FBXSDK_CURVENODE_COMPONENT_Z,
+  };
+
   ::fbxsdk::FbxTime time;
   for (size_t c = 0; c < 9; c++) {
     const auto paramRow = static_cast<Eigen::Index>(std::min(c, size_t(6)));
@@ -375,7 +379,6 @@ void FbxBuilder::addAnimatedMesh(
       break;
     }
 
-    // Skip channels where the value is constant across all frames
     bool isConstant = true;
     const float firstVal = jointParams(paramRow, 0);
     for (Eigen::Index f = 1; f < nFrames; f++) {
@@ -388,14 +391,18 @@ void FbxBuilder::addAnimatedMesh(
       continue;
     }
 
-    curves[c]->KeyModifyBegin();
+    auto* prop = properties[c / 3];
+    prop->GetCurveNode(true);
+    auto* curve = prop->GetCurve(animBaseLayer, components[c % 3], true);
+
+    curve->KeyModifyBegin();
     for (Eigen::Index f = 0; f < nFrames; f++) {
       const float val = jointParamToFbx(jointParams(paramRow, f), c, rootJoint);
       time.SetSecondDouble(static_cast<double>(f) / fps);
-      const auto keyIndex = curves[c]->KeyAdd(time);
-      curves[c]->KeySet(keyIndex, time, val);
+      const auto keyIndex = curve->KeyAdd(time);
+      curve->KeySet(keyIndex, time, val);
     }
-    curves[c]->KeyModifyEnd();
+    curve->KeyModifyEnd();
   }
 }
 
@@ -468,6 +475,15 @@ void FbxBuilder::addMotionWithJointParams(const Character&, float, const MatrixX
 }
 
 void FbxBuilder::addAnimatedMesh(const Character&, const std::string&, float, const MatrixXf&) {
+  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
+}
+
+void FbxBuilder::addAnimatedMesh(
+    const Mesh&,
+    const std::string&,
+    float,
+    const MatrixXf&,
+    const Vector3f&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
