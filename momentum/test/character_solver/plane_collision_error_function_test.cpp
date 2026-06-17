@@ -84,6 +84,19 @@ Character createSinglePrimitiveCharacterSevenDof(const CollisionPrimitive& primi
       &collisionGeometry};
 }
 
+Character createMultiPrimitiveCharacter(const CollisionGeometry& collisionGeometry) {
+  const Character baseCharacter = createTestCharacter(3);
+
+  return {
+      baseCharacter.skeleton,
+      makeRootYTransform(baseCharacter.skeleton.joints.size()),
+      ParameterLimits(),
+      baseCharacter.locators,
+      baseCharacter.mesh.get(),
+      baseCharacter.skinWeights.get(),
+      &collisionGeometry};
+}
+
 CollisionPrimitive createCapsulePrimitive() {
   TaperedCapsule capsule;
   capsule.parent = 0;
@@ -146,6 +159,113 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_GradientsAndJacobian
         /*checkJacError=*/true,
         /*checkJacobian=*/true);
   }
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_MixedFarAndContactPrimitives) {
+  using T = typename TestFixture::Type;
+
+  CollisionPrimitive farPrimitive = createCapsulePrimitive();
+  farPrimitive.transformation.translation = Eigen::Vector3f(0.0f, 10.0f, 0.0f);
+  CollisionPrimitive contactPrimitive = createCapsulePrimitive();
+  const Character character = createMultiPrimitiveCharacter({farPrimitive, contactPrimitive});
+  PlaneCollisionErrorFunctionT<T> errorFunction(character, Vector3<T>::UnitY(), T(0));
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> state(transform.apply(params), character.skeleton);
+
+  EXPECT_GT(errorFunction.getError(params, state, MeshStateT<T>()), 0.0);
+  const auto collidingPrimitives = errorFunction.getCollidingPrimitives();
+  ASSERT_EQ(collidingPrimitives.size(), 1);
+  EXPECT_EQ(collidingPrimitives[0], 1);
+
+  MatrixX<T> jacobian =
+      MatrixX<T>::Zero(errorFunction.getJacobianSize(), transform.numAllModelParameters());
+  VectorX<T> residual = VectorX<T>::Zero(errorFunction.getJacobianSize());
+  int usedRows = -1;
+  EXPECT_GT(
+      errorFunction.getJacobian(params, state, MeshStateT<T>(), jacobian, residual, usedRows), 0.0);
+  EXPECT_EQ(usedRows, 1);
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_UsesDeepestPrimitivePerParent) {
+  using T = typename TestFixture::Type;
+
+  CollisionPrimitive shallowPrimitive = createCapsulePrimitive();
+  shallowPrimitive.transformation.translation = Eigen::Vector3f(0.0f, 0.3f, 0.0f);
+  CollisionPrimitive deepPrimitive = createCapsulePrimitive();
+  deepPrimitive.transformation.translation = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+
+  const Character multiPrimitiveCharacter =
+      createMultiPrimitiveCharacter({shallowPrimitive, deepPrimitive});
+  PlaneCollisionErrorFunctionT<T> multiPrimitiveFunction(
+      multiPrimitiveCharacter, Vector3<T>::UnitY(), T(0));
+  const ParameterTransformT<T> transform = multiPrimitiveCharacter.parameterTransform.cast<T>();
+  const ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> state(transform.apply(params), multiPrimitiveCharacter.skeleton);
+
+  const Character deepPrimitiveCharacter = createSinglePrimitiveCharacter(deepPrimitive);
+  PlaneCollisionErrorFunctionT<T> deepPrimitiveFunction(
+      deepPrimitiveCharacter, Vector3<T>::UnitY(), T(0));
+  const SkeletonStateT<T> deepState(transform.apply(params), deepPrimitiveCharacter.skeleton);
+
+  const double multiPrimitiveError =
+      multiPrimitiveFunction.getError(params, state, MeshStateT<T>());
+  const double deepPrimitiveError =
+      deepPrimitiveFunction.getError(params, deepState, MeshStateT<T>());
+  EXPECT_NEAR(multiPrimitiveError, deepPrimitiveError, Eps<T>(1e-6f, 1e-10));
+
+  const auto collidingPrimitives = multiPrimitiveFunction.getCollidingPrimitives();
+  ASSERT_EQ(collidingPrimitives.size(), 2);
+
+  MatrixX<T> jacobian =
+      MatrixX<T>::Zero(multiPrimitiveFunction.getJacobianSize(), transform.numAllModelParameters());
+  VectorX<T> residual = VectorX<T>::Zero(multiPrimitiveFunction.getJacobianSize());
+  int usedRows = -1;
+  EXPECT_GT(
+      multiPrimitiveFunction.getJacobian(
+          params, state, MeshStateT<T>(), jacobian, residual, usedRows),
+      0.0);
+  EXPECT_EQ(usedRows, 1);
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_ReturnsDeepestContactPointPerParent) {
+  using T = typename TestFixture::Type;
+
+  CollisionPrimitive shallowPrimitive = createCapsulePrimitive();
+  shallowPrimitive.transformation.translation = Eigen::Vector3f(0.0f, 0.3f, 0.0f);
+  CollisionPrimitive deepPrimitive = createCapsulePrimitive();
+  deepPrimitive.transformation.translation = Eigen::Vector3f(2.0f, 0.0f, 0.0f);
+
+  const Character character = createMultiPrimitiveCharacter({shallowPrimitive, deepPrimitive});
+  PlaneCollisionErrorFunctionT<T> errorFunction(character, Vector3<T>::UnitY(), T(0));
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  const ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  const SkeletonStateT<T> state(transform.apply(params), character.skeleton);
+
+  const auto contactPoints = errorFunction.getContactPoints(state.jointState, T(0));
+  ASSERT_EQ(contactPoints.size(), 2);
+
+  const auto parentContactPoints = errorFunction.getContactPointsByParent(state.jointState, T(0));
+  ASSERT_EQ(parentContactPoints.size(), 1);
+  EXPECT_NEAR(parentContactPoints[0].x(), T(2), Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR(parentContactPoints[0].y(), T(-0.4), Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR(parentContactPoints[0].z(), T(0), Eps<T>(1e-5f, 1e-8));
+}
+
+TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_BroadPhaseKeepsLongLocalOffset) {
+  using T = typename TestFixture::Type;
+
+  CollisionPrimitive primitive = createCapsulePrimitive();
+  primitive.transformation.translation = Eigen::Vector3f(0.0f, -10.2f, 0.0f);
+  const Character character = createSinglePrimitiveCharacter(primitive);
+  PlaneCollisionErrorFunctionT<T> errorFunction(character, Vector3<T>::UnitY(), T(0));
+  const ParameterTransformT<T> transform = character.parameterTransform.cast<T>();
+  ModelParametersT<T> params = ModelParametersT<T>::Zero(transform.numAllModelParameters());
+  params[0] = T(10);
+  const SkeletonStateT<T> state(transform.apply(params), character.skeleton);
+
+  EXPECT_GT(errorFunction.getError(params, state, MeshStateT<T>()), 0.0);
+  EXPECT_EQ(errorFunction.getCollidingPrimitives().size(), 1);
 }
 
 TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_NoErrorAbovePlane) {

@@ -105,6 +105,76 @@ class MockSolverFunction : public SolverFunctionT<float> {
   }
 };
 
+class InactiveRowsSolverFunction : public SolverFunctionT<float> {
+ public:
+  InactiveRowsSolverFunction() {
+    this->numParameters_ = 2;
+    this->actualParameters_ = 2;
+  }
+
+  double getError(const VectorX<float>& parameters) override {
+    return 0.5 * parameters.squaredNorm();
+  }
+
+  double getGradient(const VectorX<float>& parameters, VectorX<float>& gradient) override {
+    gradient = parameters;
+    return getError(parameters);
+  }
+
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 2;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex < 2 ? 3 : 0;
+  }
+
+  double computeJacobianBlock(
+      const VectorX<float>& parameters,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
+      size_t& actualRows) override {
+    jacobianBlock.setConstant(100.0f);
+    residualBlock.setConstant(100.0f);
+
+    if (blockIndex == 0) {
+      jacobianBlock.row(0).setZero();
+      jacobianBlock(0, 0) = 1.0f;
+      residualBlock(0) = parameters(0);
+      actualRows = 1;
+      return 0.5f * parameters(0) * parameters(0);
+    }
+    if (blockIndex == 1) {
+      jacobianBlock.row(0).setZero();
+      jacobianBlock(0, 1) = 1.0f;
+      residualBlock(0) = parameters(1);
+      actualRows = 1;
+      return 0.5f * parameters(1) * parameters(1);
+    }
+
+    actualRows = 0;
+    return 0.0;
+  }
+
+  void finalizeJacobianComputation() override {}
+
+  void updateParameters(VectorX<float>& parameters, const VectorX<float>& delta) override {
+    parameters -= delta;
+  }
+
+  void setEnabledParameters(const ParameterSet& parameterSet) override {
+    actualParameters_ = 0;
+    for (size_t i = 0; i < numParameters_; ++i) {
+      if (parameterSet.test(i)) {
+        actualParameters_ = i + 1;
+      }
+    }
+  }
+};
+
 // Simple test to verify that the Gauss-Newton solver exists
 TEST(GaussNewtonSolverTest, SolverExists) {
   // This test doesn't actually test any functionality,
@@ -213,6 +283,28 @@ TEST(GaussNewtonSolverTest, BasicSolve) {
   // Check that the solution is close to zero (the minimum of the quadratic function)
   EXPECT_LE(parameters.norm(), 1e-4);
   EXPECT_LE(finalError, 1e-8);
+}
+
+TEST(GaussNewtonSolverTest, BlockJacobianUsesOnlyActualRows) {
+  InactiveRowsSolverFunction function;
+
+  GaussNewtonSolverOptions options;
+  options.maxIterations = 3;
+  options.minIterations = 1;
+  options.threshold = 1e-6f;
+  options.regularization = 0.0f;
+  options.verbose = false;
+  options.useBlockJtJ = false;
+
+  GaussNewtonSolverT<float> solver(options, &function);
+
+  VectorX<float> parameters(2);
+  parameters << 3.0f, -4.0f;
+
+  const double finalError = solver.solve(parameters);
+
+  EXPECT_LE(finalError, 1e-8);
+  EXPECT_LE(parameters.norm(), 1e-4);
 }
 
 // Test with line search enabled

@@ -7,6 +7,7 @@
 
 #include "momentum/solver/gauss_newton_solver.h"
 
+#include "momentum/common/checks.h"
 #include "momentum/common/profile.h"
 #include "momentum/solver/solver_function.h"
 
@@ -179,9 +180,21 @@ void GaussNewtonSolverT<T>::computeJtJFromJacobianBlocks() {
       size_t actualRows = 0;
       error += this->solverFunction_->computeJacobianBlock(
           this->parameters_, i, jacBlock, resBlock, actualRows);
+      MT_CHECK(
+          actualRows <= blockSize,
+          "Jacobian block {} used {} rows but only {} rows were allocated",
+          i,
+          actualRows,
+          blockSize);
 
-      rowPos += blockSize;
+      rowPos += actualRows;
     }
+
+    if (rowPos == 0) {
+      continue;
+    }
+
+    auto activeJacobianRows = jacobian_.mat().topRows(rowPos);
 
     // Remap columns to subset parameter space (in-place, similar to SubsetGaussNewtonSolver)
     // Move the enabled columns of the Jacobian into place.
@@ -190,13 +203,14 @@ void GaussNewtonSolverT<T>::computeJtJFromJacobianBlocks() {
     // this will effectively be a no-op since enabledParameters_[iSubsetParam] == iSubsetParam.
     for (int iSubsetParam = 0; iSubsetParam < nSubsetParams; ++iSubsetParam) {
       if (enabledParameters_[iSubsetParam] > iSubsetParam) {
-        jacobian_.mat().col(iSubsetParam) = jacobian_.mat().col(enabledParameters_[iSubsetParam]);
+        activeJacobianRows.col(iSubsetParam) =
+            activeJacobianRows.col(enabledParameters_[iSubsetParam]);
       }
     }
 
     // Accumulate JtJ and JtR for this chunk
-    const auto J_chunk = jacobian_.mat().leftCols(nSubsetParams);
-    const auto r_chunk = residual_.vec();
+    const auto J_chunk = activeJacobianRows.leftCols(nSubsetParams);
+    const auto r_chunk = residual_.vec().head(rowPos);
 
     hessianApprox_.template triangularView<Eigen::Lower>() += J_chunk.transpose() * J_chunk;
     JtR_.noalias() += J_chunk.transpose() * r_chunk;
