@@ -123,7 +123,7 @@ keywords = [
     "motion-capture",
     "character-animation",
     "robotics",
-{% if build_torch_extensions %}
+{% if build_torch_extensions or tag == "core" %}
     "torch",
 {% endif %}
 ]
@@ -148,6 +148,10 @@ classifiers = [
 dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.7.0",
+{% if not build_torch_extensions %}
+    # Pure-Python torch helpers in the core package do not require the Torch C++ ABI.
+    "torch>=1.13",
+{% endif %}
 {% if build_torch_extensions and tag != "gpu" %}
     # PyTorch version constraints - platform and Python version specific
     # Torch extension packages link against libtorch and must use a matching PyTorch version.
@@ -171,12 +175,7 @@ dependencies = [
 # Opt-in extras. Visualization stacks are large and have transitive deps
 # users may not want; keep them out of the default install.
 [project.optional-dependencies]
-{% if not build_torch_extensions %}
-# Pure-Python torch helpers do not require the Torch C++ ABI. Install this extra
-# when using pymomentum.quaternion, pymomentum.skel_state, pymomentum.trs, or
-# pymomentum.torch.* from the core package.
-torch = ["torch>=1.13"]
-{% endif %}
+rerun = ["rerun-sdk>=0.23.3,<0.34"]
 viser = ["viser>=1.0.24,<2"]
 
 [project.urls]

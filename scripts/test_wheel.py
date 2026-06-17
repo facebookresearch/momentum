@@ -90,6 +90,10 @@ def has_torch_extensions(wheel_type: str) -> bool:
     return wheel_type in {"cpu", "gpu"}
 
 
+def has_torch_runtime(wheel_type: str) -> bool:
+    return wheel_type in {"core", "cpu", "gpu"}
+
+
 def get_torch_index(wheel_type: str) -> str:
     """Get the appropriate PyTorch index URL for the wheel type."""
     if wheel_type == "gpu":
@@ -108,6 +112,7 @@ def get_import_test_script(
 ) -> str:
     """Return the Python smoke test script for a wheel type."""
     torch_extensions = has_torch_extensions(wheel_type)
+    torch_runtime = has_torch_runtime(wheel_type)
     lines = [
         "import importlib.util",
         "import os",
@@ -123,20 +128,21 @@ def get_import_test_script(
         'print("Testing imports...")',
         "try:",
     ]
-    if torch_extensions:
+    if torch_runtime:
         lines.extend(
             [
-                "    # Import torch before any PyMomentum extension so PyTorch sets up",
-                "    # native library paths first.",
+                "    # Import torch before PyMomentum's torch-backed Python modules",
+                "    # or any PyMomentum extension so PyTorch sets up native paths first.",
                 "    import torch",
                 '    print(f"  PyTorch {torch.__version__}, CUDA={torch.version.cuda}")',
-                (
-                    '    assert torch.version.cuda is not None, "pymomentum-gpu requires CUDA PyTorch"'
-                    if wheel_type == "gpu"
-                    else '    assert torch.version.cuda is None, "pymomentum-cpu should be tested with CPU PyTorch"'
-                ),
             ]
         )
+        if torch_extensions:
+            lines.append(
+                '    assert torch.version.cuda is not None, "pymomentum-gpu requires CUDA PyTorch"'
+                if wheel_type == "gpu"
+                else '    assert torch.version.cuda is None, "pymomentum-cpu should be tested with CPU PyTorch"'
+            )
     lines.extend(
         [
             "    import pymomentum.geometry as geom",
@@ -162,6 +168,15 @@ def get_import_test_script(
                 ]
             )
     else:
+        if wheel_type == "core":
+            lines.extend(
+                [
+                    "    import pymomentum.quaternion as quaternion",
+                    "    import pymomentum.skel_state as skel_state",
+                    "    import pymomentum.trs as trs",
+                    "    import pymomentum.torch.character as torch_character",
+                ]
+            )
         lines.extend(
             [
                 '    assert importlib.util.find_spec("pymomentum.diff_geometry") is None, "pymomentum-core must not expose pymomentum.diff_geometry"',
