@@ -269,6 +269,13 @@ void SignedDistanceField<ScalarType>::fill(Scalar value) {
 }
 
 template <typename ScalarType>
+void SignedDistanceField<ScalarType>::offset(Scalar delta) {
+  for (auto& value : data_) {
+    value -= delta;
+  }
+}
+
+template <typename ScalarType>
 void SignedDistanceField<ScalarType>::clear() {
   fill(Scalar{0});
 }

@@ -133,6 +133,75 @@ void meshToSdf(
     SignedDistanceField<ScalarType>& sdf,
     const MeshToSdfConfig<ScalarType>& config = {});
 
+/**
+ * Apply signs to an existing (unsigned) distance field based on inside/outside classification.
+ * This is the sign determination step from the meshToSdf pipeline, exposed for cases where
+ * you need to re-sign an SDF with a different method without recomputing distances.
+ *
+ * @param sdf Distance field to apply signs to (modified in place)
+ * @param vertices Mesh vertex positions
+ * @param triangles Mesh triangle indices
+ * @param signMethod Method for inside/outside classification
+ */
+template <typename ScalarType>
+void applySignsToDistanceField(
+    SignedDistanceField<ScalarType>& sdf,
+    std::span<const Eigen::Vector3<ScalarType>> vertices,
+    std::span<const Eigen::Vector3i> triangles,
+    SignMethod signMethod = SignMethod::RayCasting);
+
+/**
+ * Fill interior voids in an SDF using boundary-seeded flood fill.
+ *
+ * Identifies connected exterior regions by flood-filling from boundary voxels (faces of the grid)
+ * through 6-connected neighbors with value >= 0. Any voxel with value >= 0 not reached by the
+ * flood fill is considered an interior void and has its value negated.
+ *
+ * @param sdf Signed distance field to modify in place
+ */
+template <typename ScalarType>
+void floodFillExterior(SignedDistanceField<ScalarType>& sdf);
+
+/**
+ * Morphologically close the interior region of an SDF.
+ *
+ * Treats voxels with value < 0 as "interior" and performs a binary morphological
+ * closing (`iterations` dilations followed by `iterations` erosions) of that
+ * region using a 6-connected (face-adjacent) structuring element. Grid faces are
+ * treated as exterior for both passes. Any voxel newly classified as interior by
+ * the closing has its (positive) value negated, preserving distance magnitude.
+ *
+ * Unlike floodFillExterior, which only fixes fully enclosed voids, closing also
+ * bridges thin interior regions that the sign step misclassified as exterior even
+ * when they remain connected to the outside (e.g. an open grip cavity on a
+ * controller). Closing is extensive, so it only ever adds interior voxels.
+ *
+ * @param sdf Signed distance field to modify in place
+ * @param iterations Number of dilation/erosion passes (closing radius in voxels)
+ */
+template <typename ScalarType>
+void closeInterior(SignedDistanceField<ScalarType>& sdf, int iterations = 1);
+
+/**
+ * Morphologically open the interior region of an SDF.
+ *
+ * Treats voxels with value < 0 as "interior" and performs a binary morphological
+ * opening (`iterations` erosions followed by `iterations` dilations) using a
+ * 6-connected structuring element. This removes isolated interior specks and
+ * protrusions thinner than `iterations` voxels (e.g. spurious single voxels the
+ * winding-number sign step marks as interior in free space). Grid faces are
+ * treated as exterior. Any voxel removed from the interior has its (negative)
+ * value flipped positive, preserving distance magnitude.
+ *
+ * Opening is anti-extensive, so it only ever removes interior voxels — apply it
+ * after closeInterior / floodFillExterior to despeckle the result.
+ *
+ * @param sdf Signed distance field to modify in place
+ * @param iterations Number of erosion/dilation passes (opening radius in voxels)
+ */
+template <typename ScalarType>
+void openInterior(SignedDistanceField<ScalarType>& sdf, int iterations = 1);
+
 namespace detail {
 
 // ================================================================================================
