@@ -16,6 +16,7 @@
 #include "momentum/character/skin_weights.h"
 #include "momentum/character_sequence_solver/acceleration_sequence_error_function.h"
 #include "momentum/character_sequence_solver/jerk_sequence_error_function.h"
+#include "momentum/character_sequence_solver/joint_to_joint_sequence_error_function.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
@@ -1095,4 +1096,87 @@ TEST(
 
   // Verify the Skeleton+ParameterTransform constructor also produces correct gradients
   testGradientAndJacobian<double>(fromSkelPt, parameters, character, 2e-3f, 1e-5f, true);
+}
+
+TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_GradientsAndJacobians) {
+  const Character character = createTestCharacter();
+
+  JointToJointSequenceErrorFunctiond errorFunction(character);
+  errorFunction.addConstraint(/* sourceJoint= */ 2, /* referenceJoint= */ 0);
+  errorFunction.addConstraint(/* sourceJoint= */ 1, /* referenceJoint= */ 2, /* weight= */ 0.5);
+
+  EXPECT_EQ(errorFunction.getNumConstraints(), 2);
+  EXPECT_EQ(errorFunction.numFrames(), 2);
+  EXPECT_EQ(errorFunction.getJacobianSize(), 24); // 2 constraints * 12
+
+  testGradientAndJacobian<double>(errorFunction, zeroModelParameters(character, 2), character);
+  for (size_t i = 0; i < 10; i++) {
+    auto parameters = randomModelParameters(character, 2);
+    testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_ZeroErrorWhenIdentical) {
+  const Character character = createTestCharacter();
+  const ParameterTransformd transformD = character.parameterTransform.cast<double>();
+
+  JointToJointSequenceErrorFunctiond errorFunction(character);
+  errorFunction.addConstraint(1, 0);
+
+  // When both frames have the same parameters, the relative transform doesn't change,
+  // so the error should be zero.
+  ModelParametersd params =
+      Eigen::VectorXd::Random(character.parameterTransform.numAllModelParameters()) * 0.25;
+  std::vector<ModelParametersd> frameParams = {params, params};
+  std::vector<SkeletonStated> skelStates(2);
+  for (size_t i = 0; i < 2; ++i) {
+    skelStates[i] = SkeletonStated(transformD.apply(frameParams[i]), character.skeleton);
+  }
+  std::vector<MeshStated> meshStates(2);
+
+  const double error = errorFunction.getError(frameParams, skelStates, meshStates);
+  EXPECT_NEAR(error, 0.0, 1e-20);
+}
+
+TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_PositionAndOrientationWeights) {
+  const Character character = createTestCharacter();
+  const ParameterTransformd transformD = character.parameterTransform.cast<double>();
+
+  JointToJointSequenceErrorFunctiond errorFunction(character);
+  errorFunction.addConstraint(/* sourceJoint= */ 2, /* referenceJoint= */ 0);
+
+  // Two distinct frames so the relative transform changes between them and both
+  // the position and orientation residuals are non-zero.
+  const std::vector<ModelParametersd> frameParams = randomModelParameters(character, 2);
+  std::vector<SkeletonStated> skelStates(2);
+  for (size_t i = 0; i < 2; ++i) {
+    skelStates[i] = SkeletonStated(transformD.apply(frameParams[i]), character.skeleton);
+  }
+  const std::vector<MeshStated> meshStates(2);
+
+  auto errorWith = [&](double posWeight, double rotWeight) {
+    errorFunction.setPositionWeight(posWeight);
+    errorFunction.setOrientationWeight(rotWeight);
+    return errorFunction.getError(frameParams, skelStates, meshStates);
+  };
+
+  const double posOnly = errorWith(1.0, 0.0);
+  const double rotOnly = errorWith(0.0, 1.0);
+  const double both = errorWith(1.0, 1.0);
+
+  // Both residual channels are individually active for this pose pair.
+  EXPECT_GT(posOnly, 0.0);
+  EXPECT_GT(rotOnly, 0.0);
+
+  // The position and orientation terms are independent and simply add.
+  EXPECT_NEAR(both, posOnly + rotOnly, 1e-10 * both);
+
+  // Each weight scales only its own channel, linearly.
+  EXPECT_NEAR(errorWith(2.5, 0.0), 2.5 * posOnly, 1e-9 * posOnly);
+  EXPECT_NEAR(errorWith(0.0, 4.0), 4.0 * rotOnly, 1e-9 * rotOnly);
+
+  // Gradients and Jacobians must honor non-default position/orientation weights.
+  errorFunction.setPositionWeight(2.0);
+  errorFunction.setOrientationWeight(0.5);
+  testGradientAndJacobian<double>(errorFunction, frameParams, character, 2e-3f, 1e-6f, true);
 }

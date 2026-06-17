@@ -159,10 +159,14 @@ structs = [
     "SequenceSolverOptionsBase",
     "SequenceSolverOptions",
 ]
+template_structs = [
+    "JointToJointSequenceConstraint",
+]
 template_classes = [
     "AccelerationSequenceErrorFunction",
     "FiniteDifferenceSequenceErrorFunction",
     "JerkSequenceErrorFunction",
+    "JointToJointSequenceErrorFunction",
     "SequenceErrorFunction",
     "ModelParametersSequenceErrorFunction",
     "MultiposeSolver",

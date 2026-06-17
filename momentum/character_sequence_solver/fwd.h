@@ -54,6 +54,31 @@ using SequenceSolverOptions_const_u = ::std::unique_ptr<const SequenceSolverOpti
 using SequenceSolverOptions_const_w = ::std::weak_ptr<const SequenceSolverOptions>;
 
 template <typename T>
+struct JointToJointSequenceConstraintT;
+using JointToJointSequenceConstraint = JointToJointSequenceConstraintT<float>;
+using JointToJointSequenceConstraintd = JointToJointSequenceConstraintT<double>;
+
+using JointToJointSequenceConstraint_p = ::std::shared_ptr<JointToJointSequenceConstraint>;
+using JointToJointSequenceConstraint_u = ::std::unique_ptr<JointToJointSequenceConstraint>;
+using JointToJointSequenceConstraint_w = ::std::weak_ptr<JointToJointSequenceConstraint>;
+using JointToJointSequenceConstraint_const_p =
+    ::std::shared_ptr<const JointToJointSequenceConstraint>;
+using JointToJointSequenceConstraint_const_u =
+    ::std::unique_ptr<const JointToJointSequenceConstraint>;
+using JointToJointSequenceConstraint_const_w =
+    ::std::weak_ptr<const JointToJointSequenceConstraint>;
+
+using JointToJointSequenceConstraintd_p = ::std::shared_ptr<JointToJointSequenceConstraintd>;
+using JointToJointSequenceConstraintd_u = ::std::unique_ptr<JointToJointSequenceConstraintd>;
+using JointToJointSequenceConstraintd_w = ::std::weak_ptr<JointToJointSequenceConstraintd>;
+using JointToJointSequenceConstraintd_const_p =
+    ::std::shared_ptr<const JointToJointSequenceConstraintd>;
+using JointToJointSequenceConstraintd_const_u =
+    ::std::unique_ptr<const JointToJointSequenceConstraintd>;
+using JointToJointSequenceConstraintd_const_w =
+    ::std::weak_ptr<const JointToJointSequenceConstraintd>;
+
+template <typename T>
 class AccelerationSequenceErrorFunctionT;
 using AccelerationSequenceErrorFunction = AccelerationSequenceErrorFunctionT<float>;
 using AccelerationSequenceErrorFunctiond = AccelerationSequenceErrorFunctionT<double>;
@@ -127,6 +152,31 @@ using JerkSequenceErrorFunctiond_w = ::std::weak_ptr<JerkSequenceErrorFunctiond>
 using JerkSequenceErrorFunctiond_const_p = ::std::shared_ptr<const JerkSequenceErrorFunctiond>;
 using JerkSequenceErrorFunctiond_const_u = ::std::unique_ptr<const JerkSequenceErrorFunctiond>;
 using JerkSequenceErrorFunctiond_const_w = ::std::weak_ptr<const JerkSequenceErrorFunctiond>;
+
+template <typename T>
+class JointToJointSequenceErrorFunctionT;
+using JointToJointSequenceErrorFunction = JointToJointSequenceErrorFunctionT<float>;
+using JointToJointSequenceErrorFunctiond = JointToJointSequenceErrorFunctionT<double>;
+
+using JointToJointSequenceErrorFunction_p = ::std::shared_ptr<JointToJointSequenceErrorFunction>;
+using JointToJointSequenceErrorFunction_u = ::std::unique_ptr<JointToJointSequenceErrorFunction>;
+using JointToJointSequenceErrorFunction_w = ::std::weak_ptr<JointToJointSequenceErrorFunction>;
+using JointToJointSequenceErrorFunction_const_p =
+    ::std::shared_ptr<const JointToJointSequenceErrorFunction>;
+using JointToJointSequenceErrorFunction_const_u =
+    ::std::unique_ptr<const JointToJointSequenceErrorFunction>;
+using JointToJointSequenceErrorFunction_const_w =
+    ::std::weak_ptr<const JointToJointSequenceErrorFunction>;
+
+using JointToJointSequenceErrorFunctiond_p = ::std::shared_ptr<JointToJointSequenceErrorFunctiond>;
+using JointToJointSequenceErrorFunctiond_u = ::std::unique_ptr<JointToJointSequenceErrorFunctiond>;
+using JointToJointSequenceErrorFunctiond_w = ::std::weak_ptr<JointToJointSequenceErrorFunctiond>;
+using JointToJointSequenceErrorFunctiond_const_p =
+    ::std::shared_ptr<const JointToJointSequenceErrorFunctiond>;
+using JointToJointSequenceErrorFunctiond_const_u =
+    ::std::unique_ptr<const JointToJointSequenceErrorFunctiond>;
+using JointToJointSequenceErrorFunctiond_const_w =
+    ::std::weak_ptr<const JointToJointSequenceErrorFunctiond>;
 
 template <typename T>
 class SequenceErrorFunctionT;
