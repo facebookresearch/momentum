@@ -565,8 +565,9 @@ librerun-sdk = ">=0.23.3,<0.24"
 # pixi-based dev loop (and OSS CI) can always exercise the viser_vis tests.
 # Kept as its own feature for symmetry with rerun-latest/rerun-legacy and to
 # make future version pinning easier.
-# End users installing from PyPI keep viser optional via the
-# `pymomentum-core[viser]` extra in pyproject-pypi.toml.j2.
+# End users installing from PyPI keep visualization helpers optional via
+# the `pymomentum-core[viser]` and `pymomentum-core[rerun]` extras in
+# pyproject-pypi.toml.j2.
 #==============
 
 [feature.viser]
