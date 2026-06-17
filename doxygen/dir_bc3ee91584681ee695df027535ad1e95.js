@@ -56,6 +56,7 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "projection_error_function.h", "projection__error__function_8h.html", "projection__error__function_8h" ],
     [ "sdf_collision_error_function.cpp", "sdf__collision__error__function_8cpp.html", null ],
     [ "sdf_collision_error_function.h", "sdf__collision__error__function_8h.html", "sdf__collision__error__function_8h" ],
+    [ "sdf_collision_utility.h", "sdf__collision__utility_8h.html", "sdf__collision__utility_8h" ],
     [ "skeleton_derivative.cpp", "skeleton__derivative_8cpp.html", null ],
     [ "skeleton_derivative.h", "skeleton__derivative_8h.html", "skeleton__derivative_8h" ],
     [ "skeleton_error_function.h", "skeleton__error__function_8h.html", "skeleton__error__function_8h" ],

@@ -1940,8 +1940,12 @@ Linux x86_64, Windows x86_64, and macOS.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_animated_mesh">
-<span class="sig-name descname"><span class="pre">add_animated_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_animated_mesh" title="Link to this definition"></a></dt>
-<dd><p>Add an animated mesh (no skeleton) to the scene.</p>
+<span class="sig-name descname"><span class="pre">add_animated_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_animated_mesh" title="Link to this definition"></a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, character: pymomentum.geometry.Character, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None) -&gt; None</p></li>
+</ol>
+<p>Add an animated mesh (no skeleton) to the scene.</p>
 <p>Creates a standalone mesh node and animates its transform directly from
 the root joint parameters. Use this for props/objects that should appear
 as a simple animated mesh without any skeleton hierarchy.</p>
@@ -1952,6 +1956,24 @@ as a simple animated mesh without any skeleton hierarchy.</p>
 <li><p><strong>name</strong> – Name for the mesh node.</p></li>
 <li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
 <li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams).</p></li>
+</ul>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, mesh: pymomentum.geometry.Mesh, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None, translation_offset: Optional[numpy.ndarray[numpy.float32[3, 1]]] = None) -&gt; None</p></li>
+</ol>
+<p>Add an animated mesh from a Mesh object (no Character needed).</p>
+<p>Creates a standalone mesh node and animates its transform from joint
+parameters. Only the root transform (first 7 joint params) is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The mesh geometry.</p></li>
+<li><p><strong>name</strong> – Name for the mesh node.</p></li>
+<li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
+<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams).</p></li>
+<li><p><strong>translation_offset</strong> – Rest-pose translation offset added to the translation
+channels (defaults to zero).</p></li>
 </ul>
 </dd>
 </dl>
