@@ -104,6 +104,7 @@ var hierarchy =
     [ "momentum::JointToJointDistanceConstraintT< T >", "structmomentum_1_1JointToJointDistanceConstraintT.html", null ],
     [ "momentum::JointToJointOrientationDataT< T >", "structmomentum_1_1JointToJointOrientationDataT.html", null ],
     [ "momentum::JointToJointPositionDataT< T >", "structmomentum_1_1JointToJointPositionDataT.html", null ],
+    [ "momentum::JointToJointSequenceConstraintT< T >", "structmomentum_1_1JointToJointSequenceConstraintT.html", null ],
     [ "momentum::KeypointObservation", "structmomentum_1_1KeypointObservation.html", null ],
     [ "momentum::LimitData", "unionmomentum_1_1LimitData.html", null ],
     [ "momentum::LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", null ],
@@ -156,6 +157,7 @@ var hierarchy =
         [ "momentum::AccelerationSequenceErrorFunctionT< T >", "classmomentum_1_1AccelerationSequenceErrorFunctionT.html", null ],
         [ "momentum::JerkSequenceErrorFunctionT< T >", "classmomentum_1_1JerkSequenceErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::JointToJointSequenceErrorFunctionT< T >", "classmomentum_1_1JointToJointSequenceErrorFunctionT.html", null ],
       [ "momentum::ModelParametersSequenceErrorFunctionT< T >", "classmomentum_1_1ModelParametersSequenceErrorFunctionT.html", null ],
       [ "momentum::StateSequenceErrorFunctionT< T >", "classmomentum_1_1StateSequenceErrorFunctionT.html", null ],
       [ "momentum::VelocityMagnitudeSequenceErrorFunctionT< T >", "classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html", null ],

@@ -103,6 +103,8 @@ var annotated_dup =
       [ "JointToJointOrientationErrorFunctionT", "classmomentum_1_1JointToJointOrientationErrorFunctionT.html", "classmomentum_1_1JointToJointOrientationErrorFunctionT" ],
       [ "JointToJointPositionDataT", "structmomentum_1_1JointToJointPositionDataT.html", "structmomentum_1_1JointToJointPositionDataT" ],
       [ "JointToJointPositionErrorFunctionT", "classmomentum_1_1JointToJointPositionErrorFunctionT.html", "classmomentum_1_1JointToJointPositionErrorFunctionT" ],
+      [ "JointToJointSequenceConstraintT", "structmomentum_1_1JointToJointSequenceConstraintT.html", "structmomentum_1_1JointToJointSequenceConstraintT" ],
+      [ "JointToJointSequenceErrorFunctionT", "classmomentum_1_1JointToJointSequenceErrorFunctionT.html", "classmomentum_1_1JointToJointSequenceErrorFunctionT" ],
       [ "KeypointObservation", "structmomentum_1_1KeypointObservation.html", "structmomentum_1_1KeypointObservation" ],
       [ "LimitData", "unionmomentum_1_1LimitData.html", "unionmomentum_1_1LimitData" ],
       [ "LimitEllipsoid", "structmomentum_1_1LimitEllipsoid.html", "structmomentum_1_1LimitEllipsoid" ],

@@ -20,5 +20,7 @@ var searchData=
   ['jointtojointorientationdatat_17',['JointToJointOrientationDataT',['../structmomentum_1_1JointToJointOrientationDataT.html',1,'momentum']]],
   ['jointtojointorientationerrorfunctiont_18',['JointToJointOrientationErrorFunctionT',['../classmomentum_1_1JointToJointOrientationErrorFunctionT.html',1,'momentum']]],
   ['jointtojointpositiondatat_19',['JointToJointPositionDataT',['../structmomentum_1_1JointToJointPositionDataT.html',1,'momentum']]],
-  ['jointtojointpositionerrorfunctiont_20',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]]
+  ['jointtojointpositionerrorfunctiont_20',['JointToJointPositionErrorFunctionT',['../classmomentum_1_1JointToJointPositionErrorFunctionT.html',1,'momentum']]],
+  ['jointtojointsequenceconstraintt_21',['JointToJointSequenceConstraintT',['../structmomentum_1_1JointToJointSequenceConstraintT.html',1,'momentum']]],
+  ['jointtojointsequenceerrorfunctiont_22',['JointToJointSequenceErrorFunctionT',['../classmomentum_1_1JointToJointSequenceErrorFunctionT.html',1,'momentum']]]
 ];

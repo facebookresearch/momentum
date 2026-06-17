@@ -13,6 +13,8 @@ var searchData=
   ['joint_5fto_5fjoint_5forientation_5ferror_5ffunction_2eh_10',['joint_to_joint_orientation_error_function.h',['../joint__to__joint__orientation__error__function_8h.html',1,'']]],
   ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2ecpp_11',['joint_to_joint_position_error_function.cpp',['../joint__to__joint__position__error__function_8cpp.html',1,'']]],
   ['joint_5fto_5fjoint_5fposition_5ferror_5ffunction_2eh_12',['joint_to_joint_position_error_function.h',['../joint__to__joint__position__error__function_8h.html',1,'']]],
-  ['json_5futils_2ecpp_13',['json_utils.cpp',['../json__utils_8cpp.html',1,'']]],
-  ['json_5futils_2eh_14',['json_utils.h',['../json__utils_8h.html',1,'']]]
+  ['joint_5fto_5fjoint_5fsequence_5ferror_5ffunction_2ecpp_13',['joint_to_joint_sequence_error_function.cpp',['../joint__to__joint__sequence__error__function_8cpp.html',1,'']]],
+  ['joint_5fto_5fjoint_5fsequence_5ferror_5ffunction_2eh_14',['joint_to_joint_sequence_error_function.h',['../joint__to__joint__sequence__error__function_8h.html',1,'']]],
+  ['json_5futils_2ecpp_15',['json_utils.cpp',['../json__utils_8cpp.html',1,'']]],
+  ['json_5futils_2eh_16',['json_utils.h',['../json__utils_8h.html',1,'']]]
 ];
