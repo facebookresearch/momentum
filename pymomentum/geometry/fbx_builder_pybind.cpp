@@ -10,6 +10,7 @@
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
 #include <momentum/io/fbx/fbx_builder.h>
+#include <momentum/math/mesh.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -145,6 +146,41 @@ as a simple animated mesh without any skeleton hierarchy.
           py::arg("name"),
           py::arg("fps") = 120.0f,
           py::arg("joint_params") = std::nullopt)
+      .def(
+          "add_animated_mesh",
+          [](mm::FbxBuilder& builder,
+             const mm::Mesh& mesh,
+             const std::string& name,
+             float fps,
+             const std::optional<Eigen::MatrixXf>& jointParams,
+             const std::optional<Eigen::Vector3f>& translationOffset) {
+            mm::MatrixXf transposedJointParams;
+            if (jointParams.has_value() && jointParams->size() > 0) {
+              transposedJointParams = jointParams->transpose();
+            }
+            builder.addAnimatedMesh(
+                mesh,
+                name,
+                fps,
+                transposedJointParams,
+                translationOffset.value_or(Eigen::Vector3f::Zero()));
+          },
+          R"(Add an animated mesh from a Mesh object (no Character needed).
+
+Creates a standalone mesh node and animates its transform from joint
+parameters. Only the root transform (first 7 joint params) is used.
+
+:param mesh: The mesh geometry.
+:param name: Name for the mesh node.
+:param fps: Animation frame rate in frames per second.
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param translation_offset: Rest-pose translation offset added to the translation
+    channels (defaults to zero).)",
+          py::arg("mesh"),
+          py::arg("name"),
+          py::arg("fps") = 120.0f,
+          py::arg("joint_params") = std::nullopt,
+          py::arg("translation_offset") = std::nullopt)
       .def(
           "add_marker_sequence",
           [](mm::FbxBuilder& builder,
