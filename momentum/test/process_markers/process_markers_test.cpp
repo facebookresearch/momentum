@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <limits>
+
 using namespace momentum;
 
 namespace {
@@ -104,6 +106,22 @@ std::vector<std::vector<Marker>> createLinearlyMovingMarkerData(
   return markerData;
 }
 
+std::vector<GloveFrameData> createGloveData(
+    const Character& character,
+    size_t numFrames,
+    const Eigen::Vector3f& position = Eigen::Vector3f::Ones()) {
+  std::vector<GloveFrameData> gloveData(numFrames);
+  for (size_t f = 0; f < numFrames; ++f) {
+    GloveSensorObservation obs;
+    obs.jointName = character.skeleton.joints.at(1).name;
+    obs.position = position;
+    obs.orientation = Eigen::Quaternionf::Identity();
+    obs.valid = true;
+    gloveData[f] = {obs};
+  }
+  return gloveData;
+}
+
 } // namespace
 
 // Tests that calibrateMarkers throws when firstFrame exceeds markerData size.
@@ -114,6 +132,90 @@ TEST(ProcessMarkersTest, CalibrateMarkers_FirstFrameExceedsSize_Throws) {
 
   EXPECT_THROW(
       calibrateMarkers(character, identity, markerData, config, /*firstFrame=*/6), std::exception);
+}
+
+TEST(ProcessMarkersTest, CalibrateMarkers_GloveDataWithoutConfig_Throws) {
+  auto [character, identity] = createTestCharacterWithIdentity();
+  const auto markerData = createMarkerData(character, 5);
+  const auto leftGloveData = createGloveData(character, 5);
+  CalibrationConfig config;
+
+  EXPECT_THROW(
+      calibrateMarkers(
+          character,
+          identity,
+          markerData,
+          config,
+          /*firstFrame=*/0,
+          /*maxFrames=*/0,
+          leftGloveData),
+      std::exception);
+}
+
+TEST(ProcessMarkersTest, CalibrateMarkers_UnknownGloveJoint_Throws) {
+  auto [character, identity] = createTestCharacterWithIdentity();
+  const auto markerData = createMarkerData(character, 5);
+  auto leftGloveData = createGloveData(character, 5);
+  leftGloveData.at(0).at(0).jointName = "missing_joint";
+  CalibrationConfig config;
+  GloveConfig gloveConfig;
+
+  EXPECT_THROW(
+      calibrateMarkers(
+          character,
+          identity,
+          markerData,
+          config,
+          /*firstFrame=*/0,
+          /*maxFrames=*/0,
+          leftGloveData,
+          {},
+          gloveConfig),
+      std::exception);
+}
+
+TEST(ProcessMarkersTest, CalibrateMarkers_NonFiniteGloveObservation_Throws) {
+  auto [character, identity] = createTestCharacterWithIdentity();
+  const auto markerData = createMarkerData(character, 5);
+  const auto leftGloveData = createGloveData(
+      character, 5, Eigen::Vector3f(std::numeric_limits<float>::quiet_NaN(), 1.0f, 2.0f));
+  CalibrationConfig config;
+  GloveConfig gloveConfig;
+
+  EXPECT_THROW(
+      calibrateMarkers(
+          character,
+          identity,
+          markerData,
+          config,
+          /*firstFrame=*/0,
+          /*maxFrames=*/0,
+          leftGloveData,
+          {},
+          gloveConfig),
+      std::exception);
+}
+
+TEST(ProcessMarkersTest, CalibrateMarkers_ZeroGloveOrientation_Throws) {
+  auto [character, identity] = createTestCharacterWithIdentity();
+  const auto markerData = createMarkerData(character, 5);
+  auto leftGloveData = createGloveData(character, 5);
+  leftGloveData.at(0).at(0).orientation.coeffs().setZero();
+  CalibrationConfig config;
+  GloveConfig gloveConfig;
+
+  EXPECT_THROW(
+      calibrateMarkers(
+          character,
+          identity,
+          markerData,
+          config,
+          /*firstFrame=*/0,
+          /*maxFrames=*/0,
+          leftGloveData,
+          {},
+          gloveConfig),
+      std::exception);
 }
 
 // Tests that processMarkers throws when firstFrame exceeds markerData size.
@@ -132,6 +234,30 @@ TEST(ProcessMarkersTest, ProcessMarkers_FirstFrameExceedsSize_Throws) {
           calibrationConfig,
           /*calibrate=*/false,
           /*firstFrame=*/6),
+      std::exception);
+}
+
+// Tests that processMarkers enforces the same glove_config-required guard as
+// calibrateMarkers (the check is duplicated, not shared, so it needs its own
+// coverage). The guard runs even when calibrate=false.
+TEST(ProcessMarkersTest, ProcessMarkers_GloveDataWithoutConfig_Throws) {
+  auto [character, identity] = createTestCharacterWithIdentity();
+  const auto markerData = createMarkerData(character, 5);
+  const auto leftGloveData = createGloveData(character, 5);
+  TrackingConfig trackingConfig;
+  CalibrationConfig calibrationConfig;
+
+  EXPECT_THROW(
+      processMarkers(
+          character,
+          identity,
+          markerData,
+          trackingConfig,
+          calibrationConfig,
+          /*calibrate=*/false,
+          /*firstFrame=*/0,
+          /*maxFrames=*/0,
+          leftGloveData),
       std::exception);
 }
 
