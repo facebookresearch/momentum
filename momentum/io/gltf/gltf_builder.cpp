@@ -710,14 +710,16 @@ std::vector<size_t> addSkeletonToModel(
     physicalPropertiesByJoint.reserve(character.physicalProperties.size());
     for (const JointPhysicalProperties& properties : character.physicalProperties) {
       const size_t jointIndex = resolvePhysicalPropertiesJointIndex(properties, character.skeleton);
-      if (jointIndex != kInvalidIndex) {
-        const auto emplaceResult = physicalPropertiesByJoint.emplace(jointIndex, &properties);
-        MT_THROW_IF(
-            !emplaceResult.second,
-            "Multiple physical properties entries resolve to joint '{}' (index {})",
-            character.skeleton.joints.at(jointIndex).name,
-            jointIndex);
-      }
+      MT_THROW_IF(
+          jointIndex == kInvalidIndex,
+          "Physical properties entry references unknown joint '{}'",
+          properties.jointName);
+      const auto emplaceResult = physicalPropertiesByJoint.emplace(jointIndex, &properties);
+      MT_THROW_IF(
+          !emplaceResult.second,
+          "Multiple physical properties entries resolve to joint '{}' (index {})",
+          character.skeleton.joints.at(jointIndex).name,
+          jointIndex);
     }
   }
 

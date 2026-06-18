@@ -528,6 +528,7 @@ io_json_utils_sources = [
 ]
 
 io_common_test_sources = [
+    "test/io/common/json_utils_test.cpp",
     "test/io/common/stream_utils_test.cpp",
 ]
 

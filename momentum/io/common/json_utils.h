@@ -15,6 +15,7 @@
 #include <nlohmann/json.hpp>
 #include <Eigen/Core>
 
+#include <optional>
 #include <string>
 
 namespace momentum {
@@ -107,6 +108,13 @@ void jointPhysicalPropertiesToJson(
     const JointPhysicalProperties& jointProperties,
     nlohmann::json& j);
 
+/// Serializes one joint's physical mass properties to its canonical on-disk JSON string.
+///
+/// This is the string representation written by the string-based Character I/O backends (FBX, USD).
+/// It is equivalent to dumping the object produced by `jointPhysicalPropertiesToJson()`.
+[[nodiscard]] std::string jointPhysicalPropertiesToJsonString(
+    const JointPhysicalProperties& jointProperties);
+
 // from json conversion functions
 ParameterLimits parameterLimitsFromJson(const Character& character, const nlohmann::json& j);
 ParameterSets parameterSetsFromJson(const Character& character, const nlohmann::json& j);
@@ -120,6 +128,17 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
 /// duplicate the joint identity inside the physical-properties object.
 JointPhysicalProperties jointPhysicalPropertiesFromJson(
     const nlohmann::json& j,
+    const std::string& jointName,
+    size_t jointIndex);
+
+/// Parses one joint's physical mass properties from its canonical on-disk JSON string.
+///
+/// `jointName` and `jointIndex` identify the owning joint (see
+/// `jointPhysicalPropertiesFromJson()`). If the string cannot be parsed (malformed JSON) or fails
+/// semantic validation (e.g. a missing field or non-positive mass), this logs a warning and returns
+/// `std::nullopt`, so that a single corrupt entry does not abort loading the rest of the character.
+[[nodiscard]] std::optional<JointPhysicalProperties> jointPhysicalPropertiesFromJsonString(
+    const std::string& json,
     const std::string& jointName,
     size_t jointIndex);
 

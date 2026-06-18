@@ -893,7 +893,7 @@ if(MOMENTUM_BUILD_TESTING)
 
   mt_test(
     NAME io_common_test
-    LINK_LIBRARIES io_common
+    LINK_LIBRARIES io_common io_json_utils
     SOURCES_VARS io_common_test_sources
   )
 
