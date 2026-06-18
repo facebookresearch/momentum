@@ -38,6 +38,9 @@
 #include "momentum/math/mesh.h"
 #include "momentum/solver/solver.h"
 
+#include <optional>
+#include <unordered_set>
+
 using namespace momentum;
 
 namespace momentum {
@@ -1167,6 +1170,59 @@ Character addSkinnedLocatorParametersToTransform(Character character) {
   return character;
 }
 
+namespace {
+
+// Locator-index upper bounds (inclusive) used to group per-keypoint
+// reprojection errors into body / hand / surface regions in the diagnostic log.
+constexpr size_t kBodyMaxLocatorIdx = 20;
+constexpr size_t kRightHandMaxLocatorIdx = 41;
+constexpr size_t kLeftHandMaxLocatorIdx = 62;
+
+/// Build the skeleton state for a single frame of `motion`.
+SkeletonState skeletonStateForFrame(
+    const Character& character,
+    const ParameterTransform& transform,
+    const Eigen::MatrixXf& motion,
+    size_t frame) {
+  SkeletonState skelState;
+  skelState.set(
+      character.parameterTransform.apply(
+          ModelParameters(motion.col(frame).head(transform.numAllModelParameters()))),
+      character.skeleton);
+  return skelState;
+}
+
+/// World position and pixel reprojection error of a single keypoint observation.
+struct KeypointReprojection {
+  Eigen::Vector3f pWorld;
+  float pxErr;
+};
+
+/// Reproject a keypoint observation against `skelState`, returning its world
+/// position and pixel error, or nullopt if the observation should be skipped
+/// (non-positive confidence, out-of-range locator/parent, or failed projection).
+std::optional<KeypointReprojection> keypointReprojection(
+    const Character& character,
+    const SkeletonState& skelState,
+    const Camera& camera,
+    const KeypointObservation& obs) {
+  if (obs.confidence <= 0.0f || obs.locatorIndex >= character.locators.size()) {
+    return std::nullopt;
+  }
+  const auto& locator = character.locators.at(obs.locatorIndex);
+  if (locator.parent >= skelState.jointState.size()) {
+    return std::nullopt;
+  }
+  const Eigen::Vector3f pWorld = skelState.jointState.at(locator.parent).transform * locator.offset;
+  const auto [projected, valid] = camera.project(pWorld);
+  if (!valid) {
+    return std::nullopt;
+  }
+  return KeypointReprojection{pWorld, (projected.head<2>() - obs.target).norm()};
+}
+
+} // namespace
+
 void logKeypointReprojectionDiagnostic(
     const Character& character,
     const ParameterTransform& transform,
@@ -1174,16 +1230,15 @@ void logKeypointReprojectionDiagnostic(
     std::span<const CameraKeypointData> cameraKeypointData,
     const CalibrationConfig& config,
     const std::string& label) {
-  if (!config.debug || cameraKeypointData.empty() || config.projectionWeight <= 0.0f) {
+  if (cameraKeypointData.empty() || config.projectionWeight <= 0.0f) {
     return;
   }
 
   const size_t diagFrame = 0;
-  SkeletonState skelState;
-  skelState.set(
-      character.parameterTransform.apply(
-          ModelParameters(motion.col(diagFrame).head(transform.numAllModelParameters()))),
-      character.skeleton);
+  const SkeletonState skelState = skeletonStateForFrame(character, transform, motion, diagFrame);
+
+  // Per-locator error accumulators: sum of pixel errors and observation count.
+  std::unordered_map<size_t, std::pair<float, size_t>> locatorErrors;
 
   MT_LOGI("=== Keypoint reprojection diagnostic (frame {}, {}) ===", diagFrame, label);
   for (size_t iCam = 0; iCam < cameraKeypointData.size(); ++iCam) {
@@ -1195,29 +1250,24 @@ void logKeypointReprojectionDiagnostic(
     float sumPxErr = 0, maxPxErr = 0;
     float sumRadErr = 0, maxRadErr = 0;
     for (const auto& obs : camData.frameData[diagFrame]) {
-      if (obs.confidence <= 0.0f || obs.locatorIndex >= character.locators.size()) {
+      const auto reproj = keypointReprojection(character, skelState, camData.camera, obs);
+      if (!reproj) {
         nSkipped++;
         continue;
       }
-      const auto& locator = character.locators[obs.locatorIndex];
-      if (locator.parent >= skelState.jointState.size()) {
-        nSkipped++;
-        continue;
-      }
-      const Eigen::Vector3f p_world =
-          skelState.jointState[locator.parent].transform * locator.offset;
-      const auto [projected, valid] = camData.camera.project(p_world);
-      if (!valid) {
-        nSkipped++;
-        continue;
-      }
-      const float pxErr = (projected.head<2>() - obs.target).norm();
+      const float pxErr = reproj->pxErr;
       sumPxErr += pxErr;
       maxPxErr = std::max(maxPxErr, pxErr);
+
+      auto& entry = locatorErrors[obs.locatorIndex];
+      entry.first += pxErr;
+      entry.second++;
+
       const auto [M, mValid] = projectionMatrixRadians(camData.camera, obs.target);
       float radErr = 0;
       if (mValid) {
-        const Eigen::Vector4f ph(p_world[0], p_world[1], p_world[2], 1.0f);
+        const Eigen::Vector3f& pWorld = reproj->pWorld;
+        const Eigen::Vector4f ph(pWorld[0], pWorld[1], pWorld[2], 1.0f);
         const Eigen::Vector3f h = M * ph;
         if (std::abs(h[2]) > 1e-6f) {
           radErr = Eigen::Vector2f(h[0] / h[2], h[1] / h[2]).norm();
@@ -1237,6 +1287,49 @@ void logKeypointReprojectionDiagnostic(
         maxPxErr,
         maxRadErr);
   }
+
+  // Log per-locator errors grouped by region.
+  struct RegionStats {
+    float sumErr = 0;
+    size_t count = 0;
+  };
+  RegionStats body, rightHand, leftHand, surface;
+
+  std::vector<size_t> sortedIndices;
+  sortedIndices.reserve(locatorErrors.size());
+  for (const auto& [idx, _] : locatorErrors) {
+    sortedIndices.push_back(idx);
+  }
+  std::sort(sortedIndices.begin(), sortedIndices.end());
+
+  MT_LOGI("--- Per-keypoint errors ({}) ---", label);
+  for (const auto idx : sortedIndices) {
+    const auto& [sumErr, cnt] = locatorErrors[idx];
+    const float meanErr = sumErr / cnt;
+    const std::string name =
+        idx < character.locators.size() ? character.locators.at(idx).name : "?";
+    MT_LOGI("  [{:2d}] {:30s} {:7.1f}px  ({} obs)", idx, name, meanErr, cnt);
+
+    RegionStats* region = &surface;
+    if (idx <= kBodyMaxLocatorIdx) {
+      region = &body;
+    } else if (idx <= kRightHandMaxLocatorIdx) {
+      region = &rightHand;
+    } else if (idx <= kLeftHandMaxLocatorIdx) {
+      region = &leftHand;
+    }
+    region->sumErr += meanErr;
+    region->count++;
+  }
+  auto logRegion = [](const char* name, const RegionStats& r) {
+    if (r.count > 0) {
+      MT_LOGI("  {}: mean={:.1f}px ({} keypoints)", name, r.sumErr / r.count, r.count);
+    }
+  };
+  logRegion("body", body);
+  logRegion("right_hand", rightHand);
+  logRegion("left_hand", leftHand);
+  logRegion("surface", surface);
 }
 
 // Build the parameter sets controlling which body parameters are calibrated.
@@ -1265,6 +1358,123 @@ std::pair<ParameterSet, ParameterSet> buildCalibBodySets(
   }
   return {calibBodySet, calibBodySetExtended};
 }
+
+namespace {
+
+struct FilteredKeypointData {
+  std::vector<CameraKeypointData> storage;
+  std::span<const CameraKeypointData> original;
+
+  [[nodiscard]] std::span<const CameraKeypointData> span() const {
+    return storage.empty() ? original : std::span<const CameraKeypointData>(storage);
+  }
+};
+
+/// Filter keypoint observations with high reprojection error against the
+/// current marker-only pose.  Each (camera, keypoint) pair is evaluated
+/// independently on frame 0 so a keypoint that is bad in one camera can
+/// still contribute from others.
+FilteredKeypointData filterKeypointOutliers(
+    const Character& character,
+    const ParameterTransform& transform,
+    const Eigen::MatrixXf& motion,
+    std::span<const CameraKeypointData> cameraKeypointData,
+    const CalibrationConfig& config) {
+  FilteredKeypointData result;
+  result.original = cameraKeypointData;
+  if (cameraKeypointData.empty() || config.projectionWeight <= 0.0f) {
+    return result;
+  }
+
+  // TODO: make configurable via CalibrationConfig
+  const float outlierFraction = 0.05f;
+
+  const SkeletonState skelState = skeletonStateForFrame(character, transform, motion, 0);
+
+  struct ObservationError {
+    float pxErr;
+    size_t camIdx;
+    size_t locIdx;
+  };
+  std::vector<ObservationError> obsErrors;
+  for (size_t iCam = 0; iCam < cameraKeypointData.size(); ++iCam) {
+    const auto& camData = cameraKeypointData[iCam];
+    if (camData.frameData.empty() || camData.frameData[0].empty()) {
+      continue;
+    }
+    for (const auto& obs : camData.frameData[0]) {
+      const auto reproj = keypointReprojection(character, skelState, camData.camera, obs);
+      if (!reproj) {
+        continue;
+      }
+      obsErrors.push_back({reproj->pxErr, iCam, obs.locatorIndex});
+    }
+  }
+
+  if (obsErrors.empty()) {
+    return result;
+  }
+
+  // Keep the lowest (1 - outlierFraction) of observations and drop the rest.
+  // `threshold` is the largest *kept* error; dropping everything strictly above
+  // it removes the intended top fraction.  (The original min(floor(0.95 N), N-1)
+  // index left the threshold at the max value, so the strict `>` dropped nothing
+  // whenever (1 - f) * N was integral, e.g. N = 20.)
+  std::vector<float> sortedErrors;
+  sortedErrors.reserve(obsErrors.size());
+  for (const auto& obsError : obsErrors) {
+    sortedErrors.push_back(obsError.pxErr);
+  }
+  const auto keepCount = static_cast<size_t>((1.0f - outlierFraction) * sortedErrors.size());
+  if (keepCount == 0 || keepCount >= sortedErrors.size()) {
+    return result; // too few observations to robustly identify outliers
+  }
+  const size_t threshIdx = keepCount - 1;
+  std::nth_element(sortedErrors.begin(), sortedErrors.begin() + threshIdx, sortedErrors.end());
+  const float threshold = sortedErrors[threshIdx];
+
+  const size_t maxLoc = character.locators.size();
+  std::unordered_set<size_t> dropPairs;
+  for (const auto& obsError : obsErrors) {
+    if (obsError.pxErr > threshold) {
+      dropPairs.insert(obsError.camIdx * maxLoc + obsError.locIdx);
+      const std::string name = obsError.locIdx < character.locators.size()
+          ? character.locators[obsError.locIdx].name
+          : "?";
+      MT_LOGI(
+          "Filtering cam[{}] keypoint [{}] {} ({:.1f}px > {:.1f}px)",
+          obsError.camIdx,
+          obsError.locIdx,
+          name,
+          obsError.pxErr,
+          threshold);
+    }
+  }
+
+  if (dropPairs.empty()) {
+    return result;
+  }
+
+  result.storage.reserve(cameraKeypointData.size());
+  for (size_t iCam = 0; iCam < cameraKeypointData.size(); ++iCam) {
+    const auto& camData = cameraKeypointData[iCam];
+    CameraKeypointData filtered;
+    filtered.camera = camData.camera;
+    filtered.frameData.resize(camData.frameData.size());
+    for (size_t f = 0; f < camData.frameData.size(); ++f) {
+      for (const auto& obs : camData.frameData[f]) {
+        if (!dropPairs.contains(iCam * maxLoc + obs.locatorIndex)) {
+          filtered.frameData[f].push_back(obs);
+        }
+      }
+    }
+    result.storage.push_back(std::move(filtered));
+  }
+  MT_LOGI("Filtered {} camera-keypoint pairs (>{:.1f}px threshold)", dropPairs.size(), threshold);
+  return result;
+}
+
+} // namespace
 
 void calibrateModel(
     const std::span<const std::vector<Marker>> markerData,
@@ -1449,6 +1659,9 @@ void calibrateModel(
   logKeypointReprojectionDiagnostic(
       character, transform, motion, cameraKeypointData, config, "after Stage 0");
 
+  auto filteredKeypoints =
+      filterKeypointOutliers(character, transform, motion, cameraKeypointData, config);
+
   // Solve everything together for a few iterations
   const auto calibFloorConstraints =
       createFloorConstraints<float>("Floor_", character.locators, Vector3f::UnitY(), 0.0f, 5.0f);
@@ -1471,7 +1684,7 @@ void calibrateModel(
         leftGloveData,
         rightGloveData,
         gloveConfig,
-        cameraKeypointData,
+        filteredKeypoints.span(),
         perFrameFloorContacts);
     // extract solving results to identity and character so we can pass them to trackPosesPerframe
     // below.
@@ -1530,7 +1743,7 @@ void calibrateModel(
       leftGloveData,
       rightGloveData,
       gloveConfig,
-      cameraKeypointData);
+      filteredKeypoints.span());
   std::tie(identity.v, character.locators, character.skinnedLocators) =
       extractIdAndLocatorsFromParams(motion.col(0), solvingCharacter, character);
 
@@ -1553,6 +1766,9 @@ void calibrateModel(
 
   // Log final per-locator mesh distances
   logSkinnedLocatorMeshDistances(character, "Final");
+
+  logKeypointReprojectionDiagnostic(
+      character, transform, motion, filteredKeypoints.span(), config, "after final stage");
 
   // Log the calibrated character height
   const float height = computeCharacterHeight(character, identity);
