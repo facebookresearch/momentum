@@ -154,6 +154,80 @@ class TritonFKBackendTest(unittest.TestCase):
         triton_state.backward(grad_output)
         self._assert_grad_close(triton_params, torch_params)
 
+    def test_local_fk_with_model_parameters_matches_torch(self) -> None:
+        device = _cuda_device()
+        character_cpu = pym_test_utils.create_test_character()
+        character = pym_character.Character(
+            character_cpu,
+            has_parameter_transform=True,
+            has_skeleton=True,
+            has_rest_mesh=False,
+            has_skinning=False,
+        ).to(device)
+
+        torch.manual_seed(0)
+        model_params = torch.rand(
+            5,
+            character_cpu.parameter_transform.size,
+            device=device,
+            dtype=torch.float32,
+        )
+
+        torch_params = model_params.detach().clone().requires_grad_()
+        triton_params = model_params.detach().clone().requires_grad_()
+
+        torch_state = character.model_parameters_to_local_skeleton_state(
+            torch_params,
+            backend="torch",
+        )
+        triton_state = character.model_parameters_to_local_skeleton_state(
+            triton_params,
+            backend="triton",
+        )
+
+        torch.testing.assert_close(torch_state, triton_state, atol=1e-5, rtol=1e-5)
+
+        grad_output = torch.randn_like(torch_state)
+        torch_state.backward(grad_output)
+        triton_state.backward(grad_output)
+        self._assert_grad_close(triton_params, torch_params)
+
+    def test_local_fk_matches_torch(self) -> None:
+        # Direct joint-parameter local FK (no parameter transform), exercising the
+        # _local_forward_kernel / _local_backward_kernel without depending on the
+        # model-parameter transform. Covers both a single and a multi-dim batch.
+        device = _cuda_device()
+        character_cpu = pym_test_utils.create_test_character()
+        character = pym_character.Character(
+            character_cpu,
+            has_parameter_transform=False,
+            has_skeleton=True,
+            has_rest_mesh=False,
+            has_skinning=False,
+        ).to(device)
+
+        torch.manual_seed(0)
+        joint_params = torch.rand(
+            5,
+            character_cpu.skeleton.size,
+            7,
+            device=device,
+            dtype=torch.float32,
+        )
+        self._assert_local_joint_parameter_backend_close(character, joint_params)
+
+        batched_joint_params = torch.rand(
+            2,
+            3,
+            character_cpu.skeleton.size,
+            7,
+            device=device,
+            dtype=torch.float32,
+        )
+        self._assert_local_joint_parameter_backend_close(
+            character, batched_joint_params
+        )
+
     def test_inverse_fk_matches_torch(self) -> None:
         device = _cuda_device()
         character_cpu = pym_test_utils.create_test_character()
@@ -214,6 +288,30 @@ class TritonFKBackendTest(unittest.TestCase):
         triton_state = character.joint_parameters_to_skeleton_state(
             triton_params,
             use_double_precision=False,
+            backend="triton",
+        )
+
+        torch.testing.assert_close(torch_state, triton_state, atol=1e-5, rtol=1e-5)
+
+        grad_output = torch.randn_like(torch_state)
+        torch_state.backward(grad_output)
+        triton_state.backward(grad_output)
+        self._assert_grad_close(triton_params, torch_params)
+
+    def _assert_local_joint_parameter_backend_close(
+        self,
+        character: pym_character.Character,
+        joint_params: torch.Tensor,
+    ) -> None:
+        torch_params = joint_params.detach().clone().requires_grad_()
+        triton_params = joint_params.detach().clone().requires_grad_()
+
+        torch_state = character.joint_parameters_to_local_skeleton_state(
+            torch_params,
+            backend="torch",
+        )
+        triton_state = character.joint_parameters_to_local_skeleton_state(
+            triton_params,
             backend="triton",
         )
 
