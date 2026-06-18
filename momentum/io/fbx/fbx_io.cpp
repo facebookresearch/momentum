@@ -20,6 +20,8 @@
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
 
+#include <gsl/gsl>
+
 #include <variant>
 #endif // MOMENTUM_WITH_FBX_SDK
 
@@ -47,6 +49,11 @@ void saveFbxCommon(
   // initialize FBX SDK and prepare for export
   // ---------------------------------------------
   auto* manager = ::fbxsdk::FbxManager::Create();
+  // FBX SDK uses manual memory management. Use a scope guard so the manager — and the exporter,
+  // scene, and nodes it owns — are always destroyed, including when an exception is thrown mid-
+  // export (e.g. by addPhysicalProperties). Without it, a throw leaks the manager (flagged by
+  // ASAN).
+  const auto managerGuard = gsl::finally([manager]() { manager->Destroy(); });
   auto* ios = ::fbxsdk::FbxIOSettings::Create(manager, IOSROOT);
   manager->SetIOSettings(ios);
 
@@ -89,6 +96,7 @@ void saveFbxCommon(
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, scene);
   addMetaData(skeletonResult.rootNode, character);
+  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
   createLocatorNodes(character, scene, skeletonResult.nodes);
   createCollisionGeometryNodes(character, scene, skeletonResult.nodes);
 
@@ -158,15 +166,9 @@ void saveFbxCommon(
   // close the fbx exporter
   // ---------------------------------------------
 
-  // finally export the scene
+  // finally export the scene; managerGuard destroys the exporter, scene, and manager (and
+  // everything they own) when this function returns or throws.
   lExporter->Export(scene);
-  lExporter->Destroy();
-
-  // destroy the scene and the manager
-  if (scene != nullptr) {
-    scene->Destroy();
-  }
-  manager->Destroy();
 }
 
 } // namespace

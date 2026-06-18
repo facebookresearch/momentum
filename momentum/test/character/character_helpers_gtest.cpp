@@ -22,6 +22,8 @@
 #include <gtest/gtest.h>
 
 #include <limits>
+#include <string>
+#include <unordered_map>
 
 namespace momentum {
 
@@ -229,6 +231,44 @@ void compareCollisionGeometry(
   }
 }
 
+void comparePhysicalProperties(
+    const PhysicalProperties& refProperties,
+    const PhysicalProperties& properties) {
+  ASSERT_EQ(refProperties.size(), properties.size());
+
+  // Match entries by joint name rather than by position: the save/load order is not guaranteed to
+  // be preserved across formats (e.g. USD traversal order can differ from insertion order).
+  std::unordered_map<std::string, const JointPhysicalProperties*> propertiesByJoint;
+  for (const auto& entry : properties) {
+    propertiesByJoint[entry.jointName] = &entry;
+  }
+
+  for (const auto& refEntry : refProperties) {
+    const auto entryIt = propertiesByJoint.find(refEntry.jointName);
+    ASSERT_NE(entryIt, propertiesByJoint.end())
+        << "Missing physical properties for joint '" << refEntry.jointName << "'";
+    const auto& entry = *entryIt->second;
+    EXPECT_EQ(refEntry.jointIndex, entry.jointIndex);
+    EXPECT_FLOAT_EQ(refEntry.mass, entry.mass);
+    EXPECT_TRUE(refEntry.centerOfMassOffset.isApprox(
+        entry.centerOfMassOffset, kPhysicalPropertiesTolerance))
+        << "Physical center-of-mass offset for joint '" << refEntry.jointName << "' is not equal:\n"
+        << "- Expected: " << refEntry.centerOfMassOffset.transpose() << "\n"
+        << "- Actual  : " << entry.centerOfMassOffset.transpose() << "\n";
+    EXPECT_TRUE(refEntry.inertia.isApprox(entry.inertia, kPhysicalPropertiesTolerance))
+        << "Physical inertia for joint '" << refEntry.jointName << "' is not equal:\n"
+        << "- Expected:\n"
+        << refEntry.inertia << "\n"
+        << "- Actual:\n"
+        << entry.inertia << "\n";
+    EXPECT_TRUE(
+        refEntry.inertiaRotation.isApprox(entry.inertiaRotation, kPhysicalPropertiesTolerance))
+        << "Physical inertia rotation for joint '" << refEntry.jointName << "' is not equal:\n"
+        << "- Expected: " << refEntry.inertiaRotation.coeffs().transpose() << "\n"
+        << "- Actual  : " << entry.inertiaRotation.coeffs().transpose() << "\n";
+  }
+}
+
 void compareChars(
     const Character& refChar,
     const Character& character,
@@ -271,30 +311,7 @@ void compareChars(
   }
   EXPECT_EQ(refChar.jointMap, character.jointMap);
   if (withPhysicalProperties) {
-    ASSERT_EQ(refChar.physicalProperties.size(), character.physicalProperties.size());
-    for (size_t i = 0; i < refChar.physicalProperties.size(); ++i) {
-      const auto& refProperties = refChar.physicalProperties.at(i);
-      const auto& properties = character.physicalProperties.at(i);
-      EXPECT_EQ(refProperties.jointName, properties.jointName);
-      EXPECT_EQ(refProperties.jointIndex, properties.jointIndex);
-      EXPECT_FLOAT_EQ(refProperties.mass, properties.mass);
-      EXPECT_TRUE(refProperties.centerOfMassOffset.isApprox(
-          properties.centerOfMassOffset, kPhysicalPropertiesTolerance))
-          << "Physical center-of-mass offset " << i << " is not equal:\n"
-          << "- Expected: " << refProperties.centerOfMassOffset.transpose() << "\n"
-          << "- Actual  : " << properties.centerOfMassOffset.transpose() << "\n";
-      EXPECT_TRUE(refProperties.inertia.isApprox(properties.inertia, kPhysicalPropertiesTolerance))
-          << "Physical inertia " << i << " is not equal:\n"
-          << "- Expected:\n"
-          << refProperties.inertia << "\n"
-          << "- Actual:\n"
-          << properties.inertia << "\n";
-      EXPECT_TRUE(refProperties.inertiaRotation.isApprox(
-          properties.inertiaRotation, kPhysicalPropertiesTolerance))
-          << "Physical inertia rotation " << i << " is not equal:\n"
-          << "- Expected: " << refProperties.inertiaRotation.coeffs().transpose() << "\n"
-          << "- Actual  : " << properties.inertiaRotation.coeffs().transpose() << "\n";
-    }
+    comparePhysicalProperties(refChar.physicalProperties, character.physicalProperties);
   }
 
   if (withMesh) {

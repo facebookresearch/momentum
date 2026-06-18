@@ -476,6 +476,18 @@ mt_library(
 )
 
 mt_library(
+  NAME io_json_utils
+  HEADERS_VARS io_json_utils_public_headers
+  SOURCES_VARS io_json_utils_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    nlohmann_json::nlohmann_json
+  PRIVATE_LINK_LIBRARIES
+    common
+    math
+)
+
+mt_library(
   NAME io_fbx
   HEADERS_VARS
     io_fbx_public_headers
@@ -488,6 +500,7 @@ mt_library(
     io_skeleton
   PRIVATE_LINK_LIBRARIES
     io_common
+    io_json_utils
     ${io_fbx_private_link_libraries}
     OpenFBX
 )
@@ -495,18 +508,6 @@ mt_library(
 if(MOMENTUM_ENABLE_FBX_SAVING)
   target_compile_definitions(io_fbx PRIVATE MOMENTUM_WITH_FBX_SDK)
 endif()
-
-mt_library(
-  NAME io_json_utils
-  HEADERS_VARS io_json_utils_public_headers
-  SOURCES_VARS io_json_utils_sources
-  PUBLIC_LINK_LIBRARIES
-    character
-    nlohmann_json::nlohmann_json
-  PRIVATE_LINK_LIBRARIES
-    common
-    math
-)
 
 mt_library(
   NAME io_gltf
