@@ -130,18 +130,21 @@ PhysicalProperties loadPhysicalPropertiesFromNodes(
     }
 
     // Reading the FBX property itself can throw: resolveProperty/resolveStringProperty use MT_THROW
-    // (std::runtime_error) when a node carries a malformed "physicalProperties" property, and the
-    // embedded JSON may be corrupt. Catch broadly so a single bad joint is skipped rather than
-    // aborting the whole character load.
+    // (std::runtime_error) when a node carries a malformed "physicalProperties" property, and
+    // jointPhysicalPropertiesFromJsonString additionally skips entries whose JSON content is
+    // malformed or invalid. Catch broadly so a single bad joint is skipped rather than aborting the
+    // whole character load.
     try {
       if (resolveProperty(*jointNode, "physicalProperties") == nullptr) {
         continue;
       }
 
-      const nlohmann::json physicalPropertiesJson =
-          nlohmann::json::parse(resolveStringProperty(*jointNode, "physicalProperties"));
-      result.push_back(jointPhysicalPropertiesFromJson(
-          physicalPropertiesJson, skeleton.joints.at(jointIndex).name, jointIndex));
+      if (auto jointProperties = jointPhysicalPropertiesFromJsonString(
+              resolveStringProperty(*jointNode, "physicalProperties"),
+              skeleton.joints.at(jointIndex).name,
+              jointIndex)) {
+        result.push_back(std::move(*jointProperties));
+      }
     } catch (const std::exception& e) {
       MT_LOGW(
           "Skipping physical properties for FBX joint '{}': {}",

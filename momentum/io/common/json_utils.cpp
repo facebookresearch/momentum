@@ -15,6 +15,8 @@
 #include <nlohmann/json.hpp>
 
 #include <cmath>
+#include <exception>
+#include <optional>
 #include <utility>
 
 namespace momentum {
@@ -369,6 +371,28 @@ JointPhysicalProperties jointPhysicalPropertiesFromJson(
   jointProperties.inertiaRotation = quaternionFromJson(j.at("inertiaRotation"), "inertiaRotation");
 
   return jointProperties;
+}
+
+std::string jointPhysicalPropertiesToJsonString(const JointPhysicalProperties& jointProperties) {
+  nlohmann::json j;
+  jointPhysicalPropertiesToJson(jointProperties, j);
+  return j.dump();
+}
+
+std::optional<JointPhysicalProperties> jointPhysicalPropertiesFromJsonString(
+    const std::string& json,
+    const std::string& jointName,
+    const size_t jointIndex) {
+  // Catch std::exception (not just nlohmann::json::exception): a well-formed JSON string can still
+  // fail jointPhysicalPropertiesFromJson's semantic validation (e.g. missing field, non-positive
+  // mass), which throws std::runtime_error via MT_THROW. Both classes of failure must skip the
+  // single bad entry rather than abort loading the whole character.
+  try {
+    return jointPhysicalPropertiesFromJson(nlohmann::json::parse(json), jointName, jointIndex);
+  } catch (const std::exception& e) {
+    MT_LOGW("Skipping malformed physical properties for joint '{}': {}", jointName, e.what());
+    return std::nullopt;
+  }
 }
 
 namespace {

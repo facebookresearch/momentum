@@ -30,7 +30,6 @@
 // They do the most awful things to isnan in here
 #include <fbxsdk.h>
 #include <fbxsdk/fileio/fbxiosettings.h>
-#include <nlohmann/json.hpp>
 
 #ifdef isnan
 #undef isnan
@@ -206,10 +205,8 @@ inline void addPhysicalProperties(
         "Unable to find FBX node for physical properties joint '{}'",
         character.skeleton.joints.at(jointIndex).name);
 
-    nlohmann::json physicalPropertiesJson;
-    jointPhysicalPropertiesToJson(jointProperties, physicalPropertiesJson);
     ::fbxsdk::FbxProperty::Create(nodeIt->second, ::fbxsdk::FbxStringDT, "physicalProperties")
-        .Set(FbxString(physicalPropertiesJson.dump().c_str()));
+        .Set(FbxString(jointPhysicalPropertiesToJsonString(jointProperties).c_str()));
   }
 }
 

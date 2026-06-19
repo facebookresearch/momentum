@@ -277,11 +277,9 @@ void savePhysicalPropertiesToUsd(
         primName,
         jointName);
 
-    nlohmann::json physicalJson;
-    jointPhysicalPropertiesToJson(jointProperties, physicalJson);
     prim.CreateAttribute(_tokens->momentumJoint, SdfValueTypeNames->String).Set(jointName);
     prim.CreateAttribute(_tokens->momentumPhysicalProperties, SdfValueTypeNames->String)
-        .Set(physicalJson.dump());
+        .Set(jointPhysicalPropertiesToJsonString(jointProperties));
   }
 }
 
@@ -391,11 +389,9 @@ PhysicalProperties loadPhysicalPropertiesFromUsd(
       continue;
     }
 
-    try {
-      auto physicalJson = nlohmann::json::parse(physicalStr);
-      result.push_back(jointPhysicalPropertiesFromJson(physicalJson, jointName, jointIndex));
-    } catch (const nlohmann::json::exception& e) {
-      MT_LOGW("Failed to parse USD physical properties for joint '{}': {}", jointName, e.what());
+    if (auto jointProperties =
+            jointPhysicalPropertiesFromJsonString(physicalStr, jointName, jointIndex)) {
+      result.push_back(std::move(*jointProperties));
     }
   }
 
