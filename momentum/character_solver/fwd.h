@@ -827,6 +827,25 @@ using OrientationRotDiffErrorFunctiond_const_w =
     ::std::weak_ptr<const OrientationRotDiffErrorFunctiond>;
 
 template <typename T>
+class PlaneCollisionErrorFunctionT;
+using PlaneCollisionErrorFunction = PlaneCollisionErrorFunctionT<float>;
+using PlaneCollisionErrorFunctiond = PlaneCollisionErrorFunctionT<double>;
+
+using PlaneCollisionErrorFunction_p = ::std::shared_ptr<PlaneCollisionErrorFunction>;
+using PlaneCollisionErrorFunction_u = ::std::unique_ptr<PlaneCollisionErrorFunction>;
+using PlaneCollisionErrorFunction_w = ::std::weak_ptr<PlaneCollisionErrorFunction>;
+using PlaneCollisionErrorFunction_const_p = ::std::shared_ptr<const PlaneCollisionErrorFunction>;
+using PlaneCollisionErrorFunction_const_u = ::std::unique_ptr<const PlaneCollisionErrorFunction>;
+using PlaneCollisionErrorFunction_const_w = ::std::weak_ptr<const PlaneCollisionErrorFunction>;
+
+using PlaneCollisionErrorFunctiond_p = ::std::shared_ptr<PlaneCollisionErrorFunctiond>;
+using PlaneCollisionErrorFunctiond_u = ::std::unique_ptr<PlaneCollisionErrorFunctiond>;
+using PlaneCollisionErrorFunctiond_w = ::std::weak_ptr<PlaneCollisionErrorFunctiond>;
+using PlaneCollisionErrorFunctiond_const_p = ::std::shared_ptr<const PlaneCollisionErrorFunctiond>;
+using PlaneCollisionErrorFunctiond_const_u = ::std::unique_ptr<const PlaneCollisionErrorFunctiond>;
+using PlaneCollisionErrorFunctiond_const_w = ::std::weak_ptr<const PlaneCollisionErrorFunctiond>;
+
+template <typename T>
 class PlaneErrorFunctionT;
 using PlaneErrorFunction = PlaneErrorFunctionT<float>;
 using PlaneErrorFunctiond = PlaneErrorFunctionT<double>;
