@@ -27,4 +27,10 @@ template <typename T>
 
 [[nodiscard]] Character withTestFaceExpressionBlendShapes(const Character& character);
 
+/// Returns a copy of `character` with deterministic physical mass properties attached to its first
+/// two joints, for exercising physical-properties I/O round trips.
+///
+/// @pre `character.skeleton.joints.size() >= 2`.
+[[nodiscard]] Character withTestPhysicalProperties(const Character& character);
+
 } // namespace momentum

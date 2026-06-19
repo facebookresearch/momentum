@@ -78,6 +78,7 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
   addMetaData(skeletonResult.rootNode, character);
+  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
   if (options.locators) {
     createLocatorNodes(character, impl_->scene, skeletonResult.nodes);
@@ -119,6 +120,7 @@ void FbxBuilder::addRigidBody(
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
   addMetaData(skeletonResult.rootNode, character);
+  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
   // Prefix skeleton joint names with charName to avoid collisions when
   // multiple rigid bodies share the scene (e.g. "root" -> "controller_l:root").

@@ -12,11 +12,13 @@
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
+#include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/marker.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
+#include "momentum/io/common/json_utils.h"
 #include "momentum/io/file_save_options.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
@@ -28,13 +30,16 @@
 // They do the most awful things to isnan in here
 #include <fbxsdk.h>
 #include <fbxsdk/fileio/fbxiosettings.h>
+#include <nlohmann/json.hpp>
 
 #ifdef isnan
 #undef isnan
 #endif
 
 #include <span>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace momentum::fbx_internal {
 
@@ -175,6 +180,37 @@ inline SkeletonNodeResult createSkeletonNodes(
   }
 
   return result;
+}
+
+inline void addPhysicalProperties(
+    const Character& character,
+    const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap) {
+  std::unordered_set<size_t> seenJoints;
+  for (const auto& jointProperties : character.physicalProperties) {
+    const size_t jointIndex =
+        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
+
+    MT_THROW_IF(
+        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
+        "Physical properties entry references unknown joint '{}'",
+        jointProperties.jointName);
+    MT_THROW_IF(
+        !seenJoints.insert(jointIndex).second,
+        "Multiple physical properties entries resolve to joint '{}' (index {})",
+        character.skeleton.joints.at(jointIndex).name,
+        jointIndex);
+
+    const auto nodeIt = jointToNodeMap.find(jointIndex);
+    MT_THROW_IF(
+        nodeIt == jointToNodeMap.end() || nodeIt->second == nullptr,
+        "Unable to find FBX node for physical properties joint '{}'",
+        character.skeleton.joints.at(jointIndex).name);
+
+    nlohmann::json physicalPropertiesJson;
+    jointPhysicalPropertiesToJson(jointProperties, physicalPropertiesJson);
+    ::fbxsdk::FbxProperty::Create(nodeIt->second, ::fbxsdk::FbxStringDT, "physicalProperties")
+        .Set(FbxString(physicalPropertiesJson.dump().c_str()));
+  }
 }
 
 // ============================================================================

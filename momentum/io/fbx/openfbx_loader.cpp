@@ -16,6 +16,7 @@
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
+#include "momentum/io/common/json_utils.h"
 #include "momentum/io/fbx/polygon_data.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
@@ -30,6 +31,7 @@
 #include <gsl/span_ext>
 
 #include <cmath>
+#include <exception>
 #include <fstream>
 #include <functional>
 #include <numeric>
@@ -111,6 +113,44 @@ const char* propertyTypeStr(ofbx::IElementProperty::Type type) {
     default:
       return "Unknown";
   }
+}
+
+ofbx::IElement* resolveProperty(const ofbx::Object& object, const char* name);
+std::string resolveStringProperty(const ofbx::Object& object, const char* name);
+
+PhysicalProperties loadPhysicalPropertiesFromNodes(
+    const Skeleton& skeleton,
+    const std::vector<const ofbx::Object*>& jointFbxNodes) {
+  PhysicalProperties result;
+
+  for (size_t jointIndex = 0; jointIndex < jointFbxNodes.size(); ++jointIndex) {
+    const ofbx::Object* jointNode = jointFbxNodes.at(jointIndex);
+    if (jointNode == nullptr) {
+      continue;
+    }
+
+    // Reading the FBX property itself can throw: resolveProperty/resolveStringProperty use MT_THROW
+    // (std::runtime_error) when a node carries a malformed "physicalProperties" property, and the
+    // embedded JSON may be corrupt. Catch broadly so a single bad joint is skipped rather than
+    // aborting the whole character load.
+    try {
+      if (resolveProperty(*jointNode, "physicalProperties") == nullptr) {
+        continue;
+      }
+
+      const nlohmann::json physicalPropertiesJson =
+          nlohmann::json::parse(resolveStringProperty(*jointNode, "physicalProperties"));
+      result.push_back(jointPhysicalPropertiesFromJson(
+          physicalPropertiesJson, skeleton.joints.at(jointIndex).name, jointIndex));
+    } catch (const std::exception& e) {
+      MT_LOGW(
+          "Skipping physical properties for FBX joint '{}': {}",
+          skeleton.joints.at(jointIndex).name,
+          e.what());
+    }
+  }
+
+  return result;
 }
 
 template <typename T>
@@ -1471,6 +1511,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
       metadata);
   result.resetJointMap();
   result.inverseBindPose = inverseBindPoseTransforms;
+  result.physicalProperties = loadPhysicalPropertiesFromNodes(result.skeleton, jointFbxNodes);
 
   return {result, jointParamMotions, scene->getSceneFrameRate()};
 }

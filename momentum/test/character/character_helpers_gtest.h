@@ -17,6 +17,11 @@ void compareMeshes(const Mesh_u& refMesh, const Mesh_u& mesh);
 void compareCollisionGeometry(
     const CollisionGeometry_u& refCollision,
     const CollisionGeometry_u& collision);
+/// Asserts that two sets of joint physical properties are equal, matching entries by joint name so
+/// the comparison is independent of save/load ordering.
+void comparePhysicalProperties(
+    const PhysicalProperties& refProperties,
+    const PhysicalProperties& properties);
 void compareChars(
     const Character& refChar,
     const Character& character,

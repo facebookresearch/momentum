@@ -22,6 +22,8 @@
 #include "momentum/math/mppca.h"
 #include "momentum/math/random.h"
 
+#include <Eigen/Geometry>
+
 #include <limits>
 
 namespace momentum {
@@ -258,6 +260,33 @@ Character withTestFaceExpressionBlendShapes(const Character& character) {
   blendShapes->setShapeVectors(randomMatrix<float>(3 * character.mesh->vertices.size(), nShapes));
 
   return character.withFaceExpressionBlendShape(blendShapes, nShapes);
+}
+
+Character withTestPhysicalProperties(const Character& character) {
+  MT_CHECK(character.skeleton.joints.size() >= 2);
+
+  Character result = character;
+
+  JointPhysicalProperties rootProperties;
+  rootProperties.jointName = result.skeleton.joints.at(0).name;
+  rootProperties.jointIndex = 0;
+  rootProperties.mass = 10.0f;
+  rootProperties.centerOfMassOffset = Eigen::Vector3f(1.0f, 2.0f, 3.0f);
+  rootProperties.inertia << 100.0f, 1.0f, 2.0f, 1.0f, 110.0f, 3.0f, 2.0f, 3.0f, 120.0f;
+  rootProperties.inertiaRotation =
+      Eigen::Quaternionf(Eigen::AngleAxisf(0.25f, Eigen::Vector3f::UnitZ()));
+  result.physicalProperties.push_back(rootProperties);
+
+  JointPhysicalProperties childProperties;
+  childProperties.jointName = result.skeleton.joints.at(1).name;
+  childProperties.jointIndex = 1;
+  childProperties.mass = 4.0f;
+  childProperties.centerOfMassOffset = Eigen::Vector3f(-2.0f, 0.5f, 1.0f);
+  childProperties.inertia << 25.0f, 0.5f, 0.0f, 0.5f, 30.0f, 0.25f, 0.0f, 0.25f, 35.0f;
+  childProperties.inertiaRotation = Eigen::Quaternionf::Identity();
+  result.physicalProperties.push_back(childProperties);
+
+  return result;
 }
 
 template <typename T>
