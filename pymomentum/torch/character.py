@@ -65,12 +65,29 @@ class Skeleton(torch.nn.Module):
         )
 
     def joint_parameters_to_local_skeleton_state(
-        self, joint_parameters: torch.Tensor
+        self, joint_parameters: torch.Tensor, backend: str = "torch"
     ) -> torch.Tensor:
         if not hasattr(self, "joint_prerotations"):
             raise RuntimeError("Character has no skeleton")
 
         joint_parameters = _unsqueeze_joint_params(joint_parameters)
+
+        # Triton FK is not scriptable, and this method is reached from forward()
+        # so it gets compiled under torch.jit.script. Gate the backend resolution
+        # behind is_scripting() so the scripting compiler prunes the whole block
+        # (is_scripting() is compile-time True) and only the torch path is
+        # compiled. is_scripting() is False under eager and torch.jit.trace, where
+        # the backend resolves normally.
+        if not torch.jit.is_scripting():
+            resolved = resolve_fk_backend(backend, joint_parameters)
+            if resolved == "triton":
+                return triton_fk.joint_parameters_to_local_skeleton_state(
+                    joint_parameters,
+                    self.joint_translation_offsets,
+                    self.joint_prerotations,
+                )
+            if resolved != "torch":
+                raise ValueError(f"Unsupported FK backend: {resolved}")
 
         joint_translation_offsets = self.joint_translation_offsets
         while joint_translation_offsets.ndim < joint_parameters.ndim:
@@ -391,18 +408,17 @@ class Skeleton(torch.nn.Module):
         joint_parameters = _unsqueeze_joint_params(joint_parameters)
         resolved = resolve_fk_backend(
             backend,
-            joint_parameters.float(),
+            joint_parameters,
             use_double_precision,
         )
         if resolved == "triton":
-            with torch.amp.autocast("cuda", enabled=False):
-                return triton_fk.joint_parameters_to_skeleton_state(
-                    joint_parameters.float(),
-                    self.joint_translation_offsets,
-                    self.joint_prerotations,
-                    self.joint_parents,
-                    active_joints,
-                )
+            return triton_fk.joint_parameters_to_skeleton_state(
+                joint_parameters,
+                self.joint_translation_offsets,
+                self.joint_prerotations,
+                self.joint_parents,
+                active_joints,
+            )
         if resolved != "torch":
             raise ValueError(f"Unsupported FK backend: {resolved}")
         return self.local_skeleton_state_to_skeleton_state(
@@ -949,19 +965,22 @@ class Character(torch.nn.Module):
             )
 
     def joint_parameters_to_local_skeleton_state(
-        self, joint_parameters: torch.Tensor
+        self, joint_parameters: torch.Tensor, backend: str = "torch"
     ) -> torch.Tensor:
         if not hasattr(self, "skeleton"):
             raise RuntimeError("Character has no skeleton, please provide one")
-        return self.skeleton.joint_parameters_to_local_skeleton_state(joint_parameters)
+        return self.skeleton.joint_parameters_to_local_skeleton_state(
+            joint_parameters, backend=backend
+        )
 
     def model_parameters_to_local_skeleton_state(
-        self, model_parameters: torch.Tensor
+        self, model_parameters: torch.Tensor, backend: str = "torch"
     ) -> torch.Tensor:
         if not hasattr(self, "skeleton"):
             raise RuntimeError("Character has no skeleton, please provide one")
         return self.joint_parameters_to_local_skeleton_state(
-            self.model_parameters_to_joint_parameters(model_parameters)
+            self.model_parameters_to_joint_parameters(model_parameters),
+            backend=backend,
         )
 
     def local_skeleton_state_to_skeleton_state(

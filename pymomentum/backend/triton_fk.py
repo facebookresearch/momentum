@@ -715,6 +715,83 @@ if triton is not None and tl is not None:  # noqa: C901
             )
             joint -= 1
 
+    @triton.jit
+    def _local_forward_kernel(
+        joint_params,
+        offsets,
+        prerotations,
+        output,
+        batch_size,
+        n_joints,
+        BLOCK_BATCH: tl.constexpr,
+    ):
+        # Local skeleton state: the per-joint state from _load_local_state, WITHOUT
+        # the parent composition that _forward_one_joint applies (i.e. the global FK
+        # before the prefix product up the kinematic tree).
+        batch = tl.program_id(0) * BLOCK_BATCH + tl.arange(0, BLOCK_BATCH)
+        mask = batch < batch_size
+        joint = 0
+        while joint < n_joints:
+            tx, ty, tz, qx, qy, qz, qw, s = _load_local_state(
+                joint_params, offsets, prerotations, batch, joint, n_joints, mask
+            )
+            out_base = output + batch * n_joints * 8 + joint * 8
+            tl.store(out_base + 0, tx, mask=mask)
+            tl.store(out_base + 1, ty, mask=mask)
+            tl.store(out_base + 2, tz, mask=mask)
+            tl.store(out_base + 3, qx, mask=mask)
+            tl.store(out_base + 4, qy, mask=mask)
+            tl.store(out_base + 5, qz, mask=mask)
+            tl.store(out_base + 6, qw, mask=mask)
+            tl.store(out_base + 7, s, mask=mask)
+            joint += 1
+
+    @triton.jit
+    def _local_backward_kernel(
+        joint_params,
+        offsets,
+        prerotations,
+        grad_output,
+        grad_joint_params,
+        batch_size,
+        n_joints,
+        BLOCK_BATCH: tl.constexpr,
+    ):
+        # Backward of the local FK: there is no tree, so grad w.r.t. the local
+        # skeleton state IS grad_output per joint. _store_joint_param_gradients
+        # propagates it to joint_params (translation identity, rotation through the
+        # prerotation*euler quaternion multiply + euler, scale through exp2).
+        batch = tl.program_id(0) * BLOCK_BATCH + tl.arange(0, BLOCK_BATCH)
+        mask = batch < batch_size
+        joint = 0
+        while joint < n_joints:
+            _, _, _, _, _, _, _, ls = _load_local_state(
+                joint_params, offsets, prerotations, batch, joint, n_joints, mask
+            )
+            gtx, gty, gtz, gqx, gqy, gqz, gqw, gs = _load_state(
+                grad_output, batch, joint, n_joints, mask
+            )
+            _store_joint_param_gradients(
+                joint_params,
+                prerotations,
+                grad_joint_params,
+                batch,
+                joint,
+                n_joints,
+                mask,
+                True,
+                gtx,
+                gty,
+                gtz,
+                gqx,
+                gqy,
+                gqz,
+                gqw,
+                gs,
+                ls,
+            )
+            joint += 1
+
 
 def _require_triton() -> None:
     if triton is None or tl is None:
@@ -906,4 +983,135 @@ def joint_parameters_to_skeleton_state(
         joint_prerotations,
         joint_parents,
         active_joints,
+    )
+
+
+def _validate_local_inputs(
+    joint_parameters: torch.Tensor,
+    joint_translation_offsets: torch.Tensor,
+    joint_prerotations: torch.Tensor,
+) -> None:
+    # Same as _validate_inputs but the local FK needs no kinematic tree (parents).
+    if not joint_parameters.is_cuda:
+        raise RuntimeError("Triton local FK requested, but joint_parameters is on CPU.")
+    if joint_parameters.dtype != torch.float32:
+        raise RuntimeError(
+            "Triton local FK currently only supports float32 joint parameters."
+        )
+    if joint_parameters.ndim < 2 or joint_parameters.shape[-1] != 7:
+        raise RuntimeError("joint_parameters must have shape [..., num_joints, 7].")
+    if joint_translation_offsets.device != joint_parameters.device:
+        raise RuntimeError("joint_translation_offsets must be on the same device.")
+    if joint_prerotations.device != joint_parameters.device:
+        raise RuntimeError("joint_prerotations must be on the same device.")
+    if joint_translation_offsets.dtype != torch.float32:
+        raise RuntimeError("joint_translation_offsets must be float32.")
+    if joint_prerotations.dtype != torch.float32:
+        raise RuntimeError("joint_prerotations must be float32.")
+    num_joints = joint_parameters.shape[-2]
+    if joint_translation_offsets.shape != (num_joints, 3):
+        raise RuntimeError("joint_translation_offsets must have shape [num_joints, 3].")
+    if joint_prerotations.shape != (num_joints, 4):
+        raise RuntimeError("joint_prerotations must have shape [num_joints, 4].")
+
+
+def _launch_local_forward(
+    joint_parameters: torch.Tensor,
+    joint_translation_offsets: torch.Tensor,
+    joint_prerotations: torch.Tensor,
+) -> torch.Tensor:
+    _validate_local_inputs(
+        joint_parameters, joint_translation_offsets, joint_prerotations
+    )
+    _require_triton()
+    num_joints = joint_parameters.shape[-2]
+    batch_size = joint_parameters.numel() // (num_joints * 7)
+    output = torch.empty(
+        (*joint_parameters.shape[:-1], 8),
+        device=joint_parameters.device,
+        dtype=joint_parameters.dtype,
+    )
+    grid = (triton.cdiv(batch_size, _BLOCK_BATCH),)
+    _local_forward_kernel[grid](
+        joint_parameters,
+        joint_translation_offsets,
+        joint_prerotations,
+        output,
+        batch_size,
+        num_joints,
+        BLOCK_BATCH=_BLOCK_BATCH,
+    )
+    return output
+
+
+def _launch_local_backward(
+    joint_parameters: torch.Tensor,
+    joint_translation_offsets: torch.Tensor,
+    joint_prerotations: torch.Tensor,
+    grad_output: torch.Tensor,
+) -> torch.Tensor:
+    _require_triton()
+    grad_output = grad_output.contiguous()
+    grad_joint_parameters = torch.empty_like(joint_parameters)
+    num_joints = joint_parameters.shape[-2]
+    batch_size = joint_parameters.numel() // (num_joints * 7)
+    grid = (triton.cdiv(batch_size, _BLOCK_BATCH),)
+    _local_backward_kernel[grid](
+        joint_parameters,
+        joint_translation_offsets,
+        joint_prerotations,
+        grad_output,
+        grad_joint_parameters,
+        batch_size,
+        num_joints,
+        BLOCK_BATCH=_BLOCK_BATCH,
+    )
+    return grad_joint_parameters
+
+
+class _JointParametersToLocalSkeletonState(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx: torch.autograd.function.FunctionCtx,
+        joint_parameters: torch.Tensor,
+        joint_translation_offsets: torch.Tensor,
+        joint_prerotations: torch.Tensor,
+    ) -> torch.Tensor:
+        joint_parameters = joint_parameters.contiguous()
+        joint_translation_offsets = joint_translation_offsets.contiguous()
+        joint_prerotations = joint_prerotations.contiguous()
+        output = _launch_local_forward(
+            joint_parameters, joint_translation_offsets, joint_prerotations
+        )
+        ctx.save_for_backward(
+            joint_parameters, joint_translation_offsets, joint_prerotations
+        )
+        return output
+
+    @staticmethod
+    def backward(
+        ctx: torch.autograd.function.FunctionCtx,
+        grad_output: torch.Tensor,
+    ) -> tuple[torch.Tensor | None, None, None]:
+        joint_parameters, joint_translation_offsets, joint_prerotations = (
+            ctx.saved_tensors
+        )
+        grad_joint_parameters = _launch_local_backward(
+            joint_parameters,
+            joint_translation_offsets,
+            joint_prerotations,
+            grad_output,
+        )
+        return grad_joint_parameters, None, None
+
+
+def joint_parameters_to_local_skeleton_state(
+    joint_parameters: torch.Tensor,
+    joint_translation_offsets: torch.Tensor,
+    joint_prerotations: torch.Tensor,
+) -> torch.Tensor:
+    return _JointParametersToLocalSkeletonState.apply(
+        joint_parameters,
+        joint_translation_offsets,
+        joint_prerotations,
     )
