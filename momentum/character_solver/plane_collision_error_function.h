@@ -12,6 +12,7 @@
 #include <momentum/character_solver/fwd.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 
+#include <span>
 #include <vector>
 
 namespace momentum {
@@ -89,6 +90,23 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
   /// getJacobian/getError/getGradient), or the rest pose state immediately after construction.
   [[nodiscard]] std::vector<PlaneCollisionDebugEntryT<T>> getCollisionDebugInfo() const;
 
+  /// Return world-space primitive surface points at or near the plane for an explicit state.
+  ///
+  /// A primitive contributes when its signed surface distance to the plane is <=
+  /// @p contactMargin. The returned point is on the primitive surface, deepest toward the plane.
+  [[nodiscard]] std::vector<Vector3<T>> getContactPoints(
+      std::span<const JointStateT<T>> states,
+      T contactMargin);
+
+  /// Return one world-space primitive surface point per parent joint at or near the plane.
+  ///
+  /// A primitive contributes when its signed surface distance to the plane is <=
+  /// @p contactMargin. When multiple primitives under the same parent joint contribute, the
+  /// returned point is the deepest one toward the plane.
+  [[nodiscard]] std::vector<Vector3<T>> getContactPointsByParent(
+      std::span<const JointStateT<T>> states,
+      T contactMargin);
+
  protected:
   struct PlaneCollisionResult {
     T signedDistance = T(0);
@@ -97,11 +115,27 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
     Vector3<T> position = Vector3<T>::Zero();
   };
 
+  struct ActivePlaneCollision {
+    size_t primitiveIndex = kInvalidIndex;
+    PlaneCollisionResult result;
+  };
+
   void updatePrimitiveList();
 
-  void updateCollisionState(const SkeletonStateT<T>& state);
+  void updateCandidateCollisionState(const SkeletonStateT<T>& state, T contactMargin);
+
+  [[nodiscard]] bool mayPrimitiveContactPlane(
+      const SkeletonStateT<T>& state,
+      size_t primitiveIndex,
+      T contactMargin) const;
+
+  [[nodiscard]] T primitiveParentSpaceBound(size_t primitiveIndex) const;
+
+  void prepareContactPointQuery(std::span<const JointStateT<T>> states, T contactMargin);
 
   [[nodiscard]] bool checkCollision(size_t primitiveIndex, PlaneCollisionResult& result) const;
+
+  void updateActiveParentCollisions();
 
   /// Accumulate gradient contributions along a joint chain up to the root.
   ///
@@ -130,6 +164,9 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   const CollisionGeometry collisionGeometry_;
   std::vector<size_t> primitiveIndices_;
+  std::vector<size_t> candidatePrimitiveIndices_;
+  std::vector<T> primitiveParentSpaceBounds_;
+  std::vector<ActivePlaneCollision> activeParentCollisions_;
   CollisionGeometryStateT<T> collisionState_;
   Vector3<T> planeNormal_;
   T planeOffset_;

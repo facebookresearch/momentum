@@ -60,6 +60,15 @@ struct CollisionGeometryStateT {
   /// Scaled box half extents in global coordinates.
   std::vector<Vector3<T>> boxHalfExtents;
 
+  /// Resizes all per-primitive state arrays to hold @p numElements entries.
+  void resize(size_t numElements);
+
+  /// Updates one primitive state from the given skeleton state and collision geometry.
+  void updatePrimitive(
+      const SkeletonStateT<T>& skeletonState,
+      const CollisionGeometry& collisionGeometry,
+      size_t primitiveIndex);
+
   /// Updates the state based on a given skeleton state and collision geometry.
   void update(const SkeletonStateT<T>& skeletonState, const CollisionGeometry& collisionGeometry);
 };
