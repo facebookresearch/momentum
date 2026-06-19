@@ -9,6 +9,7 @@
 
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
+#include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry.h"
 #include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/parameter_transform.h"
@@ -22,6 +23,7 @@
 #include "momentum/io/usd/usd_animation_io.h"
 #include "momentum/io/usd/usd_mesh_io.h"
 #include "momentum/io/usd/usd_skeleton_io.h"
+#include "momentum/io/usd/usd_utils.h"
 #include "momentum/math/mesh.h"
 
 #include <nlohmann/json.hpp>
@@ -34,6 +36,7 @@
 #include <pxr/usd/sdf/valueTypeName.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
+#include <pxr/usd/usdGeom/scope.h>
 #include <pxr/usd/usdSkel/root.h>
 
 #include <tbb/global_control.h>
@@ -70,6 +73,7 @@
 #include <mutex>
 #include <span>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 // Import USD namespace
@@ -81,7 +85,9 @@ TF_DEFINE_PRIVATE_TOKENS(
       "momentum:characterName"))((momentumParameterTransform, "momentum:parameterTransform"))(
         (momentumParameterLimits,
          "momentum:parameterLimits"))((momentumParameterSets, "momentum:parameterSets"))(
-        (momentumPoseConstraints, "momentum:poseConstraints")));
+        (momentumPoseConstraints,
+         "momentum:poseConstraints"))(PhysicalProperties)((momentumJoint, "momentum:joint"))(
+        (momentumPhysicalProperties, "momentum:physicalProperties")));
 
 namespace momentum {
 
@@ -232,6 +238,53 @@ void saveMomentumMetadata(const Character& character, const UsdPrim& skelRootPri
   }
 }
 
+void savePhysicalPropertiesToUsd(
+    const Character& character,
+    const UsdStageRefPtr& stage,
+    const SdfPath& skelRootPath) {
+  if (character.physicalProperties.empty()) {
+    return;
+  }
+
+  auto physicalPropertiesScope =
+      UsdGeomScope::Define(stage, skelRootPath.AppendChild(_tokens->PhysicalProperties));
+  MT_THROW_IF(
+      !physicalPropertiesScope.GetPrim().IsValid(),
+      "Failed to define physical properties scope on USD stage");
+
+  std::unordered_set<size_t> seenJoints;
+  for (const auto& jointProperties : character.physicalProperties) {
+    const size_t jointIndex =
+        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
+
+    MT_THROW_IF(
+        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
+        "Physical properties entry references unknown joint '{}'",
+        jointProperties.jointName);
+    MT_THROW_IF(
+        !seenJoints.insert(jointIndex).second,
+        "Multiple physical properties entries resolve to joint '{}' (index {})",
+        character.skeleton.joints.at(jointIndex).name,
+        jointIndex);
+
+    const std::string& jointName = character.skeleton.joints.at(jointIndex).name;
+    const std::string primName =
+        sanitizePrimName(jointName + "_physical_properties_" + std::to_string(jointIndex));
+    auto prim = stage->DefinePrim(physicalPropertiesScope.GetPath().AppendChild(TfToken(primName)));
+    MT_THROW_IF(
+        !prim.IsValid(),
+        "Failed to define physical properties prim '{}' for joint '{}'",
+        primName,
+        jointName);
+
+    nlohmann::json physicalJson;
+    jointPhysicalPropertiesToJson(jointProperties, physicalJson);
+    prim.CreateAttribute(_tokens->momentumJoint, SdfValueTypeNames->String).Set(jointName);
+    prim.CreateAttribute(_tokens->momentumPhysicalProperties, SdfValueTypeNames->String)
+        .Set(physicalJson.dump());
+  }
+}
+
 void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   // Load character name
   auto nameAttr = skelRootPrim.GetAttribute(_tokens->momentumCharacterName);
@@ -299,6 +352,56 @@ void loadMomentumMetadata(Character& character, const UsdPrim& skelRootPrim) {
   }
 }
 
+PhysicalProperties loadPhysicalPropertiesFromUsd(
+    const UsdStageRefPtr& stage,
+    const Skeleton& skeleton) {
+  PhysicalProperties result;
+
+  // Physical properties are authored under <SkelRoot>/PhysicalProperties (see
+  // savePhysicalPropertiesToUsd); resolve that scope and iterate only its children instead of
+  // scanning every prim on the stage.
+  UsdPrim physicalPropertiesScope;
+  for (const auto& prim : stage->Traverse()) {
+    if (prim.IsA<UsdSkelRoot>()) {
+      physicalPropertiesScope =
+          stage->GetPrimAtPath(prim.GetPath().AppendChild(_tokens->PhysicalProperties));
+      break;
+    }
+  }
+  if (!physicalPropertiesScope) {
+    return result;
+  }
+
+  for (const auto& prim : physicalPropertiesScope.GetChildren()) {
+    auto jointAttr = prim.GetAttribute(_tokens->momentumJoint);
+    auto physicalAttr = prim.GetAttribute(_tokens->momentumPhysicalProperties);
+    if (!jointAttr || !physicalAttr) {
+      continue;
+    }
+
+    std::string jointName;
+    std::string physicalStr;
+    if (!jointAttr.Get(&jointName) || !physicalAttr.Get(&physicalStr)) {
+      continue;
+    }
+
+    const size_t jointIndex = skeleton.getJointIdByName(jointName);
+    if (jointIndex == kInvalidIndex) {
+      MT_LOGW("Skipping USD physical properties for unknown joint '{}'", jointName);
+      continue;
+    }
+
+    try {
+      auto physicalJson = nlohmann::json::parse(physicalStr);
+      result.push_back(jointPhysicalPropertiesFromJson(physicalJson, jointName, jointIndex));
+    } catch (const nlohmann::json::exception& e) {
+      MT_LOGW("Failed to parse USD physical properties for joint '{}': {}", jointName, e.what());
+    }
+  }
+
+  return result;
+}
+
 Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   Character character;
 
@@ -352,6 +455,7 @@ Character loadUsdCharacterFromStage(const UsdStageRefPtr& stage) {
   }
 
   character.locators = loadLocatorsFromUsd(stage, character.skeleton);
+  character.physicalProperties = loadPhysicalPropertiesFromUsd(stage, character.skeleton);
 
   // Load momentum-specific metadata from SkelRoot prim
   for (const auto& prim : stage->Traverse()) {
@@ -486,6 +590,7 @@ UsdSaveContext createUsdSaveContext(
 
 void finalizeUsdSave(const UsdSaveContext& ctx, const Character& character) {
   saveMomentumMetadata(character, ctx.skelRoot.GetPrim());
+  savePhysicalPropertiesToUsd(character, ctx.stage, ctx.skelRoot.GetPath());
   ctx.stage->GetRootLayer()->Save();
 }
 

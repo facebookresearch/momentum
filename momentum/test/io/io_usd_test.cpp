@@ -17,13 +17,16 @@
 #include "momentum/character/skin_weights.h"
 #include "momentum/math/mesh.h"
 #include "momentum/test/character/character_helpers.h"
+#include "momentum/test/character/character_helpers_gtest.h"
 #include "momentum/test/io/io_helpers.h"
 
 #include <pxr/base/gf/half.h>
 #include <pxr/base/gf/quatf.h>
 #include <pxr/base/gf/vec3f.h>
 #include <pxr/base/gf/vec3h.h>
+#include <pxr/base/tf/token.h>
 #include <pxr/base/vt/array.h>
+#include <pxr/usd/sdf/path.h>
 #include <pxr/usd/usd/primRange.h>
 #include <pxr/usd/usd/stage.h>
 #include <pxr/usd/usdGeom/mesh.h>
@@ -33,11 +36,14 @@
 #include <pxr/usd/usdSkel/skeleton.h>
 
 #include <gtest/gtest.h>
+#include <Eigen/Geometry>
 
 #include <filesystem>
 #include <fstream>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -52,6 +58,25 @@ std::optional<filesystem::path> getTestResourcePath(const std::string& filename)
     return std::nullopt;
   }
   return filesystem::path(envVar.value()) / "usd" / filename;
+}
+
+std::unordered_set<std::string> loadPhysicalPropertiesJointNames(const UsdStageRefPtr& stage) {
+  std::unordered_set<std::string> result;
+  for (const auto& prim : stage->Traverse()) {
+    auto jointAttr = prim.GetAttribute(TfToken("momentum:joint"));
+    auto physicalAttr = prim.GetAttribute(TfToken("momentum:physicalProperties"));
+    if (!jointAttr || !physicalAttr) {
+      continue;
+    }
+
+    std::string jointName;
+    std::string physicalProperties;
+    if (jointAttr.Get(&jointName) && physicalAttr.Get(&physicalProperties) &&
+        !physicalProperties.empty()) {
+      result.insert(jointName);
+    }
+  }
+  return result;
 }
 
 } // namespace
@@ -437,6 +462,41 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_MomentumMetadata) {
         loadedCharacter.parameterLimits[i].weight, testCharacter.parameterLimits[i].weight)
         << "Parameter limit weight mismatch at index " << i;
   }
+}
+
+TEST_F(UsdIoTest, SaveAndLoadRoundTrip_PhysicalProperties) {
+  testCharacter = withTestPhysicalProperties(testCharacter);
+
+  auto tempFile = temporaryFile("momentum_usd_physical_properties", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  const auto stage = UsdStage::Open(tempFile.path().string());
+  ASSERT_TRUE(stage);
+  const auto skelRootPrim = stage->GetPrimAtPath(SdfPath("/SkelRoot"));
+  ASSERT_TRUE(skelRootPrim.IsValid());
+  EXPECT_FALSE(skelRootPrim.GetAttribute(TfToken("momentum:physicalProperties")));
+
+  const std::unordered_set<std::string> physicalPropertiesJointNames =
+      loadPhysicalPropertiesJointNames(stage);
+  EXPECT_EQ(physicalPropertiesJointNames.size(), testCharacter.physicalProperties.size());
+  for (const auto& jointProperties : testCharacter.physicalProperties) {
+    EXPECT_TRUE(
+        physicalPropertiesJointNames.find(jointProperties.jointName) !=
+        physicalPropertiesJointNames.end());
+  }
+
+  const auto loadedCharacter = loadUsdCharacter(tempFile.path());
+
+  comparePhysicalProperties(testCharacter.physicalProperties, loadedCharacter.physicalProperties);
+}
+
+TEST_F(UsdIoTest, SaveRejectsDuplicatePhysicalProperties) {
+  testCharacter = withTestPhysicalProperties(testCharacter);
+  // A second entry that resolves to the same joint must be rejected rather than silently dropped.
+  testCharacter.physicalProperties.push_back(testCharacter.physicalProperties.at(0));
+
+  auto tempFile = temporaryFile("momentum_usd_duplicate_physical_properties", ".usda");
+  EXPECT_THROW(saveUsd(tempFile.path(), testCharacter), std::runtime_error);
 }
 
 TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkeletonStates) {
