@@ -63,6 +63,12 @@ def resolve_backend(
         return "torch"
     if torch.jit.is_tracing():
         return "torch"
+    # torch.compile / torch.export (Dynamo) capture: the _FORCED_BACKEND
+    # ContextVar read below is not traceable by Dynamo, and the torch.jit gates
+    # above do not catch Dynamo export. Fall back to the traceable torch backend
+    # before touching the ContextVar so the graph captures cleanly.
+    if torch.compiler.is_compiling():
+        return "torch"
     # Eager-mode export override (set via force_backend). After the jit gates so
     # the scripting compiler still prunes it (the ContextVar access is not
     # scriptable, but is_scripting() returns above under torch.jit.script).
