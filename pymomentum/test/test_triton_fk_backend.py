@@ -61,6 +61,18 @@ class TritonFKBackendTest(unittest.TestCase):
                 backend_selection.resolve_backend("triton", cuda_tensor), "torch"
             )
 
+        # Under torch.compile/Dynamo `tensor.numel()` is a SymInt that Triton
+        # receives as a pointer arg, so the kernel fails to compile; fall back to
+        # the torch path here too. is_tracing() is False during compilation, so
+        # this is a distinct gate.
+        with mock.patch("torch.compiler.is_compiling", return_value=True):
+            self.assertEqual(
+                backend_selection.resolve_backend("auto", cuda_tensor), "torch"
+            )
+            self.assertEqual(
+                backend_selection.resolve_backend("triton", cuda_tensor), "torch"
+            )
+
     def test_force_backend_override(self) -> None:
         # Exporters run an eager warm-up forward before tracing; is_tracing() is
         # False there, so a CUDA float32 tensor would otherwise pick Triton (which
