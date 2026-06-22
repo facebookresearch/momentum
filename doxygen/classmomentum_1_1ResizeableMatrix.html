@@ -99,7 +99,7 @@ $(document).ready(function(){initNavTree('classmomentum_1_1ResizeableMatrix.html
 </div><!--header-->
 <div class="contents">
 
-<p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a></code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call.  
+<p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code>resize()</code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call.  
  <a href="classmomentum_1_1ResizeableMatrix.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="resizeable__matrix_8h_source.html">resizeable_matrix.h</a>&gt;</code></p>
@@ -144,7 +144,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">typename</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">T</a>&gt;<br />
-class momentum::ResizeableMatrix&lt; T &gt;</div><p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">resize()</a></code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call. </p>
+class momentum::ResizeableMatrix&lt; T &gt;</div><p>A dense column-major matrix whose underlying storage capacity grows monotonically and is reused across resizes, unlike <code>Eigen::Matrix&lt;T, Dynamic, Dynamic&gt;</code> which reallocates on every <code>resize()</code> / <code><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">conservativeResize()</a></code> call. </p>
 <p>Motivation: solver inner loops repeatedly build matrices (e.g. blockwise Jacobians) whose logical dimensions vary slightly from iteration to iteration. Using a plain <a class="el" href="namespaceEigen.html">Eigen</a> matrix triggers a heap allocation each time the size changes; this class amortizes those costs by only growing the backing buffer when the requested element count exceeds the current capacity. Storage shrinks only when the object is destroyed.</p>
 <p>Capacity vs. logical size: <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#ad1afeb4b46ce6ee8acba07bdc8d567e0">rows()</a></code> / <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#aae049a055618eb21b47312f436e5b5c4">cols()</a></code> report the logical size requested by the last <code><a class="el" href="classmomentum_1_1ResizeableMatrix.html#a6fb0c1d54e0e78bd4c72b7dc3102123d" title="Sets the logical size to rows x cols and zeroes every element.">resizeAndSetZero()</a></code>. The backing <code>std::vector</code> capacity may be larger and is never returned to the allocator while the object lives.</p>
 <p>Layout: data is stored contiguously in column-major order (matching <a class="el" href="namespaceEigen.html">Eigen</a>'s default) and is aligned to <code>kAlignment</code> bytes so that the returned <code>Eigen::Map&lt;..., Eigen::Aligned128&gt;</code> can use aligned SIMD loads/stores.</p>
@@ -532,7 +532,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li><li class="navelem"><a class="el" href="classmomentum_1_1ResizeableMatrix.html">ResizeableMatrix</a></li>
-    <li class="footer">Generated on Fri Jun 19 2026 00:38:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 22 2026 09:26:28 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

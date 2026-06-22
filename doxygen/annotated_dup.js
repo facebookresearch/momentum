@@ -142,6 +142,8 @@ var annotated_dup =
       [ "ParameterLimit", "structmomentum_1_1ParameterLimit.html", "structmomentum_1_1ParameterLimit" ],
       [ "ParameterTransformT", "structmomentum_1_1ParameterTransformT.html", "structmomentum_1_1ParameterTransformT" ],
       [ "PerFrameStateT", "structmomentum_1_1PerFrameStateT.html", "structmomentum_1_1PerFrameStateT" ],
+      [ "PlaneCollisionDebugEntryT", "structmomentum_1_1PlaneCollisionDebugEntryT.html", "structmomentum_1_1PlaneCollisionDebugEntryT" ],
+      [ "PlaneCollisionErrorFunctionT", "classmomentum_1_1PlaneCollisionErrorFunctionT.html", "classmomentum_1_1PlaneCollisionErrorFunctionT" ],
       [ "PlaneDataT", "structmomentum_1_1PlaneDataT.html", "structmomentum_1_1PlaneDataT" ],
       [ "PlaneErrorFunctionT", "classmomentum_1_1PlaneErrorFunctionT.html", "classmomentum_1_1PlaneErrorFunctionT" ],
       [ "PointTriangleVertexConstraintT", "structmomentum_1_1PointTriangleVertexConstraintT.html", "structmomentum_1_1PointTriangleVertexConstraintT" ],

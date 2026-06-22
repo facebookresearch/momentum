@@ -1,5 +1,6 @@
 var hierarchy =
 [
+    [ "momentum::PlaneCollisionErrorFunctionT< T >::ActivePlaneCollision", "structmomentum_1_1PlaneCollisionErrorFunctionT_1_1ActivePlaneCollision.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >", "classmomentum_1_1AlignedAllocator.html", null ],
     [ "momentum::AlignedDeleter", "structmomentum_1_1AlignedDeleter.html", null ],
     [ "momentum::BaseConfig", "structmomentum_1_1BaseConfig.html", [
@@ -133,6 +134,8 @@ var hierarchy =
     [ "momentum::ParameterTransformT< T >", "structmomentum_1_1ParameterTransformT.html", null ],
     [ "momentum::ParameterTransformT< float >", "structmomentum_1_1ParameterTransformT.html", null ],
     [ "momentum::PerFrameStateT< T >", "structmomentum_1_1PerFrameStateT.html", null ],
+    [ "momentum::PlaneCollisionDebugEntryT< T >", "structmomentum_1_1PlaneCollisionDebugEntryT.html", null ],
+    [ "momentum::PlaneCollisionErrorFunctionT< T >::PlaneCollisionResult", "structmomentum_1_1PlaneCollisionErrorFunctionT_1_1PlaneCollisionResult.html", null ],
     [ "momentum::PointTriangleVertexConstraintT< T >", "structmomentum_1_1PointTriangleVertexConstraintT.html", null ],
     [ "momentum::PolygonData", "structmomentum_1_1PolygonData.html", null ],
     [ "momentum::PoseConstraint", "structmomentum_1_1PoseConstraint.html", null ],
@@ -221,6 +224,7 @@ var hierarchy =
       [ "momentum::ModelParametersErrorFunctionT< T >", "classmomentum_1_1ModelParametersErrorFunctionT.html", [
         [ "momentum::FullyDifferentiableMotionErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiableMotionErrorFunctionT.html", null ]
       ] ],
+      [ "momentum::PlaneCollisionErrorFunctionT< T >", "classmomentum_1_1PlaneCollisionErrorFunctionT.html", null ],
       [ "momentum::PointTriangleVertexErrorFunctionT< T >", "classmomentum_1_1PointTriangleVertexErrorFunctionT.html", null ],
       [ "momentum::PosePriorErrorFunctionT< T >", "classmomentum_1_1PosePriorErrorFunctionT.html", [
         [ "momentum::FullyDifferentiablePosePriorErrorFunctionT< T >", "classmomentum_1_1FullyDifferentiablePosePriorErrorFunctionT.html", null ]

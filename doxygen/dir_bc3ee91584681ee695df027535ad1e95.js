@@ -44,6 +44,8 @@ var dir_bc3ee91584681ee695df027535ad1e95 =
     [ "normal_error_function.h", "normal__error__function_8h.html", "normal__error__function_8h" ],
     [ "orientation_error_function.cpp", "orientation__error__function_8cpp.html", null ],
     [ "orientation_error_function.h", "orientation__error__function_8h.html", "orientation__error__function_8h" ],
+    [ "plane_collision_error_function.cpp", "plane__collision__error__function_8cpp.html", null ],
+    [ "plane_collision_error_function.h", "plane__collision__error__function_8h.html", "plane__collision__error__function_8h" ],
     [ "plane_error_function.cpp", "plane__error__function_8cpp.html", "plane__error__function_8cpp" ],
     [ "plane_error_function.h", "plane__error__function_8h.html", "plane__error__function_8h" ],
     [ "point_triangle_vertex_error_function.cpp", "point__triangle__vertex__error__function_8cpp.html", "point__triangle__vertex__error__function_8cpp" ],

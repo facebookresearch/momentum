@@ -12,7 +12,7 @@ var usd__io_8cpp =
     [ "saveUsd", "usd__io_8cpp.html#a4103c08a3df0b348ae5463e870c76955", null ],
     [ "saveUsdCharacter", "usd__io_8cpp.html#a28dbf8d395bcc2dc443d17ad47b92bae", null ],
     [ "saveUsdCharacterWithMotion", "usd__io_8cpp.html#a8ae7ce2959a2c93d18a52e5df4c8b6a6", null ],
-    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__io_8cpp.html#a1ec5740f304b046829ff8ab476c9abe2", null ],
+    [ "TF_DEFINE_PRIVATE_TOKENS", "usd__io_8cpp.html#ace1bbc900fcc5a9b86b9f4a4f853b3fa", null ],
     [ "path", "usd__io_8cpp.html#aef4d3dade87ee186105e29dd22c6a9c6", null ],
     [ "skeleton", "usd__io_8cpp.html#aa905e882c7cfe72c9518eea87a5bbfeb", null ],
     [ "skelRoot", "usd__io_8cpp.html#afe13af4ee4e142de7656acf0e3ede287", null ],

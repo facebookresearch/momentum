@@ -17,5 +17,9 @@ var marker__tracker_8cpp =
     [ "trackPosesPerframe", "marker__tracker_8cpp.html#a70be7f0735bfdc9d790f984d09116e80", null ],
     [ "trackSequence", "marker__tracker_8cpp.html#ac3b7e9c5e26fcf1d1cb538707c9bd248", null ],
     [ "trackSequence", "marker__tracker_8cpp.html#a228f202c4ee94bc13fc86a4b7fc5fe28", null ],
-    [ "updateGloveConstraintsForBothHands", "marker__tracker_8cpp.html#addd79a52c21c55dedd99fcf887eea37c", null ]
+    [ "updateGloveConstraintsForBothHands", "marker__tracker_8cpp.html#addd79a52c21c55dedd99fcf887eea37c", null ],
+    [ "original", "marker__tracker_8cpp.html#a0f696441b5fded8244eea083088f10a4", null ],
+    [ "pWorld", "marker__tracker_8cpp.html#a4e38781042f27fbf7b21024d2849ca84", null ],
+    [ "pxErr", "marker__tracker_8cpp.html#a5fd8392d9517f0bc8f19c2f9bdf85613", null ],
+    [ "storage", "marker__tracker_8cpp.html#af6c4b63b0693b94e6d9e6afcd1199c08", null ]
 ];

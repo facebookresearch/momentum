@@ -4,6 +4,7 @@ var fbx__io__internal_8h =
     [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", "structmomentum_1_1fbx__internal_1_1JointCurveSetup" ],
     [ "momentum::fbx_internal::MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult" ],
     [ "addMetaData", "fbx__io__internal_8h.html#af7c3168cb203e33baf92cb83775b55cd", null ],
+    [ "addPhysicalProperties", "fbx__io__internal_8h.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c", null ],
     [ "createAnimationCurves", "fbx__io__internal_8h.html#a389c8f8eef8f63ff35f3f5e864523809", null ],
     [ "createBlendShapeAnimationCurves", "fbx__io__internal_8h.html#aa499b5116efef2bf9a691d6e9ad1f2bf", null ],
     [ "createCollisionGeometryNodes", "fbx__io__internal_8h.html#ad3d40af0f52e4e498c3a2f8ce95c5ee1", null ],

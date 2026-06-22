@@ -99,6 +99,7 @@ $(document).ready(function(){initNavTree('usd__io_8cpp.html',''); initResizable(
 <div class="textblock"><code>#include &quot;<a class="el" href="usd__io_8h_source.html">momentum/io/usd/usd_io.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="blend__shape_8h_source.html">momentum/character/blend_shape.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="character__utility_8h_source.html">momentum/character/character_utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="collision__geometry_8h_source.html">momentum/character/collision_geometry.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="inverse__parameter__transform_8h_source.html">momentum/character/inverse_parameter_transform.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="parameter__transform_8h_source.html">momentum/character/parameter_transform.h</a>&quot;</code><br />
@@ -112,6 +113,7 @@ $(document).ready(function(){initNavTree('usd__io_8cpp.html',''); initResizable(
 <code>#include &quot;<a class="el" href="usd__animation__io_8h_source.html">momentum/io/usd/usd_animation_io.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="usd__mesh__io_8h_source.html">momentum/io/usd/usd_mesh_io.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="usd__skeleton__io_8h_source.html">momentum/io/usd/usd_skeleton_io.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="usd__utils_8h_source.html">momentum/io/usd/usd_utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
 <code>#include &lt;nlohmann/json.hpp&gt;</code><br />
 <code>#include &lt;pxr/base/tf/diagnosticMgr.h&gt;</code><br />
@@ -122,6 +124,7 @@ $(document).ready(function(){initNavTree('usd__io_8cpp.html',''); initResizable(
 <code>#include &lt;pxr/usd/sdf/valueTypeName.h&gt;</code><br />
 <code>#include &lt;pxr/usd/usd/primRange.h&gt;</code><br />
 <code>#include &lt;pxr/usd/usd/stage.h&gt;</code><br />
+<code>#include &lt;pxr/usd/usdGeom/scope.h&gt;</code><br />
 <code>#include &lt;pxr/usd/usdSkel/root.h&gt;</code><br />
 <code>#include &lt;tbb/global_control.h&gt;</code><br />
 <code>#include &lt;atomic&gt;</code><br />
@@ -132,6 +135,7 @@ $(document).ready(function(){initNavTree('usd__io_8cpp.html',''); initResizable(
 <code>#include &lt;mutex&gt;</code><br />
 <code>#include &lt;span&gt;</code><br />
 <code>#include &lt;thread&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="usd__io_8cpp_source.html">Go to the source code of this file.</a></p>
@@ -143,8 +147,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a1ec5740f304b046829ff8ab476c9abe2" id="r_a1ec5740f304b046829ff8ab476c9abe2"><td class="memItemLeft" align="right" valign="top">PXR_NAMESPACE_USING_DIRECTIVE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="usd__io_8cpp.html#a1ec5740f304b046829ff8ab476c9abe2">TF_DEFINE_PRIVATE_TOKENS</a> (_tokens,((momentumCharacterName, &quot;momentum:characterName&quot;))((momentumParameterTransform, &quot;momentum:parameterTransform&quot;))((momentumParameterLimits, &quot;momentum:parameterLimits&quot;))((momentumParameterSets, &quot;momentum:parameterSets&quot;))((momentumPoseConstraints, &quot;momentum:poseConstraints&quot;)))</td></tr>
-<tr class="separator:a1ec5740f304b046829ff8ab476c9abe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace1bbc900fcc5a9b86b9f4a4f853b3fa" id="r_ace1bbc900fcc5a9b86b9f4a4f853b3fa"><td class="memItemLeft" align="right" valign="top">PXR_NAMESPACE_USING_DIRECTIVE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="usd__io_8cpp.html#ace1bbc900fcc5a9b86b9f4a4f853b3fa">TF_DEFINE_PRIVATE_TOKENS</a> (_tokens,((momentumCharacterName, &quot;momentum:characterName&quot;))((momentumParameterTransform, &quot;momentum:parameterTransform&quot;))((momentumParameterLimits, &quot;momentum:parameterLimits&quot;))((momentumParameterSets, &quot;momentum:parameterSets&quot;))((momentumPoseConstraints, &quot;momentum:poseConstraints&quot;))(PhysicalProperties)((momentumJoint, &quot;momentum:joint&quot;))((momentumPhysicalProperties, &quot;momentum:physicalProperties&quot;)))</td></tr>
+<tr class="separator:ace1bbc900fcc5a9b86b9f4a4f853b3fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92772fd591cc0c5fc3c7d934eb1a6260" id="r_a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1Character.html">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a92772fd591cc0c5fc3c7d934eb1a6260">momentum::loadUsdCharacter</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">inputPath</a>)</td></tr>
 <tr class="memdesc:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a USD character from a local file path.  <br /></td></tr>
 <tr class="separator:a92772fd591cc0c5fc3c7d934eb1a6260"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,8 +187,8 @@ Functions</h2></td></tr>
 <tr class="separator:a9923c33753c4316124ca1d5b9da87280"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a1ec5740f304b046829ff8ab476c9abe2" name="a1ec5740f304b046829ff8ab476c9abe2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ec5740f304b046829ff8ab476c9abe2">&#9670;&#160;</a></span>TF_DEFINE_PRIVATE_TOKENS()</h2>
+<a id="ace1bbc900fcc5a9b86b9f4a4f853b3fa" name="ace1bbc900fcc5a9b86b9f4a4f853b3fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace1bbc900fcc5a9b86b9f4a4f853b3fa">&#9670;&#160;</a></span>TF_DEFINE_PRIVATE_TOKENS()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -198,7 +202,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">((momentumCharacterName, &quot;momentum:characterName&quot;))((momentumParameterTransform, &quot;momentum:parameterTransform&quot;))((momentumParameterLimits, &quot;momentum:parameterLimits&quot;))((momentumParameterSets, &quot;momentum:parameterSets&quot;))((momentumPoseConstraints, &quot;momentum:poseConstraints&quot;))&#160;</td>
+          <td class="paramtype">((momentumCharacterName, &quot;momentum:characterName&quot;))((momentumParameterTransform, &quot;momentum:parameterTransform&quot;))((momentumParameterLimits, &quot;momentum:parameterLimits&quot;))((momentumParameterSets, &quot;momentum:parameterSets&quot;))((momentumPoseConstraints, &quot;momentum:poseConstraints&quot;))(PhysicalProperties)((momentumJoint, &quot;momentum:joint&quot;))((momentumPhysicalProperties, &quot;momentum:physicalProperties&quot;))&#160;</td>
           <td class="paramname">&#160;</td>
         </tr>
         <tr>
@@ -224,9 +228,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00369">369</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00469">469</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="openfbx__loader_8cpp_source.html#l01491">momentum::loadOpenFbxCharacter()</a>, <a class="el" href="rerun__compat_8h_source.html#l00091">momentum::logAxes3D()</a>, <a class="el" href="urdf__mesh__io_8cpp_source.html#l00415">momentum::resolveMeshPath()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00054">momentum::saveSkeletonStatesToUsd()</a>, and <a class="el" href="usd__skeleton__io_8cpp_source.html#l00217">momentum::saveSkeletonToUsd()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="openfbx__loader_8cpp_source.html#l01535">momentum::loadOpenFbxCharacter()</a>, <a class="el" href="rerun__compat_8h_source.html#l00091">momentum::logAxes3D()</a>, <a class="el" href="urdf__mesh__io_8cpp_source.html#l00415">momentum::resolveMeshPath()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00054">momentum::saveSkeletonStatesToUsd()</a>, and <a class="el" href="usd__skeleton__io_8cpp_source.html#l00217">momentum::saveSkeletonToUsd()</a>.</p>
 
 </div>
 </div>
@@ -242,7 +246,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00431">431</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00531">531</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -258,7 +262,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00430">430</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00530">530</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -274,9 +278,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00429">429</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="usd__io_8cpp_source.html#l00529">529</a> of file <a class="el" href="usd__io_8cpp_source.html">usd_io.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00449">momentum::loadBlendShapesFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00314">momentum::loadCollisionGeometryFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00444">momentum::loadLocatorsFromUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00450">momentum::loadMarkerSequenceFromUsd()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00180">momentum::loadMeshFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00127">momentum::loadSkeletonFromUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00128">momentum::loadSkeletonStatesFromUsd()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="usd__io_8cpp_source.html#l00494">momentum::loadUsdCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00504">momentum::loadUsdCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00610">momentum::loadUsdCharacterWithMotion()</a>, <a class="el" href="usd__io_8cpp_source.html#l00621">momentum::loadUsdCharacterWithMotion()</a>, <a class="el" href="usd__io_8cpp_source.html#l00524">momentum::loadUsdCharacterWithSkeletonStates()</a>, <a class="el" href="usd__io_8cpp_source.html#l00538">momentum::loadUsdCharacterWithSkeletonStates()</a>, <a class="el" href="usd__io_8cpp_source.html#l00662">momentum::loadUsdMarkerSequence()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00378">momentum::saveBlendShapesToUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00244">momentum::saveCollisionGeometryToUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00389">momentum::saveLocatorsToUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00340">momentum::saveMarkerSequenceToUsd()</a>, and <a class="el" href="usd__animation__io_8cpp_source.html#l00054">momentum::saveSkeletonStatesToUsd()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="usd__mesh__io_8cpp_source.html#l00449">momentum::loadBlendShapesFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00314">momentum::loadCollisionGeometryFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00444">momentum::loadLocatorsFromUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00450">momentum::loadMarkerSequenceFromUsd()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00180">momentum::loadMeshFromUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00127">momentum::loadSkeletonFromUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00128">momentum::loadSkeletonStatesFromUsd()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00217">momentum::loadSkinWeightsFromUsd()</a>, <a class="el" href="usd__io_8cpp_source.html#l00595">momentum::loadUsdCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00605">momentum::loadUsdCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00711">momentum::loadUsdCharacterWithMotion()</a>, <a class="el" href="usd__io_8cpp_source.html#l00722">momentum::loadUsdCharacterWithMotion()</a>, <a class="el" href="usd__io_8cpp_source.html#l00625">momentum::loadUsdCharacterWithSkeletonStates()</a>, <a class="el" href="usd__io_8cpp_source.html#l00639">momentum::loadUsdCharacterWithSkeletonStates()</a>, <a class="el" href="usd__io_8cpp_source.html#l00763">momentum::loadUsdMarkerSequence()</a>, <a class="el" href="usd__mesh__io_8cpp_source.html#l00378">momentum::saveBlendShapesToUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00244">momentum::saveCollisionGeometryToUsd()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00389">momentum::saveLocatorsToUsd()</a>, <a class="el" href="usd__animation__io_8cpp_source.html#l00340">momentum::saveMarkerSequenceToUsd()</a>, and <a class="el" href="usd__animation__io_8cpp_source.html#l00054">momentum::saveSkeletonStatesToUsd()</a>.</p>
 
 </div>
 </div>
@@ -286,7 +290,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_b80d2ac3e54057ed5222b59115afcc36.html">usd</a></li><li class="navelem"><a class="el" href="usd__io_8cpp.html">usd_io.cpp</a></li>
-    <li class="footer">Generated on Fri Jun 19 2026 00:38:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 22 2026 09:26:28 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

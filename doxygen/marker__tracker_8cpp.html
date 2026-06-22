@@ -127,6 +127,8 @@ $(document).ready(function(){initNavTree('marker__tracker_8cpp.html',''); initRe
 <code>#include &quot;<a class="el" href="fmt__eigen_8h_source.html">momentum/math/fmt_eigen.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="solver_8h_source.html">momentum/solver/solver.h</a>&quot;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
 </div>
 <p><a href="marker__tracker_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -188,13 +190,82 @@ Functions</h2></td></tr>
 <tr class="memdesc:a350e89790e69638c6f53d8709da65fee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute average and maximum marker tracking errors across all frames.  <br /></td></tr>
 <tr class="separator:a350e89790e69638c6f53d8709da65fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="a0f696441b5fded8244eea083088f10a4" name="a0f696441b5fded8244eea083088f10a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f696441b5fded8244eea083088f10a4">&#9670;&#160;</a></span>original</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::span&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1CameraKeypointData.html">CameraKeypointData</a>&gt; original</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l01366">1366</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4e38781042f27fbf7b21024d2849ca84" name="a4e38781042f27fbf7b21024d2849ca84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e38781042f27fbf7b21024d2849ca84">&#9670;&#160;</a></span>pWorld</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Vector3f pWorld</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l01197">1197</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l01226">momentum::logKeypointReprojectionDiagnostic()</a>.</p>
+
+</div>
+</div>
+<a id="a5fd8392d9517f0bc8f19c2f9bdf85613" name="a5fd8392d9517f0bc8f19c2f9bdf85613"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fd8392d9517f0bc8f19c2f9bdf85613">&#9670;&#160;</a></span>pxErr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> pxErr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l01198">1198</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="marker__tracker_8cpp_source.html#l01226">momentum::logKeypointReprojectionDiagnostic()</a>.</p>
+
+</div>
+</div>
+<a id="af6c4b63b0693b94e6d9e6afcd1199c08" name="af6c4b63b0693b94e6d9e6afcd1199c08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6c4b63b0693b94e6d9e6afcd1199c08">&#9670;&#160;</a></span>storage</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="structmomentum_1_1CameraKeypointData.html">CameraKeypointData</a>&gt; storage</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="marker__tracker_8cpp_source.html#l01365">1365</a> of file <a class="el" href="marker__tracker_8cpp_source.html">marker_tracker.cpp</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_da9a4e26ab0cde1b62bca67c124a4985.html">marker_tracking</a></li><li class="navelem"><a class="el" href="marker__tracker_8cpp.html">marker_tracker.cpp</a></li>
-    <li class="footer">Generated on Fri Jun 19 2026 00:38:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 22 2026 09:26:28 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

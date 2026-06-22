@@ -100,11 +100,13 @@ $(document).ready(function(){initNavTree('fbx__io__internal_8h.html',''); initRe
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="blend__shape_8h_source.html">momentum/character/blend_shape.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="character__utility_8h_source.html">momentum/character/character_utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="collision__geometry__state_8h_source.html">momentum/character/collision_geometry_state.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="marker_8h_source.html">momentum/character/marker.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="skin__weights_8h_source.html">momentum/character/skin_weights.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="exception_8h_source.html">momentum/common/exception.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="log_8h_source.html">momentum/common/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="json__utils_8h_source.html">momentum/io/common/json_utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="file__save__options_8h_source.html">momentum/io/file_save_options.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="constants_8h_source.html">momentum/math/constants.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&quot;</code><br />
@@ -113,7 +115,9 @@ $(document).ready(function(){initNavTree('fbx__io__internal_8h.html',''); initRe
 <code>#include &lt;fbxsdk.h&gt;</code><br />
 <code>#include &lt;fbxsdk/fileio/fbxiosettings.h&gt;</code><br />
 <code>#include &lt;span&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
 <code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
 </div>
 <p><a href="fbx__io__internal_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -147,6 +151,8 @@ Functions</h2></td></tr>
 <tr class="separator:a5c7f9b1e2f65d70f2ad1e0b79bec421e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae15b9d4da6b048a9ae8e70b721af9bb2" id="r_ae15b9d4da6b048a9ae8e70b721af9bb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html">SkeletonNodeResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1fbx__internal.html#ae15b9d4da6b048a9ae8e70b721af9bb2">momentum::fbx_internal::createSkeletonNodes</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, ::fbxsdk::FbxScene *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">scene</a>)</td></tr>
 <tr class="separator:ae15b9d4da6b048a9ae8e70b721af9bb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c3cb644f6bbfd9b5f2279e34f9cf39c" id="r_a2c3cb644f6bbfd9b5f2279e34f9cf39c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1fbx__internal.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c">momentum::fbx_internal::addPhysicalProperties</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::unordered_map&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">size_t</a>, fbxsdk::FbxNode * &gt; &amp;jointToNodeMap)</td></tr>
+<tr class="separator:a2c3cb644f6bbfd9b5f2279e34f9cf39c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7c3168cb203e33baf92cb83775b55cd" id="r_af7c3168cb203e33baf92cb83775b55cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1fbx__internal.html#af7c3168cb203e33baf92cb83775b55cd">momentum::fbx_internal::addMetaData</a> (::fbxsdk::FbxNode *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skeletonRootNode</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character)</td></tr>
 <tr class="separator:af7c3168cb203e33baf92cb83775b55cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbf0e3ef2bab6df1f7433c17e321f048" id="r_abbf0e3ef2bab6df1f7433c17e321f048"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum_1_1fbx__internal.html#abbf0e3ef2bab6df1f7433c17e321f048">momentum::fbx_internal::createLocatorNodes</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, ::fbxsdk::FbxScene *<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">scene</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::vector&lt;::fbxsdk::FbxNode * &gt; &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skeletonNodes</a>)</td></tr>
@@ -196,7 +202,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__io__internal_8h.html">fbx_io_internal.h</a></li>
-    <li class="footer">Generated on Fri Jun 19 2026 00:38:01 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Mon Jun 22 2026 09:26:28 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
