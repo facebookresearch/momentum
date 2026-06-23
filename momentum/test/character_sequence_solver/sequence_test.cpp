@@ -11,6 +11,7 @@
 #include "momentum/character/linear_skinning.h"
 #include "momentum/character/mesh_state.h"
 #include "momentum/character/parameter_transform.h"
+#include "momentum/character/sdf_collision_geometry.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
@@ -18,6 +19,7 @@
 #include "momentum/character_sequence_solver/jerk_sequence_error_function.h"
 #include "momentum/character_sequence_solver/joint_to_joint_sequence_error_function.h"
 #include "momentum/character_sequence_solver/model_parameters_sequence_error_function.h"
+#include "momentum/character_sequence_solver/sdf_collision_sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_error_function.h"
 #include "momentum/character_sequence_solver/sequence_solver.h"
 #include "momentum/character_sequence_solver/sequence_solver_function.h"
@@ -25,9 +27,12 @@
 #include "momentum/character_sequence_solver/velocity_magnitude_sequence_error_function.h"
 #include "momentum/character_sequence_solver/vertex_sequence_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
+#include "momentum/common/checks.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
+
+#include <axel/SignedDistanceField.h>
 
 using namespace momentum;
 
@@ -43,6 +48,37 @@ std::vector<ModelParametersT<T2>> castModelParameters(
   }
   return result;
 }
+
+// Analytic sphere collider (duck-typed) for exact-derivative tests. Returning the closed-form
+// distance and gradient avoids voxel-grid interpolation error, so the finite-difference checks
+// validate the error function's math rather than SDF interpolation quality.
+struct AnalyticSphereCollider {
+  float radius = 1.0f;
+  size_t parent = kInvalidIndex;
+  TransformT<float> transform; // SDF-local frame to parent frame
+
+  template <typename T>
+  [[nodiscard]] T evaluate(const Eigen::Vector3<T>& localPos) const {
+    return localPos.norm() - T(radius);
+  }
+  template <typename T>
+  [[nodiscard]] std::pair<T, Eigen::Vector3<T>> evaluateWithGradient(
+      const Eigen::Vector3<T>& localPos) const {
+    const T dist = localPos.norm();
+    const Eigen::Vector3<T> grad =
+        dist > T(0) ? Eigen::Vector3<T>(localPos / dist) : Eigen::Vector3<T>::UnitX();
+    return {dist - T(radius), grad};
+  }
+  [[nodiscard]] size_t parentJoint() const {
+    return parent;
+  }
+  [[nodiscard]] TransformT<float> localToParentTransform() const {
+    return transform;
+  }
+  [[nodiscard]] static bool isValid() {
+    return true;
+  }
+};
 
 template <typename T>
 void testGradientAndJacobian(
@@ -166,7 +202,8 @@ void testGradientAndJacobian(
           jacobianPlus,
           residualPlus,
           usedRows);
-      numJacobian.block(0, p, usedRows, 1) = (residualPlus - residual) / kStepSize;
+      numJacobian.block(0, p, usedRows, 1) =
+          (residualPlus.head(usedRows) - residual.head(usedRows)) / kStepSize;
     }
 
     EXPECT_LE(
@@ -485,6 +522,140 @@ TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians)
       auto parameters = randomModelParameters(character, 2);
       testGradientAndJacobian<double>(errorFunction, parameters, character, 2e-3f, 1e-6f, true);
     }
+  }
+}
+
+TEST(Momentum_SequenceErrorFunctions, SDFCollisionSequenceError_TunnelingAndGradients) {
+  // Set up two poses that sweep a vertex across an SDF collider so the segment between frames
+  // tunnels through it, then verify (a) the swept penetration is detected, (b) no penalty arises
+  // without inter-frame motion or without penetration, and (c) the analytic gradient and Jacobian
+  // match finite differences. The energy is the maximum penetration depth along the sweep, located
+  // at the true deepest point, so by the envelope theorem its gradient is a smooth function of the
+  // parameters and the full FD checks (gradient and per-row Jacobian) apply. An analytic sphere
+  // collider is used for the FD checks so they test the error function's math, not SDF voxel
+  // interpolation; a voxelized SDF collider then exercises the production code path.
+  Random<>::GetSingleton().setSeed(12345);
+
+  const Character character = createTestCharacter(5);
+  const ParameterTransformd ptd = character.parameterTransform.cast<double>();
+  const int vi = 0;
+
+  const auto worldVertex = [&](const ModelParametersd& mp) -> Eigen::Vector3d {
+    const SkeletonStated ss(ptd.apply(mp), character.skeleton);
+    MeshStated ms;
+    ms.update(mp, ss, character);
+    MT_CHECK_NOTNULL(ms.posedMesh_);
+    return ms.posedMesh_->vertices[vi];
+  };
+
+  const auto computeError = [&](const auto& ef,
+                                const std::vector<ModelParametersd>& frameParams) -> double {
+    std::vector<SkeletonStated> skelStates(2);
+    std::vector<MeshStated> meshStates(2);
+    for (size_t f = 0; f < 2; ++f) {
+      const SkeletonStated ss(ptd.apply(frameParams[f]), character.skeleton);
+      skelStates[f].set(ss);
+      meshStates[f].update(frameParams[f], skelStates[f], character);
+    }
+    return ef.getError(frameParams, skelStates, meshStates);
+  };
+
+  // A unit vector perpendicular to `seg`, used to offset a collider off the swept axis so the
+  // deepest point has a well-defined (non-medial) normal.
+  const auto perpendicularUnit = [](const Eigen::Vector3d& seg) -> Eigen::Vector3d {
+    Eigen::Vector3d perp = seg.cross(Eigen::Vector3d::UnitX());
+    if (perp.norm() < 1e-9) {
+      perp = seg.cross(Eigen::Vector3d::UnitY());
+    }
+    return perp.normalized();
+  };
+
+  const std::vector<ModelParametersd> params = randomModelParameters(character, 2);
+  const Eigen::Vector3d p0 = worldVertex(params[0]);
+  const Eigen::Vector3d p1 = worldVertex(params[1]);
+  const double dist = (p1 - p0).norm();
+  ASSERT_GT(dist, 0.1) << "test poses must move the vertex enough to sweep through a collider";
+  const Eigen::Vector3d mid = 0.5 * (p0 + p1);
+  // Sphere radius < half the swept distance: both endpoints sit outside, the segment crosses the
+  // interior (entry + exit), which is exactly the pure-tunneling case this function targets.
+  const double radius = 0.35 * dist;
+  // Offset the collider off the sweep axis so the segment passes through the sphere off-center: the
+  // deepest point is then a well-defined surface normal rather than the sphere's medial-axis center
+  // (the exact-center pass is a measure-zero degeneracy not handled by the generic gradient).
+  const Eigen::Vector3d perp = perpendicularUnit(p1 - p0);
+
+  {
+    SCOPED_TRACE("World-fixed collider on the swept path (analytic, exact derivatives)");
+    const Eigen::Vector3f center = (mid + perp * (0.4 * radius)).cast<float>();
+    AnalyticSphereCollider collider;
+    collider.radius = static_cast<float>(radius);
+    collider.parent = kInvalidIndex;
+    collider.transform = TransformT<float>(center);
+    const std::vector<AnalyticSphereCollider> colliders = {collider};
+    SDFCollisionSequenceErrorFunctionT<double, AnalyticSphereCollider> errorFunction(
+        character, colliders, {vi});
+
+    // Tunneling is detected.
+    EXPECT_GT(computeError(errorFunction, params), 0.0);
+    // No inter-frame motion -> nothing is swept -> no penalty (this is the sequence-specific case;
+    // static penetration is the per-frame function's responsibility).
+    EXPECT_EQ(computeError(errorFunction, {params[0], params[0]}), 0.0);
+
+    // A collider far from the swept path produces no penalty.
+    const Eigen::Vector3f farCenter = (mid + Eigen::Vector3d::Constant(100.0)).cast<float>();
+    AnalyticSphereCollider farCollider = collider;
+    farCollider.transform = TransformT<float>(farCenter);
+    SDFCollisionSequenceErrorFunctionT<double, AnalyticSphereCollider> farErrorFunction(
+        character, {farCollider}, {vi});
+    EXPECT_EQ(computeError(farErrorFunction, params), 0.0);
+
+    testGradientAndJacobian<double>(errorFunction, params, character, 2e-3f, 1e-6f, true);
+  }
+
+  {
+    SCOPED_TRACE("Joint-attached collider exercises the collider hierarchy");
+    // Attach the collider to a joint and place the SDF origin at the midpoint of the swept segment
+    // expressed in that joint's frame. Because the sweep is interpolated in the collider's local
+    // frame, this makes the local segment straddle the collider origin regardless of how the parent
+    // joint itself moves between frames, guaranteeing a clean entry/exit tunnel that also drives
+    // the collider's parent-joint chain derivatives.
+    const size_t parentJoint = 1;
+    const SkeletonStated ss0(ptd.apply(params[0]), character.skeleton);
+    const SkeletonStated ss1(ptd.apply(params[1]), character.skeleton);
+    const Eigen::Vector3d a = ss0.jointState[parentJoint].transform.inverse() * p0;
+    const Eigen::Vector3d b = ss1.jointState[parentJoint].transform.inverse() * p1;
+    const double localDist = (a - b).norm();
+    ASSERT_GT(localDist, 1e-4) << "vertex must move relative to the collider's joint frame";
+    // Offset off the local sweep axis so the deepest point has a well-defined (non-medial) normal.
+    const Eigen::Vector3d perpLocal = perpendicularUnit(b - a);
+    const Eigen::Vector3f localCenter =
+        (0.5 * (a + b) + perpLocal * (0.4 * 0.35 * localDist)).cast<float>();
+    AnalyticSphereCollider collider;
+    collider.radius = static_cast<float>(0.35 * localDist);
+    collider.parent = parentJoint;
+    collider.transform = TransformT<float>(localCenter);
+    const std::vector<AnalyticSphereCollider> colliders = {collider};
+    SDFCollisionSequenceErrorFunctionT<double, AnalyticSphereCollider> errorFunction(
+        character, colliders, {vi});
+
+    EXPECT_GT(computeError(errorFunction, params), 0.0);
+    testGradientAndJacobian<double>(errorFunction, params, character, 2e-3f, 1e-6f, true);
+  }
+
+  {
+    // Confirm the production collider type (a voxelized SignedDistanceField) flows through the
+    // error function and detects the tunnel. Derivative accuracy against a voxel grid is limited by
+    // trilinear interpolation, so this case only checks behavior, not finite differences.
+    SCOPED_TRACE("Voxelized SDF collider (production type) detects tunneling");
+    const Eigen::Vector3f center = (mid + perp * (0.4 * radius)).cast<float>();
+    const auto sphere = std::make_shared<axel::SignedDistanceField<float>>(
+        axel::SignedDistanceField<float>::createSphere(
+            radius, Eigen::Vector3<axel::Index>(32, 32, 32)));
+    const std::vector<SDFColliderT<float>> colliders = {
+        SDFColliderT<float>{TransformT<float>(center), kInvalidIndex, sphere}};
+    SDFCollisionSequenceErrorFunctiond errorFunction(character, colliders, {vi});
+    EXPECT_GT(computeError(errorFunction, params), 0.0);
+    EXPECT_EQ(computeError(errorFunction, {params[0], params[0]}), 0.0);
   }
 }
 
