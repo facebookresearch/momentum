@@ -3253,3 +3253,85 @@ class TestSolver(unittest.TestCase):
         np.testing.assert_allclose(
             skel_out[:, :3], skel_init[:, :3] + transform[:3], atol=1e-2
         )
+
+    def test_joint_to_joint_sequence_error_function(self) -> None:
+        """Test JointToJointSequenceErrorFunction creation and basic behavior."""
+        character = pym_test_utils.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+
+        # Create error function
+        ef = pym_solver2.JointToJointSequenceErrorFunction(
+            character,
+            weight=1.0,
+            position_weight=2.0,
+            orientation_weight=0.5,
+        )
+        self.assertEqual(ef.weight, 1.0)
+        self.assertEqual(ef.position_weight, 2.0)
+        self.assertEqual(ef.orientation_weight, 0.5)
+
+        # Add constraints
+        ef.add_constraint(source_joint=2, reference_joint=0)
+        ef.add_constraint(
+            source_joint=1,
+            reference_joint=3,
+            weight=0.5,
+            name="test_constraint",
+        )
+        self.assertEqual(ef.num_constraints, 2)
+
+        # Same parameters on both frames: zero error
+        model_params_same = np.zeros((2, n_params), dtype=np.float32)
+        error = ef.get_error(model_params_same)
+        self.assertAlmostEqual(error, 0.0, places=6)
+
+        # Different parameters on both frames: non-zero error
+        rng = np.random.RandomState(42)
+        model_params_diff = rng.randn(2, n_params).astype(np.float32) * 0.1
+        error = ef.get_error(model_params_diff)
+        self.assertGreater(error, 0.0)
+
+        # Clear constraints
+        ef.clear_constraints()
+        self.assertEqual(ef.num_constraints, 0)
+
+        # After clearing, error should be zero
+        error = ef.get_error(model_params_diff)
+        self.assertAlmostEqual(error, 0.0, places=6)
+
+    def test_joint_to_joint_sequence_error_function_solve_reduces_error(
+        self,
+    ) -> None:
+        """Test solve_sequence() can reduce joint-to-joint sequence error."""
+        character = pym_test_utils.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+        n_frames = 2
+
+        rng = np.random.RandomState(7)
+        model_params_init = np.zeros((n_frames, n_params), dtype=np.float32)
+        model_params_init[1] = (rng.randn(n_params) * 0.25).astype(np.float32)
+
+        rel_error = pym_solver2.JointToJointSequenceErrorFunction(
+            character,
+            weight=10.0,
+            position_weight=10.0,
+            orientation_weight=10.0,
+        )
+        rel_error.add_constraint(source_joint=2, reference_joint=0)
+        initial_error = rel_error.get_error(model_params_init)
+        self.assertGreater(initial_error, 1e-4)
+
+        solver_function = pym_solver2.SequenceSolverFunction(character, n_frames)
+        solver_function.set_enabled_parameters(np.ones(n_params, dtype=bool))
+        solver_function.add_sequence_error_function(0, rel_error)
+
+        solver_options = pym_solver2.SequenceSolverOptions()
+        solver_options.max_iterations = 25
+        solver_options.regularization = 1e-6
+
+        model_params_final = pym_solver2.solve_sequence(
+            solver_function, model_params_init, solver_options
+        )
+
+        final_error = rel_error.get_error(model_params_final)
+        self.assertLess(final_error, initial_error * 1e-3)
