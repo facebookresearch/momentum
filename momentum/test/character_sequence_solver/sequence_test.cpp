@@ -69,6 +69,9 @@ struct AnalyticSphereCollider {
         dist > T(0) ? Eigen::Vector3<T>(localPos / dist) : Eigen::Vector3<T>::UnitX();
     return {dist - T(radius), grad};
   }
+  [[nodiscard]] axel::BoundingBox<float> bounds() const {
+    return axel::BoundingBox<float>(Eigen::Vector3f::Zero(), radius);
+  }
   [[nodiscard]] size_t parentJoint() const {
     return parent;
   }
