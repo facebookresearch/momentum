@@ -66,8 +66,11 @@ namespace momentum {
 /// gradient is mapped to world space including the world-to-collider scale factor, which the
 /// derivatives require whenever the collider's joint carries a non-unit scale.
 ///
+/// A conservative broadphase skips any (vertex, collider) pair whose swept segment cannot reach the
+/// collider's SDF bounds, so distant pairs cost only an axis-aligned-bounding-box test.
+///
 /// The `SdfColliderType` is duck-typed; see `SDFCollisionErrorFunctionT` for the required
-/// interface.
+/// interface (this function additionally uses `bounds()`).
 template <typename T, typename SdfColliderType = SDFColliderT<float>>
 class SDFCollisionSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
  public:
@@ -168,6 +171,15 @@ class SDFCollisionSequenceErrorFunctionT : public SequenceErrorFunctionT<T> {
       const Eigen::Vector3<T>& localPos0,
       const Eigen::Vector3<T>& delta,
       const SweptIntervalT& interval,
+      const SdfColliderType& collider) const;
+
+  /// Conservative broadphase: returns false when the swept segment's local-frame AABB cannot reach
+  /// the collider's SDF bounds, so the pair cannot penetrate and can be skipped. Because the sweep
+  /// is evaluated in the same local frame, this is exact — it only skips pairs whose detailed test
+  /// would have found no penetration.
+  [[nodiscard]] bool sweptSegmentMayCollide(
+      const Eigen::Vector3<T>& localPos0,
+      const Eigen::Vector3<T>& localPos1,
       const SdfColliderType& collider) const;
 
   // Sphere-trace step budget for crossing detection. Generous: the |sdf|-clamped step cannot skip a
@@ -326,6 +338,20 @@ T SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::findDeepestPoint(
 }
 
 template <typename T, typename SdfColliderType>
+bool SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::sweptSegmentMayCollide(
+    const Eigen::Vector3<T>& localPos0,
+    const Eigen::Vector3<T>& localPos1,
+    const SdfColliderType& collider) const {
+  const auto bounds = collider.bounds();
+  const Eigen::Vector3<T> boundsMin = bounds.min().template cast<T>();
+  const Eigen::Vector3<T> boundsMax = bounds.max().template cast<T>();
+  const Eigen::Vector3<T> segMin = localPos0.cwiseMin(localPos1);
+  const Eigen::Vector3<T> segMax = localPos0.cwiseMax(localPos1);
+  return !(
+      (segMin.array() > boundsMax.array()).any() || (segMax.array() < boundsMin.array()).any());
+}
+
+template <typename T, typename SdfColliderType>
 double SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::getError(
     std::span<const ModelParametersT<T>> /* modelParameters */,
     std::span<const SkeletonStateT<T>> skelStates,
@@ -358,6 +384,9 @@ double SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::getError(
       const T segLen = delta.norm();
       if (segLen < std::numeric_limits<T>::epsilon()) {
         continue; // no motion: static penetration is the per-frame function's job
+      }
+      if (!sweptSegmentMayCollide(localPos0, localPos1, collider)) {
+        continue;
       }
 
       const auto intervals = findPenetratingIntervals(localPos0, delta, segLen, collider);
@@ -416,6 +445,9 @@ double SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::getGradient(
       const Eigen::Vector3<T> delta = localPos1 - localPos0;
       const T segLen = delta.norm();
       if (segLen < std::numeric_limits<T>::epsilon()) {
+        continue;
+      }
+      if (!sweptSegmentMayCollide(localPos0, localPos1, collider)) {
         continue;
       }
 
@@ -530,6 +562,9 @@ double SDFCollisionSequenceErrorFunctionT<T, SdfColliderType>::getJacobian(
       const Eigen::Vector3<T> delta = localPos1 - localPos0;
       const T segLen = delta.norm();
       if (segLen < std::numeric_limits<T>::epsilon()) {
+        continue;
+      }
+      if (!sweptSegmentMayCollide(localPos0, localPos1, collider)) {
         continue;
       }
 
