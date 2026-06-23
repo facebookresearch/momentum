@@ -814,9 +814,14 @@ TYPED_TEST(UtilityTest, QuaternionLogMapEdgeCases) {
   qLargeAngle.z() = T(0.1);
   qLargeAngle.normalize();
 
-  // Just verify that the function doesn't crash and returns a valid result
+  // Just verify that the function doesn't crash and returns a valid result.
+  // Use IsNanNoOpt rather than Eigen's hasNaN()/std::isnan: NaN detection via the
+  // latter is unreliable under -ffast-math (-ffinite-math-only), which this target
+  // (math_test_fast_math) builds with. See the IsNanNoOpt test above.
   const Vector3<T> rot_vec_large = quaternionLogMap<T>(qLargeAngle);
-  EXPECT_FALSE(rot_vec_large.hasNaN());
+  EXPECT_FALSE(IsNanNoOpt(rot_vec_large.x()));
+  EXPECT_FALSE(IsNanNoOpt(rot_vec_large.y()));
+  EXPECT_FALSE(IsNanNoOpt(rot_vec_large.z()));
 }
 
 TYPED_TEST(UtilityTest, QuaternionLogMap) {

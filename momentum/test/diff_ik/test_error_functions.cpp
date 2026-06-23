@@ -162,7 +162,13 @@ void testConstraintDerivs(
 
     // Validate the gradient:
     for (size_t iParam = 0; iParam < paramTransform.numAllModelParameters(); ++iParam) {
-      const T eps = 1e-3f;
+      // Central-difference step for the error finite-difference check below. Use
+      // the same small eps as the Jacobian check above: for near-singular
+      // configurations (e.g. projection constraints whose point is close to the
+      // camera, where the gradient is ~1e10), a larger eps lets the error's
+      // curvature dominate the difference and the relativeError check spuriously
+      // trips under Eigen 5.0.1's float rounding.
+      const T eps = 1e-4f;
 
       // This is a much more accurate estimate of the gradient (grad = J^T*r) so
       // we can use a much smaller eps.
