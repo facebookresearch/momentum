@@ -10,6 +10,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/acceleration_sequence_error_function.h>
 #include <momentum/character_sequence_solver/jerk_sequence_error_function.h>
+#include <momentum/character_sequence_solver/joint_to_joint_sequence_error_function.h>
 #include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/state_sequence_error_function.h>
@@ -21,6 +22,7 @@
 #include <pybind11/stl.h>
 #include <Eigen/Core>
 
+#include <pymomentum/python_utility/eigen_quaternion.h>
 #include <pymomentum/solver2/solver2_sequence_error_functions.h>
 #include <pymomentum/solver2/solver2_utility.h>
 
@@ -271,6 +273,92 @@ the gradient contribution is set to zero.
           "target_speeds",
           &mm::VelocityMagnitudeSequenceErrorFunction::getTargetSpeeds,
           "Returns the per-joint target speeds.");
+
+  py::class_<
+      mm::JointToJointSequenceErrorFunction,
+      mm::SequenceErrorFunction,
+      std::shared_ptr<mm::JointToJointSequenceErrorFunction>>(
+      m, "JointToJointSequenceErrorFunction")
+      .def(
+          py::init<>([](const mm::Character& character,
+                        float weight,
+                        float positionWeight,
+                        float orientationWeight) {
+            validateWeight(weight, "weight");
+            validateWeight(positionWeight, "position_weight");
+            validateWeight(orientationWeight, "orientation_weight");
+
+            auto result = std::make_shared<mm::JointToJointSequenceErrorFunction>(character);
+            result->setWeight(weight);
+            result->setPositionWeight(positionWeight);
+            result->setOrientationWeight(orientationWeight);
+
+            return result;
+          }),
+          R"(A sequence error function that penalizes frame-to-frame changes in the relative
+transform between two joints.
+
+For each constraint with source joint A and reference joint B, this function computes
+the relative transform at two consecutive frames and penalizes any change between them:
+
+- Position error: ``relPos_{i+1} - relPos_i``
+- Orientation error: ``relRot_{i+1} - relRot_i``
+
+This keeps the relative transform (e.g. a hand's grip on an object) stable from frame
+to frame.
+
+:param character: The character to use.
+:param weight: The weight of the error function. Defaults to 1.0.
+:param position_weight: The weight of the position error. Defaults to 1.0.
+:param orientation_weight: The weight of the orientation error. Defaults to 1.0.)",
+          py::arg("character"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f,
+          py::arg("position_weight") = 1.0f,
+          py::arg("orientation_weight") = 1.0f)
+      .def(
+          "add_constraint",
+          [](mm::JointToJointSequenceErrorFunction& self,
+             size_t sourceJoint,
+             size_t referenceJoint,
+             float constraintWeight,
+             const std::string& name) {
+            self.addConstraint(sourceJoint, referenceJoint, constraintWeight, name);
+          },
+          R"(Add a constraint between two joints.
+
+:param source_joint: Index of the source joint (the joint whose relative pose is tracked).
+:param reference_joint: Index of the reference joint (the frame of reference).
+:param weight: Weight for this constraint. Defaults to 1.0.
+:param name: Name for debugging. Defaults to empty string.)",
+          py::arg("source_joint"),
+          py::arg("reference_joint"),
+          py::kw_only(),
+          py::arg("weight") = 1.0f,
+          py::arg("name") = "")
+      .def(
+          "clear_constraints",
+          &mm::JointToJointSequenceErrorFunction::clearConstraints,
+          "Clears all constraints from the error function.")
+      .def_property_readonly(
+          "num_constraints",
+          &mm::JointToJointSequenceErrorFunction::getNumConstraints,
+          "Returns the number of constraints.")
+      .def_property(
+          "weight",
+          &mm::JointToJointSequenceErrorFunction::getWeight,
+          &mm::JointToJointSequenceErrorFunction::setWeight,
+          "The weight applied to the error function.")
+      .def_property(
+          "position_weight",
+          &mm::JointToJointSequenceErrorFunction::getPositionWeight,
+          &mm::JointToJointSequenceErrorFunction::setPositionWeight,
+          "The weight of the position error.")
+      .def_property(
+          "orientation_weight",
+          &mm::JointToJointSequenceErrorFunction::getOrientationWeight,
+          &mm::JointToJointSequenceErrorFunction::setOrientationWeight,
+          "The weight of the orientation error.");
 
   py::class_<
       mm::StateSequenceErrorFunction,
