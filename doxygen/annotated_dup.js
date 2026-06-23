@@ -168,6 +168,7 @@ var annotated_dup =
       [ "RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", "structmomentum_1_1RigidTransformNodeResult" ],
       [ "SDFColliderT", "structmomentum_1_1SDFColliderT.html", "structmomentum_1_1SDFColliderT" ],
       [ "SDFCollisionErrorFunctionT", "classmomentum_1_1SDFCollisionErrorFunctionT.html", "classmomentum_1_1SDFCollisionErrorFunctionT" ],
+      [ "SDFCollisionSequenceErrorFunctionT", "classmomentum_1_1SDFCollisionSequenceErrorFunctionT.html", "classmomentum_1_1SDFCollisionSequenceErrorFunctionT" ],
       [ "SequenceCholeskySolverOptions", "structmomentum_1_1SequenceCholeskySolverOptions.html", "structmomentum_1_1SequenceCholeskySolverOptions" ],
       [ "SequenceCholeskySolverT", "classmomentum_1_1SequenceCholeskySolverT.html", "classmomentum_1_1SequenceCholeskySolverT" ],
       [ "SequenceErrorFunctionT", "classmomentum_1_1SequenceErrorFunctionT.html", "classmomentum_1_1SequenceErrorFunctionT" ],

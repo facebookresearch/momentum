@@ -498,7 +498,7 @@ $(document).ready(function(){initNavTree('state__error__function_8cpp_source.htm
 <div class="foldopen" id="foldopen00394" data-start="{" data-end="}">
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno"><a class="line" href="classmomentum_1_1StateErrorFunctionT.html#a49a9315ef4db65b2268444ad949a83d1">  394</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="classmomentum_1_1StateErrorFunctionT.html#a49a9315ef4db65b2268444ad949a83d1">StateErrorFunctionT&lt;T&gt;::getJacobianSize</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> =</div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>      (targetPositionWeights_.array() != 0 || targetRotationWeights_.array() != 0).<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>();</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>      (targetPositionWeights_.array() != 0 || targetRotationWeights_.array() != 0).count();</div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>  <span class="keywordflow">if</span> (rotationErrorType_ == <a class="code hl_enumvalue" href="namespacemomentum.html#a11209afa2162ab698fcda33e188be23daccaad5827425984528a9c0736e815471">RotationErrorType::QuaternionLogMap</a>) {</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    <span class="comment">// 3 (translation) + 3 (logmap) = 6 per joint</span></div>
 <div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> * 6;</div>
@@ -735,7 +735,7 @@ $(document).ready(function(){initNavTree('state__error__function_8cpp_source.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="state__error__function_8cpp.html">state_error_function.cpp</a></li>
-    <li class="footer">Generated on Mon Jun 22 2026 15:03:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 23 2026 19:22:37 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -15,6 +15,8 @@ var dir_4bbc02503dcde960b17f3ec8b41511e6 =
     [ "multipose_solver.h", "multipose__solver_8h.html", "multipose__solver_8h" ],
     [ "multipose_solver_function.cpp", "multipose__solver__function_8cpp.html", null ],
     [ "multipose_solver_function.h", "multipose__solver__function_8h.html", "multipose__solver__function_8h" ],
+    [ "sdf_collision_sequence_error_function.cpp", "sdf__collision__sequence__error__function_8cpp.html", null ],
+    [ "sdf_collision_sequence_error_function.h", "sdf__collision__sequence__error__function_8h.html", "sdf__collision__sequence__error__function_8h" ],
     [ "sequence_cholesky_solver.cpp", "sequence__cholesky__solver_8cpp.html", "sequence__cholesky__solver_8cpp" ],
     [ "sequence_cholesky_solver.h", "sequence__cholesky__solver_8h.html", "sequence__cholesky__solver_8h" ],
     [ "sequence_error_function.h", "sequence__error__function_8h.html", "sequence__error__function_8h" ],

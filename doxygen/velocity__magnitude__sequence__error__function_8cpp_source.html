@@ -350,7 +350,7 @@ $(document).ready(function(){initNavTree('velocity__magnitude__sequence__error__
 <div class="foldopen" id="foldopen00234" data-start="{" data-end="}">
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html#ad60dcfdd0699d556e7b483a87c4e1c73">  234</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="classmomentum_1_1VelocityMagnitudeSequenceErrorFunctionT.html#ad60dcfdd0699d556e7b483a87c4e1c73">VelocityMagnitudeSequenceErrorFunctionT&lt;T&gt;::getJacobianSize</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  <span class="comment">// 1 row per active joint (scalar speed residual)</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> = (targetWeights_.array() != 0).<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>();</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> = (targetWeights_.array() != 0).count();</div>
 <div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a>;</div>
 <div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>}</div>
 </div>
@@ -518,7 +518,7 @@ $(document).ready(function(){initNavTree('velocity__magnitude__sequence__error__
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="velocity__magnitude__sequence__error__function_8cpp.html">velocity_magnitude_sequence_error_function.cpp</a></li>
-    <li class="footer">Generated on Mon Jun 22 2026 15:03:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 23 2026 19:22:37 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -303,7 +303,7 @@ $(document).ready(function(){initNavTree('finite__difference__sequence__error__f
 <div class="foldopen" id="foldopen00187" data-start="{" data-end="}">
 <div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#aae348ffa03ad5936ac28eabca8d5c990">  187</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="classmomentum_1_1FiniteDifferenceSequenceErrorFunctionT.html#aae348ffa03ad5936ac28eabca8d5c990">FiniteDifferenceSequenceErrorFunctionT&lt;T&gt;::getJacobianSize</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <span class="comment">// 3 rows per active joint (x, y, z derivative components)</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> = (targetWeights_.array() != 0).<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>();</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> = (targetWeights_.array() != 0).count();</div>
 <div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">nActiveJoints</a> * 3;</div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>}</div>
 </div>
@@ -450,7 +450,7 @@ $(document).ready(function(){initNavTree('finite__difference__sequence__error__f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="finite__difference__sequence__error__function_8cpp.html">finite_difference_sequence_error_function.cpp</a></li>
-    <li class="footer">Generated on Mon Jun 22 2026 15:03:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 23 2026 19:22:37 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

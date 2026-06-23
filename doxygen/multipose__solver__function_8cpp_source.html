@@ -273,13 +273,13 @@ $(document).ready(function(){initNavTree('multipose__solver__function_8cpp_sourc
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="classmomentum_1_1MultiposeSolverFunctionT.html#a1437f5335c6bdff024920d49fe78246b">  158</a></span><a class="code hl_typedef" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> <a class="code hl_function" href="classmomentum_1_1MultiposeSolverFunctionT.html#a1437f5335c6bdff024920d49fe78246b">MultiposeSolverFunctionT&lt;T&gt;::getUniversalLocatorParameterSet</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <a class="code hl_typedef" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">res</a> = <a class="code hl_typedef" href="namespacemomentum.html#aadb2e10e938b6dde5b7faf1dfb44ce7e">ParameterSet</a>();</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a> = 0;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <span class="keywordtype">size_t</span> count = 0;</div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keywordflow">for</span> (Eigen::Index <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> = 0; <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a> &lt; parameterTransform_-&gt;numAllModelParameters(); <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>++) {</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keywordflow">if</span> (universal_[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>] &gt; 0.0f) {</div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>      <span class="keywordflow">if</span> (parameterTransform_-&gt;name[<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">i</a>][0] == <span class="charliteral">&#39;_&#39;</span>) {</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">res</a>.set(genericParameters_.size() * getNumFrames() + <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">res</a>.set(genericParameters_.size() * getNumFrames() + count);</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>      }</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>      <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">count</a>++;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>      count++;</div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    }</div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  }</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
@@ -556,7 +556,7 @@ $(document).ready(function(){initNavTree('multipose__solver__function_8cpp_sourc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4bbc02503dcde960b17f3ec8b41511e6.html">character_sequence_solver</a></li><li class="navelem"><a class="el" href="multipose__solver__function_8cpp.html">multipose_solver_function.cpp</a></li>
-    <li class="footer">Generated on Mon Jun 22 2026 15:03:47 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Jun 23 2026 19:22:37 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
