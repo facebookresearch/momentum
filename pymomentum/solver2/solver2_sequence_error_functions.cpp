@@ -6,12 +6,14 @@
  */
 
 #include <momentum/character/character.h>
+#include <momentum/character/sdf_collision_geometry.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character_sequence_solver/acceleration_sequence_error_function.h>
 #include <momentum/character_sequence_solver/jerk_sequence_error_function.h>
 #include <momentum/character_sequence_solver/joint_to_joint_sequence_error_function.h>
 #include <momentum/character_sequence_solver/model_parameters_sequence_error_function.h>
+#include <momentum/character_sequence_solver/sdf_collision_sequence_error_function.h>
 #include <momentum/character_sequence_solver/sequence_solver.h>
 #include <momentum/character_sequence_solver/state_sequence_error_function.h>
 #include <momentum/character_sequence_solver/velocity_magnitude_sequence_error_function.h>
@@ -602,6 +604,55 @@ motion in animations, cloth simulation, or any scenario where smooth vertex move
           &mm::VertexSequenceErrorFunctionT<float>::getWeight,
           &mm::VertexSequenceErrorFunctionT<float>::setWeight,
           "The weight applied to the error function.");
+
+  py::class_<
+      mm::SDFCollisionSequenceErrorFunctionT<float>,
+      mm::SequenceErrorFunction,
+      std::shared_ptr<mm::SDFCollisionSequenceErrorFunctionT<float>>>(
+      m, "SDFCollisionSequenceErrorFunction")
+      .def(
+          "__repr__",
+          [](const mm::SDFCollisionSequenceErrorFunctionT<float>& self) {
+            return fmt::format("SDFCollisionSequenceErrorFunction(weight={})", self.getWeight());
+          })
+      .def(
+          py::init<>([](const mm::Character& character,
+                        std::vector<mm::SDFColliderT<float>> sdfColliders,
+                        const std::vector<int>& participatingVertices,
+                        const std::vector<float>& vertexWeights,
+                        float weight) {
+            validateWeight(weight, "weight");
+            auto result = std::make_shared<mm::SDFCollisionSequenceErrorFunctionT<float>>(
+                character, sdfColliders, participatingVertices, vertexWeights);
+            result->setWeight(weight);
+            return result;
+          }),
+          R"(A sequence error function that penalizes a mesh vertex sweeping through an SDF collider between two consecutive frames.
+
+The single-frame :class:`SDFCollisionErrorFunction` only sees penetration at each sampled pose, so a vertex moving fast enough to pass entirely through a thin collider (e.g. a finger) in one timestep is never penalized -- it "tunnels". This function closes that gap by sweeping the straight segment connecting a vertex's positions at consecutive frames and penalizing the deepest penetration that segment reaches inside a collider. It spans two frames and is added to a :class:`SequenceSolverFunction` with :meth:`SequenceSolverFunction.add_sequence_error_function`.
+
+:param character: The character containing skeleton, mesh, and skin weights.
+:param sdf_colliders: List of :class:`pymomentum.geometry.SDFCollider` objects to sweep against.
+:param participating_vertices: Vertex indices to include in collision testing (empty = all vertices).
+:param vertex_weights: Per-vertex collision weights (empty = uniform weight of 1.0).
+:param weight: The weight applied to the error function.)",
+          py::keep_alive<1, 2>(),
+          py::arg("character"),
+          py::arg("sdf_colliders"),
+          py::arg("participating_vertices") = std::vector<int>{},
+          py::arg("vertex_weights") = std::vector<float>{},
+          py::kw_only(),
+          py::arg("weight") = 1.0f)
+      .def_property(
+          "weight",
+          &mm::SDFCollisionSequenceErrorFunctionT<float>::getWeight,
+          &mm::SDFCollisionSequenceErrorFunctionT<float>::setWeight,
+          "The weight applied to the error function.")
+      .def_property_readonly(
+          "character",
+          &mm::SDFCollisionSequenceErrorFunctionT<float>::getCharacter,
+          "Returns the character used by this error function.",
+          py::return_value_policy::reference_internal);
 }
 
 } // namespace pymomentum

@@ -9,6 +9,7 @@ import unittest
 
 import numpy as np
 import numpy.typing as npt
+import pymomentum.axel as axel  # @manual=:axel
 import pymomentum.camera as pym_camera  # @manual=:camera
 import pymomentum.geometry as pym_geometry  # @manual=:geometry
 import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
@@ -21,7 +22,116 @@ def _normalize_vec(vec: npt.NDArray) -> npt.NDArray:
     return vec / np.linalg.norm(vec)
 
 
+def _sphere_sdf(radius: float, resolution: int = 16) -> axel.SignedDistanceField:
+    """A sphere SDF of the given radius centered at the local origin."""
+    half = 1.5 * radius
+    bounds = axel.BoundingBox(
+        np.array([-half] * 3, dtype=np.float32),
+        np.array([half] * 3, dtype=np.float32),
+    )
+    sdf = axel.SignedDistanceField(bounds, np.array([resolution] * 3, dtype=np.int32))
+    sdf_view = np.asarray(sdf)
+    for k in range(resolution):
+        for j in range(resolution):
+            for i in range(resolution):
+                world = sdf.grid_to_world(
+                    np.array([float(i), float(j), float(k)], dtype=np.float32)
+                )
+                sdf_view[i, j, k] = float(np.linalg.norm(world)) - radius
+    return sdf
+
+
+def _deepest_penetration(
+    character: pym_geometry.Character,
+    params_a: npt.NDArray,
+    params_b: npt.NDArray,
+    vertex_index: int,
+    center: npt.NDArray,
+    radius: float,
+) -> float:
+    """Greatest penetration of a vertex's swept (frame A -> frame B) segment into a sphere."""
+    ss_a = pym_geometry.model_parameters_to_skeleton_state(character, params_a)
+    ss_b = pym_geometry.model_parameters_to_skeleton_state(character, params_b)
+    pa = np.asarray(character.skin_points(ss_a))[vertex_index, :3]
+    pb = np.asarray(character.skin_points(ss_b))[vertex_index, :3]
+    deepest = 0.0
+    for s in np.linspace(0.0, 1.0, 65):
+        p = (1.0 - s) * pa + s * pb
+        deepest = max(deepest, radius - float(np.linalg.norm(p - center)))
+    return deepest
+
+
 class TestSolver(unittest.TestCase):
+    def test_sdf_collision_sequence_error_function(self) -> None:
+        """The swept SDF collision sequence error function is constructible from Python,
+        integrates with the sequence solver, and pulls a vertex back out of a collider it
+        would otherwise tunnel through between two frames."""
+        character = pym_test_utils.create_test_character(num_joints=4)
+        n_params = character.parameter_transform.size
+        vi = 0
+
+        np.random.seed(7)
+        params0 = (0.3 * np.random.rand(n_params)).astype(np.float32)
+        params1 = (0.3 * np.random.rand(n_params)).astype(np.float32)
+
+        ss0 = pym_geometry.model_parameters_to_skeleton_state(character, params0)
+        ss1 = pym_geometry.model_parameters_to_skeleton_state(character, params1)
+        p0 = np.asarray(character.skin_points(ss0))[vi, :3]
+        p1 = np.asarray(character.skin_points(ss1))[vi, :3]
+        dist = float(np.linalg.norm(p1 - p0))
+        self.assertGreater(dist, 0.1)
+
+        radius = 0.35 * dist
+        seg = p1 - p0
+        perp = np.cross(seg, np.array([1.0, 0.0, 0.0]))
+        if np.linalg.norm(perp) < 1e-9:
+            perp = np.cross(seg, np.array([0.0, 1.0, 0.0]))
+        perp = perp / np.linalg.norm(perp)
+        # Place the sphere just off the swept axis so the segment tunnels through it.
+        center = (0.5 * (p0 + p1) + perp * (0.4 * radius)).astype(np.float32)
+
+        collider = pym_geometry.SDFCollider(
+            parent=-1, sdf=_sphere_sdf(radius), translation=center
+        )
+
+        # Binding sanity: constructs from a Python list of colliders and exposes properties.
+        err = pym_solver2.SDFCollisionSequenceErrorFunction(
+            character, [collider], participating_vertices=[vi], weight=1e4
+        )
+        self.assertAlmostEqual(err.weight, 1e4)
+        self.assertEqual(err.character.skeleton.size, character.skeleton.size)
+
+        # The straight sweep from params0 to params1 tunnels through the collider.
+        init_penetration = _deepest_penetration(
+            character, params0, params1, vi, center, radius
+        )
+        self.assertGreater(init_penetration, 0.0)
+
+        # Pin frame 0 firmly and frame 1 loosely toward the tunneling pose, then let the
+        # (strong) collision term resolve the sweep.
+        solver_function = pym_solver2.SequenceSolverFunction(character, 2)
+        pin0 = pym_solver2.ModelParametersErrorFunction(character)
+        pin0.set_target_parameters(params0, 1e3 * np.ones(n_params, dtype=np.float32))
+        solver_function.add_error_function(0, pin0)
+        pin1 = pym_solver2.ModelParametersErrorFunction(character)
+        pin1.set_target_parameters(params1, 1e-2 * np.ones(n_params, dtype=np.float32))
+        solver_function.add_error_function(1, pin1)
+        solver_function.add_sequence_error_function(0, err)
+
+        solver_options = pym_solver2.SequenceSolverOptions()
+        solver_options.max_iterations = 50
+        solver_options.regularization = 1e-5
+        model_params_init = np.stack([params0, params1]).astype(np.float32)
+        solved = pym_solver2.solve_sequence(
+            solver_function, model_params_init, solver_options
+        )
+
+        # The collision term should have pulled the swept vertex out, reducing penetration.
+        solved_penetration = _deepest_penetration(
+            character, solved[0], solved[1], vi, center, radius
+        )
+        self.assertLess(solved_penetration, init_penetration)
+
     def test_ik_basic(self) -> None:
         """Test solve_ik() with just position constraints."""
 
