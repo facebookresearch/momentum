@@ -337,21 +337,33 @@ If you want to compute the gradient of multiple error functions, consider wrappi
               -> std::tuple<Eigen::VectorXf, Eigen::MatrixXf> {
             const auto& pt = self.getParameterTransform();
             auto params = toModelParameters(modelParameters, pt);
-            const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
 
-            momentum::MeshState meshState;
-            if (self.needsMesh()) {
-              const auto* character = self.getCharacter();
-              MT_THROW_IF(character == nullptr, "Character is null but mesh is required.");
-              meshState.update(params, state, *character);
+            // toModelParameters returns an owned copy, so the heavy jacobian
+            // evaluation below touches no Python state and can run with the GIL
+            // released -- this lets independent error functions be evaluated
+            // concurrently from Python threads.
+            Eigen::VectorXf residual;
+            Eigen::MatrixXf jacobian;
+            {
+              py::gil_scoped_release release;
+              const momentum::SkeletonState state(pt.apply(params), self.getSkeleton());
+
+              momentum::MeshState meshState;
+              if (self.needsMesh()) {
+                const auto* character = self.getCharacter();
+                MT_THROW_IF(character == nullptr, "Character is null but mesh is required.");
+                meshState.update(params, state, *character);
+              }
+
+              const auto jacSize = self.getJacobianSize();
+              Eigen::MatrixXf jacFull = Eigen::MatrixXf::Zero(jacSize, pt.numAllModelParameters());
+              Eigen::VectorXf resFull = Eigen::VectorXf::Zero(jacSize);
+              int usedRows = 0;
+              self.getJacobian(params, state, meshState, jacFull, resFull, usedRows);
+              residual = resFull.head(usedRows);
+              jacobian = jacFull.topRows(usedRows);
             }
-
-            const auto jacSize = self.getJacobianSize();
-            Eigen::MatrixXf jacobian = Eigen::MatrixXf::Zero(jacSize, pt.numAllModelParameters());
-            Eigen::VectorXf residual = Eigen::VectorXf::Zero(jacSize);
-            int usedRows = 0;
-            self.getJacobian(params, state, meshState, jacobian, residual, usedRows);
-            return {residual.head(usedRows), jacobian.topRows(usedRows)};
+            return {residual, jacobian};
           },
           R"(Compute the jacobian and residual for a given set of model parameters.
 
