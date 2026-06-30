@@ -12,45 +12,45 @@ repository = "https://github.com/facebookresearch/momentum"
 [dependencies]
 # build and test dependencies
 c-compiler = ">=1.11.0,<2"
-clang-format = "==21.1.2"
-cmake = ">=4.3.0,<5"
+clang-format = ">=22.1.8,<23"
+cmake = ">=4.3.4,<5"
 cxx-compiler = ">=1.11.0,<2"
 gtest = ">=1.17.0,<2"
-libboost-devel = ">=1.84.0,<2"
-ninja = ">=1.13.1,<2"
-pip = ">=25.2,<26"
+libboost-devel = ">=1.91.0,<2"
+ninja = ">=1.13.2,<2"
+pip = ">=25.3,<27"
 pybind11 = ">=2.13.6,<4"
-pytest = ">=8.4.2,<9"
-scikit-build-core = ">=0.10.0,<0.11"
-scipy = ">=1.10.0,<2"
-setuptools = ">=80.9.0,<81"
-setuptools-scm = ">=8.0.0,<9"
-sphinx = ">=7.0.0,<9"
-sphinx-rtd-theme = ">=3.0.2,<4"
-jinja2 = ">=3.1.0,<4"
+pytest = ">=9.1.1,<10"
+scikit-build-core = ">=0.12.2,<0.13"
+scipy = ">=1.18.0,<2"
+setuptools = ">=81.0.0,<83"
+setuptools-scm = ">=10.2.0,<11"
+sphinx = ">=8.2.3,<9"
+sphinx-rtd-theme = ">=3.1.0,<4"
+jinja2 = ">=3.1.6,<4"
 
 # runtime dependencies
-blas = ">=2.135,<3"
+blas = ">=2.308,<3"
 ceres-solver = ">=2.2.0,<3"
-cli11 = ">=2.5.0,<3"
-dispenso = ">=1.4.0,<2"
-eigen = ">=5.0.0,<5.1"
-ezc3d = ">=1.5.19,<2"
-drjit-cpp = ">=1.2.0,<2"
-fmt = ">=11.2.0,<12"
+cli11 = ">=2.6.2,<3"
+dispenso = ">=1.5.1,<2"
+eigen = ">=5.0.1,<6"
+ezc3d = ">=1.7.0,<2"
+drjit-cpp = ">=1.4.0,<2"
+fmt = ">=11.2.0,<13"
 fx-gltf = ">=2.0.0,<3"
 indicators = ">=2.3,<3"
-ms-gsl = ">=4.2.0,<5"
+ms-gsl = ">=4.2.2,<5"
 nlohmann_json = ">=3.12.0,<4"
 openfbx = ">=0.9,<0.10"
-openusd = ">=25.05,<26"
-openssl = ">=3.5.4,<4"
-pytorch = ">=2.8.0,<3"
-re2 = ">=2025.8.12,<2026"
-spdlog = ">=1.15.3,<2"
-tracy-profiler-client = ">=0.12.2,<0.13"
-urdfdom = ">=4.0.1,<5"
-zlib = ">=1.3.1,<2"
+openusd = ">=26.5,<27"
+openssl = ">=3.6.3,<4"
+pytorch = ">=2.7.1,<3"
+re2 = ">=2025.11.5,<2026"
+spdlog = ">=1.10.0,<2"
+tracy-profiler-client = ">=0.13.1,<0.14"
+urdfdom = ">=4.0.1,<7"
+zlib = ">=1.3.2,<2"
 
 [tasks]
 clean = { cmd = """
@@ -235,11 +235,11 @@ wheel_publish = { cmd = """
 #===========
 
 [target.linux-64.dependencies]
-nvtx-c = ">=3.1.0" # TODO: Add to pytorch as run dep
+nvtx-c = ">=3.5.0,<4" # TODO: Add to pytorch as run dep
 sysroot_linux-64 = ">=2.28,<3"
-tracy-profiler-gui = ">=0.11.1,<0.13"  # not available on linux-aarch64
-cibuildwheel = ">=2.22.0,<3"  # not available on linux-aarch64
-twine = ">=6.1.0,<7"  # not available on linux-aarch64
+tracy-profiler-gui = ">=0.11.1,<0.12"  # not available on linux-aarch64
+cibuildwheel = ">=2.23.3,<5"  # not available on linux-aarch64
+twine = ">=6.2.0,<7"  # not available on linux-aarch64
 # NOTE: patchelf, auditwheel, podman are in [feature.gpu-wheel-build] only —
 # they are wheel-repair/container tools not needed by GPU test environments.
 
@@ -358,9 +358,9 @@ test_py = { cmd = "pytest pymomentum/test/ -k 'not TestRendering'", env = { MOME
 #============
 
 [target.osx.dependencies]
-tracy-profiler-gui = ">=0.11.1,<0.13"
-cibuildwheel = ">=2.22.0,<3"
-twine = ">=6.1.0,<7"
+tracy-profiler-gui = ">=0.11.1,<0.12"
+cibuildwheel = ">=4.0.0,<5"
+twine = ">=6.2.0,<7"
 
 [target.osx.tasks]
 build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
@@ -419,10 +419,10 @@ open_doc_py = { cmd = "open build/python_api_doc/index.html", depends-on = [
 #=========
 
 [target.win-64.dependencies]
-delvewheel = ">=1.8.7,<2"
-tracy-profiler-gui = ">=0.11.1,<0.13"
-cibuildwheel = ">=2.22.0,<3"
-twine = ">=6.1.0,<7"
+delvewheel = ">=1.13.0,<2"
+tracy-profiler-gui = ">=0.13.1,<0.14"
+cibuildwheel = ">=4.0.0,<5"
+twine = ">=6.2.0,<7"
 
 [target.win-64.tasks]
 # Let CMake use its default generator unless CMAKE_GENERATOR is set. Windows CI
@@ -535,10 +535,10 @@ wheel_repair = { cmd = """
 #==============
 
 [feature.py312]
-dependencies = { python = "3.12.*" }
+dependencies = { python = ">=3.12.13,<3.15" }
 
 [feature.py313]
-dependencies = { python = "3.13.*" }
+dependencies = { python = ">=3.13.14,<3.15" }
 
 #==============
 # Feature: Rerun SDK versions
@@ -549,15 +549,15 @@ dependencies = { python = "3.13.*" }
 platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 
 [feature.rerun-latest.dependencies]
-rerun-sdk = ">=0.29.0"
-librerun-sdk = ">=0.29.0"
+rerun-sdk = ">=0.33.1,<0.34"
+librerun-sdk = ">=0.33.1,<0.34"
 
 [feature.rerun-legacy]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [feature.rerun-legacy.dependencies]
-rerun-sdk = ">=0.23.3,<0.24"
-librerun-sdk = ">=0.23.3,<0.24"
+rerun-sdk = ">=0.33.1,<0.34"
+librerun-sdk = ">=0.33.1,<0.34"
 
 #==============
 # Feature: viser (visualization)
@@ -577,10 +577,10 @@ platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
 # viser (pypi) requires rich<15.0.0. Other conda deps in these envs (cibuildwheel,
 # twine) accept rich>=15, so without this pin the conda solver picks rich-15 and
 # the pypi solve for viser fails. Drop this pin once viser allows rich>=15.
-rich = ">=13.3.3,<15"
+rich = ">=15.0.0,<16"
 
 [feature.viser.pypi-dependencies]
-viser = ">=1.0.24,<2"
+viser = ">=0.2.23, <0.3"
 
 #==============
 # Feature: Minimal Build (for GPU wheel builds with limited disk space)
@@ -593,25 +593,25 @@ platforms = ["linux-64"]
 
 # Essential build tools and runtime/build dependencies (from CMakeLists.txt find_package calls)
 [feature.minimal-build.dependencies]
-cmake = ">=4.3.0,<5"
-ninja = ">=1.13.1,<2"
-blas = ">=2.135,<3"
+cmake = ">=4.3.4,<5"
+ninja = ">=1.13.2,<2"
+blas = ">=2.308,<3"
 ceres-solver = ">=2.2.0,<3"
-cli11 = ">=2.5.0,<3"
-dispenso = ">=1.4.0,<2"
-eigen = ">=5.0.0,<5.1"
-ezc3d = ">=1.5.19,<2"
-drjit-cpp = ">=1.2.0,<2"
-fmt = ">=11.2.0,<12"
+cli11 = ">=2.6.2,<3"
+dispenso = ">=1.5.1,<2"
+eigen = ">=5.0.1,<6"
+ezc3d = ">=1.7.0,<2"
+drjit-cpp = ">=1.4.0,<2"
+fmt = ">=12.2.0,<13"
 fx-gltf = ">=2.0.0,<3"
 indicators = ">=2.3,<3"
-ms-gsl = ">=4.2.0,<5"
+ms-gsl = ">=4.2.2,<5"
 nlohmann_json = ">=3.12.0,<4"
 openfbx = ">=0.9,<0.10"
-re2 = ">=2025.8.12,<2026"
-spdlog = ">=1.15.3,<2"
-urdfdom = ">=4.0.1,<5"
-zlib = ">=1.3.1,<2"
+re2 = ">=2025.11.5,<2026"
+spdlog = ">=1.10.0,<2"
+urdfdom = ">=6.0.0,<7"
+zlib = ">=1.3.2,<2"
 
 #==============
 # Feature: GPU Development (requires CUDA on host)
@@ -621,7 +621,7 @@ zlib = ">=1.3.1,<2"
 [feature.py312-cuda129]
 platforms = ["linux-64", "win-64"]
 system-requirements = { cuda = "12" }
-dependencies = { cuda-compiler = ">=12.9.0,<13", cuda-libraries-dev = "12.9.*", nvtx-c = ">=3.1.1", cuda-version = "12.9.*", python = "3.12.*", pytorch-gpu = ">=2.8.0,<3" }
+dependencies = { cuda-compiler = "*", cuda-libraries-dev = "*", nvtx-c = "*", cuda-version = "*", python = "*", pytorch-gpu = "*" }
 
 # NOTE: py313-cuda129 feature removed — pytorch-gpu does not yet support Python 3.13 on conda-forge.
 # Re-add when pytorch-gpu >=2.x has py313 builds available.
@@ -636,19 +636,19 @@ dependencies = { cuda-compiler = ">=12.9.0,<13", cuda-libraries-dev = "12.9.*", 
 platforms = ["linux-64"]
 
 [feature.gpu-wheel-build.dependencies]
-jinja2 = ">=3.1.0,<4"
-cibuildwheel = ">=2.22.0,<3"
-twine = ">=6.1.0,<7"
-pip = ">=25.2,<26"
+jinja2 = ">=3.1.6,<4"
+cibuildwheel = ">=4.0.0,<5"
+twine = ">=6.2.0,<7"
+pip = ">=26.1.2,<27"
 # Wheel repair and container tools — only needed for wheel-build environments
 patchelf = ">=0.17.2,<0.18"
-auditwheel = ">=6.4.2,<7"
-podman = ">=5.0.0,<6"
+auditwheel = ">=6.7.0,<7"
+podman = ">=5.8.3,<6"
 
 
 [feature.gpu-wheel-build-py312]
 platforms = ["linux-64"]
-dependencies = { python = "3.12.*" }
+dependencies = { python = ">=3.12.13,<3.13" }
 
 [feature.gpu-wheel-build-py312.tasks]
 # Torch GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu.
@@ -666,7 +666,7 @@ wheel_publish = { cmd = "twine upload --repository pymomentum-gpu dist/pymomentu
 
 [feature.gpu-wheel-build-py313]
 platforms = ["linux-64"]
-dependencies = { python = "3.13.*" }
+dependencies = { python = ">=3.14.6,<3.15" }
 
 [feature.gpu-wheel-build-py313.tasks]
 # Torch GPU wheel build uses cibuildwheel with PYMOMENTUM_VARIANT=gpu.
