@@ -154,6 +154,7 @@ geometry_public_headers = [
     "geometry/sdf_collider_pybind.h",
     "geometry/skeleton_pybind.h",
     "geometry/skin_weights_pybind.h",
+    "geometry/support_contacts_pybind.h",
     "geometry/texture_classification.h",
 ]
 
@@ -180,6 +181,7 @@ geometry_sources = [
     "geometry/sdf_collider_pybind.cpp",
     "geometry/skeleton_pybind.cpp",
     "geometry/skin_weights_pybind.cpp",
+    "geometry/support_contacts_pybind.cpp",
     "geometry/texture_classification.cpp",
 ]
 
