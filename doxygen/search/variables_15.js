@@ -1,13 +1,14 @@
 var searchData=
 [
   ['u_0',['u',['../texture__classification_8cpp.html#a55831f7eab5ed2917a0191e858852f42',1,'texture_classification.cpp']]],
-  ['unit_1',['unit',['../structmomentum_1_1CoordinateSystem.html#afce13995aa4d28f26fc9835e8ba0dce5',1,'momentum::CoordinateSystem']]],
-  ['up_2',['up',['../structmomentum_1_1CoordinateSystem.html#a5a54e6d9b855b6deb082f6810265c3db',1,'momentum::CoordinateSystem']]],
-  ['upvector_3',['upVector',['../structmomentum_1_1FbxCoordSystemInfo.html#a25838d22a4b80ddecbb8646af3ce2bd8',1,'momentum::FbxCoordSystemInfo']]],
-  ['urdfjointnametomodelparamidx_4',['urdfJointNameToModelParamIdx',['../urdf__io_8cpp.html#a2476d1cf5e8cd71184a7fd7430f03f25',1,'urdf_io.cpp']]],
-  ['useblockjtj_5',['useblockjtj',['../structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0',1,'momentum::GaussNewtonSolverOptions::useBlockJtJ'],['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a98dbddc86ece265b7ed3e167db2602b9',1,'momentum::SparseGaussNewtonSolverOptions::useBlockJtJ']]],
-  ['useblockldlt_6',['useBlockLdlt',['../structmomentum_1_1SequenceCholeskySolverOptions.html#a3924fac0dd4c68e8d5f7f0f25350b9b0',1,'momentum::SequenceCholeskySolverOptions']]],
-  ['usedoubleprecisionnormalequations_7',['useDoublePrecisionNormalEquations',['../structmomentum_1_1SequenceCholeskySolverOptions.html#a685e2714c89858d683fd37c4f67582a5',1,'momentum::SequenceCholeskySolverOptions']]],
-  ['usedrows_8',['usedRows',['../sequence__cholesky__solver_8cpp.html#a6191c3819af1ac2a8aebd7f1e3b87932',1,'sequence_cholesky_solver.cpp']]],
-  ['usehessian_5f_9',['useHessian_',['../classmomentum_1_1SkeletonErrorFunctionT.html#a935c03f07e1ef8aaeed9f9688b03075a',1,'momentum::SkeletonErrorFunctionT']]]
+  ['uaxis_1',['uAxis',['../structmomentum_1_1SupportPlaneT.html#a5b05677cf90744b50064621da0d46adf',1,'momentum::SupportPlaneT']]],
+  ['unit_2',['unit',['../structmomentum_1_1CoordinateSystem.html#afce13995aa4d28f26fc9835e8ba0dce5',1,'momentum::CoordinateSystem']]],
+  ['up_3',['up',['../structmomentum_1_1CoordinateSystem.html#a5a54e6d9b855b6deb082f6810265c3db',1,'momentum::CoordinateSystem']]],
+  ['upvector_4',['upVector',['../structmomentum_1_1FbxCoordSystemInfo.html#a25838d22a4b80ddecbb8646af3ce2bd8',1,'momentum::FbxCoordSystemInfo']]],
+  ['urdfjointnametomodelparamidx_5',['urdfJointNameToModelParamIdx',['../urdf__io_8cpp.html#a2476d1cf5e8cd71184a7fd7430f03f25',1,'urdf_io.cpp']]],
+  ['useblockjtj_6',['useblockjtj',['../structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0',1,'momentum::GaussNewtonSolverOptions::useBlockJtJ'],['../structmomentum_1_1SparseGaussNewtonSolverOptions.html#a98dbddc86ece265b7ed3e167db2602b9',1,'momentum::SparseGaussNewtonSolverOptions::useBlockJtJ']]],
+  ['useblockldlt_7',['useBlockLdlt',['../structmomentum_1_1SequenceCholeskySolverOptions.html#a3924fac0dd4c68e8d5f7f0f25350b9b0',1,'momentum::SequenceCholeskySolverOptions']]],
+  ['usedoubleprecisionnormalequations_8',['useDoublePrecisionNormalEquations',['../structmomentum_1_1SequenceCholeskySolverOptions.html#a685e2714c89858d683fd37c4f67582a5',1,'momentum::SequenceCholeskySolverOptions']]],
+  ['usedrows_9',['usedRows',['../sequence__cholesky__solver_8cpp.html#a6191c3819af1ac2a8aebd7f1e3b87932',1,'sequence_cholesky_solver.cpp']]],
+  ['usehessian_5f_10',['useHessian_',['../classmomentum_1_1SkeletonErrorFunctionT.html#a935c03f07e1ef8aaeed9f9688b03075a',1,'momentum::SkeletonErrorFunctionT']]]
 ];

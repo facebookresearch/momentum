@@ -40,5 +40,8 @@ var searchData=
   ['statesequenceerrorfunctiont_37',['StateSequenceErrorFunctionT',['../classmomentum_1_1StateSequenceErrorFunctionT.html',1,'momentum']]],
   ['statesimilarity_38',['StateSimilarity',['../structmomentum_1_1StateSimilarity.html',1,'momentum']]],
   ['subsetgaussnewtonsolveroptions_39',['SubsetGaussNewtonSolverOptions',['../structmomentum_1_1SubsetGaussNewtonSolverOptions.html',1,'momentum']]],
-  ['subsetgaussnewtonsolvert_40',['SubsetGaussNewtonSolverT',['../classmomentum_1_1SubsetGaussNewtonSolverT.html',1,'momentum']]]
+  ['subsetgaussnewtonsolvert_40',['SubsetGaussNewtonSolverT',['../classmomentum_1_1SubsetGaussNewtonSolverT.html',1,'momentum']]],
+  ['supportcontactlistt_41',['SupportContactListT',['../structmomentum_1_1SupportContactListT.html',1,'momentum']]],
+  ['supportcontactt_42',['SupportContactT',['../structmomentum_1_1SupportContactT.html',1,'momentum']]],
+  ['supportplanet_43',['SupportPlaneT',['../structmomentum_1_1SupportPlaneT.html',1,'momentum']]]
 ];

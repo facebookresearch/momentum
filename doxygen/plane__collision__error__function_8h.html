@@ -92,14 +92,12 @@ $(document).ready(function(){initNavTree('plane__collision__error__function_8h.h
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#namespaces">Namespaces</a>  </div>
   <div class="headertitle"><div class="title">plane_collision_error_function.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="collision__geometry_8h_source.html">momentum/character/collision_geometry.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="collision__geometry__state_8h_source.html">momentum/character/collision_geometry_state.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="character__solver_2fwd_8h_source.html">momentum/character_solver/fwd.h</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="character__solver_2fwd_8h_source.html">momentum/character_solver/fwd.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="plane__collision__query_8h_source.html">momentum/character_solver/plane_collision_query.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="skeleton__error__function_8h_source.html">momentum/character_solver/skeleton_error_function.h</a>&gt;</code><br />
 <code>#include &lt;span&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
@@ -108,28 +106,14 @@ $(document).ready(function(){initNavTree('plane__collision__error__function_8h.h
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PlaneCollisionDebugEntryT.html">momentum::PlaneCollisionDebugEntryT&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-primitive collision debug information returned by getCollisionDebugInfo().  <a href="structmomentum_1_1PlaneCollisionDebugEntryT.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1PlaneCollisionErrorFunctionT.html">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalizes collision between character collision primitives and a fixed plane.  <a href="classmomentum_1_1PlaneCollisionErrorFunctionT.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PlaneCollisionErrorFunctionT_1_1PlaneCollisionResult.html">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::PlaneCollisionResult</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1PlaneCollisionErrorFunctionT_1_1ActivePlaneCollision.html">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::ActivePlaneCollision</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:ae24e7ae7302cb5bc69e4835661519368" id="r_ae24e7ae7302cb5bc69e4835661519368"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ae24e7ae7302cb5bc69e4835661519368">momentum::PlaneCollisionDebugEntry</a> = <a class="el" href="structmomentum_1_1PlaneCollisionDebugEntryT.html">PlaneCollisionDebugEntryT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a> &gt;</td></tr>
-<tr class="separator:ae24e7ae7302cb5bc69e4835661519368"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac429b40c9b977ecc6c77f6f2e29cb15" id="r_aac429b40c9b977ecc6c77f6f2e29cb15"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aac429b40c9b977ecc6c77f6f2e29cb15">momentum::PlaneCollisionDebugEntryd</a> = <a class="el" href="structmomentum_1_1PlaneCollisionDebugEntryT.html">PlaneCollisionDebugEntryT</a>&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">double</a> &gt;</td></tr>
-<tr class="separator:aac429b40c9b977ecc6c77f6f2e29cb15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -137,7 +121,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc3ee91584681ee695df027535ad1e95.html">character_solver</a></li><li class="navelem"><a class="el" href="plane__collision__error__function_8h.html">plane_collision_error_function.h</a></li>
-    <li class="footer">Generated on Tue Jun 30 2026 09:10:36 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Jul 1 2026 09:19:46 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

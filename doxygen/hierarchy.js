@@ -1,6 +1,5 @@
 var hierarchy =
 [
-    [ "momentum::PlaneCollisionErrorFunctionT< T >::ActivePlaneCollision", "structmomentum_1_1PlaneCollisionErrorFunctionT_1_1ActivePlaneCollision.html", null ],
     [ "momentum::AlignedAllocator< T, Alignment >", "classmomentum_1_1AlignedAllocator.html", null ],
     [ "momentum::AlignedDeleter", "structmomentum_1_1AlignedDeleter.html", null ],
     [ "momentum::BaseConfig", "structmomentum_1_1BaseConfig.html", [
@@ -134,8 +133,9 @@ var hierarchy =
     [ "momentum::ParameterTransformT< T >", "structmomentum_1_1ParameterTransformT.html", null ],
     [ "momentum::ParameterTransformT< float >", "structmomentum_1_1ParameterTransformT.html", null ],
     [ "momentum::PerFrameStateT< T >", "structmomentum_1_1PerFrameStateT.html", null ],
+    [ "momentum::PlaneCollisionContactPointT< T >", "structmomentum_1_1PlaneCollisionContactPointT.html", null ],
     [ "momentum::PlaneCollisionDebugEntryT< T >", "structmomentum_1_1PlaneCollisionDebugEntryT.html", null ],
-    [ "momentum::PlaneCollisionErrorFunctionT< T >::PlaneCollisionResult", "structmomentum_1_1PlaneCollisionErrorFunctionT_1_1PlaneCollisionResult.html", null ],
+    [ "momentum::PlaneCollisionQueryT< T >", "classmomentum_1_1PlaneCollisionQueryT.html", null ],
     [ "momentum::PointTriangleVertexConstraintT< T >", "structmomentum_1_1PointTriangleVertexConstraintT.html", null ],
     [ "momentum::PolygonData", "structmomentum_1_1PolygonData.html", null ],
     [ "momentum::PoseConstraint", "structmomentum_1_1PoseConstraint.html", null ],
@@ -150,6 +150,7 @@ var hierarchy =
     [ "momentum::AlignedAllocator< T, Alignment >::rebind< U >", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::RegionColorsView", "structmomentum_1_1RegionColorsView.html", null ],
     [ "momentum::ResizeableMatrix< T >", "classmomentum_1_1ResizeableMatrix.html", null ],
+    [ "momentum::PlaneCollisionQueryT< T >::Result", "structmomentum_1_1PlaneCollisionQueryT_1_1Result.html", null ],
     [ "momentum::RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", null ],
     [ "momentum::SDFColliderT< S >", "structmomentum_1_1SDFColliderT.html", null ],
     [ "momentum::SDFColliderT< float >", "structmomentum_1_1SDFColliderT.html", null ],
@@ -291,6 +292,9 @@ var hierarchy =
     [ "std::streambuf", null, [
       [ "momentum::spanstreambuf", "structmomentum_1_1spanstreambuf.html", null ]
     ] ],
+    [ "momentum::SupportContactListT< T >", "structmomentum_1_1SupportContactListT.html", null ],
+    [ "momentum::SupportContactT< T >", "structmomentum_1_1SupportContactT.html", null ],
+    [ "momentum::SupportPlaneT< T >", "structmomentum_1_1SupportPlaneT.html", null ],
     [ "momentum::TaperedCapsuleT< S >", "structmomentum_1_1TaperedCapsuleT.html", null ],
     [ "momentum::TextureView", "structmomentum_1_1TextureView.html", null ],
     [ "momentum::TransformT< T >", "structmomentum_1_1TransformT.html", null ],

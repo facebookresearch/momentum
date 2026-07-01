@@ -23,6 +23,8 @@ var dir_296d53ceaeaa7e099814a6def439fe8a =
     [ "simd_generalized_loss.cpp", "simd__generalized__loss_8cpp.html", null ],
     [ "simd_generalized_loss.h", "simd__generalized__loss_8h.html", "simd__generalized__loss_8h" ],
     [ "span_compat.h", "span__compat_8h.html", "span__compat_8h" ],
+    [ "support_polygon.cpp", "support__polygon_8cpp.html", "support__polygon_8cpp" ],
+    [ "support_polygon.h", "support__polygon_8h.html", "support__polygon_8h" ],
     [ "transform.cpp", "transform_8cpp.html", "transform_8cpp" ],
     [ "transform.h", "transform_8h.html", "transform_8h" ],
     [ "types.h", "math_2types_8h.html", "math_2types_8h" ],

@@ -553,6 +553,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_positions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.model_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.plane_collision_contacts_by_parent"><code class="docutils literal notranslate"><span class="pre">plane_collision_contacts_by_parent()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.redirect_logs_to_python"><code class="docutils literal notranslate"><span class="pre">redirect_logs_to_python()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_faces"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_faces()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.reduce_mesh_by_vertices"><code class="docutils literal notranslate"><span class="pre">reduce_mesh_by_vertices()</span></code></a></li>
@@ -564,6 +565,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.split_mesh_by_texture_region"><code class="docutils literal notranslate"><span class="pre">split_mesh_by_texture_region()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.strip_joints"><code class="docutils literal notranslate"><span class="pre">strip_joints()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.strip_lower_body_vertices"><code class="docutils literal notranslate"><span class="pre">strip_lower_body_vertices()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.support_contacts"><code class="docutils literal notranslate"><span class="pre">support_contacts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.support_polygon"><code class="docutils literal notranslate"><span class="pre">support_polygon()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.support_polygon_from_world_points"><code class="docutils literal notranslate"><span class="pre">support_polygon_from_world_points()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.uniform_random_to_model_parameters"><code class="docutils literal notranslate"><span class="pre">uniform_random_to_model_parameters()</span></code></a></li>
 </ul>
 </li>
@@ -4758,6 +4762,39 @@ Shape: […, numJoints, 8]</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.plane_collision_contacts_by_parent">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">plane_collision_contacts_by_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact_margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.geometry.plane_collision_contacts_by_parent" title="Link to this definition"></a></dt>
+<dd><p>Return deepest plane-collision contacts, grouped by parent joint.</p>
+<p>The query uses Momentum’s plane-collision contact convention: each collision
+primitive contributes when its signed surface distance to the support plane
+is less than or equal to <code class="docutils literal notranslate"><span class="pre">contact_margin</span></code>. If multiple primitives under the
+same parent joint contribute, only the deepest contact point for that parent is
+returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character whose collision geometry is queried.</p></li>
+<li><p><strong>skeleton_state</strong> – Global skeleton state array with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.
+Columns 0-2 are translation, 3-5 are quaternion xyz, 6 is quaternion w, and
+7 is uniform scale.</p></li>
+<li><p><strong>contact_margin</strong> – Maximum signed surface distance from the support plane,
+in character units, for a primitive to count as contact.</p></li>
+<li><p><strong>plane_normal</strong> – Optional support-plane normal, normalized internally.
+Defaults to the Y-up ground plane normal <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p></li>
+<li><p><strong>plane_offset</strong> – Support-plane offset <code class="docutils literal notranslate"><span class="pre">d</span></code> for points satisfying
+<code class="docutils literal notranslate"><span class="pre">dot(plane_normal,</span> <span class="pre">point)</span> <span class="pre">=</span> <span class="pre">d</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(positions,</span> <span class="pre">parent_indices,</span> <span class="pre">parent_offsets)</span></code>. <code class="docutils literal notranslate"><span class="pre">positions</span></code> has shape
+<code class="docutils literal notranslate"><span class="pre">(n_contacts,</span> <span class="pre">3)</span></code> in world space. <code class="docutils literal notranslate"><span class="pre">parent_indices</span></code> has shape
+<code class="docutils literal notranslate"><span class="pre">(n_contacts,)</span></code>. <code class="docutils literal notranslate"><span class="pre">parent_offsets</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(n_contacts,</span> <span class="pre">3)</span></code> and stores
+the rotation-local, scale-applied parent offset for each contact point.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.redirect_logs_to_python">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">redirect_logs_to_python</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.geometry.redirect_logs_to_python" title="Link to this definition"></a></dt>
 <dd><p>Redirects C++ log messages from the momentum library to Python’s stdout via <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code>.</p>
@@ -5026,6 +5063,107 @@ This can be useful for visualization if you don’t want the legs to distract.</
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new character with only the upper body visible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.support_contacts">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">support_contacts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#pymomentum.geometry.support_contacts" title="Link to this definition"></a></dt>
+<dd><p>Return floor-locator and collision contacts used for support polygons.</p>
+<p>Floor locators whose names start with <code class="docutils literal notranslate"><span class="pre">&quot;Floor&quot;</span></code> contribute when their signed
+distance to the support plane is less than or equal to
+<code class="docutils literal notranslate"><span class="pre">contact_height</span></code>; this includes below-plane locators and locators up to
+<code class="docutils literal notranslate"><span class="pre">contact_height</span></code> above the plane. Collision primitives use the same signed
+surface-distance contact convention as
+<a class="reference internal" href="#pymomentum.geometry.plane_collision_contacts_by_parent" title="pymomentum.geometry.plane_collision_contacts_by_parent"><code class="xref py py-func docutils literal notranslate"><span class="pre">pymomentum.geometry.plane_collision_contacts_by_parent()</span></code></a>, with
+<code class="docutils literal notranslate"><span class="pre">contact_height</span></code> applied as the collision contact margin. This mirrors
+Momentum’s retargeter support-polygon contact source.</p>
+<p>When collision geometry is present, this Python binding builds a temporary
+collision query on each call. Account for that overhead when calling it in
+per-frame loops.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character whose floor locators and collision geometry are queried.</p></li>
+<li><p><strong>skeleton_state</strong> – Global skeleton state array with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.
+Columns 0-2 are translation, 3-5 are quaternion xyz, 6 is quaternion w, and
+7 is uniform scale.</p></li>
+<li><p><strong>contact_height</strong> – Maximum floor-locator signed distance and maximum
+collision surface distance from the support plane, in character units.</p></li>
+<li><p><strong>plane_normal</strong> – Optional support-plane normal, normalized internally.
+Defaults to the Y-up ground plane normal <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p></li>
+<li><p><strong>plane_offset</strong> – Support-plane offset <code class="docutils literal notranslate"><span class="pre">d</span></code> for points satisfying
+<code class="docutils literal notranslate"><span class="pre">dot(plane_normal,</span> <span class="pre">point)</span> <span class="pre">=</span> <span class="pre">d</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(positions,</span> <span class="pre">parent_indices,</span> <span class="pre">parent_offsets,</span> <span class="pre">floor_positions)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">positions</span></code> contains active floor-locator and collision contacts.
+<code class="docutils literal notranslate"><span class="pre">parent_indices</span></code> and <code class="docutils literal notranslate"><span class="pre">parent_offsets</span></code> describe each active contact’s parent
+joint and rotation-local, scale-applied offset. <code class="docutils literal notranslate"><span class="pre">floor_positions</span></code> contains
+all valid <code class="docutils literal notranslate"><span class="pre">Floor*</span></code> locator world positions, including non-contacting ones.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.support_polygon">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">support_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_u_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.support_polygon" title="Link to this definition"></a></dt>
+<dd><p>Return the support polygon for a character skeleton state.</p>
+<p>This is equivalent to calling <a class="reference internal" href="#pymomentum.geometry.support_contacts" title="pymomentum.geometry.support_contacts"><code class="xref py py-func docutils literal notranslate"><span class="pre">pymomentum.geometry.support_contacts()</span></code></a> and
+then <a class="reference internal" href="#pymomentum.geometry.support_polygon_from_world_points" title="pymomentum.geometry.support_polygon_from_world_points"><code class="xref py py-func docutils literal notranslate"><span class="pre">pymomentum.geometry.support_polygon_from_world_points()</span></code></a> on the active
+contact positions with the same support plane.</p>
+<p>When collision geometry is present, this Python binding builds a temporary
+collision query on each call through the support-contact computation. Account
+for that overhead when calling it in per-frame loops.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>character</strong> – Character whose floor locators and collision geometry are queried.</p></li>
+<li><p><strong>skeleton_state</strong> – Global skeleton state array with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.
+Columns 0-2 are translation, 3-5 are quaternion xyz, 6 is quaternion w, and
+7 is uniform scale.</p></li>
+<li><p><strong>contact_height</strong> – Contact threshold in character units.</p></li>
+<li><p><strong>plane_normal</strong> – Optional support-plane normal, normalized internally.
+Defaults to the Y-up ground plane normal <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p></li>
+<li><p><strong>plane_offset</strong> – Support-plane offset <code class="docutils literal notranslate"><span class="pre">d</span></code> for points satisfying
+<code class="docutils literal notranslate"><span class="pre">dot(plane_normal,</span> <span class="pre">point)</span> <span class="pre">=</span> <span class="pre">d</span></code>.</p></li>
+<li><p><strong>plane_u_axis</strong> – Optional axis hint for the first support-plane coordinate.
+Defaults to <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0]</span></code> when that axis is not parallel to the plane normal;
+otherwise a perpendicular fallback axis is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Support polygon vertices with shape <code class="docutils literal notranslate"><span class="pre">(n_vertices,</span> <span class="pre">3)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.support_polygon_from_world_points">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">support_polygon_from_world_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">support_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_u_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.support_polygon_from_world_points" title="Link to this definition"></a></dt>
+<dd><p>Project world-space support points onto a support plane and return their convex hull.</p>
+<p>The input points are projected to <code class="docutils literal notranslate"><span class="pre">plane_normal</span></code>/<code class="docutils literal notranslate"><span class="pre">plane_offset</span></code>, duplicate
+projected points are removed, and the returned vertices form the 3D support
+polygon in counter-clockwise order in the support-plane basis. Degenerate inputs
+return zero, one, or two vertices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>support_points</strong> – World-space support/contact points with shape
+<code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">3)</span></code>.</p></li>
+<li><p><strong>plane_normal</strong> – Optional support-plane normal, normalized internally.
+Defaults to the Y-up ground plane normal <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></code>.</p></li>
+<li><p><strong>plane_offset</strong> – Support-plane offset <code class="docutils literal notranslate"><span class="pre">d</span></code> for points satisfying
+<code class="docutils literal notranslate"><span class="pre">dot(plane_normal,</span> <span class="pre">point)</span> <span class="pre">=</span> <span class="pre">d</span></code>.</p></li>
+<li><p><strong>plane_u_axis</strong> – Optional axis hint for the first support-plane coordinate.
+Defaults to <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">0,</span> <span class="pre">0]</span></code> when that axis is not parallel to the plane normal;
+otherwise a perpendicular fallback axis is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Support polygon vertices with shape <code class="docutils literal notranslate"><span class="pre">(n_vertices,</span> <span class="pre">3)</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>

@@ -51,5 +51,9 @@ var searchData=
   ['string_2ecpp_48',['string.cpp',['../string_8cpp.html',1,'']]],
   ['string_2eh_49',['string.h',['../string_8h.html',1,'']]],
   ['subset_5fgauss_5fnewton_5fsolver_2ecpp_50',['subset_gauss_newton_solver.cpp',['../subset__gauss__newton__solver_8cpp.html',1,'']]],
-  ['subset_5fgauss_5fnewton_5fsolver_2eh_51',['subset_gauss_newton_solver.h',['../subset__gauss__newton__solver_8h.html',1,'']]]
+  ['subset_5fgauss_5fnewton_5fsolver_2eh_51',['subset_gauss_newton_solver.h',['../subset__gauss__newton__solver_8h.html',1,'']]],
+  ['support_5fcontacts_2ecpp_52',['support_contacts.cpp',['../support__contacts_8cpp.html',1,'']]],
+  ['support_5fcontacts_2eh_53',['support_contacts.h',['../support__contacts_8h.html',1,'']]],
+  ['support_5fpolygon_2ecpp_54',['support_polygon.cpp',['../support__polygon_8cpp.html',1,'']]],
+  ['support_5fpolygon_2eh_55',['support_polygon.h',['../support__polygon_8h.html',1,'']]]
 ];
