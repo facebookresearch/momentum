@@ -68,11 +68,10 @@ jobs:
         run: |
           python scripts/generate_pyproject.py
           # Set a default pyproject.toml for the initial cibuildwheel setup.
-          # IMPORTANT: Use py312 as core but broaden requires-python to ">=3.12"
-          # so cibuildwheel doesn't skip cp313 (the per-version pyproject with
-          # strict bounds is swapped in by the before-build hook for each build).
+          # The generated pyproject uses the full supported Python range so
+          # cibuildwheel does not skip cp313 before the per-build pyproject is
+          # swapped in by the before-build hook.
           cp pyproject-pypi-${{ matrix.package-variant }}-py312.toml pyproject.toml
-          sed -i 's/requires-python = ">=3.12,<3.13"/requires-python = ">=3.12"/' pyproject.toml
 
       - name: Prepare ccache mount (Linux)
         run: mkdir -p .ccache
@@ -362,11 +361,10 @@ jobs:
       - name: Generate pyproject.toml
         run: |
           python scripts/generate_pyproject.py
-          # Use GPU py312 as core but broaden requires-python to ">=3.12"
-          # so cibuildwheel doesn't skip cp313 (the per-version pyproject with
-          # strict bounds is swapped in by the before-build hook for each build).
+          # Use GPU py312 as the default pyproject for cibuildwheel setup. The
+          # generated metadata uses the full supported Python range so cp313 is
+          # not skipped before the before-build hook swaps the per-build file.
           cp pyproject-pypi-gpu-py312.toml pyproject.toml
-          sed -i 's/requires-python = ">=3.12,<3.13"/requires-python = ">=3.12"/' pyproject.toml
 
       - name: Prepare ccache mount (Linux)
         run: mkdir -p .ccache
