@@ -9,6 +9,7 @@ subdirectory = "math"
 template_structs = [
     "Mesh",
     "Mppca",
+    "SupportPlane",
     "Transform"
 ]
 template_classes = [
@@ -67,12 +68,16 @@ template_structs = [
     "JointToJointOrientationData",
     "NormalData",
     "OrientationData",
+    "PlaneCollisionContactPoint",
+    "PlaneCollisionDebugEntry",
     "PointTriangleVertexConstraint",
     "PlaneData",
     "PositionData",
     "ProjectionConstraint",
     "SkinnedLocatorConstraint",
     "SkinnedLocatorTriangleConstraint",
+    "SupportContact",
+    "SupportContactList",
     "VertexSDFConstraint",
 ]
 classes = [
@@ -104,6 +109,7 @@ template_classes = [
     "OrientationErrorFunction",
     "OrientationRotDiffErrorFunction",
     "PlaneCollisionErrorFunction",
+    "PlaneCollisionQuery",
     "PlaneErrorFunction",
     "PointTriangleVertexErrorFunction",
     "PosePriorErrorFunction",

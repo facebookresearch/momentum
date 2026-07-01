@@ -184,6 +184,44 @@ using OrientationDatad_const_u = ::std::unique_ptr<const OrientationDatad>;
 using OrientationDatad_const_w = ::std::weak_ptr<const OrientationDatad>;
 
 template <typename T>
+struct PlaneCollisionContactPointT;
+using PlaneCollisionContactPoint = PlaneCollisionContactPointT<float>;
+using PlaneCollisionContactPointd = PlaneCollisionContactPointT<double>;
+
+using PlaneCollisionContactPoint_p = ::std::shared_ptr<PlaneCollisionContactPoint>;
+using PlaneCollisionContactPoint_u = ::std::unique_ptr<PlaneCollisionContactPoint>;
+using PlaneCollisionContactPoint_w = ::std::weak_ptr<PlaneCollisionContactPoint>;
+using PlaneCollisionContactPoint_const_p = ::std::shared_ptr<const PlaneCollisionContactPoint>;
+using PlaneCollisionContactPoint_const_u = ::std::unique_ptr<const PlaneCollisionContactPoint>;
+using PlaneCollisionContactPoint_const_w = ::std::weak_ptr<const PlaneCollisionContactPoint>;
+
+using PlaneCollisionContactPointd_p = ::std::shared_ptr<PlaneCollisionContactPointd>;
+using PlaneCollisionContactPointd_u = ::std::unique_ptr<PlaneCollisionContactPointd>;
+using PlaneCollisionContactPointd_w = ::std::weak_ptr<PlaneCollisionContactPointd>;
+using PlaneCollisionContactPointd_const_p = ::std::shared_ptr<const PlaneCollisionContactPointd>;
+using PlaneCollisionContactPointd_const_u = ::std::unique_ptr<const PlaneCollisionContactPointd>;
+using PlaneCollisionContactPointd_const_w = ::std::weak_ptr<const PlaneCollisionContactPointd>;
+
+template <typename T>
+struct PlaneCollisionDebugEntryT;
+using PlaneCollisionDebugEntry = PlaneCollisionDebugEntryT<float>;
+using PlaneCollisionDebugEntryd = PlaneCollisionDebugEntryT<double>;
+
+using PlaneCollisionDebugEntry_p = ::std::shared_ptr<PlaneCollisionDebugEntry>;
+using PlaneCollisionDebugEntry_u = ::std::unique_ptr<PlaneCollisionDebugEntry>;
+using PlaneCollisionDebugEntry_w = ::std::weak_ptr<PlaneCollisionDebugEntry>;
+using PlaneCollisionDebugEntry_const_p = ::std::shared_ptr<const PlaneCollisionDebugEntry>;
+using PlaneCollisionDebugEntry_const_u = ::std::unique_ptr<const PlaneCollisionDebugEntry>;
+using PlaneCollisionDebugEntry_const_w = ::std::weak_ptr<const PlaneCollisionDebugEntry>;
+
+using PlaneCollisionDebugEntryd_p = ::std::shared_ptr<PlaneCollisionDebugEntryd>;
+using PlaneCollisionDebugEntryd_u = ::std::unique_ptr<PlaneCollisionDebugEntryd>;
+using PlaneCollisionDebugEntryd_w = ::std::weak_ptr<PlaneCollisionDebugEntryd>;
+using PlaneCollisionDebugEntryd_const_p = ::std::shared_ptr<const PlaneCollisionDebugEntryd>;
+using PlaneCollisionDebugEntryd_const_u = ::std::unique_ptr<const PlaneCollisionDebugEntryd>;
+using PlaneCollisionDebugEntryd_const_w = ::std::weak_ptr<const PlaneCollisionDebugEntryd>;
+
+template <typename T>
 struct PointTriangleVertexConstraintT;
 using PointTriangleVertexConstraint = PointTriangleVertexConstraintT<float>;
 using PointTriangleVertexConstraintd = PointTriangleVertexConstraintT<double>;
@@ -307,6 +345,44 @@ using SkinnedLocatorTriangleConstraintd_const_u =
     ::std::unique_ptr<const SkinnedLocatorTriangleConstraintd>;
 using SkinnedLocatorTriangleConstraintd_const_w =
     ::std::weak_ptr<const SkinnedLocatorTriangleConstraintd>;
+
+template <typename T>
+struct SupportContactT;
+using SupportContact = SupportContactT<float>;
+using SupportContactd = SupportContactT<double>;
+
+using SupportContact_p = ::std::shared_ptr<SupportContact>;
+using SupportContact_u = ::std::unique_ptr<SupportContact>;
+using SupportContact_w = ::std::weak_ptr<SupportContact>;
+using SupportContact_const_p = ::std::shared_ptr<const SupportContact>;
+using SupportContact_const_u = ::std::unique_ptr<const SupportContact>;
+using SupportContact_const_w = ::std::weak_ptr<const SupportContact>;
+
+using SupportContactd_p = ::std::shared_ptr<SupportContactd>;
+using SupportContactd_u = ::std::unique_ptr<SupportContactd>;
+using SupportContactd_w = ::std::weak_ptr<SupportContactd>;
+using SupportContactd_const_p = ::std::shared_ptr<const SupportContactd>;
+using SupportContactd_const_u = ::std::unique_ptr<const SupportContactd>;
+using SupportContactd_const_w = ::std::weak_ptr<const SupportContactd>;
+
+template <typename T>
+struct SupportContactListT;
+using SupportContactList = SupportContactListT<float>;
+using SupportContactListd = SupportContactListT<double>;
+
+using SupportContactList_p = ::std::shared_ptr<SupportContactList>;
+using SupportContactList_u = ::std::unique_ptr<SupportContactList>;
+using SupportContactList_w = ::std::weak_ptr<SupportContactList>;
+using SupportContactList_const_p = ::std::shared_ptr<const SupportContactList>;
+using SupportContactList_const_u = ::std::unique_ptr<const SupportContactList>;
+using SupportContactList_const_w = ::std::weak_ptr<const SupportContactList>;
+
+using SupportContactListd_p = ::std::shared_ptr<SupportContactListd>;
+using SupportContactListd_u = ::std::unique_ptr<SupportContactListd>;
+using SupportContactListd_w = ::std::weak_ptr<SupportContactListd>;
+using SupportContactListd_const_p = ::std::shared_ptr<const SupportContactListd>;
+using SupportContactListd_const_u = ::std::unique_ptr<const SupportContactListd>;
+using SupportContactListd_const_w = ::std::weak_ptr<const SupportContactListd>;
 
 template <typename T>
 struct VertexSDFConstraintT;
@@ -844,6 +920,25 @@ using PlaneCollisionErrorFunctiond_w = ::std::weak_ptr<PlaneCollisionErrorFuncti
 using PlaneCollisionErrorFunctiond_const_p = ::std::shared_ptr<const PlaneCollisionErrorFunctiond>;
 using PlaneCollisionErrorFunctiond_const_u = ::std::unique_ptr<const PlaneCollisionErrorFunctiond>;
 using PlaneCollisionErrorFunctiond_const_w = ::std::weak_ptr<const PlaneCollisionErrorFunctiond>;
+
+template <typename T>
+class PlaneCollisionQueryT;
+using PlaneCollisionQuery = PlaneCollisionQueryT<float>;
+using PlaneCollisionQueryd = PlaneCollisionQueryT<double>;
+
+using PlaneCollisionQuery_p = ::std::shared_ptr<PlaneCollisionQuery>;
+using PlaneCollisionQuery_u = ::std::unique_ptr<PlaneCollisionQuery>;
+using PlaneCollisionQuery_w = ::std::weak_ptr<PlaneCollisionQuery>;
+using PlaneCollisionQuery_const_p = ::std::shared_ptr<const PlaneCollisionQuery>;
+using PlaneCollisionQuery_const_u = ::std::unique_ptr<const PlaneCollisionQuery>;
+using PlaneCollisionQuery_const_w = ::std::weak_ptr<const PlaneCollisionQuery>;
+
+using PlaneCollisionQueryd_p = ::std::shared_ptr<PlaneCollisionQueryd>;
+using PlaneCollisionQueryd_u = ::std::unique_ptr<PlaneCollisionQueryd>;
+using PlaneCollisionQueryd_w = ::std::weak_ptr<PlaneCollisionQueryd>;
+using PlaneCollisionQueryd_const_p = ::std::shared_ptr<const PlaneCollisionQueryd>;
+using PlaneCollisionQueryd_const_u = ::std::unique_ptr<const PlaneCollisionQueryd>;
+using PlaneCollisionQueryd_const_w = ::std::weak_ptr<const PlaneCollisionQueryd>;
 
 template <typename T>
 class PlaneErrorFunctionT;

@@ -7,29 +7,14 @@
 
 #pragma once
 
-#include <momentum/character/collision_geometry.h>
-#include <momentum/character/collision_geometry_state.h>
 #include <momentum/character_solver/fwd.h>
+#include <momentum/character_solver/plane_collision_query.h>
 #include <momentum/character_solver/skeleton_error_function.h>
 
 #include <span>
 #include <vector>
 
 namespace momentum {
-
-/// Per-primitive collision debug information returned by getCollisionDebugInfo().
-template <typename T>
-struct PlaneCollisionDebugEntryT {
-  size_t primitiveIndex;
-  size_t parentJoint;
-  T overlap;
-  T signedDistance;
-  T radius;
-  Vector3<T> position;
-};
-
-using PlaneCollisionDebugEntry = PlaneCollisionDebugEntryT<float>;
-using PlaneCollisionDebugEntryd = PlaneCollisionDebugEntryT<double>;
 
 /// Penalizes collision between character collision primitives and a fixed plane.
 ///
@@ -43,13 +28,13 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const Skeleton& skel,
       const ParameterTransform& pt,
       const CollisionGeometry& cg,
-      const Vector3<T>& planeNormal = Vector3<T>::UnitY(),
-      T planeOffset = T(0));
+      const Vector3<T>& planeNormal,
+      T planeOffset);
 
   explicit PlaneCollisionErrorFunctionT(
       const Character& character,
-      const Vector3<T>& planeNormal = Vector3<T>::UnitY(),
-      T planeOffset = T(0));
+      const Vector3<T>& planeNormal,
+      T planeOffset);
 
   [[nodiscard]] double getError(
       const ModelParametersT<T>& params,
@@ -72,14 +57,29 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
 
   [[nodiscard]] size_t getJacobianSize() const final;
 
-  void setPlane(const Vector3<T>& planeNormal, T planeOffset);
-
-  [[nodiscard]] const Vector3<T>& getPlaneNormal() const {
-    return planeNormal_;
+  /// Set the collision plane after normalizing @p planeNormal and the matching offset.
+  void setPlane(const Vector3<T>& planeNormal, T planeOffset) {
+    collisionQuery_.setPlane(planeNormal, planeOffset);
   }
 
+  /// Return the normalized plane normal used by collision and contact queries.
+  [[nodiscard]] const Vector3<T>& getPlaneNormal() const {
+    return collisionQuery_.getPlaneNormal();
+  }
+
+  /// Return the plane offset after normalization by setPlane().
   [[nodiscard]] T getPlaneOffset() const {
-    return planeOffset_;
+    return collisionQuery_.getPlaneOffset();
+  }
+
+  /// Return the reusable query helper used by this error function.
+  [[nodiscard]] PlaneCollisionQueryT<T>& getCollisionQuery() {
+    return collisionQuery_;
+  }
+
+  /// Return the reusable query helper used by this error function.
+  [[nodiscard]] const PlaneCollisionQueryT<T>& getCollisionQuery() const {
+    return collisionQuery_;
   }
 
   [[nodiscard]] std::vector<size_t> getCollidingPrimitives() const;
@@ -107,36 +107,16 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       std::span<const JointStateT<T>> states,
       T contactMargin);
 
+  /// Return one detailed world-space primitive surface point per parent joint at or near the plane.
+  ///
+  /// A primitive contributes when its signed surface distance to the plane is <=
+  /// @p contactMargin. When multiple primitives under the same parent joint contribute, the
+  /// returned point is the deepest one toward the plane.
+  [[nodiscard]] std::vector<PlaneCollisionContactPointT<T>> getContactPointsByParentWithDetails(
+      std::span<const JointStateT<T>> states,
+      T contactMargin);
+
  protected:
-  struct PlaneCollisionResult {
-    T signedDistance = T(0);
-    T radius = T(0);
-    T overlap = T(0);
-    Vector3<T> position = Vector3<T>::Zero();
-  };
-
-  struct ActivePlaneCollision {
-    size_t primitiveIndex = kInvalidIndex;
-    PlaneCollisionResult result;
-  };
-
-  void updatePrimitiveList();
-
-  void updateCandidateCollisionState(const SkeletonStateT<T>& state, T contactMargin);
-
-  [[nodiscard]] bool mayPrimitiveContactPlane(
-      const SkeletonStateT<T>& state,
-      size_t primitiveIndex,
-      T contactMargin) const;
-
-  [[nodiscard]] T primitiveParentSpaceBound(size_t primitiveIndex) const;
-
-  void prepareContactPointQuery(std::span<const JointStateT<T>> states, T contactMargin);
-
-  [[nodiscard]] bool checkCollision(size_t primitiveIndex, PlaneCollisionResult& result) const;
-
-  void updateActiveParentCollisions();
-
   /// Accumulate gradient contributions along a joint chain up to the root.
   ///
   /// `scaleCorrection` accounts for the primitive support radius changing with uniform scale.
@@ -162,14 +142,7 @@ class PlaneCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       int row,
       T scaleCorrection = T(0)) const;
 
-  const CollisionGeometry collisionGeometry_;
-  std::vector<size_t> primitiveIndices_;
-  std::vector<size_t> candidatePrimitiveIndices_;
-  std::vector<T> primitiveParentSpaceBounds_;
-  std::vector<ActivePlaneCollision> activeParentCollisions_;
-  CollisionGeometryStateT<T> collisionState_;
-  Vector3<T> planeNormal_;
-  T planeOffset_;
+  PlaneCollisionQueryT<T> collisionQuery_;
 
   static constexpr T kCollisionWeight = 5e-3f;
 };
