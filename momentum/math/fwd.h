@@ -54,6 +54,25 @@ using Mppcad_const_u = ::std::unique_ptr<const Mppcad>;
 using Mppcad_const_w = ::std::weak_ptr<const Mppcad>;
 
 template <typename T>
+struct SupportPlaneT;
+using SupportPlane = SupportPlaneT<float>;
+using SupportPlaned = SupportPlaneT<double>;
+
+using SupportPlane_p = ::std::shared_ptr<SupportPlane>;
+using SupportPlane_u = ::std::unique_ptr<SupportPlane>;
+using SupportPlane_w = ::std::weak_ptr<SupportPlane>;
+using SupportPlane_const_p = ::std::shared_ptr<const SupportPlane>;
+using SupportPlane_const_u = ::std::unique_ptr<const SupportPlane>;
+using SupportPlane_const_w = ::std::weak_ptr<const SupportPlane>;
+
+using SupportPlaned_p = ::std::shared_ptr<SupportPlaned>;
+using SupportPlaned_u = ::std::unique_ptr<SupportPlaned>;
+using SupportPlaned_w = ::std::weak_ptr<SupportPlaned>;
+using SupportPlaned_const_p = ::std::shared_ptr<const SupportPlaned>;
+using SupportPlaned_const_u = ::std::unique_ptr<const SupportPlaned>;
+using SupportPlaned_const_w = ::std::weak_ptr<const SupportPlaned>;
+
+template <typename T>
 struct TransformT;
 using Transform = TransformT<float>;
 using Transformd = TransformT<double>;

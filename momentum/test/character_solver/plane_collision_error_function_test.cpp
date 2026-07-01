@@ -124,6 +124,21 @@ CollisionPrimitive createBoxPrimitive() {
 
 } // namespace
 
+TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_NormalizesPlaneDefinition) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createSinglePrimitiveCharacter(createCapsulePrimitive());
+  PlaneCollisionErrorFunctionT<T> errorFunction(
+      character, T(2) * Vector3<T>::UnitY(), /*planeOffset=*/T(4));
+
+  EXPECT_TRUE(errorFunction.getPlaneNormal().isApprox(Vector3<T>::UnitY()));
+  EXPECT_NEAR(errorFunction.getPlaneOffset(), T(2), Eps<T>(1e-5f, 1e-10));
+
+  errorFunction.setPlane(T(3) * Vector3<T>::UnitX(), T(6));
+  EXPECT_TRUE(errorFunction.getPlaneNormal().isApprox(Vector3<T>::UnitX()));
+  EXPECT_NEAR(errorFunction.getPlaneOffset(), T(2), Eps<T>(1e-5f, 1e-10));
+}
+
 TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_GradientsAndJacobians) {
   using T = typename TestFixture::Type;
 
@@ -250,6 +265,15 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_ReturnsDeepestContac
   EXPECT_NEAR(parentContactPoints[0].x(), T(2), Eps<T>(1e-5f, 1e-8));
   EXPECT_NEAR(parentContactPoints[0].y(), T(-0.4), Eps<T>(1e-5f, 1e-8));
   EXPECT_NEAR(parentContactPoints[0].z(), T(0), Eps<T>(1e-5f, 1e-8));
+
+  const auto parentContactDetails =
+      errorFunction.getContactPointsByParentWithDetails(state.jointState, T(0));
+  ASSERT_EQ(parentContactDetails.size(), 1);
+  EXPECT_EQ(parentContactDetails[0].parentJoint, 0);
+  EXPECT_NEAR(parentContactDetails[0].surfaceDistance, T(-0.4), Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR(parentContactDetails[0].position.x(), T(2), Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR(parentContactDetails[0].position.y(), T(-0.4), Eps<T>(1e-5f, 1e-8));
+  EXPECT_NEAR(parentContactDetails[0].position.z(), T(0), Eps<T>(1e-5f, 1e-8));
 }
 
 TYPED_TEST(Momentum_ErrorFunctionsTest, PlaneCollisionError_BroadPhaseKeepsLongLocalOffset) {
