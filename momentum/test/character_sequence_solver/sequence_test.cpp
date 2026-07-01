@@ -28,6 +28,7 @@
 #include "momentum/character_sequence_solver/vertex_sequence_error_function.h"
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/random.h"
 #include "momentum/test/character/character_helpers.h"
@@ -262,12 +263,14 @@ static std::vector<ModelParametersd> zeroModelParameters(const Character& c, siz
 static std::vector<ModelParametersd> randomModelParameters(const Character& c, size_t nFrames) {
   std::vector<ModelParametersd> result;
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-    result.emplace_back(VectorXd::Random(c.parameterTransform.numAllModelParameters()) * 0.25f);
+    result.emplace_back(
+        uniform<VectorXd>(c.parameterTransform.numAllModelParameters(), -1.0, 1.0) * 0.25);
   }
   return result;
 }
 
 TEST(Momentum_SequenceErrorFunctions, ModelParametersSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -292,6 +295,7 @@ TEST(Momentum_SequenceErrorFunctions, ModelParametersSequenceError_GradientsAndJ
 }
 
 TEST(Momentum_SequenceErrorFunctions, StateSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -322,6 +326,7 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_GradientsAndJacobians) 
 }
 
 TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -362,6 +367,7 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceError_WithOffsets) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -396,6 +402,7 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_GradientsAndJacob
 }
 
 TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_WithOffsets) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -441,6 +448,7 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_WithOffsets) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_CompareWithMatrixDiff) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test that both error types produce valid results and handle the same data correctly
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -491,6 +499,7 @@ TEST(Momentum_SequenceErrorFunctions, StateSequenceErrorLogMap_CompareWithMatrix
 }
 
 TEST(Momentum_SequenceErrorFunctions, VertexSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
 
@@ -547,7 +556,9 @@ TEST(Momentum_SequenceErrorFunctions, SDFCollisionSequenceError_TunnelingAndGrad
     const SkeletonStated ss(ptd.apply(mp), character.skeleton);
     MeshStated ms;
     ms.update(mp, ss, character);
-    MT_CHECK_NOTNULL(ms.posedMesh_);
+    if (ms.posedMesh_ == nullptr) {
+      MT_THROW("Expected posed mesh after mesh state update.");
+    }
     return ms.posedMesh_->vertices[vi];
   };
 
@@ -681,7 +692,8 @@ void testGradientAndJacobian(
 
   // Verify that we can round-trip through the model parameters:
   {
-    solverFunction.setJoinedParameterVector(Eigen::VectorX<T>::Random(allParameters.size()));
+    solverFunction.setJoinedParameterVector(
+        uniform<Eigen::VectorX<T>>(allParameters.size(), T(-1), T(1)));
     solverFunction.setJoinedParameterVector(allParameters);
     const ParameterSet univ = solverFunction.getUniversalParameterSet();
     for (size_t iFrame = 0; iFrame < referenceParameters.size(); ++iFrame) {
@@ -767,6 +779,7 @@ void testGradientAndJacobian(
 } // namespace
 
 TEST(Momentum_SequenceSolver, SequenceSolverFunction_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const ParameterTransform& transform = character.parameterTransform;
@@ -804,6 +817,7 @@ TEST(Momentum_SequenceSolver, SequenceSolverFunction_GradientsAndJacobians) {
 }
 
 TEST(Momentum_SequenceSolver, SequenceSolver_EnabledParameters) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const size_t nFrames = 3;
@@ -836,6 +850,7 @@ TEST(Momentum_SequenceSolver, SequenceSolver_EnabledParameters) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -866,6 +881,7 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_GradientsAndJaco
 }
 
 TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_WithTargetAcceleration) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -894,6 +910,7 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_WithTargetAccele
 }
 
 TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_PerJointTargets) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -923,6 +940,7 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_PerJointTargets)
 }
 
 TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_ZeroErrorForConstantVelocity) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test that constant velocity motion (linear interpolation) produces zero acceleration error
   // when target acceleration is zero
   const Character character = createTestCharacter();
@@ -941,9 +959,9 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_ZeroErrorForCons
   const Eigen::Index np = transform.numAllModelParameters();
 
   // Frame 0: some random offset
-  VectorXd base = VectorXd::Random(np) * 0.1;
+  VectorXd base = uniform<VectorXd>(np, -1.0, 1.0) * 0.1;
   // Frame 1: base + velocity
-  VectorXd velocity = VectorXd::Random(np) * 0.05;
+  VectorXd velocity = uniform<VectorXd>(np, -1.0, 1.0) * 0.05;
   // Frame 2: base + 2*velocity
 
   parameters[0] = base;
@@ -968,6 +986,7 @@ TEST(Momentum_SequenceErrorFunctions, AccelerationSequenceError_ZeroErrorForCons
 }
 
 TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -998,6 +1017,7 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_GradientsAndJacobians) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_WithTargetJerk) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1026,6 +1046,7 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_WithTargetJerk) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_PerJointTargets) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1055,6 +1076,7 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_PerJointTargets) {
 }
 
 TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_ZeroErrorForConstantAcceleration) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test that constant acceleration motion produces zero jerk error when target jerk is zero
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1073,10 +1095,10 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_ZeroErrorForConstantAcce
   const Eigen::Index np = transform.numAllModelParameters();
 
   // Frame 0: base position
-  VectorXd base = VectorXd::Random(np) * 0.1;
+  VectorXd base = uniform<VectorXd>(np, -1.0, 1.0) * 0.1;
   // Initial velocity and constant acceleration
-  VectorXd velocity = VectorXd::Random(np) * 0.05;
-  VectorXd acceleration = VectorXd::Random(np) * 0.02;
+  VectorXd velocity = uniform<VectorXd>(np, -1.0, 1.0) * 0.05;
+  VectorXd acceleration = uniform<VectorXd>(np, -1.0, 1.0) * 0.02;
 
   // pos[t] = base + velocity*t + 0.5*acceleration*t^2
   parameters[0] = base; // t=0
@@ -1102,6 +1124,7 @@ TEST(Momentum_SequenceErrorFunctions, JerkSequenceError_ZeroErrorForConstantAcce
 }
 
 TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1133,6 +1156,7 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_GradientsAn
 }
 
 TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_WithTargetSpeed) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1163,6 +1187,7 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_WithTargetS
 }
 
 TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_PerJointTargets) {
+  Random<>::GetSingleton().setSeed(12345);
   // create skeleton and reference values
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1194,6 +1219,7 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_PerJointTar
 }
 
 TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_ZeroErrorForTargetSpeed) {
+  Random<>::GetSingleton().setSeed(12345);
   // Test that when the actual velocity magnitude matches the target speed, the error is minimal
   const Character character = createTestCharacter();
   const Skeleton& skeleton = character.skeleton;
@@ -1233,6 +1259,7 @@ TEST(Momentum_SequenceErrorFunctions, VelocityMagnitudeSequenceError_ZeroErrorFo
 TEST(
     Momentum_SequenceErrorFunctions,
     JerkSequenceError_SkeletonParameterTransformConstructorMatchesCharacterConstructor) {
+  Random<>::GetSingleton().setSeed(12345);
   // Verify that constructing JerkSequenceErrorFunction from Skeleton + ParameterTransform
   // produces the same results as constructing from Character.
   const Character character = createTestCharacter();
@@ -1273,6 +1300,7 @@ TEST(
 }
 
 TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_GradientsAndJacobians) {
+  Random<>::GetSingleton().setSeed(12345);
   const Character character = createTestCharacter();
 
   JointToJointSequenceErrorFunctiond errorFunction(character);
@@ -1291,6 +1319,7 @@ TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_GradientsAndJacobians
 }
 
 TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_ZeroErrorWhenIdentical) {
+  Random<>::GetSingleton().setSeed(12345);
   const Character character = createTestCharacter();
   const ParameterTransformd transformD = character.parameterTransform.cast<double>();
 
@@ -1300,7 +1329,7 @@ TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_ZeroErrorWhenIdentica
   // When both frames have the same parameters, the relative transform doesn't change,
   // so the error should be zero.
   ModelParametersd params =
-      Eigen::VectorXd::Random(character.parameterTransform.numAllModelParameters()) * 0.25;
+      uniform<VectorXd>(character.parameterTransform.numAllModelParameters(), -1.0, 1.0) * 0.25;
   std::vector<ModelParametersd> frameParams = {params, params};
   std::vector<SkeletonStated> skelStates(2);
   for (size_t i = 0; i < 2; ++i) {
@@ -1313,6 +1342,7 @@ TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_ZeroErrorWhenIdentica
 }
 
 TEST(Momentum_SequenceErrorFunctions, JointToJointSequence_PositionAndOrientationWeights) {
+  Random<>::GetSingleton().setSeed(12345);
   const Character character = createTestCharacter();
   const ParameterTransformd transformD = character.parameterTransform.cast<double>();
 
