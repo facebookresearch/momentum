@@ -200,6 +200,7 @@ mt_python_binding(
   LINK_LIBRARIES
     array_utility
     character
+    character_solver
     io_character
     io_fbx
     io_file_save_options
@@ -209,6 +210,7 @@ mt_python_binding(
     io_shape
     io_skeleton
     io_urdf
+    math
     python_utility
 )
 

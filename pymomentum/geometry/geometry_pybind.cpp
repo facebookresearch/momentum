@@ -25,6 +25,7 @@
 #include "pymomentum/geometry/sdf_collider_pybind.h"
 #include "pymomentum/geometry/skeleton_pybind.h"
 #include "pymomentum/geometry/skin_weights_pybind.h"
+#include "pymomentum/geometry/support_contacts_pybind.h"
 #include "pymomentum/geometry/texture_classification.h"
 #include "pymomentum/python_utility/eigen_quaternion.h"
 
@@ -1228,6 +1229,8 @@ Supports arbitrary leading dimensions with broadcasting and both float32/float64
   Shape: [..., numJoints, 8])",
       py::arg("character"),
       py::arg("joint_parameters"));
+
+  addSupportContactBindings(m);
 
   // jointParametersToLocalSkeletonState(character, jointParameters)
   m.def(
