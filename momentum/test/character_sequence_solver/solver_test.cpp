@@ -22,6 +22,7 @@
 #include "momentum/character_solver/position_error_function.h"
 #include "momentum/character_solver/trust_region_qr.h"
 #include "momentum/math/fmt_eigen.h"
+#include "momentum/math/random.h"
 #include "momentum/solver/gauss_newton_solver.h"
 #include "momentum/solver/subset_gauss_newton_solver.h"
 #include "momentum/test/character/character_helpers.h"
@@ -30,7 +31,6 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include <cmath>
 
 using namespace momentum;
 
@@ -50,17 +50,12 @@ std::vector<int> toIntVector(const ParameterSet& params, const Character& charac
 }
 
 template <typename T>
-Eigen::VectorX<T> deterministicParameters(Eigen::Index nParams, size_t seed) {
-  Eigen::VectorX<T> result(nParams);
-  for (Eigen::Index i = 0; i < nParams; ++i) {
-    result(i) = static_cast<T>(0.25 * std::sin(0.37 * static_cast<double>(i + 1 + 17 * seed)));
-  }
-  return result;
-}
-
-template <typename T>
 struct MultiPoseTestProblem {
-  MultiPoseTestProblem(const Character& character, size_t nFrames, ParameterSet universalParams_in);
+  MultiPoseTestProblem(
+      Random<>& rng,
+      const Character& character,
+      size_t nFrames,
+      ParameterSet universalParams_in);
 
   std::vector<std::shared_ptr<PositionErrorFunctionT<T>>> positionErrors;
   std::vector<std::shared_ptr<OrientationErrorFunctionT<T>>> orientErrors;
@@ -70,20 +65,21 @@ struct MultiPoseTestProblem {
 
 template <typename T>
 MultiPoseTestProblem<T>::MultiPoseTestProblem(
+    Random<>& rng,
     const Character& character,
     size_t nFrames,
     ParameterSet universalParams_in)
     : universalParams(universalParams_in) {
   const ParameterTransformT<T> parameterTransform = character.parameterTransform.cast<T>();
-  Eigen::VectorX<T> randomParams_base =
-      deterministicParameters<T>(parameterTransform.numAllModelParameters(), 0);
+  auto randomParams_base = rng.template uniform<Eigen::VectorX<T>>(
+      parameterTransform.numAllModelParameters(), T(-0.25), T(0.25));
 
   positionErrors.resize(nFrames);
   orientErrors.resize(nFrames);
   targetParams.resize(nFrames);
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-    Eigen::VectorX<T> randomParams_cur =
-        deterministicParameters<T>(parameterTransform.numAllModelParameters(), iFrame + 1);
+    auto randomParams_cur = rng.template uniform<Eigen::VectorX<T>>(
+        parameterTransform.numAllModelParameters(), T(-0.25), T(0.25));
     for (int i = 0; i < parameterTransform.numAllModelParameters(); ++i) {
       if (universalParams.test(i)) {
         randomParams_cur[i] = randomParams_base[i];
@@ -117,6 +113,7 @@ MultiPoseTestProblem<T>::MultiPoseTestProblem(
 template <typename T>
 struct MultiposeSolverTest : public testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(MultiposeSolverTest, Types);
@@ -137,7 +134,7 @@ TYPED_TEST(MultiposeSolverTest, CompareGaussNewton) {
   enabledParams.set();
 
   const size_t nFrames = 2;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   MultiposeSolverFunctionT<T> solverFunction(
       &character.skeleton,
@@ -163,6 +160,7 @@ TYPED_TEST(MultiposeSolverTest, CompareGaussNewton) {
 template <typename T>
 struct SequenceSolverTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(SequenceSolverTest, Types);
@@ -183,7 +181,7 @@ TYPED_TEST(SequenceSolverTest, CompareSequenceMultiPose) {
   universalParams.set(7);
 
   const size_t nFrames = 3;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -247,7 +245,7 @@ TYPED_TEST(SequenceSolverTest, CompareGaussNewton) {
   universalParams.set(7);
 
   const size_t nFrames = 3;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -287,7 +285,7 @@ TYPED_TEST(SequenceSolverTest, CompareMultithreaded) {
   universalParams.set(7);
 
   const size_t nFrames = 5;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -338,7 +336,7 @@ TYPED_TEST(SequenceSolverTest, CompareCholesky) {
   universalParams.set(7);
 
   const size_t nFrames = 3;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunctionQr(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -396,7 +394,7 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyScalarLdltWithoutUniversalParamete
 
   const ParameterSet universalParams;
   const size_t nFrames = 4;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
     for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
@@ -456,7 +454,7 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyMultithreaded) {
   universalParams.set(7);
 
   const size_t nFrames = 4;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
     for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
@@ -542,7 +540,7 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyMixedSequenceBoundaryCases) {
   universalParams.set(7);
 
   const size_t nFrames = 5;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
     for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
@@ -613,7 +611,7 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyOnlyUniversalParameters) {
   universalParams.set(7);
 
   const size_t nFrames = 4;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunctionCholesky(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -670,7 +668,7 @@ TYPED_TEST(SequenceSolverTest, MixedFrameCountErrorFunctions) {
   // - StateSequenceErrorFunction at frames 0,1,2 (2-frame windows)
   // - AccelerationSequenceErrorFunction at frames 0,1 (3-frame windows)
   const size_t nFrames = 5;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
       character, castedCharacterParameterTransform, problem.universalParams, nFrames);
@@ -725,7 +723,7 @@ TYPED_TEST(SequenceSolverTest, OnlySharedParams) {
   universalParams.set(7);
 
   const size_t nFrames = 5;
-  MultiPoseTestProblem<T> problem(character, nFrames, universalParams);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   SequenceSolverFunctionT<T> sequenceSolverFunction(
       character, castedCharacterParameterTransform, universalParams, nFrames);
