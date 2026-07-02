@@ -21,6 +21,8 @@
 
 namespace {
 
+constexpr std::mt19937::result_type kRandomSeed = 12345;
+
 template <typename T>
 Eigen::MatrixX<T> stack(const std::vector<Eigen::MatrixX<T>>& mats) {
   MT_THROW_IF(mats.empty(), "Empty stack.");
@@ -123,14 +125,14 @@ Eigen::MatrixXd randomMatrix(
     sv(i) = singularValues[i];
   }
 
-  const Eigen::MatrixXd U = svd.matrixU();
-  const Eigen::MatrixXd V = svd.matrixV();
+  const Eigen::MatrixXd& U = svd.matrixU();
+  const Eigen::MatrixXd& V = svd.matrixV();
   return U * Eigen::DiagonalMatrix<double, -1>(sv) * V.transpose();
 }
 
 // Test the built-in lambda inclusion:
 TEST(OnlineQR, WithLambda) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   const Eigen::Index dim = 3;
   const Eigen::Index nRows = 5;
@@ -167,7 +169,7 @@ TEST(OnlineQR, WithLambda) {
 }
 
 TEST(OnlineQR, MatrixWithZeros) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   const Eigen::Index dim = 3;
 
@@ -194,7 +196,7 @@ TEST(OnlineQR, MatrixWithZeros) {
 
 // Try solving the same problem but adding the rows in various combinations.
 TEST(OnlineQR, AdditionCombinations) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   for (Eigen::Index iTest = 0; iTest < 10; ++iTest) {
     const Eigen::Index dim = 3;
@@ -231,7 +233,7 @@ TEST(OnlineQR, AdditionCombinations) {
 // Solve with a known x value for easy validation and to compare against
 // other methods (e.g. the normal equations, etc.).
 TEST(OnlineQR, LargeMatrix) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   const Eigen::Index dim = 20;
   const Eigen::Index nRows = 5000;
@@ -260,9 +262,11 @@ TEST(OnlineQR, LargeMatrix) {
 
   std::vector<Eigen::MatrixXf> A_mat_f;
   std::vector<Eigen::VectorXf> b_vec_f;
+  A_mat_f.reserve(A_mat.size());
   for (const auto& a : A_mat) {
     A_mat_f.emplace_back(a.cast<float>());
   }
+  b_vec_f.reserve(b_vec.size());
   for (const auto& b : b_vec) {
     b_vec_f.emplace_back(b.cast<float>());
   }
@@ -663,7 +667,7 @@ TEST(OnlineBlockQR, RandomMatrix) {
   const size_t nTests = 10;
   const size_t nBlocks = 6;
 
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
   for (size_t iTest = 0; iTest < nTests; ++iTest) {
     std::vector<Eigen::MatrixXf> A_ii;
     std::vector<Eigen::MatrixXf> A_in;
@@ -902,7 +906,7 @@ TEST(OnlineBandedQR, EdgeCases) {
 
 // Test OnlineBandedHouseholderQR reset method comprehensively
 TEST(OnlineBandedQR, ResetMethod) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   // Test reset with different configurations
   std::vector<std::tuple<int, int, int, double>> configs = {
@@ -1132,7 +1136,7 @@ TEST(OnlineBandedQR, ZeroBandwidth) {
 }
 
 TEST(OnlineBandedQR, RandomMatrix) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   for (size_t n_cols_banded = 0; n_cols_banded < 10; ++n_cols_banded) {
     for (size_t n_cols_shared = 0; n_cols_shared < 10; ++n_cols_shared) {
@@ -1269,7 +1273,7 @@ TEST(ValidateColumnIndices, Valid) {
 }
 
 TEST(ResizableMatrix, Basic) {
-  std::mt19937 rng;
+  std::mt19937 rng{kRandomSeed};
 
   ResizeableMatrix<float> m;
 
