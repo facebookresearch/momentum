@@ -48,8 +48,8 @@ void activateSomeBakeableParams(const Character& c, ModelParametersT<T>& mp) {
 }
 
 TYPED_TEST(BakeTest, Geometry) {
-  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
+  Random<> rng{12345};
 
   // Build a character with both scale & blend-shape capabilities
   const Character characterBlend = withTestBlendShapes(createTestCharacter());
@@ -60,21 +60,30 @@ TYPED_TEST(BakeTest, Geometry) {
   const ParameterTransformT<T> paramX = characterBlend.parameterTransform.cast<T>();
 
   // Random (but reproducible) model parameters
-  ModelParametersT<T> modelParams = uniform<VectorX<T>>(paramX.numAllModelParameters(), 0, 1);
+  ModelParametersT<T> modelParams = rng.uniform<VectorX<T>>(paramX.numAllModelParameters(), 0, 1);
 
   activateSomeBakeableParams(characterBlend, modelParams);
 
   // Runtime path: skinning with blend shapes
   SkeletonStateT<T> skelState(paramX.apply(modelParams), characterBlend.skeleton);
 
-  MeshT<T> posedMesh = characterBlend.mesh->cast<T>();
+  const auto* characterMesh = characterBlend.mesh.get();
+  if (characterMesh == nullptr) {
+    ADD_FAILURE() << "Expected test character mesh.";
+    return;
+  }
+  MeshT<T> posedMesh = characterMesh->cast<T>();
   skinWithBlendShapes(characterBlend, skelState, modelParams, posedMesh);
 
   // Bake-time path
   Character baked = characterBlend.bake(modelParams.template cast<float>());
-  ASSERT_TRUE(baked.mesh); // sanity
+  const auto* bakedMeshPtr = baked.mesh.get();
+  if (bakedMeshPtr == nullptr) {
+    ADD_FAILURE() << "Expected baked character mesh.";
+    return;
+  }
 
-  MeshT<T> bakedMesh = baked.mesh->cast<T>(); // convert verts to current precision
+  MeshT<T> bakedMesh = bakedMeshPtr->cast<T>(); // convert verts to current precision
 
   // Compare vertex positions
   ASSERT_EQ(posedMesh.vertices.size(), bakedMesh.vertices.size());

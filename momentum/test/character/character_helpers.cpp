@@ -31,8 +31,8 @@ namespace momentum {
 namespace {
 
 template <typename T>
-Eigen::MatrixX<T> randomMatrix(Eigen::Index nRows, Eigen::Index nCols) {
-  return normal<MatrixX<T>>(nRows, nCols, 0, 1);
+Eigen::MatrixX<T> randomMatrix(Random<>& rng, Eigen::Index nRows, Eigen::Index nCols) {
+  return rng.template normal<MatrixX<T>>(nRows, nCols, 0, 1);
 }
 
 [[nodiscard]] Skeleton createDefaultSkeleton(size_t numJoints) {
@@ -247,8 +247,10 @@ Character withTestBlendShapes(const Character& character) {
   MT_CHECK(character.mesh);
 
   const int nShapes = 5;
+  Random<> rng{12345};
   auto blendShapes = std::make_shared<BlendShape>(character.mesh->vertices, nShapes);
-  blendShapes->setShapeVectors(randomMatrix<float>(3 * character.mesh->vertices.size(), nShapes));
+  blendShapes->setShapeVectors(
+      randomMatrix<float>(rng, 3 * character.mesh->vertices.size(), nShapes));
   return character.withBlendShape(blendShapes, nShapes);
 }
 
@@ -256,8 +258,10 @@ Character withTestFaceExpressionBlendShapes(const Character& character) {
   MT_CHECK(character.mesh);
 
   const int nShapes = 5;
+  Random<> rng{67890};
   auto blendShapes = std::make_shared<BlendShapeBase>();
-  blendShapes->setShapeVectors(randomMatrix<float>(3 * character.mesh->vertices.size(), nShapes));
+  blendShapes->setShapeVectors(
+      randomMatrix<float>(rng, 3 * character.mesh->vertices.size(), nShapes));
 
   return character.withFaceExpressionBlendShape(blendShapes, nShapes);
 }
@@ -299,15 +303,16 @@ std::shared_ptr<const MppcaT<T>> createDefaultPosePrior() {
   // Number of mixtures:
   const int p = 2;
 
-  Eigen::VectorX<T> pi = randomMatrix<T>(p, 1).array().abs();
+  Random<> rng{12345};
+  Eigen::VectorX<T> pi = randomMatrix<T>(rng, p, 1).array().abs();
   pi /= pi.sum();
-  Eigen::MatrixX<T> mu = randomMatrix<T>(p, d);
-  Eigen::VectorX<T> sigma2 = randomMatrix<T>(p, 1).array().square();
+  Eigen::MatrixX<T> mu = randomMatrix<T>(rng, p, d);
+  Eigen::VectorX<T> sigma2 = randomMatrix<T>(rng, p, 1).array().square();
 
   std::vector<Eigen::MatrixX<T>> W(p);
   const int q = 2;
   for (int i = 0; i < p; ++i) {
-    W[i] = randomMatrix<T>(d, q);
+    W[i] = randomMatrix<T>(rng, d, q);
   }
 
   auto result = std::make_shared<MppcaT<T>>();

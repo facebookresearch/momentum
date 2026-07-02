@@ -18,32 +18,32 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct BlendShapeTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(BlendShapeTest, Types);
 
 // Helper function to create random vertices
 template <typename T>
-std::vector<Eigen::Vector3<T>> createRandomVertices(size_t count) {
+std::vector<Eigen::Vector3<T>> createRandomVertices(Random<>& rng, size_t count) {
   std::vector<Eigen::Vector3<T>> vertices;
   vertices.reserve(count);
   for (size_t i = 0; i < count; ++i) {
-    vertices.push_back(uniform<Eigen::Vector3<T>>(T(-1), T(1)));
+    vertices.push_back(rng.template uniform<Eigen::Vector3<T>>(T(-1), T(1)));
   }
   return vertices;
 }
 
 // Helper function to create random blend weights
 template <typename T>
-BlendWeightsT<T> createRandomBlendWeights(size_t count) {
+BlendWeightsT<T> createRandomBlendWeights(Random<>& rng, size_t count) {
   BlendWeightsT<T> weights;
-  weights.v = uniform<VectorX<T>>(count, T(-1), T(1));
+  weights.v = rng.template uniform<VectorX<T>>(count, T(-1), T(1));
   return weights;
 }
 
 // Tests for BlendShapeBase
 TEST(BlendShapeTest, BlendShapeBaseConstruction) {
-  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
@@ -56,14 +56,14 @@ TEST(BlendShapeTest, BlendShapeBaseConstruction) {
 }
 
 TEST(BlendShapeTest, BlendShapeBaseSetShapeVector) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   BlendShapeBase blendShapeBase(modelSize, numShapes);
 
   // Create a random shape vector
-  std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> shapeVector = createRandomVertices<float>(rng, modelSize);
 
   // Set the shape vector at index 2
   blendShapeBase.setShapeVector(2, shapeVector);
@@ -78,7 +78,6 @@ TEST(BlendShapeTest, BlendShapeBaseSetShapeVector) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeBaseComputeDeltas) {
-  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
@@ -89,13 +88,13 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseComputeDeltas) {
   // Create and set random shape vectors
   std::vector<std::vector<Vector3f>> shapeVectors;
   for (size_t i = 0; i < numShapes; ++i) {
-    std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+    std::vector<Vector3f> shapeVector = createRandomVertices<float>(this->rng, modelSize);
     shapeVectors.push_back(shapeVector);
     blendShapeBase.setShapeVector(i, shapeVector);
   }
 
   // Create random blend weights
-  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(numShapes);
+  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(this->rng, numShapes);
 
   // Compute deltas
   VectorX<T> deltas = blendShapeBase.computeDeltas(blendWeights);
@@ -120,7 +119,6 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseComputeDeltas) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeBaseApplyDeltas) {
-  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
@@ -131,16 +129,16 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseApplyDeltas) {
   // Create and set random shape vectors
   std::vector<std::vector<Vector3f>> shapeVectors;
   for (size_t i = 0; i < numShapes; ++i) {
-    std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+    std::vector<Vector3f> shapeVector = createRandomVertices<float>(this->rng, modelSize);
     shapeVectors.push_back(shapeVector);
     blendShapeBase.setShapeVector(i, shapeVector);
   }
 
   // Create random blend weights
-  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(numShapes);
+  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(this->rng, numShapes);
 
   // Create base shape
-  std::vector<Eigen::Vector3<T>> baseShape = createRandomVertices<T>(modelSize);
+  std::vector<Eigen::Vector3<T>> baseShape = createRandomVertices<T>(this->rng, modelSize);
   std::vector<Eigen::Vector3<T>> result = baseShape;
 
   // Apply deltas
@@ -165,12 +163,12 @@ TYPED_TEST(BlendShapeTest, BlendShapeBaseApplyDeltas) {
 
 // Tests for BlendShape
 TEST(BlendShapeTest, BlendShapeConstruction) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape(baseShape, numShapes);
 
@@ -190,17 +188,17 @@ TEST(BlendShapeTest, BlendShapeConstruction) {
 }
 
 TEST(BlendShapeTest, BlendShapeSetBaseShape) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape1 = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape1 = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape(baseShape1, numShapes);
 
   // Create a new random base shape
-  std::vector<Vector3f> baseShape2 = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape2 = createRandomVertices<float>(rng, modelSize);
 
   // Set the new base shape
   blendShape.setBaseShape(baseShape2);
@@ -214,27 +212,26 @@ TEST(BlendShapeTest, BlendShapeSetBaseShape) {
 }
 
 TYPED_TEST(BlendShapeTest, BlendShapeComputeShape) {
-  Random<>::GetSingleton().setSeed(12345);
   using T = typename TestFixture::Type;
 
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(this->rng, modelSize);
 
   BlendShape blendShape(baseShape, numShapes);
 
   // Create and set random shape vectors
   std::vector<std::vector<Vector3f>> shapeVectors;
   for (size_t i = 0; i < numShapes; ++i) {
-    std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+    std::vector<Vector3f> shapeVector = createRandomVertices<float>(this->rng, modelSize);
     shapeVectors.push_back(shapeVector);
     blendShape.setShapeVector(i, shapeVector);
   }
 
   // Create random blend weights
-  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(numShapes);
+  BlendWeightsT<T> blendWeights = createRandomBlendWeights<T>(this->rng, numShapes);
 
   // Compute shape
   std::vector<Eigen::Vector3<T>> shape = blendShape.computeShape(blendWeights);
@@ -274,25 +271,25 @@ TYPED_TEST(BlendShapeTest, BlendShapeComputeShape) {
 }
 
 TEST(BlendShapeTest, BlendShapeEstimateCoefficients) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape(baseShape, numShapes);
 
   // Create and set random shape vectors
   std::vector<std::vector<Vector3f>> shapeVectors;
   for (size_t i = 0; i < numShapes; ++i) {
-    std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+    std::vector<Vector3f> shapeVector = createRandomVertices<float>(rng, modelSize);
     shapeVectors.push_back(shapeVector);
     blendShape.setShapeVector(i, shapeVector);
   }
 
   // Create known blend weights
-  auto knownCoefficients = uniform<VectorXf>(numShapes, -1.f, 1.f);
+  auto knownCoefficients = rng.uniform<VectorXf>(numShapes, -1.f, 1.f);
   BlendWeightsT<float> blendWeights;
   blendWeights.v = knownCoefficients;
 
@@ -325,17 +322,17 @@ TEST(BlendShapeTest, BlendShapeEstimateCoefficients) {
 }
 
 TEST(BlendShapeTest, BlendShapeSetShapeVector) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape(baseShape, numShapes);
 
   // Create a random shape vector
-  std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> shapeVector = createRandomVertices<float>(rng, modelSize);
 
   // Set the shape vector at index 2
   blendShape.setShapeVector(2, shapeVector);
@@ -352,7 +349,7 @@ TEST(BlendShapeTest, BlendShapeSetShapeVector) {
   EXPECT_FALSE(blendShape.getFactorizationValid());
 
   // Force factorization to be computed
-  std::vector<Vector3f> targetShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> targetShape = createRandomVertices<float>(rng, modelSize);
   (void)blendShape.estimateCoefficients(targetShape);
 
   // Check that factorization is now valid
@@ -366,19 +363,19 @@ TEST(BlendShapeTest, BlendShapeSetShapeVector) {
 }
 
 TEST(BlendShapeTest, BlendShapeIsApprox) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape1(baseShape, numShapes);
 
   // Create and set random shape vectors
   std::vector<std::vector<Vector3f>> shapeVectors;
   for (size_t i = 0; i < numShapes; ++i) {
-    std::vector<Vector3f> shapeVector = createRandomVertices<float>(modelSize);
+    std::vector<Vector3f> shapeVector = createRandomVertices<float>(rng, modelSize);
     shapeVectors.push_back(shapeVector);
     blendShape1.setShapeVector(i, shapeVector);
   }
@@ -393,7 +390,7 @@ TEST(BlendShapeTest, BlendShapeIsApprox) {
   EXPECT_TRUE(blendShape1.isApprox(blendShape2));
 
   // Modify the second blend shape
-  std::vector<Vector3f> differentBaseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> differentBaseShape = createRandomVertices<float>(rng, modelSize);
   blendShape2.setBaseShape(differentBaseShape);
 
   // Check that the blend shapes are no longer approximately equal
@@ -401,7 +398,7 @@ TEST(BlendShapeTest, BlendShapeIsApprox) {
 
   // Reset the base shape but modify a shape vector
   blendShape2.setBaseShape(baseShape);
-  std::vector<Vector3f> differentShapeVector = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> differentShapeVector = createRandomVertices<float>(rng, modelSize);
   blendShape2.setShapeVector(0, differentShapeVector);
 
   // Check that the blend shapes are no longer approximately equal
@@ -410,7 +407,6 @@ TEST(BlendShapeTest, BlendShapeIsApprox) {
 
 // Test edge cases
 TEST(BlendShapeTest, EdgeCases) {
-  Random<>::GetSingleton().setSeed(12345);
   // Test with empty base shape and no shape vectors
   BlendShape emptyBlendShape;
   EXPECT_EQ(emptyBlendShape.modelSize(), 0);
@@ -444,30 +440,30 @@ TEST(BlendShapeTest, EdgeCases) {
 
 // Test error cases
 TEST(BlendShapeTest, ErrorCases) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
   // Create a random base shape
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(modelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, modelSize);
 
   BlendShape blendShape(baseShape, numShapes);
 
   // Test setting a shape vector with wrong size
-  std::vector<Vector3f> wrongSizeShapeVector = createRandomVertices<float>(modelSize + 1);
+  std::vector<Vector3f> wrongSizeShapeVector = createRandomVertices<float>(rng, modelSize + 1);
 
   // This should trigger an assertion failure, but we can't test that directly in gtest
   // Just documenting that this would be an error case
 
   // Test estimating coefficients with wrong size vertices
-  std::vector<Vector3f> wrongSizeVertices = createRandomVertices<float>(modelSize + 1);
+  std::vector<Vector3f> wrongSizeVertices = createRandomVertices<float>(rng, modelSize + 1);
 
   // This should trigger an assertion failure, but we can't test that directly in gtest
   // Just documenting that this would be an error case
 
   // Test with blend weights that have more coefficients than shape vectors
   BlendWeightsT<float> tooManyWeights;
-  tooManyWeights.v = uniform<VectorXf>(numShapes + 1, -1.f, 1.f);
+  tooManyWeights.v = rng.uniform<VectorXf>(numShapes + 1, -1.f, 1.f);
 
   // This should trigger an assertion failure, but we can't test that directly in gtest
   // Just documenting that this would be an error case
@@ -475,12 +471,12 @@ TEST(BlendShapeTest, ErrorCases) {
 
 // Test with different sizes
 TEST(BlendShapeTest, DifferentSizes) {
-  Random<>::GetSingleton().setSeed(12345);
+  Random<> rng{12345};
   // Test with a larger model
   const size_t largeModelSize = 1000;
   const size_t numShapes = 10;
 
-  std::vector<Vector3f> baseShape = createRandomVertices<float>(largeModelSize);
+  std::vector<Vector3f> baseShape = createRandomVertices<float>(rng, largeModelSize);
   BlendShape largeBlendShape(baseShape, numShapes);
 
   EXPECT_EQ(largeBlendShape.modelSize(), largeModelSize);
@@ -490,7 +486,7 @@ TEST(BlendShapeTest, DifferentSizes) {
   const size_t modelSize = 10;
   const size_t manyShapes = 100;
 
-  baseShape = createRandomVertices<float>(modelSize);
+  baseShape = createRandomVertices<float>(rng, modelSize);
   BlendShape manyShapesBlendShape(baseShape, manyShapes);
 
   EXPECT_EQ(manyShapesBlendShape.modelSize(), modelSize);
@@ -498,7 +494,6 @@ TEST(BlendShapeTest, DifferentSizes) {
 }
 
 TEST(BlendShapeTest, BlendShapeNames) {
-  Random<>::GetSingleton().setSeed(12345);
   const size_t modelSize = 10;
   const size_t numShapes = 5;
 
