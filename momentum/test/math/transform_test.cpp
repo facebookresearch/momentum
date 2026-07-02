@@ -15,6 +15,42 @@
 
 using namespace momentum;
 
+namespace {
+
+// Draw four normals and normalize to get a Haar-uniform quaternion on SO(3)
+// using only the seeded fixture engine. Random<>::uniformQuaternion routes to
+// Eigen's Quaternion::UnitRandom, which uses the unseeded std::rand path and
+// would make the rotation non-reproducible.
+template <typename T>
+Quaternion<T> makeRandomQuaternion(Random<>& rng) {
+  const T x = rng.template normal<T>(T(0), T(1));
+  const T y = rng.template normal<T>(T(0), T(1));
+  const T z = rng.template normal<T>(T(0), T(1));
+  const T w = rng.template normal<T>(T(0), T(1));
+  return Quaternion<T>(w, x, y, z).normalized();
+}
+
+template <typename T>
+TransformT<T> makeRandomTransform(
+    Random<>& rng,
+    bool translation = true,
+    bool rotation = true,
+    bool scale = true) {
+  TransformT<T> result;
+  if (translation) {
+    result.translation = rng.template uniform<Vector3<T>>(T(-1), T(1));
+  }
+  if (rotation) {
+    result.rotation = makeRandomQuaternion<T>(rng);
+  }
+  if (scale) {
+    result.scale = rng.template uniform<T>(T(0.1), T(2));
+  }
+  return result;
+}
+
+} // namespace
+
 using Types = testing::Types<float, double>;
 
 template <typename T>
@@ -30,7 +66,7 @@ TYPED_TEST(TransformTest, FactoryMethods) {
   using T = typename TestFixture::Type;
 
   // Test makeRotation
-  const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+  const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
   const TransformT<T> rotTransform = TransformT<T>::makeRotation(rotation);
   EXPECT_TRUE(rotTransform.rotation.isApprox(rotation));
   EXPECT_TRUE(rotTransform.translation.isZero());
@@ -50,23 +86,23 @@ TYPED_TEST(TransformTest, FactoryMethods) {
   EXPECT_TRUE(scaleTransform.rotation.isApprox(Quaternion<T>::Identity()));
   EXPECT_EQ(scaleTransform.scale, scale);
 
-  // Test makeRandom with different combinations
-  const TransformT<T> randomTransform1 = TransformT<T>::makeRandom(true, true, true);
+  // Test random transforms with different component combinations
+  const TransformT<T> randomTransform1 = makeRandomTransform<T>(this->rng, true, true, true);
   EXPECT_FALSE(randomTransform1.translation.isZero());
   EXPECT_FALSE(randomTransform1.rotation.isApprox(Quaternion<T>::Identity()));
   EXPECT_NE(randomTransform1.scale, T(1));
 
-  const TransformT<T> randomTransform2 = TransformT<T>::makeRandom(true, false, false);
+  const TransformT<T> randomTransform2 = makeRandomTransform<T>(this->rng, true, false, false);
   EXPECT_FALSE(randomTransform2.translation.isZero());
   EXPECT_TRUE(randomTransform2.rotation.isApprox(Quaternion<T>::Identity()));
   EXPECT_EQ(randomTransform2.scale, T(1));
 
-  const TransformT<T> randomTransform3 = TransformT<T>::makeRandom(false, true, false);
+  const TransformT<T> randomTransform3 = makeRandomTransform<T>(this->rng, false, true, false);
   EXPECT_TRUE(randomTransform3.translation.isZero());
   EXPECT_FALSE(randomTransform3.rotation.isApprox(Quaternion<T>::Identity()));
   EXPECT_EQ(randomTransform3.scale, T(1));
 
-  const TransformT<T> randomTransform4 = TransformT<T>::makeRandom(false, false, true);
+  const TransformT<T> randomTransform4 = makeRandomTransform<T>(this->rng, false, false, true);
   EXPECT_TRUE(randomTransform4.translation.isZero());
   EXPECT_TRUE(randomTransform4.rotation.isApprox(Quaternion<T>::Identity()));
   EXPECT_NE(randomTransform4.scale, T(1));
@@ -84,7 +120,7 @@ TYPED_TEST(TransformTest, Constructors) {
 
   // Test constructor with parameters
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
-  const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+  const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
   const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   const TransformT<T> paramTransform(translation, rotation, scale);
@@ -123,7 +159,7 @@ TYPED_TEST(TransformTest, Constructors) {
   // evaluation of function arguments is unspecified in C++, so drawing both inline would make
   // which value the RNG produces first (and thus the inputs) compiler-dependent.
   const auto floatTranslation = this->rng.template uniform<Vector3f>(-1.0f, 1.0f);
-  const Quaternion<float> floatRotation = this->rng.template uniformQuaternion<float>();
+  const Quaternion<float> floatRotation = makeRandomQuaternion<float>(this->rng);
   const TransformT<float> floatTransform(floatTranslation, floatRotation, 2.5f);
   const TransformT<double> doubleTransform(floatTransform);
 
@@ -137,7 +173,7 @@ TYPED_TEST(TransformTest, AssignmentOperators) {
   using T = typename TestFixture::Type;
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
-  const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+  const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
   const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   // Test assignment from Affine3
@@ -173,7 +209,7 @@ TYPED_TEST(TransformTest, ConversionMethods) {
   using T = typename TestFixture::Type;
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
-  const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+  const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
   const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   const TransformT<T> transform(translation, rotation, scale);
@@ -211,7 +247,7 @@ TYPED_TEST(TransformTest, ConversionMethods) {
 TYPED_TEST(TransformTest, AdditionalOperators) {
   using T = typename TestFixture::Type;
 
-  const TransformT<T> transform = TransformT<T>::makeRandom();
+  const TransformT<T> transform = makeRandomTransform<T>(this->rng);
 
   // Test operator*(const Affine3<T>&)
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
@@ -237,7 +273,7 @@ TYPED_TEST(TransformTest, FromMethods) {
   using T = typename TestFixture::Type;
 
   const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
-  const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+  const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
   const T scale = this->rng.template uniform<T>(T(0.1), T(10));
 
   // Test fromAffine3
@@ -274,7 +310,7 @@ TYPED_TEST(TransformTest, EdgeCases) {
   EXPECT_EQ(identity.scale, T(1));
 
   // Test that identity * transform = transform
-  const TransformT<T> transform = TransformT<T>::makeRandom();
+  const TransformT<T> transform = makeRandomTransform<T>(this->rng);
   const TransformT<T> result = identity * transform;
 
   EXPECT_TRUE(result.translation.isApprox(transform.translation));
@@ -308,8 +344,10 @@ TYPED_TEST(TransformTest, Multiplication) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
-    const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
-    const TransformT<T> trans2 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
+    const TransformT<T> trans1 =
+        makeRandomTransform<T>(this->rng, iTest > 1, iTest > 10, iTest > 50);
+    const TransformT<T> trans2 =
+        makeRandomTransform<T>(this->rng, iTest > 1, iTest > 10, iTest > 50);
 
     const TransformT<T> tmp = trans1 * trans2;
     const Affine3<T> res1 = tmp.toAffine3();
@@ -324,7 +362,8 @@ TYPED_TEST(TransformTest, Inverse) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
-    const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
+    const TransformT<T> trans1 =
+        makeRandomTransform<T>(this->rng, iTest > 1, iTest > 10, iTest > 50);
 
     const Affine3<T> res1 = trans1.inverse().toAffine3();
     const Affine3<T> res2 = trans1.toAffine3().inverse();
@@ -341,7 +380,7 @@ TYPED_TEST(TransformTest, InverseScalePrecision) {
     // Draw into named locals first; the order of evaluation of function arguments is unspecified
     // in C++, so drawing both inline would make the inputs compiler-dependent.
     const auto translation = this->rng.template uniform<Vector3<T>>(T(-1), T(1));
-    const Quaternion<T> rotation = this->rng.template uniformQuaternion<T>();
+    const Quaternion<T> rotation = makeRandomQuaternion<T>(this->rng);
     const TransformT<T> trans(translation, rotation, scale);
     const TransformT<T> identity = trans * trans.inverse();
 
@@ -355,7 +394,8 @@ TYPED_TEST(TransformTest, TransformPoint) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
-    const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
+    const TransformT<T> trans1 =
+        makeRandomTransform<T>(this->rng, iTest > 1, iTest > 10, iTest > 50);
     const auto randomPoint = this->rng.template uniform<Vector3<T>>(T(-10), T(10));
 
     const Eigen::Vector3<T> res1 = trans1.transformPoint(randomPoint);
@@ -369,7 +409,8 @@ TYPED_TEST(TransformTest, TransformVec) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
-    const TransformT<T> trans1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
+    const TransformT<T> trans1 =
+        makeRandomTransform<T>(this->rng, iTest > 1, iTest > 10, iTest > 50);
     const Eigen::Vector3<T> randomVec =
         this->rng.template uniform<Vector3<T>>(T(-1), T(1)).normalized();
 
@@ -386,8 +427,7 @@ TYPED_TEST(TransformTest, CompatibleWithEigenAffine) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 100; ++iTest) {
-    // const TransformT<T> tf1 = TransformT<T>::makeRandom(iTest > 1, iTest > 10, iTest > 50);
-    const TransformT<T> tf1 = TransformT<T>::makeRandom();
+    const TransformT<T> tf1 = makeRandomTransform<T>(this->rng);
     const Affine3<T> tf2 = tf1.toAffine3();
     TransformT<T> tf3;
     tf3 = tf2;
@@ -409,7 +449,7 @@ TYPED_TEST(TransformTest, Blend1) {
 
   const auto nTest = 10;
   for (size_t i = 0; i < nTest; ++i) {
-    const auto js = TransformT<T>::makeRandom();
+    const auto js = makeRandomTransform<T>(this->rng);
     const std::vector<TransformT<T>> transforms{js};
     const std::vector<T> weights{T(1.0)};
     const auto blended =
@@ -426,8 +466,8 @@ TYPED_TEST(TransformTest, Blend2) {
 
   const auto nTest = 10;
   for (size_t i = 0; i < nTest; ++i) {
-    const auto js1 = TransformT<T>::makeRandom();
-    const auto js2 = TransformT<T>::makeRandom();
+    const auto js1 = makeRandomTransform<T>(this->rng);
+    const auto js2 = makeRandomTransform<T>(this->rng);
 
     {
       const std::vector<TransformT<T>> transforms{js1, js2};
@@ -469,7 +509,7 @@ TYPED_TEST(TransformTest, BlendOpposites) {
 
   const auto nTest = 10;
   for (size_t iTest = 0; iTest < nTest; ++iTest) {
-    const auto js1 = TransformT<T>::makeRandom();
+    const auto js1 = makeRandomTransform<T>(this->rng);
     const TransformT<T> js2(js1.translation, Quaternion<T>(-js1.rotation.coeffs()), js1.scale);
 
     for (int j = 0; j < 5; ++j) {
@@ -527,8 +567,8 @@ TYPED_TEST(TransformTest, SlerpRandomTransforms) {
   using T = typename TestFixture::Type;
 
   for (size_t iTest = 0; iTest < 20; ++iTest) {
-    const TransformT<T> t1 = TransformT<T>::makeRandom();
-    const TransformT<T> t2 = TransformT<T>::makeRandom();
+    const TransformT<T> t1 = makeRandomTransform<T>(this->rng);
+    const TransformT<T> t2 = makeRandomTransform<T>(this->rng);
 
     // Check the endpoints:
     {

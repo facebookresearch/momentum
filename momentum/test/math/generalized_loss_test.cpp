@@ -27,18 +27,18 @@ using Types = testing::Types<float, double>;
 template <typename T>
 struct GeneralizedLossTest : testing::Test {
   using Type = T;
+  Random<> rng{12345};
 };
 
 TYPED_TEST_SUITE(GeneralizedLossTest, Types);
 
 template <typename T>
-void testGeneralizedLoss(T alpha, T c, T absTol, T relTol) {
-  Random rand;
+void testGeneralizedLoss(Random<>& rng, T alpha, T c, T absTol, T relTol) {
   const GeneralizedLossT<T> loss(alpha, c);
 
   const T stepSize = Eps<T>(5e-3f, 5e-5);
   // make sure the value is greater than stepSize for finite difference test
-  const T sqrError = rand.uniform<T>(stepSize, 1e3);
+  const T sqrError = rng.uniform<T>(stepSize, 1e3);
   const T refDeriv = loss.deriv(sqrError);
 
   // finite difference test
@@ -70,27 +70,31 @@ void testGeneralizedLoss(T alpha, T c, T absTol, T relTol) {
 TYPED_TEST(GeneralizedLossTest, SpecialCaseTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const size_t nTrials = 20;
   const T absTol = Eps<T>(5e-1f, 5e-5);
   const T relTol = 0.01;  // 1% relative tolerance
   for (size_t i = 0; i < nTrials; ++i) {
-    testGeneralizedLoss<T>(GeneralizedLossd::kL2, rand.uniform<T>(1, 10), absTol, relTol);
-    testGeneralizedLoss<T>(GeneralizedLossd::kL1, rand.uniform<T>(1, 10), absTol, relTol);
-    testGeneralizedLoss<T>(GeneralizedLossd::kCauchy, rand.uniform<T>(1, 10), absTol, relTol);
-    testGeneralizedLoss<T>(GeneralizedLossd::kWelsch, rand.uniform<T>(1, 10), absTol, relTol);
+    const T l2Scale = this->rng.template uniform<T>(T(1), T(10));
+    testGeneralizedLoss<T>(this->rng, GeneralizedLossd::kL2, l2Scale, absTol, relTol);
+    const T l1Scale = this->rng.template uniform<T>(T(1), T(10));
+    testGeneralizedLoss<T>(this->rng, GeneralizedLossd::kL1, l1Scale, absTol, relTol);
+    const T cauchyScale = this->rng.template uniform<T>(T(1), T(10));
+    testGeneralizedLoss<T>(this->rng, GeneralizedLossd::kCauchy, cauchyScale, absTol, relTol);
+    const T welschScale = this->rng.template uniform<T>(T(1), T(10));
+    testGeneralizedLoss<T>(this->rng, GeneralizedLossd::kWelsch, welschScale, absTol, relTol);
   }
 }
 
 TYPED_TEST(GeneralizedLossTest, GeneralCaseTest) {
   using T = typename TestFixture::Type;
 
-  Random rand;
   const size_t nTrials = 100;
   const T absTol = Eps<T>(1e-3f, 2e-6);
   const T relTol = 0.02;  // 2% relative tolerance
-  testGeneralizedLoss<T>(10, 10, absTol, relTol);  // most extreme case
+  testGeneralizedLoss<T>(this->rng, T(10), T(10), absTol, relTol);  // most extreme case
   for (size_t i = 0; i < nTrials; ++i) {
-    testGeneralizedLoss<T>(rand.uniform<T>(-1e6, 10), rand.uniform<T>(0, 10), absTol, relTol);
+    const T alpha = this->rng.template uniform<T>(T(-1e6), T(10));
+    const T c = this->rng.template uniform<T>(T(0), T(10));
+    testGeneralizedLoss<T>(this->rng, alpha, c, absTol, relTol);
   }
 }
