@@ -10,12 +10,18 @@ PyTorch version defaults can be customized via command-line arguments.
 For Python 3.14+, add new arguments following the pattern:
   --torch-min-py314 X.X.X --torch-max-py314 X.X
   --torch-min-py314-macos X.X.X --torch-max-py314-macos X.X
+Then update SUPPORTED_PYTHON_TAGS and PYTHON_REQUIRES_MAX below.
 """
 
 import argparse
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+
+SUPPORTED_PYTHON_TAGS = ["312", "313"]
+PYTHON_REQUIRES_MIN = "3.12"
+PYTHON_REQUIRES_MAX = "3.14"
 
 
 def main():
@@ -117,12 +123,10 @@ def main():
     ]
 
     for variant in variants:
-        for py_ver in ["312", "313"]:
-            py_ver_min = f"3.{py_ver[1:]}"
-            py_ver_max = f"3.{int(py_ver[1:]) + 1}"
+        for py_ver in SUPPORTED_PYTHON_TAGS:
             config = template.render(
-                python_version_min=py_ver_min,
-                python_version_max=py_ver_max,
+                python_requires_min=PYTHON_REQUIRES_MIN,
+                python_requires_max=PYTHON_REQUIRES_MAX,
                 **variant,
                 **common_vars,
             )
@@ -131,7 +135,8 @@ def main():
             )
             output_path.write_text(config)
             print(
-                f"Generated {output_path.name} (requires-python: >={py_ver_min},<{py_ver_max})"
+                f"Generated {output_path.name} "
+                f"(requires-python: >={PYTHON_REQUIRES_MIN},<{PYTHON_REQUIRES_MAX})"
             )
 
 
