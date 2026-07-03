@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <limits>
+
 namespace momentum {
 
 /// Implementation of "A General and Adaptive Robust Loss Function"
@@ -30,7 +32,8 @@ namespace momentum {
 ///   convergence.
 /// - `alpha = -2.0`: Geman-McClure. Extremely robust. Bounded influence — large outliers are
 ///   essentially ignored.
-/// - `alpha = -inf` (`kWelsch`): Welsch. Limit case. Maximum robustness, slowest convergence.
+/// - `alpha = kWelsch`: Welsch. Negative-infinity limit case. Maximum robustness, slowest
+///   convergence.
 ///
 /// The @p c parameter controls the transition scale: residuals << c behave like L2, residuals >> c
 /// are downweighted according to the loss shape.
@@ -47,13 +50,18 @@ class GeneralizedLossT {
   static constexpr T kL2 = T(2);
   static constexpr T kL1 = T(1);
   static constexpr T kCauchy = T(0);
-  /// Sentinel for the Welsch (alpha = -inf) limit; any alpha less than this is treated as -inf.
-  static constexpr T kWelsch = -1e-9;
+  /// Sentinel for the Welsch (alpha -> -inf) limit. Pass this as `alpha` to opt into the Welsch
+  /// closed form. This uses the finite lowest value instead of an infinity literal so fast-math
+  /// builds that disable infinities can still compile the public header. Other finite negative
+  /// alphas (e.g. -2 for Geman-McClure) are evaluated by the `LossType::General` branch and are
+  /// NOT silently rerouted to Welsch.
+  static constexpr T kWelsch = std::numeric_limits<T>::lowest();
 
   /// Constructs a generalized loss with shape @p a and scale @p c.
   ///
-  /// @param a Shape parameter alpha. Theoretically in [-inf, inf], but values with very large
-  ///   magnitude (e.g., > 100) are numerically unstable and not needed in practice.
+  /// @param a Shape parameter alpha. Theoretically unbounded, but values with very large
+  ///   magnitude (e.g., > 100) are numerically unstable and not needed in practice. Use `kWelsch`
+  ///   to select the Welsch negative-infinity limit.
   /// @param c Scale parameter. Must be > 0. Very small values are unstable because the gradient
   ///   scales with 1/c^2.
   ///

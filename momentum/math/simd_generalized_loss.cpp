@@ -87,11 +87,10 @@ Packet<T> SimdGeneralizedLossT<T>::value(const Packet<T>& sqrError) const {
     case Base::LossType::Cauchy:
       return CauchyLoss(sqrError, this->invC2_);
     case Base::LossType::Welsch:
-      // Welsch limit is taken when alpha <= kWelsch (alpha == -inf is handled by the same branch
-      // since Base classifies any sufficiently negative alpha as Welsch).
+      // Welsch closed form is selected only when alpha == kWelsch.
       return WelschLoss(sqrError, this->invC2_);
     case Base::LossType::General:
-      // General Barron loss for alpha not near 0, 1, 2, or -inf. The packet `pow` is the slow
+      // General Barron loss for alpha not near 0, 1, 2, or kWelsch. The packet `pow` is the slow
       // path; the special cases above exist precisely to avoid it. The scalar prefactor
       // `|alpha - 2| / alpha` is computed once outside the packet expression.
       return (drjit::pow(
