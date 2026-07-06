@@ -129,7 +129,32 @@ find_package(fmt CONFIG REQUIRED)
 find_package(fx-gltf CONFIG REQUIRED)
 find_package(indicators 2.3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(openfbx CONFIG REQUIRED)
+if(MSVC)
+  include(FetchContent)
+  # OpenFBX uses CMAKE_SOURCE_DIR when installing headers, which doesn't work in a tree build
+  FetchContent_Populate(
+    openfbx
+    GIT_REPOSITORY https://github.com/nem0/OpenFBX.git
+    GIT_TAG v0.9
+  )
+  file(READ "${openfbx_SOURCE_DIR}/CMakeLists.txt" contents)
+  string(REPLACE
+      "\${CMAKE_SOURCE_DIR}/src/ofbx.h"
+      "\${CMAKE_CURRENT_SOURCE_DIR}/src/ofbx.h"
+      contents
+      "${contents}")
+  file(WRITE "${openfbx_SOURCE_DIR}/CMakeLists.txt" "${contents}")
+  add_subdirectory("${openfbx_SOURCE_DIR}" "${openfbx_BINARY_DIR}")
+  # TODO: Replace the above with this below once the OpenFBX CMakeLists.txt has been updated
+  # FetchContent_Declare(
+  #   openfbx
+  #   GIT_REPOSITORY https://github.com/nem0/OpenFBX.git
+  #   GIT_TAG v<version>
+  # )
+  # FetchContent_MakeAvailable(openfbx)
+else()
+  find_package(openfbx CONFIG REQUIRED)
+endif()
 if(MOMENTUM_BUILD_IO_USD)
   find_package(pxr CONFIG REQUIRED HINTS ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_PREFIX}/cmake)
   find_package(TBB CONFIG REQUIRED)
@@ -246,6 +271,7 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     Eigen3::Eigen
     drjit
+    drjit-core
 )
 
 mt_library(

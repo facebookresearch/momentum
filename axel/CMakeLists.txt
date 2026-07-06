@@ -88,6 +88,7 @@ target_link_libraries(${target_name}
     Microsoft.GSL::GSL
     Dispenso::dispenso
     drjit
+    drjit-core
     nlohmann_json::nlohmann_json
 )
 
