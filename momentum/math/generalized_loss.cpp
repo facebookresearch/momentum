@@ -84,20 +84,16 @@ GeneralizedLossT<T>::GeneralizedLossT(const T& a, const T& c) : alpha_(a), invC2
   // Snap alpha to a closed-form branch when it is within kEps of a special value, both for
   // numerical stability (the General formula has a removable singularity at alpha=2 from the
   // |alpha - 2| factor, and a 0/0 form at alpha=0) and for speed (closed forms avoid pow/log).
-  // Note: kWelsch = -1e-9 is a sentinel for the alpha -> -inf limit; the branch below routes
-  // *any* alpha <= kWelsch to the Welsch closed form.
-  // TODO: This Welsch branch is too greedy — finite negative alphas like -2 (Geman-McClure),
-  // which the header documents as a supported case, are silently replaced by the alpha = -inf
-  // Welsch limit instead of being evaluated with the General formula. Tighten the predicate to
-  // something like `alpha_ < some_large_negative_threshold` (or check for -infinity explicitly)
-  // so that finite negative alphas fall through to LossType::General.
+  // The Welsch branch fires only for the exact kWelsch sentinel; finite negative alphas such as -2
+  // (Geman-McClure) fall through to LossType::General and are evaluated with the full Barron
+  // formula.
   if (alpha_ >= kL2 - kEps && alpha_ <= kL2 + kEps) {
     lossType_ = LossType::L2;
   } else if (alpha_ >= kL1 - kEps && alpha_ <= kL1 + kEps) {
     lossType_ = LossType::L1;
   } else if (alpha_ >= kCauchy - kEps && alpha_ <= kCauchy + kEps) {
     lossType_ = LossType::Cauchy;
-  } else if (alpha_ <= kWelsch) {
+  } else if (alpha_ == kWelsch) {
     lossType_ = LossType::Welsch;
   } else {
     lossType_ = LossType::General;

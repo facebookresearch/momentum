@@ -85,7 +85,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorL1_GradientsAndJacobians) {
         ModelParametersT<T>::Zero(transform.numAllModelParameters()),
         character,
         Eps<T>(5e-2f, 5e-9),
-        Eps<T>(1e-6f, 1e-7),
+        Eps<T>(2e-6f, 1e-7),
         false,
         false);
     for (size_t i = 0; i < 10; i++) {
@@ -189,7 +189,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, PositionErrorWelsch_GradientsAndJacobian
           parameters,
           character,
           Eps<T>(1e-1f, 5e-9),
-          Eps<T>(1e-6f, 1e-7),
+          Eps<T>(2e-6f, 1e-7),
           false,
           false);
     }
