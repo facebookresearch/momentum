@@ -88,7 +88,8 @@ target_link_libraries(${target_name}
     Microsoft.GSL::GSL
     Dispenso::dispenso
     drjit
-    drjit-core
+    # DrJit's debug assertions emit jit_raise references when NDEBUG is unset.
+    $<$<CONFIG:Debug>:drjit-core>
     nlohmann_json::nlohmann_json
 )
 

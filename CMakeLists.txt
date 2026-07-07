@@ -118,6 +118,10 @@ find_package(Ceres CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(Dispenso CONFIG REQUIRED)
 find_package(drjit CONFIG REQUIRED)
+# DrJit's debug assertions emit jit_raise references when NDEBUG is unset. Keep
+# drjit-core out of release builds to avoid pulling large transitive libraries
+# into wheels.
+set(momentum_drjit_core_debug_link "$<$<CONFIG:Debug>:drjit-core>")
 find_package(Eigen3 CONFIG REQUIRED)
 if(DEFINED Eigen3_VERSION AND
    (Eigen3_VERSION VERSION_LESS 5.0.0 OR Eigen3_VERSION VERSION_GREATER_EQUAL 5.1.0))
@@ -129,31 +133,49 @@ find_package(fmt CONFIG REQUIRED)
 find_package(fx-gltf CONFIG REQUIRED)
 find_package(indicators 2.3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-if(MSVC)
+find_package(openfbx CONFIG REQUIRED)
+
+set(momentum_needs_openfbx_debug_target OFF)
+if(MSVC AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
+  set(momentum_needs_openfbx_debug_target ON)
+endif()
+
+set(momentum_openfbx_link_libraries OpenFBX)
+if(momentum_needs_openfbx_debug_target)
   include(FetchContent)
-  # OpenFBX uses CMAKE_SOURCE_DIR when installing headers, which doesn't work in a tree build
-  FetchContent_Populate(
-    openfbx
+
+  # The conda-forge Windows package only provides a Release OpenFBX static
+  # library. Use it for normal builds and wheels, but build OpenFBX from source
+  # for MSVC Debug so its runtime library matches the rest of the Debug build.
+  FetchContent_Declare(
+    momentum_openfbx
     GIT_REPOSITORY https://github.com/nem0/OpenFBX.git
     GIT_TAG v0.9
+    SOURCE_SUBDIR runtime
   )
-  file(READ "${openfbx_SOURCE_DIR}/CMakeLists.txt" contents)
-  string(REPLACE
-      "\${CMAKE_SOURCE_DIR}/src/ofbx.h"
-      "\${CMAKE_CURRENT_SOURCE_DIR}/src/ofbx.h"
-      contents
-      "${contents}")
-  file(WRITE "${openfbx_SOURCE_DIR}/CMakeLists.txt" "${contents}")
-  add_subdirectory("${openfbx_SOURCE_DIR}" "${openfbx_BINARY_DIR}")
-  # TODO: Replace the above with this below once the OpenFBX CMakeLists.txt has been updated
-  # FetchContent_Declare(
-  #   openfbx
-  #   GIT_REPOSITORY https://github.com/nem0/OpenFBX.git
-  #   GIT_TAG v<version>
-  # )
-  # FetchContent_MakeAvailable(openfbx)
-else()
-  find_package(openfbx CONFIG REQUIRED)
+  FetchContent_MakeAvailable(momentum_openfbx)
+
+  add_library(momentum_openfbx_debug STATIC EXCLUDE_FROM_ALL
+    "${momentum_openfbx_SOURCE_DIR}/src/ofbx.cpp"
+  )
+  target_include_directories(momentum_openfbx_debug
+    PUBLIC "${momentum_openfbx_SOURCE_DIR}/src"
+  )
+  target_link_libraries(momentum_openfbx_debug
+    PRIVATE
+      $<IF:$<TARGET_EXISTS:libdeflate::libdeflate_shared>,libdeflate::libdeflate_shared,libdeflate::libdeflate_static>
+  )
+  target_compile_definitions(momentum_openfbx_debug PRIVATE _LARGEFILE64_SOURCE)
+  set_target_properties(momentum_openfbx_debug PROPERTIES
+    OUTPUT_NAME OpenFBX
+    POSITION_INDEPENDENT_CODE ON
+  )
+
+  set(momentum_openfbx_link_libraries
+    "$<BUILD_INTERFACE:$<$<CONFIG:Debug>:momentum_openfbx_debug>>"
+    "$<BUILD_INTERFACE:$<$<NOT:$<CONFIG:Debug>>:OpenFBX>>"
+    "$<INSTALL_INTERFACE:OpenFBX>"
+  )
 endif()
 if(MOMENTUM_BUILD_IO_USD)
   find_package(pxr CONFIG REQUIRED HINTS ${CMAKE_INSTALL_PREFIX} ${CMAKE_INSTALL_PREFIX}/cmake)
@@ -271,7 +293,8 @@ mt_library(
   PUBLIC_LINK_LIBRARIES
     Eigen3::Eigen
     drjit
-    drjit-core
+    # DrJit's debug assertions emit jit_raise references when NDEBUG is unset.
+    ${momentum_drjit_core_debug_link}
 )
 
 mt_library(
@@ -528,7 +551,7 @@ mt_library(
     io_common
     io_json_utils
     ${io_fbx_private_link_libraries}
-    OpenFBX
+    ${momentum_openfbx_link_libraries}
 )
 
 if(MOMENTUM_ENABLE_FBX_SAVING)
