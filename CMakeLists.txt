@@ -117,6 +117,13 @@ mt_print_options()
 find_package(Ceres CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(Dispenso CONFIG REQUIRED)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # GCC 14 reports noisy -Wstringop-overflow diagnostics from Dispenso's
+  # vendored moodycamel queue during template instantiation. The include
+  # directories are already marked as system, but the warning still appears in
+  # every translation unit using dispenso::parallel_for and overwhelms CI logs.
+  target_compile_options(Dispenso::dispenso INTERFACE -Wno-stringop-overflow)
+endif()
 find_package(drjit CONFIG REQUIRED)
 # DrJit's debug assertions emit jit_raise references when NDEBUG is unset. Keep
 # drjit-core out of release builds to avoid pulling large transitive libraries
