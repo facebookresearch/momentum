@@ -1,0 +1,151 @@
+name: Nightly Debug CI
+
+on:
+  schedule:
+    # Run one desktop Debug build per night. Windows gets the extra weekly slot
+    # because the most recent Debug-only breakage was reported there.
+    - cron: '0 4 * * 0,1,4' # Windows Debug: Sun, Mon, Thu
+    - cron: '0 4 * * 2,5' # Ubuntu Debug: Tue, Fri
+    - cron: '0 4 * * 3,6' # macOS Debug: Wed, Sat
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Debug build target to run
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - windows
+          - ubuntu
+          - macos
+
+permissions:
+  contents: read
+
+jobs:
+  momentum-windows-debug:
+    name: nightly-cpp-debug-win
+    if: ${{ github.event.schedule == '0 4 * * 0,1,4' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'all' || github.event.inputs.target == 'windows')) }}
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_GENERATOR_INSTANCE: ""
+      CMAKE_GENERATOR_PLATFORM: ""
+      CMAKE_GENERATOR_TOOLSET: ""
+      CMAKE_C_COMPILER_LAUNCHER: sccache
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
+      MOMENTUM_BUILD_PYMOMENTUM: "OFF"
+      SCCACHE_CACHE_SIZE: "2G"
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Restore sccache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .sccache
+          key: ${{ github.workflow }}-win-sccache-cpp-debug-${{ hashFiles('pixi.lock', 'CMakeLists.txt', 'cmake/**', 'momentum/**', 'pymomentum/**', 'axel/**') }}
+          restore-keys: |
+            ${{ github.workflow }}-win-sccache-cpp-debug-
+            ${{ github.workflow }}-win-sccache-
+
+      - name: Set up sccache
+        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.9.5
+        with:
+          cache: true
+
+      - name: Build Momentum Debug
+        run: pixi run build_dev
+
+      - name: Print sccache stats
+        if: always()
+        run: sccache --show-stats
+
+  momentum-ubuntu-debug:
+    name: nightly-cpp-debug-ubuntu
+    if: ${{ github.event.schedule == '0 4 * * 2,5' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'all' || github.event.inputs.target == 'ubuntu')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CCACHE_EXTRAFILES: /tmp/native-cpu.txt
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      MOMENTUM_BUILD_PYMOMENTUM: "OFF"
+      MOMENTUM_ENABLE_SIMD: "ON"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Record native CPU for ccache
+        run: |
+          lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: ${{ github.workflow }}-cpp-debug-ubuntu
+          restore-keys: |
+            ${{ github.workflow }}-cpp-debug-ubuntu
+          max-size: 2G
+
+      - name: Reset ccache stats
+        run: ccache --zero-stats
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.9.5
+        with:
+          cache: true
+
+      - name: Build Momentum Debug
+        run: |
+          pixi run build_dev
+
+      - name: Print ccache stats
+        if: always()
+        run: ccache --show-stats --verbose
+
+  momentum-macos-debug:
+    name: nightly-cpp-debug-mac-arm64
+    if: ${{ github.event.schedule == '0 4 * * 3,6' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'all' || github.event.inputs.target == 'macos')) }}
+    runs-on: macos-latest
+    timeout-minutes: 90
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      MOMENTUM_BUILD_PYMOMENTUM: "OFF"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        with:
+          key: ${{ github.workflow }}-cpp-debug-macos
+          restore-keys: |
+            ${{ github.workflow }}-cpp-debug-macos
+          max-size: 2G
+
+      - name: Install FBX SDK
+        run: |
+          curl -O https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202037_fbxsdk_clang_mac.pkg.tgz
+          tar -xvf fbx202037_fbxsdk_clang_mac.pkg.tgz
+          sudo installer -pkg fbx202037_fbxsdk_clang_macos.pkg -target /
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.9.5
+        with:
+          cache: true
+
+      - name: Build Momentum Debug
+        run: |
+          MOMENTUM_BUILD_WITH_FBXSDK=ON pixi run build_dev
+
+      - name: Print ccache stats
+        if: always()
+        run: ccache -s
