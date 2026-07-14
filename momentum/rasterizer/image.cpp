@@ -166,7 +166,7 @@ void alphaMatte(Span2f zBuffer, Span3f rgbBuffer, Span<T, 3> tgtImage, float alp
       drjit::scatter(tempBuffer.data(), rgba, colIndices);
     }
 
-    for (const auto [colIndices, colMask] : drjit::range<IntP>(imageWidthDownsampled)) {
+    for (const auto [colIndices, colMask] : intPacketRange(imageWidthDownsampled)) {
       auto rgba = drjit::zeros<Vector4fP>();
       // Walk through the columns and sum horizontally
       for (int32_t offset = 0; offset < downsampleAmount; ++offset) {

@@ -321,7 +321,7 @@ void rasterizeLinesImp(
 
   const Vector3f color_drjit = toEnokiVec(color);
 
-  for (auto [lineIndices, lineMask] : drjit::range<IntP>(nLines)) {
+  for (auto [lineIndices, lineMask] : intPacketRange(nLines)) {
     const auto lineStart_world =
         drjit::gather<Vector3fP>(positions_world.data(), 2 * lineIndices + 0, lineMask);
     const auto lineEnd_world =
@@ -407,7 +407,7 @@ void rasterizeCirclesImp(
   const int combinedRadiusPixels =
       std::clamp<int>(static_cast<int>(std::ceil(combinedRadius)), 1, cameraSimd.imageHeight() - 1);
 
-  for (auto [circleIndices, circleMask] : drjit::range<IntP>(nCircles)) {
+  for (auto [circleIndices, circleMask] : intPacketRange(nCircles)) {
     const auto center_world =
         drjit::gather<Vector3fP>(positions_world.data(), circleIndices, circleMask);
     const auto [center_window, validProj] = cameraSimd.worldToWindow(center_world);
@@ -490,7 +490,7 @@ void rasterizeWireframeImp(
 
   const Vector3f color_drjit = toEnokiVec(color);
 
-  for (auto [triangleIndices, triangleMask] : drjit::range<IntP>(nTriangles)) {
+  for (auto [triangleIndices, triangleMask] : intPacketRange(nTriangles)) {
     auto triangles_cur = drjit::gather<Vector3iP>(triangles.data(), triangleIndices, triangleMask);
     std::array<Vector3fP, 3> p_tri_window;
     IntP::MaskType validTriangles = triangleMask;

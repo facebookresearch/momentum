@@ -10,12 +10,14 @@
 #include <drjit/array.h>
 #include <drjit/fwd.h>
 #include <drjit/matrix.h>
+#include <drjit/util.h>
 #include <mdspan/mdspan.hpp>
 #include <momentum/common/exception.h>
 #include <momentum/rasterizer/fwd.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <array>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -25,7 +27,76 @@ namespace momentum::rasterizer {
 
 using index_t = std::ptrdiff_t;
 
-// Actual implementations
+// drjit::range<IntP>() assumes IntP is a packed SIMD type. Use it only in
+// SIMD builds; scalar/non-SIMD builds need explicit packet iteration.
+#if defined(MOMENTUM_ENABLE_SIMD) && MOMENTUM_ENABLE_SIMD
+/// Returns integer packet indices and validity masks for rasterizer primitive loops.
+inline auto intPacketRange(index_t count) {
+  static_assert(IntP::IsPacked, "MOMENTUM_ENABLE_SIMD requires packed Dr.Jit IntP packets.");
+  return drjit::range<IntP>(count);
+}
+#else
+/// Scalar fallback range yielding IntP index packets and validity masks.
+class ScalarIntPacketRange {
+ public:
+  /// Creates a range over integer indices in [0, count).
+  explicit ScalarIntPacketRange(index_t count) : count_(count) {
+    MT_THROW_IF(
+        count < 0 || count > std::numeric_limits<int>::max(),
+        "Packet range count {} is outside the supported int range.",
+        count);
+  }
+
+  /// Iterator for ScalarIntPacketRange.
+  class Iterator {
+   public:
+    /// Creates an iterator at a packet base offset.
+    Iterator(index_t base, index_t count) : base_(base), count_(count) {}
+
+    /// Returns true when the iterator has not reached the end sentinel.
+    bool operator!=(const Iterator& other) const {
+      return base_ != other.base_;
+    }
+
+    /// Advances to the next packet of indices.
+    Iterator& operator++() {
+      base_ += static_cast<index_t>(kSimdPacketSize);
+      return *this;
+    }
+
+    /// Returns the current index packet and a mask for lanes below count.
+    auto operator*() const {
+      const IntP indices = IntP(static_cast<int>(base_)) + drjit::arange<IntP>();
+      const auto mask = indices < IntP(static_cast<int>(count_));
+      return std::pair{indices, mask};
+    }
+
+   private:
+    index_t base_;
+    index_t count_;
+  };
+
+  /// Returns an iterator for the first packet.
+  Iterator begin() const {
+    return Iterator(0, count_);
+  }
+
+  /// Returns the sentinel iterator after the final packet.
+  Iterator end() const {
+    constexpr index_t kPacketSize = static_cast<index_t>(kSimdPacketSize);
+    const index_t endBase = ((count_ + kPacketSize - 1) / kPacketSize) * kPacketSize;
+    return Iterator(endBase, count_);
+  }
+
+ private:
+  index_t count_;
+};
+
+/// Returns integer packet indices and validity masks for scalar rasterizer builds.
+inline ScalarIntPacketRange intPacketRange(index_t count) {
+  return ScalarIntPacketRange(count);
+}
+#endif
 
 template <std::size_t R>
 std::string formatTensorSizes(const std::array<index_t, R>& extents) {

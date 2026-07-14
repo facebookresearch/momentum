@@ -328,8 +328,7 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { FBXSDK_PATH 
 """, MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" }, depends-on = [
     "install_deps",
 ] }
-# TODO(T219163027): Skip TestRendering entirely on Linux — drjit segfaults in scalar SIMD mode (test_lighting, test_rasterize_*, etc.)
-test_py = { cmd = "pytest pymomentum/test/ -k 'not TestRendering'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+test_py = { cmd = "pytest pymomentum/test/", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
@@ -356,8 +355,7 @@ build_py = { cmd = "pip install . -v --no-build-isolation", env = { CMAKE_ARGS =
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_CXX_FLAGS=-fsigned-char
 """, MOMENTUM_ENABLE_SIMD = "ON" } }
-# TODO(T219163027): Skip TestRendering entirely on Linux — drjit segfaults in scalar SIMD mode
-test_py = { cmd = "pytest pymomentum/test/ -k 'not TestRendering'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+test_py = { cmd = "pytest pymomentum/test/", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py",
 ] }
 
@@ -380,8 +378,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
-# TODO(T219163027): Remove test_lighting skip once drjit::range<IntP> crash in scalar SIMD mode is fixed
-test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+test_py = { cmd = "pytest pymomentum/test/ -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py", "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [
@@ -411,8 +408,7 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DBUILD_SHARED_LIBS=OFF
 """, MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
-# TODO(T219163027): Remove test_lighting skip once drjit::range<IntP> crash in scalar SIMD mode is fixed
-test_py = { cmd = "pytest pymomentum/test/ -k 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
+test_py = { cmd = "pytest pymomentum/test/ -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
     "build_py", "install",
 ] }
 doc_py = { cmd = "sphinx-build -a -E -W -b html pymomentum/doc build/python_api_doc", depends-on = [

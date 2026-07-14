@@ -261,6 +261,13 @@ if(MOMENTUM_BUILD_TESTING OR MOMENTUM_BUILD_PYMOMENTUM)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+  # GCC emits very noisy psABI notes for arm64 vector and Eigen types after its
+  # GCC 10 ABI correction. We build the wheel with one toolchain, so these notes
+  # do not indicate a mixed-ABI problem and only obscure real warnings in CI.
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>)
+endif()
+
 if(MSVC)
   add_compile_options(/bigobj)
   add_compile_options(/utf-8)
