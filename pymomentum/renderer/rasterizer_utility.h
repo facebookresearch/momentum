@@ -302,7 +302,7 @@ inline std::vector<momentum::rasterizer::Light> convertLightsToEyeSpace(
     return {};
   }
 
-  const Eigen::Affine3f worldToEyeXF = camera.worldFromEye();
+  const Eigen::Affine3f worldToEyeXF = camera.eyeFromWorld();
   std::vector<momentum::rasterizer::Light> result;
   result.reserve(lights->size());
   for (const auto& l : *lights) {

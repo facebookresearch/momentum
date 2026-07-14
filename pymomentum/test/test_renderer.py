@@ -111,6 +111,86 @@ class TestRendering(unittest.TestCase):
         self.assertLess(np.mean(right_lighting[:, : image_width // 2]), 1e-5)
         self.assertGreater(np.mean(right_lighting[:, image_width // 2 :]), 0.1)
 
+    def test_headlight_lit_under_camera_rotation(self) -> None:
+        """A camera-forward "headlight" must light the camera-facing surface at
+        any camera orientation, not just at the equator.
+
+        Regression test for an inverse-transform bug in
+        ``convertLightsToEyeSpace`` (``pymomentum/renderer/rasterizer_utility.h``):
+        lights were transformed to eye space by ``worldFromEye`` (eye->world),
+        the INVERSE of the ``eyeFromWorld`` (world->eye) transform used for the
+        surface normals. The shading ``dot(light, normal)`` was therefore only
+        correct when the camera view rotation was symmetric (identity/equator);
+        at tilted or polar cameras the camera-facing surface went dark.
+
+        A headlight-lit sphere looks identical from every direction, so rotating
+        the camera around it must produce an equally-bright image.
+        """
+        image_width, image_height = 30, 30
+        intrinsics = pym_camera.PinholeIntrinsicsModel(
+            image_width=image_width, image_height=image_height
+        )
+
+        far_clip = np.float32(3.4028234663852886e38)
+
+        def headlight_brightness(camera: pym_camera.Camera) -> float:
+            z_buffer = pym_renderer.create_z_buffer(camera)
+            rgb_buffer = pym_renderer.create_rgb_buffer(camera)
+            pym_renderer.rasterize_spheres(
+                center=np.array([[0, 0, 0]], dtype=np.float32),
+                lights=[
+                    pym_renderer.Light.create_directional_light(
+                        camera.world_space_principle_axis
+                    )
+                ],
+                radius=np.array([5], dtype=np.float32),
+                camera=camera,
+                rgb_buffer=rgb_buffer,
+                z_buffer=z_buffer,
+            )
+            rendered = z_buffer < far_clip
+            self.assertGreater(int(rendered.sum()), 0, "sphere was not rendered")
+            return float(np.mean(rgb_buffer[rendered]))
+
+        distance = 20.0
+        base = pym_camera.Camera(intrinsics)
+        origin = np.array([0, 0, 0], dtype=np.float32)
+
+        # Baseline: camera on the equator, looking along +Z at the sphere.
+        equator_brightness = headlight_brightness(
+            base.look_at(
+                position=np.array([0, 0, -distance], dtype=np.float32),
+                target=origin,
+            )
+        )
+        self.assertGreater(equator_brightness, 0.05, "equator headlight is not lit")
+
+        # (camera position, up vector) for a range of tilted / polar poses. The
+        # ``up`` vector is chosen non-parallel to the view direction.
+        posed_cameras = [
+            ([0.0, -distance, 0.0], [0.0, 0.0, 1.0]),  # straight up (90 deg)
+            ([0.0, distance, 0.0], [0.0, 0.0, 1.0]),  # straight down (90 deg)
+            ([0.0, -14.14, -14.14], [0.0, 1.0, 0.0]),  # 45 deg elevation
+            ([-distance, 0.0, 0.0], [0.0, 1.0, 0.0]),  # 90 deg azimuth
+            ([-14.14, -14.14, 0.0], [0.0, 1.0, 0.0]),  # azimuth + elevation
+        ]
+        for position, up in posed_cameras:
+            camera = base.look_at(
+                position=np.array(position, dtype=np.float32),
+                target=origin,
+                up=np.array(up, dtype=np.float32),
+            )
+            brightness = headlight_brightness(camera)
+            self.assertAlmostEqual(
+                brightness,
+                equator_brightness,
+                delta=0.05,
+                msg=f"headlight brightness at camera position {position} "
+                f"({brightness:.4f}) differs from equator baseline "
+                f"({equator_brightness:.4f}); the camera-facing surface should "
+                f"be lit identically from every direction",
+            )
+
     def test_subdivide_uneven(self) -> None:
         """Check that we can do uneven subdivision where only some edges are split."""
 
