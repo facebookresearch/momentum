@@ -131,8 +131,6 @@ def get_import_test_script(
     if torch_runtime:
         lines.extend(
             [
-                "    # Import torch before PyMomentum's torch-backed Python modules",
-                "    # or any PyMomentum extension so PyTorch sets up native paths first.",
                 "    import torch",
                 '    print(f"  PyTorch {torch.__version__}, CUDA={torch.version.cuda}")',
             ]
@@ -287,6 +285,23 @@ def get_import_test_script(
     return "\n".join(lines) + "\n"
 
 
+def get_torch_after_pymomentum_script() -> str:
+    """Return a regression test for PyMomentum's native loader state."""
+    return "\n".join(
+        [
+            "import faulthandler",
+            "faulthandler.enable()",
+            'print("Testing pymomentum.geometry before torch...")',
+            "import pymomentum.geometry",
+            'print("  pymomentum.geometry imported")',
+            "import torch",
+            'print(f"  PyTorch {torch.__version__} imported")',
+            'print("[PASS] pymomentum.geometry before torch")',
+            "",
+        ]
+    )
+
+
 def run_import_tests(
     python_exe: str,
     wheel_type: str,
@@ -305,6 +320,21 @@ def run_import_tests(
         env.pop(name, None)
     # Keep the checkout's namespace-package directories out of wheel import checks.
     with tempfile.TemporaryDirectory() as tmpdir:
+        if has_torch_runtime(wheel_type):
+            result = subprocess.run(
+                [
+                    python_exe,
+                    "-I",
+                    "-c",
+                    get_torch_after_pymomentum_script(),
+                ],
+                capture_output=False,
+                cwd=tmpdir,
+                env=env,
+            )
+            if result.returncode != 0:
+                return result.returncode
+
         result = subprocess.run(
             [
                 python_exe,
@@ -374,7 +404,7 @@ def test_in_container(
         "$PYTHON -m uv venv --python $PYTHON /tmp/test_venv",
         "",
     ]
-    if has_torch_extensions(wheel_type):
+    if has_torch_runtime(wheel_type):
         torch_index = get_torch_index(wheel_type)
         container_lines.extend(
             [
@@ -385,6 +415,7 @@ def test_in_container(
             ]
         )
 
+    torch_after_pymomentum_script = get_torch_after_pymomentum_script()
     import_test_script = get_import_test_script(
         wheel_type,
         require_cuda,
@@ -395,6 +426,21 @@ def test_in_container(
             'echo "Installing wheel..."',
             f"$PYTHON -m uv pip install --python /tmp/test_venv/bin/python /wheel/{wheel_file.name}",
             "",
+        ]
+    )
+    if has_torch_runtime(wheel_type):
+        container_lines.extend(
+            [
+                'echo "Testing pymomentum.geometry before torch..."',
+                "cat >/tmp/test_torch_after_pymomentum.py <<'PYTEST'",
+                *torch_after_pymomentum_script.rstrip().splitlines(),
+                "PYTEST",
+                "/tmp/test_venv/bin/python -I /tmp/test_torch_after_pymomentum.py",
+                "",
+            ]
+        )
+    container_lines.extend(
+        [
             'echo "Testing imports..."',
             "cat >/tmp/test_wheel_imports.py <<'PYTEST'",
             *import_test_script.rstrip().splitlines(),
@@ -465,7 +511,7 @@ def test_locally_with_uv(
             print(f"[FAIL] Failed to create venv: {result.stderr}", file=sys.stderr)
             return result.returncode
 
-        if has_torch_extensions(wheel_type):
+        if has_torch_runtime(wheel_type):
             torch_index = get_torch_index(wheel_type)
             print(f"Installing torch from {torch_index}...")
             result = subprocess.run(
