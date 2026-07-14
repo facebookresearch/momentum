@@ -153,5 +153,5 @@ jobs:
           pixi run -e py312-cuda129 python -c "
           import os, subprocess, sys
           os.environ['MOMENTUM_MODELS_PATH'] = 'momentum/'
-          sys.exit(subprocess.call(['pytest', 'pymomentum/test/', '-k', 'not ((TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params)) or test_lighting)']))
+          sys.exit(subprocess.call(['pytest', 'pymomentum/test/', '-k', 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))']))
           "
