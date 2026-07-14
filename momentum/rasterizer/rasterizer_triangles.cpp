@@ -20,7 +20,9 @@
 #include <drjit/matrix.h>
 #include <drjit/util.h>
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <span>
 #include <sstream>
@@ -30,6 +32,13 @@
 namespace momentum::rasterizer {
 
 namespace {
+
+#if (defined(_MSC_VER) && defined(MOMENTUM_ENABLE_SIMD) && MOMENTUM_ENABLE_SIMD) || \
+    defined(MOMENTUM_RASTERIZER_FORCE_SCALAR_OUTER)
+#define MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP 1
+#else
+#define MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP 0
+#endif
 
 // This is the vertex interpolation matrix, where we map from
 // homgeneous coordinates to interpolate texture coordinates, etc.
@@ -58,10 +67,45 @@ inline Matrix3fP createVertexMatrix(
   return result;
 }
 
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+inline Matrix3f createVertexMatrix(
+    const std::array<Vector3f, 3>& p_tri_window,
+    const Camera& camera) {
+  Matrix3f result;
+  for (int i = 0; i < 3; ++i) {
+    result(i, 0) = p_tri_window[i].x() / camera.fx() * p_tri_window[i].z();
+    result(i, 1) = p_tri_window[i].y() / camera.fy() * p_tri_window[i].z();
+    result(i, 2) = p_tri_window[i].z();
+  }
+  return result;
+}
+#endif
+
 inline Vector3fP reflect(const Vector3fP& v, const Vector3fP& n) {
   const FloatP dotProd = drjit::dot(v, n);
   return (2.0f * dotProd) * n - v;
 }
+
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+inline Eigen::Vector3f transformModelToEye(
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix,
+    const Eigen::Vector3f& p_model) {
+  const Eigen::Vector4f p_model_h(p_model.x(), p_model.y(), p_model.z(), 1.0f);
+  const Eigen::Vector4f p_world_h = modelMatrix * p_model_h;
+  const Eigen::Vector3f p_world = p_world_h.head<3>() / p_world_h.w();
+  return camera.eyeFromWorld() * p_world;
+}
+
+inline Eigen::Matrix3f createNormalMatrix(
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix) {
+  return (camera.eyeFromWorld() * Eigen::Transform<float, 3, Eigen::Affine>(modelMatrix))
+      .linear()
+      .inverse()
+      .transpose();
+}
+#endif
 
 template <int N>
 Matrix3f extractTriangleAttributes(
@@ -109,6 +153,20 @@ Matrix3f toUniformMat(const Eigen::Vector3f& v) {
 inline auto isAllFinite(const Vector3dP& v) {
   return drjit::isfinite(v.x()) && drjit::isfinite(v.y()) && drjit::isfinite(v.z());
 }
+
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+inline bool isAllFinite(const Vector3d& v) {
+  return std::isfinite(v.x()) && std::isfinite(v.y()) && std::isfinite(v.z());
+}
+
+inline int32_t floorClippedToImage(float value, int32_t maxValue) {
+  return static_cast<int32_t>(std::floor(std::clamp(value, 0.0f, static_cast<float>(maxValue))));
+}
+
+inline int32_t ceilClippedToImage(float value, int32_t maxValue) {
+  return static_cast<int32_t>(std::ceil(std::clamp(value, 0.0f, static_cast<float>(maxValue))));
+}
+#endif
 
 inline auto allBehindNearClip(const std::array<Vector3fP, 4>& pts, float nearClip) {
   return pts[0].z() < nearClip && pts[1].z() < nearClip && pts[2].z() < nearClip &&
@@ -484,6 +542,32 @@ inline Matrix3fP computeTriangleEyeNormals(
   return n_tri_eye;
 }
 
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+inline Matrix3f computeTriangleEyeNormals(
+    const Eigen::Ref<const Eigen::VectorXf>& normals_world,
+    const Eigen::Matrix3f& normalMatrix,
+    const Matrix3f& p_tri_eye,
+    const Eigen::Vector3i& triangle) {
+  Matrix3f n_tri_eye;
+  if (normals_world.size() == 0) {
+    const Vector3f n_eye = drjit::normalize(
+        drjit::cross(
+            extractColumn(p_tri_eye, 1) - extractColumn(p_tri_eye, 0),
+            extractColumn(p_tri_eye, 2) - extractColumn(p_tri_eye, 0)));
+    n_tri_eye = toUniformMat(n_eye);
+  } else {
+    for (int i = 0; i < 3; ++i) {
+      const Eigen::Vector3f n_world = normals_world.segment<3>(3 * triangle[i]);
+      const Eigen::Vector3f n_eye = (normalMatrix * n_world).normalized();
+      for (int j = 0; j < 3; ++j) {
+        n_tri_eye(j, i) = n_eye[j];
+      }
+    }
+  }
+  return n_tri_eye;
+}
+#endif
+
 // Support both signed and unsigned triangles for backward compatibility:
 template <typename TriangleT>
 Matrix3f getTextureAttributes(
@@ -501,6 +585,134 @@ Matrix3f getTextureAttributes(
       : textureTriangles.template segment<3>(3 * iTriangle).template cast<int32_t>();
   return extractTriangleAttributes<2>(textureCoords, textureTriangle);
 }
+
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+// Support both signed and unsigned triangles for backward compatibility:
+template <typename TriangleT>
+void rasterizeMeshImpScalarTriangleLoop(
+    const Eigen::Ref<const Eigen::VectorXf>& positions_world,
+    const Eigen::Ref<const Eigen::VectorXf>& normals_world,
+    const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& triangles,
+    const Eigen::Ref<const Eigen::VectorXf>& textureCoords,
+    const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& textureTriangles,
+    const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
+    const Camera& camera,
+    const SimdCamera& cameraSimd,
+    int32_t imageWidth,
+    int32_t imageHeight,
+    bool usePerVertexColor,
+    bool useTextureCoords,
+    float* zBufferPtr,
+    float* rgbBufferPtr,
+    float* surfaceNormalsBufferPtr,
+    int* vertexIndexBufferPtr,
+    int* triangleIndexBufferPtr,
+    index_t zBufferRowStride,
+    const std::vector<Light>& lights_eye,
+    const PhongMaterial& material,
+    const Eigen::Matrix4f& modelMatrix,
+    bool backfaceCulling,
+    float nearClip,
+    float depthOffset) {
+  const auto nTriangles = triangles.size() / 3;
+  const Eigen::Matrix3f normalMatrix = createNormalMatrix(camera, modelMatrix);
+  const Matrix3f diffuseColor = toUniformMat(material.diffuseColor);
+
+  for (index_t iTriangle = 0; iTriangle < nTriangles; ++iTriangle) {
+    const Eigen::Vector3i triangle =
+        triangles.template segment<3>(3 * iTriangle).template cast<int32_t>();
+
+    std::array<Vector3f, 3> p_tri_window;
+    Matrix3f p_tri_eye;
+
+    bool validTriangle = true;
+    for (int i = 0; i < 3; ++i) {
+      const Eigen::Vector3f p_model = positions_world.segment<3>(3 * triangle[i]);
+      const Eigen::Vector3f p_eye = transformModelToEye(camera, modelMatrix, p_model);
+      const auto [p_window, validProj] = camera.intrinsicsModel()->project(p_eye);
+
+      p_tri_window[i] = toEnokiVec(p_window);
+      for (int j = 0; j < 3; ++j) {
+        p_tri_eye(j, i) = p_eye[j];
+      }
+      validTriangle = validTriangle && validProj;
+    }
+
+    if (backfaceCulling) {
+      const Eigen::Vector2f edge1(
+          p_tri_window[1].x() - p_tri_window[0].x(), p_tri_window[1].y() - p_tri_window[0].y());
+      const Eigen::Vector2f edge2(
+          p_tri_window[2].x() - p_tri_window[0].x(), p_tri_window[2].y() - p_tri_window[0].y());
+
+      const float signedArea = edge1.y() * edge2.x() - edge1.x() * edge2.y();
+      validTriangle = validTriangle && signedArea > 0;
+    }
+    if (!validTriangle) {
+      continue;
+    }
+
+    const Matrix3f vertexMatrix = createVertexMatrix(p_tri_window, camera);
+    const Matrix3d vertexMatrixInverse = drjit::inverse(Matrix3d(vertexMatrix));
+
+    const Vector3d recipWInterp(
+        vertexMatrixInverse(0, 0) + vertexMatrixInverse(0, 1) + vertexMatrixInverse(0, 2),
+        vertexMatrixInverse(1, 0) + vertexMatrixInverse(1, 1) + vertexMatrixInverse(1, 2),
+        vertexMatrixInverse(2, 0) + vertexMatrixInverse(2, 1) + vertexMatrixInverse(2, 2));
+    if (!isAllFinite(recipWInterp)) {
+      continue;
+    }
+
+    if (p_tri_window[0].z() < nearClip && p_tri_window[1].z() < nearClip &&
+        p_tri_window[2].z() < nearClip) {
+      continue;
+    }
+
+    const int32_t startX = floorClippedToImage(
+        std::min({p_tri_window[0].x(), p_tri_window[1].x(), p_tri_window[2].x()}), imageWidth - 1);
+    const int32_t endX = ceilClippedToImage(
+        std::max({p_tri_window[0].x(), p_tri_window[1].x(), p_tri_window[2].x()}), imageWidth - 1);
+    const int32_t startY = floorClippedToImage(
+        std::min({p_tri_window[0].y(), p_tri_window[1].y(), p_tri_window[2].y()}), imageHeight - 1);
+    const int32_t endY = ceilClippedToImage(
+        std::max({p_tri_window[0].y(), p_tri_window[1].y(), p_tri_window[2].y()}), imageHeight - 1);
+
+    const Matrix3f n_tri_eye =
+        computeTriangleEyeNormals(normals_world, normalMatrix, p_tri_eye, triangle);
+
+    rasterizeOneTriangle(
+        static_cast<int32_t>(iTriangle),
+        triangle,
+        cameraSimd,
+        startX,
+        endX,
+        startY,
+        endY,
+        Vector3f(recipWInterp),
+        drjit::transpose(Matrix3f(vertexMatrixInverse)),
+        p_tri_eye,
+        n_tri_eye,
+        getTextureAttributes(
+            textureCoords,
+            textureTriangles,
+            useTextureCoords,
+            static_cast<int>(iTriangle),
+            triangle),
+        usePerVertexColor ? extractTriangleAttributes<3>(perVertexDiffuseColor, triangle)
+                          : diffuseColor,
+        material,
+        lights_eye,
+        nearClip,
+        zBufferRowStride,
+        depthOffset,
+        zBufferPtr,
+        rgbBufferPtr,
+        surfaceNormalsBufferPtr,
+        vertexIndexBufferPtr,
+        triangleIndexBufferPtr,
+        false);
+  }
+}
+#endif
 
 // Support both signed and unsigned triangles for backward compatibility:
 template <typename TriangleT>
@@ -561,7 +773,39 @@ void rasterizeMeshImp(
   float* surfaceNormalsBufferPtr = dataOrNull(surfaceNormalsBuffer);
   int* vertexIndexBufferPtr = dataOrNull(vertexIndexBuffer);
   int* triangleIndexBufferPtr = dataOrNull(triangleIndexBuffer);
+  const index_t zBufferRowStride = getRowStride(zBuffer);
 
+#if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
+  // MSVC's codegen for the DrJit packetized triangle setup has very large stack
+  // frames in the Python renderer call chain. Keep pixel SIMD, but process the
+  // per-triangle setup scalarly on Windows so the renderer fits the default
+  // Python thread stack.
+  rasterizeMeshImpScalarTriangleLoop(
+      positions_world,
+      normals_world,
+      triangles,
+      textureCoords,
+      textureTriangles,
+      perVertexDiffuseColor,
+      camera,
+      cameraSimd,
+      imageWidth,
+      imageHeight,
+      usePerVertexColor,
+      useTextureCoords,
+      zBufferPtr,
+      rgbBufferPtr,
+      surfaceNormalsBufferPtr,
+      vertexIndexBufferPtr,
+      triangleIndexBufferPtr,
+      zBufferRowStride,
+      lights_eye,
+      material,
+      modelMatrix,
+      backfaceCulling,
+      nearClip,
+      depthOffset);
+#else
   for (auto [triangleIndices, triangleMask] : intPacketRange(nTriangles)) {
     auto triangles_cur = drjit::gather<Vector3iP>(triangles.data(), triangleIndices, triangleMask);
     std::array<Vector3fP, 3> p_tri_window;
@@ -673,7 +917,7 @@ void rasterizeMeshImp(
           material,
           lights_eye,
           nearClip,
-          getRowStride(zBuffer),
+          zBufferRowStride,
           depthOffset,
           zBufferPtr,
           rgbBufferPtr,
@@ -683,6 +927,7 @@ void rasterizeMeshImp(
           false);
     }
   }
+#endif
 }
 
 void validateSplatInputs(

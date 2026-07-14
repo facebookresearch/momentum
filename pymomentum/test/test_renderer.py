@@ -5,7 +5,6 @@
 
 # pyre-strict
 
-import sys
 import unittest
 
 import numpy as np
@@ -302,11 +301,6 @@ class TestRendering(unittest.TestCase):
         render without texture coordinates, depth values should be correct,
         and the rgb_buffer should contain visible (lit) pixels.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
@@ -358,11 +352,6 @@ class TestRendering(unittest.TestCase):
         pixel count should match a baseline render without texture
         coordinates, and the geometry is unaffected by the texture mapping.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
@@ -427,11 +416,6 @@ class TestRendering(unittest.TestCase):
         - The geometry (z-buffer) is unaffected by the choice of texture
           triangle indices.
         """
-        # The SIMD rasterizer uses large stack frames (drjit SIMD types +
-        # deep inlining) that overflow the default 1 MB Windows thread stack.
-        if sys.platform == "win32":
-            return
-
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(image_width=64, image_height=64)
         )
