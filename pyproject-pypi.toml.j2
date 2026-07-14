@@ -19,10 +19,10 @@
     # The pixi environment's pybind11 uses pybind11NewTools which requires python3_add_library
     # from CMake's FindPython, but manylinux Python only has Interpreter component
     "-DMOMENTUM_USE_SYSTEM_PYBIND11=OFF",
-    # Use manylinux container's compiler (gcc-toolset-12) instead of pixi's GCC 14.3
-    # to ensure manylinux_2_28 compatibility (requires GLIBCXX <= 3.4.24, CXXABI <= 1.3.11)
-    "-DCMAKE_CXX_FLAGS=-static-libstdc++ -static-libgcc",
-    "-DCMAKE_C_FLAGS=-static-libgcc",
+    # Do not static-link libstdc++ into extension modules: duplicated static C++
+    # runtime symbols can put later extension imports, notably torch._C, into an
+    # incompatible state under Python's default RTLD_LOCAL mode. The Linux wheel
+    # repair step below gives libstdc++ a private SONAME instead.
 {%- endmacro %}
 
 {#- macOS-specific args -#}
@@ -364,8 +364,10 @@ repair-wheel-command = """
 # - manylinux_2_28 policy rejects our libs (too-recent GLIBCXX symbols)
 # - linux_x86_64 policy is not available inside the manylinux container
 #
-# We manually bundle dependencies and rename libstdc++ to avoid the dynamic
-# linker collision where Python/torch load the system libstdc++.so.6 first.
+# We manually bundle dependencies, including libstdc++, because conda-forge
+# dependencies require newer GLIBCXX symbols than manylinux_2_28's system
+# libstdc++ provides. libstdc++ is renamed to a private SONAME so torch-first
+# imports cannot pin the older system libstdc++.so.6 for PyMomentum's DSOs.
 
 set -e
 
@@ -376,6 +378,80 @@ rm -rf $WORK /tmp/final_wheel && mkdir -p $WORK /tmp/final_wheel
 echo '=== Unpacking wheel ==='
 cd $WORK
 unzip -q {wheel}
+
+echo '=== Adding Linux native loader shim ==='
+cat > pymomentum/__init__.py <<'PYMOMENTUM_INIT'
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+from __future__ import annotations
+
+import importlib.abc
+import importlib.machinery
+import sys
+
+
+_NATIVE_MODULES = {
+    f"{__name__}.{module}"
+    for module in (
+        "axel",
+        "camera",
+        "diff_geometry",
+        "geometry",
+        "marker_tracking",
+        "renderer",
+        "solver",
+        "solver2",
+    )
+}
+
+
+class _TorchFirstExtensionLoader(importlib.abc.Loader):
+    def __init__(self, loader: importlib.abc.Loader) -> None:
+        self._loader = loader
+
+    def __getattr__(self, name: str):
+        return getattr(self._loader, name)
+
+    def create_module(self, spec):
+        _import_torch_if_available()
+        if not hasattr(self._loader, "create_module"):
+            return None
+        return self._loader.create_module(spec)
+
+    def exec_module(self, module) -> None:
+        _import_torch_if_available()
+        self._loader.exec_module(module)
+
+
+class _TorchFirstExtensionFinder(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname: str, path=None, target=None):
+        if fullname not in _NATIVE_MODULES:
+            return None
+        spec = importlib.machinery.PathFinder.find_spec(fullname, path)
+        if spec is None or not isinstance(
+            spec.loader, importlib.machinery.ExtensionFileLoader
+        ):
+            return spec
+        if not isinstance(spec.loader, _TorchFirstExtensionLoader):
+            spec.loader = _TorchFirstExtensionLoader(spec.loader)
+        return spec
+
+
+def _import_torch_if_available() -> None:
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        pass
+
+
+if sys.platform.startswith("linux") and not any(
+    isinstance(finder, _TorchFirstExtensionFinder) for finder in sys.meta_path
+):
+    sys.meta_path.insert(0, _TorchFirstExtensionFinder())
+PYMOMENTUM_INIT
 
 # Find or create the .libs directory for this distribution.
 LIBS_DIR="{{ wheel_libs_dir }}"
@@ -392,7 +468,6 @@ is_skip_lib() {
         libresolv*|libnss*|ld-linux*) return 0 ;;
         libgcc_s*) return 0 ;;
         libpython*) return 0 ;;
-        libstdc++.so*) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -462,35 +537,30 @@ done
 echo "Bundled libraries:"
 ls -la "$LIBS_DIR/"
 
-# Special handling: rename libstdc++ to avoid dynamic linker collision
+# Keep PyMomentum's C++ runtime dependency private. Python package init imports
+# torch, when available, before loading PyMomentum extension modules so torch
+# owns its process-global C++ runtime state without exposing PyMomentum's private
+# libstdc++ symbols to later native extensions such as Triton.
 echo '=== Renaming libstdc++ ==='
 RENAMED_LIBSTDCXX="libstdc++-pymomentum.so.6"
-
-# Find pixi's libstdc++ (the one with GLIBCXX_3.4.29)
-PIXI_LIBSTDCXX=$(find "$PIXI_ENV/lib" -name 'libstdc++.so.6.*' -not -type l | sort -V | tail -1)
-if [ -z "$PIXI_LIBSTDCXX" ]; then
-    PIXI_LIBSTDCXX="$PIXI_ENV/lib/libstdc++.so.6"
+if [ -f "$LIBS_DIR/libstdc++.so.6" ]; then
+    mv "$LIBS_DIR/libstdc++.so.6" "$LIBS_DIR/$RENAMED_LIBSTDCXX"
+else
+    PIXI_LIBSTDCXX=$(find "$PIXI_ENV/lib" -name 'libstdc++.so.6*' -not -type l | sort -V | tail -1)
+    if [ -z "$PIXI_LIBSTDCXX" ]; then
+        PIXI_LIBSTDCXX="$PIXI_ENV/lib/libstdc++.so.6"
+    fi
+    cp "$(readlink -f "$PIXI_LIBSTDCXX")" "$LIBS_DIR/$RENAMED_LIBSTDCXX"
 fi
-PIXI_LIBSTDCXX=$(readlink -f "$PIXI_LIBSTDCXX")
-echo "Pixi libstdc++: $PIXI_LIBSTDCXX"
-
-# Copy with renamed name
-cp "$PIXI_LIBSTDCXX" "$LIBS_DIR/$RENAMED_LIBSTDCXX"
 chmod 755 "$LIBS_DIR/$RENAMED_LIBSTDCXX"
-# Remove the original-named copy if bundled above
-rm -f "$LIBS_DIR/libstdc++.so.6"
-
-# Set the SONAME of the renamed library
 patchelf --set-soname "$RENAMED_LIBSTDCXX" "$LIBS_DIR/$RENAMED_LIBSTDCXX"
 
-# Patch DT_NEEDED in all .so files
 echo '=== Patching DT_NEEDED and RPATH ==='
 find . -name '*.so*' -type f | while read so_file; do
     case "$so_file" in
-        *libstdc++-pymomentum*) continue ;;
+        *"$RENAMED_LIBSTDCXX") continue ;;
     esac
 
-    # Replace libstdc++.so.6 reference with renamed version
     if patchelf --print-needed "$so_file" 2>/dev/null | grep -q '^libstdc++[.]so[.]6$'; then
         echo "  Patching DT_NEEDED: $so_file"
         patchelf --replace-needed libstdc++.so.6 "$RENAMED_LIBSTDCXX" "$so_file"
