@@ -562,7 +562,7 @@ void rasterizeMeshImp(
   int* vertexIndexBufferPtr = dataOrNull(vertexIndexBuffer);
   int* triangleIndexBufferPtr = dataOrNull(triangleIndexBuffer);
 
-  for (auto [triangleIndices, triangleMask] : drjit::range<IntP>(nTriangles)) {
+  for (auto [triangleIndices, triangleMask] : intPacketRange(nTriangles)) {
     auto triangles_cur = drjit::gather<Vector3iP>(triangles.data(), triangleIndices, triangleMask);
     std::array<Vector3fP, 3> p_tri_window;
     Matrix3fP p_tri_eye;
@@ -746,7 +746,7 @@ void rasterizeSplatsImp(
   const std::array<Vector3f, 4> quadTextureCoords = {
       Vector3f(-1, -1, 0), Vector3f(1, -1, 0), Vector3f(1, 1, 0), Vector3f(-1, 1, 0)};
 
-  for (auto [splatIndices, splatMask] : drjit::range<IntP>(nSplats)) {
+  for (auto [splatIndices, splatMask] : intPacketRange(nSplats)) {
     auto position_world = drjit::gather<Vector3fP>(positions_world.data(), splatIndices, splatMask);
     auto normal_world = drjit::gather<Vector3fP>(normals_world.data(), splatIndices, splatMask);
 
