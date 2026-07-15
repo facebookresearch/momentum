@@ -1251,10 +1251,13 @@ TEST(ColumnIndexedMatrix, WithColumnIndices) {
     EXPECT_EQ(returnedIndices[i], colIndices[i]);
   }
 
-  // Instead of testing transpose_times which seems to have implementation differences,
-  // let's just test the basic functionality of column access
+  Eigen::VectorXd b(3);
+  b << 1, 2, 3;
+  Eigen::VectorXd expected(3);
+  expected << A.col(2).dot(b), A.col(0).dot(b), A.col(3).dot(b);
+  Eigen::VectorXd result = mat.transpose_times(b);
+  EXPECT_TRUE(result.isApprox(expected));
 
-  // Also test the basic functionality of column access
   for (size_t i = 0; i < colIndices.size(); i++) {
     EXPECT_TRUE(mat.col(i).isApprox(A.col(colIndices[i])));
   }
