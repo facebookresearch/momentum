@@ -428,9 +428,25 @@ tracy-profiler-gui = ">=0.11.1,<0.13"
 cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 
+[target.win-64.activation.env]
+# Pixi sets these automatically on Windows, but this breaks Ninja.
+CMAKE_GENERATOR_INSTANCE = ""
+CMAKE_GENERATOR_PLATFORM = ""
+CMAKE_GENERATOR_TOOLSET = ""
+
 [target.win-64.tasks]
+# On Windows, we can't pass files as individual args since args buffer is too
+# small, fails with `[WinError 206] The filename or extension is too long`.
+lint = { cmd = """
+mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/*.cpp" "pymomentum/*.h" "pymomentum/*.cpp" > build/cf-sources-list.txt && clang-format -i --files=build/cf-sources-list.txt
+"""}
+lint-check = { cmd = """
+mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/*.cpp" "pymomentum/*.h" "pymomentum/*.cpp" > build/cf-sources-list.txt && clang-format --dry-run --Werror --files=build/cf-sources-list.txt
+"""}
 # Let CMake use its default generator unless CMAKE_GENERATOR is set. Windows CI
 # sets CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations.
+# NB: Use `pixi run build[_dev] -- -G "Ninja Multi-Config"` if building both Debug
+# and Release, otherwise Ninja writes bins to same dir for both configs.
 config = { cmd = """
     cmake \
         -S . \
@@ -450,19 +466,23 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
-open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
+open_vs = { cmd = "cmd /c \"start build/{{ pixi.environment.name }}/cpp/momentum.sln\"", depends-on = [
     "config",
 ] }
-build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel", depends-on = [
+# With Visual Studio as generator, `--parallel` has no effect. Use Ninja for a faster build.
+build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel && cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Release/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Release", depends-on = [
     "config",
 ] }
-build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel", depends-on = [
+build_fast = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel 4 && cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Release/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Release", depends-on = [
+    "config",
+], description = "Build Release version with limited parallelism" }
+build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel && cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Debug/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Debug", depends-on = [
     "config",
 ] }
-test = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Release;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release\"", depends-on = [
+test = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release", depends-on = [
     "build",
 ] }
-test_dev = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Debug;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug\"", depends-on = [
+test_dev = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug", depends-on = [
     "build_dev",
 ] }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/hello_world.exe", depends-on = [
