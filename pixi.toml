@@ -428,9 +428,24 @@ tracy-profiler-gui = ">=0.11.1,<0.13"
 cibuildwheel = ">=2.22.0,<3"
 twine = ">=6.1.0,<7"
 
+[target.win-64.activation.env]
+# Pixi sets these automatically on Windows, but this breaks Ninja.
+CMAKE_GENERATOR_INSTANCE = ""
+CMAKE_GENERATOR_PLATFORM = ""
+CMAKE_GENERATOR_TOOLSET = ""
+
 [target.win-64.tasks]
-# Let CMake use its default generator unless CMAKE_GENERATOR is set. Windows CI
-# sets CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations.
+# On Windows, we can't pass files as individual args since args buffer is too
+# small, fails with `[WinError 206] The filename or extension is too long`.
+lint = { cmd = """
+mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/*.cpp" "pymomentum/*.h" "pymomentum/*.cpp" > build/cf-sources-list.txt && clang-format -i --files=build/cf-sources-list.txt
+"""}
+lint-check = { cmd = """
+mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/*.cpp" "pymomentum/*.h" "pymomentum/*.cpp" > build/cf-sources-list.txt && clang-format --dry-run --Werror --files=build/cf-sources-list.txt
+"""}
+# Windows CI sets CMAKE_GENERATOR=Ninja so sccache can wrap compiler invocations.
+# For local builds, use Ninja Multi-Config, so that debug and release don't
+# build to the same directory.
 config = { cmd = """
     cmake \
         -S . \
@@ -443,26 +458,48 @@ config = { cmd = """
         -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
         -DMOMENTUM_BUILD_TESTING=ON \
         -DMOMENTUM_ENABLE_PROFILING=ON \
-        -DMOMENTUM_ENABLE_SIMD=%MOMENTUM_ENABLE_SIMD% \
+        -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
+        -DMOMENTUM_INSTALL_EXAMPLES=ON \
+        -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
+        -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
+        -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
+        -DMOMENTUM_USE_SYSTEM_TRACY=ON
+    """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR = "Ninja Multi-Config", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+config_vs = { cmd = """
+    cmake \
+        -S . \
+        -B build/$PIXI_ENVIRONMENT_NAME/cpp_vs \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+        -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
+        -DMOMENTUM_BUILD_EXAMPLES=ON \
+        -DMOMENTUM_ENABLE_FBX_SAVING=$MOMENTUM_ENABLE_FBX_SAVING \
+        -DMOMENTUM_BUILD_PYMOMENTUM=$MOMENTUM_BUILD_PYMOMENTUM \
+        -DMOMENTUM_BUILD_TESTING=ON \
+        -DMOMENTUM_ENABLE_PROFILING=ON \
+        -DMOMENTUM_ENABLE_SIMD=$MOMENTUM_ENABLE_SIMD \
         -DMOMENTUM_INSTALL_EXAMPLES=ON \
         -DMOMENTUM_USE_SYSTEM_GOOGLETEST=ON \
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
     """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
-open_vs = { cmd = "cmd /c start build\\$PIXI_ENVIRONMENT_NAME\\cpp\\momentum.sln", depends-on = [
+open_vs = { cmd = "cmd /c \"start build/{{ pixi.environment.name }}/cpp_vs/momentum.sln\"", depends-on = [
+    "config_vs",
+] }
+build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel && (cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Release/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Release || echo 'No axel DLL to copy')", depends-on = [
     "config",
 ] }
-build = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel", depends-on = [
+build_fast = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Release --parallel 4 && (cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Release/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Release || echo 'No axel DLL to copy')", depends-on = [
+    "config",
+], description = "Build Release version with limited parallelism" }
+build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel && (cp build/$PIXI_ENVIRONMENT_NAME/cpp/axel/Debug/axel.dll build/$PIXI_ENVIRONMENT_NAME/cpp/Debug || echo 'No axel DLL to copy')", depends-on = [
     "config",
 ] }
-build_dev = { cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/cpp --config Debug --parallel", depends-on = [
-    "config",
-] }
-test = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Release;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release\"", depends-on = [
+test = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Release", depends-on = [
     "build",
 ] }
-test_dev = { cmd = "cmd /c \"set PATH=build\\$PIXI_ENVIRONMENT_NAME\\cpp\\Debug;%PATH% & ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug\"", depends-on = [
+test_dev = { cmd = "ctest --test-dir build/$PIXI_ENVIRONMENT_NAME/cpp --output-on-failure --build-config Debug", depends-on = [
     "build_dev",
 ] }
 hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/hello_world.exe", depends-on = [
@@ -513,10 +550,10 @@ build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
     -DMOMENTUM_USE_SYSTEM_PYBIND11=OFF \
     -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
     -DBUILD_SHARED_LIBS=OFF
-""", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
+""", CMAKE_GENERATOR = "Ninja", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_ENABLE_SIMD = "ON", TORCH_CUDA_ARCH_LIST = "5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX" } }
 # TODO: Remove -k option, once saving tests are disabled programmatically when Autodesk FBX SDK is unavailable (FBX loading always works via OpenFBX)
 test_py = { cmd = "pytest pymomentum/test/ -k 'not (TestFBXIO and (test_save_motions_with_joint_params or test_save_motions_with_model_params))'", env = { MOMENTUM_MODELS_PATH = "momentum/" }, depends-on = [
-    "build_py", "install",
+    "build_py",
 ] }
 
 # Windows variant-aware wheel build using pip wheel + delvewheel
@@ -525,7 +562,7 @@ test_py = { cmd = "pytest pymomentum/test/ -k 'not (TestFBXIO and (test_save_mot
 wheel_build = { cmd = """
     python scripts/generate_pyproject.py && \
     python scripts/build_pypi_wheel.py
-""", env = { CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "" }, description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
+""", env = { CMAKE_GENERATOR = "Ninja", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "" }, description = "Build wheel for Windows (set PYMOMENTUM_VARIANT=cpu or gpu for Torch extensions)" }
 
 # Repair wheel using delvewheel - variant-aware (bundles DLLs for standalone distribution)
 wheel_repair = { cmd = """
