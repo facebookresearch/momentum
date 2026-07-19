@@ -449,7 +449,6 @@ mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/
 config = { cmd = """
     cmake \
         -S . \
-        -G "Ninja Multi-Config" \
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
@@ -465,7 +464,7 @@ config = { cmd = """
         -DMOMENTUM_USE_SYSTEM_PYBIND11=ON \
         -DMOMENTUM_USE_SYSTEM_RERUN_CPP_SDK=ON \
         -DMOMENTUM_USE_SYSTEM_TRACY=ON
-    """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
+    """, env = { BUILD_SHARED_LIBS = "ON", CMAKE_GENERATOR = "Ninja Multi-Config", CMAKE_GENERATOR_INSTANCE = "", CMAKE_GENERATOR_PLATFORM = "", CMAKE_GENERATOR_TOOLSET = "", MOMENTUM_ENABLE_FBX_SAVING = "OFF", MOMENTUM_BUILD_PYMOMENTUM = "OFF", MOMENTUM_ENABLE_SIMD = "ON" } }
 config_vs = { cmd = """
     cmake \
         -S . \
