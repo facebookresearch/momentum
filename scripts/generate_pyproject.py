@@ -133,7 +133,7 @@ def main():
             output_path = (
                 output_dir / f"pyproject-pypi-{variant['tag']}-py{py_ver}.toml"
             )
-            output_path.write_text(config)
+            output_path.write_text(config, encoding='utf-8')
             print(
                 f"Generated {output_path.name} "
                 f"(requires-python: >={PYTHON_REQUIRES_MIN},<{PYTHON_REQUIRES_MAX})"
