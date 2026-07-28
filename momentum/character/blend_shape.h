@@ -102,7 +102,7 @@ struct BlendShape : public BlendShapeBase {
 
  private:
   std::vector<Vector3f> baseShape_;
-  mutable Eigen::JacobiSVD<MatrixXf> factorization_;
+  mutable Eigen::JacobiSVD<MatrixXf, Eigen::ComputeThinU | Eigen::ComputeThinV> factorization_;
   mutable bool factorizationValid_;
 };
 

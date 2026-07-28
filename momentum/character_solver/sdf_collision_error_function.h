@@ -140,8 +140,6 @@ class SDFCollisionErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const std::vector<int>& participatingVertices,
       const std::vector<T>& weights);
 
-  void organizeVerticesByBone(const std::vector<std::pair<int, T>>& vertexWeightPairs);
-
   void initializeBoneCollisionPairs(bool filterRestPoseIntersections);
 
   [[nodiscard]] bool testRestPoseIntersection(
