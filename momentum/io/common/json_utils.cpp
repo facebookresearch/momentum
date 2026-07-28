@@ -265,7 +265,7 @@ ParameterTransform parameterTransformFromJson(const Character& character, const 
 
           // add triplet
           triplets.emplace_back(
-              static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+              static_cast<int>(jointIndex * kParametersPerJoint + attributeIndex),
               static_cast<int>(parameterIndex),
               weight);
         }

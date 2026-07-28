@@ -106,7 +106,7 @@ std::pair<T, T> computeHouseholderVec(
 {
   const T sigma = vec.squaredNorm();
   if (sigma == 0) {
-    return {0, x1};
+    return {T(0), x1};
   }
 
   const T mu = std::sqrt(sqr(x1) + sigma);

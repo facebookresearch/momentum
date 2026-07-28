@@ -220,7 +220,7 @@ void parseParameter(
 
       // add triplet
       triplets.emplace_back(
-          static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+          static_cast<int>(jointIndex * kParametersPerJoint + attributeIndex),
           static_cast<int>(parameterIndex),
           weight);
     } else if (
@@ -233,7 +233,7 @@ void parseParameter(
         const auto& t = triplets[tr];
         if (static_cast<size_t>(t.row()) == refJointId) {
           triplets.emplace_back(
-              static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+              static_cast<int>(jointIndex * kParametersPerJoint + attributeIndex),
               static_cast<int>(t.col()),
               t.value() * weight);
         }
@@ -241,7 +241,7 @@ void parseParameter(
     } else if (parameterIndex != kInvalidIndex) {
       // add triplet
       triplets.emplace_back(
-          static_cast<int>(jointIndex) * kParametersPerJoint + static_cast<int>(attributeIndex),
+          static_cast<int>(jointIndex * kParametersPerJoint + attributeIndex),
           static_cast<int>(parameterIndex),
           weight);
     } else {

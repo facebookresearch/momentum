@@ -114,31 +114,6 @@ class VertexVertexDistanceErrorFunctionT : public SkeletonErrorFunctionT<T> {
       const VertexVertexDistanceConstraintT<T>& constraint,
       Eigen::Ref<Eigen::VectorX<T>> gradient) const;
 
-  /// Calculate gradient contribution from a single vertex
-  void calculateVertexGradient(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      int vertexIndex,
-      const Eigen::Vector3<T>& gradientDirection,
-      Eigen::Ref<Eigen::VectorX<T>> gradient) const;
-
-  /// Calculate jacobian contribution from a single vertex
-  void calculateVertexJacobian(
-      const ModelParametersT<T>& modelParameters,
-      const SkeletonStateT<T>& state,
-      const MeshStateT<T>& meshState,
-      int vertexIndex,
-      const Eigen::Vector3<T>& jacobianDirection,
-      Eigen::Ref<Eigen::MatrixX<T>> jacobian) const;
-
-  /// Calculate world space position derivative for blend shape parameters
-  void calculateDWorldPos(
-      const SkeletonStateT<T>& state,
-      int vertexIndex,
-      const Eigen::Vector3<T>& d_restPos,
-      Eigen::Vector3<T>& d_worldPos) const;
-
   const Character& character_;
 
   std::vector<VertexVertexDistanceConstraintT<T>> constraints_;

@@ -70,7 +70,9 @@ Mesh mergeMeshes(const std::initializer_list<Mesh>& meshes) {
     // Add faces with offset
     for (const auto& face : m.faces) {
       result.faces.emplace_back(
-          face.x() + vertOffset, face.y() + vertOffset, face.z() + vertOffset);
+          static_cast<int>(face.x() + vertOffset),
+          static_cast<int>(face.y() + vertOffset),
+          static_cast<int>(face.z() + vertOffset));
     }
   }
 
@@ -181,7 +183,7 @@ Mesh makeCylinderCap(int numCircleSubdivisions, bool top, float radius = 1.0) {
   const Eigen::Vector3f normal = (top ? 1.0f : -1.0f) * Eigen::Vector3f::UnitX();
 
   // Add center vertex
-  result.vertices.emplace_back(xValue, 0, 0);
+  result.vertices.emplace_back(xValue, 0.0f, 0.0f);
   result.normals.push_back(normal);
 
   // Add circle vertices
@@ -305,8 +307,9 @@ Mesh makeCapsule(
 
   // Build the main cylinder body vertices
   size_t vertexOffset = 0;
-  auto vertexIndex = [&](int iLength, int jRadius) {
-    return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
+  auto vertexIndex = [&](int iLength, int jRadius) -> int {
+    return static_cast<int>(
+        vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions));
   };
 
   // Build the vertices along the length:
@@ -461,8 +464,9 @@ Mesh makeArrowhead(
   //     \ |/______________|__ x axis
   const float normalX = -(endRadius - startRadius) / length;
 
-  auto vertexIndex = [&](int iLength, int jRadius) {
-    return vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions);
+  auto vertexIndex = [&](int iLength, int jRadius) -> int {
+    return static_cast<int>(
+        vertexOffset + iLength * numCircleSubdivisions + (jRadius % numCircleSubdivisions));
   };
 
   // Build the vertices along the length:
@@ -506,13 +510,13 @@ Mesh makeArrowhead(
     const int iCircleNext = (iCircle + 1) % numCircleSubdivisions;
 
     result.faces.emplace_back(
-        vertexOffset + 2 * iCircle + 0,
-        vertexOffset + 2 * iCircleNext + 0,
-        vertexOffset + 2 * iCircle + 1);
+        static_cast<int>(vertexOffset + 2 * iCircle + 0),
+        static_cast<int>(vertexOffset + 2 * iCircleNext + 0),
+        static_cast<int>(vertexOffset + 2 * iCircle + 1));
     result.faces.emplace_back(
-        vertexOffset + 2 * iCircle + 1,
-        vertexOffset + 2 * iCircleNext + 0,
-        vertexOffset + 2 * iCircleNext + 1);
+        static_cast<int>(vertexOffset + 2 * iCircle + 1),
+        static_cast<int>(vertexOffset + 2 * iCircleNext + 0),
+        static_cast<int>(vertexOffset + 2 * iCircleNext + 1));
   }
 
   return result;
@@ -583,7 +587,7 @@ std::array<Mesh, 2> makeCheckerboard(float width, int numChecks, int subdivision
             const float xPos = xPositions.at(iCheck * subdivisions + iSubd);
             const float zPos = xPositions.at(jCheck * subdivisions + jSubd);
 
-            positions.emplace_back(xPos, 0, zPos);
+            positions.emplace_back(xPos, 0.0f, zPos);
 
             if (iSubd >= 1 && jSubd >= 1) {
               triangles.emplace_back(
@@ -679,10 +683,10 @@ std::tuple<Mesh, std::vector<Eigen::Vector3f>> makeOctahedron(float radius, floa
     const Eigen::Vector3f p_cur = midPoints[iSide];
     const Eigen::Vector3f p_next = midPoints[(iSide + 1) % 4];
 
-    lines.emplace_back(0, 0, 0);
+    lines.emplace_back(0.0f, 0.0f, 0.0f);
     lines.push_back(midPoints[iSide]);
     lines.push_back(midPoints[iSide]);
-    lines.emplace_back(1, 0, 0);
+    lines.emplace_back(1.0f, 0.0f, 0.0f);
 
     {
       // left triangle:
@@ -837,7 +841,8 @@ struct ExtendableTriangleMesh {
     }
 
     bool inserted = false;
-    std::tie(edgeItr, inserted) = edgeVerts.insert(std::make_pair(edge, vertices.size()));
+    std::tie(edgeItr, inserted) =
+        edgeVerts.insert(std::make_pair(edge, static_cast<int>(vertices.size())));
     vertices.push_back(blend(vertices.at(edge.first), vertices.at(edge.second)));
     return edgeItr->second;
   }

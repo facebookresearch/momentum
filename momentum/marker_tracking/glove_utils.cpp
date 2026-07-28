@@ -82,7 +82,7 @@ Character addGloveBones(
     }
 
     // Resize the transform matrix rows for the new joint (no new columns)
-    const int newRows = static_cast<int>(newSkel.joints.size()) * kParametersPerJoint;
+    const int newRows = static_cast<int>(newSkel.joints.size() * kParametersPerJoint);
     const int curCols = static_cast<int>(newTransform.name.size());
     newTransform.transform.conservativeResize(newRows, curCols);
   }
@@ -121,8 +121,7 @@ Character addGloveCalibrationParameters(
     // Add 6 DOF parameters (TX, TY, TZ, RX, RY, RZ) for this glove bone
     for (size_t d = 0; d < 6; ++d) {
       const std::string paramName = gloveBoneName + dofNames[d];
-      const auto row =
-          static_cast<int>(jointIdx) * kParametersPerJoint + static_cast<int>(dofIndices[d]);
+      const int row = static_cast<int>(jointIdx * kParametersPerJoint + dofIndices[d]);
       const auto col = static_cast<int>(newTransform.name.size());
 
       triplets.emplace_back(row, col, 1.0f);
@@ -139,7 +138,7 @@ Character addGloveCalibrationParameters(
   newTransform.parameterSets["gloves"] = gloveSet;
 
   // Update the parameter transform matrix
-  const int newRows = static_cast<int>(newSkel.joints.size()) * kParametersPerJoint;
+  const int newRows = static_cast<int>(newSkel.joints.size() * kParametersPerJoint);
   const int newCols = static_cast<int>(newTransform.name.size());
   newTransform.transform.conservativeResize(newRows, newCols);
   SparseRowMatrixf additionalTransforms(newRows, newCols);
