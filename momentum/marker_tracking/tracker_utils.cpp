@@ -672,7 +672,7 @@ Character createLocatorCharacter(const Character& sourceCharacter, const std::st
       }
       const std::string jname = joint.name + tNames[j];
       triplets.emplace_back(
-          static_cast<int>(id) * kParametersPerJoint + static_cast<int>(j),
+          static_cast<int>(id * kParametersPerJoint + j),
           static_cast<int>(newTransform.name.size()),
           1.0f);
       MT_CHECK(

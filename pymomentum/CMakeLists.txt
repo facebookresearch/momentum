@@ -4,6 +4,20 @@
 # LICENSE file in the root directory of this source tree.
 
 #===============================================================================
+# MSVC warning suppression
+#===============================================================================
+
+# PyMomentum links against LibTorch, whose headers trigger a large volume of
+# MSVC C4267/C4244 "possible loss of data" (size_t -> int) warnings from
+# template instantiations we do not control. Silence them for the pymomentum
+# targets defined in this directory so they do not drown out actionable
+# warnings. Momentum core (which does not depend on torch) fixes these at the
+# source instead.
+if(MSVC)
+  add_compile_options(/wd4267 /wd4244)
+endif()
+
+#===============================================================================
 # Find dependencies
 #===============================================================================
 

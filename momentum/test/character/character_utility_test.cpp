@@ -1197,9 +1197,12 @@ Character createTestCharacterWithConstrainedJoints() {
   // Set up identity transform matrix (for simplicity, each joint param maps to itself)
   std::vector<Eigen::Triplet<float>> triplets;
   for (size_t i = 0; i < numJoints; ++i) {
-    triplets.emplace_back(i * kParametersPerJoint + 4, i * 3 + 0, 1.0f); // Y rotation
-    triplets.emplace_back(i * kParametersPerJoint + 3, i * 3 + 1, 1.0f); // X rotation
-    triplets.emplace_back(i * kParametersPerJoint + 5, i * 3 + 2, 1.0f); // Z rotation
+    triplets.emplace_back(
+        static_cast<int>(i * kParametersPerJoint + 4), static_cast<int>(i * 3 + 0), 1.0f); // Y rot
+    triplets.emplace_back(
+        static_cast<int>(i * kParametersPerJoint + 3), static_cast<int>(i * 3 + 1), 1.0f); // X rot
+    triplets.emplace_back(
+        static_cast<int>(i * kParametersPerJoint + 5), static_cast<int>(i * 3 + 2), 1.0f); // Z rot
   }
   parameterTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
 

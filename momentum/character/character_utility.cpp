@@ -898,12 +898,30 @@ RigidTransformNodeResult addRigidTransformNode(
 
   // Rebuild the sparse transform matrix: keep existing triplets and add 6 new ones
   std::vector<Eigen::Triplet<float>> triplets = toTriplets(newParamTransform.transform);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TX, parameterStartIndex + 0, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TY, parameterStartIndex + 1, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TZ, parameterStartIndex + 2, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RX, parameterStartIndex + 3, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RY, parameterStartIndex + 4, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RZ, parameterStartIndex + 5, 1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + TX),
+      static_cast<int>(parameterStartIndex + 0),
+      1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + TY),
+      static_cast<int>(parameterStartIndex + 1),
+      1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + TZ),
+      static_cast<int>(parameterStartIndex + 2),
+      1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + RX),
+      static_cast<int>(parameterStartIndex + 3),
+      1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + RY),
+      static_cast<int>(parameterStartIndex + 4),
+      1.0f);
+  triplets.emplace_back(
+      static_cast<int>(boneIndex * kParametersPerJoint + RZ),
+      static_cast<int>(parameterStartIndex + 5),
+      1.0f);
 
   newParamTransform.transform.resize(newNumJointParams, newParamTransform.name.size());
   newParamTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
@@ -1077,7 +1095,10 @@ std::vector<Eigen::Vector3i> remapFaces(
         mapping[face[0]] != kInvalidIndex && mapping[face[1]] != kInvalidIndex &&
         mapping[face[2]] != kInvalidIndex);
 
-    remappedFaces.emplace_back(mapping[face[0]], mapping[face[1]], mapping[face[2]]);
+    remappedFaces.emplace_back(
+        static_cast<int>(mapping[face[0]]),
+        static_cast<int>(mapping[face[1]]),
+        static_cast<int>(mapping[face[2]]));
   }
 
   return remappedFaces;

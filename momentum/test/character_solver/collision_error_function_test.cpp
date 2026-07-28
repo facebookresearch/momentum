@@ -131,15 +131,15 @@ std::pair<Skeleton, ParameterTransform> makeScalableDoubleBranchSkeletonAndTrans
   pt.offsets = Eigen::VectorXf::Zero(numJointParams);
   pt.transform.resize(numJointParams, static_cast<int>(pt.name.size()));
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0 * kParametersPerJoint + 0, 0, 1.0f); // root_tx
-  triplets.emplace_back(0 * kParametersPerJoint + 1, 1, 1.0f); // root_ty
-  triplets.emplace_back(0 * kParametersPerJoint + 2, 2, 1.0f); // root_tz
-  triplets.emplace_back(0 * kParametersPerJoint + 3, 3, 1.0f); // root_rx
-  triplets.emplace_back(0 * kParametersPerJoint + 4, 4, 1.0f); // root_ry
-  triplets.emplace_back(0 * kParametersPerJoint + 5, 5, 1.0f); // root_rz
-  triplets.emplace_back(0 * kParametersPerJoint + 6, 6, 1.0f); // scale_global
-  triplets.emplace_back(1 * kParametersPerJoint + 5, 7, 1.0f); // joint1_rz
-  triplets.emplace_back(3 * kParametersPerJoint + 5, 8, 1.0f); // joint3_rz
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 0), 0, 1.0f); // root_tx
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 1), 1, 1.0f); // root_ty
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 2), 2, 1.0f); // root_tz
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 3), 3, 1.0f); // root_rx
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 4), 4, 1.0f); // root_ry
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 5), 5, 1.0f); // root_rz
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 6), 6, 1.0f); // scale_global
+  triplets.emplace_back(static_cast<int>(1 * kParametersPerJoint + 5), 7, 1.0f); // joint1_rz
+  triplets.emplace_back(static_cast<int>(3 * kParametersPerJoint + 5), 8, 1.0f); // joint3_rz
   pt.transform.setFromTriplets(triplets.begin(), triplets.end());
   pt.activeJointParams = pt.computeActiveJointParams();
 
@@ -468,7 +468,7 @@ TYPED_TEST(Momentum_ErrorFunctionsTest, BoxCollisionError_ProducesError) {
   rootYTransform.offsets = Eigen::VectorXf::Zero(numJointParams);
   rootYTransform.transform.resize(numJointParams, 1);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0 * kParametersPerJoint + 1, 0, 1.0f);
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 1), 0, 1.0f);
   rootYTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
   rootYTransform.activeJointParams = rootYTransform.computeActiveJointParams();
 

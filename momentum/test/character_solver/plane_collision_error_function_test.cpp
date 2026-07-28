@@ -29,7 +29,7 @@ ParameterTransform makeRootYTransform(size_t numJoints) {
   transform.offsets = Eigen::VectorXf::Zero(numJointParams);
   transform.transform.resize(numJointParams, 1);
   std::vector<Eigen::Triplet<float>> triplets;
-  triplets.emplace_back(0 * kParametersPerJoint + 1, 0, 1.0f);
+  triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + 1), 0, 1.0f);
   transform.transform.setFromTriplets(triplets.begin(), triplets.end());
   transform.activeJointParams = transform.computeActiveJointParams();
   return transform;
@@ -61,7 +61,7 @@ ParameterTransform makeRootSevenDofTransform(size_t numJoints) {
   transform.transform.resize(numJointParams, kParametersPerJoint);
   std::vector<Eigen::Triplet<float>> triplets;
   for (size_t i = 0; i < kParametersPerJoint; ++i) {
-    triplets.emplace_back(0 * kParametersPerJoint + i, i, 1.0f);
+    triplets.emplace_back(static_cast<int>(0 * kParametersPerJoint + i), static_cast<int>(i), 1.0f);
   }
   transform.transform.setFromTriplets(triplets.begin(), triplets.end());
   transform.activeJointParams = transform.computeActiveJointParams();

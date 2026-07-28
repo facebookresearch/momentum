@@ -86,6 +86,7 @@ const char* channelTypeName(BvhChannel ch) {
     case BvhChannel::Zrotation:
       return "Zrotation";
   }
+  MT_THROW("Invalid BVH channel: {}", static_cast<int>(ch));
 }
 
 // Returns the Eigen axis index for a rotation channel (0=X, 1=Y, 2=Z)
@@ -102,6 +103,7 @@ int rotationAxisIndex(BvhChannel ch) {
     case BvhChannel::Zposition:
       MT_THROW("Not a rotation channel");
   }
+  MT_THROW("Invalid BVH channel: {}", static_cast<int>(ch));
 }
 
 // Returns the joint parameter index for a position channel (TX=0, TY=1, TZ=2)
@@ -118,6 +120,7 @@ int positionParameterIndex(BvhChannel ch) {
     case BvhChannel::Zrotation:
       MT_THROW("Not a position channel");
   }
+  MT_THROW("Invalid BVH channel: {}", static_cast<int>(ch));
 }
 
 bool isRotationChannel(BvhChannel ch) {
