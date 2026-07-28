@@ -456,7 +456,7 @@ class TestCamera(unittest.TestCase):
         theta_d = theta * (
             1.0 + k1 * theta2 + k2 * theta2**2 + k3 * theta2**3 + k4 * theta2**4
         )
-        scale = np.where(r > 1e-8, theta_d / r, 1.0)
+        scale = np.where(r > 1e-8, theta_d / np.where(r > 1e-8, r, 1.0), 1.0)
         u_ref = fx_val * scale * a + cx_val
         v_ref = fy_val * scale * b + cy_val
 

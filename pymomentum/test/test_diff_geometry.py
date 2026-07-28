@@ -95,7 +95,10 @@ class TestDiffGeometry(unittest.TestCase):
         nBatch = 2
         # Some nonzero vector as 0 always maps to 0 in momentum:
         modelParams = 0.3 * torch.ones(
-            nBatch, character.parameter_transform.size, requires_grad=AUTOGRAD_ENABLED
+            nBatch,
+            character.parameter_transform.size,
+            requires_grad=AUTOGRAD_ENABLED,
+            dtype=torch.float64,
         )
         jointParams = pym_diff_geometry.apply_parameter_transform(
             character, modelParams
