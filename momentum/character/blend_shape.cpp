@@ -60,7 +60,7 @@ VectorXf BlendShape::estimateCoefficients(
   // damped least squares) or document it on the header.
   if (weights.size() != static_cast<Eigen::Index>(vertices.size())) {
     if (!factorizationValid_) {
-      factorization_.compute(shapeVectors_, Eigen::ComputeThinU | Eigen::ComputeThinV);
+      factorization_.compute(shapeVectors_);
       factorizationValid_ = true;
     }
 

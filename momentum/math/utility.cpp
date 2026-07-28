@@ -192,7 +192,7 @@ Vector3<T> rotationMatrixToEuler(
     return rotationMatrixToEuler(m, axis2, axis1, axis0, EulerConvention::Intrinsic).reverse();
   }
 
-  return m.eulerAngles(axis0, axis1, axis2);
+  return m.canonicalEulerAngles(axis0, axis1, axis2);
 }
 
 template <typename T>
@@ -422,7 +422,7 @@ Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::spa
 template <typename T>
 MatrixX<T> pseudoInverse(const MatrixX<T>& mat) {
   constexpr T pinvtoler = Eps<T>(T(1e-6), T(1e-60)); // choose your tolerance wisely!
-  const auto svd = mat.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+  const auto svd = mat.template jacobiSvd<Eigen::ComputeThinU | Eigen::ComputeThinV>();
   VectorX<T> singularValues_inv = svd.singularValues();
   for (int j = 0; j < singularValues_inv.size(); ++j) {
     if (singularValues_inv(j) > pinvtoler) {

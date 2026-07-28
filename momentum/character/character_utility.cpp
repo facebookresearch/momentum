@@ -898,14 +898,18 @@ RigidTransformNodeResult addRigidTransformNode(
 
   // Rebuild the sparse transform matrix: keep existing triplets and add 6 new ones
   std::vector<Eigen::Triplet<float>> triplets = toTriplets(newParamTransform.transform);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TX, parameterStartIndex + 0, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TY, parameterStartIndex + 1, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + TZ, parameterStartIndex + 2, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RX, parameterStartIndex + 3, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RY, parameterStartIndex + 4, 1.0f);
-  triplets.emplace_back(boneIndex * kParametersPerJoint + RZ, parameterStartIndex + 5, 1.0f);
+  const auto jointParameterStart = static_cast<Eigen::Index>(boneIndex * kParametersPerJoint);
+  const auto parameterStart = static_cast<Eigen::Index>(parameterStartIndex);
+  triplets.emplace_back(jointParameterStart + TX, parameterStart + 0, 1.0f);
+  triplets.emplace_back(jointParameterStart + TY, parameterStart + 1, 1.0f);
+  triplets.emplace_back(jointParameterStart + TZ, parameterStart + 2, 1.0f);
+  triplets.emplace_back(jointParameterStart + RX, parameterStart + 3, 1.0f);
+  triplets.emplace_back(jointParameterStart + RY, parameterStart + 4, 1.0f);
+  triplets.emplace_back(jointParameterStart + RZ, parameterStart + 5, 1.0f);
 
-  newParamTransform.transform.resize(newNumJointParams, newParamTransform.name.size());
+  newParamTransform.transform.resize(
+      static_cast<Eigen::Index>(newNumJointParams),
+      static_cast<Eigen::Index>(newParamTransform.name.size()));
   newParamTransform.transform.setFromTriplets(triplets.begin(), triplets.end());
 
   // Recompute activeJointParams
