@@ -443,13 +443,16 @@ mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/
 lint-check = { cmd = """
 mkdir -p build && git ls-files "axel/*.h" "axel/*.cpp" "momentum/*.h" "momentum/*.cpp" "pymomentum/*.h" "pymomentum/*.cpp" > build/cf-sources-list.txt && clang-format --dry-run --Werror --files=build/cf-sources-list.txt
 """}
-# In Windows CI, sccache wraps compiler invocations.
+# In Windows CI, sccache wraps compiler invocations. Embed debug information
+# in object files because MSVC compiler PDBs cannot be cached reliably.
 config = { cmd = """
     cmake \
         -S . \
         -B build/$PIXI_ENVIRONMENT_NAME/cpp \
         -G "Ninja Multi-Config" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POLICY_DEFAULT_CMP0141=NEW \
+        -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT="$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>" \
         -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
         -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
         -DMOMENTUM_BUILD_EXAMPLES=ON \
