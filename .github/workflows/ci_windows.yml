@@ -54,7 +54,7 @@ jobs:
             ${{ github.workflow }}-win-sccache-
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.9.5
@@ -117,7 +117,7 @@ jobs:
             ${{ github.workflow }}-win-sccache-
 
       - name: Set up sccache
-        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: Setup CUDA
         if: ${{ contains(matrix.pixi_env, 'cuda') || contains(matrix.pixi_env, 'gpu') }}
