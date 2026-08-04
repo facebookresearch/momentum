@@ -5,6 +5,7 @@
 
 # pyre-strict
 
+import io
 import math
 import unittest
 
@@ -26,6 +27,43 @@ def generateRandomQuats(sz: int) -> torch.Tensor:
 
 
 class TestQuaternion(unittest.TestCase):
+    def test_rotation_conversions_are_scriptable(self) -> None:
+        quaternions = quaternion.normalize(torch.randn(4, 4))
+        matrices = quaternion.to_rotation_matrix(quaternions)
+
+        scripted_to_matrix_assume_normalized = torch.jit.script(
+            quaternion.to_rotation_matrix_assume_normalized
+        )
+        scripted_to_matrix = torch.jit.script(quaternion.to_rotation_matrix)
+        scripted_from_matrix = torch.jit.script(quaternion.from_rotation_matrix)
+
+        self.assertTrue(
+            torch.allclose(
+                scripted_to_matrix_assume_normalized(quaternions, "auto"),
+                quaternion.to_rotation_matrix_assume_normalized(
+                    quaternions, backend="auto"
+                ),
+            )
+        )
+        self.assertTrue(
+            torch.allclose(
+                scripted_to_matrix(quaternions, "auto"),
+                quaternion.to_rotation_matrix(quaternions, backend="auto"),
+            )
+        )
+        self.assertTrue(
+            torch.allclose(
+                scripted_from_matrix(matrices, 1e-6, "auto"),
+                quaternion.from_rotation_matrix(matrices, backend="auto"),
+            )
+        )
+        for scripted_conversion in (
+            scripted_to_matrix_assume_normalized,
+            scripted_to_matrix,
+            scripted_from_matrix,
+        ):
+            torch.jit.save(scripted_conversion, io.BytesIO())
+
     def test_euler_conversion(self) -> None:
         torch.manual_seed(0)  # ensure repeatability
         nBatch = 6
