@@ -306,7 +306,7 @@ stability across all rotation matrix configurations.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>matrices</strong> – A tensor of shape (…, 3, 3) representing the rotation matrices.</p></li>
 <li><p><strong>eta</strong> – Numerical precision threshold (unused, kept for compatibility).</p></li>
-<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch.</p></li>
+<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -639,7 +639,7 @@ the logarithmic map from unit quaternions to so(3).</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q</strong> – (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.</p></li>
-<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch.</p></li>
+<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.</p></li>
 <li><p><strong>eps</strong> – Minimum quaternion norm used during normalization.</p></li>
 </ul>
 </dd>
@@ -657,7 +657,7 @@ the logarithmic map from unit quaternions to so(3).</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q</strong> – (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.</p></li>
-<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch.</p></li>
+<li><p><strong>backend</strong> – Backend to use. “auto” opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
