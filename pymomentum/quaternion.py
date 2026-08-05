@@ -206,9 +206,11 @@ def to_rotation_matrix_assume_normalized(
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
-    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
+    if torch.jit.is_scripting():
+        return torch_quaternion.to_rotation_matrix_assume_normalized(q)
     backend = resolve_backend(
         backend,
         q,
@@ -228,10 +230,12 @@ def to_rotation_matrix(
     Convert quaternions to 3x3 rotation matrices.
 
     :parameter q: (nBatch x k x 4) tensor with the quaternions in ((x, y, z), w) format.
-    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.
     :parameter eps: Minimum quaternion norm used during normalization.
     :return: (nBatch x k x 3 x 3) tensor with 3x3 rotation matrices.
     """
+    if torch.jit.is_scripting():
+        return torch_quaternion.to_rotation_matrix(q, eps=eps)
     backend = resolve_backend(
         backend,
         q,
@@ -329,9 +333,11 @@ def from_rotation_matrix(
 
     :parameter matrices: A tensor of shape (..., 3, 3) representing the rotation matrices.
     :parameter eta: Numerical precision threshold (unused, kept for compatibility).
-    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch.
+    :parameter backend: Backend to use. "auto" opts into the experimental Triton backend on CUDA float32, else torch. Scripted calls always use the Torch backend.
     :return: A tensor of shape (..., 4) representing the quaternions in ((x, y, z), w) format.
     """
+    if torch.jit.is_scripting():
+        return torch_quaternion.from_rotation_matrix(matrices, eta)
     backend = resolve_backend(
         backend,
         matrices,
