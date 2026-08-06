@@ -370,6 +370,33 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
           :param metadata: The metadata string to attach to the character.
           )",
           py::arg("metadata"))
+      .def(
+          "with_name",
+          [](const mm::Character& character, const std::string& name) {
+            return momentum::Character(
+                character.skeleton,
+                character.parameterTransform,
+                character.parameterLimits,
+                character.locators,
+                character.mesh.get(),
+                character.skinWeights.get(),
+                character.collision.get(),
+                character.poseShapes.get(),
+                character.blendShape,
+                character.faceExpressionBlendShape,
+                name,
+                character.inverseBindPose,
+                character.skinnedLocators,
+                character.metadata,
+                character.physicalProperties);
+          },
+          R"(Returns a new character with the passed-in name.
+
+          The name is written out as the character's root node name when the character is exported to glTF, and is read back into :attr:`name` when the file is loaded. Setting a meaningful name is therefore how a character keeps its identity across a glTF round trip.
+
+          :param name: The name to give the character.
+          )",
+          py::arg("name"))
       .def_readonly("name", &mm::Character::name, "The character's name.")
       .def_readonly("metadata", &mm::Character::metadata, "The character's metadata.")
       .def_readonly(
