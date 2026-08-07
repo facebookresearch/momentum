@@ -30,6 +30,16 @@ using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>
 /// and motions for each character.
 /// By default, momentum extension is added to the glb nodes. This is required if you
 /// want to correctly load the exported character back.
+///
+/// @note A scene may hold multiple characters, but the momentum loaders can only read a
+/// single-character scene back (loading a multi-character scene throws or drops all but the
+/// first). Names returned by addCharacter are handles for use within this builder session, not
+/// persistent identifiers recoverable on reload.
+///
+/// @note Character identity is the *exported* name, not character.name. addCharacter dedupes names,
+/// so the exported name it RETURNS may differ from character.name. Pass that returned name as
+/// `characterName` to addMotion/addSkeletonStates to target a specific character or instance; an
+/// empty characterName resolves to the first character added under character.name.
 class GltfBuilder final {
  public:
   GltfBuilder();
@@ -50,7 +60,12 @@ class GltfBuilder final {
   /// Add a character to the scene. Each character will have a root node with the character's
   /// name as the parent of the skeleton root and the character mesh.
   /// positionOffset and rotationOffset can be provided as an initial offset to the character.
-  void addCharacter(
+  /// Duplicate names are made unique by appending a numeric suffix.
+  ///
+  /// @return The name used for the exported character. This is a within-session handle: pass it as
+  /// characterName to addMotion/addSkeletonStates to target this specific character. It is not a
+  /// persistent identifier recoverable on reload.
+  std::string addCharacter(
       const Character& character,
       const Vector3f& positionOffset = Vector3f::Zero(),
       const Quaternionf& rotationOffset = Quaternionf::Identity(),
@@ -71,6 +86,11 @@ class GltfBuilder final {
   /// @param[in] addExtensions Whether to add momentum extensions to the document.
   /// @param[in] customName Custom name for the animation (default is "default").
   /// @param[in] timestamps Per-frame timestamps. Size should match motion columns.
+  /// @param[in] characterName Exported name returned by addCharacter, selecting which exported
+  /// character to animate. Pass it to target a specific instance when the same Character object was
+  /// added more than once, or a duplicate whose name was auto-suffixed. When empty, resolves to the
+  /// character exported under character.name (the first added under that name); if none exists, the
+  /// character is auto-added with default settings.
   void addMotion(
       const Character& character,
       float fps = 120.0f,
@@ -78,15 +98,21 @@ class GltfBuilder final {
       const IdentityParameters& offsets = {},
       bool addExtensions = true,
       const std::string& customName = "default",
-      std::span<const int64_t> timestamps = {});
+      std::span<const int64_t> timestamps = {},
+      const std::string& characterName = "");
 
   /// Add a skeleton states to the provided character. If addCharacter is not called before adding
   /// the skeleton states, the character will be automatically added with the default settings.
+  ///
+  /// @param[in] characterName Exported name returned by addCharacter, selecting which exported
+  /// character to animate (see addMotion). When empty, resolves to the character exported under
+  /// character.name; if none exists, the character is auto-added with default settings.
   void addSkeletonStates(
       const Character& character,
       float fps,
       std::span<const SkeletonState> skeletonStates,
-      const std::string& customName = "default");
+      const std::string& customName = "default",
+      const std::string& characterName = "");
 
   /// Add marker data to the file
   ///
@@ -138,6 +164,14 @@ class GltfBuilder final {
   std::vector<size_t> getCharacterMotions(const std::string& characterName);
 
  private:
+  /// Resolve which exported character an addMotion/addSkeletonStates call targets (see the
+  /// "Character name model" note in gltf_builder.cpp) and validate its skeleton matches @p
+  /// character; returns the resolved exported name. For an empty @p characterName whose source name
+  /// was never added, the character is auto-added with default settings.
+  std::string resolveCharacterForMotion(
+      const Character& character,
+      const std::string& characterName);
+
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };
