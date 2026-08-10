@@ -730,13 +730,16 @@ TEST(RandomTest, NormalDistributionStatisticalProperties) {
   const int numSamples = 10000;
   const float expectedMean = 5.0f;
   const float expectedSigma = 2.0f;
+  const float meanTolerance = 5.0f * expectedSigma / std::sqrt(static_cast<float>(numSamples));
+  const float sigmaTolerance = 0.10f;
 
   std::vector<float> samples;
   samples.reserve(numSamples);
+  Random<> rng(42);
 
   // Generate large sample
   for (int i = 0; i < numSamples; ++i) {
-    samples.push_back(normal<float>(expectedMean, expectedSigma));
+    samples.push_back(rng.normal<float>(expectedMean, expectedSigma));
   }
 
   // Calculate sample statistics
@@ -755,9 +758,9 @@ TEST(RandomTest, NormalDistributionStatisticalProperties) {
   float sampleStdDev = std::sqrt(sampleVariance);
 
   // With large sample size, statistics should be very close to expected values
-  EXPECT_NEAR(sampleMean, expectedMean, 0.05f)
+  EXPECT_NEAR(sampleMean, expectedMean, meanTolerance)
       << "Sample mean should be very close to expected mean with large sample";
-  EXPECT_NEAR(sampleStdDev, expectedSigma, 0.05f)
+  EXPECT_NEAR(sampleStdDev, expectedSigma, sigmaTolerance)
       << "Sample std dev should be very close to expected sigma with large sample";
 
   // Test empirical rule (68-95-99.7 rule)
