@@ -122,7 +122,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-14, windows-latest]
+        os: [macos-15, windows-latest]
         python-version: ['3.12', '3.13']
         package-variant: [core, cpu]
         include:
@@ -130,7 +130,7 @@ jobs:
             pixi-environment: py312
           - python-version: '3.13'
             pixi-environment: py313
-          - os: macos-14
+          - os: macos-15
             os-short: mac-arm64
           - os: windows-latest
             os-short: win64
@@ -444,20 +444,20 @@ jobs:
             artifact-pattern: wheels-core-linux
             wheel-type: core
           # macOS core - always test py3.12
-          - os: macos-14
+          - os: macos-15
             os-short: mac-arm64
             variant: core
             python-version: '3.12'
             pixi-environment: py312
-            artifact-pattern: wheels-core-macos-14-py3.12
+            artifact-pattern: wheels-core-macos-15-py3.12
             wheel-type: core
           # macOS core - py3.13 only on tags/releases
-          - os: macos-14
+          - os: macos-15
             os-short: mac-arm64
             variant: core
             python-version: '3.13'
             pixi-environment: py313
-            artifact-pattern: wheels-core-macos-14-py3.13
+            artifact-pattern: wheels-core-macos-15-py3.13
             wheel-type: core
           # Windows core - always test py3.12
           - os: windows-latest
@@ -492,20 +492,20 @@ jobs:
             artifact-pattern: wheels-cpu-linux
             wheel-type: cpu
           # macOS CPU - always test py3.12
-          - os: macos-14
+          - os: macos-15
             os-short: mac-arm64
             variant: cpu
             python-version: '3.12'
             pixi-environment: py312
-            artifact-pattern: wheels-cpu-macos-14-py3.12
+            artifact-pattern: wheels-cpu-macos-15-py3.12
             wheel-type: cpu
           # macOS CPU - py3.13 only on tags/releases
-          - os: macos-14
+          - os: macos-15
             os-short: mac-arm64
             variant: cpu
             python-version: '3.13'
             pixi-environment: py313
-            artifact-pattern: wheels-cpu-macos-14-py3.13
+            artifact-pattern: wheels-cpu-macos-15-py3.13
             wheel-type: cpu
           # Windows CPU - always test py3.12
           - os: windows-latest
