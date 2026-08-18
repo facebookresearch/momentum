@@ -397,6 +397,9 @@ wheel_repair = { cmd = """
 #============
 
 [target.osx-arm64.dependencies]
+# PyPI PyTorch bundles libomp, so keep NumPy's BLAS on a pthread runtime.
+blas = { version = ">=2.135,<3", build = "blis" }
+blis = { version = ">=2,<3", build = "pthreads_*" }
 
 [target.osx-arm64.tasks]
 build_py = { cmd = "pip install . -v", env = { CMAKE_ARGS = """
