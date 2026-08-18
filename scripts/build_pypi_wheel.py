@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+from importlib.util import find_spec
 from pathlib import Path
 
 
@@ -38,14 +39,16 @@ def run(args: list[str], env: dict[str, str] | None = None) -> None:
 
 
 def torch_cmake_prefix_path() -> str:
-    return subprocess.check_output(
-        [
-            sys.executable,
-            "-c",
-            "import torch; print(torch.utils.cmake_prefix_path)",
-        ],
-        text=True,
-    ).strip()
+    """Find Torch's CMake package without loading its native extension."""
+    torch_spec = find_spec("torch")
+    if torch_spec is None or not torch_spec.submodule_search_locations:
+        raise RuntimeError("Unable to locate the installed torch package")
+
+    package_dir = Path(next(iter(torch_spec.submodule_search_locations)))
+    cmake_prefix = package_dir / "share" / "cmake"
+    if not cmake_prefix.is_dir():
+        raise RuntimeError(f"Torch CMake package directory not found: {cmake_prefix}")
+    return str(cmake_prefix)
 
 
 def main() -> None:
