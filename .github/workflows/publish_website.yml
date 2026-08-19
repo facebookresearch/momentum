@@ -54,11 +54,20 @@ jobs:
     - name: Install Doxygen
       run: sudo apt-get install doxygen
 
+    - name: Install Website Dependencies
+      working-directory: momentum/website
+      timeout-minutes: 10
+      run: yarn install --frozen-lockfile
+
+    - name: Test Image Parser Security
+      working-directory: momentum/website
+      timeout-minutes: 5
+      run: yarn test:image-size-security
+
     - name: Build the Website
       working-directory: momentum/website
-      run: |
-        yarn install --frozen-lockfile
-        yarn run build
+      timeout-minutes: 15
+      run: yarn build
 
     # 3) Build Python API docs for main-branch deploys when pymomentum changed.
     # PR validation happens in CI Ubuntu after the PyMomentum tests build the extension.
