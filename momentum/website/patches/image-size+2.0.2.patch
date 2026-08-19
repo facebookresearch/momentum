@@ -1,0 +1,853 @@
+diff --git a/node_modules/image-size/package.json b/node_modules/image-size/package.json
+--- a/node_modules/image-size/package.json
++++ b/node_modules/image-size/package.json
+@@ -2,39 +2,29 @@
+   "name": "image-size",
+   "version": "2.0.2",
+   "description": "get dimensions of any image file",
+-  "main": "./dist/index.cjs",
+-  "module": "./dist/index.mjs",
+-  "types": "./dist/index.d.ts",
++  "main": "./dist/momentum-website-root-shim.cjs",
++  "module": "./dist/momentum-website-root-shim.mjs",
++  "types": "./dist/momentum-website-root-shim.d.ts",
+   "exports": {
+     ".": {
+       "import": {
+-        "types": "./dist/index.d.ts",
+-        "default": "./dist/index.mjs"
++        "types": "./dist/momentum-website-root-shim.d.ts",
++        "default": "./dist/momentum-website-root-shim.mjs"
+       },
+       "require": {
+-        "types": "./dist/index.d.ts",
+-        "default": "./dist/index.cjs"
++        "types": "./dist/momentum-website-root-shim.d.ts",
++        "default": "./dist/momentum-website-root-shim.cjs"
+       }
+     },
+     "./fromFile": {
+       "import": {
+-        "types": "./dist/fromFile.d.ts",
+-        "default": "./dist/fromFile.mjs"
++        "types": "./dist/momentum-website-from-file-shim.d.ts",
++        "default": "./dist/momentum-website-from-file-shim.mjs"
+       },
+       "require": {
+-        "types": "./dist/fromFile.d.ts",
+-        "default": "./dist/fromFile.cjs"
++        "types": "./dist/momentum-website-from-file-shim.d.ts",
++        "default": "./dist/momentum-website-from-file-shim.cjs"
+       }
+-    },
+-    "./types/*": {
+-      "import": {
+-        "types": "./dist/types/*.d.ts",
+-        "default": "./dist/types/*.mjs"
+-      },
+-      "require": {
+-        "types": "./dist/types/*.d.ts",
+-        "default": "./dist/types/*.cjs"
+-      }
+     }
+   },
+   "files": [
+diff --git a/node_modules/image-size/bin/image-size.js b/node_modules/image-size/bin/image-size.js
+--- a/node_modules/image-size/bin/image-size.js
++++ b/node_modules/image-size/bin/image-size.js
+@@ -3,7 +3,7 @@
+ 
+ const fs = require('node:fs')
+ const path = require('node:path')
+-const { imageSizeFromFile } = require('../dist/fromFile.cjs')
++const { imageSizeFromFile } = require('../dist/momentum-website-from-file-shim.cjs')
+ 
+ const files = process.argv.slice(2)
+ 
+diff --git a/node_modules/image-size/dist/index.cjs b/node_modules/image-size/dist/index.cjs
+--- a/node_modules/image-size/dist/index.cjs
++++ b/node_modules/image-size/dist/index.cjs
+@@ -163,6 +163,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -253,6 +256,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -487,6 +493,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/index.mjs b/node_modules/image-size/dist/index.mjs
+--- a/node_modules/image-size/dist/index.mjs
++++ b/node_modules/image-size/dist/index.mjs
+@@ -159,6 +159,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -249,6 +252,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -483,6 +489,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/lookup.cjs b/node_modules/image-size/dist/lookup.cjs
+--- a/node_modules/image-size/dist/lookup.cjs
++++ b/node_modules/image-size/dist/lookup.cjs
+@@ -161,6 +161,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -251,6 +254,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -485,6 +491,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/lookup.mjs b/node_modules/image-size/dist/lookup.mjs
+--- a/node_modules/image-size/dist/lookup.mjs
++++ b/node_modules/image-size/dist/lookup.mjs
+@@ -159,6 +159,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -249,6 +252,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -483,6 +489,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/fromFile.cjs b/node_modules/image-size/dist/fromFile.cjs
+--- a/node_modules/image-size/dist/fromFile.cjs
++++ b/node_modules/image-size/dist/fromFile.cjs
+@@ -187,6 +187,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -277,6 +280,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -511,6 +517,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+@@ -1052,5 +1061,6 @@
+   processQueue();
+ });
+ 
+-exports.imageSizeFromFile = imageSizeFromFile;
+-exports.setConcurrency = setConcurrency;
++const shim = require("./momentum-website-from-file-shim.cjs");
++exports.imageSizeFromFile = shim.imageSizeFromFile;
++exports.setConcurrency = shim.setConcurrency;
+diff --git a/node_modules/image-size/dist/fromFile.mjs b/node_modules/image-size/dist/fromFile.mjs
+--- a/node_modules/image-size/dist/fromFile.mjs
++++ b/node_modules/image-size/dist/fromFile.mjs
+@@ -1,3 +1,7 @@
++import {
++  imageSizeFromFile as shimImageSizeFromFile,
++  setConcurrency as shimSetConcurrency,
++} from "./momentum-website-from-file-shim.mjs";
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ 
+@@ -164,6 +168,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -254,6 +261,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize2 = getImageSize2(imageHeader[0]);
+       images.push(imageSize2);
+       imageOffset += imageHeader[1];
+@@ -488,6 +498,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+@@ -1029,4 +1042,7 @@
+   processQueue();
+ });
+ 
+-export { imageSizeFromFile, setConcurrency };
++export {
++  shimImageSizeFromFile as imageSizeFromFile,
++  shimSetConcurrency as setConcurrency,
++};
+diff --git a/node_modules/image-size/dist/types/index.cjs b/node_modules/image-size/dist/types/index.cjs
+--- a/node_modules/image-size/dist/types/index.cjs
++++ b/node_modules/image-size/dist/types/index.cjs
+@@ -161,6 +161,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -251,6 +254,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize = getImageSize2(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+@@ -485,6 +491,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/types/index.mjs b/node_modules/image-size/dist/types/index.mjs
+--- a/node_modules/image-size/dist/types/index.mjs
++++ b/node_modules/image-size/dist/types/index.mjs
+@@ -159,6 +159,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+@@ -249,6 +252,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize = getImageSize2(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+@@ -483,6 +489,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/types/heif.cjs b/node_modules/image-size/dist/types/heif.cjs
+--- a/node_modules/image-size/dist/types/heif.cjs
++++ b/node_modules/image-size/dist/types/heif.cjs
+@@ -59,6 +59,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+diff --git a/node_modules/image-size/dist/types/heif.mjs b/node_modules/image-size/dist/types/heif.mjs
+--- a/node_modules/image-size/dist/types/heif.mjs
++++ b/node_modules/image-size/dist/types/heif.mjs
+@@ -57,6 +57,9 @@
+     while (currentOffset < ipcoBox.offset + ipcoBox.size) {
+       const ispeBox = findBox(input, "ispe", currentOffset);
+       if (!ispeBox) break;
++      if (ispeBox.size < 20) {
++        throw new TypeError("Invalid HEIF, invalid ispe box size");
++      }
+       const rawWidth = readUInt32BE(input, ispeBox.offset + 12);
+       const rawHeight = readUInt32BE(input, ispeBox.offset + 16);
+       const clapBox = findBox(input, "clap", currentOffset);
+diff --git a/node_modules/image-size/dist/types/icns.cjs b/node_modules/image-size/dist/types/icns.cjs
+--- a/node_modules/image-size/dist/types/icns.cjs
++++ b/node_modules/image-size/dist/types/icns.cjs
+@@ -72,6 +72,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize = getImageSize(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+diff --git a/node_modules/image-size/dist/types/icns.mjs b/node_modules/image-size/dist/types/icns.mjs
+--- a/node_modules/image-size/dist/types/icns.mjs
++++ b/node_modules/image-size/dist/types/icns.mjs
+@@ -70,6 +70,9 @@
+     const images = [];
+     while (imageOffset < fileLength && imageOffset < inputLength) {
+       const imageHeader = readImageHeader(input, imageOffset);
++      if (imageHeader[1] < 8) {
++        throw new TypeError("Invalid ICNS, invalid entry length");
++      }
+       const imageSize = getImageSize(imageHeader[0]);
+       images.push(imageSize);
+       imageOffset += imageHeader[1];
+diff --git a/node_modules/image-size/dist/types/jxl.cjs b/node_modules/image-size/dist/types/jxl.cjs
+--- a/node_modules/image-size/dist/types/jxl.cjs
++++ b/node_modules/image-size/dist/types/jxl.cjs
+@@ -116,6 +116,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/types/jxl.mjs b/node_modules/image-size/dist/types/jxl.mjs
+--- a/node_modules/image-size/dist/types/jxl.mjs
++++ b/node_modules/image-size/dist/types/jxl.mjs
+@@ -114,6 +114,9 @@
+   while (offset < input.length) {
+     const jxlpBox = findBox(input, "jxlp", offset);
+     if (!jxlpBox) break;
++    if (jxlpBox.size < 12) {
++      throw new TypeError("Invalid JXL, invalid jxlp box size");
++    }
+     partialStreams.push(
+       input.slice(jxlpBox.offset + 12, jxlpBox.offset + jxlpBox.size)
+     );
+diff --git a/node_modules/image-size/dist/momentum-website-shim.cjs b/node_modules/image-size/dist/momentum-website-shim.cjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-shim.cjs
+@@ -0,0 +1,290 @@
++"use strict";
++
++const { execFile } = require("node:child_process");
++const { constants } = require("node:fs");
++const { open } = require("node:fs/promises");
++const { resolve: resolvePath } = require("node:path");
++
++const FILE_READ_TIMEOUT_MILLISECONDS = 2000;
++const MAX_CONCURRENCY = 4;
++const PNG_HEADER_SIZE = 49;
++const types = ["png"];
++let disabledTypes = new Set();
++let concurrency = MAX_CONCURRENCY;
++let activeJobs = 0;
++const queue = [];
++
++function asBytes(input) {
++  if (input instanceof Uint8Array) {
++    return input;
++  }
++  throw new TypeError("Expected image input to be a Uint8Array");
++}
++
++function hasAscii(input, offset, value) {
++  if (offset + value.length > input.length) {
++    return false;
++  }
++  for (let index = 0; index < value.length; index += 1) {
++    if (input[offset + index] !== value.charCodeAt(index)) {
++      return false;
++    }
++  }
++  return true;
++}
++
++function readUInt32BE(input, offset) {
++  if (offset + 4 > input.length) {
++    throw new TypeError("Invalid PNG");
++  }
++  return (
++    input[offset] * 0x1000000 +
++    ((input[offset + 1] << 16) | (input[offset + 2] << 8) | input[offset + 3])
++  );
++}
++
++function hasPngSignature(input) {
++  return (
++    input.length >= 8 &&
++    input[0] === 0x89 &&
++    hasAscii(input, 1, "PNG\r\n\u001a\n")
++  );
++}
++
++function crc32(input, start, end) {
++  let crc = 0xffffffff;
++  for (let index = start; index < end; index += 1) {
++    crc ^= input[index];
++    for (let bit = 0; bit < 8; bit += 1) {
++      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
++    }
++  }
++  return (crc ^ 0xffffffff) >>> 0;
++}
++
++function isValidBitDepth(bitDepth, colorType) {
++  const validDepths = {
++    0: [1, 2, 4, 8, 16],
++    2: [8, 16],
++    3: [1, 2, 4, 8],
++    4: [8, 16],
++    6: [8, 16],
++  };
++  return validDepths[colorType]?.includes(bitDepth) ?? false;
++}
++
++function parsePng(input) {
++  let ihdrOffset = 12;
++  if (hasAscii(input, ihdrOffset, "CgBI")) {
++    if (
++      readUInt32BE(input, 8) !== 4 ||
++      crc32(input, 12, 20) !== readUInt32BE(input, 20)
++    ) {
++      throw new TypeError("Invalid PNG");
++    }
++    ihdrOffset = 28;
++  }
++  if (
++    input.length < ihdrOffset + 21 ||
++    readUInt32BE(input, ihdrOffset - 4) !== 13 ||
++    !hasAscii(input, ihdrOffset, "IHDR")
++  ) {
++    throw new TypeError("Invalid PNG");
++  }
++  const width = readUInt32BE(input, ihdrOffset + 4);
++  const height = readUInt32BE(input, ihdrOffset + 8);
++  const bitDepth = input[ihdrOffset + 12];
++  const colorType = input[ihdrOffset + 13];
++  const compression = input[ihdrOffset + 14];
++  const filter = input[ihdrOffset + 15];
++  const interlace = input[ihdrOffset + 16];
++  const expectedCrc = readUInt32BE(input, ihdrOffset + 17);
++  if (
++    width === 0 ||
++    height === 0 ||
++    width > 0x7fffffff ||
++    height > 0x7fffffff ||
++    !isValidBitDepth(bitDepth, colorType) ||
++    compression !== 0 ||
++    filter !== 0 ||
++    (interlace !== 0 && interlace !== 1) ||
++    crc32(input, ihdrOffset, ihdrOffset + 17) !== expectedCrc
++  ) {
++    throw new TypeError("Invalid PNG");
++  }
++  return {
++    width,
++    height,
++    type: "png",
++  };
++}
++
++function imageSize(input) {
++  const bytes = asBytes(input);
++  if (!hasPngSignature(bytes)) {
++    throw new TypeError("unsupported file type: undefined");
++  }
++  if (disabledTypes.has("png")) {
++    throw new TypeError("disabled file type: png");
++  }
++  return parsePng(bytes);
++}
++
++async function readHeader(handle, size) {
++  const input = new Uint8Array(Math.min(size, PNG_HEADER_SIZE));
++  let bytesRead = 0;
++  while (bytesRead < input.length) {
++    const result = await handle.read(
++      input,
++      bytesRead,
++      input.length - bytesRead,
++      bytesRead,
++    );
++    if (result.bytesRead === 0) {
++      break;
++    }
++    bytesRead += result.bytesRead;
++  }
++  return input.subarray(0, bytesRead);
++}
++
++async function readImageSizeFromFile(filePath) {
++  const handle = await open(
++    resolvePath(filePath),
++    constants.O_RDONLY | (constants.O_NONBLOCK ?? 0),
++  );
++  try {
++    const stats = await handle.stat();
++    if (!stats.isFile()) {
++      throw new TypeError("Expected image path to reference a regular file");
++    }
++    const { size } = stats;
++    if (size <= 0) {
++      throw new Error("Empty file");
++    }
++    return imageSize(await readHeader(handle, size));
++  } finally {
++    await handle.close();
++  }
++}
++
++function imageSizeFromFileNow(filePath) {
++  return new Promise((resolve, reject) => {
++    execFile(
++      process.execPath,
++      [
++        __filename,
++        "--read-file",
++        resolvePath(filePath),
++        "0",
++      ],
++      {
++        encoding: "utf8",
++        killSignal: "SIGKILL",
++        timeout: FILE_READ_TIMEOUT_MILLISECONDS,
++        windowsHide: true,
++      },
++      (error, stdout, stderr) => {
++        if (error) {
++          const message = error.killed
++            ? "Timed out reading image file"
++            : stderr.trim() || error.message;
++          const helperError = new Error(message);
++          for (const property of ["code", "errno", "syscall", "path"]) {
++            if (error[property] !== undefined) {
++              helperError[property] = error[property];
++            }
++          }
++          if (error.killed) {
++            helperError.code = "ETIMEDOUT";
++          }
++          reject(helperError);
++          return;
++        }
++        try {
++          const result = JSON.parse(stdout);
++          if (result.error) {
++            const ErrorType =
++              result.error.name === "TypeError" ? TypeError : Error;
++            const helperError = new ErrorType(result.error.message);
++            for (const property of ["code", "errno", "syscall", "path"]) {
++              if (result.error[property] !== undefined) {
++                helperError[property] = result.error[property];
++              }
++            }
++            reject(helperError);
++          } else {
++            resolve(result.size);
++          }
++        } catch (parseError) {
++          reject(parseError);
++        }
++      },
++    );
++  });
++}
++
++function processQueue() {
++  while (activeJobs < concurrency && queue.length > 0) {
++    activeJobs += 1;
++    const { filePath, reject, resolve } = queue.shift();
++    imageSizeFromFileNow(filePath)
++      .then(resolve, reject)
++      .finally(() => {
++        activeJobs -= 1;
++        processQueue();
++      });
++  }
++}
++
++function imageSizeFromFile(filePath) {
++  return new Promise((resolve, reject) => {
++    queue.push({ filePath, reject, resolve });
++    processQueue();
++  });
++}
++
++function disableTypes(typesToDisable = []) {
++  disabledTypes = new Set(typesToDisable);
++}
++
++function setConcurrency(value) {
++  const nextConcurrency = Math.trunc(Number(value));
++  concurrency =
++    Number.isFinite(nextConcurrency) && nextConcurrency > 0
++      ? Math.min(nextConcurrency, MAX_CONCURRENCY)
++      : 1;
++  processQueue();
++}
++
++Object.defineProperty(module.exports, "__esModule", { value: true });
++module.exports.default = imageSize;
++module.exports.disableTypes = disableTypes;
++module.exports.imageSize = imageSize;
++module.exports.imageSizeFromFile = imageSizeFromFile;
++module.exports.setConcurrency = setConcurrency;
++module.exports.types = types;
++
++if (require.main === module && process.argv[2] === "--read-file") {
++  disableTypes(process.argv[4] === "1" ? ["png"] : []);
++  readImageSizeFromFile(process.argv[3])
++    .then((size) => {
++      process.stdout.write(JSON.stringify({ size }));
++    })
++    .catch((error) => {
++      const serializedError = {
++        message: error?.message ?? String(error),
++        name: error?.name ?? "Error",
++      };
++      for (const property of ["code", "errno", "syscall", "path"]) {
++        if (error?.[property] !== undefined) {
++          serializedError[property] = error[property];
++        }
++      }
++      process.stdout.write(
++        JSON.stringify({
++          error: serializedError,
++        }),
++      );
++    });
++}
+diff --git a/node_modules/image-size/dist/momentum-website-shim.mjs b/node_modules/image-size/dist/momentum-website-shim.mjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-shim.mjs
+@@ -0,0 +1,19 @@
++import shim from "./momentum-website-shim.cjs";
++
++const {
++  default: defaultExport,
++  disableTypes,
++  imageSize,
++  imageSizeFromFile,
++  setConcurrency,
++  types,
++} = shim;
++
++export {
++  defaultExport as default,
++  disableTypes,
++  imageSize,
++  imageSizeFromFile,
++  setConcurrency,
++  types,
++};
+diff --git a/node_modules/image-size/dist/momentum-website-shim.d.ts b/node_modules/image-size/dist/momentum-website-shim.d.ts
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-shim.d.ts
+@@ -0,0 +1,19 @@
++import type { imageType } from "./types/index.js";
++import { ISizeCalculationResult } from "./types/interface.js";
++
++declare const types: imageType[];
++declare function imageSize(input: Uint8Array): ISizeCalculationResult;
++declare function imageSizeFromFile(
++  filePath: string,
++): Promise<ISizeCalculationResult>;
++declare function disableTypes(types: imageType[]): void;
++declare function setConcurrency(concurrency: number): void;
++
++export {
++  imageSize as default,
++  disableTypes,
++  imageSize,
++  imageSizeFromFile,
++  setConcurrency,
++  types,
++};
+diff --git a/node_modules/image-size/dist/momentum-website-root-shim.cjs b/node_modules/image-size/dist/momentum-website-root-shim.cjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-root-shim.cjs
+@@ -0,0 +1,14 @@
++"use strict";
++
++const {
++  default: defaultExport,
++  disableTypes,
++  imageSize,
++  types,
++} = require("./momentum-website-shim.cjs");
++
++Object.defineProperty(module.exports, "__esModule", { value: true });
++module.exports.default = defaultExport;
++module.exports.disableTypes = disableTypes;
++module.exports.imageSize = imageSize;
++module.exports.types = types;
+diff --git a/node_modules/image-size/dist/momentum-website-root-shim.mjs b/node_modules/image-size/dist/momentum-website-root-shim.mjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-root-shim.mjs
+@@ -0,0 +1,6 @@
++export {
++  default,
++  disableTypes,
++  imageSize,
++  types,
++} from "./momentum-website-shim.mjs";
+diff --git a/node_modules/image-size/dist/momentum-website-root-shim.d.ts b/node_modules/image-size/dist/momentum-website-root-shim.d.ts
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-root-shim.d.ts
+@@ -0,0 +1,8 @@
++import type { imageType } from "./types/index.js";
++import { ISizeCalculationResult } from "./types/interface.js";
++
++declare const types: imageType[];
++declare function imageSize(input: Uint8Array): ISizeCalculationResult;
++declare function disableTypes(types: imageType[]): void;
++
++export { imageSize as default, disableTypes, imageSize, types };
+diff --git a/node_modules/image-size/dist/momentum-website-from-file-shim.cjs b/node_modules/image-size/dist/momentum-website-from-file-shim.cjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-from-file-shim.cjs
+@@ -0,0 +1,9 @@
++"use strict";
++
++const {
++  imageSizeFromFile,
++  setConcurrency,
++} = require("./momentum-website-shim.cjs");
++
++module.exports.imageSizeFromFile = imageSizeFromFile;
++module.exports.setConcurrency = setConcurrency;
+diff --git a/node_modules/image-size/dist/momentum-website-from-file-shim.mjs b/node_modules/image-size/dist/momentum-website-from-file-shim.mjs
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-from-file-shim.mjs
+@@ -0,0 +1 @@
++export { imageSizeFromFile, setConcurrency } from "./momentum-website-shim.mjs";
+diff --git a/node_modules/image-size/dist/momentum-website-from-file-shim.d.ts b/node_modules/image-size/dist/momentum-website-from-file-shim.d.ts
+new file mode 100644
+--- /dev/null
++++ b/node_modules/image-size/dist/momentum-website-from-file-shim.d.ts
+@@ -0,0 +1,8 @@
++import { ISizeCalculationResult } from "./types/interface.js";
++
++declare function imageSizeFromFile(
++  filePath: string,
++): Promise<ISizeCalculationResult>;
++declare function setConcurrency(concurrency: number): void;
++
++export { imageSizeFromFile, setConcurrency };
