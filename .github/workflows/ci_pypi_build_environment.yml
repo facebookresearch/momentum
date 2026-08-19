@@ -1,0 +1,63 @@
+name: PyPI Build Environment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ci_pypi_build_environment.yml"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "pyproject-pypi.toml.j2"
+      - "scripts/build_pypi_wheel.py"
+      - "scripts/generate_pyproject.py"
+      - "scripts/test_pypi_build_environment.py"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/ci_pypi_build_environment.yml"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "pyproject-pypi.toml.j2"
+      - "scripts/build_pypi_wheel.py"
+      - "scripts/generate_pyproject.py"
+      - "scripts/test_pypi_build_environment.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  torch-imports:
+    name: torch-imports-${{ matrix.pixi-environment }}-${{ matrix.os-short }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-latest]
+        pixi-environment: [py312, py313]
+        include:
+          - os: macos-15
+            os-short: mac-arm64
+          - os: windows-latest
+            os-short: win64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.9.5
+        with:
+          pixi-version: latest
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          environments: ${{ matrix.pixi-environment }}
+
+      - name: Test PyPI Torch imports in the Pixi build environment
+        run: pixi run -e ${{ matrix.pixi-environment }} python scripts/test_pypi_build_environment.py
