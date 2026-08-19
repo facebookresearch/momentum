@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "//": "image-size is pinned to 2.0.2 only while patches/image-size+2.0.2.patch is needed; remove both when upstream ships a fixed release.",
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
@@ -75,7 +76,7 @@
   "engines": {
     "node": ">=16",
     "npm": "use yarn instead",
-    "yarn": "^1.5"
+    "yarn": ">=1.22.0 <2"
   },
   "devDependencies": {
     "image-size": "2.0.2",

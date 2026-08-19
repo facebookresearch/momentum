@@ -4,3 +4,14 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/momentum/website"
+    schedule:
+      interval: "weekly"
+    groups:
+      website-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
