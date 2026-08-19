@@ -37,7 +37,7 @@ jobs:
           - runner: macos-latest
             pixi_env: py312
             conda_override_cuda: ""
-          - runner: macos-14
+          - runner: macos-15
             pixi_env: py312
             conda_override_cuda: ""
           - runner: windows-latest
