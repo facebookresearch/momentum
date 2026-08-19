@@ -397,6 +397,60 @@ class TestFBX(unittest.TestCase):
             # Should have 3 frames total (sparse support)
             self.assertEqual(len(loaded_sequence.frames), nFrames)
 
+    def _save_animated_mesh(
+        self, path: str, user_properties: dict[str, bool | int | float | str]
+    ) -> bytes:
+        """Write a one-object FBX via add_animated_mesh and return its raw bytes."""
+        builder = pym_geometry.FbxBuilder()
+        builder.add_animated_mesh(
+            self.character,
+            name="prop",
+            fps=60,
+            joint_params=self.joint_params,
+            user_properties=user_properties,
+        )
+        builder.save(path)
+        with open(path, "rb") as f:
+            return f.read()
+
+    def test_animated_mesh_user_properties(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            data = self._save_animated_mesh(
+                temp_file.name,
+                {
+                    "HOI": 1,
+                    "category_id": 433,
+                    "held": True,
+                    "mass": 0.25,
+                    "category_label": "screwdriver",
+                },
+            )
+            for token in (b"HOI", b"category_label", b"screwdriver", b"held", b"mass"):
+                self.assertIn(token, data)
+
+            # Each property record is: name, type, subtype, flags, value. The flags
+            # field must be the length-prefixed string "U" (user-defined), or DCC
+            # tools store the property without surfacing it as a custom attribute.
+            user_defined_flag = b"S\x01\x00\x00\x00U"
+            label_at = data.index(b"category_label")
+            self.assertIn(user_defined_flag, data[label_at : label_at + 96])
+
+            # Ints round-trip as ints rather than being stringified: the record for
+            # category_id ends in an "I" marker followed by 433 little-endian.
+            id_at = data.index(b"category_id")
+            self.assertIn(
+                user_defined_flag + b"I" + (433).to_bytes(4, "little"),
+                data[id_at : id_at + 96],
+            )
+
+        with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            # Passing no properties must not invent any.
+            bare = self._save_animated_mesh(temp_file.name, {})
+            self.assertNotIn(b"category_label", bare)
+
     def test_load_markers_empty_file(self) -> None:
         if not pym_geometry.is_fbxsdk_available():
             return

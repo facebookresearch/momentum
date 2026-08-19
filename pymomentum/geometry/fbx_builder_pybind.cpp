@@ -125,12 +125,13 @@ This is useful for rigid bodies or characters with simple parameterization.
              const mm::Character& character,
              const std::string& name,
              float fps,
-             const std::optional<Eigen::MatrixXf>& jointParams) {
+             const std::optional<Eigen::MatrixXf>& jointParams,
+             const mm::FbxUserProperties& userProperties) {
             mm::MatrixXf transposedJointParams;
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addAnimatedMesh(character, name, fps, transposedJointParams);
+            builder.addAnimatedMesh(character, name, fps, transposedJointParams, userProperties);
           },
           R"(Add an animated mesh (no skeleton) to the scene.
 
@@ -141,11 +142,15 @@ as a simple animated mesh without any skeleton hierarchy.
 :param character: The character providing the mesh geometry.
 :param name: Name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).)",
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param user_properties: Mapping of name to bool/int/float/str, written onto the
+    mesh node as user-defined FBX properties. DCC tools surface these as the
+    object's custom attributes.)",
           py::arg("character"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
-          py::arg("joint_params") = std::nullopt)
+          py::arg("joint_params") = std::nullopt,
+          py::arg("user_properties") = mm::FbxUserProperties{})
       .def(
           "add_animated_mesh",
           [](mm::FbxBuilder& builder,
@@ -153,7 +158,8 @@ as a simple animated mesh without any skeleton hierarchy.
              const std::string& name,
              float fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
-             const std::optional<Eigen::Vector3f>& translationOffset) {
+             const std::optional<Eigen::Vector3f>& translationOffset,
+             const mm::FbxUserProperties& userProperties) {
             mm::MatrixXf transposedJointParams;
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
@@ -163,7 +169,8 @@ as a simple animated mesh without any skeleton hierarchy.
                 name,
                 fps,
                 transposedJointParams,
-                translationOffset.value_or(Eigen::Vector3f::Zero()));
+                translationOffset.value_or(Eigen::Vector3f::Zero()),
+                userProperties);
           },
           R"(Add an animated mesh from a Mesh object (no Character needed).
 
@@ -175,12 +182,16 @@ parameters. Only the root transform (first 7 joint params) is used.
 :param fps: Animation frame rate in frames per second.
 :param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
 :param translation_offset: Rest-pose translation offset added to the translation
-    channels (defaults to zero).)",
+    channels (defaults to zero).
+:param user_properties: Mapping of name to bool/int/float/str, written onto the
+    mesh node as user-defined FBX properties. DCC tools surface these as the
+    object's custom attributes.)",
           py::arg("mesh"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
           py::arg("joint_params") = std::nullopt,
-          py::arg("translation_offset") = std::nullopt)
+          py::arg("translation_offset") = std::nullopt,
+          py::arg("user_properties") = mm::FbxUserProperties{})
       .def(
           "add_marker_sequence",
           [](mm::FbxBuilder& builder,

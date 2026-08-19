@@ -14,9 +14,22 @@
 #include <momentum/math/mesh.h>
 #include <momentum/math/types.h>
 
+#include <map>
 #include <span>
+#include <string>
+#include <variant>
 
 namespace momentum {
+
+/// Value of a user-defined FBX property.
+using FbxUserPropertyValue = std::variant<bool, int, float, std::string>;
+
+/// User-defined FBX properties, keyed by property name.
+///
+/// These are written to a node as user-defined properties, which is how DCC
+/// tools surface them as an object's "custom attributes". Note this is unrelated
+/// to the FBX SDK's `FbxNodeAttribute`, which is the geometry attached to a node.
+using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 
 /// Builder class for creating FBX files with multiple characters and animations.
 ///
@@ -108,11 +121,14 @@ class FbxBuilder final {
   /// @param name Name for the mesh node.
   /// @param fps Animation frame rate in frames per second.
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  /// @param userProperties User-defined properties to write onto the mesh node,
+  ///   surfaced by DCC tools as the object's custom attributes.
   void addAnimatedMesh(
       const Character& character,
       const std::string& name,
       float fps,
-      const MatrixXf& jointParams);
+      const MatrixXf& jointParams,
+      const FbxUserProperties& userProperties = {});
 
   /// Add an animated mesh from a Mesh object (no Character needed).
   ///
@@ -127,12 +143,15 @@ class FbxBuilder final {
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
   /// @param translationOffset Rest-pose translation offset added to the
   ///   translation channels (defaults to zero).
+  /// @param userProperties User-defined properties to write onto the mesh node,
+  ///   surfaced by DCC tools as the object's custom attributes.
   void addAnimatedMesh(
       const Mesh& mesh,
       const std::string& name,
       float fps,
       const MatrixXf& jointParams,
-      const Vector3f& translationOffset = Vector3f::Zero());
+      const Vector3f& translationOffset = Vector3f::Zero(),
+      const FbxUserProperties& userProperties = {});
 
   /// Add a marker sequence to the scene.
   ///
