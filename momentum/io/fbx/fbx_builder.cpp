@@ -278,11 +278,48 @@ void FbxBuilder::addMotionWithJointParams(
       true); // skipActiveJointParamCheck = true
 }
 
+namespace {
+
+// Writes each entry as a user-defined FBX property. The eUserDefined flag is what
+// makes DCC tools treat these as the object's custom attributes; without it they
+// are stored but not surfaced on import.
+void writeUserProperties(::fbxsdk::FbxNode* node, const FbxUserProperties& userProperties) {
+  for (const auto& entry : userProperties) {
+    const std::string& propertyName = entry.first;
+    const FbxUserPropertyValue& value = entry.second;
+    std::visit(
+        [&](const auto& typedValue) {
+          using T = std::decay_t<decltype(typedValue)>;
+          ::fbxsdk::FbxDataType dataType;
+          if constexpr (std::is_same_v<T, bool>) {
+            dataType = ::fbxsdk::FbxBoolDT;
+          } else if constexpr (std::is_same_v<T, int>) {
+            dataType = ::fbxsdk::FbxIntDT;
+          } else if constexpr (std::is_same_v<T, float>) {
+            dataType = ::fbxsdk::FbxFloatDT;
+          } else {
+            dataType = ::fbxsdk::FbxStringDT;
+          }
+          auto property = ::fbxsdk::FbxProperty::Create(node, dataType, propertyName.c_str());
+          property.ModifyFlag(::fbxsdk::FbxPropertyFlags::eUserDefined, true);
+          if constexpr (std::is_same_v<T, std::string>) {
+            property.Set(::fbxsdk::FbxString(typedValue.c_str()));
+          } else {
+            property.Set(typedValue);
+          }
+        },
+        value);
+  }
+}
+
+} // namespace
+
 void FbxBuilder::addAnimatedMesh(
     const Character& character,
     const std::string& name,
     float fps,
-    const MatrixXf& jointParams) {
+    const MatrixXf& jointParams,
+    const FbxUserProperties& userProperties) {
   MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
   addAnimatedMesh(
       *character.mesh,
@@ -290,7 +327,8 @@ void FbxBuilder::addAnimatedMesh(
       fps,
       jointParams,
       character.skeleton.joints.empty() ? Vector3f::Zero()
-                                        : character.skeleton.joints[0].translationOffset);
+                                        : character.skeleton.joints[0].translationOffset,
+      userProperties);
 }
 
 void FbxBuilder::addAnimatedMesh(
@@ -298,7 +336,8 @@ void FbxBuilder::addAnimatedMesh(
     const std::string& name,
     float fps,
     const MatrixXf& jointParams,
-    const Vector3f& translationOffset) {
+    const Vector3f& translationOffset,
+    const FbxUserProperties& userProperties) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
   MT_THROW_IF(jointParams.cols() == 0, "jointParams is empty");
@@ -331,6 +370,8 @@ void FbxBuilder::addAnimatedMesh(
     }
     writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
   }
+
+  writeUserProperties(meshNode, userProperties);
 
   root->AddChild(meshNode);
 
@@ -476,7 +517,12 @@ void FbxBuilder::addMotionWithJointParams(const Character&, float, const MatrixX
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addAnimatedMesh(const Character&, const std::string&, float, const MatrixXf&) {
+void FbxBuilder::addAnimatedMesh(
+    const Character&,
+    const std::string&,
+    float,
+    const MatrixXf&,
+    const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
@@ -485,7 +531,8 @@ void FbxBuilder::addAnimatedMesh(
     const std::string&,
     float,
     const MatrixXf&,
-    const Vector3f&) {
+    const Vector3f&,
+    const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
