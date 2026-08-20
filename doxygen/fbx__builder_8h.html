@@ -92,7 +92,8 @@ $(document).ready(function(){initNavTree('fbx__builder_8h.html',''); initResizab
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">fbx_builder.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -102,7 +103,10 @@ $(document).ready(function(){initNavTree('fbx__builder_8h.html',''); initResizab
 <code>#include &lt;<a class="el" href="file__save__options_8h_source.html">momentum/io/file_save_options.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="mesh_8h_source.html">momentum/math/mesh.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
 <code>#include &lt;span&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;variant&gt;</code><br />
 </div>
 <p><a href="fbx__builder_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -116,6 +120,15 @@ Classes</h2></td></tr>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacemomentum" id="r_namespacemomentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a570780bfa100e3c5f4a3fb20a2f445de" id="r_a570780bfa100e3c5f4a3fb20a2f445de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a570780bfa100e3c5f4a3fb20a2f445de">momentum::FbxUserPropertyValue</a> = std::variant&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bool</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">float</a>, std::string &gt;</td></tr>
+<tr class="memdesc:a570780bfa100e3c5f4a3fb20a2f445de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of a user-defined FBX property.  <br /></td></tr>
+<tr class="separator:a570780bfa100e3c5f4a3fb20a2f445de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a296bf543e268b6bb5c0adb577458bd32" id="r_a296bf543e268b6bb5c0adb577458bd32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a296bf543e268b6bb5c0adb577458bd32">momentum::FbxUserProperties</a> = std::map&lt; std::string, <a class="el" href="namespacemomentum.html#a570780bfa100e3c5f4a3fb20a2f445de">FbxUserPropertyValue</a> &gt;</td></tr>
+<tr class="memdesc:a296bf543e268b6bb5c0adb577458bd32"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-defined FBX properties, keyed by property name.  <br /></td></tr>
+<tr class="separator:a296bf543e268b6bb5c0adb577458bd32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -123,7 +136,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a class="el" href="dir_361ac212f17575925ff8429f34d39fe5.html">fbx</a></li><li class="navelem"><a class="el" href="fbx__builder_8h.html">fbx_builder.h</a></li>
-    <li class="footer">Generated on Wed Aug 19 2026 21:30:22 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed Aug 19 2026 23:39:50 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

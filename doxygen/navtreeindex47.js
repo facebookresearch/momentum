@@ -1,5 +1,9 @@
 var NAVTREEINDEX47 =
 {
+"vertex__position__error__function_8h.html":[3,0,2,87],
+"vertex__position__error__function_8h_source.html":[3,0,2,87],
+"vertex__projection__error__function_8cpp.html":[3,0,2,88],
+"vertex__projection__error__function_8cpp_source.html":[3,0,2,88],
 "vertex__projection__error__function_8h.html":[3,0,2,89],
 "vertex__projection__error__function_8h_source.html":[3,0,2,89],
 "vertex__sdf__error__function_8cpp.html":[3,0,2,90],

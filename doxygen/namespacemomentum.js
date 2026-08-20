@@ -535,6 +535,8 @@ var namespacemomentum =
     [ "ErrorFunctionDerivativesd_p", "namespacemomentum.html#a4c959cf35dd65af12738c19007e0394c", null ],
     [ "ErrorFunctionDerivativesd_u", "namespacemomentum.html#ac27c040c0c56ae246afa6de46facb1ee", null ],
     [ "ErrorFunctionDerivativesd_w", "namespacemomentum.html#a3d87cb8ed585e1dc6d57dec146b10cf6", null ],
+    [ "FbxUserProperties", "namespacemomentum.html#a296bf543e268b6bb5c0adb577458bd32", null ],
+    [ "FbxUserPropertyValue", "namespacemomentum.html#a570780bfa100e3c5f4a3fb20a2f445de", null ],
     [ "FiniteDifferenceSequenceErrorFunction", "namespacemomentum.html#a382cf3b57bfb884b595f11a5eb41bcd5", null ],
     [ "FiniteDifferenceSequenceErrorFunction_const_p", "namespacemomentum.html#a62bd8991d0759c629e5bec9b0d96dd23", null ],
     [ "FiniteDifferenceSequenceErrorFunction_const_u", "namespacemomentum.html#af788adafe68f65d18ffe89cd9fe00713", null ],

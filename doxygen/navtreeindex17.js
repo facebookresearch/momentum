@@ -211,6 +211,8 @@ var NAVTREEINDEX17 =
 "fbx__builder_8cpp.html":[3,0,6,2,0],
 "fbx__builder_8cpp_source.html":[3,0,6,2,0],
 "fbx__builder_8h.html":[3,0,6,2,1],
+"fbx__builder_8h.html#a296bf543e268b6bb5c0adb577458bd32":[3,0,6,2,1,1],
+"fbx__builder_8h.html#a570780bfa100e3c5f4a3fb20a2f445de":[3,0,6,2,1,2],
 "fbx__builder_8h_source.html":[3,0,6,2,1],
 "fbx__io_8cpp.html":[3,0,6,2,2],
 "fbx__io_8cpp.html#a3b5e1ccde169eb166d05c6f8e863ed9d":[3,0,6,2,2,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX17 =
 "fbx__io__internal_8h.html":[3,0,6,2,4],
 "fbx__io__internal_8h.html#a06d36feab74e5cecdd46ee2d184a0d06":[3,0,6,2,4,12],
 "fbx__io__internal_8h.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c":[3,0,6,2,4,4],
-"fbx__io__internal_8h.html#a2d1b13c0bdfcff880333b6807915484b":[3,0,6,2,4,16],
-"fbx__io__internal_8h.html#a2f5522199c98ffbe1fe355cbb3f12236":[3,0,6,2,4,14],
-"fbx__io__internal_8h.html#a37dabd44dce447a0466151ece56a1f09":[3,0,6,2,4,27]
+"fbx__io__internal_8h.html#a2d1b13c0bdfcff880333b6807915484b":[3,0,6,2,4,16]
 };

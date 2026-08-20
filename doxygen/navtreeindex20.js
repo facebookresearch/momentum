@@ -1,5 +1,7 @@
 var NAVTREEINDEX20 =
 {
+"linear__skinning_8cpp.html#a059636b9c20493e113473d972ce4c929":[3,0,0,21,13],
+"linear__skinning_8cpp.html#a065470fd202b73ce24098d8840f0d84e":[3,0,0,21,27],
 "linear__skinning_8cpp.html#a067a42dadd71b957d59d21c052b52ee2":[3,0,0,21,38],
 "linear__skinning_8cpp.html#a19c85eb87ae6ad34068bea2bb31ddd1e":[3,0,0,21,9],
 "linear__skinning_8cpp.html#a1c046a30172ce87a331d2008c989f42c":[3,0,0,21,35],
@@ -247,7 +249,5 @@ var NAVTREEINDEX20 =
 "marker__tracking_2fwd_8h.html#af1c89f1ce62c63a12edcd5a5b2d33ded":[3,0,7,2,0],
 "marker__tracking_2fwd_8h_source.html":[3,0,7,2],
 "math_2coordinate__system_8h.html":[3,0,8,2],
-"math_2coordinate__system_8h.html#a1ecaa50a4aaf2cb918991967e681ed8b":[3,0,8,2,4],
-"math_2coordinate__system_8h.html#a4986771c22a177a790cbfe32172233c4":[3,0,8,2,8],
-"math_2coordinate__system_8h.html#a589b5dfcb8d318182dba9c2908174523":[3,0,8,2,13]
+"math_2coordinate__system_8h.html#a1ecaa50a4aaf2cb918991967e681ed8b":[3,0,8,2,4]
 };
