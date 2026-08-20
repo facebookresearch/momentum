@@ -30,7 +30,7 @@
     "@mdx-js/react": "^3.0.1",
     "clsx": "^2.1.1",
     "docusaurus-plugin-internaldocs-fb": "^1.19.2",
-    "nth-check": ">=2.0.1",
+    "nth-check": ">=3.0.1",
     "prism-react-renderer": "<2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
