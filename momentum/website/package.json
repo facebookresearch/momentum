@@ -23,7 +23,7 @@
     "postinstall": "patch-package --error-on-fail"
   },
   "dependencies": {
-    "@algolia/client-search": "^4.23.3",
+    "@algolia/client-search": "^5.56.0",
     "@docusaurus/core": "^3.2.1",
     "@docusaurus/preset-classic": "^3.2.1",
     "@docusaurus/theme-classic": "^3.2.1",
