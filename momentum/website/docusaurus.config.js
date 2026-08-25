@@ -5,8 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const {themes} = require('prism-react-renderer');
 const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/internal');
 
 // With JSDoc @type annotations, IDEs can provide config autocompletion
@@ -17,7 +16,11 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
   url: 'https://facebookresearch.github.io',
   baseUrl: '/momentum/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'throw',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+    },
+  },
   favicon: 'img/favicon.ico',
   organizationName: 'facebookresearch',
   projectName: 'momentum',
@@ -175,8 +178,8 @@ const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/i
         copyright: `Copyright © ${new Date().getFullYear()} Meta Platforms, Inc. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: themes.github,
+        darkTheme: themes.dracula,
       },
     }),
 });
