@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmomentum_website=globalThis.webpackChunkmomentum_website||[]).push([[2953],{66843(e){e.exports=JSON.parse('{"metadata":{"permalink":"/momentum/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":0,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

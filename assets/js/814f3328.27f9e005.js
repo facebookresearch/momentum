@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmomentum_website=globalThis.webpackChunkmomentum_website||[]).push([[7472],{55513(e){e.exports=JSON.parse('{"title":"Recent posts","items":[]}')}}]);
