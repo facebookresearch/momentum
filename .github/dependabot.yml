@@ -9,9 +9,26 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      website-dependencies:
+      # Docusaurus requires all official packages to use the same version.
+      docusaurus:
         patterns:
-          - "*"
+          - "@docusaurus/*"
         update-types:
           - "minor"
           - "patch"
+      website-dependencies:
+        # Keep major upgrades separate because they can require source changes.
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@docusaurus/*"
+          - "docusaurus-plugin-internaldocs-fb"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Version 1.20.0 pins @docusaurus/theme-mermaid 2.4.3 and is
+      # incompatible with Docusaurus 3.
+      - dependency-name: "docusaurus-plugin-internaldocs-fb"
+        versions:
+          - "1.20.0"
