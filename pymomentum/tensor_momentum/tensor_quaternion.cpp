@@ -21,6 +21,8 @@
 #endif
 #include <Eigen/Core>
 
+#include <limits>
+
 namespace pymomentum {
 
 using torch::autograd::AutogradContext;
@@ -212,13 +214,23 @@ at::Tensor quaternionInverse(at::Tensor q) {
 
 at::Tensor quaternionToXYZEuler(at::Tensor q) {
   checkQuaternion(q);
+
+  // The asin argument is analytically exactly +/-1 at the gimbal singularity, so rounding tips it
+  // out of domain and returns NaN. Clamp short of the endpoints rather than to them: asin's
+  // derivative is unbounded there. eps is 8 ULP of the tensor's own dtype so float64 is not held
+  // to float32's far looser bound. Reduced-precision dtypes fall back to the float32 value, which
+  // is below their own ULP; this conversion is not usable at that precision regardless.
+  const double kEulerEps = 8.0 *
+      (q.scalar_type() == at::kDouble ? std::numeric_limits<double>::epsilon()
+                                      : std::numeric_limits<float>::epsilon());
+
   at::Tensor qx = q.select(-1, 0);
   at::Tensor qy = q.select(-1, 1);
   at::Tensor qz = q.select(-1, 2);
   at::Tensor qw = q.select(-1, 3);
 
   at::Tensor rx = at::atan2(2 * (qw * qx + qy * qz), 1 - 2 * (sqr(qx) + sqr(qy)));
-  at::Tensor ry = at::asin(2 * (qw * qy - qz * qx));
+  at::Tensor ry = at::asin(at::clamp(2 * (qw * qy - qz * qx), -1.0 + kEulerEps, 1.0 - kEulerEps));
   at::Tensor rz = at::atan2(2 * (qw * qz + qx * qy), 1 - 2 * (sqr(qy) + sqr(qz)));
   return at::stack({rx, ry, rz}, -1);
 }

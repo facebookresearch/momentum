@@ -12,6 +12,7 @@ This file contains all torch-dependent tests migrated from test_geometry.py and 
 These tests verify that differentiable operations work correctly with PyTorch autograd.
 """
 
+import itertools
 import math
 import unittest
 
@@ -439,6 +440,78 @@ class TestDiffGeometry(unittest.TestCase):
                 pym_skel_state.to_matrix(skel_state2),
             )
         )
+
+    def _assert_gimbal_singularity_finite(
+        self,
+        # pyre-ignore[2]: pymomentum Character has no stub in this test module
+        character,
+        dtype: torch.dtype,
+        sign: float,
+        label: str,
+    ) -> None:
+        """One (dtype, sign) case of the gimbal-singularity guard.
+
+        The conversion is applied to inv(pre_rotation) * local_rotation, so simply rotating the
+        joint by 90 degrees does not reach the singularity. Use the root, whose local rotation
+        equals its global one, and pre-multiply by its pre-rotation so the conversion receives
+        exactly R_y(+/-90).
+        """
+        n_joints = character.skeleton.size
+        pre = character.skeleton.joints[0].pre_rotation  # (x, y, z, w)
+        pre_q = torch.tensor(
+            [float(pre[0]), float(pre[1]), float(pre[2]), float(pre[3])], dtype=dtype
+        )
+        h = math.sqrt(2.0) / 2.0  # sin(45) == cos(45)
+        r_y = torch.tensor([0.0, sign * h, 0.0, h], dtype=dtype)
+
+        rot = torch.zeros(1, n_joints, 4, dtype=dtype)
+        rot[..., 3] = 1.0  # identity for every joint
+        rot[0, 0, :] = pym_quaternion.multiply(pre_q, r_y)
+        skel_state = torch.cat(
+            [
+                torch.zeros(1, n_joints, 3, dtype=dtype),
+                rot,
+                torch.ones(1, n_joints, 1, dtype=dtype),
+            ],
+            dim=-1,
+        )
+
+        joint_params = pym_diff_geometry.skeleton_state_to_joint_parameters(
+            character, skel_state
+        )
+        self.assertTrue(
+            torch.isfinite(joint_params).all(),
+            f"non-finite joint parameters at the {label} gimbal singularity ({dtype}): "
+            f"{int(torch.isnan(joint_params).sum())} NaN, "
+            f"{int(torch.isinf(joint_params).sum())} Inf",
+        )
+
+        # The clamp must not distort a legitimate rotation: this angle is exactly +/-pi/2 at the
+        # singularity and should come back essentially unchanged. Tolerance is per-dtype since the
+        # clamp truncates 1.381e-03 rad in float32 but 5.96e-08 in float64. The signed comparison
+        # keeps +90 and -90 distinct, and trips if the construction stops reaching the singularity.
+        middle_euler = joint_params.view(1, n_joints, 7)[0, 0, 4]
+        self.assertAlmostEqual(
+            float(middle_euler),
+            sign * math.pi / 2,
+            delta=4e-3 if dtype == torch.float32 else 1e-6,
+            msg=f"{label} ({dtype}) no longer reaches the gimbal singularity, "
+            f"so it cannot detect the NaN",
+        )
+
+    def test_skeleton_state_to_joint_parameters_gimbal_singularity(self) -> None:
+        # At a +/-90 degree middle Euler angle the asin argument is analytically exactly +/-1, so
+        # rounding can push it out of domain and return NaN. In float64 even a plain 90 degree
+        # rotation about Y does it: 2 * (cos45 * sin45) == 1.0000000000000002.
+        #
+        # Both dtypes and both signs are covered: the clamp bounds are symmetric and its epsilon
+        # is chosen per dtype, so a change to either could regress a case the other misses.
+        character = pym_test_utils.create_test_character()
+        for dtype, (sign, label) in itertools.product(
+            (torch.float64, torch.float32), ((1.0, "+90"), (-1.0, "-90"))
+        ):
+            with self.subTest(dtype=str(dtype), rotation=label):
+                self._assert_gimbal_singularity_finite(character, dtype, sign, label)
 
     def test_typePromotion(self) -> None:
         # Verify that float/double promotion is working.
