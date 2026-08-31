@@ -20,6 +20,7 @@
 #include "momentum/common/progress_bar.h"
 
 #include <dispenso/parallel_for.h>
+#include <dispenso/thread_pool.h>
 
 #include <Eigen/Cholesky>
 
@@ -145,6 +146,11 @@ class NormalEquationBlock {
 
   [[nodiscard]] const VectorType& rhs() const {
     return rhs_;
+  }
+
+  MatrixType takeBlockBand() {
+    MT_CHECK(hasBlockBand());
+    return std::move(blockBand_);
   }
 
   auto blockBandBlock(Eigen::Index iBlock, Eigen::Index jBlock) {
@@ -724,40 +730,13 @@ using BlockFactorScalar = double;
 using BlockFactorMatrixType = Eigen::Matrix<BlockFactorScalar, Eigen::Dynamic, Eigen::Dynamic>;
 using BlockFactorVectorType = Eigen::Matrix<BlockFactorScalar, Eigen::Dynamic, 1>;
 
-template <typename T>
-BlockFactorMatrixType getBlockNormalEquation(
-    const NormalEquationBlock<T>& hessian,
-    Eigen::Index blockSize,
-    Eigen::Index iBlock,
-    Eigen::Index jBlock) {
-  if (hessian.hasBlockBand()) {
-    return hessian.blockBandBlock(iBlock, jBlock).template cast<BlockFactorScalar>();
-  }
-
-  BlockFactorMatrixType result = BlockFactorMatrixType::Zero(blockSize, blockSize);
-  const Eigen::Index iOffset = iBlock * blockSize;
-  const Eigen::Index jOffset = jBlock * blockSize;
-  for (Eigen::Index i = 0; i < blockSize; ++i) {
-    for (Eigen::Index j = 0; j < blockSize; ++j) {
-      const Eigen::Index iGlobal = iOffset + i;
-      const Eigen::Index jGlobal = jOffset + j;
-      if (iGlobal <= jGlobal) {
-        if (jGlobal - iGlobal < hessian.bandwidth()) {
-          result(i, j) = hessian.bandEntry(iGlobal, jGlobal);
-        }
-      } else if (iGlobal - jGlobal < hessian.bandwidth()) {
-        result(i, j) = hessian.bandEntry(jGlobal, iGlobal);
-      }
-    }
-  }
-  return result;
-}
-
 struct BlockLdltFactors {
   Eigen::Index blockSize = 0;
   Eigen::Index nBlocks = 0;
   Eigen::Index bandwidthBlocks = 0;
   BlockFactorMatrixType lowerFactors;
+  // The block-tridiagonal fast path never needs the unfactored diagonal blocks after their
+  // LDLT decompositions have been computed.  Wider bands use them when updating later blocks.
   BlockFactorMatrixType diagonalFactors;
   std::vector<Eigen::LDLT<BlockFactorMatrixType>> diagonalLdltFactors;
 
@@ -782,27 +761,43 @@ struct BlockLdltFactors {
 
 template <typename T>
 BlockLdltFactors factorBlockNormalEquations(
-    const NormalEquationBlock<T>& hessian,
+    NormalEquationBlock<T>& hessian,
     Eigen::Index blockSize) {
   const Eigen::Index nBand = hessian.nBand();
   const Eigen::Index nBlocks = nBand / blockSize;
   const Eigen::Index bandwidthBlocks = hessian.blockBandwidth();
+
+  // The normal-equation band and the lower factor have the same packed layout. Consume the
+  // former so both full matrices are not resident throughout factorization.
+  BlockFactorMatrixType lowerFactors;
+  if constexpr (std::is_same_v<T, BlockFactorScalar>) {
+    lowerFactors = hessian.takeBlockBand();
+  } else {
+    const auto packedBand = hessian.takeBlockBand();
+    lowerFactors = packedBand.template cast<BlockFactorScalar>();
+  }
+
   BlockLdltFactors factors{
       .blockSize = blockSize,
       .nBlocks = nBlocks,
       .bandwidthBlocks = bandwidthBlocks,
-      .lowerFactors = BlockFactorMatrixType::Zero(nBlocks * blockSize, bandwidthBlocks * blockSize),
-      .diagonalFactors = BlockFactorMatrixType::Zero(nBand, blockSize),
+      .lowerFactors = std::move(lowerFactors),
+      .diagonalFactors = bandwidthBlocks > 2 ? BlockFactorMatrixType::Zero(nBand, blockSize)
+                                             : BlockFactorMatrixType(),
       .diagonalLdltFactors = std::vector<Eigen::LDLT<BlockFactorMatrixType>>(nBlocks)};
 
+  BlockFactorMatrixType previousDiagonalUpdate;
+  if (bandwidthBlocks == 2) {
+    previousDiagonalUpdate = BlockFactorMatrixType::Zero(blockSize, blockSize);
+  }
+
   for (Eigen::Index iBlock = 0; iBlock < nBlocks; ++iBlock) {
-    auto diagonal = getBlockNormalEquation(hessian, blockSize, iBlock, iBlock);
+    BlockFactorMatrixType diagonal = factors.lowerFactor(iBlock, iBlock);
     const Eigen::Index kStart = std::max<Eigen::Index>(0, iBlock - bandwidthBlocks + 1);
     if (bandwidthBlocks == 2 && iBlock > 0) {
       // For block-tridiagonal systems, L_ik * D_k * L_ik^T is equivalent to
-      // L_ik * A_ik^T and saves one dense block multiply per frame.
-      diagonal.noalias() -= factors.lowerFactor(iBlock, iBlock - 1) *
-          getBlockNormalEquation(hessian, blockSize, iBlock, iBlock - 1).transpose();
+      // L_ik * A_ik^T. Carry that update forward because A_ik shares storage with L_ik.
+      diagonal -= previousDiagonalUpdate;
     } else {
       for (Eigen::Index kBlock = kStart; kBlock < iBlock; ++kBlock) {
         const auto& lik = factors.lowerFactor(iBlock, kBlock);
@@ -814,22 +809,28 @@ BlockLdltFactors factorBlockNormalEquations(
     if (factors.diagonalLdltFactors.at(static_cast<size_t>(iBlock)).info() != Eigen::Success) {
       MT_THROW("Block banded LDLT factorization failed at block {}", iBlock);
     }
-    factors.diagonalFactor(iBlock) = diagonal;
+    if (bandwidthBlocks > 2) {
+      factors.diagonalFactor(iBlock) = diagonal;
+    }
     factors.lowerFactor(iBlock, iBlock).setIdentity();
 
     const Eigen::Index jEnd = std::min(nBlocks, iBlock + bandwidthBlocks);
     for (Eigen::Index jBlock = iBlock + 1; jBlock < jEnd; ++jBlock) {
-      auto value = getBlockNormalEquation(hessian, blockSize, jBlock, iBlock);
+      BlockFactorMatrixType value = factors.lowerFactor(jBlock, iBlock);
       const auto kStartCur = std::max<Eigen::Index>({0, jBlock - bandwidthBlocks + 1, kStart});
       for (Eigen::Index kBlock = kStartCur; kBlock < iBlock; ++kBlock) {
         value.noalias() -= factors.lowerFactor(jBlock, kBlock) * factors.diagonalFactor(kBlock) *
             factors.lowerFactor(iBlock, kBlock).transpose();
       }
 
-      factors.lowerFactor(jBlock, iBlock) =
+      const BlockFactorMatrixType lowerFactor =
           factors.diagonalLdltFactors.at(static_cast<size_t>(iBlock))
               .solve(value.transpose())
               .transpose();
+      if (bandwidthBlocks == 2) {
+        previousDiagonalUpdate.noalias() = lowerFactor * value.transpose();
+      }
+      factors.lowerFactor(jBlock, iBlock) = lowerFactor;
     }
   }
 
@@ -919,7 +920,7 @@ BlockFactorVectorType solveBlockBandVariables(
 
 template <typename T>
 Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquationsBlock(
-    const NormalEquationBlock<T>& hessian,
+    NormalEquationBlock<T>& hessian,
     Eigen::Index blockSize) {
   const Eigen::Index nBand = hessian.nBand();
   const Eigen::Index nCommon = hessian.nCommon();
@@ -954,10 +955,8 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquationsBlock(
 }
 
 template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquations(
-    const NormalEquationBlock<T>& hessian,
-    Eigen::Index blockSize,
-    bool useBlockLdlt) {
+Eigen::Matrix<T, Eigen::Dynamic, 1>
+solveNormalEquations(NormalEquationBlock<T>& hessian, Eigen::Index blockSize, bool useBlockLdlt) {
   if (!useBlockLdlt || hessian.nBand() == 0 || blockSize <= 1 || hessian.nBand() % blockSize != 0 ||
       hessian.bandwidth() % blockSize != 0 || !hessian.hasBlockBand()) {
     return solveNormalEquationsScalarLdlt(hessian);
@@ -1047,23 +1046,6 @@ void SequenceCholeskySolverT<T>::doIterationWithNormalEquationScalar() {
 
   const size_t chunkSize = std::max<size_t>(1, chunkSize_);
   const size_t nChunks = (fn.getNumFrames() + chunkSize - 1) / chunkSize;
-  std::vector<AccumulationResult<T, NormalEquationScalar>> chunkResults(nChunks);
-
-  if (this->multithreaded_) {
-    dispenso::parallel_for(size_t(0), nChunks, [&](size_t iChunk) {
-      const size_t chunkStart = iChunk * chunkSize;
-      const size_t chunkEnd = std::min(fn.getNumFrames(), chunkStart + chunkSize);
-      chunkResults[iChunk] = processChunk<T, NormalEquationScalar>(
-          &fn, chunkStart, chunkEnd, this->bandwidth_, targetRowsPerJtJChunk_);
-    });
-  } else {
-    for (size_t iChunk = 0; iChunk < nChunks; ++iChunk) {
-      const size_t chunkStart = iChunk * chunkSize;
-      const size_t chunkEnd = std::min(fn.getNumFrames(), chunkStart + chunkSize);
-      chunkResults[iChunk] = processChunk<T, NormalEquationScalar>(
-          &fn, chunkStart, chunkEnd, this->bandwidth_, targetRowsPerJtJChunk_);
-    }
-  }
 
   std::unique_ptr<ProgressBar> progress;
   if (this->progressBar_) {
@@ -1073,11 +1055,40 @@ void SequenceCholeskySolverT<T>::doIterationWithNormalEquationScalar() {
   }
 
   this->error_ = 0;
-  for (auto& result : chunkResults) {
+  const auto mergeChunkResult = [&](AccumulationResult<T, NormalEquationScalar>& result) {
     globalHessian.mergeBlock(*result.normalEquations);
     this->error_ += result.error;
     if (progress) {
       progress->increment(result.nFunctions);
+    }
+    result.normalEquations.reset();
+  };
+
+  if (this->multithreaded_) {
+    const auto workerCount = dispenso::globalThreadPool().numThreads();
+    const size_t chunksPerBatch =
+        std::min(nChunks, workerCount > 0 ? static_cast<size_t>(workerCount + 1) : size_t(1));
+    std::vector<AccumulationResult<T, NormalEquationScalar>> chunkResults(chunksPerBatch);
+    for (size_t batchStart = 0; batchStart < nChunks; batchStart += chunksPerBatch) {
+      const size_t batchSize = std::min(chunksPerBatch, nChunks - batchStart);
+      dispenso::parallel_for(size_t(0), batchSize, [&](size_t iResult) {
+        const size_t iChunk = batchStart + iResult;
+        const size_t chunkStart = iChunk * chunkSize;
+        const size_t chunkEnd = std::min(fn.getNumFrames(), chunkStart + chunkSize);
+        chunkResults[iResult] = processChunk<T, NormalEquationScalar>(
+            &fn, chunkStart, chunkEnd, this->bandwidth_, targetRowsPerJtJChunk_);
+      });
+      for (size_t iResult = 0; iResult < batchSize; ++iResult) {
+        mergeChunkResult(chunkResults[iResult]);
+      }
+    }
+  } else {
+    for (size_t iChunk = 0; iChunk < nChunks; ++iChunk) {
+      const size_t chunkStart = iChunk * chunkSize;
+      const size_t chunkEnd = std::min(fn.getNumFrames(), chunkStart + chunkSize);
+      auto result = processChunk<T, NormalEquationScalar>(
+          &fn, chunkStart, chunkEnd, this->bandwidth_, targetRowsPerJtJChunk_);
+      mergeChunkResult(result);
     }
   }
 
