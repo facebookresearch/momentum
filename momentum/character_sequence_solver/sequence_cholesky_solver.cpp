@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <deque>
 #include <limits>
 #include <memory>
 #include <span>
@@ -729,6 +730,8 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> solveCommonNormalEquationsOnly(
 using BlockFactorScalar = double;
 using BlockFactorMatrixType = Eigen::Matrix<BlockFactorScalar, Eigen::Dynamic, Eigen::Dynamic>;
 using BlockFactorVectorType = Eigen::Matrix<BlockFactorScalar, Eigen::Dynamic, 1>;
+using BlockFactorRefType = Eigen::Ref<BlockFactorMatrixType>;
+using BlockDiagonalLdlt = Eigen::LDLT<BlockFactorRefType>;
 
 struct BlockLdltFactors {
   Eigen::Index blockSize = 0;
@@ -738,7 +741,7 @@ struct BlockLdltFactors {
   // The block-tridiagonal fast path never needs the unfactored diagonal blocks after their
   // LDLT decompositions have been computed.  Wider bands use them when updating later blocks.
   BlockFactorMatrixType diagonalFactors;
-  std::vector<Eigen::LDLT<BlockFactorMatrixType>> diagonalLdltFactors;
+  std::deque<BlockDiagonalLdlt> diagonalLdltFactors;
 
   auto lowerFactor(Eigen::Index iBlock, Eigen::Index jBlock) {
     MT_CHECK(iBlock >= jBlock);
@@ -760,7 +763,7 @@ struct BlockLdltFactors {
 };
 
 template <typename T>
-BlockLdltFactors factorBlockNormalEquations(
+std::unique_ptr<BlockLdltFactors> factorBlockNormalEquations(
     NormalEquationBlock<T>& hessian,
     Eigen::Index blockSize) {
   const Eigen::Index nBand = hessian.nBand();
@@ -777,14 +780,13 @@ BlockLdltFactors factorBlockNormalEquations(
     lowerFactors = packedBand.template cast<BlockFactorScalar>();
   }
 
-  BlockLdltFactors factors{
-      .blockSize = blockSize,
-      .nBlocks = nBlocks,
-      .bandwidthBlocks = bandwidthBlocks,
-      .lowerFactors = std::move(lowerFactors),
-      .diagonalFactors = bandwidthBlocks > 2 ? BlockFactorMatrixType::Zero(nBand, blockSize)
-                                             : BlockFactorMatrixType(),
-      .diagonalLdltFactors = std::vector<Eigen::LDLT<BlockFactorMatrixType>>(nBlocks)};
+  auto factors = std::make_unique<BlockLdltFactors>();
+  factors->blockSize = blockSize;
+  factors->nBlocks = nBlocks;
+  factors->bandwidthBlocks = bandwidthBlocks;
+  factors->lowerFactors = std::move(lowerFactors);
+  factors->diagonalFactors =
+      bandwidthBlocks > 2 ? BlockFactorMatrixType::Zero(nBand, blockSize) : BlockFactorMatrixType();
 
   BlockFactorMatrixType previousDiagonalUpdate;
   if (bandwidthBlocks == 2) {
@@ -792,7 +794,7 @@ BlockLdltFactors factorBlockNormalEquations(
   }
 
   for (Eigen::Index iBlock = 0; iBlock < nBlocks; ++iBlock) {
-    BlockFactorMatrixType diagonal = factors.lowerFactor(iBlock, iBlock);
+    BlockFactorMatrixType diagonal = factors->lowerFactor(iBlock, iBlock);
     const Eigen::Index kStart = std::max<Eigen::Index>(0, iBlock - bandwidthBlocks + 1);
     if (bandwidthBlocks == 2 && iBlock > 0) {
       // For block-tridiagonal systems, L_ik * D_k * L_ik^T is equivalent to
@@ -800,37 +802,39 @@ BlockLdltFactors factorBlockNormalEquations(
       diagonal -= previousDiagonalUpdate;
     } else {
       for (Eigen::Index kBlock = kStart; kBlock < iBlock; ++kBlock) {
-        const auto& lik = factors.lowerFactor(iBlock, kBlock);
-        diagonal.noalias() -= lik * factors.diagonalFactor(kBlock) * lik.transpose();
+        const auto& lik = factors->lowerFactor(iBlock, kBlock);
+        diagonal.noalias() -= lik * factors->diagonalFactor(kBlock) * lik.transpose();
       }
     }
 
-    factors.diagonalLdltFactors.at(static_cast<size_t>(iBlock)).compute(diagonal);
-    if (factors.diagonalLdltFactors.at(static_cast<size_t>(iBlock)).info() != Eigen::Success) {
+    if (bandwidthBlocks > 2) {
+      factors->diagonalFactor(iBlock) = diagonal;
+    }
+    auto diagonalBlock = factors->lowerFactor(iBlock, iBlock);
+    diagonalBlock = diagonal;
+    factors->diagonalLdltFactors.emplace_back(diagonalBlock);
+    const auto& diagonalLdlt = factors->diagonalLdltFactors.back();
+    if (diagonalLdlt.info() != Eigen::Success) {
       MT_THROW("Block banded LDLT factorization failed at block {}", iBlock);
     }
-    if (bandwidthBlocks > 2) {
-      factors.diagonalFactor(iBlock) = diagonal;
-    }
-    factors.lowerFactor(iBlock, iBlock).setIdentity();
 
     const Eigen::Index jEnd = std::min(nBlocks, iBlock + bandwidthBlocks);
     for (Eigen::Index jBlock = iBlock + 1; jBlock < jEnd; ++jBlock) {
-      BlockFactorMatrixType value = factors.lowerFactor(jBlock, iBlock);
+      BlockFactorMatrixType value = factors->lowerFactor(jBlock, iBlock);
       const auto kStartCur = std::max<Eigen::Index>({0, jBlock - bandwidthBlocks + 1, kStart});
       for (Eigen::Index kBlock = kStartCur; kBlock < iBlock; ++kBlock) {
-        value.noalias() -= factors.lowerFactor(jBlock, kBlock) * factors.diagonalFactor(kBlock) *
-            factors.lowerFactor(iBlock, kBlock).transpose();
+        value.noalias() -= factors->lowerFactor(jBlock, kBlock) * factors->diagonalFactor(kBlock) *
+            factors->lowerFactor(iBlock, kBlock).transpose();
       }
 
       const BlockFactorMatrixType lowerFactor =
-          factors.diagonalLdltFactors.at(static_cast<size_t>(iBlock))
+          factors->diagonalLdltFactors.at(static_cast<size_t>(iBlock))
               .solve(value.transpose())
               .transpose();
       if (bandwidthBlocks == 2) {
         previousDiagonalUpdate.noalias() = lowerFactor * value.transpose();
       }
-      factors.lowerFactor(jBlock, iBlock) = lowerFactor;
+      factors->lowerFactor(jBlock, iBlock) = lowerFactor;
     }
   }
 
@@ -927,7 +931,7 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquationsBlock(
   MT_CHECK(blockSize > 0);
   MT_CHECK(nBand % blockSize == 0);
 
-  const BlockLdltFactors factors = factorBlockNormalEquations(hessian, blockSize);
+  const auto factors = factorBlockNormalEquations(hessian, blockSize);
 
   BlockFactorVectorType zBand = hessian.rhs().head(nBand).template cast<BlockFactorScalar>();
   BlockFactorMatrixType e = BlockFactorMatrixType::Zero(nBand, nCommon);
@@ -935,13 +939,13 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquationsBlock(
     e = hessian.common().topRows(nBand).template cast<BlockFactorScalar>();
   }
 
-  applyBlockForwardSubstitution(factors, zBand, e);
+  applyBlockForwardSubstitution(*factors, zBand, e);
 
   BlockFactorVectorType result = BlockFactorVectorType::Zero(nBand + nCommon);
   if (nCommon > 0) {
     BlockFactorMatrixType dInvE = e;
     BlockFactorVectorType dInvZ = zBand;
-    applyBlockDiagonalInverse(factors, dInvZ, dInvE);
+    applyBlockDiagonalInverse(*factors, dInvZ, dInvE);
     result.tail(nCommon) = solveCommonBlock(hessian, e, dInvE, dInvZ);
   }
 
@@ -949,7 +953,7 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> solveNormalEquationsBlock(
   if (nCommon > 0) {
     bandRhs.noalias() -= e * result.tail(nCommon);
   }
-  result.head(nBand) = solveBlockBandVariables(factors, bandRhs);
+  result.head(nBand) = solveBlockBandVariables(*factors, bandRhs);
 
   return result.template cast<T>();
 }

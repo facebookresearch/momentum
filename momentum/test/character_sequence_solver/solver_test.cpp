@@ -28,6 +28,8 @@
 #include "momentum/test/character/character_helpers.h"
 #include "momentum/test/solver/solver_test_helpers.h"
 
+#include <dispenso/thread_pool.h>
+
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -369,6 +371,68 @@ TYPED_TEST(SequenceSolverTest, CompareCholesky) {
   solverOptionsCholesky.regularization = solverOptionsQr.regularization;
   solverOptionsCholesky.multithreaded = false;
   solverOptionsCholesky.chunkSize = 1;
+
+  const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionQr.getJoinedParameterVector();
+
+  SequenceSolverT<T> solverQr(solverOptionsQr, &sequenceSolverFunctionQr);
+  Eigen::VectorX<T> parametersQr = parametersInit;
+  solverQr.solve(parametersQr);
+  const T errQr = sequenceSolverFunctionQr.getError(parametersQr);
+
+  SequenceCholeskySolverT<T> solverCholesky(solverOptionsCholesky, &sequenceSolverFunctionCholesky);
+  Eigen::VectorX<T> parametersCholesky = parametersInit;
+  solverCholesky.solve(parametersCholesky);
+  const T errCholesky = sequenceSolverFunctionCholesky.getError(parametersCholesky);
+
+  EXPECT_NEAR(errQr, errCholesky, Eps<T>(5e-5f, 1e-8));
+  EXPECT_NEAR((parametersQr - parametersCholesky).norm(), T(0), Eps<T>(1e-4f, 1e-8));
+}
+
+TYPED_TEST(SequenceSolverTest, CompareCholeskyPerFrameOnlyAcrossBatchesAndIterations) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  ParameterTransformT<T> castedCharacterParameterTransform = character.parameterTransform.cast<T>();
+
+  ParameterSet universalParams;
+  universalParams.set(2);
+  universalParams.set(4);
+  universalParams.set(7);
+
+  const auto workerCount = dispenso::globalThreadPool().numThreads();
+  ASSERT_GE(workerCount, 0);
+  const size_t nFrames = std::max<size_t>(4, static_cast<size_t>(workerCount) + 2);
+  MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
+
+  const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
+    for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+      result.addErrorFunction(iFrame, problem.positionErrors[iFrame]);
+      result.addErrorFunction(iFrame, problem.orientErrors[iFrame]);
+    }
+  };
+
+  SequenceSolverFunctionT<T> sequenceSolverFunctionQr(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionQr);
+  SequenceSolverFunctionT<T> sequenceSolverFunctionCholesky(
+      character, castedCharacterParameterTransform, problem.universalParams, nFrames);
+  populateSolverFunction(sequenceSolverFunctionCholesky);
+
+  auto solverOptionsQr = SequenceSolverOptions();
+  solverOptionsQr.minIterations = 2;
+  solverOptionsQr.maxIterations = 2;
+  solverOptionsQr.threshold = 0.0f;
+  solverOptionsQr.regularization = 0.37f;
+  solverOptionsQr.multithreaded = false;
+
+  auto solverOptionsCholesky = SequenceCholeskySolverOptions();
+  solverOptionsCholesky.minIterations = solverOptionsQr.minIterations;
+  solverOptionsCholesky.maxIterations = solverOptionsQr.maxIterations;
+  solverOptionsCholesky.threshold = solverOptionsQr.threshold;
+  solverOptionsCholesky.regularization = solverOptionsQr.regularization;
+  solverOptionsCholesky.multithreaded = true;
+  solverOptionsCholesky.chunkSize = 1;
+  solverOptionsCholesky.useDoublePrecisionNormalEquations = true;
 
   const Eigen::VectorX<T> parametersInit = sequenceSolverFunctionQr.getJoinedParameterVector();
 
