@@ -1,6 +1,7 @@
 name: Update Lock Files
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -23,15 +24,33 @@ jobs:
           pixi global install pixi-diff-to-markdown
           pixi update --json --no-install | pixi-diff-to-markdown >> diff.md
       - name: Create pull request
+        id: create-pull-request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
-          # The PAT behind this secret determines which GitHub account opens the PR.
-          token: ${{ secrets.YUTINGYE_BYPASS_TOKEN }}
+          token: ${{ github.token }}
           commit-message: Update pixi lockfile
           title: Update pixi lockfile
           body-path: diff.md
-          branch: update-pixi
+          # scratch/** is excluded from the Meta CLA rule that blocks branch creation.
+          branch: scratch/update-pixi
           base: main
           labels: pixi
           delete-branch: true
           add-paths: pixi.lock
+      - name: Run CI for pull request
+        # Pull requests created by GITHUB_TOKEN do not trigger other Actions workflows.
+        if: >-
+          steps.create-pull-request.outputs.pull-request-operation == 'created' ||
+          steps.create-pull-request.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ steps.create-pull-request.outputs.pull-request-branch }}
+        run: |
+          for workflow in \
+            ci_ubuntu.yml \
+            ci_macos.yml \
+            ci_windows.yml \
+            ci_pypi_build_environment.yml
+          do
+            gh workflow run "$workflow" --ref "$PR_BRANCH"
+          done
