@@ -23,17 +23,18 @@ jobs:
         run: |
           pixi global install pixi-diff-to-markdown
           pixi update --json --no-install | pixi-diff-to-markdown >> diff.md
+          printf '\n# GITHUB_TOKEN end-to-end verification\n' >> pixi.lock
       - name: Create pull request
         id: create-pull-request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ github.token }}
           commit-message: Update pixi lockfile
-          title: Update pixi lockfile
+          title: Verify GITHUB_TOKEN lockfile updater
           body-path: diff.md
-          # scratch/** is excluded from the Meta CLA rule that blocks branch creation.
-          branch: scratch/update-pixi
-          base: main
+          branch: scratch/update-pixi-e2e-test
+          base: verify-github-token-lockfile-updater-20260903
+          draft: true
           labels: pixi
           delete-branch: true
           add-paths: pixi.lock
