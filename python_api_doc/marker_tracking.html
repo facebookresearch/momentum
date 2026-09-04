@@ -771,7 +771,7 @@ identity and locator parameters). Use the character’s <a class="reference inte
 to construct a meaningful set, e.g. to exclude finger DOFs:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pt</span> <span class="o">=</span> <span class="n">character</span><span class="o">.</span><span class="n">parameter_transform</span>
 <span class="n">active</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">pose_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">active</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">pt</span><span class="o">.</span><span class="n">parameter_sets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fingers&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">active</span><span class="p">))</span>
+<span class="n">active</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">pt</span><span class="o">.</span><span class="n">parameter_sets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fingers"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">active</span><span class="p">))</span>
 <span class="n">tracking_config</span><span class="o">.</span><span class="n">active_params</span> <span class="o">=</span> <span class="n">active</span>
 </pre></div>
 </div>

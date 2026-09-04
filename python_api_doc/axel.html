@@ -691,7 +691,7 @@ Useful when triangles are very thin. Default: 0.0</p></li>
 <span class="c1"># Query closest point</span>
 <span class="n">query_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">bvh</span><span class="o">.</span><span class="n">closest_surface_point</span><span class="p">(</span><span class="n">query_point</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closest point: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="si">}</span><span class="s2">, on triangle: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">triangle_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Closest point: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">point</span><span class="si">}</span><span class="s2">, on triangle: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">triangle_idx</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -916,8 +916,8 @@ triangles, which better preserves surface topology and reduces mesh artifacts.</
 <span class="c1"># Extract mesh (always returns quads)</span>
 <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">quads</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">isovalue</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertex normals have shape: </span><span class="si">{</span><span class="n">normals</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Vertex normals have shape: </span><span class="si">{</span><span class="n">normals</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -979,8 +979,8 @@ Ignored for other methods.</p></li>
 <span class="n">filled_vertices</span><span class="p">,</span> <span class="n">filled_triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">fill_holes</span><span class="p">(</span>
     <span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">axel</span><span class="o">.</span><span class="n">HoleFillingMethod</span><span class="o">.</span><span class="n">SphericalCap</span><span class="p">,</span> <span class="n">cap_height_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filled mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Original mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filled mesh: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_vertices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filled_triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1017,8 +1017,8 @@ not reached by the flood fill is considered an interior void and has its value n
 <p>Example usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
 
-<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdf_from_msgpack</span><span class="p">(</span><span class="s2">&quot;/tmp/my_sdf.msgpack&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded SDF with resolution </span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdf_from_msgpack</span><span class="p">(</span><span class="s2">"/tmp/my_sdf.msgpack"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded SDF with resolution </span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1043,9 +1043,9 @@ Only float32 precision is supported from Python.</p>
 <p>Example usage:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
 
-<span class="n">sdfs</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdfs_from_msgpack</span><span class="p">(</span><span class="s2">&quot;/tmp/body_sdfs.msgpack&quot;</span><span class="p">)</span>
+<span class="n">sdfs</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">load_sdfs_from_msgpack</span><span class="p">(</span><span class="s2">"/tmp/body_sdfs.msgpack"</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: joint=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">parent_joint</span><span class="si">}</span><span class="s2">, resolution=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: joint=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">parent_joint</span><span class="si">}</span><span class="s2">, resolution=</span><span class="si">{</span><span class="n">sdf</span><span class="o">.</span><span class="n">resolution</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1238,7 +1238,7 @@ values in a compact binary format.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
 
 <span class="n">sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">axel</span><span class="o">.</span><span class="n">save_sdf_to_msgpack</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="s2">&quot;/tmp/my_sdf.msgpack&quot;</span><span class="p">)</span>
+<span class="n">axel</span><span class="o">.</span><span class="n">save_sdf_to_msgpack</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="s2">"/tmp/my_sdf.msgpack"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1261,8 +1261,8 @@ Only float32 precision is supported from Python.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.axel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">axel</span>
 
 <span class="n">chest_sdf</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">mesh_to_sdf</span><span class="p">(</span><span class="n">chest_verts</span><span class="p">,</span> <span class="n">chest_tris</span><span class="p">,</span> <span class="n">voxel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">chest_sdf</span><span class="o">.</span><span class="n">parent_joint</span> <span class="o">=</span> <span class="s2">&quot;c_spine2&quot;</span>
-<span class="n">axel</span><span class="o">.</span><span class="n">save_sdfs_to_msgpack</span><span class="p">({</span><span class="s2">&quot;chest&quot;</span><span class="p">:</span> <span class="n">chest_sdf</span><span class="p">},</span> <span class="s2">&quot;/tmp/body_sdfs.msgpack&quot;</span><span class="p">)</span>
+<span class="n">chest_sdf</span><span class="o">.</span><span class="n">parent_joint</span> <span class="o">=</span> <span class="s2">"c_spine2"</span>
+<span class="n">axel</span><span class="o">.</span><span class="n">save_sdfs_to_msgpack</span><span class="p">({</span><span class="s2">"chest"</span><span class="p">:</span> <span class="n">chest_sdf</span><span class="p">},</span> <span class="s2">"/tmp/body_sdfs.msgpack"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1369,7 +1369,7 @@ Each row contains 4 vertex indices defining a quad.</p>
 <span class="c1"># Convert to triangles if needed for rendering</span>
 <span class="n">triangles</span> <span class="o">=</span> <span class="n">axel</span><span class="o">.</span><span class="n">triangulate_quads</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Converted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">quads</span><span class="p">)</span><span class="si">}</span><span class="s2"> quads to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
