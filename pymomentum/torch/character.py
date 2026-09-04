@@ -749,11 +749,11 @@ class ParameterTransform(torch.nn.Module):
     def forward(self, model_parameters: torch.Tensor) -> torch.Tensor:
         if not hasattr(self, "parameter_transform"):
             raise RuntimeError("Character has no parameter transform")
-        return torch.einsum(
-            "dn,...n->...d",
-            self.parameter_transform,
-            model_parameters,
-        )
+        # Equivalent to einsum("dn,...n->...d", parameter_transform, model_parameters).
+        # Spelled as a linear so torch.export does not decompose it into a pair of
+        # permutes over the [d, n] buffer, which on an exported graph are re-executed
+        # every frame rather than folded away.
+        return torch.nn.functional.linear(model_parameters, self.parameter_transform)
 
 
 class InverseParameterTransform(torch.nn.Module):
