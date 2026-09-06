@@ -57,7 +57,7 @@ jobs:
           cuda-version: "12.9.0"
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.9.5
+        uses: prefix-dev/setup-pixi@d3f436a425481402e6a95a1d1fc10331c708cd9e # v0.9.5
         with:
           # run-install: false + no environments — we install manually below with retry.
           # cache: false avoids filling /home/runner/.cache/rattler with large CUDA packages.
@@ -128,7 +128,7 @@ jobs:
           cuda-version: "12.9.0"
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.9.5
+        uses: prefix-dev/setup-pixi@d3f436a425481402e6a95a1d1fc10331c708cd9e # v0.9.5
         with:
           environments: py312-cuda129
           cache: true
