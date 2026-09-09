@@ -8,11 +8,13 @@
 #include "momentum/io/fbx/fbx_builder.h"
 
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 
 #ifdef MOMENTUM_WITH_FBX_SDK
 
 #include "momentum/character/character.h"
 #include "momentum/character/character_state.h"
+#include "momentum/common/name_utils.h"
 #include "momentum/io/fbx/fbx_io_internal.h"
 
 #include <unordered_map>
@@ -20,6 +22,23 @@
 namespace momentum {
 
 using namespace fbx_internal; // NOLINT(google-build-using-namespace)
+
+namespace {
+
+void prefixSkeletonNodeNames(
+    const std::string& prefix,
+    const std::vector<::fbxsdk::FbxNode*>& nodes) {
+  for (auto* node : nodes) {
+    MT_THROW_IF(node == nullptr, "Cannot rename a null FBX node");
+    const std::string prefixedName = prefix + ":" + node->GetName();
+    node->SetName(prefixedName.c_str());
+    if (auto* attribute = node->GetNodeAttribute()) {
+      attribute->SetName(prefixedName.c_str());
+    }
+  }
+}
+
+} // namespace
 
 struct FbxBuilder::Impl {
   struct CharacterData {
@@ -30,7 +49,25 @@ struct FbxBuilder::Impl {
 
   ::fbxsdk::FbxManager* manager = nullptr;
   ::fbxsdk::FbxScene* scene = nullptr;
+
+  // --- Character name model (read before changing name handling) ---
+  // Every added character/rigid body is stored in `characters` under a UNIQUE *exported* name (the
+  // map key). The exported name is derived from a requested name -- character.name for
+  // addCharacter, or the `name` argument (falling back to character.name) for addRigidBody -- and
+  // is made unique by makeUniqueName(), which appends a numeric suffix ("name_1", ...) on
+  // collision. Because of the addRigidBody `name` override AND suffixing, the exported name is
+  // frequently NOT equal to character.name: character.name is the *source* name, not the identity.
+  // addCharacter/ addRigidBody RETURN the exported name; callers pass it back as `characterName` to
+  // addMotion* to target a specific character -- required for instancing (the same Character object
+  // added more than once) or whenever the name was overridden/suffixed.
+  //
+  // `exportedNameBySourceName` maps source name (character.name) -> exported name, FIRST-WINS
+  // (never overwritten). It lets addMotion* resolve an EMPTY characterName back to a character even
+  // when the exported name differs from character.name (e.g. an addRigidBody `name` override).
+  // First-wins (not latest-wins) makes an empty characterName deterministically resolve to the
+  // *name-owner* -- the first character added under that source name -- never a later duplicate.
   std::unordered_map<std::string, CharacterData> characters;
+  std::unordered_map<std::string, std::string> exportedNameBySourceName;
 
   Impl() {
     manager = ::fbxsdk::FbxManager::Create();
@@ -54,6 +91,38 @@ struct FbxBuilder::Impl {
   Impl& operator=(const Impl&) = delete;
   Impl(Impl&&) = delete;
   Impl& operator=(Impl&&) = delete;
+
+  // Resolve which stored character an addMotion* call targets (see the "Character name model" note
+  // above) and validate that its skeleton matches `character`. Returns the stored CharacterData.
+  CharacterData& resolveCharacterForMotion(
+      const Character& character,
+      const std::string& characterName) {
+    std::string resolvedCharacterName = characterName;
+    if (resolvedCharacterName.empty()) {
+      const auto sourceIt = exportedNameBySourceName.find(character.name);
+      MT_THROW_IF(
+          sourceIt == exportedNameBySourceName.end(),
+          "Character '{}' has not been added to the builder",
+          character.name);
+      resolvedCharacterName = sourceIt->second;
+    }
+
+    const auto it = characters.find(resolvedCharacterName);
+    MT_THROW_IF(
+        it == characters.end(),
+        "Character '{}' has not been added to the builder",
+        resolvedCharacterName);
+
+    MT_THROW_IF(
+        it->second.skeletonResult.nodes.size() != character.skeleton.joints.size(),
+        "Character '{}' ({} joints) does not match exported character '{}' ({} skeleton nodes). When multiple characters share a name, pass the exact name returned by addCharacter/addRigidBody.",
+        character.name,
+        character.skeleton.joints.size(),
+        resolvedCharacterName,
+        it->second.skeletonResult.nodes.size());
+
+    return it->second;
+  }
 };
 
 FbxBuilder::FbxBuilder() : impl_(std::make_unique<Impl>()) {}
@@ -64,9 +133,15 @@ FbxBuilder::FbxBuilder(FbxBuilder&&) noexcept = default;
 
 FbxBuilder& FbxBuilder::operator=(FbxBuilder&&) noexcept = default;
 
-void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions& options) {
+std::string FbxBuilder::addCharacter(const Character& character, const FileSaveOptions& options) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
+
+  std::string characterName = makeUniqueName(character.name, impl_->characters);
+  if (characterName != character.name) {
+    MT_LOGW(
+        "Character name '{}' is already in use; exporting as '{}'.", character.name, characterName);
+  }
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
@@ -77,7 +152,10 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
 
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
-  addMetaData(skeletonResult.rootNode, character);
+  if (characterName != character.name) {
+    prefixSkeletonNodeNames(characterName, skeletonResult.nodes);
+  }
+  addMetaData(skeletonResult.rootNode, character, characterName);
   addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
   if (options.locators) {
@@ -90,8 +168,10 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
   // Create mesh with blend shapes (parented to scene root = skinned)
   MeshBlendShapeResult meshResult;
   if (options.mesh && character.mesh != nullptr) {
+    const std::string meshName =
+        characterName == character.name ? "body_mesh" : characterName + "_mesh";
     meshResult = createMeshNode(
-        character, impl_->scene, root, skeletonResult.jointToNodeMap, options.permissive);
+        character, impl_->scene, root, skeletonResult.jointToNodeMap, options.permissive, meshName);
   }
 
   // Add skeleton to scene root
@@ -100,11 +180,17 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
   }
 
   // Store character data for later animation
-  const std::string& name = character.name;
-  impl_->characters[name] = {std::move(skeletonResult), std::move(meshResult), name};
+  impl_->characters[characterName] = {
+      .skeletonResult = std::move(skeletonResult),
+      .meshResult = std::move(meshResult),
+      .name = characterName};
+  // First-wins: record source name -> exported name so an empty characterName in addMotion*
+  // resolves to the first character added under this source name (see FbxBuilder::Impl).
+  impl_->exportedNameBySourceName.emplace(character.name, characterName);
+  return characterName;
 }
 
-void FbxBuilder::addRigidBody(
+std::string FbxBuilder::addRigidBody(
     const Character& character,
     const std::string& name,
     size_t parentJoint,
@@ -115,23 +201,22 @@ void FbxBuilder::addRigidBody(
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
-  const std::string charName = name.empty() ? character.name : name;
+  const std::string requestedName = name.empty() ? character.name : name;
+  std::string characterName = makeUniqueName(requestedName, impl_->characters);
+  if (characterName != requestedName) {
+    MT_LOGW(
+        "Character name '{}' is already in use; exporting as '{}'.", requestedName, characterName);
+  }
 
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
-  addMetaData(skeletonResult.rootNode, character);
+  addMetaData(skeletonResult.rootNode, character, characterName);
   addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
-  // Prefix skeleton joint names with charName to avoid collisions when
+  // Prefix skeleton joint names with characterName to avoid collisions when
   // multiple rigid bodies share the scene (e.g. "root" -> "controller_l:root").
-  if (!name.empty()) {
-    for (auto* node : skeletonResult.nodes) {
-      std::string prefixed = charName + ":" + node->GetName();
-      node->SetName(prefixed.c_str());
-      if (auto* attr = node->GetNodeAttribute()) {
-        attr->SetName(prefixed.c_str());
-      }
-    }
+  if (!name.empty() || characterName != character.name) {
+    prefixSkeletonNodeNames(characterName, skeletonResult.nodes);
   }
 
   // Resolve which joint node to parent the mesh under
@@ -149,7 +234,7 @@ void FbxBuilder::addRigidBody(
     // Parent it under the target joint so it moves rigidly with that joint.
     const auto numVertices = static_cast<int>(character.mesh->vertices.size());
     ::fbxsdk::FbxNode* meshNode =
-        ::fbxsdk::FbxNode::Create(impl_->scene, (charName + "_mesh").c_str());
+        ::fbxsdk::FbxNode::Create(impl_->scene, (characterName + "_mesh").c_str());
     ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, "mesh");
     lMesh->SetControlPointCount(numVertices);
     lMesh->InitNormals(numVertices);
@@ -191,21 +276,25 @@ void FbxBuilder::addRigidBody(
     root->AddChild(skeletonResult.rootNode);
   }
 
-  impl_->characters[character.name] = {std::move(skeletonResult), std::move(meshResult), charName};
+  impl_->characters[characterName] = {
+      .skeletonResult = std::move(skeletonResult),
+      .meshResult = std::move(meshResult),
+      .name = characterName};
+  // First-wins: record source name -> exported name so an empty characterName in addMotion*
+  // resolves to the first character added under this source name (see FbxBuilder::Impl).
+  impl_->exportedNameBySourceName.emplace(character.name, characterName);
+  return characterName;
 }
 
 void FbxBuilder::addMotion(
     const Character& character,
     float fps,
     const MatrixXf& motion,
-    const VectorXf& offsets) {
+    const VectorXf& offsets,
+    const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
-  auto it = impl_->characters.find(character.name);
-  MT_THROW_IF(
-      it == impl_->characters.end(),
-      "Character '{}' has not been added to the builder",
-      character.name);
+  const auto& charData = impl_->resolveCharacterForMotion(character, characterName);
 
   if (motion.cols() == 0) {
     return;
@@ -233,7 +322,6 @@ void FbxBuilder::addMotion(
     jointValues.col(f) = state.skeletonState.jointParameters.v;
   }
 
-  const auto& charData = it->second;
   if (jointValues.rows() == character.parameterTransform.numJointParameters()) {
     createAnimationCurves(
         character, impl_->scene, charData.skeletonResult.nodes, jointValues, fps, false);
@@ -255,20 +343,16 @@ void FbxBuilder::addMotion(
 void FbxBuilder::addMotionWithJointParams(
     const Character& character,
     float fps,
-    const MatrixXf& jointParams) {
+    const MatrixXf& jointParams,
+    const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
-  auto it = impl_->characters.find(character.name);
-  MT_THROW_IF(
-      it == impl_->characters.end(),
-      "Character '{}' has not been added to the builder",
-      character.name);
+  const auto& charData = impl_->resolveCharacterForMotion(character, characterName);
 
   if (jointParams.cols() == 0) {
     return;
   }
 
-  const auto& charData = it->second;
   createAnimationCurves(
       character,
       impl_->scene,
@@ -497,23 +581,29 @@ FbxBuilder::FbxBuilder(FbxBuilder&&) noexcept = default;
 
 FbxBuilder& FbxBuilder::operator=(FbxBuilder&&) noexcept = default;
 
-void FbxBuilder::addCharacter(const Character&, const FileSaveOptions&) {
+std::string FbxBuilder::addCharacter(const Character&, const FileSaveOptions&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addRigidBody(
+std::string
+FbxBuilder::addRigidBody(const Character&, const std::string&, size_t, const FileSaveOptions&) {
+  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
+}
+
+void FbxBuilder::addMotion(
     const Character&,
-    const std::string&,
-    size_t,
-    const FileSaveOptions&) {
+    float,
+    const MatrixXf&,
+    const VectorXf&,
+    const std::string&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addMotion(const Character&, float, const MatrixXf&, const VectorXf&) {
-  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
-}
-
-void FbxBuilder::addMotionWithJointParams(const Character&, float, const MatrixXf&) {
+void FbxBuilder::addMotionWithJointParams(
+    const Character&,
+    float,
+    const MatrixXf&,
+    const std::string&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 

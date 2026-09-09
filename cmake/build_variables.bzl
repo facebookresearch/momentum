@@ -15,6 +15,7 @@ common_public_headers = [
     "common/log_channel.h",
     "common/log.h",
     "common/memory.h",
+    "common/name_utils.h",
     "common/profile.h",
     "common/string.h",
 ]
