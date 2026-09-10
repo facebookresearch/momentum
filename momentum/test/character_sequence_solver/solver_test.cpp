@@ -399,9 +399,9 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyPerFrameOnlyAcrossBatchesAndIterat
   universalParams.set(4);
   universalParams.set(7);
 
-  const auto workerCount = dispenso::globalThreadPool().numThreads();
-  ASSERT_GE(workerCount, 0);
-  const size_t nFrames = std::max<size_t>(4, static_cast<size_t>(workerCount) + 2);
+  constexpr size_t kWorkerCount = 1;
+  // One pool worker plus the caller processes four one-frame chunks in two batches.
+  constexpr size_t nFrames = 2 * (kWorkerCount + 1);
   MultiPoseTestProblem<T> problem(this->rng, character, nFrames, universalParams);
 
   const auto populateSolverFunction = [&](SequenceSolverFunctionT<T>& result) {
@@ -443,7 +443,16 @@ TYPED_TEST(SequenceSolverTest, CompareCholeskyPerFrameOnlyAcrossBatchesAndIterat
 
   SequenceCholeskySolverT<T> solverCholesky(solverOptionsCholesky, &sequenceSolverFunctionCholesky);
   Eigen::VectorX<T> parametersCholesky = parametersInit;
-  solverCholesky.solve(parametersCholesky);
+  auto& threadPool = dispenso::globalThreadPool();
+  const auto originalWorkerCount = threadPool.numThreads();
+  threadPool.resize(kWorkerCount);
+  try {
+    solverCholesky.solve(parametersCholesky);
+  } catch (...) {
+    threadPool.resize(originalWorkerCount);
+    throw;
+  }
+  threadPool.resize(originalWorkerCount);
   const T errCholesky = sequenceSolverFunctionCholesky.getError(parametersCholesky);
 
   EXPECT_NEAR(errQr, errCholesky, Eps<T>(5e-5f, 1e-8));
