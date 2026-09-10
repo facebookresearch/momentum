@@ -46,6 +46,7 @@
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
 #include <momentum/io/marker/coordinate_system.h>
+#include <momentum/io/obj/obj_io.h>
 #include <momentum/io/shape/blend_shape_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/math/intersection.h>
@@ -961,6 +962,23 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
 :return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames]. Does NOT include the character or FPS.
       )",
       py::arg("gltf_filename"));
+
+  m.def(
+      "load_obj",
+      [](const std::string& path) { return mm::loadObj(path); },
+      R"(Load a mesh from a Wavefront OBJ file.
+
+Reads positions, texture coordinates and faces. Polygons are fan-triangulated, with the
+original topology kept in the mesh's polygon arrays. Texture coordinates are kept only if
+every face has them, since they must stay index-aligned with the triangulated faces.
+
+Normals are recomputed from the geometry rather than read from the file, because a Mesh
+stores one normal per vertex while OBJ indexes them per face corner.
+
+:param path: Path to a .obj file.
+:return: The loaded Mesh.
+      )",
+      py::arg("path"));
 
   // loadMarkersFromFile(path, mainSubjectOnly)
   // TODO(T138941756): Expose the loadMarker and loadMarkersForMainSubject

@@ -692,6 +692,18 @@ io_legacy_json_test_sources = [
     "test/io/io_legacy_json_test.cpp",
 ]
 
+io_obj_public_headers = [
+    "io/obj/obj_io.h",
+]
+
+io_obj_sources = [
+    "io/obj/obj_io.cpp",
+]
+
+io_obj_test_sources = [
+    "test/io/io_obj_test.cpp",
+]
+
 io_bvh_public_headers = [
     "io/bvh/bvh_io.h",
 ]
