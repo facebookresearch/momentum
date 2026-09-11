@@ -129,7 +129,7 @@ def main():
         {
             "tag": "core",
             "distribution_name": "pymomentum-core",
-            "description_suffix": "core package without PyTorch",
+            "description_suffix": "core package without PyTorch C++ extensions",
             "build_torch_extensions": False,
             "wheel_libs_dir": "pymomentum_core.libs",
             "install_component": "pymomentum_core",

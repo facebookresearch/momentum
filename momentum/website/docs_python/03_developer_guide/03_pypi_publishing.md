@@ -118,8 +118,9 @@ PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_test
 ```
 
 Core and add-on wheels use separate CMake install components. The core wheel
-owns all NumPy/native modules; CPU and GPU wheels own only Torch-backed modules
-and require the matching core release series.
+owns all NumPy/native modules and pure-Python Torch helpers; CPU and GPU wheels
+own only the compiled Torch extensions and require the matching core release
+series.
 
 ## CI Workflow
 
