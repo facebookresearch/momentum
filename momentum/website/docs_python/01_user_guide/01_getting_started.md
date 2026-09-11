@@ -29,7 +29,7 @@ Choose your preferred installation method based on your workflow. **We recommend
 pixi add pymomentum
 
 # Explicit backend selection
-pixi add pymomentum-core # NumPy/native modules, no PyTorch
+pixi add pymomentum-core # NumPy/native modules and optional pure-Python Torch helpers
 pixi add pymomentum-cpu  # CPU-only
 pixi add pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -45,7 +45,7 @@ pixi add pymomentum-gpu  # GPU (CUDA) support
 conda install -c conda-forge pymomentum
 
 # Explicit backend selection
-conda install -c conda-forge pymomentum-core # NumPy/native modules, no PyTorch
+conda install -c conda-forge pymomentum-core # NumPy/native modules and optional pure-Python Torch helpers
 conda install -c conda-forge pymomentum-cpu  # CPU-only
 conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -72,18 +72,22 @@ For the most stable and well-tested installation experience, we recommend using 
 
 ```bash
 # Using uv (preferred over pip)
-uv add pymomentum-core  # NumPy/native modules, no PyTorch
+uv add pymomentum-core          # Core without installing PyTorch
+uv add "pymomentum-core[torch]" # Core with pure-Python Torch helpers enabled
 uv add pymomentum-cpu   # CPU version
 uv add pymomentum-gpu   # GPU version (requires CUDA)
 
 # Alternative: Using pip
 pip install pymomentum-core
+pip install "pymomentum-core[torch]" # Include PyTorch for the pure-Python helpers
 pip install pymomentum-cpu
 pip install pymomentum-gpu
 ```
 
-The CPU and GPU distributions are add-ons that install a compatible
-`pymomentum-core`; do not install both add-ons in the same environment.
+Core includes the pure-Python Torch helpers but does not install PyTorch unless
+the `torch` extra is selected. The CPU and GPU distributions add the compiled
+Torch extensions and install a compatible `pymomentum-core`; do not install
+both add-ons in the same environment.
 
 **Browse packages:** [pymomentum-core](https://pypi.org/project/pymomentum-core/), [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
 
