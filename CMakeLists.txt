@@ -648,6 +648,15 @@ mt_library(
 )
 
 mt_library(
+  NAME io_obj
+  HEADERS_VARS io_obj_public_headers
+  SOURCES_VARS io_obj_sources
+  PUBLIC_LINK_LIBRARIES
+    character
+    io_common
+)
+
+mt_library(
   NAME io_motion
   HEADERS_VARS io_motion_public_headers
   SOURCES_VARS io_motion_sources
@@ -692,6 +701,7 @@ mt_library(
     io_common
     io_legacy_json
     io_marker
+    io_obj
     io_motion
     io_shape
     ${io_usd_library}
@@ -1000,6 +1010,14 @@ if(MOMENTUM_BUILD_TESTING)
       io_test_helper
     ENV
       "TEST_RESOURCES_PATH=${CMAKE_SOURCE_DIR}/momentum/test/resources"
+  )
+
+  mt_test(
+    NAME io_obj_test
+    SOURCES_VARS io_obj_test_sources
+    LINK_LIBRARIES
+      io_obj
+      io_test_helper
   )
 
   mt_test(

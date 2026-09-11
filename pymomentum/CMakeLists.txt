@@ -221,6 +221,7 @@ mt_python_binding(
     io_gltf
     io_legacy_json
     io_marker
+    io_obj
     io_shape
     io_skeleton
     io_urdf
