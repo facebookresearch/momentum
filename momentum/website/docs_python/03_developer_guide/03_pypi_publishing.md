@@ -1,6 +1,7 @@
 # PyPI Publishing Guide
 
-This guide explains how to maintain and update PyPI publishing configuration for `pymomentum-cpu` and `pymomentum-gpu` packages.
+This guide explains how to maintain and update PyPI publishing configuration
+for the `pymomentum-core`, `pymomentum-cpu`, and `pymomentum-gpu` packages.
 
 ## System Overview
 
@@ -8,7 +9,8 @@ The PyPI publishing system uses a **template-based approach** to generate platfo
 
 - **Template**: `pyproject-pypi.toml.j2` - Jinja2 template with PyTorch version placeholders
 - **Generator**: `scripts/generate_pyproject.py` - Renders template with version constraints
-- **Generated files**: `pyproject-pypi-cpu.toml` and `pyproject-pypi-gpu.toml` (temporary, gitignored)
+- **Generated files**: `pyproject-pypi-{core,cpu,gpu}-py{version}.toml`
+  (temporary, gitignored)
 - **CI workflow**: `.github/workflows/publish_to_pypi.yml` - Builds and publishes wheels
 
 ## Updating PyTorch Versions
@@ -109,10 +111,15 @@ cat pyproject-pypi-gpu.toml    # Check GPU constraints
 
 Build test wheels:
 ```bash
-pixi run -e py312 clean_dist
-pixi run -e py312 build_pypi_wheel
-pixi run -e py312 check_pypi
+pixi run -e py312 wheel_clean
+pixi run -e py312 wheel_build
+PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_build
+PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_test
 ```
+
+Core and add-on wheels use separate CMake install components. The core wheel
+owns all NumPy/native modules; CPU and GPU wheels own only Torch-backed modules
+and require the matching core release series.
 
 ## CI Workflow
 

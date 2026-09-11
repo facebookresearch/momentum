@@ -242,6 +242,7 @@ endif()
 
 mt_python_binding(
   NAME geometry_test_utils
+  COMPONENT pymomentum_test
   PYMOMENTUM_SOURCES_VARS geometry_test_utils_sources
   LINK_LIBRARIES
     character
@@ -252,6 +253,7 @@ mt_python_binding(
 if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
   mt_python_binding(
     NAME diff_geometry
+    COMPONENT pymomentum_torch
     PYMOMENTUM_HEADERS_VARS diff_geometry_public_headers
     PYMOMENTUM_SOURCES_VARS diff_geometry_sources
     INCLUDE_DIRECTORIES
@@ -273,6 +275,7 @@ if(MOMENTUM_BUILD_TORCH_EXTENSIONS)
   mt_python_binding(
     NAME pymomentum_solver
     MODULE_NAME solver
+    COMPONENT pymomentum_torch
     PYMOMENTUM_HEADERS_VARS solver_public_headers
     PYMOMENTUM_SOURCES_VARS solver_sources
     INCLUDE_DIRECTORIES
@@ -359,6 +362,7 @@ mt_python_binding(
 mt_python_library(
   NAME quaternion
   PYMOMENTUM_SOURCES_VARS quaternion_sources
+  COMPONENT pymomentum_torch
 )
 
 mt_python_library(
@@ -369,6 +373,7 @@ mt_python_library(
 mt_python_library(
   NAME skel_state
   PYMOMENTUM_SOURCES_VARS skel_state_sources
+  COMPONENT pymomentum_torch
 )
 
 mt_python_library(
@@ -379,18 +384,21 @@ mt_python_library(
 mt_python_library(
   NAME trs
   PYMOMENTUM_SOURCES_VARS trs_sources
+  COMPONENT pymomentum_torch
 )
 
 mt_python_library(
   NAME backend
   PYMOMENTUM_SOURCES_VARS backend_common_sources backend_torch_core_sources backend_torch_sources backend_triton_sources
   PRESERVE_DIRECTORY_STRUCTURE
+  COMPONENT pymomentum_torch
 )
 
 mt_python_library(
   NAME torch
   PYMOMENTUM_SOURCES_VARS gpu_character_sources
   PRESERVE_DIRECTORY_STRUCTURE
+  COMPONENT pymomentum_torch
 )
 
 mt_python_library(

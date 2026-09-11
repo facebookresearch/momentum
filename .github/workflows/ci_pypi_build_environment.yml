@@ -12,6 +12,7 @@ on:
       - "scripts/build_pypi_wheel.py"
       - "scripts/generate_pyproject.py"
       - "scripts/test_pypi_build_environment.py"
+      - "scripts/test_generate_pyproject.py"
   pull_request:
     branches:
       - "**"
@@ -23,6 +24,7 @@ on:
       - "scripts/build_pypi_wheel.py"
       - "scripts/generate_pyproject.py"
       - "scripts/test_pypi_build_environment.py"
+      - "scripts/test_generate_pyproject.py"
   workflow_dispatch:
 
 permissions:
@@ -60,4 +62,6 @@ jobs:
           environments: ${{ matrix.pixi-environment }}
 
       - name: Test PyPI Torch imports in the Pixi build environment
-        run: pixi run -e ${{ matrix.pixi-environment }} python scripts/test_pypi_build_environment.py
+        run: |
+          pixi run -e ${{ matrix.pixi-environment }} python -m unittest scripts.test_generate_pyproject scripts.test_build_pypi_wheel
+          pixi run -e ${{ matrix.pixi-environment }} python scripts/test_pypi_build_environment.py

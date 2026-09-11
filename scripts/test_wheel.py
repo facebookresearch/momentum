@@ -17,13 +17,18 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
-
 
 WHEEL_PREFIX_BY_TYPE = {
     "core": "pymomentum_core-",
     "cpu": "pymomentum_cpu-",
     "gpu": "pymomentum_gpu-",
+}
+DIST_NAME_BY_TYPE = {
+    "core": "pymomentum-core",
+    "cpu": "pymomentum-cpu",
+    "gpu": "pymomentum-gpu",
 }
 DYNAMIC_LIBRARY_ENV_VARS = (
     "DYLD_INSERT_LIBRARIES",
@@ -90,8 +95,48 @@ def has_torch_extensions(wheel_type: str) -> bool:
     return wheel_type in {"cpu", "gpu"}
 
 
-def has_torch_runtime(wheel_type: str) -> bool:
-    return wheel_type in {"core", "cpu", "gpu"}
+def check_wheel_contents(
+    wheel_file: Path, wheel_type: str, core_wheel: Path | None = None
+) -> None:
+    """Check that core and Torch add-on wheels own disjoint payloads."""
+    with zipfile.ZipFile(wheel_file) as archive:
+        names = {name for name in archive.namelist() if not name.endswith("/")}
+    package_files = {name for name in names if name.startswith("pymomentum/")}
+    if any(name.startswith(("include/", "lib/", "bin/", "share/")) for name in names):
+        raise RuntimeError(f"{wheel_file.name} contains C++ SDK files")
+    if any("geometry_test_utils" in name for name in names):
+        raise RuntimeError(f"{wheel_file.name} contains test-only bindings")
+
+    torch_paths = {
+        "pymomentum/quaternion.py",
+        "pymomentum/skel_state.py",
+        "pymomentum/trs.py",
+    }
+    if wheel_type == "core":
+        unexpected = sorted(
+            name
+            for name in package_files
+            if name in torch_paths
+            or name.startswith("pymomentum/backend/")
+            or name.startswith("pymomentum/torch/")
+            or name.startswith("pymomentum/diff_geometry.")
+            or name.startswith("pymomentum/solver.")
+        )
+        if unexpected:
+            raise RuntimeError(f"core wheel contains Torch add-on files: {unexpected}")
+        return
+
+    if core_wheel is None:
+        raise RuntimeError("CPU/GPU wheel tests require the matching core wheel")
+    with zipfile.ZipFile(core_wheel) as archive:
+        core_files = {
+            name
+            for name in archive.namelist()
+            if name.startswith("pymomentum/") and not name.endswith("/")
+        }
+    overlap = sorted(package_files & core_files)
+    if overlap:
+        raise RuntimeError(f"core and {wheel_type} wheels overlap: {overlap}")
 
 
 def get_torch_index(wheel_type: str) -> str:
@@ -109,10 +154,11 @@ def get_import_test_script(
     wheel_type: str,
     require_cuda: bool = False,
     require_triton: bool = False,
+    expect_no_torch: bool = False,
 ) -> str:
     """Return the Python smoke test script for a wheel type."""
     torch_extensions = has_torch_extensions(wheel_type)
-    torch_runtime = has_torch_runtime(wheel_type)
+    torch_runtime = has_torch_extensions(wheel_type)
     lines = [
         "import importlib.util",
         "import os",
@@ -154,8 +200,13 @@ def get_import_test_script(
     if torch_extensions:
         lines.extend(
             [
+                "    import pymomentum.backend as backend",
                 "    import pymomentum.diff_geometry as diff_geometry",
+                "    import pymomentum.quaternion as quaternion",
+                "    import pymomentum.skel_state as skel_state",
                 "    import pymomentum.solver as solver",
+                "    import pymomentum.torch.character as torch_character",
+                "    import pymomentum.trs as trs",
             ]
         )
         if wheel_type == "gpu" and require_cuda:
@@ -167,18 +218,22 @@ def get_import_test_script(
             )
     else:
         if wheel_type == "core":
+            if expect_no_torch:
+                lines.append(
+                    '    assert importlib.util.find_spec("torch") is None, "pymomentum-core must not install PyTorch"'
+                )
             lines.extend(
                 [
-                    "    import pymomentum.quaternion as quaternion",
-                    "    import pymomentum.skel_state as skel_state",
-                    "    import pymomentum.trs as trs",
-                    "    import pymomentum.torch.character as torch_character",
+                    "    import pymomentum.quaternion_np as quaternion_np",
+                    "    import pymomentum.skel_state_np as skel_state_np",
                 ]
             )
         lines.extend(
             [
                 '    assert importlib.util.find_spec("pymomentum.diff_geometry") is None, "pymomentum-core must not expose pymomentum.diff_geometry"',
                 '    assert importlib.util.find_spec("pymomentum.solver") is None, "pymomentum-core must not expose pymomentum.solver"',
+                '    assert importlib.util.find_spec("pymomentum.torch") is None, "pymomentum-core must not expose pymomentum.torch"',
+                '    assert importlib.util.find_spec("pymomentum.quaternion") is None, "pymomentum-core must not expose torch-backed helpers"',
             ]
         )
     lines.extend(
@@ -307,6 +362,7 @@ def run_import_tests(
     wheel_type: str,
     require_cuda: bool = False,
     require_triton: bool = False,
+    expect_no_torch: bool = False,
 ) -> int:
     """Run import and parallel operation tests using the specified Python."""
     env = os.environ.copy()
@@ -320,7 +376,7 @@ def run_import_tests(
         env.pop(name, None)
     # Keep the checkout's namespace-package directories out of wheel import checks.
     with tempfile.TemporaryDirectory() as tmpdir:
-        if has_torch_runtime(wheel_type):
+        if has_torch_extensions(wheel_type):
             result = subprocess.run(
                 [
                     python_exe,
@@ -340,7 +396,9 @@ def run_import_tests(
                 python_exe,
                 "-I",
                 "-c",
-                get_import_test_script(wheel_type, require_cuda, require_triton),
+                get_import_test_script(
+                    wheel_type, require_cuda, require_triton, expect_no_torch
+                ),
             ],
             capture_output=False,
             cwd=tmpdir,
@@ -361,6 +419,7 @@ def test_in_container(
     wheel_file: Path,
     wheel_type: str,
     py_ver: str,
+    core_wheel: Path | None = None,
     require_cuda: bool = False,
     require_triton: bool = False,
 ) -> int:
@@ -376,6 +435,7 @@ def test_in_container(
             wheel_file,
             wheel_type,
             py_ver,
+            core_wheel,
             require_cuda,
             require_triton,
         )
@@ -404,7 +464,7 @@ def test_in_container(
         "$PYTHON -m uv venv --python $PYTHON /tmp/test_venv",
         "",
     ]
-    if has_torch_runtime(wheel_type):
+    if has_torch_extensions(wheel_type):
         torch_index = get_torch_index(wheel_type)
         container_lines.extend(
             [
@@ -420,15 +480,21 @@ def test_in_container(
         wheel_type,
         require_cuda,
         require_triton,
+        expect_no_torch=wheel_type == "core",
     )
     container_lines.extend(
         [
             'echo "Installing wheel..."',
-            f"$PYTHON -m uv pip install --python /tmp/test_venv/bin/python /wheel/{wheel_file.name}",
+            "$PYTHON -m uv pip install --python /tmp/test_venv/bin/python "
+            + " ".join(
+                f"/wheel/{path.name}"
+                for path in ([core_wheel, wheel_file] if core_wheel else [wheel_file])
+            ),
+            "$PYTHON -m uv pip check --python /tmp/test_venv/bin/python",
             "",
         ]
     )
-    if has_torch_runtime(wheel_type):
+    if has_torch_extensions(wheel_type):
         container_lines.extend(
             [
                 'echo "Testing pymomentum.geometry before torch..."',
@@ -448,6 +514,20 @@ def test_in_container(
             "/tmp/test_venv/bin/python -I /tmp/test_wheel_imports.py",
         ]
     )
+    if core_wheel is not None:
+        core_import_script = get_import_test_script("core")
+        container_lines.extend(
+            [
+                "",
+                'echo "Testing core after uninstalling add-on..."',
+                "$PYTHON -m uv pip uninstall --python /tmp/test_venv/bin/python "
+                + DIST_NAME_BY_TYPE[wheel_type],
+                "cat >/tmp/test_core_imports.py <<'PYTEST'",
+                *core_import_script.rstrip().splitlines(),
+                "PYTEST",
+                "/tmp/test_venv/bin/python -I /tmp/test_core_imports.py",
+            ]
+        )
     container_script = "\n".join(container_lines) + "\n"
 
     container_command = [container_runtime, "run", "--rm"]
@@ -473,6 +553,7 @@ def test_locally_with_uv(
     wheel_file: Path,
     wheel_type: str,
     py_ver: str,
+    core_wheel: Path | None = None,
     require_cuda: bool = False,
     require_triton: bool = False,
 ) -> int:
@@ -511,7 +592,7 @@ def test_locally_with_uv(
             print(f"[FAIL] Failed to create venv: {result.stderr}", file=sys.stderr)
             return result.returncode
 
-        if has_torch_runtime(wheel_type):
+        if has_torch_extensions(wheel_type):
             torch_index = get_torch_index(wheel_type)
             print(f"Installing torch from {torch_index}...")
             result = subprocess.run(
@@ -538,7 +619,18 @@ def test_locally_with_uv(
 
         print(f"Installing wheel {wheel_file.name}...")
         result = subprocess.run(
-            [uv_path, "pip", "install", "--python", python_exe, str(wheel_file)],
+            [
+                uv_path,
+                "pip",
+                "install",
+                "--python",
+                python_exe,
+                *(
+                    [str(core_wheel), str(wheel_file)]
+                    if core_wheel
+                    else [str(wheel_file)]
+                ),
+            ],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -548,7 +640,48 @@ def test_locally_with_uv(
             print(f"[FAIL] Failed to install wheel: {result.stderr}", file=sys.stderr)
             return result.returncode
 
-        return run_import_tests(python_exe, wheel_type, require_cuda, require_triton)
+        result = subprocess.run(
+            [uv_path, "pip", "check", "--python", python_exe],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if result.returncode != 0:
+            print(f"[FAIL] Dependency check failed: {result.stderr}", file=sys.stderr)
+            return result.returncode
+
+        returncode = run_import_tests(
+            python_exe,
+            wheel_type,
+            require_cuda,
+            require_triton,
+            expect_no_torch=wheel_type == "core",
+        )
+        if returncode != 0 or core_wheel is None:
+            return returncode
+
+        print(f"Uninstalling {DIST_NAME_BY_TYPE[wheel_type]} and retesting core...")
+        result = subprocess.run(
+            [
+                uv_path,
+                "pip",
+                "uninstall",
+                "--python",
+                python_exe,
+                DIST_NAME_BY_TYPE[wheel_type],
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if result.returncode != 0:
+            print(
+                f"[FAIL] Failed to uninstall add-on: {result.stderr}", file=sys.stderr
+            )
+            return result.returncode
+        return run_import_tests(python_exe, "core")
 
 
 def main():
@@ -603,6 +736,22 @@ def main():
     # Pick the most recently modified wheel to avoid stale wheels from prior steps
     wheel_file = max(wheel_files, key=lambda f: f.stat().st_mtime)
     print(f"Found wheel: {wheel_file.name}")
+    core_wheel = None
+    if wheel_type != "core":
+        core_wheels = [
+            path
+            for path in dist_dir.iterdir()
+            if path.name.startswith(WHEEL_PREFIX_BY_TYPE["core"])
+            and py_ver in path.name
+            and path.name.endswith(".whl")
+        ]
+        if not core_wheels:
+            print(f"[FAIL] No matching core wheel found for {py_ver}", file=sys.stderr)
+            sys.exit(1)
+        core_wheel = max(core_wheels, key=lambda path: path.stat().st_mtime)
+        print(f"Found core wheel: {core_wheel.name}")
+
+    check_wheel_contents(wheel_file, wheel_type, core_wheel)
 
     # Choose test method based on platform and wheel type
     if sys.platform == "linux" and "manylinux" in wheel_file.name and not force_local:
@@ -611,6 +760,7 @@ def main():
             wheel_file,
             wheel_type,
             py_ver,
+            core_wheel,
             require_cuda,
             require_triton,
         )
@@ -620,6 +770,7 @@ def main():
             wheel_file,
             wheel_type,
             py_ver,
+            core_wheel,
             require_cuda,
             require_triton,
         )

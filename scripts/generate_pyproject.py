@@ -14,14 +14,31 @@ Then update SUPPORTED_PYTHON_TAGS and PYTHON_REQUIRES_MAX below.
 """
 
 import argparse
+import re
+import subprocess
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-
 SUPPORTED_PYTHON_TAGS = ["312", "313"]
 PYTHON_REQUIRES_MIN = "3.12"
 PYTHON_REQUIRES_MAX = "3.14"
+
+
+def core_version_bounds(version: str) -> tuple[str, str]:
+    """Return the compatible core range for an add-on release."""
+    match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)", version)
+    if match is None:
+        raise ValueError(f"Expected a three-part release version, got {version!r}")
+    major, minor, patch = (int(part) for part in match.groups())
+    return f"{major}.{minor}.{patch}", f"{major}.{minor}.{patch + 1}"
+
+
+def latest_release_tag() -> str:
+    """Return the most recent version tag reachable from the checkout."""
+    return subprocess.check_output(
+        ["git", "describe", "--tags", "--abbrev=0"], text=True
+    ).strip()
 
 
 def main():
@@ -72,7 +89,15 @@ def main():
         help="Maximum PyTorch version for Python 3.13 (macOS): <X.X (exclusive)",
     )
     parser.add_argument("--output-dir", default=".", help="Output directory")
+    parser.add_argument(
+        "--core-version",
+        default=None,
+        help="Core release version required by CPU/GPU add-ons (defaults to latest tag)",
+    )
     args = parser.parse_args()
+    core_version_min, core_version_max = core_version_bounds(
+        args.core_version or latest_release_tag()
+    )
 
     # Setup Jinja2
     template_dir = Path(__file__).parent.parent
@@ -96,15 +121,18 @@ def main():
         "torch_max_py312_macos": args.torch_max_py312_macos,
         "torch_min_py313_macos": args.torch_min_py313_macos,
         "torch_max_py313_macos": args.torch_max_py313_macos,
+        "core_version_min": core_version_min,
+        "core_version_max": core_version_max,
     }
 
     variants = [
         {
             "tag": "core",
             "distribution_name": "pymomentum-core",
-            "description_suffix": "core package without Torch C++ extensions",
+            "description_suffix": "core package without PyTorch",
             "build_torch_extensions": False,
             "wheel_libs_dir": "pymomentum_core.libs",
+            "install_component": "pymomentum_core",
         },
         {
             "tag": "cpu",
@@ -112,6 +140,7 @@ def main():
             "description_suffix": "Torch C++ extension package linked against CPU PyTorch",
             "build_torch_extensions": True,
             "wheel_libs_dir": "pymomentum_cpu.libs",
+            "install_component": "pymomentum_torch",
         },
         {
             "tag": "gpu",
@@ -119,6 +148,7 @@ def main():
             "description_suffix": "Torch C++ extension package linked against CUDA PyTorch",
             "build_torch_extensions": True,
             "wheel_libs_dir": "pymomentum_gpu.libs",
+            "install_component": "pymomentum_torch",
         },
     ]
 

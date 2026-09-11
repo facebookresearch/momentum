@@ -123,7 +123,7 @@ keywords = [
     "motion-capture",
     "character-animation",
     "robotics",
-{% if build_torch_extensions or tag == "core" %}
+{% if build_torch_extensions %}
     "torch",
 {% endif %}
 ]
@@ -146,13 +146,12 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+{% if tag == "core" %}
     "numpy>=1.20.0",
-    "scipy>=1.7.0",
-{% if not build_torch_extensions %}
-    # Pure-Python torch helpers in the core package do not require the Torch C++ ABI.
-    "torch>=1.13",
-{% endif %}
-{% if build_torch_extensions and tag != "gpu" %}
+{% else %}
+    # The add-on contributes only Torch-backed modules to the core namespace.
+    "pymomentum-core>={{ core_version_min }},<{{ core_version_max }}",
+{% if tag != "gpu" %}
     # PyTorch version constraints - platform and Python version specific
     # Torch extension packages link against libtorch and must use a matching PyTorch version.
     # The GPU package is intentionally excluded here because wheel metadata cannot
@@ -170,13 +169,16 @@ dependencies = [
     # PyPI dependency metadata cannot require a custom package index, so the
     # supported install path documents PyTorch as an explicit prerequisite.
 {% endif %}
+{% endif %}
 ]
 
+{% if tag == "core" %}
 # Opt-in extras. Visualization stacks are large and have transitive deps
 # users may not want; keep them out of the default install.
 [project.optional-dependencies]
 rerun = ["rerun-sdk>=0.23.3,<0.34"]
 viser = ["viser>=1.0.24,<2"]
+{% endif %}
 
 [project.urls]
 Homepage = "https://github.com/facebookresearch/momentum"
@@ -198,6 +200,7 @@ cmake.args = [
 cmake.define.CMAKE_PREFIX_PATH = {env = "CMAKE_PREFIX_PATH"}
 minimum-version = "0.10"
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+install.components = ["{{ install_component }}"]
 sdist.exclude = [
     ".github/",
     ".pixi/",
@@ -205,7 +208,6 @@ sdist.exclude = [
     "dist/",
     "*.lock",
 ]
-wheel.exclude = ["geometry_test_utils.*"]
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^darwin"
@@ -317,8 +319,10 @@ if [ "$VARIANT" != "core" ]; then
   LD_LIBRARY_PATH="" python -c "import torch; print(f'PyTorch {torch.__version__} installed at {torch.__file__}')"
 fi
 """
-test-command = "python -c \"import pymomentum\""
-test-requires = ["numpy", "scipy"]
+{% if tag == "core" %}
+test-command = "python -c \"import pymomentum.geometry, pymomentum.solver2\""
+test-requires = ["numpy"]
+{% endif %}
 before-test = """
 VARIANT="${PYMOMENTUM_VARIANT:-core}"
 case "$VARIANT" in
@@ -379,6 +383,7 @@ echo '=== Unpacking wheel ==='
 cd $WORK
 unzip -q {wheel}
 
+{% if tag == "core" %}
 echo '=== Adding Linux native loader shim ==='
 cat > pymomentum/__init__.py <<'PYMOMENTUM_INIT'
 # Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -452,6 +457,7 @@ if sys.platform.startswith("linux") and not any(
 ):
     sys.meta_path.insert(0, _TorchFirstExtensionFinder())
 PYMOMENTUM_INIT
+{% endif %}
 
 # Find or create the .libs directory for this distribution.
 LIBS_DIR="{{ wheel_libs_dir }}"

@@ -29,6 +29,7 @@ Choose your preferred installation method based on your workflow. **We recommend
 pixi add pymomentum
 
 # Explicit backend selection
+pixi add pymomentum-core # NumPy/native modules, no PyTorch
 pixi add pymomentum-cpu  # CPU-only
 pixi add pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -44,6 +45,7 @@ pixi add pymomentum-gpu  # GPU (CUDA) support
 conda install -c conda-forge pymomentum
 
 # Explicit backend selection
+conda install -c conda-forge pymomentum-core # NumPy/native modules, no PyTorch
 conda install -c conda-forge pymomentum-cpu  # CPU-only
 conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -70,15 +72,20 @@ For the most stable and well-tested installation experience, we recommend using 
 
 ```bash
 # Using uv (preferred over pip)
+uv add pymomentum-core  # NumPy/native modules, no PyTorch
 uv add pymomentum-cpu   # CPU version
 uv add pymomentum-gpu   # GPU version (requires CUDA)
 
 # Alternative: Using pip
+pip install pymomentum-core
 pip install pymomentum-cpu
 pip install pymomentum-gpu
 ```
 
-**Browse packages:** [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
+The CPU and GPU distributions are add-ons that install a compatible
+`pymomentum-core`; do not install both add-ons in the same environment.
+
+**Browse packages:** [pymomentum-core](https://pypi.org/project/pymomentum-core/), [pymomentum-cpu](https://pypi.org/project/pymomentum-cpu/), [pymomentum-gpu](https://pypi.org/project/pymomentum-gpu/)
 
 ### Checking Available Versions
 
