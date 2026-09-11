@@ -13,6 +13,21 @@ on:
     tags:
       - 'v*'
 
+  # Validate wheel packaging before merging changes that affect it.
+  pull_request:
+    paths:
+      - ".github/actions/**"
+      - ".github/workflows/publish_to_pypi.yml"
+      - "CMakeLists.txt"
+      - "cmake/**"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "pymomentum/**"
+      - "pyproject-pypi.toml.j2"
+      - "scripts/detect_container_engine.sh"
+      - "scripts/generate_pyproject.py"
+      - "scripts/*wheel*.py"
+
   # Allow manual trigger for testing builds or publishing
   workflow_dispatch:
     inputs:
