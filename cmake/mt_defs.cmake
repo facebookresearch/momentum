@@ -485,6 +485,7 @@ function(mt_python_binding)
   set(oneValueArgs
     NAME
     MODULE_NAME
+    COMPONENT
   )
   set(multiValueArgs
     HEADERS
@@ -548,8 +549,12 @@ function(mt_python_binding)
   if(NOT _ARG_MODULE_NAME)
     set(_ARG_MODULE_NAME ${_ARG_NAME})
   endif()
+  if(NOT _ARG_COMPONENT)
+    set(_ARG_COMPONENT pymomentum_core)
+  endif()
   set_target_properties(${_ARG_NAME} PROPERTIES
     OUTPUT_NAME "${_ARG_MODULE_NAME}"
+    MOMENTUM_INSTALL_COMPONENT "${_ARG_COMPONENT}"
   )
 
   # Set RPATH for PyPI wheels to find torch libraries when building the
@@ -586,6 +591,7 @@ function(mt_python_library)
   set(oneValueArgs
     NAME
     DESTINATION_SUBDIR
+    COMPONENT
   )
   set(multiValueArgs
     PYMOMENTUM_SOURCES_VARS
@@ -613,33 +619,37 @@ function(mt_python_library)
   set(libs "${filtered_libs}")
 
   if(NOT ${_ARG_NO_INSTALL})
+    if(NOT _ARG_COMPONENT)
+      set(_ARG_COMPONENT pymomentum_core)
+    endif()
     if(${_ARG_PRESERVE_DIRECTORY_STRUCTURE})
-      # Store files with their directory structure preserved
       foreach(lib ${libs})
-        # Get relative path from pymomentum source directory
         file(RELATIVE_PATH rel_path "${PROJECT_SOURCE_DIR}/pymomentum" "${lib}")
         get_filename_component(file_dir "${rel_path}" DIRECTORY)
 
         if(file_dir STREQUAL "")
-          # File is in root, install to pymomentum directly
           set(install_dest "pymomentum")
         else()
-          # File is in subdirectory, preserve structure
           set(install_dest "pymomentum/${file_dir}")
         endif()
-
-        # Store file and its destination
-        set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL "${lib}:${install_dest}")
+        install(
+          FILES ${lib}
+          DESTINATION ${install_dest}
+          COMPONENT ${_ARG_COMPONENT}
+        )
       endforeach()
     elseif(_ARG_DESTINATION_SUBDIR)
-      # Install to specific subdirectory
-      set(install_dest "pymomentum/${_ARG_DESTINATION_SUBDIR}")
-      foreach(lib ${libs})
-        set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL "${lib}:${install_dest}")
-      endforeach()
+      install(
+        FILES ${libs}
+        DESTINATION "pymomentum/${_ARG_DESTINATION_SUBDIR}"
+        COMPONENT ${_ARG_COMPONENT}
+      )
     else()
-      # Default behavior: install flat to pymomentum directory
-      set_property(GLOBAL APPEND PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL ${libs})
+      install(
+        FILES ${libs}
+        DESTINATION pymomentum
+        COMPONENT ${_ARG_COMPONENT}
+      )
     endif()
   endif()
 endfunction()
@@ -663,61 +673,12 @@ function(mt_install_pymomentum)
 
   # Install C++ binding modules
   get_property(pymomentum_targets_to_install GLOBAL PROPERTY PYMOMENTUM_TARGETS_TO_INSTALL)
-  install(
-    TARGETS ${pymomentum_targets_to_install}
-    DESTINATION pymomentum
-  )
-
-  # Install Python modules (flat structure, legacy behavior)
-  get_property(pymomentum_python_libraries_to_install GLOBAL PROPERTY PYMOMENTUM_PYTHON_LIBRARIES_TO_INSTALL)
-  if(pymomentum_python_libraries_to_install)
+  foreach(target ${pymomentum_targets_to_install})
+    get_target_property(component ${target} MOMENTUM_INSTALL_COMPONENT)
     install(
-      FILES ${pymomentum_python_libraries_to_install}
+      TARGETS ${target}
       DESTINATION pymomentum
+      COMPONENT ${component}
     )
-  endif()
-
-  # Install Python modules with preserved directory structure
-  get_property(pymomentum_structured_libraries_to_install GLOBAL PROPERTY PYMOMENTUM_STRUCTURED_LIBRARIES_TO_INSTALL)
-  if(pymomentum_structured_libraries_to_install)
-    # Group files by destination directory
-    set(destinations_processed "")
-    foreach(file_dest_pair ${pymomentum_structured_libraries_to_install})
-      # Use the *last* colon as the separator; Windows paths have "C:/..."
-      string(FIND "${file_dest_pair}" ":" colon_pos REVERSE)
-      if(colon_pos EQUAL -1)
-        message(FATAL_ERROR "Malformed mapping: '${file_dest_pair}' (expected 'file:dest')")
-      endif()
-      string(SUBSTRING "${file_dest_pair}" 0 ${colon_pos} file_path)
-      math(EXPR dest_start "${colon_pos} + 1")
-      string(SUBSTRING "${file_dest_pair}" ${dest_start} -1 dest_path)
-      file(TO_CMAKE_PATH "${file_path}" file_path)
-
-      # Check if we've already processed this destination
-      list(FIND destinations_processed "${dest_path}" dest_index)
-      if(dest_index EQUAL -1)
-        # New destination, collect all files for this destination
-        set(files_for_dest "")
-        foreach(other_pair ${pymomentum_structured_libraries_to_install})
-          string(FIND "${other_pair}" ":" other_colon_pos REVERSE)
-          math(EXPR other_dest_start "${other_colon_pos} + 1")
-          string(SUBSTRING "${other_pair}" 0 ${other_colon_pos} other_file_path)
-          string(SUBSTRING "${other_pair}" ${other_dest_start} -1 other_dest_path)
-
-          if("${other_dest_path}" STREQUAL "${dest_path}")
-            list(APPEND files_for_dest "${other_file_path}")
-          endif()
-        endforeach()
-
-        # Install all files for this destination
-        install(
-          FILES ${files_for_dest}
-          DESTINATION ${dest_path}
-        )
-
-        # Mark this destination as processed
-        list(APPEND destinations_processed "${dest_path}")
-      endif()
-    endforeach()
-  endif()
+  endforeach()
 endfunction()

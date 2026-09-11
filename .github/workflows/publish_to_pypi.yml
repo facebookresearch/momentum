@@ -13,6 +13,21 @@ on:
     tags:
       - 'v*'
 
+  # Validate wheel packaging before merging changes that affect it.
+  pull_request:
+    paths:
+      - ".github/actions/**"
+      - ".github/workflows/publish_to_pypi.yml"
+      - "CMakeLists.txt"
+      - "cmake/**"
+      - "pixi.lock"
+      - "pixi.toml"
+      - "pymomentum/**"
+      - "pyproject-pypi.toml.j2"
+      - "scripts/detect_container_engine.sh"
+      - "scripts/generate_pyproject.py"
+      - "scripts/*wheel*.py"
+
   # Allow manual trigger for testing builds or publishing
   workflow_dispatch:
     inputs:
@@ -482,6 +497,7 @@ jobs:
             python-version: '3.12'
             pixi-environment: py312
             artifact-pattern: wheels-cpu-linux
+            core-artifact-pattern: wheels-core-linux
             wheel-type: cpu
           # Linux CPU - py3.13 only on tags/releases
           - os: ubuntu-latest
@@ -490,6 +506,7 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-cpu-linux
+            core-artifact-pattern: wheels-core-linux
             wheel-type: cpu
           # macOS CPU - always test py3.12
           - os: macos-15
@@ -498,6 +515,7 @@ jobs:
             python-version: '3.12'
             pixi-environment: py312
             artifact-pattern: wheels-cpu-macos-15-py3.12
+            core-artifact-pattern: wheels-core-macos-15-py3.12
             wheel-type: cpu
           # macOS CPU - py3.13 only on tags/releases
           - os: macos-15
@@ -506,6 +524,7 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-cpu-macos-15-py3.13
+            core-artifact-pattern: wheels-core-macos-15-py3.13
             wheel-type: cpu
           # Windows CPU - always test py3.12
           - os: windows-latest
@@ -514,6 +533,7 @@ jobs:
             python-version: '3.12'
             pixi-environment: py312
             artifact-pattern: wheels-cpu-windows-latest-py3.12
+            core-artifact-pattern: wheels-core-windows-latest-py3.12
             wheel-type: cpu
           # Windows CPU - py3.13 only on tags/releases
           - os: windows-latest
@@ -522,6 +542,7 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-cpu-windows-latest-py3.13
+            core-artifact-pattern: wheels-core-windows-latest-py3.13
             wheel-type: cpu
           # Windows GPU - always test py3.12
           - os: windows-latest
@@ -530,6 +551,7 @@ jobs:
             python-version: '3.12'
             pixi-environment: py312
             artifact-pattern: wheels-gpu-windows-latest-py3.12
+            core-artifact-pattern: wheels-core-windows-latest-py3.12
             wheel-type: gpu
           # Windows GPU - py3.13 only on tags/releases
           - os: windows-latest
@@ -538,6 +560,7 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-gpu-windows-latest-py3.13
+            core-artifact-pattern: wheels-core-windows-latest-py3.13
             wheel-type: gpu
           # Linux GPU - always test py3.12
           - os: ubuntu-latest
@@ -546,6 +569,7 @@ jobs:
             python-version: '3.12'
             pixi-environment: py312
             artifact-pattern: wheels-gpu-linux
+            core-artifact-pattern: wheels-core-linux
             wheel-type: gpu
           # Linux GPU - py3.13 only on tags/releases
           - os: ubuntu-latest
@@ -554,6 +578,7 @@ jobs:
             python-version: '3.13'
             pixi-environment: py313
             artifact-pattern: wheels-gpu-linux
+            core-artifact-pattern: wheels-core-linux
             wheel-type: gpu
 
     steps:
@@ -589,6 +614,14 @@ jobs:
           pattern: ${{ matrix.artifact-pattern }}
           merge-multiple: true
 
+      - name: Download matching core wheel artifacts
+        if: steps.should_run.outputs.run == 'true' && matrix.variant != 'core'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: dist
+          pattern: ${{ matrix.core-artifact-pattern }}
+          merge-multiple: true
+
       - name: List downloaded wheels
         if: steps.should_run.outputs.run == 'true'
         run: pixi run -e ${{ matrix.pixi-environment }} python -c "from pathlib import Path; [print(path) for path in sorted(Path('dist').glob('*'))]"
@@ -610,7 +643,7 @@ jobs:
   # cu129.
   test_gpu_wheels_with_cuda:
     name: Test GPU wheel with CUDA - py${{ matrix.python-version }}-${{ matrix.os-short }}
-    needs: [build_gpu_wheels_linux]
+    needs: [build_core_and_cpu_wheels_linux, build_gpu_wheels_linux]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -650,6 +683,13 @@ jobs:
         with:
           path: dist
           pattern: ${{ matrix.artifact-pattern }}
+          merge-multiple: true
+      - name: Download matching core wheel artifacts
+        if: steps.should_run.outputs.run == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: dist
+          pattern: wheels-core-linux
           merge-multiple: true
 
       - name: List downloaded wheels
@@ -708,7 +748,7 @@ jobs:
 
   publish_cpu:
     name: Publish pymomentum-cpu to PyPI
-    needs: [build_core_and_cpu_wheels_linux, build_core_and_cpu_wheels, test_pip_wheels]
+    needs: [publish_core, build_core_and_cpu_wheels_linux, build_core_and_cpu_wheels, test_pip_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi-cpu
@@ -746,7 +786,7 @@ jobs:
 
   publish_gpu:
     name: Publish pymomentum-gpu to PyPI
-    needs: [build_gpu_wheels, build_gpu_wheels_linux, test_pip_wheels, test_gpu_wheels_with_cuda]
+    needs: [publish_core, build_gpu_wheels, build_gpu_wheels_linux, test_pip_wheels, test_gpu_wheels_with_cuda]
     runs-on: ubuntu-latest
     environment:
       name: pypi-gpu

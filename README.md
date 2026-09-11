@@ -49,13 +49,13 @@ conda install -c conda-forge momentum-cpp
 
 Install PyPI wheels -- these are experimental ⚠️
 ```bash
-# Install core package with NumPy/SciPy and PyTorch dependencies, but no Torch C++ extension modules
+# Install the NumPy/native core without PyTorch
 pip install pymomentum-core
 
 # Install core package with optional visualization helpers
 pip install "pymomentum-core[viser,rerun]"
 
-# Install full package including diff_geometry and differentiable solver modules, linked against CPU PyTorch
+# Add diff_geometry, Torch helpers, and differentiable solvers for CPU PyTorch
 pip install pymomentum-cpu
 
 # Install full package including diff_geometry and differentiable solver modules, linked against CUDA PyTorch
@@ -63,9 +63,14 @@ pip install "torch>=2.8,<2.9" --index-url https://download.pytorch.org/whl/cu129
 pip install pymomentum-gpu
 ```
 
-Conda/Pixi currently publish the full PyMomentum package. Use the PyPI core package (since release v0.1.111) when you need a Python install without the Torch C++ extension dependency.
+The same layered packages are available from conda-forge. `pymomentum` remains a
+compatibility package that installs the CPU or GPU stack selected by the solver.
 
-Install exactly one PyPI package for a given environment. The `pymomentum-core` package includes the NumPy/SciPy modules `geometry`, `solver2`, `marker_tracking`, `axel`, `camera`, and `renderer`, plus the torch-backed Python helper modules `torch`. The `pymomentum-cpu` and `pymomentum-gpu` packages provide differentiable optimization modules `diff_geometry` and `solver`, but they must match a supported PyTorch C++ ABI and therefore have stricter PyTorch version constraints.
+The `pymomentum-core` package owns the NumPy/native modules `geometry`,
+`solver2`, `marker_tracking`, `axel`, `camera`, and `renderer`. It does not
+install PyTorch. `pymomentum-cpu` and `pymomentum-gpu` are mutually exclusive
+add-ons: each installs the Torch helpers plus `diff_geometry` and `solver`, and
+depends on a compatible `pymomentum-core` release.
 
 > ⚠️ **PyPI support is experimental.** For the most stable experience, we recommend using Conda or Pixi.
 
