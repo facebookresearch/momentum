@@ -126,6 +126,8 @@ Studio project.
 - Public headers should include Momentum headers with angle brackets, for
   example `#include <momentum/common/checks.h>`. Implementation files usually
   include local Momentum headers with quotes.
+- Include urdfdom headers through `momentum/io/urdf/urdf_headers.h` so the
+  Windows `near`/`far` macro workaround remains scoped.
 
 ## PyMomentum Conventions
 
