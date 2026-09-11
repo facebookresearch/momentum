@@ -6542,6 +6542,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a024533134e914471260571ce2cdfff9c" id="r_a024533134e914471260571ce2cdfff9c"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="namespacemomentum.html#a946ab1953d1fb51ba0a9d204ed46b68e">MatrixXf</a>, <a class="el" href="namespacemomentum.html#a954f7505066845a67c868e1ae88a5b1e">VectorXf</a>, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a024533134e914471260571ce2cdfff9c">loadMmo</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::string &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>)</td></tr>
 <tr class="memdesc:a024533134e914471260571ce2cdfff9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load motion data from file.  <br /></td></tr>
 <tr class="separator:a024533134e914471260571ce2cdfff9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69630f1173afb70dffd2f49850920df6" id="r_a69630f1173afb70dffd2f49850920df6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a69630f1173afb70dffd2f49850920df6">loadObj</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filepath</a>)</td></tr>
+<tr class="memdesc:a69630f1173afb70dffd2f49850920df6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a mesh from a Wavefront OBJ file.  <br /></td></tr>
+<tr class="separator:a69630f1173afb70dffd2f49850920df6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54bf309ff86412d50e72906e6238cccb" id="r_a54bf309ff86412d50e72906e6238cccb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a54bf309ff86412d50e72906e6238cccb">loadObj</a> (std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">bytes</a>)</td></tr>
+<tr class="memdesc:a54bf309ff86412d50e72906e6238cccb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a mesh from an in-memory OBJ file.  <br /></td></tr>
+<tr class="separator:a54bf309ff86412d50e72906e6238cccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b35444b18e26cbd1b6260f79e7016f1" id="r_a3b35444b18e26cbd1b6260f79e7016f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1BlendShapeBase.html">BlendShapeBase</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a3b35444b18e26cbd1b6260f79e7016f1">loadBlendShapeBase</a> (<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">filename</a>, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedShapes</a>=-1, <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">int</a> <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">expectedVertices</a>=-1)</td></tr>
 <tr class="memdesc:a3b35444b18e26cbd1b6260f79e7016f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads blend shape vectors from a file without base shape.  <br /></td></tr>
 <tr class="separator:a3b35444b18e26cbd1b6260f79e7016f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -56581,6 +56587,83 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 </div>
 </div>
+<a id="a69630f1173afb70dffd2f49850920df6" name="a69630f1173afb70dffd2f49850920df6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69630f1173afb70dffd2f49850920df6">&#9670;&#160;</a></span>loadObj() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> momentum::loadObj </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> filesystem::path &amp;&#160;</td>
+          <td class="paramname"><em>filepath</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads a mesh from a Wavefront OBJ file. </p>
+<p>Reads positions (<code>v</code>), texture coordinates (<code>vt</code>) and faces (<code>f</code>), accepting all four OBJ face-corner forms (<code>v</code>, <code>v/vt</code>, <code>v//vn</code>, <code>v/vt/vn</code>) and both positive and negative (relative) indices. Polygons are fan-triangulated into <a class="el" href="structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524">Mesh::faces</a>, and the original topology is preserved in <a class="el" href="structmomentum_1_1MeshT.html#a049699a783091e6bd764590959b37199">Mesh::polyFaces</a> and <a class="el" href="structmomentum_1_1MeshT.html#a2b51627da2b8666cfd33496d03e65c53">Mesh::polyFaceSizes</a>.</p>
+<p>Texture coordinates are indexed per face corner, which is OBJ's own layout, so they map directly onto <a class="el" href="structmomentum_1_1MeshT.html#a5785a167dd2a949c45c462a7de893ef0">Mesh::texcoords</a> and <a class="el" href="structmomentum_1_1MeshT.html#a067360df2b2d1f9a55c7c34c1a8f2390">Mesh::texcoord_faces</a>. They are kept only if every face carries a complete set of <code>vt</code> indices; a file that texture-maps some faces and not others is loaded untextured, because <a class="el" href="structmomentum_1_1MeshT.html#a067360df2b2d1f9a55c7c34c1a8f2390">Mesh::texcoord_faces</a> has to align one-to-one with <a class="el" href="structmomentum_1_1MeshT.html#acf270a428de37b54d65a3c03d5e83524">Mesh::faces</a>.</p>
+<p>Vertex normals are recomputed from the geometry rather than read from <code>vn</code>: <a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> stores one normal per vertex, while OBJ indexes them per face corner, so honouring <code>vn</code> in general would mean splitting vertices. This matches how the FBX and glTF loaders treat normals.</p>
+<p>Vertex colours are read from the six-float <code>v x y z r g b</code> form some exporters emit, and default to white otherwise.</p>
+<p>Material, group, object and smoothing directives (<code>mtllib</code>, <code>usemtl</code>, <code>g</code>, <code>o</code>, <code>s</code>) are ignored, so the whole file loads as one mesh.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">filepath</td><td>Path to the OBJ file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The loaded mesh. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::runtime_error</td><td>if the file cannot be opened, an index is out of range, or the file contains no geometry. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="obj__io_8cpp_source.html#l00220">220</a> of file <a class="el" href="obj__io_8cpp_source.html">obj_io.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
+
+</div>
+</div>
+<a id="a54bf309ff86412d50e72906e6238cccb" name="a54bf309ff86412d50e72906e6238cccb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54bf309ff86412d50e72906e6238cccb">&#9670;&#160;</a></span>loadObj() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#ad6c97613c9fc58260459b5c954e75e98">Mesh</a> momentum::loadObj </td>
+          <td>(</td>
+          <td class="paramtype">std::span&lt; <a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">const</a> std::byte &gt;&#160;</td>
+          <td class="paramname"><em>bytes</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads a mesh from an in-memory OBJ file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">bytes</td><td>Buffer holding the OBJ file contents. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The loaded mesh. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::runtime_error</td><td>under the same conditions as the path overload. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="obj__io_8cpp_source.html#l00226">226</a> of file <a class="el" href="obj__io_8cpp_source.html">obj_io.cpp</a>.</p>
+
+</div>
+</div>
 <a id="ae4f9e12ca5c04054ee78a1cbdad1795e" name="ae4f9e12ca5c04054ee78a1cbdad1795e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae4f9e12ca5c04054ee78a1cbdad1795e">&#9670;&#160;</a></span>loadObjMesh()</h2>
 
@@ -64711,7 +64794,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 
 <p class="definition">Definition at line <a class="el" href="usd__mesh__io_8cpp_source.html#l00272">272</a> of file <a class="el" href="usd__mesh__io_8cpp_source.html">usd_mesh_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__mesh__io_8cpp_source.html#l00031">colors</a>, <a class="el" href="mesh_8h_source.html#l00035">momentum::MeshT&lt; T &gt;::colors</a>, <a class="el" href="mesh_8h_source.html#l00039">momentum::MeshT&lt; T &gt;::confidence</a>, <a class="el" href="mesh_8h_source.html#l00028">momentum::MeshT&lt; T &gt;::faces</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, <a class="el" href="random-inl_8h_source.html#l00382">normal()</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00030">normals</a>, <a class="el" href="mesh_8h_source.html#l00025">momentum::MeshT&lt; T &gt;::normals</a>, and <a class="el" href="mesh_8h_source.html#l00022">momentum::MeshT&lt; T &gt;::vertices</a>.</p>
+<p class="reference">References <a class="el" href="gltf__mesh__io_8cpp_source.html#l00031">colors</a>, <a class="el" href="mesh_8h_source.html#l00035">momentum::MeshT&lt; T &gt;::colors</a>, <a class="el" href="mesh_8h_source.html#l00039">momentum::MeshT&lt; T &gt;::confidence</a>, <a class="el" href="mesh_8h_source.html#l00028">momentum::MeshT&lt; T &gt;::faces</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, <a class="el" href="random-inl_8h_source.html#l00382">normal()</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00030">normals</a>, <a class="el" href="mesh_8h_source.html#l00025">momentum::MeshT&lt; T &gt;::normals</a>, <a class="el" href="obj__io_8cpp_source.html#l00027">vertex</a>, and <a class="el" href="mesh_8h_source.html#l00022">momentum::MeshT&lt; T &gt;::vertices</a>.</p>
 
 </div>
 </div>
@@ -71348,7 +71431,7 @@ template&lt;<a class="el" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacemomentum.html">momentum</a></li>
-    <li class="footer">Generated on Thu Sep 10 2026 03:19:19 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Fri Sep 11 2026 19:26:13 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

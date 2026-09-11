@@ -2822,6 +2822,8 @@ var namespacemomentum =
     [ "loadMppca", "namespacemomentum.html#a12d28033968b3ef64224546abcb5552e", null ],
     [ "loadMppca", "namespacemomentum.html#a56de99579d44e8209b54b3107dc3039e", null ],
     [ "loadMppca", "namespacemomentum.html#a451522ca4c242443fcf19ac0e3ce4df7", null ],
+    [ "loadObj", "namespacemomentum.html#a69630f1173afb70dffd2f49850920df6", null ],
+    [ "loadObj", "namespacemomentum.html#a54bf309ff86412d50e72906e6238cccb", null ],
     [ "loadObjMesh", "namespacemomentum.html#ae4f9e12ca5c04054ee78a1cbdad1795e", null ],
     [ "loadOpenFbxCharacter", "namespacemomentum.html#ad19eae36b6e945ab913d12d9cb294273", null ],
     [ "loadOpenFbxCharacter", "namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e", null ],

@@ -1,5 +1,18 @@
 var NAVTREEINDEX47 =
 {
+"vertex__error__function_8cpp_source.html":[3,0,2,80],
+"vertex__error__function_8h.html":[3,0,2,81],
+"vertex__error__function_8h_source.html":[3,0,2,81],
+"vertex__normal__error__function_8cpp.html":[3,0,2,82],
+"vertex__normal__error__function_8cpp_source.html":[3,0,2,82],
+"vertex__normal__error__function_8h.html":[3,0,2,83],
+"vertex__normal__error__function_8h_source.html":[3,0,2,83],
+"vertex__plane__error__function_8cpp.html":[3,0,2,84],
+"vertex__plane__error__function_8cpp_source.html":[3,0,2,84],
+"vertex__plane__error__function_8h.html":[3,0,2,85],
+"vertex__plane__error__function_8h_source.html":[3,0,2,85],
+"vertex__position__error__function_8cpp.html":[3,0,2,86],
+"vertex__position__error__function_8cpp_source.html":[3,0,2,86],
 "vertex__position__error__function_8h.html":[3,0,2,87],
 "vertex__position__error__function_8h_source.html":[3,0,2,87],
 "vertex__projection__error__function_8cpp.html":[3,0,2,88],

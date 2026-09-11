@@ -546,6 +546,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.load_markers"><code class="docutils literal notranslate"><span class="pre">load_markers()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.load_markers_from_bytes"><code class="docutils literal notranslate"><span class="pre">load_markers_from_bytes()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.load_motion"><code class="docutils literal notranslate"><span class="pre">load_motion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.load_obj"><code class="docutils literal notranslate"><span class="pre">load_obj()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.local_skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">local_skeleton_state_to_joint_parameters()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.map_joint_parameters"><code class="docutils literal notranslate"><span class="pre">map_joint_parameters()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.map_model_parameters"><code class="docutils literal notranslate"><span class="pre">map_model_parameters()</span></code></a></li>
@@ -4587,6 +4588,25 @@ you will likely want to retarget the parameters using the <code class="xref py p
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tuple [motionData, motionParameterNames, identityData, identityParameterNames]. Does NOT include the character or FPS.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.load_obj">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">load_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.load_obj" title="Link to this definition"></a></dt>
+<dd><p>Load a mesh from a Wavefront OBJ file.</p>
+<p>Reads positions, texture coordinates and faces. Polygons are fan-triangulated, with the
+original topology kept in the mesh’s polygon arrays. Texture coordinates are kept only if
+every face has them, since they must stay index-aligned with the triangulated faces.</p>
+<p>Normals are recomputed from the geometry rather than read from the file, because a Mesh
+stores one normal per vertex while OBJ indexes them per face corner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Path to a .obj file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded Mesh.</p>
 </dd>
 </dl>
 </dd></dl>
