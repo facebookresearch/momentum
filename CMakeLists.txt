@@ -595,6 +595,8 @@ mt_library(
   NAME io_urdf
   HEADERS_VARS
     io_urdf_public_headers
+  PRIVATE_HEADERS_VARS
+    io_urdf_private_headers
   SOURCES_VARS io_urdf_sources
   PUBLIC_LINK_LIBRARIES
     character
