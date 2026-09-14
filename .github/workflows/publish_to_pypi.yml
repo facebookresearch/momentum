@@ -54,6 +54,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux_2_28_x86_64@sha256:012f4a50472412f18bb2b450c1cce7158434cfae4ae878591c2748a13a30c2be"
+
 jobs:
   # Linux core and CPU wheels are built with cibuildwheel (for manylinux_2_28 compatibility)
   build_core_and_cpu_wheels_linux:
@@ -65,6 +68,17 @@ jobs:
         package-variant: [core, cpu]
 
     steps:
+      - name: Pull manylinux image with retry
+        run: |
+          if docker image inspect "$CIBW_MANYLINUX_X86_64_IMAGE" >/dev/null 2>&1; then
+            exit 0
+          fi
+          for delay in 0 15 30 60; do
+            sleep "$delay"
+            docker pull "$CIBW_MANYLINUX_X86_64_IMAGE" && exit 0
+          done
+          exit 1
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
@@ -101,7 +115,7 @@ jobs:
             ${{ github.workflow }}-linux-
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v3.4.2.0
+        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         env:
           PYMOMENTUM_VARIANT: ${{ matrix.package-variant }}
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
@@ -359,6 +373,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Pull manylinux image with retry
+        run: |
+          if docker image inspect "$CIBW_MANYLINUX_X86_64_IMAGE" >/dev/null 2>&1; then
+            exit 0
+          fi
+          for delay in 0 15 30 60; do
+            sleep "$delay"
+            docker pull "$CIBW_MANYLINUX_X86_64_IMAGE" && exit 0
+          done
+          exit 1
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
@@ -394,7 +419,7 @@ jobs:
             ${{ github.workflow }}-linux-
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v3.4.2.0
+        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         env:
           PYMOMENTUM_VARIANT: gpu
           CIBW_BUILD: ${{ (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish == 'true' || github.event.inputs.force_all_builds == 'true'))) && 'cp312-* cp313-*' || 'cp312-*' }}
