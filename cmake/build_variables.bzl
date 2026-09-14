@@ -671,6 +671,10 @@ io_urdf_public_headers = [
     "io/urdf/urdf_mesh_io.h",
 ]
 
+io_urdf_private_headers = [
+    "io/urdf/urdf_headers.h",
+]
+
 io_urdf_sources = [
     "io/urdf/urdf_io.cpp",
     "io/urdf/urdf_mesh_io.cpp",

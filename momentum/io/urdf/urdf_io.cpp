@@ -6,6 +6,7 @@
  */
 
 #include "momentum/io/urdf/urdf_io.h"
+#include "momentum/io/urdf/urdf_headers.h"
 #include "momentum/io/urdf/urdf_mesh_io.h"
 
 #include "momentum/character/skeleton_state.h"
@@ -13,10 +14,6 @@
 #include "momentum/math/constants.h"
 
 #include <fmt/format.h>
-#include <urdf_model/link.h>
-#include <urdf_model/model.h>
-#include <urdf_model/pose.h>
-#include <urdf_parser/urdf_parser.h>
 
 #include <algorithm>
 #include <array>
