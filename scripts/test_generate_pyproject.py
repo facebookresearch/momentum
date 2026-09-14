@@ -48,6 +48,9 @@ class GeneratePyprojectTest(unittest.TestCase):
         core = generated["core"]
         self.assertEqual(core["project"]["dependencies"], ["numpy>=1.20.0"])
         self.assertEqual(
+            core["project"]["optional-dependencies"]["torch"], ["torch>=1.13"]
+        )
+        self.assertEqual(
             core["tool"]["scikit-build"]["install"]["components"],
             ["pymomentum_core"],
         )

@@ -107,27 +107,40 @@ def check_wheel_contents(
     if any("geometry_test_utils" in name for name in names):
         raise RuntimeError(f"{wheel_file.name} contains test-only bindings")
 
-    torch_paths = {
+    pure_torch_paths = {
+        "pymomentum/backend/selection.py",
         "pymomentum/quaternion.py",
         "pymomentum/skel_state.py",
+        "pymomentum/torch/character.py",
         "pymomentum/trs.py",
     }
     if wheel_type == "core":
+        missing = sorted(pure_torch_paths - package_files)
+        if missing:
+            raise RuntimeError(f"core wheel is missing Torch helpers: {missing}")
         unexpected = sorted(
             name
             for name in package_files
-            if name in torch_paths
-            or name.startswith("pymomentum/backend/")
-            or name.startswith("pymomentum/torch/")
-            or name.startswith("pymomentum/diff_geometry.")
+            if name.startswith("pymomentum/diff_geometry.")
             or name.startswith("pymomentum/solver.")
         )
         if unexpected:
-            raise RuntimeError(f"core wheel contains Torch add-on files: {unexpected}")
+            raise RuntimeError(
+                f"core wheel contains compiled Torch extensions: {unexpected}"
+            )
         return
 
     if core_wheel is None:
         raise RuntimeError("CPU/GPU wheel tests require the matching core wheel")
+    unexpected = sorted(
+        name
+        for name in package_files
+        if name in pure_torch_paths
+        or name.startswith("pymomentum/backend/")
+        or name.startswith("pymomentum/torch/")
+    )
+    if unexpected:
+        raise RuntimeError(f"{wheel_type} wheel contains core files: {unexpected}")
     with zipfile.ZipFile(core_wheel) as archive:
         core_files = {
             name
@@ -158,7 +171,7 @@ def get_import_test_script(
 ) -> str:
     """Return the Python smoke test script for a wheel type."""
     torch_extensions = has_torch_extensions(wheel_type)
-    torch_runtime = has_torch_extensions(wheel_type)
+    torch_runtime = not expect_no_torch
     lines = [
         "import importlib.util",
         "import os",
@@ -197,16 +210,21 @@ def get_import_test_script(
             "    import pymomentum.renderer as renderer",
         ]
     )
-    if torch_extensions:
+    if torch_runtime:
         lines.extend(
             [
                 "    import pymomentum.backend as backend",
-                "    import pymomentum.diff_geometry as diff_geometry",
                 "    import pymomentum.quaternion as quaternion",
                 "    import pymomentum.skel_state as skel_state",
-                "    import pymomentum.solver as solver",
                 "    import pymomentum.torch.character as torch_character",
                 "    import pymomentum.trs as trs",
+            ]
+        )
+    if torch_extensions:
+        lines.extend(
+            [
+                "    import pymomentum.diff_geometry as diff_geometry",
+                "    import pymomentum.solver as solver",
             ]
         )
         if wheel_type == "gpu" and require_cuda:
@@ -219,8 +237,14 @@ def get_import_test_script(
     else:
         if wheel_type == "core":
             if expect_no_torch:
-                lines.append(
-                    '    assert importlib.util.find_spec("torch") is None, "pymomentum-core must not install PyTorch"'
+                lines.extend(
+                    [
+                        '    assert importlib.util.find_spec("torch") is None, "pymomentum-core must not install PyTorch"',
+                        '    assert importlib.util.find_spec("pymomentum.quaternion") is not None',
+                        '    assert importlib.util.find_spec("pymomentum.skel_state") is not None',
+                        '    assert importlib.util.find_spec("pymomentum.torch.character") is not None',
+                        '    assert importlib.util.find_spec("pymomentum.trs") is not None',
+                    ]
                 )
             lines.extend(
                 [
@@ -232,8 +256,6 @@ def get_import_test_script(
             [
                 '    assert importlib.util.find_spec("pymomentum.diff_geometry") is None, "pymomentum-core must not expose pymomentum.diff_geometry"',
                 '    assert importlib.util.find_spec("pymomentum.solver") is None, "pymomentum-core must not expose pymomentum.solver"',
-                '    assert importlib.util.find_spec("pymomentum.torch") is None, "pymomentum-core must not expose pymomentum.torch"',
-                '    assert importlib.util.find_spec("pymomentum.quaternion") is None, "pymomentum-core must not expose torch-backed helpers"',
             ]
         )
     lines.extend(
@@ -376,7 +398,7 @@ def run_import_tests(
         env.pop(name, None)
     # Keep the checkout's namespace-package directories out of wheel import checks.
     with tempfile.TemporaryDirectory() as tmpdir:
-        if has_torch_extensions(wheel_type):
+        if not expect_no_torch:
             result = subprocess.run(
                 [
                     python_exe,
@@ -514,6 +536,26 @@ def test_in_container(
             "/tmp/test_venv/bin/python -I /tmp/test_wheel_imports.py",
         ]
     )
+    if wheel_type == "core":
+        core_with_torch_script = get_import_test_script("core")
+        container_lines.extend(
+            [
+                "",
+                'echo "Installing optional PyTorch dependency..."',
+                '$PYTHON -m uv pip install --python /tmp/test_venv/bin/python "torch>=2.8.0,<2.9" --index-url '
+                + get_torch_index("core"),
+                "$PYTHON -m uv pip check --python /tmp/test_venv/bin/python",
+                "cat >/tmp/test_core_torch_after_pymomentum.py <<'PYTEST'",
+                *torch_after_pymomentum_script.rstrip().splitlines(),
+                "PYTEST",
+                "/tmp/test_venv/bin/python -I /tmp/test_core_torch_after_pymomentum.py",
+                'echo "Testing pure-Python Torch helpers..."',
+                "cat >/tmp/test_core_with_torch.py <<'PYTEST'",
+                *core_with_torch_script.rstrip().splitlines(),
+                "PYTEST",
+                "/tmp/test_venv/bin/python -I /tmp/test_core_with_torch.py",
+            ]
+        )
     if core_wheel is not None:
         core_import_script = get_import_test_script("core")
         container_lines.extend(
@@ -658,8 +700,38 @@ def test_locally_with_uv(
             require_triton,
             expect_no_torch=wheel_type == "core",
         )
-        if returncode != 0 or core_wheel is None:
+        if returncode != 0:
             return returncode
+
+        if wheel_type == "core":
+            torch_index = get_torch_index("core")
+            print(f"Installing optional torch dependency from {torch_index}...")
+            result = subprocess.run(
+                [
+                    uv_path,
+                    "pip",
+                    "install",
+                    "--python",
+                    python_exe,
+                    "torch>=2.8.0,<2.9",
+                    "--index-url",
+                    torch_index,
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if result.returncode != 0:
+                print(
+                    f"[FAIL] Failed to install optional torch: {result.stderr}",
+                    file=sys.stderr,
+                )
+                return result.returncode
+            return run_import_tests(python_exe, "core")
+
+        if core_wheel is None:
+            return 0
 
         print(f"Uninstalling {DIST_NAME_BY_TYPE[wheel_type]} and retesting core...")
         result = subprocess.run(
