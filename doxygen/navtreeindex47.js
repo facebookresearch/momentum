@@ -1,5 +1,7 @@
 var NAVTREEINDEX47 =
 {
+"velocity__magnitude__sequence__error__function_8h_source.html":[3,0,1,28],
+"vertex__error__function_8cpp.html":[3,0,2,80],
 "vertex__error__function_8cpp_source.html":[3,0,2,80],
 "vertex__error__function_8h.html":[3,0,2,81],
 "vertex__error__function_8h_source.html":[3,0,2,81],
