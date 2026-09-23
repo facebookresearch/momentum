@@ -43,7 +43,8 @@ Creates the skeleton hierarchy, mesh with skin deformer, locators,
 collision geometry, and metadata.
 
 :param character: The character to add.
-:param options: File save options controlling mesh, locators, collisions.)",
+:param options: File save options controlling mesh, locators, collisions.
+:return: The exported character name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("options") = mm::FileSaveOptions())
       .def(
@@ -56,10 +57,12 @@ The mesh is parented under the specified joint node instead of the scene
 root, so it inherits the skeleton's animation without needing skin weights.
 
 :param character: The character to add as a rigid body.
-:param name: Optional name override. Uses character.name if empty.
+:param name: Optional requested base name. Uses character.name if empty. A numeric
+    suffix is appended if the resulting name is already in use.
 :param parent_joint: Index of the joint to parent the mesh under. Defaults to 0
     (the root joint).
-:param options: File save options (mesh option is respected).)",
+:param options: File save options (mesh option is respected).
+:return: The exported rigid-body name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("name") = "",
           py::arg("parent_joint") = 0,
@@ -70,7 +73,8 @@ root, so it inherits the skeleton's animation without needing skin weights.
              const mm::Character& character,
              float fps,
              const std::optional<Eigen::MatrixXf>& motion,
-             const std::optional<Eigen::VectorXf>& offsets) {
+             const std::optional<Eigen::VectorXf>& offsets,
+             const std::optional<std::string>& characterName) {
             // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
             mm::MatrixXf transposedMotion;
             if (motion.has_value() && motion->size() > 0) {
@@ -80,7 +84,8 @@ root, so it inherits the skeleton's animation without needing skin weights.
             if (offsets.has_value()) {
               actualOffsets = offsets.value();
             }
-            builder.addMotion(character, fps, transposedMotion, actualOffsets);
+            builder.addMotion(
+                character, fps, transposedMotion, actualOffsets, characterName.value_or(""));
           },
           R"(Add model-parameter animation for a previously added character.
 
@@ -90,23 +95,27 @@ curves. Also extracts and animates blend shape weights when applicable.
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
 :param motion: Model parameters matrix with shape (nFrames, nModelParams). None for no animation.
-:param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.)",
+:param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.
+:param character_name: Exported name returned by :meth:`add_character` or :meth:`add_rigid_body`, selecting which exported character to animate. Pass it to target a specific instance when the same character was added more than once, or a duplicate whose name was auto-suffixed. When omitted, resolves to the character exported under the source name.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
           py::arg("motion") = std::nullopt,
-          py::arg("offsets") = std::nullopt)
+          py::arg("offsets") = std::nullopt,
+          py::arg("character_name") = std::nullopt)
       .def(
           "add_motion_with_joint_params",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
              float fps,
-             const std::optional<Eigen::MatrixXf>& jointParams) {
+             const std::optional<Eigen::MatrixXf>& jointParams,
+             const std::optional<std::string>& characterName) {
             // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
             mm::MatrixXf transposedJointParams;
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addMotionWithJointParams(character, fps, transposedJointParams);
+            builder.addMotionWithJointParams(
+                character, fps, transposedJointParams, characterName.value_or(""));
           },
           R"(Add joint-parameter animation for a previously added character.
 
@@ -115,10 +124,12 @@ This is useful for rigid bodies or characters with simple parameterization.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.)",
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.
+:param character_name: Exported name returned by :meth:`add_character` or :meth:`add_rigid_body`, selecting which exported character to animate. Pass it to target a specific instance when the same character was added more than once, or a duplicate whose name was auto-suffixed. When omitted, resolves to the character exported under the source name.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
-          py::arg("joint_params") = std::nullopt)
+          py::arg("joint_params") = std::nullopt,
+          py::arg("character_name") = std::nullopt)
       .def(
           "add_animated_mesh",
           [](mm::FbxBuilder& builder,

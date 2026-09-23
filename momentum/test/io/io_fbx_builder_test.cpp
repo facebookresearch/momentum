@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 using namespace momentum;
 
 TEST(FbxBuilderTest, AddCharacter_RoundTripsNameAndMetadata) {
@@ -143,21 +145,32 @@ TEST(FbxBuilderTest, AddRigidBodyWithMotion) {
 
 TEST(FbxBuilderTest, MultipleCharacters) {
   Character body = createTestCharacter(5);
-  body.name = "body";
   Character prop = createTestCharacter(3);
-  prop.name = "prop";
+
+  const auto numPropJointParams =
+      static_cast<Eigen::Index>(prop.parameterTransform.numJointParameters());
+  const MatrixXf propJointParams = MatrixXf::Zero(numPropJointParams, 2);
 
   const auto outFile = temporaryFile("builder_multi", "fbx");
   {
     FbxBuilder builder;
-    builder.addCharacter(body);
-    builder.addRigidBody(prop, "prop");
+    const std::string bodyName = builder.addCharacter(body);
+    const std::string propName = builder.addRigidBody(prop);
+    EXPECT_EQ(bodyName, "test character");
+    EXPECT_EQ(propName, "test character_1");
+    builder.addMotionWithJointParams(prop, 30.0f, propJointParams, propName);
     builder.save(outFile.path());
   }
 
-  // The FBX should load without error; permissive because of the rigid body mesh
   const Character loaded = loadFbxCharacter(outFile.path(), KeepLocators::No, Permissive::Yes);
-  EXPECT_FALSE(loaded.skeleton.joints.empty());
+  EXPECT_EQ(
+      loaded.skeleton.joints.size(), body.skeleton.joints.size() + prop.skeleton.joints.size());
+  EXPECT_EQ(
+      std::count_if(
+          loaded.skeleton.joints.begin(),
+          loaded.skeleton.joints.end(),
+          [](const Joint& joint) { return joint.parent == kInvalidIndex; }),
+      2);
 }
 
 TEST(FbxBuilderTest, MarkerSequence) {
@@ -196,4 +209,90 @@ TEST(FbxBuilderTest, SaveConsumesBuilder) {
   // After save, the builder is consumed — further operations should throw
   EXPECT_THROW(builder.addCharacter(character), std::runtime_error);
   EXPECT_THROW(builder.save(outFile.path()), std::runtime_error);
+}
+
+TEST(FbxBuilderTest, DuplicateNamesGetSequentialSuffixes) {
+  FbxBuilder builder;
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3)), "test character");
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3)), "test character_1");
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3)), "test character_2");
+}
+
+TEST(FbxBuilderTest, DuplicateSkinnedCharacterNamesArePrefixed) {
+  Character body = createTestCharacter(4);
+  Character other = createTestCharacter(6);
+
+  const auto outFile = temporaryFile("builder_dup_skinned", "fbx");
+  std::string name1;
+  std::string name2;
+  {
+    FbxBuilder builder;
+    name1 = builder.addCharacter(body);
+    name2 = builder.addCharacter(other);
+    EXPECT_EQ(name1, "test character");
+    EXPECT_EQ(name2, "test character_1");
+    builder.save(outFile.path());
+  }
+
+  // Load without stripping namespaces so the deduped second character's prefix is visible.
+  const Character loaded = loadFbxCharacter(
+      outFile.path(), KeepLocators::No, Permissive::Yes, LoadBlendShapes::No, false);
+  EXPECT_EQ(
+      loaded.skeleton.joints.size(), body.skeleton.joints.size() + other.skeleton.joints.size());
+  EXPECT_TRUE(
+      std::any_of(
+          loaded.skeleton.joints.begin(),
+          loaded.skeleton.joints.end(),
+          [&name2](const Joint& joint) { return joint.name.rfind(name2 + ":", 0) == 0; }));
+}
+
+TEST(FbxBuilderTest, AddMotionWrongExplicitNameThrows) {
+  Character body = createTestCharacter(5);
+  Character prop = createTestCharacter(3);
+
+  const auto numBodyJointParams =
+      static_cast<Eigen::Index>(body.parameterTransform.numJointParameters());
+  const auto numPropJointParams =
+      static_cast<Eigen::Index>(prop.parameterTransform.numJointParameters());
+  const MatrixXf bodyJointParams = MatrixXf::Zero(numBodyJointParams, 2);
+  const MatrixXf propJointParams = MatrixXf::Zero(numPropJointParams, 2);
+
+  FbxBuilder builder;
+  const std::string bodyName = builder.addCharacter(body);
+  const std::string propName = builder.addRigidBody(prop);
+  ASSERT_EQ(bodyName, "test character");
+  ASSERT_EQ(propName, "test character_1");
+
+  // Passing the explicit name of a different-skeleton character (the rigid body, 3 joints) while
+  // animating body (5 joints) must throw instead of indexing out of bounds.
+  EXPECT_THROW(
+      builder.addMotionWithJointParams(body, 30.0f, bodyJointParams, propName), std::exception);
+  // Empty characterName resolves to the character exported under character.name (body), which
+  // matches.
+  EXPECT_NO_THROW(builder.addMotionWithJointParams(body, 30.0f, bodyJointParams));
+  // Passing the exact returned name targets the correct character.
+  EXPECT_NO_THROW(builder.addMotionWithJointParams(prop, 30.0f, propJointParams, propName));
+}
+
+TEST(FbxBuilderTest, AddMotionUnknownCharacterThrows) {
+  Character character = createTestCharacter(3);
+  const auto numJointParams =
+      static_cast<Eigen::Index>(character.parameterTransform.numJointParameters());
+  const MatrixXf jointParams = MatrixXf::Zero(numJointParams, 2);
+
+  FbxBuilder builder;
+  EXPECT_THROW(builder.addMotionWithJointParams(character, 30.0f, jointParams), std::exception);
+  EXPECT_THROW(
+      builder.addMotionWithJointParams(character, 30.0f, jointParams, "nonexistent"),
+      std::exception);
+}
+
+TEST(FbxBuilderTest, DedupeSkipsNamesTakenByExplicitNames) {
+  FbxBuilder builder;
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup_1"), "dup_1");
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup"), "dup");
+  // The auto-generated "dup_1" is already taken, so the next free suffix is used.
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup"), "dup_2");
+  // An explicit name colliding with an existing one is itself suffixed.
+  EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup_1"), "dup_1_1");
 }
