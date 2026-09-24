@@ -76,7 +76,7 @@
     "yarn": ">=1.22.0 <2"
   },
   "devDependencies": {
-    "image-size": "2.0.2",
+    "image-size": "2.0.3",
     "patch-package": "^8.0.0"
   }
 }
