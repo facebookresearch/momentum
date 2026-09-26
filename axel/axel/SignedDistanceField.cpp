@@ -175,7 +175,7 @@ SignedDistanceField<ScalarType>::sampleWithGradient(
 
     // If point was outside bounds, add offset distance and use offset gradient
     if (offsetDistance > InputScalar{0}) {
-      return {value + offsetDistance, -(offsetVector / offsetDistance)};
+      return {value + offsetDistance, offsetVector / offsetDistance};
     }
   }
 

@@ -11,6 +11,8 @@
 
 #include "axel/common/Constants.h"
 
+#include <array>
+
 namespace axel {
 
 class SignedDistanceFieldTest : public ::testing::Test {
@@ -210,6 +212,80 @@ TEST_F(SignedDistanceFieldTest, BoundaryHandling) {
   const Eigen::Vector3f clampedPos2 = sdf_->gridToWorld(Eigen::Vector3f(3.0f, 3.0f, 3.0f));
   const float expectedValue2 = 1.0f + (outsidePos2 - clampedPos2).norm();
   EXPECT_NEAR(outsideValue2, expectedValue2, 1e-5f);
+}
+
+TEST_F(SignedDistanceFieldTest, BoundaryGradientPointsAwayFromTheGrid) {
+  // The gradient counterpart of BoundaryHandling above, which only checks the
+  // value. Outside the grid `sample()` adds the distance from the query point
+  // to the clamped boundary point, so the field grows outward -- and its
+  // gradient must therefore point outward too. Returning the inward direction
+  // reads as "moving further away gets you closer", which silently inverts the
+  // Jacobian of any error function pulling a point toward a target distance
+  // from outside the grid. Collision terms never noticed: they act only on
+  // penetration, which is always inside.
+  //
+  // A uniform field on purpose. For a query outside on one axis the true
+  // derivative also picks up the field's variation *along* the boundary face,
+  // which this implementation discards in favour of the pure offset direction.
+  // Making the field constant removes that term, so the finite difference is
+  // exactly the outward unit vector and the comparison tests the sign rather
+  // than the approximation.
+  constexpr float kUniform = 2.0f;
+  sdf_->fill(kUniform);
+
+  constexpr float kStep = 1e-3f;
+  const auto centralDifference = [&](const Eigen::Vector3f& p) {
+    Eigen::Vector3f out;
+    for (int axis = 0; axis < 3; ++axis) {
+      Eigen::Vector3f step = Eigen::Vector3f::Zero();
+      step[axis] = kStep;
+      // Materialised rather than passed as an Eigen expression: sample() is
+      // templated on the scalar and cannot deduce it from a CwiseBinaryOp.
+      const Eigen::Vector3f ahead = p + step;
+      const Eigen::Vector3f behind = p - step;
+      out[axis] = (sdf_->sample(ahead) - sdf_->sample(behind)) / (2.0f * kStep);
+    }
+    return out;
+  };
+
+  // The grid spans world (0,0,0)..(2.25,2.25,2.25): four samples per axis at a
+  // spacing of 3/4. Exits on one axis and on all three, so a sign error cannot
+  // hide behind a symmetric direction.
+  const Eigen::Vector3f maxGrid = sdf_->resolution().cast<float>() - Eigen::Vector3f::Ones();
+  const auto outwardFrom = [&](const Eigen::Vector3f& p) {
+    const Eigen::Vector3f clamped = sdf_->worldToGrid(p).cwiseMax(0.0f).cwiseMin(maxGrid);
+    return (p - sdf_->gridToWorld(clamped)).eval();
+  };
+
+  const std::array<Eigen::Vector3f, 3> outsidePositions = {
+      Eigen::Vector3f(6.0f, 1.5f, 1.5f),
+      Eigen::Vector3f(-3.0f, 1.5f, 1.5f),
+      Eigen::Vector3f(-2.0f, -2.0f, -2.0f)};
+
+  for (const auto& position : outsidePositions) {
+    const auto [distance, gradient] = sdf_->sampleWithGradient(position);
+    const Eigen::Vector3f numerical = centralDifference(position);
+
+    EXPECT_NEAR(distance, sdf_->sample(position), 1e-4f)
+        << "sampleWithGradient and sample disagree at " << position.transpose();
+    EXPECT_LT((gradient - numerical).norm(), 1e-2f)
+        << "at " << position.transpose() << ": analytical " << gradient.transpose()
+        << " vs finite difference of sample() " << numerical.transpose();
+
+    // The invariant behind the comparison, stated directly: the distance grows
+    // as the query leaves the grid, so the gradient has a positive component
+    // along the direction it left in.
+    EXPECT_GT(gradient.dot(outwardFrom(position)), 0.0f)
+        << "gradient " << gradient.transpose() << " points back into the grid from "
+        << position.transpose();
+  }
+
+  // Inside the grid the two must still agree -- a uniform field has no
+  // gradient there, so this is the control that the outward term is only
+  // applied outside.
+  const Eigen::Vector3f inside(1.0f, 1.0f, 1.0f);
+  EXPECT_LT(sdf_->sampleWithGradient(inside).second.norm(), 1e-4f);
+  EXPECT_NEAR(sdf_->sample(inside), kUniform, 1e-5f);
 }
 
 TEST_F(SignedDistanceFieldTest, DoubleTypeSDF) {
