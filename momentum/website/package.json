@@ -20,7 +20,7 @@
     "prettier:diff": "prettier --config .prettierrc --list-different \"**/*.{js,jsx,ts,tsx,md,mdx}\""
   },
   "dependencies": {
-    "@algolia/client-search": "^5.57.0",
+    "@algolia/client-search": "^5.59.0",
     "@docusaurus/core": "3.10.2",
     "@docusaurus/preset-classic": "3.10.2",
     "@docusaurus/theme-classic": "3.10.2",
