@@ -17,6 +17,7 @@
 #include "momentum/common/exception.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
+#include "momentum/common/name_utils.h"
 #include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
@@ -931,7 +932,24 @@ struct GltfBuilder::Impl {
 
   Impl();
   fx::gltf::Document document;
+
+  // --- Character name model (read before changing name handling) ---
+  // Every added character is stored in `characterData` under a UNIQUE *exported* name (the map
+  // key), derived from character.name and made unique by makeUniqueName(), which appends a numeric
+  // suffix
+  // ("name_1", ...) on collision. So the exported name is NOT equal to character.name when the same
+  // source name is added more than once: character.name is the *source* name, not the identity.
+  // addCharacter RETURNS the exported name; callers pass it back as `characterName` to addMotion/
+  // addSkeletonStates to target a specific character -- required for instancing (the same Character
+  // object added more than once) or whenever the name was suffixed.
+  //
+  // `exportedNameBySourceName` maps source name (character.name) -> exported name, FIRST-WINS
+  // (never overwritten). It lets addMotion/addSkeletonStates resolve an EMPTY characterName back to
+  // a character even when the exported name differs from character.name. First-wins (not
+  // latest-wins) makes an empty characterName deterministically resolve to the *name-owner* -- the
+  // first character added under that source name -- never a later duplicate.
   std::unordered_map<std::string, CharacterData> characterData;
+  std::unordered_map<std::string, std::string> exportedNameBySourceName;
   MarkerMesh markerMesh = MarkerMesh::None;
 };
 
@@ -950,20 +968,20 @@ GltfBuilder::GltfBuilder(GltfBuilder&&) noexcept = default;
 
 GltfBuilder& GltfBuilder::operator=(GltfBuilder&&) noexcept = default;
 
-void GltfBuilder::addCharacter(
+std::string GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
     const Quaternionf& rotationOffset /*= Quaternionf::Identity()*/,
     const FileSaveOptions& options) {
-  if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
-    // Character already exist. Doesn't allow character with the same name to be saved.
-    // #TODO: proper warning
-    return;
+  std::string characterName = makeUniqueName(character.name, impl_->characterData);
+  if (characterName != character.name) {
+    MT_LOGW(
+        "Character name '{}' is already in use; exporting as '{}'.", character.name, characterName);
   }
   auto& scene = getDefaultScene(impl_->document);
 
   // Add character root node
-  const auto rootNodeIdx = appendNode(impl_->document, character.name);
+  const auto rootNodeIdx = appendNode(impl_->document, characterName);
   MT_CHECK(
       rootNodeIdx >= 0 && rootNodeIdx < impl_->document.nodes.size(),
       "{}: {}",
@@ -974,7 +992,11 @@ void GltfBuilder::addCharacter(
   node.translation = {translation[0], translation[1], translation[2]};
   node.rotation = fromMomentumQuaternionf(rotationOffset);
   scene.nodes.push_back(static_cast<uint32_t>(rootNodeIdx));
-  auto& characterData = impl_->characterData[character.name];
+  auto& characterData = impl_->characterData[characterName];
+  // First-wins: record source name -> exported name so an empty characterName in addMotion/
+  // addSkeletonStates resolves to the first character added under this source name (see
+  // GltfBuilder::Impl).
+  impl_->exportedNameBySourceName.emplace(character.name, characterName);
   characterData.rootIndex = rootNodeIdx;
 
   // fill with data
@@ -1010,6 +1032,8 @@ void GltfBuilder::addCharacter(
       def["metadata"] = character.metadata;
     }
   }
+
+  return characterName;
 }
 
 void GltfBuilder::addMesh(const Mesh& mesh, const std::string& name, bool addColor) {
@@ -1063,6 +1087,37 @@ void GltfBuilder::setFps(float fps) {
   }
 }
 
+std::string GltfBuilder::resolveCharacterForMotion(
+    const Character& character,
+    const std::string& characterName) {
+  // See the "Character name model" note on GltfBuilder::Impl. A non-empty characterName is used
+  // directly; an empty one resolves through exportedNameBySourceName to the first character added
+  // under character.name, auto-adding the character if none has been added yet.
+  std::string resolvedCharacterName = characterName;
+  if (resolvedCharacterName.empty()) {
+    const auto sourceIt = impl_->exportedNameBySourceName.find(character.name);
+    resolvedCharacterName = sourceIt != impl_->exportedNameBySourceName.end()
+        ? sourceIt->second
+        : addCharacter(character);
+  } else {
+    MT_THROW_IF(
+        impl_->characterData.find(resolvedCharacterName) == impl_->characterData.end(),
+        "Character '{}' has not been added to the builder",
+        resolvedCharacterName);
+  }
+
+  const auto& characterData = impl_->characterData.at(resolvedCharacterName);
+  MT_THROW_IF(
+      characterData.nodeMap.size() != character.skeleton.joints.size(),
+      "Character '{}' ({} joints) does not match exported character '{}' ({} nodes). When multiple characters share a name, pass the exact name returned by addCharacter.",
+      character.name,
+      character.skeleton.joints.size(),
+      resolvedCharacterName,
+      characterData.nodeMap.size());
+
+  return resolvedCharacterName;
+}
+
 void GltfBuilder::addMotion(
     const Character& character,
     const float fps /*= 120.0f*/,
@@ -1070,15 +1125,13 @@ void GltfBuilder::addMotion(
     const IdentityParameters& offsets /*= {}*/,
     const bool addExtensions /*= true*/,
     const std::string& customName /*= "default"*/,
-    std::span<const int64_t> timestamps /*= {}*/) {
+    std::span<const int64_t> timestamps /*= {}*/,
+    const std::string& characterName /*= ""*/) {
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
-  const size_t meshIndex = impl_->characterData[character.name].meshIndex;
+  const std::string resolvedCharacterName = resolveCharacterForMotion(character, characterName);
+  auto& characterData = impl_->characterData.at(resolvedCharacterName);
+  const auto& jointToNodeMap = characterData.nodeMap;
+  const size_t meshIndex = characterData.meshIndex;
   // add motion
   addMotionToModel(
       impl_->document,
@@ -1097,7 +1150,7 @@ void GltfBuilder::addMotion(
       [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
   if (animIter != impl_->document.animations.end()) {
     const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
+    characterData.animationIndices.push_back(animIdx);
   }
 
   // Add timestamps to the FB_momentum extension
@@ -1180,14 +1233,12 @@ void GltfBuilder::addSkeletonStates(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::string& customName) {
+    const std::string& customName,
+    const std::string& characterName) {
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
+  const std::string resolvedCharacterName = resolveCharacterForMotion(character, characterName);
+  auto& characterData = impl_->characterData.at(resolvedCharacterName);
+  const auto& jointToNodeMap = characterData.nodeMap;
 
   // add motion from skeleton states
   addSkeletonStatesToModel(
@@ -1199,7 +1250,7 @@ void GltfBuilder::addSkeletonStates(
       [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
   if (animIter != impl_->document.animations.end()) {
     const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
+    characterData.animationIndices.push_back(animIdx);
   }
 }
 
