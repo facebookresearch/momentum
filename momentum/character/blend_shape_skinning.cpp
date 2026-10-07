@@ -101,7 +101,7 @@ void skinWithBlendShapes(
   outputMesh.vertices.resize(character.mesh->vertices.size(), Eigen::Vector3<T>::Zero());
 
   dispenso::parallel_for(
-      dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAuto),
+      dispenso::makeChunkedRange(0, skin.index.rows(), dispenso::ParForChunking::kAdaptive),
       [&blendWeights, &character, &transformations, &outputMesh](
           const size_t rangeBegin, const size_t rangeEnd) {
         const auto& skinWeights = *character.skinWeights;
