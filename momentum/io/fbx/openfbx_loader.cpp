@@ -415,7 +415,7 @@ void extractCollisionCapsule(const ofbx::Object* node, size_t parent, CollisionG
   capsule.length = length;
   capsule.radius = {rad_a, rad_b};
   capsule.transformation = toEigen(xf).cast<float>();
-  capsules.push_back(capsule);
+  capsules.emplace_back(capsule);
 }
 
 void extractCollisionEllipsoid(
@@ -433,7 +433,7 @@ void extractCollisionEllipsoid(
   ellipsoid.radii = Eigen::Vector3f(
       static_cast<float>(radiusX), static_cast<float>(radiusY), static_cast<float>(radiusZ));
   ellipsoid.transformation = toEigen(xf).cast<float>();
-  collisionGeometry.push_back(ellipsoid);
+  collisionGeometry.emplace_back(ellipsoid);
 }
 
 void extractCollisionBox(
@@ -453,7 +453,7 @@ void extractCollisionBox(
       static_cast<float>(halfExtentsY),
       static_cast<float>(halfExtentsZ));
   box.transformation = toEigen(xf).cast<float>();
-  collisionGeometry.push_back(box);
+  collisionGeometry.emplace_back(box);
 }
 
 void extractCollisionPrimitive(
