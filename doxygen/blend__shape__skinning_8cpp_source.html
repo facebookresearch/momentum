@@ -208,7 +208,7 @@ $(document).ready(function(){initNavTree('blend__shape__skinning_8cpp_source.htm
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">outputMesh</a>.vertices.resize(character.<a class="code hl_variable" href="structmomentum_1_1Character.html#a6350b7ebc84df89bab72c29972181aa5">mesh</a>-&gt;vertices.size(), Eigen::Vector3&lt;T&gt;::Zero());</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  dispenso::parallel_for(</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      dispenso::makeChunkedRange(0, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.index.rows(), dispenso::ParForChunking::kAuto),</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      dispenso::makeChunkedRange(0, <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">skin</a>.index.rows(), dispenso::ParForChunking::kAdaptive),</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>      [&amp;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">blendWeights</a>, &amp;character, &amp;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">transformations</a>, &amp;<a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">outputMesh</a>](</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>          <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rangeBegin</a>, <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_typedef" href="namespacemomentum.html#a1f12cb470d2d0a22b8eb57b097739e06">rangeEnd</a>) {</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        const auto&amp; skinWeights = *character.skinWeights;</div>
@@ -315,7 +315,7 @@ $(document).ready(function(){initNavTree('blend__shape__skinning_8cpp_source.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_b19dfde638f642544c68678fc7a0f0f5.html">character</a></li><li class="navelem"><a class="el" href="blend__shape__skinning_8cpp.html">blend_shape_skinning.cpp</a></li>
-    <li class="footer">Generated on Fri Oct 2 2026 19:48:04 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Oct 13 2026 08:20:26 for Momentum by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
