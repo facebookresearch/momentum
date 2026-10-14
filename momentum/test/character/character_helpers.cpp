@@ -193,6 +193,9 @@ std::tuple<Mesh, SkinWeights> createDefaultMesh(int numBones) {
       skin.weight(i, 0) += skin.weight(i, 1);
       skin.weight(i, 1) = 0.0f;
     }
+    if (skin.weight(i, 1) == 0.0f) {
+      skin.index(i, 1) = 0;
+    }
   }
 
   for (int i = 0; i < (kNumSegments - 1); ++i) {

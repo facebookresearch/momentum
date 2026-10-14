@@ -70,20 +70,19 @@ void registerSkinWeightsBindings(py::class_<mm::SkinWeights>& skinWeightsClass) 
                 const auto num_vertices = index_array.shape(0);
                 const auto num_influences = index_array.shape(1);
 
-                // Initialize matrices with zeros - these are fixed-size
-                // matrices with kMaxSkinJoints columns
-                mm::IndexMatrix index_matrix =
-                    mm::IndexMatrix::Zero(num_vertices, mm::kMaxSkinJoints);
-                mm::WeightMatrix weight_matrix =
-                    mm::WeightMatrix::Zero(num_vertices, mm::kMaxSkinJoints);
-
-                // Copy data from numpy arrays to Eigen matrices
+                std::vector<std::vector<size_t>> indices(num_vertices);
+                std::vector<std::vector<float>> weights(num_vertices);
                 auto index_accessor = index_array.unchecked<2>();
                 auto weights_accessor = weights_array.unchecked<2>();
 
-                for (int i = 0; i < num_vertices; ++i) {
-                  for (int j = 0; j < num_influences; ++j) {
-                    auto index = index_accessor(i, j);
+                for (py::ssize_t i = 0; i < num_vertices; ++i) {
+                  auto& rowIndices = indices.at(static_cast<size_t>(i));
+                  auto& rowWeights = weights.at(static_cast<size_t>(i));
+                  rowIndices.reserve(num_influences);
+                  rowWeights.reserve(num_influences);
+
+                  for (py::ssize_t j = 0; j < num_influences; ++j) {
+                    const auto index = index_accessor(i, j);
                     if (index < 0) {
                       throw py::value_error(
                           fmt::format(
@@ -91,14 +90,14 @@ void registerSkinWeightsBindings(py::class_<mm::SkinWeights>& skinWeightsClass) 
                               i,
                               j));
                     }
-                    index_matrix(i, j) = static_cast<uint32_t>(index);
-                  }
-                  for (int j = 0; j < num_influences; ++j) {
-                    weight_matrix(i, j) = weights_accessor(i, j);
+                    rowIndices.push_back(static_cast<size_t>(index));
+                    rowWeights.push_back(weights_accessor(i, j));
                   }
                 }
 
-                return {std::move(index_matrix), std::move(weight_matrix)};
+                mm::SkinWeights skinWeights;
+                skinWeights.set(indices, weights);
+                return skinWeights;
               }),
           py::arg("index"),
           py::arg("weights"),
@@ -109,7 +108,8 @@ void registerSkinWeightsBindings(py::class_<mm::SkinWeights>& skinWeightsClass) 
               Values should be non-negative integers representing joint indices.
 :param weights: 2D numpy array of shape (num_vertices, num_influences) containing joint weights.
                Maximum influencing joints per vertex is defined by kMaxSkinJoints constant.
-               Weights for each vertex typically sum to 1.0.
+               Positive weights are packed and sorted in descending order without rescaling;
+               zero, negative, and non-finite weights are discarded.
 :return: SkinWeights object with properly formatted index and weight matrices.
 :raises ValueError: If arrays have incompatible dimensions or exceed maximum joint limits.)")
       .def(
