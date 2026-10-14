@@ -96,7 +96,8 @@ Setting this value will affect subsequently added motions and animations.
                 actualRotationOffset[1], // y
                 actualRotationOffset[2]); // z
 
-            builder.addCharacter(character, actualPositionOffset, quaternionOffset, actualOptions);
+            return builder.addCharacter(
+                character, actualPositionOffset, quaternionOffset, actualOptions);
           },
           R"(Add a character to the GLTF scene.
 
@@ -107,10 +108,8 @@ can be provided as an initial transform for the character.
 :param character: The character to add to the scene.
 :param position_offset: Translation offset for the character's root node. Defaults to zero vector if None.
 :param rotation_offset: Rotation offset as a quaternion in (x,y,z,w) format. Defaults to identity quaternion if None.
-:param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param add_collisions: Whether to add collision geometry to the scene.
-:param add_locators: Whether to add locator data to the scene.
-:param add_mesh: Whether to add the character's mesh to the scene.)",
+:param options: File save options controlling extensions, collisions, locators, and meshes.
+:return: The exported character name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("position_offset") = std::nullopt,
           py::arg("rotation_offset") = std::nullopt,
@@ -138,7 +137,8 @@ node in the scene with the specified name.
              const std::optional<mm::MotionParameters>& motion,
              const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
              bool addExtensions,
-             const std::string& customName) {
+             const std::string& customName,
+             const std::optional<std::string>& characterName) {
             // Apply same validation and transposition as
             // saveGLTFCharacterToFile
             mm::MotionParameters transposedMotion;
@@ -164,7 +164,9 @@ node in the scene with the specified name.
                 pymomentum::transpose(motion.value_or(mm::MotionParameters{})),
                 identityParams,
                 addExtensions,
-                customName);
+                customName,
+                {},
+                characterName.value_or(""));
           },
           R"(Add a motion sequence to the specified character.
 
@@ -179,26 +181,30 @@ model parameters that animate the character over time.
 :param offsets: Optional identity parameters as a tuple of (joint_names, offset_data).
                 Offset data should be a vector with shape [n_joints * 7].
 :param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param custom_name: Custom name for the animation in the GLTF file.)",
+:param custom_name: Custom name for the animation in the GLTF file.
+:param character_name: Exported name returned by :meth:`add_character`, selecting which exported character to animate. Pass it to target a specific instance when the same character was added more than once, or a duplicate whose name was auto-suffixed. When omitted, resolves to the character exported under the source name (auto-adding it if absent).)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
           py::arg("motion") = std::optional<mm::MotionParameters>{},
           py::arg("offsets") = std::optional<mm::IdentityParameters>{},
           py::arg("add_extensions") = true,
-          py::arg("custom_name") = "default")
+          py::arg("custom_name") = "default",
+          py::arg("character_name") = std::nullopt)
       .def(
           "add_skeleton_states",
           [](mm::GltfBuilder& builder,
              const mm::Character& character,
              float fps,
              const py::array_t<float>& skeletonStates,
-             const std::string& customName) {
+             const std::string& customName,
+             const std::optional<std::string>& characterName) {
             // Use the shared utility function for conversion
             std::vector<mm::SkeletonState> skelStates =
                 pymomentum::arrayToSkeletonStates(skeletonStates, character);
 
             // Call the addSkeletonStates method
-            builder.addSkeletonStates(character, fps, std::span(skelStates), customName);
+            builder.addSkeletonStates(
+                character, fps, std::span(skelStates), customName, characterName.value_or(""));
           },
           R"(Add skeleton states animation to the specified character.
 
@@ -212,11 +218,13 @@ per-joint transforms that define the character's pose over time.
                        Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
                        translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
                        in (x,y,z,w) format, and s is scale.
-:param custom_name: Custom name for the animation in the GLTF file.)",
+:param custom_name: Custom name for the animation in the GLTF file.
+:param character_name: Exported name returned by :meth:`add_character`, selecting which exported character to animate. Pass it to target a specific instance when the same character was added more than once, or a duplicate whose name was auto-suffixed. When omitted, resolves to the character exported under the source name (auto-adding it if absent).)",
           py::arg("character"),
           py::arg("fps"),
           py::arg("skeleton_states"),
-          py::arg("custom_name") = "default")
+          py::arg("custom_name") = "default",
+          py::arg("character_name") = std::nullopt)
       .def(
           "add_marker_sequence",
           [](mm::GltfBuilder& builder,

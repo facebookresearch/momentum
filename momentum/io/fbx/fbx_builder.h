@@ -37,6 +37,17 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// skinned characters, rigid bodies, motions, and marker data. This is useful
 /// for creating scenes with multiple characters/objects in a single FBX file.
 ///
+/// @note A scene may hold multiple characters, but the momentum loaders cannot read a
+/// multi-character scene back as separate characters (all skeletons load as one merged
+/// Character). Names returned by addCharacter/addRigidBody are handles for use within this
+/// builder session, not persistent identifiers recoverable on reload.
+///
+/// @note Character identity is the *exported* name, not character.name. addCharacter/addRigidBody
+/// dedupe names (and addRigidBody accepts a `name` override), so the exported name they RETURN may
+/// differ from character.name. Pass that returned name as `characterName` to addMotion* to target a
+/// specific character or instance; an empty characterName resolves to the first character added
+/// under character.name.
+///
 /// Example usage:
 /// @code
 ///   FbxBuilder builder;
@@ -67,7 +78,12 @@ class FbxBuilder final {
   ///
   /// @param character The character to add.
   /// @param options File save options controlling mesh, locators, collisions.
-  void addCharacter(const Character& character, const FileSaveOptions& options = FileSaveOptions());
+  /// @return The name used for the exported character. Duplicate names receive a numeric suffix.
+  /// This returned name is a within-session handle: pass it as characterName to addMotion to target
+  /// this specific character. It is not a persistent identifier recoverable on reload.
+  std::string addCharacter(
+      const Character& character,
+      const FileSaveOptions& options = FileSaveOptions());
 
   /// Add a rigid body (skeleton + mesh parented to a joint, no skinning).
   ///
@@ -76,10 +92,14 @@ class FbxBuilder final {
   /// root, so it inherits the skeleton's animation without needing skin weights.
   ///
   /// @param character The character to add as a rigid body.
-  /// @param name Optional name override. Uses character.name if empty.
+  /// @param name Optional requested base name. Uses character.name if empty. A numeric suffix is
+  /// appended if the resulting name is already in use.
   /// @param parentJoint Index of the joint to parent the mesh under.
   /// @param options File save options (mesh option is respected).
-  void addRigidBody(
+  /// @return The name used for the exported rigid body. Duplicate names receive a numeric suffix.
+  /// Pass it as characterName to addMotion/addMotionWithJointParams to target this specific rigid
+  /// body.
+  std::string addRigidBody(
       const Character& character,
       const std::string& name = "",
       size_t parentJoint = 0,
@@ -95,11 +115,17 @@ class FbxBuilder final {
   /// @param fps Animation frame rate in frames per second.
   /// @param motion Model parameters matrix with shape (nFrames x nModelParams).
   /// @param offsets Identity/offset parameters for the bind pose.
+  /// @param characterName Exported name returned by addCharacter/addRigidBody, selecting which
+  /// exported character to animate. Pass it to target a specific instance when the same Character
+  /// object was added more than once, or a duplicate whose name was auto-suffixed. When empty,
+  /// resolves to the character exported under character.name (the first added under that name), and
+  /// throws if none exists.
   void addMotion(
       const Character& character,
       float fps,
       const MatrixXf& motion = {},
-      const VectorXf& offsets = {});
+      const VectorXf& offsets = {},
+      const std::string& characterName = "");
 
   /// Add joint-parameter animation for a previously added character.
   ///
@@ -109,7 +135,16 @@ class FbxBuilder final {
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
-  void addMotionWithJointParams(const Character& character, float fps, const MatrixXf& jointParams);
+  /// @param characterName Exported name returned by addCharacter/addRigidBody, selecting which
+  /// exported character to animate. Pass it to target a specific instance when the same Character
+  /// object was added more than once, or a duplicate whose name was auto-suffixed. When empty,
+  /// resolves to the character exported under character.name (the first added under that name), and
+  /// throws if none exists.
+  void addMotionWithJointParams(
+      const Character& character,
+      float fps,
+      const MatrixXf& jointParams,
+      const std::string& characterName = "");
 
   /// Add an animated mesh (mesh node with per-frame transform, no skeleton).
   ///
