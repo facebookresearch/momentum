@@ -107,10 +107,7 @@ can be provided as an initial transform for the character.
 :param character: The character to add to the scene.
 :param position_offset: Translation offset for the character's root node. Defaults to zero vector if None.
 :param rotation_offset: Rotation offset as a quaternion in (x,y,z,w) format. Defaults to identity quaternion if None.
-:param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param add_collisions: Whether to add collision geometry to the scene.
-:param add_locators: Whether to add locator data to the scene.
-:param add_mesh: Whether to add the character's mesh to the scene.)",
+:param options: :class:`FileSaveOptions` controlling which components (mesh, locators, collisions, blend shapes, ...) are written. Defaults to ``FileSaveOptions()`` if None.)",
           py::arg("character"),
           py::arg("position_offset") = std::nullopt,
           py::arg("rotation_offset") = std::nullopt,

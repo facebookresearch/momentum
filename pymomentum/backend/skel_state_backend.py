@@ -101,15 +101,17 @@ def global_skel_state_from_local_skel_state_impl(
     with its parent's global transformation to produce the joint's global transformation.
 
     The skeleton state uses an 8-parameter representation per joint: [translation, quaternion, scale]
+
     - translation (3D): local translation vector [tx, ty, tz]
     - quaternion (4D): rotation quaternion [qx, qy, qz, qw] (normalized)
     - scale (1D): uniform scale factor [s]
 
-    Forward Kinematics Algorithm:
-    For each joint j with parent p in the kinematic hierarchy:
+    Forward kinematics algorithm, for each joint j with parent p in the kinematic hierarchy::
+
         global_state_j = global_state_p ⊙ local_state_j
 
     Where ⊙ represents similarity transformation composition:
+
     - t_global = t_parent + s_parent * rotate_by_quaternion(q_parent, t_local)
     - q_global = quaternion_multiply(q_parent, q_local)
     - s_global = s_parent * s_local
@@ -128,11 +130,13 @@ def global_skel_state_from_local_skel_state_impl(
             accumulated floating-point errors.
 
     Returns:
-        global_skel_state: Global joint transformations, shape (batch_size, num_joints, 8).
-            Each joint contains the composed transformation from root to that joint.
-        intermediate_results: List of intermediate joint states from the forward pass.
-            Required for efficient gradient computation during backpropagation.
-            Empty if save_intermediate_results=False.
+        A tuple ``(global_skel_state, intermediate_results)`` where
+
+        - ``global_skel_state``: Global joint transformations, shape (batch_size, num_joints, 8).
+          Each joint contains the composed transformation from root to that joint.
+        - ``intermediate_results``: List of intermediate joint states from the forward pass.
+          Required for efficient gradient computation during backpropagation.
+          Empty if save_intermediate_results=False.
 
     Note:
         This function is JIT-compiled for performance. The prefix multiplication approach
@@ -183,8 +187,10 @@ def global_skel_state_from_local_skel_state_no_grad(
         use_double_precision: Whether to use float64 for numerical stability
 
     Returns:
-        global_skel_state: Global joint transformations, shape (batch_size, num_joints, 8)
-        intermediate_results: List of intermediate joint states from forward pass
+        A tuple ``(global_skel_state, intermediate_results)`` where
+
+        - ``global_skel_state``: Global joint transformations, shape (batch_size, num_joints, 8)
+        - ``intermediate_results``: List of intermediate joint states from forward pass
 
     See Also:
         :func:`global_skel_state_from_local_skel_state_impl`: Implementation function
@@ -447,11 +453,12 @@ def skin_points_from_skel_state(
     to skinning weights. Each point is influenced by multiple joints, with the final
     position computed as a weighted average of joint-transformed positions.
 
-    Linear Blend Skinning Formula:
-    For each vertex v_i with position p_i in template:
+    Linear blend skinning formula, for each vertex v_i with position p_i in template::
+
         skinned_p_i = Σ_j w_ij * T_j * (T_bind_j^(-1) * p_i)
 
     Where:
+
     - w_ij: skinning weight of joint j on vertex i (sum to 1 per vertex)
     - T_j: global transformation of joint j
     - T_bind_j^(-1): inverse bind pose transformation of joint j
@@ -585,10 +592,12 @@ def skin_oriented_points_from_skel_state(
             Flattened list of point indices corresponding to joint influences.
 
     Returns:
-        skinned_means: Deformed point positions, shape (batch_size, num_points, 3).
-            Transformed positions according to current joint poses and skinning weights.
-        skinned_quaternions: Blended point orientations, shape (batch_size, num_points, 4).
-            Orientations blended using rotation matrix interpolation and converted back to quaternions.
+        A tuple ``(skinned_means, skinned_quaternions)`` where
+
+        - ``skinned_means``: Deformed point positions, shape (batch_size, num_points, 3).
+          Transformed positions according to current joint poses and skinning weights.
+        - ``skinned_quaternions``: Blended point orientations, shape (batch_size, num_points, 4).
+          Orientations blended using rotation matrix interpolation and converted back to quaternions.
 
     Note:
         This function is commonly used for Gaussian splatting applications where each

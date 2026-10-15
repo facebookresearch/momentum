@@ -7,9 +7,8 @@
 Backend Utility Functions for PyMomentum
 =========================================
 
-This module provides utility functions that are specific to backend operations
-and were previously available in real_lbs_pytorch but are now implemented
-within pymomentum for the backend porting effort.
+This module provides utility functions used by the PyMomentum skinning and forward
+kinematics backends.
 """
 
 # pyre-strict
@@ -108,10 +107,9 @@ class LBSAdapter:
     """Adapter class to make pymomentum Character compatible with LBS interface.
 
     This adapter provides a compatibility layer that allows pymomentum Character objects
-    to be used in tests and code that originally expected the LBS interface from the
-    real_lbs_pytorch library. It extracts and converts the necessary properties from
-    a Character object into the expected tensor format and provides the methods that
-    the original LBS interface had.
+    to be used in tests and code that expect a standalone LBS interface. It extracts
+    and converts the necessary properties from a Character object into the expected
+    tensor format and provides the methods of that interface.
     """
 
     def __init__(self, character: pym_geometry.Character, device: str = "cpu") -> None:
