@@ -132,9 +132,9 @@ Valid values: "Disabled", "Error", "Warning", "Info", "Debug", "Trace" (case-ins
         return false;
 #endif
       },
-      R"(Redirects C++ log messages from the momentum library to Python's stdout via :func:`print`.
+      R"(Redirects C++ log messages from the momentum library to Python's stdout via ``print()``.
 
-This allows C++ log output (from :func:`MT_LOG` macros) to appear alongside Python output,
+This allows C++ log output (from the ``MT_LOG`` macros) to appear alongside Python output,
 which is useful when running momentum from a Python script or Jupyter notebook.
 
 The redirection is performed at most once; subsequent calls have no effect and return ``True``.
@@ -167,7 +167,7 @@ The redirection is performed at most once; subsequent calls have no effect and r
           thread.join();
         }
       },
-      R"(Test helper: fire :func:`MT_LOGW` from multiple C++ threads concurrently.
+      R"(Test helper: fire ``MT_LOGW`` from multiple C++ threads concurrently.
 
 This is used internally to verify that the Python logging callback handles
 the GIL correctly and does not crash under concurrent access.

@@ -68,6 +68,8 @@ from pymomentum import quaternion
 # pyre-strict
 
 # Type alias for TRS transform tuple
+#: A TRS transform: a ``(translation, rotation_matrix, scale)`` tuple of tensors with shapes
+#: ``(..., 3)``, ``(..., 3, 3)`` and ``(..., 1)``.
 TRSTransform = tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 
 

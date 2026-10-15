@@ -802,8 +802,7 @@ want to calibrate on a ROM (range of motion) sequence but don't need the tracked
 that sequence.
 
 The calibration modifies the character in-place (updating locators if configured) and returns
-the calibrated identity parameters. These can then be used with :func:`process_markers` or
-:func:`track_poses` for tracking other sequences.
+the calibrated identity parameters. These can then be used with :func:`process_markers` for tracking other sequences.
 
 When glove data is provided via ``left_glove_data`` / ``right_glove_data`` and a
 :class:`GloveConfig`, the solver adds glove-to-finger constraints during calibration.

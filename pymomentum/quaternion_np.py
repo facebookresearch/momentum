@@ -9,8 +9,8 @@ Quaternion Utilities (NumPy)
 
 NumPy implementation of quaternion utilities for PyMomentum.
 
-This module mirrors :mod:`quaternion` but uses NumPy arrays instead of PyTorch tensors.
-See :mod:`quaternion` for full documentation on the quaternion format and operations.
+This module mirrors :mod:`pymomentum.quaternion` but uses NumPy arrays instead of PyTorch tensors.
+See :mod:`pymomentum.quaternion` for full documentation on the quaternion format and operations.
 
 Quaternion Format
 -----------------
