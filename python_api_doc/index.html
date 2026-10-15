@@ -45,8 +45,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
@@ -54,6 +58,8 @@
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
 </ul>
 
         </div>
@@ -190,6 +196,42 @@
 <li class="toctree-l2"><a class="reference internal" href="geometry.html#pymomentum.geometry.uniform_random_to_model_parameters"><code class="docutils literal notranslate"><span class="pre">uniform_random_to_model_parameters()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.apply_inverse_parameter_transform"><code class="docutils literal notranslate"><span class="pre">apply_inverse_parameter_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.apply_model_param_limits"><code class="docutils literal notranslate"><span class="pre">apply_model_param_limits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.apply_parameter_transform"><code class="docutils literal notranslate"><span class="pre">apply_parameter_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.compute_blend_shape"><code class="docutils literal notranslate"><span class="pre">compute_blend_shape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.compute_vertex_normals"><code class="docutils literal notranslate"><span class="pre">compute_vertex_normals()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.find_closest_points"><code class="docutils literal notranslate"><span class="pre">find_closest_points()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.find_closest_points_on_mesh"><code class="docutils literal notranslate"><span class="pre">find_closest_points_on_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_local_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.joint_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_positions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.joint_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.local_skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">local_skeleton_state_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.map_joint_parameters"><code class="docutils literal notranslate"><span class="pre">map_joint_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.map_model_parameters"><code class="docutils literal notranslate"><span class="pre">map_model_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.model_parameters_to_blend_shape_coefficients"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_blend_shape_coefficients()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.model_parameters_to_face_expression_coefficients"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_face_expression_coefficients()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.model_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_local_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.model_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_positions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.model_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">model_parameters_to_skeleton_state()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.reduce_to_selected_model_parameters"><code class="docutils literal notranslate"><span class="pre">reduce_to_selected_model_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.skeleton_state_to_joint_parameters"><code class="docutils literal notranslate"><span class="pre">skeleton_state_to_joint_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.skin_points"><code class="docutils literal notranslate"><span class="pre">skin_points()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.skin_skinned_locators"><code class="docutils literal notranslate"><span class="pre">skin_skinned_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="diff_geometry.html#pymomentum.diff_geometry.uniform_random_to_model_parameters"><code class="docutils literal notranslate"><span class="pre">uniform_random_to_model_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.Camera"><code class="docutils literal notranslate"><span class="pre">Camera</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.IntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.OpenCVDistortionParameters"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.OpenCVFisheyeDistortionParameters"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.OpenCVFisheyeIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.OpenCVIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera.html#pymomentum.camera.PinholeIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="quaternion.html#quaternion-utilities">Quaternion Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quaternion.html#pymomentum.quaternion.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
@@ -221,6 +263,33 @@
 <li class="toctree-l2"><a class="reference internal" href="quaternion.html#pymomentum.quaternion.to_rotation_matrix_assume_normalized"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix_assume_normalized()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#quaternion-utilities-numpy">Quaternion Utilities (NumPy)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.align_z_with"><code class="docutils literal notranslate"><span class="pre">align_z_with()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.angular_distance"><code class="docutils literal notranslate"><span class="pre">angular_distance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.check_and_normalize_weights"><code class="docutils literal notranslate"><span class="pre">check_and_normalize_weights()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.conjugate"><code class="docutils literal notranslate"><span class="pre">conjugate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.euler_xyz_to_quaternion"><code class="docutils literal notranslate"><span class="pre">euler_xyz_to_quaternion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.euler_zyx_to_quaternion"><code class="docutils literal notranslate"><span class="pre">euler_zyx_to_quaternion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.from_axis_angle"><code class="docutils literal notranslate"><span class="pre">from_axis_angle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.from_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">from_rotation_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.from_two_vectors"><code class="docutils literal notranslate"><span class="pre">from_two_vectors()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.multiply_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.quaternion_to_xyz_euler"><code class="docutils literal notranslate"><span class="pre">quaternion_to_xyz_euler()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.rotate_vector"><code class="docutils literal notranslate"><span class="pre">rotate_vector()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.rotate_vector_assume_normalized"><code class="docutils literal notranslate"><span class="pre">rotate_vector_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.to_rotation_matrix"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="quaternion_np.html#pymomentum.quaternion_np.to_rotation_matrix_assume_normalized"><code class="docutils literal notranslate"><span class="pre">to_rotation_matrix_assume_normalized()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skel_state.html#skeleton-state-utilities">Skeleton State Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skel_state.html#pymomentum.skel_state.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
@@ -239,6 +308,25 @@
 <li class="toctree-l2"><a class="reference internal" href="skel_state.html#pymomentum.skel_state.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="skel_state.html#pymomentum.skel_state.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="skel_state.html#pymomentum.skel_state.transform_points_assume_normalized"><code class="docutils literal notranslate"><span class="pre">transform_points_assume_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#skeleton-state-utilities-numpy">Skeleton State Utilities (NumPy)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.from_matrix"><code class="docutils literal notranslate"><span class="pre">from_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.from_quaternion"><code class="docutils literal notranslate"><span class="pre">from_quaternion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.from_scale"><code class="docutils literal notranslate"><span class="pre">from_scale()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.from_translation"><code class="docutils literal notranslate"><span class="pre">from_translation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.multiply_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="skel_state_np.html#pymomentum.skel_state_np.transform_points_assume_normalized"><code class="docutils literal notranslate"><span class="pre">transform_points_assume_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a><ul>
@@ -265,6 +353,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.selection">pymomentum.backend.selection module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.trs_backend">pymomentum.backend.trs_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="backend.html#module-pymomentum.backend.utils">pymomentum.backend.utils module</a></li>
@@ -398,6 +487,7 @@
 <li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.character">pymomentum.torch.character</a></li>
 <li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.parameter_limits">pymomentum.torch.parameter_limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.sdf_collision">pymomentum.torch.sdf_collision</a></li>
 <li class="toctree-l2"><a class="reference internal" href="torch.html#module-pymomentum.torch.utility">pymomentum.torch.utility</a></li>
 </ul>
 </li>
@@ -434,6 +524,42 @@
 <li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.rasterize_wireframe"><code class="docutils literal notranslate"><span class="pre">rasterize_wireframe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.subdivide_mesh"><code class="docutils literal notranslate"><span class="pre">subdivide_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="renderer.html#pymomentum.renderer.triangulate"><code class="docutils literal notranslate"><span class="pre">triangulate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#rerun-visualization-helpers">Rerun Visualization Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_animation"><code class="docutils literal notranslate"><span class="pre">log_animation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_character"><code class="docutils literal notranslate"><span class="pre">log_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_collision_geometry"><code class="docutils literal notranslate"><span class="pre">log_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_joints"><code class="docutils literal notranslate"><span class="pre">log_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_locators"><code class="docutils literal notranslate"><span class="pre">log_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="rerun_vis.html#pymomentum.rerun_vis.log_mesh"><code class="docutils literal notranslate"><span class="pre">log_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#viser-visualization-helpers">Viser Visualization Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.CM_TO_M"><code class="docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.CharacterHandles"><code class="docutils literal notranslate"><span class="pre">CharacterHandles</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.LogPanel"><code class="docutils literal notranslate"><span class="pre">LogPanel</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_character"><code class="docutils literal notranslate"><span class="pre">add_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_character_param_sliders"><code class="docutils literal notranslate"><span class="pre">add_character_param_sliders()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_collision_geometry"><code class="docutils literal notranslate"><span class="pre">add_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_floor"><code class="docutils literal notranslate"><span class="pre">add_floor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_joints"><code class="docutils literal notranslate"><span class="pre">add_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_log_panel"><code class="docutils literal notranslate"><span class="pre">add_log_panel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_mesh"><code class="docutils literal notranslate"><span class="pre">add_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.add_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">add_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.can_use_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">can_use_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.max_skin_influences"><code class="docutils literal notranslate"><span class="pre">max_skin_influences()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.remove_character"><code class="docutils literal notranslate"><span class="pre">remove_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_character"><code class="docutils literal notranslate"><span class="pre">update_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_collision_geometry"><code class="docutils literal notranslate"><span class="pre">update_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_joints"><code class="docutils literal notranslate"><span class="pre">update_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_joints_transforms"><code class="docutils literal notranslate"><span class="pre">update_joints_transforms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_mesh"><code class="docutils literal notranslate"><span class="pre">update_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_mesh_vertices"><code class="docutils literal notranslate"><span class="pre">update_mesh_vertices()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">update_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="viser_vis.html#pymomentum.viser_vis.update_skinned_mesh_transforms"><code class="docutils literal notranslate"><span class="pre">update_skinned_mesh_transforms()</span></code></a></li>
 </ul>
 </li>
 </ul>

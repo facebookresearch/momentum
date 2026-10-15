@@ -46,10 +46,20 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.backend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.backend.selection">pymomentum.backend.selection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.selection.force_backend"><code class="docutils literal notranslate"><span class="pre">force_backend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.selection.resolve_backend"><code class="docutils literal notranslate"><span class="pre">resolve_backend()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.selection.resolve_fk_backend"><code class="docutils literal notranslate"><span class="pre">resolve_fk_backend()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.backend.skel_state_backend">pymomentum.backend.skel_state_backend module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pymomentum.backend.skel_state_backend.GlobalSkelStateFromLocalSkelStateJIT.backward"><code class="docutils literal notranslate"><span class="pre">GlobalSkelStateFromLocalSkelStateJIT.backward()</span></code></a></li>
@@ -95,6 +105,8 @@
 <li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
 <li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
 </ul>
 
         </div>
@@ -123,6 +135,29 @@
              
   <section id="module-pymomentum.backend">
 <span id="pymomentum-backend"></span><h1>pymomentum.backend<a class="headerlink" href="#module-pymomentum.backend" title="Link to this heading"></a></h1>
+<section id="module-pymomentum.backend.selection">
+<span id="pymomentum-backend-selection-module"></span><h2>pymomentum.backend.selection module<a class="headerlink" href="#module-pymomentum.backend.selection" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.backend.selection.force_backend">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.backend.selection.</span></span><span class="sig-name descname"><span class="pre">force_backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.backend.selection.force_backend" title="Link to this definition"></a></dt>
+<dd><p>Force <cite>resolve_backend</cite> to return <cite>backend</cite> within this context.</p>
+<p>Used by model export to keep the entire export (the eager warm-up forward and
+the subsequent jit.trace) on the traceable torch backend, since Triton kernels
+are not traceable. Pass None to clear the override. The override is scoped to
+the current thread / async context.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.backend.selection.resolve_backend">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.backend.selection.</span></span><span class="sig-name descname"><span class="pre">resolve_backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_double_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.backend.selection.resolve_backend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.backend.selection.resolve_fk_backend">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.backend.selection.</span></span><span class="sig-name descname"><span class="pre">resolve_fk_backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_double_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.backend.selection.resolve_fk_backend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
 <section id="module-pymomentum.backend.skel_state_backend">
 <span id="pymomentum-backend-skel-state-backend-module"></span><h2>pymomentum.backend.skel_state_backend module<a class="headerlink" href="#module-pymomentum.backend.skel_state_backend" title="Link to this heading"></a></h2>
 <p>Skeleton State Backend for PyMomentum</p>

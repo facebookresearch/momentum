@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.rerun_vis &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.viser_vis" href="viser_vis.html" />
+    <link rel="prev" title="pymomentum.renderer" href="renderer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.rerun_vis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rerun-visualization-helpers">Rerun Visualization Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_animation"><code class="docutils literal notranslate"><span class="pre">log_animation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_character"><code class="docutils literal notranslate"><span class="pre">log_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_collision_geometry"><code class="docutils literal notranslate"><span class="pre">log_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_joints"><code class="docutils literal notranslate"><span class="pre">log_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_locators"><code class="docutils literal notranslate"><span class="pre">log_locators()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.rerun_vis.log_mesh"><code class="docutils literal notranslate"><span class="pre">log_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.rerun_vis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/rerun_vis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.rerun_vis">
+<span id="pymomentum-rerun-vis"></span><h1>pymomentum.rerun_vis<a class="headerlink" href="#module-pymomentum.rerun_vis" title="Link to this heading"></a></h1>
+<section id="rerun-visualization-helpers">
+<h2>Rerun Visualization Helpers<a class="headerlink" href="#rerun-visualization-helpers" title="Link to this heading"></a></h2>
+<p>Helper functions for visualizing momentum characters using the
+<a class="reference external" href="https://www.rerun.io/">Rerun</a> viewer, providing the Python equivalent of
+the C++ <code class="docutils literal notranslate"><span class="pre">momentum::logCharacter</span></code> family of functions in
+<code class="docutils literal notranslate"><span class="pre">momentum/gui/rerun/logger.h</span></code>.</p>
+<p>The primary entry point is <a class="reference internal" href="#pymomentum.rerun_vis.log_character" title="pymomentum.rerun_vis.log_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_character()</span></code></a>, which logs the skeleton,
+mesh, and locators of a character in a structured entity tree:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rerun</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.geometry</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">geo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymomentum.rerun_vis</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_character</span>
+
+<span class="n">character</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">Character</span><span class="o">.</span><span class="n">load_gltf</span><span class="p">(</span><span class="s2">"character.glb"</span><span class="p">)</span>
+<span class="n">char</span><span class="p">,</span> <span class="n">motion</span><span class="p">,</span> <span class="n">identity</span><span class="p">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">Character</span><span class="o">.</span><span class="n">load_gltf_with_motion</span><span class="p">(</span><span class="s2">"motion.glb"</span><span class="p">)</span>
+<span class="n">skel_state</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">joint_parameters_to_skeleton_state</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">motion</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">posed_mesh</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">pose_mesh</span><span class="p">(</span><span class="n">motion</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">rec</span> <span class="o">=</span> <span class="n">rr</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="s2">"pymomentum_viewer"</span><span class="p">,</span> <span class="n">spawn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">log_character</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="s2">"character"</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">skel_state</span><span class="p">,</span> <span class="n">posed_mesh</span><span class="o">=</span><span class="n">posed_mesh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For multi-frame animation, use <a class="reference internal" href="#pymomentum.rerun_vis.log_animation" title="pymomentum.rerun_vis.log_animation"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_animation()</span></code></a> which sends all frames
+using <code class="xref py py-func docutils literal notranslate"><span class="pre">rerun.send_columns()</span></code> for dramatically better throughput:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">skel_states</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">joint_parameters_to_skeleton_state</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">joint_params</span><span class="p">)</span>
+<span class="n">posed_meshes</span> <span class="o">=</span> <span class="p">[</span><span class="n">char</span><span class="o">.</span><span class="n">pose_mesh</span><span class="p">(</span><span class="n">jp</span><span class="p">)</span> <span class="k">for</span> <span class="n">jp</span> <span class="ow">in</span> <span class="n">joint_params</span><span class="p">]</span>
+<span class="n">log_animation</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="s2">"character"</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">skel_states</span><span class="p">,</span>
+              <span class="n">posed_meshes</span><span class="o">=</span><span class="n">posed_meshes</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Individual logging functions are also available for finer control:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pymomentum.rerun_vis.log_mesh" title="pymomentum.rerun_vis.log_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_mesh()</span></code></a> — log a <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pymomentum.rerun_vis.log_joints" title="pymomentum.rerun_vis.log_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_joints()</span></code></a> — log skeleton bones and per-joint transforms</p></li>
+<li><p><a class="reference internal" href="#pymomentum.rerun_vis.log_locators" title="pymomentum.rerun_vis.log_locators"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_locators()</span></code></a> — log locator world-space positions</p></li>
+<li><p><a class="reference internal" href="#pymomentum.rerun_vis.log_collision_geometry" title="pymomentum.rerun_vis.log_collision_geometry"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_collision_geometry()</span></code></a> — log collision proxy capsules, ellipsoids, and boxes</p></li>
+</ul>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_animation">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">posed_meshes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_animation" title="Link to this definition"></a></dt>
+<dd><p>Log a multi-frame character animation using columnar batch sends.</p>
+<p>This sends all frames at once using <code class="xref py py-func docutils literal notranslate"><span class="pre">rerun.send_columns()</span></code>, which is
+dramatically faster than per-frame <a class="reference internal" href="#pymomentum.rerun_vis.log_character" title="pymomentum.rerun_vis.log_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_character()</span></code></a> calls for long
+animations.</p>
+<p>For memory-bounded processing of very long animations, call this function
+in a loop with chunks of frames and matching <em>frame_offset</em> values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">)</span>
+    <span class="n">chunk_meshes</span> <span class="o">=</span> <span class="p">[</span><span class="n">char</span><span class="o">.</span><span class="n">pose_mesh</span><span class="p">(</span><span class="n">jp</span><span class="p">)</span> <span class="k">for</span> <span class="n">jp</span> <span class="ow">in</span> <span class="n">joint_params</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]]</span>
+    <span class="n">log_animation</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">skel_states</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
+                  <span class="n">posed_meshes</span><span class="o">=</span><span class="n">chunk_meshes</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">,</span> <span class="n">frame_offset</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Root entity path for the character.</p></li>
+<li><p><strong>character</strong> – The character to visualize.</p></li>
+<li><p><strong>skel_states</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joints,</span> <span class="pre">8)</span></code>
+with per-joint <code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">rx,</span> <span class="pre">ry,</span> <span class="pre">rz,</span> <span class="pre">rw,</span> <span class="pre">scale]</span></code>.  Use
+<a class="reference internal" href="geometry.html#pymomentum.geometry.joint_parameters_to_skeleton_state" title="pymomentum.geometry.joint_parameters_to_skeleton_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">joint_parameters_to_skeleton_state()</span></code></a> with
+a batched <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joint_params)</span></code> input to compute this
+efficiently in a single C++ call.</p></li>
+<li><p><strong>posed_meshes</strong> – Optional sequence of pre-posed meshes, one per frame.
+If <em>None</em>, no mesh is logged.</p></li>
+<li><p><strong>fps</strong> – Frames per second for the time column.</p></li>
+<li><p><strong>color</strong> – RGB color for the mesh albedo factor.</p></li>
+<li><p><strong>frame_offset</strong> – Starting frame index for the time columns.  Use when
+sending multiple chunks of the same animation.</p></li>
+<li><p><strong>collision_geometry</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, log collision proxy capsules,
+ellipsoids, and boxes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_character">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">posed_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_character" title="Link to this definition"></a></dt>
+<dd><p>Log a complete character visualization to Rerun.</p>
+<p>This is the top-level convenience function that logs the skeleton,
+optionally the mesh, and locators as a structured entity tree:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/mesh</span></code> — posed mesh (if <em>posed_mesh</em> is provided)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/joints</span></code> — skeleton bones and per-joint transforms</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/locators</span></code> — locator positions (if character has locators)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/collision_proxies</span></code> — collision capsules, ellipsoids, and
+boxes (when requested)</p></li>
+</ul>
+<p>This is the Python equivalent of the C++ <code class="docutils literal notranslate"><span class="pre">momentum::logCharacter</span></code> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Root entity path for the character.</p></li>
+<li><p><strong>character</strong> – The character to visualize.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code> with
+per-joint <code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">rx,</span> <span class="pre">ry,</span> <span class="pre">rz,</span> <span class="pre">rw,</span> <span class="pre">scale]</span></code>.  Obtain via
+<a class="reference internal" href="geometry.html#pymomentum.geometry.joint_parameters_to_skeleton_state" title="pymomentum.geometry.joint_parameters_to_skeleton_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">joint_parameters_to_skeleton_state()</span></code></a> or
+<a class="reference internal" href="geometry.html#pymomentum.geometry.model_parameters_to_skeleton_state" title="pymomentum.geometry.model_parameters_to_skeleton_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">model_parameters_to_skeleton_state()</span></code></a>.</p></li>
+<li><p><strong>posed_mesh</strong> – An optional pre-posed mesh (from
+<a class="reference internal" href="geometry.html#pymomentum.geometry.Character.pose_mesh" title="pymomentum.geometry.Character.pose_mesh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pose_mesh()</span></code></a>).  If <em>None</em>, no mesh
+is logged.</p></li>
+<li><p><strong>color</strong> – RGB color tuple for the mesh albedo.  Defaults to light grey
+<code class="docutils literal notranslate"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></code>.</p></li>
+<li><p><strong>collision_geometry</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, log collision proxy capsules,
+ellipsoids, and boxes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_collision_geometry">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_collision_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(128,</span> <span class="pre">64,</span> <span class="pre">64)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_collision_geometry" title="Link to this definition"></a></dt>
+<dd><p>Log collision proxy primitives to Rerun.</p>
+<p>Momentum collision geometry is stored as tapered capsules, ellipsoids, and
+boxes. Capsules are logged at <code class="docutils literal notranslate"><span class="pre">entity_path</span></code> (Rerun renders them as ordinary
+capsules using the larger endpoint radius); ellipsoids and boxes are logged at
+the <code class="docutils literal notranslate"><span class="pre">{entity_path}/ellipsoids</span></code> and <code class="docutils literal notranslate"><span class="pre">{entity_path}/boxes</span></code> sub-paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Entity path for the collision proxy entity.</p></li>
+<li><p><strong>character</strong> – The character whose collision geometry is logged.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>color</strong> – RGB color tuple for the collision proxies.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_joints">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_joints" title="Link to this definition"></a></dt>
+<dd><p>Log skeleton bones and per-joint transforms to Rerun.</p>
+<p>Bones are drawn as grey <code class="xref py py-class docutils literal notranslate"><span class="pre">rerun.LineStrips3D</span></code> connecting parent–child
+joint pairs.  Each joint also gets a <code class="xref py py-class docutils literal notranslate"><span class="pre">rerun.Transform3D</span></code> logged as a
+child entity so that the Rerun viewer can display its local coordinate
+frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Entity path for the skeleton entity.</p></li>
+<li><p><strong>character</strong> – The character whose skeleton is logged.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code> with
+per-joint <code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">rx,</span> <span class="pre">ry,</span> <span class="pre">rz,</span> <span class="pre">rw,</span> <span class="pre">scale]</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_locators">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_locators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_locators" title="Link to this definition"></a></dt>
+<dd><p>Log locator positions to Rerun as colored 3D points.</p>
+<p>Locators whose name contains <code class="docutils literal notranslate"><span class="pre">&quot;Floor_&quot;</span></code> are shown in green; others are
+shown in a grey whose intensity is proportional to the locator weight.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Entity path for the locators entity.</p></li>
+<li><p><strong>character</strong> – The character whose locators are logged.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.rerun_vis.log_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.rerun_vis.</span></span><span class="sig-name descname"><span class="pre">log_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rr.RecordingStream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.rerun_vis.log_mesh" title="Link to this definition"></a></dt>
+<dd><p>Log a <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> to Rerun as a 3D mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rec</strong> – The Rerun recording stream.</p></li>
+<li><p><strong>entity_path</strong> – Entity path in the Rerun viewer.</p></li>
+<li><p><strong>mesh</strong> – The mesh to log (typically a posed mesh from
+<a class="reference internal" href="geometry.html#pymomentum.geometry.Character.pose_mesh" title="pymomentum.geometry.Character.pose_mesh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pose_mesh()</span></code></a>).</p></li>
+<li><p><strong>color</strong> – Optional RGB color tuple <code class="docutils literal notranslate"><span class="pre">(r,</span> <span class="pre">g,</span> <span class="pre">b)</span></code> applied as an
+albedo factor.  If <em>None</em>, per-vertex colors from the mesh are used
+when available.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="renderer.html" class="btn btn-neutral float-left" title="pymomentum.renderer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="viser_vis.html" class="btn btn-neutral float-right" title="pymomentum.viser_vis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

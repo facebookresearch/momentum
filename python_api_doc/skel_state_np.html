@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.skel_state_np &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.trs" href="trs.html" />
+    <link rel="prev" title="pymomentum.skel_state" href="skel_state.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.skel_state_np</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#skeleton-state-utilities-numpy">Skeleton State Utilities (NumPy)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.blend"><code class="docutils literal notranslate"><span class="pre">blend()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.from_matrix"><code class="docutils literal notranslate"><span class="pre">from_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.from_quaternion"><code class="docutils literal notranslate"><span class="pre">from_quaternion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.from_scale"><code class="docutils literal notranslate"><span class="pre">from_scale()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.from_translation"><code class="docutils literal notranslate"><span class="pre">from_translation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.multiply"><code class="docutils literal notranslate"><span class="pre">multiply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.multiply_assume_normalized"><code class="docutils literal notranslate"><span class="pre">multiply_assume_normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.slerp"><code class="docutils literal notranslate"><span class="pre">slerp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.split"><code class="docutils literal notranslate"><span class="pre">split()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.to_matrix"><code class="docutils literal notranslate"><span class="pre">to_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.transform_points"><code class="docutils literal notranslate"><span class="pre">transform_points()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.skel_state_np.transform_points_assume_normalized"><code class="docutils literal notranslate"><span class="pre">transform_points_assume_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.skel_state_np</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/skel_state_np.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.skel_state_np">
+<span id="pymomentum-skel-state-np"></span><h1>pymomentum.skel_state_np<a class="headerlink" href="#module-pymomentum.skel_state_np" title="Link to this heading"></a></h1>
+<section id="skeleton-state-utilities-numpy">
+<h2>Skeleton State Utilities (NumPy)<a class="headerlink" href="#skeleton-state-utilities-numpy" title="Link to this heading"></a></h2>
+<p>NumPy implementation of skeleton state utilities for PyMomentum.</p>
+<p>This module mirrors <code class="xref py py-mod docutils literal notranslate"><span class="pre">skel_state</span></code> but uses NumPy arrays instead of PyTorch tensors.
+See <code class="xref py py-mod docutils literal notranslate"><span class="pre">skel_state</span></code> for full documentation on the skeleton state format and operations.</p>
+<p>A skeleton state is a compact 8-dimensional representation of a 3D transformation
+that encodes translation, rotation, and uniform scale. The 8 components are organized as:</p>
+<ul class="simple">
+<li><p><strong>Translation (3 components)</strong>: tx, ty, tz - 3D position offset</p></li>
+<li><p><strong>Rotation (4 components)</strong>: rx, ry, rz, rw - quaternion rotation (x, y, z, w)</p></li>
+<li><p><strong>Scale (1 component)</strong>: s - uniform scale factor</p></li>
+</ul>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.blend">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">blend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.blend" title="Link to this definition"></a></dt>
+<dd><p>Blend k skeleton states with the passed-in weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_states</strong> – The skeleton states to blend.</p></li>
+<li><p><strong>weights</strong> – The weights to use, if not provided, weights are assumed to be all 1s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The blended skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.check">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.check" title="Link to this definition"></a></dt>
+<dd><p>Check if the skeleton state has the correct shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skel_state</strong> – The skeleton state to check.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the skeleton state does not have the correct shape.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.from_matrix">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.from_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert 4x4 matrices to skeleton states.  Assumes that the scale is uniform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>matrices</strong> – An array of 4x4 matrices.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The corresponding skeleton states.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.from_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">from_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.from_quaternion" title="Link to this definition"></a></dt>
+<dd><p>Create a skeleton state from rotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rotation</strong> – The rotation component.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.from_scale">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">from_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.from_scale" title="Link to this definition"></a></dt>
+<dd><p>Create a skeleton state from scale.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scale</strong> – The scale component.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.from_translation">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">from_translation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.from_translation" title="Link to this definition"></a></dt>
+<dd><p>Create a skeleton state from translation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>translation</strong> – The translation component.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.identity">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size:</span> <span class="pre">~collections.abc.Sequence[int]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">~numpy.dtype</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.identity" title="Link to this definition"></a></dt>
+<dd><p>Returns a skeleton state representing the identity transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> – The size of each dimension in the output array. Defaults to None, which means the output will be a 1D array with 8 elements.</p></li>
+<li><p><strong>dtype</strong> – The data type for the array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The identity skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.inverse">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skeleton_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.inverse" title="Link to this definition"></a></dt>
+<dd><p>Compute the inverse of a skeleton state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skeleton_states</strong> – The skeleton state to invert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The inverted skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.multiply">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.multiply" title="Link to this definition"></a></dt>
+<dd><p>Multiply two skeleton states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s1</strong> – The first skeleton state.</p></li>
+<li><p><strong>s2</strong> – The second skeleton state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The product of the two skeleton states.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.multiply_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">multiply_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.multiply_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Multiply two skeleton states.
+This is an optimized version that assumes both skeleton states are already properly
+formatted and the quaternions are normalized, skipping validation checks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s1</strong> – The first skeleton state.</p></li>
+<li><p><strong>s2</strong> – The second skeleton state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The product of the two skeleton states.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.slerp">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">slerp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.slerp" title="Link to this definition"></a></dt>
+<dd><p>Spherical linear interpolation between two skeleton states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s0</strong> – The first skeleton state.</p></li>
+<li><p><strong>s1</strong> – The second skeleton state.</p></li>
+<li><p><strong>t</strong> – The interpolation factor, where 0 &lt;= t &lt;= 1.  t=0 corresponds to s0, t=1 corresponds to s1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The interpolated skeleton state.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.split">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.split" title="Link to this definition"></a></dt>
+<dd><p>Split a skeleton state into translation, rotation, and scale components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skel_state</strong> – The skeleton state to split.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of arrays (translation, rotation, scale).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.to_matrix">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">to_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skeleton_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.to_matrix" title="Link to this definition"></a></dt>
+<dd><p>Convert skeleton state to an array of 4x4 matrices. The matrix represents the transform from a local joint space to the world space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skeleton_state</strong> – The skeleton state to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing 4x4 matrix transforms.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.transform_points">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">transform_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.transform_points" title="Link to this definition"></a></dt>
+<dd><p>Transform 3d points by the transform represented by the skeleton state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – The skeleton state to use for transformation.</p></li>
+<li><p><strong>points</strong> – The points to transform.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed points.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.skel_state_np.transform_points_assume_normalized">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.skel_state_np.</span></span><span class="sig-name descname"><span class="pre">transform_points_assume_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span></span></span><a class="headerlink" href="#pymomentum.skel_state_np.transform_points_assume_normalized" title="Link to this definition"></a></dt>
+<dd><p>Transform 3d points by the transform represented by the skeleton state.
+This is an optimized version that assumes the skeleton state is already properly
+formatted and the quaternion is normalized, skipping validation checks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – The skeleton state to use for transformation.</p></li>
+<li><p><strong>points</strong> – The points to transform.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed points.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skel_state.html" class="btn btn-neutral float-left" title="pymomentum.skel_state" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trs.html" class="btn btn-neutral float-right" title="pymomentum.trs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

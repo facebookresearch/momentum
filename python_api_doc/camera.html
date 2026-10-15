@@ -1,0 +1,814 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.camera &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymomentum.quaternion" href="quaternion.html" />
+    <link rel="prev" title="pymomentum.diff_geometry" href="diff_geometry.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.camera</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.Camera"><code class="docutils literal notranslate"><span class="pre">Camera</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.T_eye_from_world"><code class="docutils literal notranslate"><span class="pre">Camera.T_eye_from_world</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.T_world_from_eye"><code class="docutils literal notranslate"><span class="pre">Camera.T_world_from_eye</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.__init__"><code class="docutils literal notranslate"><span class="pre">Camera.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.center_of_projection"><code class="docutils literal notranslate"><span class="pre">Camera.center_of_projection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.crop"><code class="docutils literal notranslate"><span class="pre">Camera.crop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.frame"><code class="docutils literal notranslate"><span class="pre">Camera.frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.fx"><code class="docutils literal notranslate"><span class="pre">Camera.fx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.fy"><code class="docutils literal notranslate"><span class="pre">Camera.fy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.image_height"><code class="docutils literal notranslate"><span class="pre">Camera.image_height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.image_width"><code class="docutils literal notranslate"><span class="pre">Camera.image_width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.intrinsics_model"><code class="docutils literal notranslate"><span class="pre">Camera.intrinsics_model</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.look_at"><code class="docutils literal notranslate"><span class="pre">Camera.look_at()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.project"><code class="docutils literal notranslate"><span class="pre">Camera.project()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.unproject"><code class="docutils literal notranslate"><span class="pre">Camera.unproject()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.upsample"><code class="docutils literal notranslate"><span class="pre">Camera.upsample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.Camera.world_space_principle_axis"><code class="docutils literal notranslate"><span class="pre">Camera.world_space_principle_axis</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.__init__"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.clone"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.clone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.crop"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.crop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.downsample"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.downsample()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.fx"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.fx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.fy"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.fy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.get_intrinsic_parameters"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.get_intrinsic_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.image_height"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.image_height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.image_width"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.image_width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.name"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.num_intrinsic_parameters"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.num_intrinsic_parameters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.parameter_names</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.project"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.project()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.project_intrinsics_jacobian"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.project_intrinsics_jacobian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.resize"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.resize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.set_intrinsic_parameters"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.set_intrinsic_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel.upsample"><code class="docutils literal notranslate"><span class="pre">IntrinsicsModel.upsample()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.__init__"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k1"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k2"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k3"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k4"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k5"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k5</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.k6"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.k6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.p1"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.p1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.p2"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.p2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.p3"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.p3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters.p4"><code class="docutils literal notranslate"><span class="pre">OpenCVDistortionParameters.p4</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.__init__"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k1"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters.k1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k2"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters.k2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k3"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters.k3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k4"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters.k4</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.__init__"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cx"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel.cx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cy"><code class="docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel.cy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.OpenCVIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVIntrinsicsModel.__init__"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVIntrinsicsModel.cx"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel.cx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.OpenCVIntrinsicsModel.cy"><code class="docutils literal notranslate"><span class="pre">OpenCVIntrinsicsModel.cy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.camera.PinholeIntrinsicsModel"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.PinholeIntrinsicsModel.__init__"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.PinholeIntrinsicsModel.cx"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel.cx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.camera.PinholeIntrinsicsModel.cy"><code class="docutils literal notranslate"><span class="pre">PinholeIntrinsicsModel.cy</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.camera</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/camera.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.camera">
+<span id="pymomentum-camera"></span><h1>pymomentum.camera<a class="headerlink" href="#module-pymomentum.camera" title="Link to this heading"></a></h1>
+<p>Camera classes for projection and rendering in pymomentum.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">Camera</span></span><a class="headerlink" href="#pymomentum.camera.Camera" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Camera for rendering</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.T_eye_from_world">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T_eye_from_world</span></span><a class="headerlink" href="#pymomentum.camera.Camera.T_eye_from_world" title="Link to this definition"></a></dt>
+<dd><p>Transform from world space to camera/eye space</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.T_world_from_eye">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T_world_from_eye</span></span><a class="headerlink" href="#pymomentum.camera.Camera.T_world_from_eye" title="Link to this definition"></a></dt>
+<dd><p>Transform from world space to camera/eye space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsics_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">eye_from_world</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.Camera.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a camera with specified intrinsics and pose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intrinsics_model</strong> – Camera intrinsics model defining focal length, principal point, and image dimensions.</p></li>
+<li><p><strong>eye_from_world</strong> – Optional 4x4 transformation matrix from world space to camera/eye space. Defaults to identity matrix if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Camera instance with the specified intrinsics and pose.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.center_of_projection">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center_of_projection</span></span><a class="headerlink" href="#pymomentum.camera.Camera.center_of_projection" title="Link to this definition"></a></dt>
+<dd><p>Position of the camera center in world space</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.crop">
+<span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.camera.Camera.crop" title="Link to this definition"></a></dt>
+<dd><p>Create a new camera with cropped image region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>top</strong> – Top offset in pixels.</p></li>
+<li><p><strong>left</strong> – Left offset in pixels.</p></li>
+<li><p><strong>width</strong> – New width in pixels after cropping.</p></li>
+<li><p><strong>height</strong> – New height in pixels after cropping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Camera instance with cropped intrinsics and same pose.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.frame">
+<span class="sig-name descname"><span class="pre">frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.10000000149011612</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05000000074505806</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.camera.Camera.frame" title="Link to this definition"></a></dt>
+<dd><p>Adjust the camera position to ensure all specified points are in view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – (N x 3) array of 3D points that should be visible in the camera view.</p></li>
+<li><p><strong>min_z</strong> – Minimum distance from camera to maintain. Defaults to 0.1.</p></li>
+<li><p><strong>edge_padding</strong> – Padding factor to add around the points as a fraction of the image size. Defaults to 0.05.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Camera instance positioned to frame all the specified points.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.fx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fx</span></span><a class="headerlink" href="#pymomentum.camera.Camera.fx" title="Link to this definition"></a></dt>
+<dd><p>Focal length in x direction (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.fy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fy</span></span><a class="headerlink" href="#pymomentum.camera.Camera.fy" title="Link to this definition"></a></dt>
+<dd><p>Focal length in y direction (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.image_height">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">image_height</span></span><a class="headerlink" href="#pymomentum.camera.Camera.image_height" title="Link to this definition"></a></dt>
+<dd><p>Height of the image in pixels</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.image_width">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">image_width</span></span><a class="headerlink" href="#pymomentum.camera.Camera.image_width" title="Link to this definition"></a></dt>
+<dd><p>Width of the image in pixels</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.intrinsics_model">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">intrinsics_model</span></span><a class="headerlink" href="#pymomentum.camera.Camera.intrinsics_model" title="Link to this definition"></a></dt>
+<dd><p>The camera’s intrinsics model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.look_at">
+<span class="sig-name descname"><span class="pre">look_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.camera.Camera.look_at" title="Link to this definition"></a></dt>
+<dd><p>Position the camera to look at a specific target point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position</strong> – 3D position where the camera should be placed.</p></li>
+<li><p><strong>target</strong> – 3D point the camera should look at. Defaults to origin (0,0,0) if not provided.</p></li>
+<li><p><strong>up</strong> – Up vector for camera orientation. Defaults to (0,1,0) if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Camera instance positioned to look at the target.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.project">
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.camera.Camera.project" title="Link to this definition"></a></dt>
+<dd><p>Project 3D points from world space to 2D image coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>world_points</strong> – (N x 3) array of 3D points in world coordinate space to project.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(N x 3) array of projected points where columns are [x, y, depth] in image coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.unproject">
+<span class="sig-name descname"><span class="pre">unproject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.camera.Camera.unproject" title="Link to this definition"></a></dt>
+<dd><p>Unproject 3D image coordinates to 3D points in world space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image_points</strong> – (N x 3) array of 3D points in image coordinates [x, y, depth].</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(N x 3) array of 3D points in world coordinate space.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.upsample">
+<span class="sig-name descname"><span class="pre">upsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.camera.Camera.upsample" title="Link to this definition"></a></dt>
+<dd><p>Create a new camera with upsampled resolution by the given factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>factor</strong> – Upsampling factor (e.g., 2.0 doubles the resolution).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Camera instance with upsampled intrinsics and same pose.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.Camera.world_space_principle_axis">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">world_space_principle_axis</span></span><a class="headerlink" href="#pymomentum.camera.Camera.world_space_principle_axis" title="Link to this definition"></a></dt>
+<dd><p>Camera world-space principal axis (direction the camera is looking)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">IntrinsicsModel</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Base class for camera intrinsics models</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.clone" title="Link to this definition"></a></dt>
+<dd><p>Create a deep copy of this intrinsics model.</p>
+<p>The returned model is mutable and can be modified for optimization purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new IntrinsicsModel instance that is an independent copy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.crop">
+<span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.crop" title="Link to this definition"></a></dt>
+<dd><p>Create a new intrinsics model cropped to a sub-region of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>top</strong> – Top offset in pixels.</p></li>
+<li><p><strong>left</strong> – Left offset in pixels.</p></li>
+<li><p><strong>width</strong> – New width in pixels after cropping.</p></li>
+<li><p><strong>height</strong> – New height in pixels after cropping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new IntrinsicsModel instance with cropped parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.downsample">
+<span class="sig-name descname"><span class="pre">downsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.downsample" title="Link to this definition"></a></dt>
+<dd><p>Create a new intrinsics model downsampled by the given factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>factor</strong> – Downsampling factor (e.g., 2.0 halves the resolution).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new IntrinsicsModel instance with downsampled parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.fx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fx</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.fx" title="Link to this definition"></a></dt>
+<dd><p>Focal length in x direction (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.fy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fy</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.fy" title="Link to this definition"></a></dt>
+<dd><p>Focal length in y direction (pixels)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.get_intrinsic_parameters">
+<span class="sig-name descname"><span class="pre">get_intrinsic_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.get_intrinsic_parameters" title="Link to this definition"></a></dt>
+<dd><p>Get all intrinsic parameters as a vector.</p>
+<p>Parameter order is model-specific:
+- PinholeIntrinsicsModel: [fx, fy, cx, cy] (4 parameters)
+- OpenCVIntrinsicsModel: [fx, fy, cx, cy, k1, k2, k3, k4, k5, k6, p1, p2, p3, p4] (14 parameters)
+- OpenCVFisheyeIntrinsicsModel: [fx, fy, cx, cy, k1, k2, k3, k4] (8 parameters)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vector of intrinsic parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.image_height">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">image_height</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.image_height" title="Link to this definition"></a></dt>
+<dd><p>Height of the image in pixels</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.image_width">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">image_width</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.image_width" title="Link to this definition"></a></dt>
+<dd><p>Width of the image in pixels</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.name" title="Link to this definition"></a></dt>
+<dd><p>Name identifier for this camera (used in parameter transform naming)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.num_intrinsic_parameters">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_intrinsic_parameters</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.num_intrinsic_parameters" title="Link to this definition"></a></dt>
+<dd><p>Number of intrinsic parameters for this model</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.parameter_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.parameter_names" title="Link to this definition"></a></dt>
+<dd><p>List of intrinsic parameter names (e.g., [‘fx’, ‘fy’, ‘cx’, ‘cy’]).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.project">
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.project" title="Link to this definition"></a></dt>
+<dd><p>Project 3D points in camera space to 2D image coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> – (N x 3) array of 3D points in camera coordinate space to project.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(N x 3) array of projected points where columns are [x, y, depth] in image coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.project_intrinsics_jacobian">
+<span class="sig-name descname"><span class="pre">project_intrinsics_jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.project_intrinsics_jacobian" title="Link to this definition"></a></dt>
+<dd><p>Compute the Jacobian of projection with respect to intrinsic parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>point</strong> – 3D point in camera coordinate space.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (projected point, Jacobian matrix [3 x num_params], valid flag).
+The Jacobian rows are [du/d*, dv/d*, 0] where * represents each intrinsic parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.resize">
+<span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.resize" title="Link to this definition"></a></dt>
+<dd><p>Create a new intrinsics model resized to new image dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_width</strong> – New image width in pixels.</p></li>
+<li><p><strong>image_height</strong> – New image height in pixels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new IntrinsicsModel instance with resized parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.set_intrinsic_parameters">
+<span class="sig-name descname"><span class="pre">set_intrinsic_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.set_intrinsic_parameters" title="Link to this definition"></a></dt>
+<dd><p>Set all intrinsic parameters from a vector.</p>
+<p>Parameter order must match get_intrinsic_parameters().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> – Vector of parameters (must match num_intrinsic_parameters).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.IntrinsicsModel.upsample">
+<span class="sig-name descname"><span class="pre">upsample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><span class="pre">pymomentum.camera.IntrinsicsModel</span></a></span></span><a class="headerlink" href="#pymomentum.camera.IntrinsicsModel.upsample" title="Link to this definition"></a></dt>
+<dd><p>Create a new intrinsics model upsampled by the given factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>factor</strong> – Upsampling factor (e.g., 2.0 doubles the resolution).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new IntrinsicsModel instance with upsampled parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">OpenCVDistortionParameters</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>OpenCV distortion parameters</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters" title="pymomentum.camera.OpenCVDistortionParameters"><span class="pre">pymomentum.camera.OpenCVDistortionParameters</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize with default parameters (no distortion)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k1</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k1" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k1</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k2</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k2" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k2</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k3">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k3</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k3" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k3</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k4">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k4</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k4" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k4</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k5">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k5</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k5" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k5</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.k6">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k6</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.k6" title="Link to this definition"></a></dt>
+<dd><p>Radial distortion coefficient k6</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.p1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p1</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.p1" title="Link to this definition"></a></dt>
+<dd><p>Tangential distortion coefficient p1</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.p2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p2</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.p2" title="Link to this definition"></a></dt>
+<dd><p>Tangential distortion coefficient p2</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.p3">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p3</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.p3" title="Link to this definition"></a></dt>
+<dd><p>Tangential distortion coefficient p3</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVDistortionParameters.p4">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p4</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVDistortionParameters.p4" title="Link to this definition"></a></dt>
+<dd><p>Tangential distortion coefficient p4</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">OpenCVFisheyeDistortionParameters</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Distortion parameters for the OpenCV fisheye (equidistant) camera model.</p>
+<p>This struct holds four radial distortion coefficients (k1-k4) used by the
+equidistant fisheye projection model.  Unlike the standard OpenCV model,
+there are no tangential distortion terms.</p>
+<p>See <a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel" title="pymomentum.camera.OpenCVFisheyeIntrinsicsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenCVFisheyeIntrinsicsModel</span></code></a> for the projection equations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters" title="pymomentum.camera.OpenCVFisheyeDistortionParameters"><span class="pre">pymomentum.camera.OpenCVFisheyeDistortionParameters</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize with default parameters (no distortion)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters.k1">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k1</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k1" title="Link to this definition"></a></dt>
+<dd><p>First radial distortion coefficient</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters.k2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k2</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k2" title="Link to this definition"></a></dt>
+<dd><p>Second radial distortion coefficient</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters.k3">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k3</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k3" title="Link to this definition"></a></dt>
+<dd><p>Third radial distortion coefficient</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeDistortionParameters.k4">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k4</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters.k4" title="Link to this definition"></a></dt>
+<dd><p>Fourth radial distortion coefficient</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeIntrinsicsModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">OpenCVFisheyeIntrinsicsModel</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a></p>
+<p>OpenCV fisheye (equidistant) camera intrinsics model with radial distortion.</p>
+<p>This model implements the equidistant fisheye projection used by OpenCV’s
+<code class="docutils literal notranslate"><span class="pre">cv::fisheye</span></code> module.  The projection equations are:</p>
+<ol class="arabic simple">
+<li><p>Normalize: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">x/z</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">y/z</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">=</span> <span class="pre">sqrt(a²</span> <span class="pre">+</span> <span class="pre">b²)</span></code>, <code class="docutils literal notranslate"><span class="pre">theta</span> <span class="pre">=</span> <span class="pre">atan(r)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">theta_d</span> <span class="pre">=</span> <span class="pre">theta</span> <span class="pre">*</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">k1*θ²</span> <span class="pre">+</span> <span class="pre">k2*θ⁴</span> <span class="pre">+</span> <span class="pre">k3*θ⁶</span> <span class="pre">+</span> <span class="pre">k4*θ⁸)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x'</span> <span class="pre">=</span> <span class="pre">(theta_d</span> <span class="pre">/</span> <span class="pre">r)</span> <span class="pre">*</span> <span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">y'</span> <span class="pre">=</span> <span class="pre">(theta_d</span> <span class="pre">/</span> <span class="pre">r)</span> <span class="pre">*</span> <span class="pre">b</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">fx</span> <span class="pre">*</span> <span class="pre">x'</span> <span class="pre">+</span> <span class="pre">cx</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">fy</span> <span class="pre">*</span> <span class="pre">y'</span> <span class="pre">+</span> <span class="pre">cy</span></code></p></li>
+</ol>
+<p>See <a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters" title="pymomentum.camera.OpenCVFisheyeDistortionParameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters</span></code></a> for the distortion coefficients.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeIntrinsicsModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel" title="pymomentum.camera.OpenCVFisheyeIntrinsicsModel"><span class="pre">pymomentum.camera.OpenCVFisheyeIntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distortion_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters" title="pymomentum.camera.OpenCVFisheyeDistortionParameters"><span class="pre">pymomentum.camera.OpenCVFisheyeDistortionParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create an OpenCV fisheye camera model with specified parameters and optional distortion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_width</strong> – Width of the image in pixels.</p></li>
+<li><p><strong>image_height</strong> – Height of the image in pixels.</p></li>
+<li><p><strong>fx</strong> – Focal length in x direction (pixels). Defaults to computed value based on 50mm equivalent lens.</p></li>
+<li><p><strong>fy</strong> – Focal length in y direction (pixels). Defaults to computed value based on 50mm equivalent lens.</p></li>
+<li><p><strong>cx</strong> – Principal point x-coordinate (pixels). Defaults to image center if not provided.</p></li>
+<li><p><strong>cy</strong> – Principal point y-coordinate (pixels). Defaults to image center if not provided.</p></li>
+<li><p><strong>distortion_params</strong> – Optional <a class="reference internal" href="#pymomentum.camera.OpenCVFisheyeDistortionParameters" title="pymomentum.camera.OpenCVFisheyeDistortionParameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenCVFisheyeDistortionParameters</span></code></a>. Defaults to no distortion if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new OpenCVFisheyeIntrinsicsModel instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cx</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cx" title="Link to this definition"></a></dt>
+<dd><p>Principal point x-coordinate (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cy</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVFisheyeIntrinsicsModel.cy" title="Link to this definition"></a></dt>
+<dd><p>Principal point y-coordinate (pixels)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVIntrinsicsModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">OpenCVIntrinsicsModel</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVIntrinsicsModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a></p>
+<p>OpenCV camera intrinsics model with distortion</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVIntrinsicsModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVIntrinsicsModel" title="pymomentum.camera.OpenCVIntrinsicsModel"><span class="pre">pymomentum.camera.OpenCVIntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distortion_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.OpenCVDistortionParameters" title="pymomentum.camera.OpenCVDistortionParameters"><span class="pre">pymomentum.camera.OpenCVDistortionParameters</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.OpenCVIntrinsicsModel.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create an OpenCV camera model with specified parameters and optional distortion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_width</strong> – Width of the image in pixels.</p></li>
+<li><p><strong>image_height</strong> – Height of the image in pixels.</p></li>
+<li><p><strong>fx</strong> – Focal length in x direction (pixels).</p></li>
+<li><p><strong>fy</strong> – Focal length in y direction (pixels).</p></li>
+<li><p><strong>cx</strong> – Principal point x-coordinate (pixels).</p></li>
+<li><p><strong>cy</strong> – Principal point y-coordinate (pixels).</p></li>
+<li><p><strong>distortion_params</strong> – Optional OpenCV distortion parameters. Defaults to no distortion if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new OpenCVIntrinsicsModel instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVIntrinsicsModel.cx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cx</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVIntrinsicsModel.cx" title="Link to this definition"></a></dt>
+<dd><p>Principal point x-coordinate (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.OpenCVIntrinsicsModel.cy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cy</span></span><a class="headerlink" href="#pymomentum.camera.OpenCVIntrinsicsModel.cy" title="Link to this definition"></a></dt>
+<dd><p>Principal point y-coordinate (pixels)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.camera.PinholeIntrinsicsModel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.camera.</span></span><span class="sig-name descname"><span class="pre">PinholeIntrinsicsModel</span></span><a class="headerlink" href="#pymomentum.camera.PinholeIntrinsicsModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymomentum.camera.IntrinsicsModel" title="pymomentum.camera.IntrinsicsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntrinsicsModel</span></code></a></p>
+<p>Pinhole camera intrinsics model without distortion</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.camera.PinholeIntrinsicsModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.camera.PinholeIntrinsicsModel" title="pymomentum.camera.PinholeIntrinsicsModel"><span class="pre">pymomentum.camera.PinholeIntrinsicsModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.camera.PinholeIntrinsicsModel.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a pinhole camera model with specified focal lengths and image dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_width</strong> – Width of the image in pixels.</p></li>
+<li><p><strong>image_height</strong> – Height of the image in pixels.</p></li>
+<li><p><strong>fx</strong> – Focal length in x direction (pixels). Defaults to computed value based on 50mm equivalent lens.</p></li>
+<li><p><strong>fy</strong> – Focal length in y direction (pixels). Defaults to computed value based on 50mm equivalent lens.</p></li>
+<li><p><strong>cx</strong> – Principal point x-coordinate (pixels). Defaults to image center if not provided.</p></li>
+<li><p><strong>cy</strong> – Principal point y-coordinate (pixels). Defaults to image center if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new PinholeIntrinsicsModel instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.PinholeIntrinsicsModel.cx">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cx</span></span><a class="headerlink" href="#pymomentum.camera.PinholeIntrinsicsModel.cx" title="Link to this definition"></a></dt>
+<dd><p>Principal point x-coordinate (pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymomentum.camera.PinholeIntrinsicsModel.cy">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cy</span></span><a class="headerlink" href="#pymomentum.camera.PinholeIntrinsicsModel.cy" title="Link to this definition"></a></dt>
+<dd><p>Principal point y-coordinate (pixels)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="diff_geometry.html" class="btn btn-neutral float-left" title="pymomentum.diff_geometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="quaternion.html" class="btn btn-neutral float-right" title="pymomentum.quaternion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

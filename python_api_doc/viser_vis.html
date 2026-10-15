@@ -1,0 +1,690 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymomentum.viser_vis &mdash; PyMomentum  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pymomentum.rerun_vis" href="rerun_vis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyMomentum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solver2.html">pymomentum.solver2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marker_tracking.html">pymomentum.marker_tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch.html">pymomentum.torch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pymomentum.viser_vis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#viser-visualization-helpers">Viser Visualization Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M"><code class="docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles"><code class="docutils literal notranslate"><span class="pre">CharacterHandles</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.__init__"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.bones_handle"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.bones_handle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.collision_handles"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.collision_handles</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.collision_root_handle"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.collision_root_handle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.entity_path"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.entity_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.joint_frames"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.joint_frames</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.mesh_handle"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.mesh_handle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles.wireframe_handle"><code class="docutils literal notranslate"><span class="pre">CharacterHandles.wireframe_handle</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.LogPanel"><code class="docutils literal notranslate"><span class="pre">LogPanel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.LogPanel.__init__"><code class="docutils literal notranslate"><span class="pre">LogPanel.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.viser_vis.LogPanel.log"><code class="docutils literal notranslate"><span class="pre">LogPanel.log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_character"><code class="docutils literal notranslate"><span class="pre">add_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_character_param_sliders"><code class="docutils literal notranslate"><span class="pre">add_character_param_sliders()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_collision_geometry"><code class="docutils literal notranslate"><span class="pre">add_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_floor"><code class="docutils literal notranslate"><span class="pre">add_floor()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_joints"><code class="docutils literal notranslate"><span class="pre">add_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_log_panel"><code class="docutils literal notranslate"><span class="pre">add_log_panel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_mesh"><code class="docutils literal notranslate"><span class="pre">add_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.add_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">add_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.can_use_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">can_use_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.max_skin_influences"><code class="docutils literal notranslate"><span class="pre">max_skin_influences()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.remove_character"><code class="docutils literal notranslate"><span class="pre">remove_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_character"><code class="docutils literal notranslate"><span class="pre">update_character()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_collision_geometry"><code class="docutils literal notranslate"><span class="pre">update_collision_geometry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_joints"><code class="docutils literal notranslate"><span class="pre">update_joints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_joints_transforms"><code class="docutils literal notranslate"><span class="pre">update_joints_transforms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_mesh"><code class="docutils literal notranslate"><span class="pre">update_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_mesh_vertices"><code class="docutils literal notranslate"><span class="pre">update_mesh_vertices()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_skinned_mesh"><code class="docutils literal notranslate"><span class="pre">update_skinned_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.viser_vis.update_skinned_mesh_transforms"><code class="docutils literal notranslate"><span class="pre">update_skinned_mesh_transforms()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyMomentum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymomentum.viser_vis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/viser_vis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymomentum.viser_vis">
+<span id="pymomentum-viser-vis"></span><h1>pymomentum.viser_vis<a class="headerlink" href="#module-pymomentum.viser_vis" title="Link to this heading"></a></h1>
+<section id="viser-visualization-helpers">
+<h2>Viser Visualization Helpers<a class="headerlink" href="#viser-visualization-helpers" title="Link to this heading"></a></h2>
+<p>Helper functions for visualizing momentum characters in a
+<a class="reference external" href="https://viser.studio/">viser</a> web viewer, providing a live interactive
+3D scene with per-frame updates.</p>
+<p>Unlike the Rerun helpers (<a class="reference internal" href="rerun_vis.html#module-pymomentum.rerun_vis" title="pymomentum.rerun_vis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pymomentum.rerun_vis</span></code></a>), viser is a
+<strong>live server</strong> — you add geometry once and then update transforms each
+frame.  The typical usage pattern is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">viser</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.geometry</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">geo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymomentum.viser_vis</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_character</span><span class="p">,</span> <span class="n">update_character</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">viser</span><span class="o">.</span><span class="n">ViserServer</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">"::"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">)</span>
+<span class="n">character</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">Character</span><span class="o">.</span><span class="n">load_urdf</span><span class="p">(</span><span class="s2">"robot.urdf"</span><span class="p">)</span>
+<span class="n">skel_state</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">joint_parameters_to_skeleton_state</span><span class="p">(</span><span class="n">character</span><span class="p">,</span> <span class="n">joint_params</span><span class="p">)</span>
+
+<span class="n">handles</span> <span class="o">=</span> <span class="n">add_character</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s2">"character"</span><span class="p">,</span> <span class="n">character</span><span class="p">,</span> <span class="n">skel_state</span><span class="p">)</span>
+
+<span class="c1"># In your simulation loop:</span>
+<span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+    <span class="n">new_skel_state</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">joint_parameters_to_skeleton_state</span><span class="p">(</span><span class="n">character</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="n">update_character</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">handles</span><span class="p">,</span> <span class="n">character</span><span class="p">,</span> <span class="n">new_skel_state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Individual functions are also available:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.update_mesh" title="pymomentum.viser_vis.update_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_mesh()</span></code></a> — manage a <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_skinned_mesh" title="pymomentum.viser_vis.add_skinned_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_skinned_mesh()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.update_skinned_mesh" title="pymomentum.viser_vis.update_skinned_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_skinned_mesh()</span></code></a> — upload mesh data once
+and update only bone transforms</p></li>
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_joints" title="pymomentum.viser_vis.add_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_joints()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.update_joints" title="pymomentum.viser_vis.update_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_joints()</span></code></a> — manage skeleton joint frames</p></li>
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_collision_geometry" title="pymomentum.viser_vis.add_collision_geometry"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_collision_geometry()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.update_collision_geometry" title="pymomentum.viser_vis.update_collision_geometry"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_collision_geometry()</span></code></a> — manage
+collision proxy capsules, ellipsoids, and boxes</p></li>
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_character" title="pymomentum.viser_vis.add_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_character()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.update_character" title="pymomentum.viser_vis.update_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_character()</span></code></a> / <a class="reference internal" href="#pymomentum.viser_vis.remove_character" title="pymomentum.viser_vis.remove_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_character()</span></code></a> —
+manage a complete character</p></li>
+</ul>
+<p>Mesh wireframe and collision proxy visibility are controlled through viser’s
+built-in scene-tree panel (each is its own scene node), so no bespoke GUI
+toggle is provided — a single control avoids the desync between a custom
+checkbox and the scene tree’s client-side visibility override.</p>
+<p>GUI widget helpers (optional, for apps building interactive viewers):</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_character_param_sliders" title="pymomentum.viser_vis.add_character_param_sliders"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_character_param_sliders()</span></code></a> — one slider per model parameter</p></li>
+<li><p><a class="reference internal" href="#pymomentum.viser_vis.add_log_panel" title="pymomentum.viser_vis.add_log_panel"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_log_panel()</span></code></a> — scrollable HTML log strip (returns a <a class="reference internal" href="#pymomentum.viser_vis.LogPanel" title="pymomentum.viser_vis.LogPanel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogPanel</span></code></a>)</p></li>
+</ul>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CM_TO_M">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">CM_TO_M</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.01</span></em><a class="headerlink" href="#pymomentum.viser_vis.CM_TO_M" title="Link to this definition"></a></dt>
+<dd><p>Default scale factor to convert momentum units (cm) to meters for viser.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">CharacterHandles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_frames:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bones_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_root_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_handles:</span> <span class="pre">list[~pymomentum.viser_vis._CollisionCapsuleHandles</span> <span class="pre">|</span> <span class="pre">~pymomentum.viser_vis._CollisionEllipsoidHandles</span> <span class="pre">|</span> <span class="pre">~pymomentum.viser_vis._CollisionBoxHandles]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Opaque handle bag returned by <a class="reference internal" href="#pymomentum.viser_vis.add_character" title="pymomentum.viser_vis.add_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_character()</span></code></a>.</p>
+<p>Pass this to <a class="reference internal" href="#pymomentum.viser_vis.update_character" title="pymomentum.viser_vis.update_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_character()</span></code></a> or <a class="reference internal" href="#pymomentum.viser_vis.remove_character" title="pymomentum.viser_vis.remove_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_character()</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_frames:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bones_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_root_handle:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_handles:</span> <span class="pre">list[~pymomentum.viser_vis._CollisionCapsuleHandles</span> <span class="pre">|</span> <span class="pre">~pymomentum.viser_vis._CollisionEllipsoidHandles</span> <span class="pre">|</span> <span class="pre">~pymomentum.viser_vis._CollisionBoxHandles]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.bones_handle">
+<span class="sig-name descname"><span class="pre">bones_handle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.bones_handle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.collision_handles">
+<span class="sig-name descname"><span class="pre">collision_handles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_CollisionCapsuleHandles</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_CollisionEllipsoidHandles</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_CollisionBoxHandles</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.collision_handles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.collision_root_handle">
+<span class="sig-name descname"><span class="pre">collision_root_handle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.collision_root_handle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.entity_path">
+<span class="sig-name descname"><span class="pre">entity_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.entity_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.joint_frames">
+<span class="sig-name descname"><span class="pre">joint_frames</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.joint_frames" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.mesh_handle">
+<span class="sig-name descname"><span class="pre">mesh_handle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.mesh_handle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.CharacterHandles.wireframe_handle">
+<span class="sig-name descname"><span class="pre">wireframe_handle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymomentum.viser_vis.CharacterHandles.wireframe_handle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.LogPanel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">LogPanel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_px</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo_to_stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.viser_vis.LogPanel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scrollable HTML log strip created by <a class="reference internal" href="#pymomentum.viser_vis.add_log_panel" title="pymomentum.viser_vis.add_log_panel"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_log_panel()</span></code></a>.</p>
+<p>Call <a class="reference internal" href="#pymomentum.viser_vis.LogPanel.log" title="pymomentum.viser_vis.LogPanel.log"><code class="xref py py-meth docutils literal notranslate"><span class="pre">log()</span></code></a> to append a line. The panel keeps the last <code class="docutils literal notranslate"><span class="pre">max_lines</span></code>
+entries and auto-scrolls to the latest.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.LogPanel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_px</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo_to_stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.LogPanel.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.LogPanel.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'info'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.LogPanel.log" title="Link to this definition"></a></dt>
+<dd><p>Append a log line. <em>level</em> is one of <code class="docutils literal notranslate"><span class="pre">&quot;info&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;warning&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;error&quot;</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_character">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">posed_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_skinned_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision_geometry_visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles" title="pymomentum.viser_vis.CharacterHandles"><span class="pre">CharacterHandles</span></a></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_character" title="Link to this definition"></a></dt>
+<dd><p>Add a complete character visualization to the viser scene.</p>
+<p>Creates joint frames and optionally a mesh, returning handles for
+subsequent updates via <a class="reference internal" href="#pymomentum.viser_vis.update_character" title="pymomentum.viser_vis.update_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_character()</span></code></a>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/joints/{name}</span></code> — per-joint coordinate frames</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/mesh</span></code> — posed or skinned mesh</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{entity_path}/collision_proxies</span></code> — collision capsules, ellipsoids, and
+boxes, if requested</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Root scene-graph path for the character.</p></li>
+<li><p><strong>character</strong> – The character to visualize.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>posed_mesh</strong> – An optional pre-posed mesh for the legacy mesh path.  If
+<em>None</em> and <em>use_skinned_mesh</em> is false, no mesh is added.</p></li>
+<li><p><strong>use_skinned_mesh</strong> – If true and the character has a skinned mesh, add
+a client-side skinned mesh instead of uploading posed vertices.</p></li>
+<li><p><strong>color</strong> – RGB color tuple for the mesh.</p></li>
+<li><p><strong>axes_length</strong> – Length of joint axis indicators.</p></li>
+<li><p><strong>axes_radius</strong> – Radius of joint axis indicators.</p></li>
+<li><p><strong>collision_geometry</strong> – If true, add collision proxy capsules,
+ellipsoids, and boxes.</p></li>
+<li><p><strong>collision_geometry_visible</strong> – Initial visibility for collision proxies.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles" title="pymomentum.viser_vis.CharacterHandles"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharacterHandles</span></code></a> for use with <a class="reference internal" href="#pymomentum.viser_vis.update_character" title="pymomentum.viser_vis.update_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_character()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_character_param_sliders">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_character_param_sliders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_change</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_character_param_sliders" title="Link to this definition"></a></dt>
+<dd><p>Build one slider per model parameter of <em>character</em>.</p>
+<p>Unbounded parameter limits are clamped via <code class="xref py py-func docutils literal notranslate"><span class="pre">_normalize_param_limit()</span></code> so
+the sliders stay usable. The caller reads slider values from the returned
+list (e.g. <code class="docutils literal notranslate"><span class="pre">np.array([s.value</span> <span class="pre">for</span> <span class="pre">s</span> <span class="pre">in</span> <span class="pre">sliders])</span></code>) and converts them back
+into model parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>character</strong> – The character whose model parameters drive the sliders.</p></li>
+<li><p><strong>on_change</strong> – Optional callback wired to every slider’s
+<code class="docutils literal notranslate"><span class="pre">on_update</span></code> event. The callback receives a single positional argument
+(the viser event object), which it can ignore.</p></li>
+<li><p><strong>initial_values</strong> – Optional length-<code class="docutils literal notranslate"><span class="pre">n_params</span></code> array of initial slider
+values. Each value is clamped to its slider’s range. If <em>None</em>, all
+sliders start at 0 (or the closest in-range value).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of slider handles, in parameter-index order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_collision_geometry">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_collision_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(128,</span> <span class="pre">64,</span> <span class="pre">64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.45</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_CollisionPrimitiveHandles</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_collision_geometry" title="Link to this definition"></a></dt>
+<dd><p>Add collision proxy primitives to the viser scene.</p>
+<p>Momentum stores tapered capsules, ellipsoids, and boxes. Capsules are
+rendered as a cylinder plus two end icospheres using the larger endpoint
+radius (viser does not expose tapered capsules); ellipsoids are rendered as a
+scaled icosphere and boxes as a box mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Scene-graph path for the collision proxy group.</p></li>
+<li><p><strong>character</strong> – The character whose collision geometry is visualized.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor. Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+<li><p><strong>color</strong> – RGB color tuple for the collision proxies.</p></li>
+<li><p><strong>opacity</strong> – Material opacity for the proxies.</p></li>
+<li><p><strong>visible</strong> – Initial visibility for the collision proxy group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (root_handle, collision primitive handle groups), one
+handle group per primitive in collision-geometry order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_floor">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_floor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/ground'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'z'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow_opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_floor" title="Link to this definition"></a></dt>
+<dd><p>Add a ground plane grid with shadow receiving to the viser scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Scene-graph path for the grid node.</p></li>
+<li><p><strong>height</strong> – Position along the up axis for the ground plane.</p></li>
+<li><p><strong>up</strong> – The up axis — <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> for Y-up (glTF/FBX convention) or
+<code class="docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> for Z-up (URDF/robotics convention).</p></li>
+<li><p><strong>width</strong> – Width and depth of the grid (in scene units).</p></li>
+<li><p><strong>cell_size</strong> – Size of each grid cell.</p></li>
+<li><p><strong>shadow_opacity</strong> – Shadow darkness (0 = none, 1 = black).</p></li>
+<li><p><strong>plane_opacity</strong> – Ground plane opacity (0 = transparent, 1 = opaque).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A viser grid handle.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_joints">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bone_line_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bone_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(180,</span> <span class="pre">180,</span> <span class="pre">180)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_joints" title="Link to this definition"></a></dt>
+<dd><p>Add per-joint coordinate frames and bone lines to the viser scene.</p>
+<p>Each joint is rendered as a small set of RGB axes at its world-space
+position and orientation.  Parent-child joints are connected by grey
+line segments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Base scene-graph path; joints are added as children.</p></li>
+<li><p><strong>character</strong> – The character whose skeleton is visualized.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code> with
+per-joint <code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">rx,</span> <span class="pre">ry,</span> <span class="pre">rz,</span> <span class="pre">rw,</span> <span class="pre">scale]</span></code>.</p></li>
+<li><p><strong>axes_length</strong> – Length of the axis indicators (in scene units).</p></li>
+<li><p><strong>axes_radius</strong> – Radius of the axis indicators.</p></li>
+<li><p><strong>bone_line_width</strong> – Width of the bone line segments.</p></li>
+<li><p><strong>bone_color</strong> – RGB color tuple for the bone lines.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (joint_handle_dict, bones_handle_or_None).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_log_panel">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_log_panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_px</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo_to_stdout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.viser_vis.LogPanel" title="pymomentum.viser_vis.LogPanel"><span class="pre">LogPanel</span></a></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_log_panel" title="Link to this definition"></a></dt>
+<dd><p>Add a scrollable HTML log strip to the GUI and return its controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>height_px</strong> – Fixed height of the log strip.</p></li>
+<li><p><strong>max_lines</strong> – Maximum number of lines retained on screen.</p></li>
+<li><p><strong>echo_to_stdout</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code> (default), each <code class="docutils literal notranslate"><span class="pre">log()</span></code> call also
+prints to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> for terminal visibility.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="#pymomentum.viser_vis.LogPanel" title="pymomentum.viser_vis.LogPanel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogPanel</span></code></a> whose <code class="docutils literal notranslate"><span class="pre">.log(msg,</span> <span class="pre">level)</span></code> method appends lines.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_mesh" title="Link to this definition"></a></dt>
+<dd><p>Add a <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code></a> to the viser scene.</p>
+<p>Creates both a solid mesh and a hidden wireframe mesh for toggling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Scene-graph path for the mesh node.</p></li>
+<li><p><strong>mesh</strong> – The mesh to add (typically from
+<a class="reference internal" href="geometry.html#pymomentum.geometry.Character.pose_mesh" title="pymomentum.geometry.Character.pose_mesh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pose_mesh()</span></code></a>).</p></li>
+<li><p><strong>color</strong> – RGB color tuple <code class="docutils literal notranslate"><span class="pre">(r,</span> <span class="pre">g,</span> <span class="pre">b)</span></code> in 0–255.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor applied to vertex positions.
+Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a> (0.01) to convert momentum’s cm to meters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of (solid_handle, wireframe_handle). The solid handle is a list
+of uniformly colored submesh handles when per-vertex colors are present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.add_skinned_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">add_skinned_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(200,</span> <span class="pre">200,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.add_skinned_mesh" title="Link to this definition"></a></dt>
+<dd><p>Add a client-side skinned mesh to the viser scene.</p>
+<p>Unlike <a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a>, this sends rest vertices, faces, skin weights, and
+bind-pose bones once. Subsequent animation only needs
+<a class="reference internal" href="#pymomentum.viser_vis.update_skinned_mesh" title="pymomentum.viser_vis.update_skinned_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_skinned_mesh()</span></code></a>, which updates per-joint bone transforms rather
+than re-uploading all posed vertex positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>entity_path</strong> – Scene-graph path for the mesh node.</p></li>
+<li><p><strong>character</strong> – Character with a mesh, skin weights, and bind pose.</p></li>
+<li><p><strong>skel_state</strong> – Initial skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>color</strong> – RGB color tuple <code class="docutils literal notranslate"><span class="pre">(r,</span> <span class="pre">g,</span> <span class="pre">b)</span></code> in 0–255.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor applied to vertices and bone
+translations. Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The viser skinned mesh handle. When per-vertex colors are present,
+returns a list of uniformly colored skinned submesh handles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.can_use_skinned_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">can_use_skinned_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.can_use_skinned_mesh" title="Link to this definition"></a></dt>
+<dd><p>Return whether Viser client-side skinning can represent <em>character</em>.</p>
+<p>Viser uses at most four skinning influences per vertex. Characters with
+more influences should use the posed-vertex mesh path to preserve the
+original deformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>character</strong> – Character to inspect.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the character has a mesh and no vertex has more than
+four nonzero skin weights.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.max_skin_influences">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">max_skin_influences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.max_skin_influences" title="Link to this definition"></a></dt>
+<dd><p>Return the maximum nonzero skinning influences per vertex for <em>character</em>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>character</strong> – Character to inspect.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The largest number of nonzero skin weights on any mesh vertex, or
+zero if the character has no skinned mesh.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.remove_character">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">remove_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles" title="pymomentum.viser_vis.CharacterHandles"><span class="pre">CharacterHandles</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.remove_character" title="Link to this definition"></a></dt>
+<dd><p>Remove all character scene nodes from the viser scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>handles</strong> – The handles returned by <a class="reference internal" href="#pymomentum.viser_vis.add_character" title="pymomentum.viser_vis.add_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_character()</span></code></a>.</p></li>
+<li><p><strong>server</strong> – If provided, removes the entire scene subtree by name
+(cleans up parent nodes from viser’s scene tree).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_character">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">viser.ViserServer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.viser_vis.CharacterHandles" title="pymomentum.viser_vis.CharacterHandles"><span class="pre">CharacterHandles</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">posed_mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_character" title="Link to this definition"></a></dt>
+<dd><p>Update all character transforms in a single atomic batch.</p>
+<p>Wraps updates in <code class="docutils literal notranslate"><span class="pre">server.atomic()</span></code> to avoid partial-frame rendering
+artifacts, following the pattern used in <code class="docutils literal notranslate"><span class="pre">rl_robot</span></code>’s viser renderer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – The viser server instance.</p></li>
+<li><p><strong>handles</strong> – The handles returned by <a class="reference internal" href="#pymomentum.viser_vis.add_character" title="pymomentum.viser_vis.add_character"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_character()</span></code></a>.</p></li>
+<li><p><strong>character</strong> – The character being updated.</p></li>
+<li><p><strong>skel_state</strong> – New skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>posed_mesh</strong> – If provided, updates mesh vertex positions.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor.  Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_collision_geometry">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_collision_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collision_handles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_CollisionPrimitiveHandles</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_collision_geometry" title="Link to this definition"></a></dt>
+<dd><p>Update collision proxy positions and sizes.</p>
+<p>Always repositions every primitive from the current <code class="docutils literal notranslate"><span class="pre">skel_state</span></code>,
+regardless of visibility, so the proxies stay in sync with the model.
+Visibility is a separate concern controlled through viser’s scene-tree panel;
+gating updates on visibility would leave proxies stranded at a stale pose when
+later revealed through a path that does not re-run this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collision_handles</strong> – Collision primitive handles returned by
+<a class="reference internal" href="#pymomentum.viser_vis.add_collision_geometry" title="pymomentum.viser_vis.add_collision_geometry"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_collision_geometry()</span></code></a>.</p></li>
+<li><p><strong>character</strong> – The character whose collision geometry is visualized.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor. Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_joints">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bones_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_joints" title="Link to this definition"></a></dt>
+<dd><p>Update joint frame positions, orientations, and bone lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>handles</strong> – The joint handle dict returned by <a class="reference internal" href="#pymomentum.viser_vis.add_joints" title="pymomentum.viser_vis.add_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_joints()</span></code></a>.</p></li>
+<li><p><strong>bones_handle</strong> – The bones handle returned by <a class="reference internal" href="#pymomentum.viser_vis.add_joints" title="pymomentum.viser_vis.add_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_joints()</span></code></a>.</p></li>
+<li><p><strong>character</strong> – The character whose skeleton is being updated.</p></li>
+<li><p><strong>skel_state</strong> – New skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor.  Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_joints_transforms">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_joints_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bones_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wxyzs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bone_segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_joints_transforms" title="Link to this definition"></a></dt>
+<dd><p>Update joint frames from precomputed scene-space transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>handles</strong> – The joint handle dict returned by <a class="reference internal" href="#pymomentum.viser_vis.add_joints" title="pymomentum.viser_vis.add_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_joints()</span></code></a>.</p></li>
+<li><p><strong>bones_handle</strong> – The bones handle returned by <a class="reference internal" href="#pymomentum.viser_vis.add_joints" title="pymomentum.viser_vis.add_joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_joints()</span></code></a>.</p></li>
+<li><p><strong>character</strong> – The character whose skeleton is being updated.</p></li>
+<li><p><strong>positions</strong> – Joint positions with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">3)</span></code> in scene units.</p></li>
+<li><p><strong>wxyzs</strong> – Joint orientations with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">4)</span></code> in Viser’s
+<code class="docutils literal notranslate"><span class="pre">wxyz</span></code> quaternion order.</p></li>
+<li><p><strong>bone_segments</strong> – Optional precomputed bone line segments with shape
+<code class="docutils literal notranslate"><span class="pre">(n_bones,</span> <span class="pre">2,</span> <span class="pre">3)</span></code> in scene units.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_mesh" title="Link to this definition"></a></dt>
+<dd><p>Update vertex positions of existing mesh handles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh_handle</strong> – The solid mesh handle from <a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a>.</p></li>
+<li><p><strong>wireframe_handle</strong> – The wireframe handle from <a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a>.</p></li>
+<li><p><strong>mesh</strong> – The new posed mesh.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor.  Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_mesh_vertices">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_mesh_vertices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_mesh_vertices" title="Link to this definition"></a></dt>
+<dd><p>Update vertex positions of existing mesh handles from a vertex array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh_handle</strong> – The solid mesh handle from <a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a>.</p></li>
+<li><p><strong>wireframe_handle</strong> – The wireframe handle from <a class="reference internal" href="#pymomentum.viser_vis.add_mesh" title="pymomentum.viser_vis.add_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_mesh()</span></code></a>.</p></li>
+<li><p><strong>vertices</strong> – The new vertex positions.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor.  Defaults to <a class="reference internal" href="#pymomentum.viser_vis.CM_TO_M" title="pymomentum.viser_vis.CM_TO_M"><code class="xref py py-data docutils literal notranslate"><span class="pre">CM_TO_M</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_skinned_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_skinned_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skinned_mesh_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_skinned_mesh" title="Link to this definition"></a></dt>
+<dd><p>Update a skinned mesh by sending only bone transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skinned_mesh_handle</strong> – The handle returned by <a class="reference internal" href="#pymomentum.viser_vis.add_skinned_mesh" title="pymomentum.viser_vis.add_skinned_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_skinned_mesh()</span></code></a>.
+This may be a list of uniformly colored skinned submesh handles.</p></li>
+<li><p><strong>skel_state</strong> – Skeleton state array of shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>scale</strong> – Unit conversion factor for bone translations.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.viser_vis.update_skinned_mesh_transforms">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.viser_vis.</span></span><span class="sig-name descname"><span class="pre">update_skinned_mesh_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skinned_mesh_handle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wxyzs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.viser_vis.update_skinned_mesh_transforms" title="Link to this definition"></a></dt>
+<dd><p>Update a skinned mesh from precomputed bone transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skinned_mesh_handle</strong> – The handle returned by <a class="reference internal" href="#pymomentum.viser_vis.add_skinned_mesh" title="pymomentum.viser_vis.add_skinned_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_skinned_mesh()</span></code></a>.
+This may be a list of uniformly colored skinned submesh handles.</p></li>
+<li><p><strong>positions</strong> – Bone positions with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">3)</span></code> in scene units.</p></li>
+<li><p><strong>wxyzs</strong> – Bone orientations with shape <code class="docutils literal notranslate"><span class="pre">(n_joints,</span> <span class="pre">4)</span></code> in Viser’s
+<code class="docutils literal notranslate"><span class="pre">wxyz</span></code> quaternion order.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rerun_vis.html" class="btn btn-neutral float-left" title="pymomentum.rerun_vis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

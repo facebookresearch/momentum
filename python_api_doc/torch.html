@@ -46,8 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="axel.html">pymomentum.axel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">pymomentum.geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diff_geometry.html">pymomentum.diff_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera.html">pymomentum.camera</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quaternion.html">pymomentum.quaternion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quaternion_np.html">pymomentum.quaternion_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skel_state.html">pymomentum.skel_state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skel_state_np.html">pymomentum.skel_state_np</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trs.html">pymomentum.trs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="backend.html">pymomentum.backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solver.html">pymomentum.solver</a></li>
@@ -138,10 +142,30 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.torch.sdf_collision">pymomentum.torch.sdf_collision</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider"><code class="docutils literal notranslate"><span class="pre">SDFCollider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider.__init__"><code class="docutils literal notranslate"><span class="pre">SDFCollider.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider.evaluate"><code class="docutils literal notranslate"><span class="pre">SDFCollider.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider.from_pymomentum"><code class="docutils literal notranslate"><span class="pre">SDFCollider.from_pymomentum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider.parent_joint"><code class="docutils literal notranslate"><span class="pre">SDFCollider.parent_joint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry"><code class="docutils literal notranslate"><span class="pre">SDFCollisionGeometry</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.__init__"><code class="docutils literal notranslate"><span class="pre">SDFCollisionGeometry.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate"><code class="docutils literal notranslate"><span class="pre">SDFCollisionGeometry.evaluate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate_min"><code class="docutils literal notranslate"><span class="pre">SDFCollisionGeometry.evaluate_min()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.from_pymomentum"><code class="docutils literal notranslate"><span class="pre">SDFCollisionGeometry.from_pymomentum()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.torch.sdf_collision.evaluate_sdf"><code class="docutils literal notranslate"><span class="pre">evaluate_sdf()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pymomentum.torch.utility">pymomentum.torch.utility</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="renderer.html">pymomentum.renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rerun_vis.html">pymomentum.rerun_vis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="viser_vis.html">pymomentum.viser_vis</a></li>
 </ul>
 
         </div>
@@ -693,6 +717,208 @@ registered hooks while the latter silently ignores them.</p>
 </div>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-pymomentum.torch.sdf_collision">
+<span id="pymomentum-torch-sdf-collision"></span><h2>pymomentum.torch.sdf_collision<a class="headerlink" href="#module-pymomentum.torch.sdf_collision" title="Link to this heading"></a></h2>
+<p>Pure PyTorch SDF collision geometry for torch_character.</p>
+<p>Provides differentiable SDF evaluation matching the behavior of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">momentum.SDFColliderT</span></code>. All operations use pure PyTorch ops,
+enabling gradient computation through autograd including higher-order
+gradients (gradient-of-gradient).</p>
+<p>Typical usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pymomentum.geometry</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pym_geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymomentum.torch.sdf_collision</span><span class="w"> </span><span class="kn">import</span> <span class="n">SDFCollider</span><span class="p">,</span> <span class="n">SDFCollisionGeometry</span>
+
+<span class="c1"># Create from pymomentum colliders</span>
+<span class="n">pym_colliders</span> <span class="o">=</span> <span class="p">[</span><span class="n">pym_geometry</span><span class="o">.</span><span class="n">SDFCollider</span><span class="p">(</span><span class="n">sdf</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">joint_idx</span><span class="p">)]</span>
+<span class="n">collision_geo</span> <span class="o">=</span> <span class="n">SDFCollisionGeometry</span><span class="o">.</span><span class="n">from_pymomentum</span><span class="p">(</span><span class="n">pym_colliders</span><span class="p">)</span>
+
+<span class="c1"># Evaluate: skel_state from Skeleton.forward(), points in world space</span>
+<span class="n">distances</span> <span class="o">=</span> <span class="n">collision_geo</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">skel_state</span><span class="p">,</span> <span class="n">world_points</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollider">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.sdf_collision.</span></span><span class="sig-name descname"><span class="pre">SDFCollider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_translation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A signed distance field volume attached to a skeleton joint.</p>
+<p>Mirrors <code class="xref py py-class docutils literal notranslate"><span class="pre">momentum.SDFColliderT</span></code> with evaluation implemented
+in pure PyTorch for full autograd differentiability.</p>
+<p>The SDF data is stored as a 3D tensor in <code class="docutils literal notranslate"><span class="pre">(nz,</span> <span class="pre">ny,</span> <span class="pre">nx)</span></code> (DHW) order:
+<code class="docutils literal notranslate"><span class="pre">sdf_data[k,</span> <span class="pre">j,</span> <span class="pre">i]</span></code> is the signed distance at grid point
+<code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">j,</span> <span class="pre">k)</span></code>.  This layout is compatible with <code class="docutils literal notranslate"><span class="pre">F.grid_sample</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf_data</strong> – 3D SDF grid values, shape <code class="docutils literal notranslate"><span class="pre">(nz,</span> <span class="pre">ny,</span> <span class="pre">nx)</span></code> (DHW order).</p></li>
+<li><p><strong>bounds_min</strong> – SDF bounding box minimum corner, shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>.</p></li>
+<li><p><strong>voxel_size</strong> – Voxel dimensions in world units, shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>.</p></li>
+<li><p><strong>local_translation</strong> – Translation offset from parent joint, shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>.</p></li>
+<li><p><strong>local_rotation</strong> – Rotation matrix relative to parent joint, shape <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">3)</span></code>.</p></li>
+<li><p><strong>parent_joint</strong> – Parent joint index. Use <code class="docutils literal notranslate"><span class="pre">-1</span></code> for world-space SDFs.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_translation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollider.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollider.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollider.evaluate" title="Link to this definition"></a></dt>
+<dd><p>Evaluate SDF distances for world-space query points.</p>
+<p>Transforms <code class="docutils literal notranslate"><span class="pre">points</span></code> from world space into the SDF’s local coordinate
+system using the joint transform from <code class="docutils literal notranslate"><span class="pre">skel_state</span></code>, then evaluates
+via trilinear interpolation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – Global skeleton state from forward kinematics,
+shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_joints,</span> <span class="pre">8)</span></code> with per-joint format
+<code class="docutils literal notranslate"><span class="pre">[tx,</span> <span class="pre">ty,</span> <span class="pre">tz,</span> <span class="pre">qx,</span> <span class="pre">qy,</span> <span class="pre">qz,</span> <span class="pre">qw,</span> <span class="pre">scale]</span></code>.
+Ignored when <code class="docutils literal notranslate"><span class="pre">parent_joint</span> <span class="pre">==</span> <span class="pre">-1</span></code> (world-space SDF).</p></li>
+<li><p><strong>points</strong> – World-space query points, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points,</span> <span class="pre">3)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SDF distances at each query point, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollider.from_pymomentum">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pymomentum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><span class="pre">SDFCollider</span></a></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollider.from_pymomentum" title="Link to this definition"></a></dt>
+<dd><p>Create an <a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">SDFCollider</span></code></a> from a <a class="reference internal" href="geometry.html#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.SDFCollider</span></code></a>.</p>
+<p>Converts the SDF grid data to a <code class="docutils literal notranslate"><span class="pre">(nz,</span> <span class="pre">ny,</span> <span class="pre">nx)</span></code> PyTorch tensor
+(DHW order, ready for <code class="docutils literal notranslate"><span class="pre">F.grid_sample</span></code>) and the collider’s local
+transform to a rotation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collider</strong> – A <a class="reference internal" href="geometry.html#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.SDFCollider</span></code></a> instance.</p></li>
+<li><p><strong>dtype</strong> – Tensor dtype (default: <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">SDFCollider</span></code></a> module.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollider.parent_joint">
+<span class="sig-name descname"><span class="pre">parent_joint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollider.parent_joint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollisionGeometry">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymomentum.torch.sdf_collision.</span></span><span class="sig-name descname"><span class="pre">SDFCollisionGeometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colliders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><span class="pre">SDFCollider</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Collection of SDF colliders for character collision detection.</p>
+<p>Mirrors <code class="xref py py-class docutils literal notranslate"><span class="pre">momentum.SDFCollisionGeometryT</span></code> — a list of
+<a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">SDFCollider</span></code></a> modules attached to skeleton joints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>colliders</strong> – List of <a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">SDFCollider</span></code></a> modules.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollisionGeometry.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colliders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollider" title="pymomentum.torch.sdf_collision.SDFCollider"><span class="pre">SDFCollider</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate" title="Link to this definition"></a></dt>
+<dd><p>Evaluate all colliders and return per-collider SDF distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – Global skeleton state, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>points</strong> – World-space query points, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points,</span> <span class="pre">3)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of distance tensors, one per collider, each shape
+<code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate_min">
+<span class="sig-name descname"><span class="pre">evaluate_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skel_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.evaluate_min" title="Link to this definition"></a></dt>
+<dd><p>Minimum SDF distance across all colliders for each point.</p>
+<p>Useful for collision detection: negative values indicate penetration
+into at least one collider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>skel_state</strong> – Global skeleton state, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_joints,</span> <span class="pre">8)</span></code>.</p></li>
+<li><p><strong>points</strong> – World-space query points, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points,</span> <span class="pre">3)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Minimum signed distance per point, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">n_points)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.SDFCollisionGeometry.from_pymomentum">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pymomentum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colliders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry" title="pymomentum.torch.sdf_collision.SDFCollisionGeometry"><span class="pre">SDFCollisionGeometry</span></a></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry.from_pymomentum" title="Link to this definition"></a></dt>
+<dd><p>Create from a list of <a class="reference internal" href="geometry.html#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.SDFCollider</span></code></a> objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>colliders</strong> – List of <a class="reference internal" href="geometry.html#pymomentum.geometry.SDFCollider" title="pymomentum.geometry.SDFCollider"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.SDFCollider</span></code></a> instances.</p></li>
+<li><p><strong>dtype</strong> – Tensor dtype (default: <code class="docutils literal notranslate"><span class="pre">torch.float32</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <a class="reference internal" href="#pymomentum.torch.sdf_collision.SDFCollisionGeometry" title="pymomentum.torch.sdf_collision.SDFCollisionGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">SDFCollisionGeometry</span></code></a> module.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.torch.sdf_collision.evaluate_sdf">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.torch.sdf_collision.</span></span><span class="sig-name descname"><span class="pre">evaluate_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voxel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#pymomentum.torch.sdf_collision.evaluate_sdf" title="Link to this definition"></a></dt>
+<dd><p>Evaluate SDF distances at query points in SDF local space.</p>
+<p>Performs world-to-grid conversion, boundary clamping, trilinear
+interpolation, and out-of-bounds distance computation, matching
+<code class="docutils literal notranslate"><span class="pre">axel::SignedDistanceField::sample()</span></code>.</p>
+<p>All operations are differentiable via PyTorch autograd. For out-of-bounds
+points, the Euclidean distance to the nearest grid boundary is added to
+the interpolated boundary value, providing correct gradient behavior:</p>
+<ul class="simple">
+<li><p>Inside the grid: gradient comes from trilinear interpolation derivatives.</p></li>
+<li><p>Outside the grid: gradient points away from the boundary (increasing
+distance).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf_data</strong> – 3D SDF grid values, shape <code class="docutils literal notranslate"><span class="pre">(nz,</span> <span class="pre">ny,</span> <span class="pre">nx)</span></code> (DHW order).</p></li>
+<li><p><strong>bounds_min</strong> – SDF bounding box minimum corner, shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>.</p></li>
+<li><p><strong>voxel_size</strong> – Size of each voxel in world units, shape <code class="docutils literal notranslate"><span class="pre">(3,)</span></code>.</p></li>
+<li><p><strong>points</strong> – Query points in SDF local space, shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Signed distance values, shape <code class="docutils literal notranslate"><span class="pre">(...)</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
