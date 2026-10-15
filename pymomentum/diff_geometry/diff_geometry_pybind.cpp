@@ -39,7 +39,7 @@ Working directly from modelParameters is preferable to mapping to jointParameter
 sparsity in the model and therefore can be made somewhat faster.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param model_parameters: Model parameter tensor, with dimension (nBatch x nModelParams).
 :param parents: Joint parents, on for each target position.
 :param offsets: 3-d offset in each joint's local space.
@@ -61,7 +61,7 @@ You should prefer :meth:`model_parameters_to_positions` when working from modelP
 function is provided as a convenience because motion read from external files generally uses jointParameters.
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param joint_parameters: Joint parameter tensor, with dimension (nBatch x (7*nJoints)).
 :param parents: Joint parents, on for each target position.
 :param offsets: 3-d offset in each joint's local space.
@@ -82,7 +82,7 @@ The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the tr
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
@@ -99,7 +99,7 @@ The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the tr
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param model_parameters: torch.Tensor containing the (nBatch x nModelParameters) model parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
@@ -116,7 +116,7 @@ The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the tr
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",
@@ -133,7 +133,7 @@ The skeletonState is stored (tx, ty, tz; rx, ry, rz, rw; s) and each maps the tr
 Rotations are Quaternions in the ((x, y, z), w) format.  This is deliberately identical to the representation used in a legacy format.)
 
 :param character: Character to use.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param joint_parameters: torch.Tensor containing the (nBatch x nJointParameters) joint parameters.
 
 :return: torch.Tensor of size (nBatch x nJoints x 8) containing the skeleton state; should be also compatible with a legacy format's skeleton state representation.)",

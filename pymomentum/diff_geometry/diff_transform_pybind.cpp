@@ -29,11 +29,11 @@ void defParameterTransforms(pybind11::module_& m) {
         return applyParamTransform(std::move(character), std::move(modelParameters));
       },
       R"(Apply the parameter transform to a [nBatch x nParams] tensor of model parameters.
-This is functionally identical to :meth:`ParameterTransform.apply` except that it allows
+This is functionally identical to :meth:`pymomentum.geometry.ParameterTransform.apply` except that it allows
 batching on the character.
 
 :param character: A character or list of characters.
-:type character: Union[Character, List[Character]]
+:type character: Union[pymomentum.geometry.Character, List[pymomentum.geometry.Character]]
 :param model_parameters: A [nBatch x nParams] tensor of model parameters.
 
 :return: a tensor of joint parameters.)",
@@ -47,11 +47,11 @@ batching on the character.
         return applyInverseParamTransform(invParamTransform, std::move(jointParameters));
       },
       R"(Apply the inverse parameter transform to a [nBatch x nJointParams] tensor of joint parameters.
-This is functionally identical to :meth:`InverseParameterTransform.apply` except that it supports
+This is functionally identical to :meth:`pymomentum.geometry.InverseParameterTransform.apply` except that it supports
 automatic differentiation.
 
 :param inverse_parameter_transform: An inverse parameter transform (from ParameterTransform.inverse()).
-:type inverse_parameter_transform: InverseParameterTransform
+:type inverse_parameter_transform: pymomentum.geometry.InverseParameterTransform
 :param joint_parameters: A [nBatch x nJointParams] tensor of joint parameters.
 
 :return: a tensor of model parameters.)",

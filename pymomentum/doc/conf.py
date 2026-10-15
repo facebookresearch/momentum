@@ -3,6 +3,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import re
+
 project = "PyMomentum"
 
 extensions = [
@@ -38,5 +40,27 @@ def skip_pycapsule(app, what, name, obj, skip, options):
     return skip
 
 
+_BARE_GEOMETRY_TYPE = re.compile(r"(?<![\w.])(Character|Mesh)\b")
+
+
+def qualify_geometry_types(app, what, name, obj, options, signature, return_annotation):
+    """Qualify bare ``Character``/``Mesh`` annotations as ``pymomentum.geometry`` types.
+
+    Modules such as :mod:`pymomentum.rerun_vis` import these names only under
+    ``TYPE_CHECKING``, so autodoc renders them unqualified, and Sphinx then finds
+    two targets (:mod:`pymomentum.geometry` and :mod:`pymomentum.torch.character`).
+    """
+    if name.startswith("pymomentum.torch."):
+        return None
+
+    def qualify(text):
+        if text is None:
+            return None
+        return _BARE_GEOMETRY_TYPE.sub(r"pymomentum.geometry.\1", text)
+
+    return qualify(signature), qualify(return_annotation)
+
+
 def setup(app):
     app.connect("autodoc-skip-member", skip_pycapsule)
+    app.connect("autodoc-process-signature", qualify_geometry_types)

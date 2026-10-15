@@ -22,6 +22,14 @@ pymomentum.torch.parameter_limits
    :undoc-members:
    :show-inheritance:
 
+pymomentum.torch.sdf_collision
+------------------------------
+
+.. automodule:: pymomentum.torch.sdf_collision
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pymomentum.torch.utility
 ------------------------
 
