@@ -6,6 +6,14 @@ pymomentum.backend
    :undoc-members:
    :show-inheritance:
 
+pymomentum.backend.selection module
+-----------------------------------
+
+.. automodule:: pymomentum.backend.selection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pymomentum.backend.skel\_state\_backend module
 ----------------------------------------------
 

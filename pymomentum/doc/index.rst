@@ -7,8 +7,12 @@ Welcome to PyMomentum
 
    axel
    geometry
+   diff_geometry
+   camera
    quaternion
+   quaternion_np
    skel_state
+   skel_state_np
    trs
    backend
    solver
@@ -16,3 +20,5 @@ Welcome to PyMomentum
    marker_tracking
    torch
    renderer
+   rerun_vis
+   viser_vis
