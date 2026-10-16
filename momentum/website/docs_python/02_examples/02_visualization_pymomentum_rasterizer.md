@@ -1,6 +1,10 @@
-# Visualization using pymomentum rasterizer
+# Visualization using the PyMomentum rasterizer
 
 Visualizing results is an important part of what we do. There are various ways to do it, but many of our pipelines rely on rendering MP4 movies in batch for later playback. This works well because videos work in any browser and are easy to share links, etc.
+
+![A tour of PyMomentum rasterizer features](/img/pymomentum/rasterizer/overview.png)
+
+The character poses in these figures are sampled from the public [Embody 3D dataset](https://github.com/facebookresearch/embody-3d) and rendered with the default character shape.
 
 ## Why render on the CPU?
 
@@ -88,8 +92,8 @@ rgb_buffer = pym_renderer.create_rgb_buffer(camera)
 Note: the buffer size will get padded out to the nearest multiple of 8 for better SIMD performance. You can correct this after the rendering is complete using standard slicing:
 
 ```python
-z_buffer = z_buffer[:,:camera.image_width]
-rgb_buffer = rgb_buffer[:,:camera.image_height]
+z_buffer = z_buffer[:, : camera.image_width]
+rgb_buffer = rgb_buffer[:, : camera.image_width, :]
 ```
 
 ### 3d primitives
@@ -130,20 +134,26 @@ pym_renderer.rasterize_wireframe(vertex_positions,
   triangles, camera, z_buffer=z_buffer, rgb_buffer=rgb_buffer)
 ```
 
+![An arbitrary shaded and wireframe mesh rendered with spheres, cylinders, and a coordinate frame](/img/pymomentum/rasterizer/mesh_and_primitives.png)
+
 #### Spheres and cylinders
 
 There is special functionality for rendering spheres and cylinders.
 
 ```python
-sphere_centers = torch.stack(
-    [torch.arange(-10, 10, 3), 5 * torch.ones(7), torch.ones(7)]
-).transpose(0, 1)
+sphere_centers = np.stack(
+    [np.arange(-10, 10, 3), 5 * np.ones(7), np.ones(7)], axis=1
+).astype(np.float32)
 pym_renderer.rasterize_spheres(
-    sphere_centers, camera, z_buffer, rgb_buffer=rgb_buffer, radius=torch.ones(7)
+    sphere_centers,
+    camera,
+    z_buffer,
+    rgb_buffer=rgb_buffer,
+    radius=np.ones(7, dtype=np.float32),
 )
 pym_renderer.rasterize_cylinders(
-    start_position=torch.tensor([[-5, 8, 0]]),
-    end_position=torch.tensor([[5, 8, 0]]),
+    start_position=np.array([[-5, 8, 0]], dtype=np.float32),
+    end_position=np.array([[5, 8, 0]], dtype=np.float32),
     camera=camera,
     z_buffer=z_buffer,
     rgb_buffer=rgb_buffer
@@ -193,6 +203,8 @@ pym_renderer.rasterize_skeleton(character, skel_state, camera, z_buffer,
 
 There are three different skeleton "styles": "Pipes" (3d cylinders and spheres), "Octahedrons" (this asymmetric octahedron shape, useful for visualizing rotations) and "Lines" (2d lines and circles).
 
+![Three skeleton styles shown with varied poses](/img/pymomentum/rasterizer/skeleton_styles.png)
+
 ### 2d primitives
 
 It can be useful to render 2d primitives like circles and lines but have them respect the z buffer. This can be used:
@@ -208,7 +220,7 @@ pym_renderer.rasterize_lines(
     camera=camera,
     z_buffer=z_buffer,
     rgb_buffer=rgb_buffer,
-    thickness=2.0,
+    thickness=3.0,
     color=np.array([1.0, 0.0, 0.0])  # Red lines
 )
 pym_renderer.rasterize_circles(
@@ -216,11 +228,13 @@ pym_renderer.rasterize_circles(
     camera=camera,
     z_buffer=z_buffer,
     rgb_buffer=rgb_buffer,
-    radius=5.0,
-    line_thickness=1.0,
+    radius=12.0,
+    line_thickness=2.5,
     line_color=np.array([0.0, 1.0, 0.0])  # Green circles
 )
 ```
+
+![Large depth-aware circles and lines marking selected joints](/img/pymomentum/rasterizer/lines_and_circles.png)
 
 Note that aliasing can be particularly bad for lines so see the notes about antialiasing below.
 
@@ -242,6 +256,8 @@ z_buffer = pym_renderer.create_z_buffer(camera)
 pym_renderer.alpha_matte(z_buffer, rgb_buffer, tgt_image)
 ```
 
+![A source image and the same image with a rendered character composited into it](/img/pymomentum/rasterizer/compositing.png)
+
 ### Using depth offset for clearer skeleton/keypoint rendering
 
 A classic approach to rendering e.g. 3d keypoints is to render circles on top of the image. The problem with this approach is that because the depth buffer is not respected, the keypoints will be visible through the mesh. This can be very confusing to look at. Notice in the left character how the skeleton of the right hand is visible all the way through the character, which makes it hard to see what is going on.
@@ -257,6 +273,8 @@ pym_renderer.rasterize_skeleton(character, skel_state, camera, z_buffer,
     rgb_buffer=rgb_buffer, style=pym_renderer.SkeletonStyle.Pipes, sphere_radius=1.0,
     cylinder_radius=0.5, depth_offset=-15, image_offset=np.asarray([300, 0]))
 ```
+
+![An always-on-top skeleton compared with a depth-aware skeleton overlay](/img/pymomentum/rasterizer/skeleton_depth_offset.png)
 
 In addition, you can pass an `image_offset` (in pixels) to any rasterizer function and it will displace a mesh in image-space.
 
@@ -304,18 +322,16 @@ pym_renderer.rasterize_character(
 pym_renderer.rasterize_checkerboard(camera, z_buffer, rgb_buffer, width=500,
     subdivisions=3)
 # Use the shadow z buffer to darken the ground plane wherever the shadow hits:
-very_far = 10000.0
-rgb_buffer *= (
-    torch.logical_or(shadow_buffer > very_far, z_buffer > very_far)
-    .to(torch.float)
-    .clamp(0.5, 1.0)
-    .unsqueeze(-1)
-)
+very_far = 10_000.0
+visible_shadow = (shadow_buffer < very_far) & (z_buffer < very_far)
+rgb_buffer[visible_shadow] *= 0.5
 # Finally rasterize the character mesh:
 pym_renderer.rasterize_character(
     character, skel_state, camera, z_buffer, rgb_buffer=rgb_buffer, lights=lights
 )
 ```
+
+![The same pose and ground plane rendered without and with a projected shadow](/img/pymomentum/rasterizer/ground_shadow.png)
 
 ### Generating a video
 
@@ -413,21 +429,18 @@ pym_renderer.rasterize_character(character, skel_state, camera,
     triangle_index_buffer=triangle_index_buffer,
 )
 
-# Generate some random colors:
-random_colors = torch.rand(
-    max(triangles.shape[0], vertices.shape[0]), 3, dtype=torch.float32
-)
-# Need to shift by 1 since empty pixels are set to -1 (torch tensor indexing doesn't
-# appear to support -1).
-triangle_colors = random_colors[triangle_index_buffer.flatten() + 1, :].reshape(
-    rgb_buffer.shape
-)
-vertex_colors = random_colors[vertex_index_buffer.flatten() + 1, :].reshape(
-    rgb_buffer.shape
-)
+# Generate deterministic colors and reserve index 0 for empty pixels.
+rng = np.random.default_rng(0)
+max_index = max(character.mesh.n_faces, character.mesh.n_vertices)
+random_colors = rng.random((max_index + 1, 3), dtype=np.float32)
+random_colors[0] = 0
+triangle_colors = random_colors[triangle_index_buffer + 1]
+vertex_colors = random_colors[vertex_index_buffer + 1]
 ```
 
 From left: RGB buffer, normals buffer, triangle index buffer, vertex index buffer (notice the Voronoi regions).
+
+![RGB, eye-space normals, triangle IDs, and vertex IDs](/img/pymomentum/rasterizer/output_buffers.png)
 
 ### Antialiasing
 
@@ -443,10 +456,14 @@ rgb_buffer = pym_renderer.create_rgb_buffer(cam_supersample)
 # render
 pym_renderer.rasterize_mesh(...)
 
-output_image = np.zeros(shape=(cam.image_height, cam.image_width, 3)
+output_image = np.zeros(
+    shape=(cam.image_height, cam.image_width, 3), dtype=np.float32
+)
 # Alpha_matte function knows how to handle alpha with upsampled cameras (will
 # correctly blend along edges using the averaged alpha).
 pym_renderer.alpha_matte(z_buffer, rgb_buffer, output_image)
 ```
 
 No supersampling vs with supersampling provides significantly better visual quality.
+
+![A line skeleton rendered directly and with 3x supersampling](/img/pymomentum/rasterizer/supersampling.png)
