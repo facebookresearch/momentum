@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <vector>
 
 using namespace momentum;
@@ -726,17 +727,20 @@ TEST(RandomTest, NormalDistributionConsistency) {
 }
 
 TEST(RandomTest, NormalDistributionStatisticalProperties) {
+  Random<> rng{12345};
+
   // More rigorous statistical test for normal distribution
-  const int numSamples = 10000;
-  const float expectedMean = 5.0f;
-  const float expectedSigma = 2.0f;
+  constexpr int numSamples = 10000;
+  constexpr float expectedMean = 5.0f;
+  constexpr float expectedSigma = 2.0f;
+  constexpr float maxStandardErrors = 5.0f;
 
   std::vector<float> samples;
   samples.reserve(numSamples);
 
   // Generate large sample
   for (int i = 0; i < numSamples; ++i) {
-    samples.push_back(normal<float>(expectedMean, expectedSigma));
+    samples.push_back(rng.normal<float>(expectedMean, expectedSigma));
   }
 
   // Calculate sample statistics
@@ -754,11 +758,16 @@ TEST(RandomTest, NormalDistributionStatisticalProperties) {
   sampleVariance /= (numSamples - 1);
   float sampleStdDev = std::sqrt(sampleVariance);
 
-  // With large sample size, statistics should be very close to expected values
-  EXPECT_NEAR(sampleMean, expectedMean, 0.05f)
-      << "Sample mean should be very close to expected mean with large sample";
-  EXPECT_NEAR(sampleStdDev, expectedSigma, 0.05f)
-      << "Sample std dev should be very close to expected sigma with large sample";
+  // Bound sampling error in terms of the estimator's standard error. Five standard errors gives
+  // strong sensitivity to biased generators while making a false failure vanishingly unlikely.
+  const float meanTolerance =
+      maxStandardErrors * expectedSigma / std::sqrt(static_cast<float>(numSamples));
+  const float stdDevTolerance =
+      maxStandardErrors * expectedSigma / std::sqrt(2.0f * static_cast<float>(numSamples - 1));
+  EXPECT_NEAR(sampleMean, expectedMean, meanTolerance)
+      << "Sample mean should be within five standard errors of the expected mean";
+  EXPECT_NEAR(sampleStdDev, expectedSigma, stdDevTolerance)
+      << "Sample standard deviation should be within five standard errors of the expected sigma";
 
   // Test empirical rule (68-95-99.7 rule)
   int within1Sigma = 0, within2Sigma = 0, within3Sigma = 0;
