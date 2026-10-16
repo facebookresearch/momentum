@@ -204,7 +204,7 @@ template <typename T>
 /// Fits a two-axis Euler rotation to a rotation matrix
 ///
 /// Finds the best-fit two-axis Euler angles (axis0 then axis1) that minimize the
-/// L2 distance to the target rotation matrix using Levenberg-Marquardt optimization.
+/// L2 distance to the target rotation matrix using Gauss-Newton optimization.
 ///
 /// @tparam T The scalar type.
 /// @param[in] m The target rotation matrix.
@@ -217,7 +217,7 @@ template <typename T>
 /// Fits a single-axis Euler rotation to a rotation matrix
 ///
 /// Finds the best-fit single-axis rotation angle that minimizes the L2 distance
-/// to the target rotation matrix using Levenberg-Marquardt optimization. This is
+/// to the target rotation matrix using Gauss-Newton optimization. This is
 /// NOT a direct conversion - if the input matrix cannot be exactly represented as
 /// a single-axis rotation, this function returns the closest approximation.
 ///
