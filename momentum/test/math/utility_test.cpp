@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <bit>
+#include <cmath>
 #include <cstdint>
 
 using namespace momentum;
@@ -207,6 +208,21 @@ TYPED_TEST(UtilityTest, QuaternionToEuler) {
     EXPECT_NEAR(euler.x(), pi<T>() / 4, T(1e-3));
     EXPECT_NEAR(euler.y(), T(0), T(1e-3));
     EXPECT_NEAR(euler.z(), T(0), T(1e-3));
+  }
+
+  // A slightly non-unit quaternion can push the pitch term outside asin's domain.
+  {
+    const T excess = Eps<T>(1e-4f, 1e-12);
+    const T component = std::sqrt((T(1) + excess) / T(2));
+    const T tolerance = Eps<T>(1e-5f, 1e-12);
+
+    const Quaternion<T> positive(component, T(0), component, T(0));
+    ASSERT_GT(T(2) * positive.w() * positive.y(), T(1));
+    EXPECT_NEAR(quaternionToEuler(positive).y(), pi<T>() / T(2), tolerance);
+
+    const Quaternion<T> negative(component, T(0), -component, T(0));
+    ASSERT_LT(T(2) * negative.w() * negative.y(), T(-1));
+    EXPECT_NEAR(quaternionToEuler(negative).y(), -pi<T>() / T(2), tolerance);
   }
 }
 
@@ -511,6 +527,20 @@ TYPED_TEST(UtilityTest, ClosestPointsOnSegments) {
     EXPECT_EQ(params[0], T(0));
     EXPECT_EQ(params[1], T(0));
   }
+}
+
+TEST(UtilityTest, ClosestPointsOnSegmentsUsesDoublePrecisionTolerance) {
+  constexpr double slope = 1e-4;
+  const Vector3d o1(0.0, 0.0, 0.0);
+  const Vector3d d1(1.0, 0.0, 0.0);
+  const Vector3d o2(0.25, -0.5 * slope, 0.0);
+  const Vector3d d2(1.0, slope, 0.0);
+
+  const auto [success, distance, params] = closestPointsOnSegments(o1, d1, o2, d2);
+
+  ASSERT_TRUE(success);
+  EXPECT_NEAR(distance, 0.0, 1e-12);
+  EXPECT_TRUE(params.isApprox(Vector2d(0.75, 0.5), 1e-7));
 }
 
 TYPED_TEST(UtilityTest, CrossProductMatrix) {

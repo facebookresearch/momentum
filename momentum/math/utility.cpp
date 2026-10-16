@@ -12,6 +12,7 @@
 
 #include <Eigen/Eigenvalues>
 
+#include <algorithm>
 #include <type_traits>
 
 namespace momentum {
@@ -381,15 +382,12 @@ Matrix3<T> eulerZYXToRotationMatrix(const Vector3<T>& angles, EulerConvention co
 
 template <typename T>
 Vector3<T> quaternionToEuler(const Quaternion<T>& q) {
-  // Standard closed-form XYZ Tait-Bryan extraction. Caller must pass a normalized
-  // quaternion; if not, the asin argument can exceed [-1,1] and produce NaN. There
-  // is no gimbal-lock guard here because callers (skeleton_state) work in regimes
-  // where |2(wy - zx)| < 1.
-  // TODO: Clamp the asin argument to [-1, 1] for robustness if non-unit inputs are possible.
   Vector3<T> res;
   res.x() =
       std::atan2(T(2) * (q.w() * q.x() + q.y() * q.z()), T(1) - T(2) * (sqr(q.x()) + sqr(q.y())));
-  res.y() = std::asin(T(2) * (q.w() * q.y() - q.z() * q.x()));
+  // Non-unit inputs and floating-point drift can push the pitch term just outside asin's domain.
+  const T sinY = std::clamp(T(2) * (q.w() * q.y() - q.z() * q.x()), T(-1), T(1));
+  res.y() = std::asin(sinY);
   res.z() =
       std::atan2(T(2) * (q.w() * q.z() + q.x() * q.y()), T(1) - T(2) * (sqr(q.y()) + sqr(q.z())));
   return res;
@@ -473,10 +471,8 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
   // D is the determinant of the 2x2 normal-equations matrix; when small, the segments
   // are nearly parallel (or one direction has near-zero length) and the linear system
   // is ill-conditioned, so we pin s=0 and solve for t along d2 only.
-  // TODO: T(1e-7) is a hard-coded tolerance independent of T's precision. For double
-  // this is conservative but for float it is roughly 1 ulp at unit scale; consider
-  // using Eps<T>(...) like the Euler routines do.
-  if (D < T(1e-7)) {
+  constexpr T kTolerance = Eps<T>(T(1e-7), T(1e-15));
+  if (D < kTolerance) {
     sN = T(0);
     sD = T(1);
     tN = e;
@@ -536,8 +532,8 @@ std::tuple<bool, T, Eigen::Vector2<T>> closestPointsOnSegments(
 
   // finally do the division to get sc and tc
   // Check for small denominators to avoid division by zero or very small numbers
-  res[0] = (std::abs(sN) < T(1e-7) || std::abs(sD) < T(1e-7)) ? T(0) : sN / sD;
-  res[1] = (std::abs(tN) < T(1e-7) || std::abs(tD) < T(1e-7)) ? T(0) : tN / tD;
+  res[0] = (std::abs(sN) < kTolerance || std::abs(sD) < kTolerance) ? T(0) : sN / sD;
+  res[1] = (std::abs(tN) < kTolerance || std::abs(tD) < kTolerance) ? T(0) : tN / tD;
 
   // get the difference of the two closest points
   const auto dP = w + (d1 * res[0]) - (d2 * res[1]);
@@ -693,7 +689,7 @@ Matrix3<T> singleAxisRotationMatrixDerivative(int axis, T angle) {
 
 // Rotation matrix for a composition R(axis1) * R(axis0). Note the order: axis0 is
 // applied first (innermost), then axis1 — this matches the intrinsic angle ordering
-// used by the Levenberg-Marquardt callers below.
+// used by the Gauss-Newton callers below.
 template <typename T>
 Matrix3<T> twoAxisRotationMatrix(int axis0, int axis1, const Vector2<T>& angles) {
   return singleAxisRotationMatrix(axis1, angles[1]) * singleAxisRotationMatrix(axis0, angles[0]);
@@ -711,11 +707,9 @@ twoAxisRotationMatrixDerivatives(int axis0, int axis1, const Vector2<T>& angles)
   return {R1 * dR0, dR1 * R0};
 }
 
-// Levenberg-Marquardt solver minimizing ||R(axis, angle) - target||_F^2 in the angle.
-// Despite the name, this is a plain Gauss-Newton step (no LM damping term is added).
-// TODO: Either add real LM damping or rename to gaussNewtonSolveScalar to match behavior.
+// Gauss-Newton solver minimizing ||R(axis, angle) - target||_F^2 in the angle.
 template <typename T>
-T levenbergMarquardtSolveScalar(
+T gaussNewtonSolveScalar(
     const Matrix3<T>& target,
     int axis,
     T initialGuess = T(0),
@@ -751,7 +745,6 @@ T levenbergMarquardtSolveScalar(
 
     const Eigen::Vector<T, 9> residualVector = residualMatrix.reshaped(9, 1);
 
-    // Gauss-Newton step (no LM damping is added — see TODO above).
     const Eigen::Vector<T, 1> delta = jacobian.householderQr().solve(-residualVector);
 
     // No line search or trust-region — we trust the Gauss-Newton direction directly.
@@ -761,13 +754,10 @@ T levenbergMarquardtSolveScalar(
   return angle;
 }
 
-// Levenberg-Marquardt solver minimizing ||R(axis0, axis1, angles) - target||_F^2 in the
-// two-vector of angles. As with the scalar version, this is currently a Gauss-Newton step
-// (the comment about (J^T J + lambda I) below describes the intended LM update, not what
-// is actually solved by the householder QR call).
-// TODO: Add proper LM damping (lambda) or rename this to gaussNewtonSolveTwoAxis.
+// Gauss-Newton solver minimizing ||R(axis0, axis1, angles) - target||_F^2 in the two-vector
+// of angles.
 template <typename T>
-Vector2<T> levenbergMarquardtSolveTwoAxis(
+Vector2<T> gaussNewtonSolveTwoAxis(
     const Matrix3<T>& target,
     int axis0,
     int axis1,
@@ -802,7 +792,6 @@ Vector2<T> levenbergMarquardtSolveTwoAxis(
     jacobian.template block<9, 1>(0, 1) = dR1.reshaped(9, 1);
 
     // Gauss-Newton step solved as a 9x2 linear least-squares: minimize ||J*delta + r||.
-    // No LM damping (lambda) is applied; see TODO above the function.
     const Vector2<T> delta = jacobian.householderQr().solve(-residualVector);
 
     // Check if solution is valid
@@ -835,10 +824,8 @@ T rotationMatrixToOneAxisEuler(const Matrix3<T>& m, int axis0) {
     initialGuess = std::atan2(m(1, 0), m(0, 0));
   }
 
-  // Use Levenberg-Marquardt starting from the atan2 initial guess
-  // For exact single-axis rotations, this will converge immediately
-  // For non-exact cases, this provides a much better starting point
-  return levenbergMarquardtSolveScalar(m, axis0, initialGuess);
+  // Refine the atan2 estimate with Gauss-Newton.
+  return gaussNewtonSolveScalar(m, axis0, initialGuess);
 }
 
 template <typename T>
@@ -847,8 +834,7 @@ Vector2<T> rotationMatrixToTwoAxisEuler(const Matrix3<T>& m, int axis0, int axis
   MT_CHECK(axis0 >= 0 && axis0 <= 2, "Invalid axis0");
   MT_CHECK(axis1 >= 0 && axis1 <= 2, "Invalid axis1");
 
-  // Use Levenberg-Marquardt to find optimal two-axis rotation
-  return levenbergMarquardtSolveTwoAxis(
+  return gaussNewtonSolveTwoAxis(
       m,
       axis0,
       axis1,
