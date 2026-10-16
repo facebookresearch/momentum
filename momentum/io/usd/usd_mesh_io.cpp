@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <string>
 #include <unordered_set>
 
@@ -215,12 +216,8 @@ Mesh loadMeshFromUsd(const UsdStageRefPtr& stage) {
 }
 
 SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertices) {
-  SkinWeights skinWeights;
-
-  skinWeights.index.resize(numVertices, kMaxSkinJoints);
-  skinWeights.weight.resize(numVertices, kMaxSkinJoints);
-  skinWeights.index.setZero();
-  skinWeights.weight.setZero();
+  std::vector<std::vector<size_t>> indices(numVertices);
+  std::vector<std::vector<float>> weights(numVertices);
 
   for (const auto& prim : stage->Traverse()) {
     if (!prim.IsA<UsdGeomMesh>()) {
@@ -238,27 +235,40 @@ SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertic
 
     if (bindingAPI.GetJointIndicesAttr().Get(&jointIndices) &&
         bindingAPI.GetJointWeightsAttr().Get(&jointWeights)) {
-      if (!jointIndices.empty() && !jointWeights.empty() &&
-          jointIndices.size() == jointWeights.size()) {
-        const int influencesPerVertex = static_cast<int>(jointIndices.size() / numVertices);
-
-        if (influencesPerVertex > 0 && jointIndices.size() == numVertices * influencesPerVertex) {
-          for (size_t v = 0; v < numVertices; ++v) {
-            int validInfluences = 0;
-            for (int i = 0;
-                 i < influencesPerVertex && validInfluences < static_cast<int>(kMaxSkinJoints);
-                 ++i) {
-              const size_t idx = v * influencesPerVertex + i;
-              int jointIndex = jointIndices[idx];
-              float weight = jointWeights[idx];
-
-              if (weight > 0.0f && jointIndex >= 0) {
-                skinWeights.index(v, validInfluences) = static_cast<uint32_t>(jointIndex);
-                skinWeights.weight(v, validInfluences) = weight;
-                validInfluences++;
-              }
+      if (jointIndices.empty() || jointWeights.empty()) {
+        MT_LOGW("Ignoring USD skin weights because a joint primvar is empty");
+      } else if (jointIndices.size() != jointWeights.size()) {
+        MT_LOGW(
+            "Ignoring USD skin weights because there are {} joint indices but {} weights",
+            jointIndices.size(),
+            jointWeights.size());
+      } else if (numVertices == 0) {
+        MT_LOGW("Ignoring USD skin weights because the mesh has no vertices");
+      } else if (jointIndices.size() % numVertices != 0) {
+        MT_LOGW(
+            "Ignoring USD skin weights because {} influences cannot be divided among {} vertices",
+            jointIndices.size(),
+            numVertices);
+      } else {
+        const size_t influencesPerVertex = jointIndices.size() / numVertices;
+        size_t invalidJointIndexCount = 0;
+        for (size_t v = 0; v < numVertices; ++v) {
+          indices[v].reserve(influencesPerVertex);
+          weights[v].reserve(influencesPerVertex);
+          for (size_t i = 0; i < influencesPerVertex; ++i) {
+            const size_t idx = v * influencesPerVertex + i;
+            const auto jointIndex = static_cast<int64_t>(jointIndices[idx]);
+            if (jointIndex < 0) {
+              ++invalidJointIndexCount;
+              continue;
             }
+
+            indices[v].push_back(static_cast<size_t>(jointIndex));
+            weights[v].push_back(jointWeights[idx]);
           }
+        }
+        if (invalidJointIndexCount > 0) {
+          MT_LOGW("Discarded {} invalid USD joint indices", invalidJointIndexCount);
         }
       }
     }
@@ -266,6 +276,8 @@ SkinWeights loadSkinWeightsFromUsd(const UsdStageRefPtr& stage, size_t numVertic
     break; // Use first skinned mesh found
   }
 
+  SkinWeights skinWeights;
+  skinWeights.set(indices, weights);
   return skinWeights;
 }
 
