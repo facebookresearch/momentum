@@ -104,6 +104,16 @@ pixi search -c conda-forge pymomentum
 conda search -c conda-forge pymomentum
 ```
 
+## Visualizing results
+
+PyMomentum provides a fully featured [software rasterizer](../02_examples/02_visualization_pymomentum_rasterizer.md)
+([API reference](https://facebookresearch.github.io/momentum/python_api_doc/renderer.html))
+for rendering characters, images, videos, and overlays. You can also inspect
+results interactively with [Rerun](https://facebookresearch.github.io/momentum/python_api_doc/rerun_vis.html)
+or [Viser](https://facebookresearch.github.io/momentum/python_api_doc/viser_vis.html),
+or [export glTF/GLB](https://facebookresearch.github.io/momentum/python_api_doc/geometry.html#pymomentum.geometry.Character.save_gltf)
+for use with standard 3D viewers.
+
 ## Building PyMomentum from Source
 
 ### Prerequisite

@@ -183,9 +183,12 @@ Studio project.
 
 ## Documentation
 
-- Keep code examples out of the `momentum/website/` docs — they go stale.
-  Describe the approach and reference a test or example instead; when code is
-  unavoidable, prefer pseudocode.
+- Keep substantial code examples in tests or example files, where they can be
+  executed and maintained. Concise tutorial snippets are appropriate when they
+  use public assets and are covered by the referenced tests or examples.
+- Executable Python tutorial pages are tested by running their fenced Python
+  blocks in order. Keep those blocks self-consistent, and update the test asset
+  staging when a tutorial adds external files.
 - Public documentation lives on the docs site: the Python and C++ API references
   and the getting-started guides linked from `README.md`.
 
