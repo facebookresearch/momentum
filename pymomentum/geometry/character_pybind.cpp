@@ -83,11 +83,11 @@ mm::CollisionGeometry collisionGeometryFromPython(const py::sequence& collisionG
   result.reserve(collisionGeometry.size());
   for (const py::handle item : collisionGeometry) {
     if (py::isinstance<mm::TaperedCapsule>(item)) {
-      result.push_back(item.cast<mm::TaperedCapsule>());
+      result.emplace_back(item.cast<mm::TaperedCapsule>());
     } else if (py::isinstance<mm::CollisionEllipsoid>(item)) {
-      result.push_back(item.cast<mm::CollisionEllipsoid>());
+      result.emplace_back(item.cast<mm::CollisionEllipsoid>());
     } else if (py::isinstance<mm::CollisionBox>(item)) {
-      result.push_back(item.cast<mm::CollisionBox>());
+      result.emplace_back(item.cast<mm::CollisionBox>());
     } else {
       MT_THROW(
           "Collision geometry entries must be TaperedCapsule, Ellipsoid, or Box; got {}",
