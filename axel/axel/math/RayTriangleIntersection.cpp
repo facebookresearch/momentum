@@ -10,6 +10,8 @@
 #include "axel/common/Constants.h"
 #include "axel/math/RayTriangleIntersection.h"
 
+#include <cmath>
+
 namespace axel {
 
 template <typename T>
@@ -27,45 +29,33 @@ bool rayTriangleIntersect(
   const Eigen::Vector3<T> v0v1 = p1 - p0;
   const Eigen::Vector3<T> v0v2 = p2 - p0;
   const Eigen::Vector3<T> pvec = direction.cross(v0v2);
-
-  // ray and triangle are parallel if direction is parallel to v0v2, which is indicated by pvec
-  // being the zero vector; adding this check to avoid having a non-zero determinant due to
-  // normalization of an almost-zero pvec
-  if (pvec.norm() < kEpsilon) {
-    return false;
-  }
-
   const T det = v0v1.dot(pvec);
-  // #ifdef CULLING
-  //  if the determinant is negative the triangle is backfacing
-  //  if the determinant is close to 0, the ray misses the triangle
-  //  if (det < kEpsilon) { return false; }
-
-  // ray and triangle are parallel if det is close to 0
-  // calculate determinant with normalized vectors to check for parallelism
-  // invDet could become quite large - consider using det and lower threshold (maybe 1e-12)
-  const T det_norm = (v0v1.normalized()).dot(pvec.normalized());
-  if (std::abs(det_norm) < kEpsilon) {
+  const T detScale = v0v1.norm() * direction.norm() * v0v2.norm();
+  if (!(detScale > T(0)) || !std::isfinite(detScale) || !std::isfinite(det) ||
+      std::abs(det) <= kEpsilon * detScale) {
     return false;
   }
 
-  const T invDet = 1 / det;
+  const T invDet = T(1) / det;
 
   const Eigen::Vector3<T> tvec = beginRay - p0;
   u = tvec.dot(pvec) * invDet;
-  if (u < -kEpsilon || u > 1 + kEpsilon) {
+  if (!std::isfinite(u) || u < -kEpsilon || u > T(1) + kEpsilon) {
     return false;
   }
 
   const Eigen::Vector3<T> qvec = tvec.cross(v0v1);
   v = direction.dot(qvec) * invDet;
-  if (v < -kEpsilon || u + v > 1 + kEpsilon) {
+  if (!std::isfinite(v) || v < -kEpsilon || u + v > T(1) + kEpsilon) {
     return false;
   }
 
   tOut = v0v2.dot(qvec) * invDet;
+  if (!std::isfinite(tOut)) {
+    return false;
+  }
   intersectionPoint = beginRay + tOut * direction;
-  return true;
+  return intersectionPoint.allFinite();
 }
 
 template bool rayTriangleIntersect(
