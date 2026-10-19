@@ -118,7 +118,7 @@ jobs:
           sudo chown -R "$(id -u):$(id -g)" .ccache
           du -sh .ccache
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: wheels-${{ matrix.package-variant }}-linux
           path: ./wheelhouse/*.whl
@@ -232,7 +232,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: wheels-${{ matrix.package-variant }}-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -346,7 +346,7 @@ jobs:
 
       - name: Upload wheel artifacts
         if: steps.should_run.outputs.run == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: wheels-gpu-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/*.whl
@@ -427,7 +427,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: wheels-gpu-linux
           path: ./wheelhouse/*.whl
