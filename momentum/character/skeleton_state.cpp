@@ -166,13 +166,11 @@ StateSimilarity SkeletonStateT<T>::compare(
     result.orientationError[i] = gsl::narrow_cast<float>(T(2) * std::acos(sgn * dot));
   }
 
-  result.positionRMSE = std::sqrt(
-      result.positionError.squaredNorm() / static_cast<float>(result.positionError.size()));
-  // TODO: orientationRMSE divides by positionError.size() instead of orientationError.size().
-  // The sizes are identical today (both resized to jointState.size() above), so this is harmless,
-  // but it's a latent bug if the two arrays ever diverge. Use orientationError.size() here.
-  result.orientationRMSE = std::sqrt(
-      result.orientationError.squaredNorm() / static_cast<float>(result.positionError.size()));
+  const auto rootMeanSquare = [](const VectorXf& errors) {
+    return std::sqrt(errors.squaredNorm() / static_cast<float>(errors.size()));
+  };
+  result.positionRMSE = rootMeanSquare(result.positionError);
+  result.orientationRMSE = rootMeanSquare(result.orientationError);
   result.positionMax = result.positionError.maxCoeff();
   result.orientationMax = result.orientationError.maxCoeff();
 
@@ -251,15 +249,6 @@ JointParametersT<T> skeletonStateToJointParameters(
   JointParametersT<T> result =
       JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
-    // TODO: parentJoint and parentXF are computed but never used in this overload -- the local
-    // transform is read directly from jointState[i].localTransform. Remove the dead lookup, or
-    // assert it matches parentXF.inverse() * jointState[i].transform.
-    const auto parentJoint = skeleton.joints[i].parent;
-    TransformT<T> parentXF;
-    if (parentJoint != kInvalidIndex) {
-      parentXF = state.jointState[parentJoint].transform;
-    }
-
     const TransformT<T> localXF = state.jointState[i].localTransform;
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParameters(skeleton.joints[i], localXF);
@@ -370,15 +359,6 @@ JointParametersT<T> skeletonStateToJointParametersRespectingActiveParameters(
       JointParametersT<T>::Zero(skeleton.joints.size() * kParametersPerJoint);
 
   for (size_t i = 0; i < skeleton.joints.size(); ++i) {
-    // TODO: parentJoint and parentXF are computed but never used in this overload -- the local
-    // transform is read directly from jointState[i].localTransform. Remove the dead lookup, or
-    // assert it matches parentXF.inverse() * jointState[i].transform.
-    const auto parentJoint = skeleton.joints[i].parent;
-    TransformT<T> parentXF;
-    if (parentJoint != kInvalidIndex) {
-      parentXF = state.jointState[parentJoint].transform;
-    }
-
     const TransformT<T> localXF = state.jointState[i].localTransform;
     result.v.template segment<kParametersPerJoint>(i * kParametersPerJoint) =
         localTransformToJointParametersRespectingConstraints(
