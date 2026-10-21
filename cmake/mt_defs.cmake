@@ -289,17 +289,25 @@ function(mt_library)
   )
   if(MOMENTUM_ENABLE_SIMD)
     if(MSVC)
-      target_compile_options(${_ARG_NAME} ${public_or_interface} "/arch:SSE2")
-      target_compile_options(${_ARG_NAME} ${public_or_interface} "/arch:AVX")
-      target_compile_options(${_ARG_NAME} ${public_or_interface} "/arch:AVX2")
+      target_compile_options(${_ARG_NAME} ${public_or_interface}
+        "$<$<COMPILE_LANGUAGE:CXX>:/arch:SSE2>"
+        "$<$<COMPILE_LANGUAGE:CXX>:/arch:AVX>"
+        "$<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>"
+      )
     elseif(APPLE)
       if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-        target_compile_options(${_ARG_NAME} ${public_or_interface} -march=armv8-a)
+        target_compile_options(${_ARG_NAME} ${public_or_interface}
+          "$<$<COMPILE_LANGUAGE:CXX>:-march=armv8-a>"
+        )
       else()
-        target_compile_options(${_ARG_NAME} ${public_or_interface} -march=native)
+        target_compile_options(${_ARG_NAME} ${public_or_interface}
+          "$<$<COMPILE_LANGUAGE:CXX>:-march=native>"
+        )
       endif()
     else()
-      target_compile_options(${_ARG_NAME} ${public_or_interface} -march=native)
+      target_compile_options(${_ARG_NAME} ${public_or_interface}
+        "$<$<COMPILE_LANGUAGE:CXX>:-march=native>"
+      )
     endif()
     target_compile_definitions(${_ARG_NAME}
       ${public_or_interface} -DMOMENTUM_ENABLE_SIMD=1
