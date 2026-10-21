@@ -274,6 +274,10 @@ character_manager_sources = [
     "character_manager/character_manager_pybind.cpp",
 ]
 
+renderer_cuda_sources = [
+    "renderer/cuda_rasterizer_pybind.cpp",
+]
+
 renderer_public_headers = [
     "renderer/mesh_processing.h",
     "renderer/momentum_render.h",
@@ -288,6 +292,10 @@ renderer_sources = [
     "renderer/rasterizer_primitives.cpp",
     "renderer/renderer_pybind.cpp",
     "renderer/software_rasterizer.cpp",
+]
+
+torch_renderer_sources = [
+    "torch/renderer.py",
 ]
 
 axel_public_headers = [

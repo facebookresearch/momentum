@@ -360,6 +360,31 @@ mt_python_binding(
     skeleton
 )
 
+if(MOMENTUM_BUILD_CUDA_RASTERIZER AND MOMENTUM_BUILD_TORCH_EXTENSIONS)
+  mt_python_binding(
+    NAME _renderer_cuda
+    PYMOMENTUM_SOURCES_VARS renderer_cuda_sources
+    INCLUDE_DIRECTORIES
+      ${CUDAToolkit_INCLUDE_DIRS}
+      ${TORCH_INCLUDE_DIRS}
+    LINK_LIBRARIES
+      rasterizer_cuda
+      torch_bridge
+      ${TORCH_LIBRARIES}
+      ${torch_python}
+    COMPILE_OPTIONS
+      ${TORCH_CXX_FLAGS}
+    COMPONENT pymomentum_torch
+  )
+endif()
+
+mt_python_library(
+  NAME torch_renderer
+  PYMOMENTUM_SOURCES_VARS torch_renderer_sources
+  PRESERVE_DIRECTORY_STRUCTURE
+  COMPONENT pymomentum_torch
+)
+
 mt_python_library(
   NAME quaternion
   PYMOMENTUM_SOURCES_VARS quaternion_sources

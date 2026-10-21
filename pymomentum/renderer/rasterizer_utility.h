@@ -18,6 +18,8 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
+#include <array>
+#include <cstdint>
 #include <optional>
 #include <tuple>
 
@@ -29,12 +31,27 @@ using momentum::rasterizer::index_t;
 template <typename T, size_t R>
 using Span = momentum::rasterizer::Span<T, R>;
 
+inline bool isCompatibleBufferFormat(
+    const py::buffer_info& info,
+    const std::string& expectedFormat) {
+  if (info.format == expectedFormat) {
+    return true;
+  }
+
+  // PEP 3118 uses C type codes: NumPy int32 exports "l" on Windows even
+  // though pybind11's int32_t descriptor is "i". Their 4-byte signed layouts
+  // are equivalent for these native-endian rasterizer buffers.
+  const bool actualIsSignedInt = info.format == "i" || info.format == "l";
+  const bool expectedIsSignedInt = expectedFormat == "i" || expectedFormat == "l";
+  return info.itemsize == sizeof(int32_t) && actualIsSignedInt && expectedIsSignedInt;
+}
+
 template <typename T, size_t R>
 Span<T, R> make_mdspan(const py::buffer_info& info) {
   using ExtentsType = Kokkos::dextents<index_t, R>;
   using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
 
-  if (info.format != py::format_descriptor<T>::format()) {
+  if (!isCompatibleBufferFormat(info, py::format_descriptor<T>::format())) {
     throw std::runtime_error("Incorrect scalar format in Numpy array.");
   }
 
@@ -183,7 +200,7 @@ inline void validateBuffer(
     const std::vector<int64_t>& expectedShape) {
   auto info = buffer.request();
 
-  if (info.format != expectedFormat) {
+  if (!isCompatibleBufferFormat(info, expectedFormat)) {
     throw std::runtime_error(
         fmt::format(
             "{} has incorrect data type. Expected {} but got {}",
@@ -218,27 +235,44 @@ inline void validateBuffer(
   const int64_t paddedWidth =
       momentum::rasterizer::padImageWidthForRasterizer(static_cast<int32_t>(width));
 
-  // Compute expected strides based on paddedWidth
-  std::vector<int64_t> expectedStridesInElements;
-  if (expectedRank == 2) {
-    expectedStridesInElements = {paddedWidth, 1};
-  } else if (expectedRank == 3) {
-    int64_t channels = expectedShape[2];
-    expectedStridesInElements = {paddedWidth * channels, channels, 1};
-  } else {
+  if (expectedRank != 2 && expectedRank != 3) {
     throw std::runtime_error("Only 2D and 3D arrays are supported");
   }
+  const int64_t channels = expectedRank == 3 ? expectedShape[2] : 1;
+  const int64_t minimumRowStrideElements = paddedWidth * channels;
+  const int64_t rowStrideBytes = info.strides[0];
+  const bool hasWholeElementStride =
+      info.itemsize > 0 && rowStrideBytes >= 0 && rowStrideBytes % info.itemsize == 0;
+  const int64_t rowStrideElements = hasWholeElementStride ? rowStrideBytes / info.itemsize : -1;
+  const bool rowStrideIsValid = hasWholeElementStride &&
+      rowStrideElements >= minimumRowStrideElements &&
+      rowStrideElements % static_cast<int64_t>(momentum::kSimdPacketSize) == 0;
+  if (!rowStrideIsValid) {
+    throw std::runtime_error(
+        fmt::format(
+            "{} has incorrect stride at dimension 0. Expected at least {} elements and a "
+            "multiple of {} elements but got {} bytes",
+            name,
+            minimumRowStrideElements,
+            momentum::kSimdPacketSize,
+            rowStrideBytes));
+  }
+  if (reinterpret_cast<uintptr_t>(info.ptr) % momentum::kSimdAlignment != 0) {
+    throw std::runtime_error(fmt::format("{} data pointer is not SIMD-aligned", name));
+  }
 
-  // Validate strides
-  for (int i = 0; i < expectedRank; ++i) {
-    int64_t expectedStrideInBytes = expectedStridesInElements[i] * info.itemsize;
-    if (info.strides[i] != expectedStrideInBytes) {
+  const std::vector<int64_t> expectedInnerStrides = expectedRank == 2
+      ? std::vector<int64_t>{info.itemsize}
+      : std::vector<int64_t>{channels * info.itemsize, info.itemsize};
+  for (int i = 1; i < expectedRank; ++i) {
+    const int64_t expectedStride = expectedInnerStrides[i - 1];
+    if (info.strides[i] != expectedStride) {
       throw std::runtime_error(
           fmt::format(
               "{} has incorrect stride at dimension {}. Expected {} bytes but got {}",
               name,
               i,
-              expectedStrideInBytes,
+              expectedStride,
               info.strides[i]));
     }
   }
