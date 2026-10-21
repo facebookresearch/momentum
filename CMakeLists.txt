@@ -82,6 +82,7 @@ endif()
 mt_option(MOMENTUM_BUILD_IO_USD "Build USD I/O support" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
 mt_option(MOMENTUM_BUILD_TORCH_EXTENSIONS "Build PyMomentum modules that link against the PyTorch C++ API" ON)
+mt_option(MOMENTUM_BUILD_CUDA_RASTERIZER "Build the CUDA rasterizer and PyMomentum binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
 mt_option(MOMENTUM_BUILD_EXAMPLES "Enable building examples" OFF)
 mt_option(MOMENTUM_BUILD_RERUN "Build native Rerun C++ visualization support" ON)
@@ -108,6 +109,22 @@ if(MOMENTUM_INSTALL_EXAMPLES AND NOT MOMENTUM_BUILD_EXAMPLES)
 endif()
 
 mt_print_options()
+
+if(MOMENTUM_BUILD_CUDA_RASTERIZER)
+  if(CMAKE_VERSION VERSION_LESS 3.18)
+    message(FATAL_ERROR "MOMENTUM_BUILD_CUDA_RASTERIZER requires CMake 3.18 or newer")
+  endif()
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    message(FATAL_ERROR "Set CMAKE_CUDA_ARCHITECTURES when enabling MOMENTUM_BUILD_CUDA_RASTERIZER")
+  endif()
+  include(CheckLanguage)
+  check_language(CUDA)
+  if(NOT CMAKE_CUDA_COMPILER)
+    message(FATAL_ERROR "MOMENTUM_BUILD_CUDA_RASTERIZER requires a CUDA compiler")
+  endif()
+  enable_language(CUDA)
+  find_package(CUDAToolkit REQUIRED)
+endif()
 
 #===============================================================================
 # Find dependencies
@@ -763,6 +780,27 @@ mt_library(
     Microsoft.GSL::GSL
 )
 
+if(MOMENTUM_BUILD_CUDA_RASTERIZER)
+  mt_library(
+    NAME rasterizer_cuda
+    HEADERS_VARS
+      rasterizer_cuda_public_headers
+    PRIVATE_HEADERS_VARS
+      rasterizer_cuda_private_headers
+    SOURCES_VARS
+      rasterizer_cuda_sources
+    PUBLIC_LINK_LIBRARIES
+      camera
+      common
+      CUDA::cudart
+      Eigen3::Eigen
+  )
+  set_target_properties(rasterizer_cuda PROPERTIES
+    CUDA_STANDARD 17
+    CUDA_STANDARD_REQUIRED ON
+  )
+endif()
+
 if(MOMENTUM_BUILD_RERUN)
   mt_library(
     NAME rerun_eigen_adapters
@@ -1084,6 +1122,16 @@ if(MOMENTUM_BUILD_TESTING)
       rasterizer
       axel
   )
+
+  if(MOMENTUM_BUILD_CUDA_RASTERIZER)
+    mt_test(
+      NAME rasterizer_cuda_test
+      SOURCES_VARS rasterizer_cuda_test_sources
+      LINK_LIBRARIES
+        rasterizer
+        rasterizer_cuda
+    )
+  endif()
 
   mt_test(
     NAME glove_utils_test
