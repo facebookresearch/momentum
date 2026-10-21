@@ -957,6 +957,23 @@ refine_motion_sources = [
     "examples/refine_motion/refine_motion.cpp",
 ]
 
+rasterizer_cuda_private_headers = [
+    "rasterizer/cuda_rasterizer_kernels.cuh",
+]
+
+rasterizer_cuda_public_headers = [
+    "rasterizer/cuda_rasterizer.h",
+]
+
+rasterizer_cuda_sources = [
+    "rasterizer/cuda_rasterizer.cpp",
+    "rasterizer/cuda_rasterizer.cu",
+]
+
+rasterizer_cuda_test_sources = [
+    "test/rasterizer/test_cuda_rasterizer.cpp",
+]
+
 rasterizer_public_headers = [
     "rasterizer/geometry.h",
     "rasterizer/fwd.h",
