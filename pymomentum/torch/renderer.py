@@ -15,6 +15,7 @@ import numpy.typing as npt
 import pymomentum.camera as pym_camera  # @manual=:camera
 import pymomentum.renderer as pym_renderer  # @manual=:renderer
 import torch
+from pymomentum.torch.character import Character
 
 # Keep Torch outputs compatible with the CPU rasterizer's 64-byte SIMD rows.
 _BUFFER_ALIGNMENT = 16
@@ -435,3 +436,139 @@ def rasterize_mesh(  # noqa: C901
         depth_offset=depth_offset,
     )
     return depth, triangle_index
+
+
+def _validate_character_inputs(
+    character: Character, model_parameters: torch.Tensor
+) -> None:
+    if model_parameters.ndim not in (1, 2):
+        raise RuntimeError(
+            "model_parameters must have shape (n_parameters,) or (batch, n_parameters)"
+        )
+    if model_parameters.ndim == 2 and model_parameters.shape[0] == 0:
+        raise RuntimeError("model_parameters batch must be non-empty")
+    if model_parameters.dtype != torch.float32:
+        raise RuntimeError("model_parameters must have dtype torch.float32")
+    for attribute, description in (
+        ("parameter_transform", "parameter transform"),
+        ("skeleton", "skeleton"),
+        ("mesh", "rest mesh"),
+        ("linear_blend_skinning", "skinning information"),
+    ):
+        if not hasattr(character, attribute):
+            raise RuntimeError(f"Character has no {description}")
+    if model_parameters.shape[-1] != len(character.parameter_transform.parameter_names):
+        raise RuntimeError("model_parameters has the wrong number of parameters")
+    if cast(torch.Tensor, character.mesh.faces).device != model_parameters.device:
+        raise RuntimeError("Character and model_parameters must be on the same device")
+
+
+def _character_rest_vertices(
+    character: Character,
+    model_parameters: torch.Tensor,
+    rest_vertex_positions: torch.Tensor | None,
+) -> torch.Tensor:
+    if rest_vertex_positions is None:
+        if hasattr(character, "blend_shape") or hasattr(
+            character, "face_expression_blend_shape"
+        ):
+            raise RuntimeError(
+                "Character has blend shapes; pass fully shaped rest_vertex_positions "
+                "explicitly so shape parameters are not ignored"
+            )
+        rest_vertex_positions = cast(torch.Tensor, character.mesh.rest_vertices)
+
+    if rest_vertex_positions.dtype != torch.float32:
+        raise RuntimeError("rest_vertex_positions must have dtype torch.float32")
+    if rest_vertex_positions.device != model_parameters.device:
+        raise RuntimeError(
+            "rest_vertex_positions and model_parameters must be on the same device"
+        )
+    if rest_vertex_positions.ndim not in (2, 3) or rest_vertex_positions.shape[-1] != 3:
+        raise RuntimeError(
+            "rest_vertex_positions must have shape (n_vertices, 3) or "
+            "(batch, n_vertices, 3)"
+        )
+    expected_batch_size = 1 if model_parameters.ndim == 1 else model_parameters.shape[0]
+    if (
+        rest_vertex_positions.ndim == 3
+        and rest_vertex_positions.shape[0] != expected_batch_size
+    ):
+        raise RuntimeError("rest_vertex_positions batch must match model_parameters")
+    return rest_vertex_positions
+
+
+@torch.no_grad()
+def rasterize_character(
+    character: Character,
+    model_parameters: torch.Tensor,
+    camera: pym_camera.Camera,
+    *,
+    backend: str = "auto",
+    rest_vertex_positions: torch.Tensor | None = None,
+    z_buffer: torch.Tensor | None = None,
+    triangle_index_buffer: torch.Tensor | None = None,
+    vertex_index_buffer: torch.Tensor | None = None,
+    surface_normals_buffer: torch.Tensor | None = None,
+    model_matrix: npt.NDArray[np.float32] | None = None,
+    back_face_culling: bool = True,
+    near_clip: float = 0.1,
+    depth_offset: float = 0.0,
+) -> tuple[torch.Tensor, torch.Tensor | None]:
+    """Pose, skin, and rasterize a :class:`pymomentum.torch.character.Character`.
+
+    Model parameters may describe one pose or a batch of poses. Forward
+    kinematics and skinning use the requested backend; ``"auto"`` selects the
+    Triton implementations for compatible CUDA float32 tensors. Rasterization
+    is non-differentiable, so this function does not construct an autograd graph.
+
+    :param character: Torch character containing the skeleton, mesh, parameter transform, and skinning data.
+    :param model_parameters: Float32 tensor with shape ``(n_parameters,)`` or ``(batch, n_parameters)``.
+    :param camera: Camera shared by every pose.
+    :param backend: Forward-kinematics and skinning backend, normally ``"auto"``, ``"torch"``, or ``"triton"``.
+    :param rest_vertex_positions: Optional fully shaped float32 rest vertices with shape ``(n_vertices, 3)`` or ``(batch, n_vertices, 3)``. Required for characters with body or face blend shapes.
+    :param z_buffer: Optional padded depth buffer to update in place.
+    :param triangle_index_buffer: Optional padded triangle-index output buffer.
+    :param vertex_index_buffer: Optional padded closest-vertex output buffer.
+    :param surface_normals_buffer: Optional padded eye-space surface-normal output buffer.
+    :param model_matrix: Optional host-side float32 model transformation matrix shared across the batch.
+    :param back_face_culling: Whether to discard back-facing triangles.
+    :param near_clip: Per-pixel near clipping distance.
+    :param depth_offset: Value added to rasterized depth before depth testing.
+    :return: Depth and the caller-provided triangle-index tensor, or ``None`` when triangle indices were not requested.
+    """
+    _validate_character_inputs(character, model_parameters)
+    unbatched = model_parameters.ndim == 1
+    batched_parameters = (
+        model_parameters.unsqueeze(0) if unbatched else model_parameters
+    )
+    rest_vertices = _character_rest_vertices(
+        character, model_parameters, rest_vertex_positions
+    )
+
+    skeleton_state = character.model_parameters_to_skeleton_state(
+        batched_parameters,
+        use_double_precision=False,
+        backend=backend,
+    )
+    vertices = character.skin_points(
+        skeleton_state,
+        rest_vertices,
+        backend=backend,
+    ).contiguous()
+    if unbatched:
+        vertices = vertices[0]
+
+    return rasterize_mesh(
+        vertices,
+        cast(torch.Tensor, character.mesh.faces),
+        camera,
+        z_buffer=z_buffer,
+        triangle_index_buffer=triangle_index_buffer,
+        vertex_index_buffer=vertex_index_buffer,
+        surface_normals_buffer=surface_normals_buffer,
+        model_matrix=model_matrix,
+        back_face_culling=back_face_culling,
+        near_clip=near_clip,
+        depth_offset=depth_offset,
+    )
