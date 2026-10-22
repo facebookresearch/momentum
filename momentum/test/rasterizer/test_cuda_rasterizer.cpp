@@ -165,7 +165,6 @@ CudaRenderResult renderCuda(
 
   DeviceBuffer<float> positions(static_cast<size_t>(mesh.positions.size()));
   DeviceBuffer<int32_t> triangles(static_cast<size_t>(mesh.triangles.size()));
-  DeviceBuffer<uint64_t> visibility(bufferSize);
   DeviceBuffer<float> depth(bufferSize);
   DeviceBuffer<int32_t> triangleIndex(bufferSize);
   positions.copyFromHost(mesh.positions.data());
@@ -186,8 +185,6 @@ CudaRenderResult renderCuda(
       modelMatrix,
       0.1f,
       CudaRasterizerBuffers{
-          .visibilityBuffer = visibility.data(),
-          .visibilityBufferSize = bufferSize,
           .zBuffer = depth.data(),
           .zBufferSize = bufferSize,
           .triangleIndexBuffer = triangleIndex.data(),
@@ -203,6 +200,155 @@ CudaRenderResult renderCuda(
       .triangleIndex = triangleIndex.copyToHost(),
       .rowStride = rowStride,
   };
+}
+
+struct CudaAttributeRenderResult {
+  std::vector<float> depth;
+  std::vector<int32_t> triangleIndex;
+  std::vector<int32_t> vertexIndex;
+  std::vector<float> surfaceNormals;
+  int64_t rowStride = 0;
+};
+
+CudaAttributeRenderResult renderCudaAttributes(
+    const MeshInputs& mesh,
+    const Eigen::VectorXf* normals,
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix = Eigen::Matrix4f::Identity()) {
+  const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
+  const size_t bufferSize = static_cast<size_t>(camera.imageHeight()) * rowStride;
+  std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
+  std::vector<int32_t> initialIndex(bufferSize, -1);
+  std::vector<float> initialNormals(3 * bufferSize, 0.0f);
+
+  DeviceBuffer<float> positions(static_cast<size_t>(mesh.positions.size()));
+  DeviceBuffer<int32_t> triangles(static_cast<size_t>(mesh.triangles.size()));
+  std::unique_ptr<DeviceBuffer<float>> deviceNormals;
+  if (normals != nullptr) {
+    deviceNormals = std::make_unique<DeviceBuffer<float>>(static_cast<size_t>(normals->size()));
+    deviceNormals->copyFromHost(normals->data());
+  }
+  DeviceBuffer<float> depth(bufferSize);
+  DeviceBuffer<int32_t> triangleIndex(bufferSize);
+  DeviceBuffer<int32_t> vertexIndex(bufferSize);
+  DeviceBuffer<float> surfaceNormals(3 * bufferSize);
+  positions.copyFromHost(mesh.positions.data());
+  triangles.copyFromHost(mesh.triangles.data());
+  depth.copyFromHost(initialDepth.data());
+  triangleIndex.copyFromHost(initialIndex.data());
+  vertexIndex.copyFromHost(initialIndex.data());
+  surfaceNormals.copyFromHost(initialNormals.data());
+
+  rasterizeMeshCuda(
+      CudaRasterizerInputs{
+          .positionsModel = positions.data(),
+          .positionsModelSize = static_cast<size_t>(mesh.positions.size()),
+          .normalsModel = deviceNormals ? deviceNormals->data() : nullptr,
+          .normalsModelSize = normals == nullptr ? 0 : static_cast<size_t>(normals->size()),
+          .numVertices = static_cast<size_t>(mesh.positions.size() / 3),
+          .triangles = triangles.data(),
+          .trianglesSize = static_cast<size_t>(mesh.triangles.size()),
+          .numTriangles = static_cast<size_t>(mesh.triangles.size() / 3),
+      },
+      camera,
+      modelMatrix,
+      0.1f,
+      CudaRasterizerBuffers{
+          .zBuffer = depth.data(),
+          .zBufferSize = bufferSize,
+          .triangleIndexBuffer = triangleIndex.data(),
+          .triangleIndexBufferSize = bufferSize,
+          .vertexIndexBuffer = vertexIndex.data(),
+          .vertexIndexBufferSize = bufferSize,
+          .surfaceNormalsBuffer = surfaceNormals.data(),
+          .surfaceNormalsBufferSize = 3 * bufferSize,
+          .rowStride = rowStride,
+      });
+  throwIfCudaError(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+
+  return {
+      .depth = depth.copyToHost(),
+      .triangleIndex = triangleIndex.copyToHost(),
+      .vertexIndex = vertexIndex.copyToHost(),
+      .surfaceNormals = surfaceNormals.copyToHost(),
+      .rowStride = rowStride,
+  };
+}
+
+TEST(CudaRasterizerTest, WritesVertexIndicesAndInverseTransposeSurfaceNormals) {
+  MeshInputs mesh;
+  mesh.positions.resize(9);
+  mesh.positions << -0.4f, -0.4f, 1.7f, -0.4f, 0.4f, 2.2f, 0.4f, -0.4f, 2.8f;
+  mesh.triangles.resize(3);
+  mesh.triangles << 0, 1, 2;
+  Eigen::VectorXf normals(9);
+  const Eigen::Vector3f normalModel = Eigen::Vector3f(1.0f, 2.0f, 3.0f).normalized();
+  for (int32_t vertex = 0; vertex < 3; ++vertex) {
+    normals.segment<3>(3 * vertex) = normalModel;
+  }
+
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(64, 48, 40.0f, 38.0f, 32.0f, 24.0f));
+  Eigen::Matrix4f modelMatrix = Eigen::Matrix4f::Identity();
+  modelMatrix(0, 0) = 1.5f;
+  modelMatrix(1, 1) = 0.75f;
+  modelMatrix(2, 2) = 1.2f;
+  modelMatrix(0, 1) = 0.2f;
+  const Eigen::Vector3f expectedNormal =
+      (modelMatrix.topLeftCorner<3, 3>().inverse().transpose() * normalModel).normalized();
+
+  const CudaAttributeRenderResult result =
+      renderCudaAttributes(mesh, &normals, camera, modelMatrix);
+  int32_t coveredPixels = 0;
+  for (int32_t y = 0; y < camera.imageHeight(); ++y) {
+    for (int32_t x = 0; x < camera.imageWidth(); ++x) {
+      const size_t offset = static_cast<size_t>(y * result.rowStride + x);
+      if (!std::isfinite(result.depth[offset])) {
+        continue;
+      }
+      ++coveredPixels;
+      EXPECT_EQ(result.triangleIndex[offset], 0);
+      EXPECT_GE(result.vertexIndex[offset], 0);
+      EXPECT_LT(result.vertexIndex[offset], 3);
+      EXPECT_NEAR(result.surfaceNormals[3 * offset], expectedNormal.x(), 1e-5f);
+      EXPECT_NEAR(result.surfaceNormals[3 * offset + 1], expectedNormal.y(), 1e-5f);
+      EXPECT_NEAR(result.surfaceNormals[3 * offset + 2], expectedNormal.z(), 1e-5f);
+    }
+  }
+  EXPECT_GT(coveredPixels, 0);
+}
+
+TEST(CudaRasterizerTest, SingularNormalTransformAndZeroNormalsStayFinite) {
+  MeshInputs mesh;
+  mesh.positions.resize(9);
+  mesh.positions << -0.4f, -0.4f, 1.7f, -0.4f, 0.4f, 2.2f, 0.4f, -0.4f, 2.8f;
+  mesh.triangles.resize(3);
+  mesh.triangles << 0, 1, 2;
+  const Eigen::VectorXf normals = Eigen::VectorXf::Zero(9);
+
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(64, 48, 40.0f, 38.0f, 32.0f, 24.0f));
+  Eigen::Matrix4f modelMatrix = Eigen::Matrix4f::Identity();
+  modelMatrix(2, 2) = 0.0f;
+  modelMatrix(2, 3) = 2.0f;
+
+  const CudaAttributeRenderResult result =
+      renderCudaAttributes(mesh, &normals, camera, modelMatrix);
+  int32_t coveredPixels = 0;
+  for (int32_t y = 0; y < camera.imageHeight(); ++y) {
+    for (int32_t x = 0; x < camera.imageWidth(); ++x) {
+      const size_t offset = static_cast<size_t>(y * result.rowStride + x);
+      if (!std::isfinite(result.depth[offset])) {
+        continue;
+      }
+      ++coveredPixels;
+      EXPECT_TRUE(std::isfinite(result.surfaceNormals[3 * offset]));
+      EXPECT_TRUE(std::isfinite(result.surfaceNormals[3 * offset + 1]));
+      EXPECT_TRUE(std::isfinite(result.surfaceNormals[3 * offset + 2]));
+      EXPECT_FLOAT_EQ(result.surfaceNormals[3 * offset], 0.0f);
+      EXPECT_FLOAT_EQ(result.surfaceNormals[3 * offset + 1], 0.0f);
+      EXPECT_FLOAT_EQ(result.surfaceNormals[3 * offset + 2], 0.0f);
+    }
+  }
+  EXPECT_GT(coveredPixels, 0);
 }
 
 TEST(CudaRasterizerTest, DepthAndTriangleIdsMatchCpuForSupportedCameras) {
@@ -238,7 +384,6 @@ TEST(CudaRasterizerTest, DepthAndTriangleIdsMatchCpuForSupportedCameras) {
     bool sawTriangle0 = false;
     bool sawTriangle1 = false;
     int32_t coverageDifferences = 0;
-    int32_t triangleDifferences = 0;
     for (int32_t y = 0; y < camera.imageHeight(); ++y) {
       for (int32_t x = 0; x < camera.imageWidth(); ++x) {
         const size_t offset = static_cast<size_t>(y * gpu.rowStride + x);
@@ -251,11 +396,8 @@ TEST(CudaRasterizerTest, DepthAndTriangleIdsMatchCpuForSupportedCameras) {
         }
         coverageDifferences += cpuCovered != gpuCovered;
         if (cpuCovered && gpuCovered) {
-          const bool sameTriangle = cpuTriangleIndex(y, x) == gpu.triangleIndex[offset];
-          triangleDifferences += !sameTriangle;
-          if (sameTriangle) {
-            EXPECT_NEAR(cpuDepth(y, x), gpu.depth[offset], 2e-4f);
-          }
+          EXPECT_NEAR(cpuDepth(y, x), gpu.depth[offset], 2e-4f);
+          EXPECT_EQ(gpu.triangleIndex[offset], cpuTriangleIndex(y, x));
         }
       }
     }
@@ -264,11 +406,10 @@ TEST(CudaRasterizerTest, DepthAndTriangleIdsMatchCpuForSupportedCameras) {
     EXPECT_TRUE(sawTriangle0);
     EXPECT_TRUE(sawTriangle1);
     EXPECT_LE(coverageDifferences, 4);
-    EXPECT_LE(triangleDifferences, 4);
   }
 }
 
-TEST(CudaRasterizerTest, BatchedRenderingMatchesIndependentRenders) {
+TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid) {
   const MeshInputs firstMesh = makeOverlappingTriangles();
   MeshInputs secondMesh = firstMesh;
   for (Eigen::Index index = 0; index < secondMesh.positions.size(); index += 3) {
@@ -295,7 +436,6 @@ TEST(CudaRasterizerTest, BatchedRenderingMatchesIndependentRenders) {
 
   DeviceBuffer<float> devicePositions(positions.size());
   DeviceBuffer<int32_t> deviceTriangles(static_cast<size_t>(firstMesh.triangles.size()));
-  DeviceBuffer<uint64_t> visibility(bufferSize);
   DeviceBuffer<float> depth(bufferSize);
   DeviceBuffer<int32_t> triangleIndex(bufferSize);
   devicePositions.copyFromHost(positions.data());
@@ -317,8 +457,6 @@ TEST(CudaRasterizerTest, BatchedRenderingMatchesIndependentRenders) {
       Eigen::Matrix4f::Identity(),
       0.1f,
       CudaBatchedRasterizerBuffers{
-          .visibilityBuffer = visibility.data(),
-          .visibilityBufferSize = bufferSize,
           .zBuffer = depth.data(),
           .zBufferSize = bufferSize,
           .triangleIndexBuffer = triangleIndex.data(),
@@ -337,14 +475,19 @@ TEST(CudaRasterizerTest, BatchedRenderingMatchesIndependentRenders) {
     EXPECT_EQ(
         std::vector<float>(batchDepth.begin() + begin, batchDepth.begin() + begin + imageStride),
         independent.depth);
-    EXPECT_EQ(
-        std::vector<int32_t>(
-            batchTriangleIndex.begin() + begin, batchTriangleIndex.begin() + begin + imageStride),
-        independent.triangleIndex);
+    for (size_t pixel = 0; pixel < static_cast<size_t>(imageStride); ++pixel) {
+      const int32_t batchId = batchTriangleIndex[begin + pixel];
+      if (std::isfinite(batchDepth[begin + pixel])) {
+        EXPECT_GE(batchId, 0);
+        EXPECT_LT(batchId, 2);
+      } else {
+        EXPECT_EQ(batchId, -1);
+      }
+    }
   }
 }
 
-TEST(CudaRasterizerTest, TieBreakAndNegativeDepthOffsetAreDeterministic) {
+TEST(CudaRasterizerTest, NegativeDepthOffsetAndExactDepthTiesAreSupported) {
   MeshInputs mesh;
   mesh.positions.resize(9);
   mesh.positions << -0.5f, -0.5f, 1.0f, -0.5f, 0.5f, 1.0f, 0.5f, -0.5f, 1.0f;
@@ -356,10 +499,21 @@ TEST(CudaRasterizerTest, TieBreakAndNegativeDepthOffsetAreDeterministic) {
   const CudaRenderResult second = renderCuda(mesh, camera, -1.5f);
   const size_t interior = static_cast<size_t>(20 * first.rowStride + 24);
 
-  EXPECT_EQ(first.triangleIndex[interior], 0);
+  EXPECT_TRUE(first.triangleIndex[interior] == 0 || first.triangleIndex[interior] == 1);
   EXPECT_NEAR(first.depth[interior], -0.5f, 1e-5f);
-  EXPECT_EQ(second.triangleIndex, first.triangleIndex);
-  EXPECT_EQ(second.depth, first.depth);
+  EXPECT_TRUE(second.triangleIndex[interior] == 0 || second.triangleIndex[interior] == 1);
+  EXPECT_NEAR(second.depth[interior], -0.5f, 1e-5f);
+
+  const CudaAttributeRenderResult attributes = renderCudaAttributes(mesh, nullptr, camera);
+  EXPECT_TRUE(attributes.triangleIndex[interior] == 0 || attributes.triangleIndex[interior] == 1);
+  EXPECT_GE(attributes.vertexIndex[interior], 0);
+  EXPECT_LT(attributes.vertexIndex[interior], 3);
+  const Eigen::Vector3f normal(
+      attributes.surfaceNormals[3 * interior],
+      attributes.surfaceNormals[3 * interior + 1],
+      attributes.surfaceNormals[3 * interior + 2]);
+  EXPECT_TRUE(normal.allFinite());
+  EXPECT_NEAR(normal.norm(), 1.0f, 1e-5f);
 }
 
 TEST(CudaRasterizerTest, ExistingDepthWinsAndPaddedRowsRemainUsable) {
@@ -370,8 +524,11 @@ TEST(CudaRasterizerTest, ExistingDepthWinsAndPaddedRowsRemainUsable) {
   std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
   std::vector<int32_t> initialTriangleIndex(bufferSize, -1);
   const size_t preservedPixel = static_cast<size_t>(16 * rowStride + 24);
-  initialDepth[preservedPixel] = 0.5f;
+  const size_t nanPixel = static_cast<size_t>(20 * rowStride + 31);
+  initialDepth[preservedPixel] = 0.0f;
   initialTriangleIndex[preservedPixel] = 17;
+  initialDepth[nanPixel] = std::numeric_limits<float>::quiet_NaN();
+  initialTriangleIndex[nanPixel] = 18;
 
   const CudaRenderResult result = renderCuda(
       mesh, camera, 0.0f, Eigen::Matrix4f::Identity(), &initialDepth, &initialTriangleIndex);
@@ -379,8 +536,11 @@ TEST(CudaRasterizerTest, ExistingDepthWinsAndPaddedRowsRemainUsable) {
 
   EXPECT_GT(result.rowStride, camera.imageWidth());
   EXPECT_EQ(result.triangleIndex[preservedPixel], 17);
-  EXPECT_FLOAT_EQ(result.depth[preservedPixel], 0.5f);
-  EXPECT_EQ(result.triangleIndex[rasterizedPixel], 1);
+  EXPECT_FLOAT_EQ(result.depth[preservedPixel], 0.0f);
+  EXPECT_TRUE(result.triangleIndex[nanPixel] == 0 || result.triangleIndex[nanPixel] == 1);
+  EXPECT_NEAR(result.depth[nanPixel], 1.0f, 1e-5f);
+  EXPECT_TRUE(
+      result.triangleIndex[rasterizedPixel] == 0 || result.triangleIndex[rasterizedPixel] == 1);
   EXPECT_NEAR(result.depth[rasterizedPixel], 1.0f, 1e-5f);
 }
 
@@ -413,16 +573,19 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   const Camera camera(std::make_shared<PinholeIntrinsicsModel>(63, 48, 40.0f, 38.0f, 31.5f, 24.0f));
   const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
   const size_t bufferSize = static_cast<size_t>(camera.imageHeight()) * rowStride;
-  uint64_t visibility = 0;
   float depth = 0.0f;
   int32_t triangleIndex = -1;
+  int32_t vertexIndex = -1;
+  float surfaceNormal = 0.0f;
   const CudaRasterizerBuffers validBuffers{
-      .visibilityBuffer = &visibility,
-      .visibilityBufferSize = bufferSize,
       .zBuffer = &depth,
       .zBufferSize = bufferSize,
       .triangleIndexBuffer = &triangleIndex,
       .triangleIndexBufferSize = bufferSize,
+      .vertexIndexBuffer = &vertexIndex,
+      .vertexIndexBufferSize = bufferSize,
+      .surfaceNormalsBuffer = &surfaceNormal,
+      .surfaceNormalsBufferSize = 3 * bufferSize,
       .rowStride = rowStride,
   };
   float positions[3]{};
@@ -442,9 +605,6 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   };
 
   auto buffers = validBuffers;
-  buffers.visibilityBufferSize = bufferSize - 1;
-  expectRejected(validInputs, buffers);
-  buffers = validBuffers;
   buffers.zBufferSize = bufferSize - 1;
   expectRejected(validInputs, buffers);
   buffers = validBuffers;
@@ -457,6 +617,16 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   inputs = validInputs;
   inputs.trianglesSize = 2;
   expectRejected(inputs, validBuffers);
+  inputs = validInputs;
+  inputs.normalsModel = positions;
+  inputs.normalsModelSize = 2;
+  expectRejected(inputs, validBuffers);
+  buffers = validBuffers;
+  buffers.vertexIndexBufferSize = bufferSize - 1;
+  expectRejected(validInputs, buffers);
+  buffers = validBuffers;
+  buffers.surfaceNormalsBufferSize = 3 * bufferSize - 1;
+  expectRejected(validInputs, buffers);
   buffers = validBuffers;
   buffers.rowStride = std::numeric_limits<int64_t>::max();
   expectRejected(validInputs, buffers);
@@ -473,12 +643,14 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
       .numTriangles = 1,
   };
   const CudaBatchedRasterizerBuffers validBatchedBuffers{
-      .visibilityBuffer = &visibility,
-      .visibilityBufferSize = batchedBufferSize,
       .zBuffer = &depth,
       .zBufferSize = batchedBufferSize,
       .triangleIndexBuffer = &triangleIndex,
       .triangleIndexBufferSize = batchedBufferSize,
+      .vertexIndexBuffer = &vertexIndex,
+      .vertexIndexBufferSize = batchedBufferSize,
+      .surfaceNormalsBuffer = &surfaceNormal,
+      .surfaceNormalsBufferSize = 3 * batchedBufferSize,
       .rowStride = rowStride,
       .imageStride = static_cast<int64_t>(bufferSize),
   };
@@ -491,9 +663,6 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   };
 
   auto batchedBuffers = validBatchedBuffers;
-  batchedBuffers.visibilityBufferSize = batchedBufferSize - 1;
-  expectBatchedRejected(validBatchedInputs, batchedBuffers);
-  batchedBuffers = validBatchedBuffers;
   batchedBuffers.zBufferSize = batchedBufferSize - 1;
   expectBatchedRejected(validBatchedInputs, batchedBuffers);
   batchedBuffers = validBatchedBuffers;
@@ -503,6 +672,16 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   inputs = validBatchedInputs;
   inputs.positionsModelSize = 5;
   expectBatchedRejected(inputs, validBatchedBuffers);
+  inputs = validBatchedInputs;
+  inputs.normalsModel = batchedPositions;
+  inputs.normalsModelSize = 5;
+  expectBatchedRejected(inputs, validBatchedBuffers);
+  batchedBuffers = validBatchedBuffers;
+  batchedBuffers.vertexIndexBufferSize = batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
+  batchedBuffers = validBatchedBuffers;
+  batchedBuffers.surfaceNormalsBufferSize = 3 * batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
 }
 
 } // namespace

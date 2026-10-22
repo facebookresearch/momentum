@@ -10,6 +10,8 @@
 #include "momentum/common/exception.h"
 #include "momentum/rasterizer/cuda_rasterizer_kernels.cuh"
 
+#include <Eigen/LU>
+
 #include <limits>
 
 namespace momentum::rasterizer {
@@ -74,6 +76,20 @@ detail::CudaCamera makeCudaCamera(const Camera& camera, const Eigen::Matrix4f& m
     result.worldToEye[4 * row + 3] = eyeFromWorld.translation()(row);
   }
 
+  const Eigen::Matrix3f linearToEye = eyeFromWorld.linear() * modelMatrix.topLeftCorner<3, 3>();
+  Eigen::Matrix3f normalToEye;
+  normalToEye.col(0) = linearToEye.col(1).cross(linearToEye.col(2));
+  normalToEye.col(1) = linearToEye.col(2).cross(linearToEye.col(0));
+  normalToEye.col(2) = linearToEye.col(0).cross(linearToEye.col(1));
+  if (linearToEye.determinant() < 0.0f) {
+    normalToEye = -normalToEye;
+  }
+  for (int32_t row = 0; row < 3; ++row) {
+    for (int32_t column = 0; column < 3; ++column) {
+      result.normalToEye[3 * row + column] = normalToEye(row, column);
+    }
+  }
+
   return result;
 }
 
@@ -90,6 +106,7 @@ void rasterizeMeshesCuda(
     float depthOffset,
     cudaStream_t stream) {
   const auto* positionsModel = inputs.positionsModel;
+  const auto* normalsModel = inputs.normalsModel;
   const size_t numVertices = inputs.numVertices;
   const auto* triangles = inputs.triangles;
   const size_t numTriangles = inputs.numTriangles;
@@ -112,24 +129,35 @@ void rasterizeMeshesCuda(
       batchSize - 1 > (std::numeric_limits<size_t>::max() - imageRowsSize) / imageStride,
       "CUDA rasterizer output size overflows");
   const size_t requiredBufferSize = (batchSize - 1) * imageStride + imageRowsSize;
-  MT_THROW_IF(buffers.visibilityBuffer == nullptr, "CUDA visibility buffer is null");
   MT_THROW_IF(buffers.zBuffer == nullptr, "CUDA z buffer is null");
-  MT_THROW_IF(buffers.triangleIndexBuffer == nullptr, "CUDA triangle-index buffer is null");
-  MT_THROW_IF(
-      buffers.visibilityBufferSize < requiredBufferSize,
-      "CUDA visibility buffer has {} elements; at least {} are required",
-      buffers.visibilityBufferSize,
-      requiredBufferSize);
   MT_THROW_IF(
       buffers.zBufferSize < requiredBufferSize,
       "CUDA z buffer has {} elements; at least {} are required",
       buffers.zBufferSize,
       requiredBufferSize);
   MT_THROW_IF(
-      buffers.triangleIndexBufferSize < requiredBufferSize,
+      buffers.triangleIndexBuffer != nullptr &&
+          buffers.triangleIndexBufferSize < requiredBufferSize,
       "CUDA triangle-index buffer has {} elements; at least {} are required",
       buffers.triangleIndexBufferSize,
       requiredBufferSize);
+  MT_THROW_IF(
+      buffers.vertexIndexBuffer != nullptr && buffers.vertexIndexBufferSize < requiredBufferSize,
+      "CUDA vertex-index buffer has {} elements; at least {} are required",
+      buffers.vertexIndexBufferSize,
+      requiredBufferSize);
+  MT_THROW_IF(
+      buffers.surfaceNormalsBuffer != nullptr &&
+          requiredBufferSize > std::numeric_limits<size_t>::max() / 3,
+      "CUDA surface-normal buffer size overflows");
+  const size_t requiredNormalBufferSize =
+      buffers.surfaceNormalsBuffer == nullptr ? 0 : 3 * requiredBufferSize;
+  MT_THROW_IF(
+      buffers.surfaceNormalsBuffer != nullptr &&
+          buffers.surfaceNormalsBufferSize < requiredNormalBufferSize,
+      "CUDA surface-normal buffer has {} elements; at least {} are required",
+      buffers.surfaceNormalsBufferSize,
+      requiredNormalBufferSize);
   MT_THROW_IF(
       numVertices > std::numeric_limits<size_t>::max() / 3 ||
           numTriangles > std::numeric_limits<size_t>::max() / 3,
@@ -149,6 +177,11 @@ void rasterizeMeshesCuda(
       inputs.positionsModelSize,
       requiredPositionElements);
   MT_THROW_IF(
+      normalsModel != nullptr && inputs.normalsModelSize < requiredPositionElements,
+      "CUDA normals buffer has {} elements; at least {} are required",
+      inputs.normalsModelSize,
+      requiredPositionElements);
+  MT_THROW_IF(
       inputs.trianglesSize < requiredTriangleElements,
       "CUDA triangle buffer has {} elements; at least {} are required",
       inputs.trianglesSize,
@@ -165,15 +198,6 @@ void rasterizeMeshesCuda(
   throwIfCudaError(
       cudaDeviceGetAttribute(&maxGridDimensionX, cudaDevAttrMaxGridDimX, device),
       "CUDA rasterizer grid-limit lookup");
-  const size_t numPixels = imageHeight * static_cast<size_t>(camera.imageWidth());
-  const size_t pixelBlocks = (numPixels + detail::kCudaRasterizerThreadsPerBlock - 1) /
-      detail::kCudaRasterizerThreadsPerBlock;
-  MT_THROW_IF(
-      pixelBlocks > static_cast<size_t>(maxGridDimensionX),
-      "CUDA rasterizer image requires {} pixel blocks; device {} supports at most {}",
-      pixelBlocks,
-      device,
-      maxGridDimensionX);
   MT_THROW_IF(
       numTriangles > static_cast<size_t>(maxGridDimensionX),
       "CUDA rasterizer supports at most {} triangles on device {}",
@@ -183,6 +207,7 @@ void rasterizeMeshesCuda(
   throwIfCudaError(
       detail::launchCudaRasterizeMeshes(
           positionsModel,
+          normalsModel,
           batchSize,
           numVertices,
           triangles,
@@ -193,9 +218,10 @@ void rasterizeMeshesCuda(
           backfaceCulling,
           buffers.rowStride,
           buffers.imageStride,
-          buffers.visibilityBuffer,
           buffers.zBuffer,
           buffers.triangleIndexBuffer,
+          buffers.vertexIndexBuffer,
+          buffers.surfaceNormalsBuffer,
           stream),
       "Batched CUDA rasterizer launch");
 }
@@ -222,12 +248,14 @@ void rasterizeMeshCuda(
       modelMatrix,
       nearClip,
       CudaBatchedRasterizerBuffers{
-          .visibilityBuffer = buffers.visibilityBuffer,
-          .visibilityBufferSize = buffers.visibilityBufferSize,
           .zBuffer = buffers.zBuffer,
           .zBufferSize = buffers.zBufferSize,
           .triangleIndexBuffer = buffers.triangleIndexBuffer,
           .triangleIndexBufferSize = buffers.triangleIndexBufferSize,
+          .vertexIndexBuffer = buffers.vertexIndexBuffer,
+          .vertexIndexBufferSize = buffers.vertexIndexBufferSize,
+          .surfaceNormalsBuffer = buffers.surfaceNormalsBuffer,
+          .surfaceNormalsBufferSize = buffers.surfaceNormalsBufferSize,
           .rowStride = buffers.rowStride,
           .imageStride = imageStride,
       },

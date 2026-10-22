@@ -17,7 +17,9 @@ constexpr int32_t kRasterThreadsPerBlock = 32;
 struct TriangleSetup {
   float u[3];
   float v[3];
-  float z[3];
+  float3 eye[3];
+  float3 normal[3];
+  int32_t vertexIndex[3];
   float denominator;
   int32_t minX;
   int32_t maxX;
@@ -26,18 +28,59 @@ struct TriangleSetup {
   int32_t valid;
 };
 
-__device__ uint32_t floatToOrderedUint(float value) {
-  const uint32_t bits = __float_as_uint(value);
-  return (bits & 0x80000000U) != 0U ? ~bits : bits ^ 0x80000000U;
+__device__ void atomicMinDepth(float* address, float value) {
+  auto* addressBits = reinterpret_cast<unsigned int*>(address);
+  // Caller-owned buffers may contain any prior depth, including zero.
+  unsigned int oldBits = atomicAdd(addressBits, 0U);
+  while (isnan(__uint_as_float(oldBits)) || value < __uint_as_float(oldBits)) {
+    const unsigned int assumed = oldBits;
+    oldBits = atomicCAS(addressBits, assumed, __float_as_uint(value));
+    if (oldBits == assumed) {
+      return;
+    }
+  }
 }
 
-__device__ float orderedUintToFloat(uint32_t value) {
-  const uint32_t bits = (value & 0x80000000U) != 0U ? value ^ 0x80000000U : ~value;
-  return __uint_as_float(bits);
+__device__ void atomicWriteFloat(float* address, float value) {
+  atomicExch(reinterpret_cast<unsigned int*>(address), __float_as_uint(value));
 }
 
-__device__ bool
-projectPoint(const CudaCamera& camera, const float3& pointModel, float& u, float& v, float& z) {
+__device__ float3 normalizeVector(float3 value) {
+  const float squaredLength = value.x * value.x + value.y * value.y + value.z * value.z;
+  if (!(squaredLength > 0.0f) || !isfinite(squaredLength)) {
+    return make_float3(0.0f, 0.0f, 0.0f);
+  }
+  const float inverseLength = rsqrtf(squaredLength);
+  return make_float3(value.x * inverseLength, value.y * inverseLength, value.z * inverseLength);
+}
+
+__device__ float3 subtract(float3 first, float3 second) {
+  return make_float3(first.x - second.x, first.y - second.y, first.z - second.z);
+}
+
+__device__ float3 cross(float3 first, float3 second) {
+  return make_float3(
+      first.y * second.z - first.z * second.y,
+      first.z * second.x - first.x * second.z,
+      first.x * second.y - first.y * second.x);
+}
+
+__device__ float3 transformNormal(const CudaCamera& camera, float3 normalModel) {
+  return normalizeVector(make_float3(
+      camera.normalToEye[0] * normalModel.x + camera.normalToEye[1] * normalModel.y +
+          camera.normalToEye[2] * normalModel.z,
+      camera.normalToEye[3] * normalModel.x + camera.normalToEye[4] * normalModel.y +
+          camera.normalToEye[5] * normalModel.z,
+      camera.normalToEye[6] * normalModel.x + camera.normalToEye[7] * normalModel.y +
+          camera.normalToEye[8] * normalModel.z));
+}
+
+__device__ bool projectPoint(
+    const CudaCamera& camera,
+    const float3& pointModel,
+    float& u,
+    float& v,
+    float3& pointEye) {
   const float worldXUnnormalized = camera.modelToWorld[0] * pointModel.x +
       camera.modelToWorld[1] * pointModel.y + camera.modelToWorld[2] * pointModel.z +
       camera.modelToWorld[3];
@@ -59,15 +102,16 @@ projectPoint(const CudaCamera& camera, const float3& pointModel, float& u, float
       camera.worldToEye[2] * worldZ + camera.worldToEye[3];
   const float eyeY = camera.worldToEye[4] * worldX + camera.worldToEye[5] * worldY +
       camera.worldToEye[6] * worldZ + camera.worldToEye[7];
-  z = camera.worldToEye[8] * worldX + camera.worldToEye[9] * worldY +
+  const float eyeZ = camera.worldToEye[8] * worldX + camera.worldToEye[9] * worldY +
       camera.worldToEye[10] * worldZ + camera.worldToEye[11];
+  pointEye = make_float3(eyeX, eyeY, eyeZ);
 
-  if (!(z > 0.0f) || !isfinite(z)) {
+  if (!(eyeZ > 0.0f) || !isfinite(eyeZ)) {
     return false;
   }
 
-  const float x = eyeX / z;
-  const float y = eyeY / z;
+  const float x = eyeX / eyeZ;
+  const float y = eyeY / eyeZ;
   if (camera.model == CudaCameraModel::Pinhole) {
     u = camera.fx * x + camera.cx;
     v = camera.fy * y + camera.cy;
@@ -110,30 +154,9 @@ projectPoint(const CudaCamera& camera, const float3& pointModel, float& u, float
   return isfinite(u) && isfinite(v);
 }
 
-__global__ void initializeVisibilityKernel(
-    int32_t imageWidth,
-    int32_t imageHeight,
-    int64_t rowStride,
-    int64_t imageStride,
-    const float* zBuffer,
-    uint64_t* visibilityBuffer) {
-  const int64_t pixel = static_cast<int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
-  const int64_t numPixels = static_cast<int64_t>(imageWidth) * imageHeight;
-  if (pixel >= numPixels) {
-    return;
-  }
-
-  const int64_t batchOffset = static_cast<int64_t>(blockIdx.y) * imageStride;
-  const int32_t y = static_cast<int32_t>(pixel / imageWidth);
-  const int32_t x = static_cast<int32_t>(pixel - static_cast<int64_t>(y) * imageWidth);
-  const int64_t offset = batchOffset + static_cast<int64_t>(y) * rowStride + x;
-  const float existingDepth = zBuffer[offset];
-  visibilityBuffer[offset] =
-      isnan(existingDepth) ? 0 : static_cast<uint64_t>(floatToOrderedUint(existingDepth)) << 32;
-}
-
-__global__ void rasterizeVisibilityKernel(
+__global__ void rasterizeKernel(
     const float* positionsModel,
+    const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
     size_t numTriangles,
@@ -141,13 +164,29 @@ __global__ void rasterizeVisibilityKernel(
     float nearClip,
     float depthOffset,
     bool backfaceCulling,
+    bool writeDepth,
     int64_t rowStride,
     int64_t imageStride,
-    uint64_t* visibilityBuffer) {
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer) {
   const size_t batchIndex = blockIdx.y;
   const size_t triangleIndex = blockIdx.x;
   positionsModel += 3 * batchIndex * numVertices;
-  visibilityBuffer += static_cast<int64_t>(batchIndex) * imageStride;
+  if (normalsModel != nullptr) {
+    normalsModel += 3 * batchIndex * numVertices;
+  }
+  zBuffer += static_cast<int64_t>(batchIndex) * imageStride;
+  if (triangleIndexBuffer != nullptr) {
+    triangleIndexBuffer += static_cast<int64_t>(batchIndex) * imageStride;
+  }
+  if (vertexIndexBuffer != nullptr) {
+    vertexIndexBuffer += static_cast<int64_t>(batchIndex) * imageStride;
+  }
+  if (surfaceNormalsBuffer != nullptr) {
+    surfaceNormalsBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
+  }
   if (triangleIndex >= numTriangles) {
     return;
   }
@@ -161,11 +200,33 @@ __global__ void rasterizeVisibilityKernel(
         setup.valid = 0;
         break;
       }
+      setup.vertexIndex[vertex] = vertexIndex;
       const float3 point = make_float3(
           positionsModel[3 * vertexIndex],
           positionsModel[3 * vertexIndex + 1],
           positionsModel[3 * vertexIndex + 2]);
-      setup.valid &= projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.z[vertex]);
+      setup.valid &=
+          projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.eye[vertex]);
+      if (!writeDepth) {
+        if (surfaceNormalsBuffer != nullptr && normalsModel != nullptr) {
+          setup.normal[vertex] = transformNormal(
+              camera,
+              make_float3(
+                  normalsModel[3 * vertexIndex],
+                  normalsModel[3 * vertexIndex + 1],
+                  normalsModel[3 * vertexIndex + 2]));
+        }
+      }
+    }
+
+    if (!writeDepth) {
+      if (setup.valid && surfaceNormalsBuffer != nullptr && normalsModel == nullptr) {
+        const float3 faceNormal = normalizeVector(
+            cross(subtract(setup.eye[1], setup.eye[0]), subtract(setup.eye[2], setup.eye[0])));
+        setup.normal[0] = faceNormal;
+        setup.normal[1] = faceNormal;
+        setup.normal[2] = faceNormal;
+      }
     }
 
     if (setup.valid) {
@@ -213,7 +274,7 @@ __global__ void rasterizeVisibilityKernel(
     }
 
     const float reciprocalDepth =
-        lambda0 / setup.z[0] + lambda1 / setup.z[1] + lambda2 / setup.z[2];
+        lambda0 / setup.eye[0].z + lambda1 / setup.eye[1].z + lambda2 / setup.eye[2].z;
     const float depth = 1.0f / reciprocalDepth;
     if (!(depth > nearClip) || !isfinite(depth)) {
       continue;
@@ -224,46 +285,48 @@ __global__ void rasterizeVisibilityKernel(
       continue;
     }
 
-    const uint64_t key = (static_cast<uint64_t>(floatToOrderedUint(outputDepth)) << 32) |
-        static_cast<uint32_t>(triangleIndex + 1);
-    auto* address = reinterpret_cast<unsigned long long*>(
-        visibilityBuffer + static_cast<int64_t>(y) * rowStride + x);
-    atomicMin(address, static_cast<unsigned long long>(key));
-  }
-}
+    const int64_t offset = static_cast<int64_t>(y) * rowStride + x;
+    if (writeDepth) {
+      atomicMinDepth(zBuffer + offset, outputDepth);
+    } else {
+      // Both passes execute this same runtime-parameterized kernel, so a given
+      // fragment recomputes the same depth bits. Exact matching avoids races
+      // between attributes from different triangles at nearly equal depths.
+      if (__float_as_uint(zBuffer[offset]) != __float_as_uint(outputDepth)) {
+        continue;
+      }
 
-__global__ void resolveVisibilityKernel(
-    int32_t imageWidth,
-    int32_t imageHeight,
-    int64_t rowStride,
-    int64_t imageStride,
-    const uint64_t* visibilityBuffer,
-    float* zBuffer,
-    int32_t* triangleIndexBuffer) {
-  const int64_t pixel = static_cast<int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
-  const int64_t numPixels = static_cast<int64_t>(imageWidth) * imageHeight;
-  if (pixel >= numPixels) {
-    return;
+      if (triangleIndexBuffer != nullptr) {
+        atomicExch(triangleIndexBuffer + offset, static_cast<int32_t>(triangleIndex));
+      }
+      const float bary0 = lambda0 * depth / setup.eye[0].z;
+      const float bary1 = lambda1 * depth / setup.eye[1].z;
+      const float bary2 = lambda2 * depth / setup.eye[2].z;
+      if (vertexIndexBuffer != nullptr) {
+        const int32_t vertexIndex = bary0 > bary1 && bary0 > bary2
+            ? setup.vertexIndex[0]
+            : (bary1 > bary2 ? setup.vertexIndex[1] : setup.vertexIndex[2]);
+        atomicExch(vertexIndexBuffer + offset, vertexIndex);
+      }
+      if (surfaceNormalsBuffer != nullptr) {
+        const float3 normal = normalizeVector(make_float3(
+            bary0 * setup.normal[0].x + bary1 * setup.normal[1].x + bary2 * setup.normal[2].x,
+            bary0 * setup.normal[0].y + bary1 * setup.normal[1].y + bary2 * setup.normal[2].y,
+            bary0 * setup.normal[0].z + bary1 * setup.normal[1].z + bary2 * setup.normal[2].z));
+        float* output = surfaceNormalsBuffer + 3 * offset;
+        atomicWriteFloat(output, normal.x);
+        atomicWriteFloat(output + 1, normal.y);
+        atomicWriteFloat(output + 2, normal.z);
+      }
+    }
   }
-
-  const int64_t batchOffset = static_cast<int64_t>(blockIdx.y) * imageStride;
-  const int32_t y = static_cast<int32_t>(pixel / imageWidth);
-  const int32_t x = static_cast<int32_t>(pixel - static_cast<int64_t>(y) * imageWidth);
-  const int64_t offset = batchOffset + static_cast<int64_t>(y) * rowStride + x;
-  const uint64_t key = visibilityBuffer[offset];
-  const uint32_t triangleKey = static_cast<uint32_t>(key);
-  if (triangleKey == 0) {
-    return;
-  }
-
-  zBuffer[offset] = orderedUintToFloat(static_cast<uint32_t>(key >> 32));
-  triangleIndexBuffer[offset] = static_cast<int32_t>(triangleKey - 1);
 }
 
 } // namespace
 
 cudaError_t launchCudaRasterizeMeshes(
     const float* positionsModel,
+    const float* normalsModel,
     size_t batchSize,
     size_t numVertices,
     const int32_t* triangles,
@@ -274,32 +337,42 @@ cudaError_t launchCudaRasterizeMeshes(
     bool backfaceCulling,
     int64_t rowStride,
     int64_t imageStride,
-    uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
     cudaStream_t stream) {
-  const int64_t numPixels = static_cast<int64_t>(camera.imageWidth) * camera.imageHeight;
-  const int32_t pixelBlocks = static_cast<int32_t>(
-      (numPixels + kCudaRasterizerThreadsPerBlock - 1) / kCudaRasterizerThreadsPerBlock);
-  const uint32_t batchGridSize = static_cast<uint32_t>(batchSize);
+  if (numTriangles == 0) {
+    return cudaSuccess;
+  }
 
-  initializeVisibilityKernel<<<
-      dim3(static_cast<uint32_t>(pixelBlocks), batchGridSize),
-      kCudaRasterizerThreadsPerBlock,
-      0,
-      stream>>>(
-      camera.imageWidth, camera.imageHeight, rowStride, imageStride, zBuffer, visibilityBuffer);
+  const dim3 grid(static_cast<uint32_t>(numTriangles), static_cast<uint32_t>(batchSize));
+  rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
+      positionsModel,
+      normalsModel,
+      numVertices,
+      triangles,
+      numTriangles,
+      camera,
+      nearClip,
+      depthOffset,
+      backfaceCulling,
+      true,
+      rowStride,
+      imageStride,
+      zBuffer,
+      triangleIndexBuffer,
+      vertexIndexBuffer,
+      surfaceNormalsBuffer);
   if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
     return error;
   }
 
-  if (numTriangles > 0) {
-    rasterizeVisibilityKernel<<<
-        dim3(static_cast<uint32_t>(numTriangles), batchGridSize),
-        kRasterThreadsPerBlock,
-        0,
-        stream>>>(
+  if (triangleIndexBuffer != nullptr || vertexIndexBuffer != nullptr ||
+      surfaceNormalsBuffer != nullptr) {
+    rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
         positionsModel,
+        normalsModel,
         numVertices,
         triangles,
         numTriangles,
@@ -307,31 +380,21 @@ cudaError_t launchCudaRasterizeMeshes(
         nearClip,
         depthOffset,
         backfaceCulling,
+        false,
         rowStride,
         imageStride,
-        visibilityBuffer);
-    if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
-      return error;
-    }
+        zBuffer,
+        triangleIndexBuffer,
+        vertexIndexBuffer,
+        surfaceNormalsBuffer);
+    return cudaGetLastError();
   }
-
-  resolveVisibilityKernel<<<
-      dim3(static_cast<uint32_t>(pixelBlocks), batchGridSize),
-      kCudaRasterizerThreadsPerBlock,
-      0,
-      stream>>>(
-      camera.imageWidth,
-      camera.imageHeight,
-      rowStride,
-      imageStride,
-      visibilityBuffer,
-      zBuffer,
-      triangleIndexBuffer);
-  return cudaGetLastError();
+  return cudaSuccess;
 }
 
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
+    const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
     size_t numTriangles,
@@ -340,12 +403,14 @@ cudaError_t launchCudaRasterizeMesh(
     float depthOffset,
     bool backfaceCulling,
     int64_t rowStride,
-    uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
     cudaStream_t stream) {
   return launchCudaRasterizeMeshes(
       positionsModel,
+      normalsModel,
       1,
       numVertices,
       triangles,
@@ -356,9 +421,10 @@ cudaError_t launchCudaRasterizeMesh(
       backfaceCulling,
       rowStride,
       static_cast<int64_t>(camera.imageHeight) * rowStride,
-      visibilityBuffer,
       zBuffer,
       triangleIndexBuffer,
+      vertexIndexBuffer,
+      surfaceNormalsBuffer,
       stream);
 }
 

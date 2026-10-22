@@ -37,6 +37,7 @@
 #include <utility>
 #include <vector>
 
+// NOLINTNEXTLINE(misc-unused-alias-decls)
 namespace py = pybind11;
 
 namespace pymomentum {
@@ -246,7 +247,7 @@ void rasterizeMeshes(
     const ContiguousArray<int32_t>& triangles,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
-    const pybind11::buffer& triangleIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -258,7 +259,10 @@ void rasterizeMeshes(
   const py::buffer_info positionsInfo = positions.request();
   const py::buffer_info trianglesInfo = triangles.request();
   const py::buffer_info zBufferInfo = zBuffer.request();
-  const py::buffer_info triangleIndexInfo = triangleIndexBuffer.request();
+  std::optional<py::buffer_info> triangleIndexInfo;
+  if (triangleIndexBuffer.has_value()) {
+    triangleIndexInfo = triangleIndexBuffer->request();
+  }
   MT_THROW_IF(
       positionsInfo.ndim != 3 || positionsInfo.shape[0] <= 0 || positionsInfo.shape[2] != 3,
       "positions must have shape [batch, numVertices, 3]");
@@ -267,10 +271,14 @@ void rasterizeMeshes(
       "triangles must have shape [numTriangles, 3]");
   MT_THROW_IF(
       !rasterizer_detail::isCompatibleBufferFormat(
-          zBufferInfo, py::format_descriptor<float>::format()) ||
-          !rasterizer_detail::isCompatibleBufferFormat(
-              triangleIndexInfo, py::format_descriptor<int32_t>::format()),
-      "Batched rasterizer outputs have incorrect data types");
+          zBufferInfo, py::format_descriptor<float>::format()),
+      "z_buffer has an incorrect data type");
+  if (triangleIndexInfo.has_value()) {
+    MT_THROW_IF(
+        !rasterizer_detail::isCompatibleBufferFormat(
+            *triangleIndexInfo, py::format_descriptor<int32_t>::format()),
+        "triangle_index_buffer has an incorrect data type");
+  }
 
   const int64_t batchSize = positionsInfo.shape[0];
   const int64_t imageHeight = camera.imageHeight();
@@ -283,15 +291,17 @@ void rasterizeMeshes(
       batchSize,
       imageHeight,
       imageWidth);
-  MT_THROW_IF(
-      triangleIndexInfo.ndim != 3 || triangleIndexInfo.shape != expectedOutputShape,
-      "triangle_index_buffer must have shape [{}, {}, {}]",
-      batchSize,
-      imageHeight,
-      imageWidth);
-  MT_THROW_IF(
-      zBufferInfo.strides != triangleIndexInfo.strides,
-      "Batched rasterizer outputs must have matching strides");
+  if (triangleIndexInfo.has_value()) {
+    MT_THROW_IF(
+        triangleIndexInfo->ndim != 3 || triangleIndexInfo->shape != expectedOutputShape,
+        "triangle_index_buffer must have shape [{}, {}, {}]",
+        batchSize,
+        imageHeight,
+        imageWidth);
+    MT_THROW_IF(
+        zBufferInfo.strides != triangleIndexInfo->strides,
+        "Batched rasterizer outputs must have matching strides");
+  }
 
   const int64_t rowStride = zBufferInfo.strides[1] / static_cast<int64_t>(sizeof(float));
   const int64_t imageStride = zBufferInfo.strides[0] / static_cast<int64_t>(sizeof(float));
@@ -315,28 +325,36 @@ void rasterizeMeshes(
   MT_THROW_IF(
       availableBufferBytes(zBuffer, zBufferInfo, "z_buffer") < requiredBytes,
       "z_buffer backing storage is too small");
-  MT_THROW_IF(
-      availableBufferBytes(triangleIndexBuffer, triangleIndexInfo, "triangle_index_buffer") <
-          requiredBytes,
-      "triangle_index_buffer backing storage is too small");
+  if (triangleIndexBuffer && triangleIndexInfo) {
+    const auto& indexBuffer = *triangleIndexBuffer;
+    const auto& indexInfo = *triangleIndexInfo;
+    MT_THROW_IF(
+        availableBufferBytes(indexBuffer, indexInfo, "triangle_index_buffer") < requiredBytes,
+        "triangle_index_buffer backing storage is too small");
+  }
   MT_THROW_IF(
       reinterpret_cast<uintptr_t>(zBufferInfo.ptr) % momentum::kSimdAlignment != 0 ||
-          reinterpret_cast<uintptr_t>(triangleIndexInfo.ptr) % momentum::kSimdAlignment != 0 ||
           zBufferInfo.strides[0] % momentum::kSimdAlignment != 0 ||
-          triangleIndexInfo.strides[0] % momentum::kSimdAlignment != 0 ||
-          zBufferInfo.strides[1] % momentum::kSimdAlignment != 0 ||
-          triangleIndexInfo.strides[1] % momentum::kSimdAlignment != 0,
-      "Batched rasterizer outputs must be SIMD-aligned");
+          zBufferInfo.strides[1] % momentum::kSimdAlignment != 0,
+      "z_buffer must be SIMD-aligned");
+  if (triangleIndexInfo.has_value()) {
+    MT_THROW_IF(
+        reinterpret_cast<uintptr_t>(triangleIndexInfo->ptr) % momentum::kSimdAlignment != 0 ||
+            triangleIndexInfo->strides[0] % momentum::kSimdAlignment != 0 ||
+            triangleIndexInfo->strides[1] % momentum::kSimdAlignment != 0,
+        "triangle_index_buffer must be SIMD-aligned");
+  }
 
   if (positionsInfo.ptr == nullptr || zBufferInfo.ptr == nullptr ||
-      triangleIndexInfo.ptr == nullptr ||
+      (triangleIndexInfo.has_value() && triangleIndexInfo->ptr == nullptr) ||
       (trianglesInfo.shape[0] > 0 && trianglesInfo.ptr == nullptr)) {
     MT_THROW("Batched rasterizer tensors must have storage");
   }
 
   auto* positionsData = static_cast<float*>(positionsInfo.ptr);
   auto* zBufferData = static_cast<float*>(zBufferInfo.ptr);
-  auto* triangleIndexData = static_cast<int32_t*>(triangleIndexInfo.ptr);
+  auto* triangleIndexData =
+      triangleIndexInfo.has_value() ? static_cast<int32_t*>(triangleIndexInfo->ptr) : nullptr;
   const int64_t positionStride = positionsInfo.strides[0] / static_cast<int64_t>(sizeof(float));
   const int64_t numPositionValues = positionsInfo.shape[1] * positionsInfo.shape[2];
   auto trianglesMap = bufferToEigenMap<int32_t>(trianglesInfo);
@@ -352,11 +370,18 @@ void rasterizeMeshes(
   dispenso::parallel_for(int64_t(0), batchSize, [&](int64_t frame) {
     drjit::scoped_flush_denormals flushDenorm(true);
     Eigen::Map<Eigen::VectorXf> positionsMap(
-        positionsData + frame * positionStride, numPositionValues);
-    auto depth =
-        make_mdspan<float, 2>(zBufferData + frame * imageStride, imageExtents, imageStrides);
-    auto triangleIndex = make_mdspan<int32_t, 2>(
-        triangleIndexData + frame * imageStride, imageExtents, imageStrides);
+        // @lint-ignore NULLSAFECLANG nullable-arithmetic -- Validated before releasing the GIL.
+        positionsData + frame * positionStride,
+        numPositionValues);
+    auto depth = make_mdspan<float, 2>(
+        // @lint-ignore NULLSAFECLANG nullable-arithmetic -- Validated before releasing the GIL.
+        zBufferData + frame * imageStride,
+        imageExtents,
+        imageStrides);
+    auto triangleIndex = triangleIndexData == nullptr
+        ? momentum::rasterizer::Span2i{}
+        : make_mdspan<int32_t, 2>(
+              triangleIndexData + frame * imageStride, imageExtents, imageStrides);
     momentum::rasterizer::rasterizeMesh(
         positionsMap,
         emptyFloat,
