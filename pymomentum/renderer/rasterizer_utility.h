@@ -46,11 +46,17 @@ inline bool isCompatibleBufferFormat(
   return info.itemsize == sizeof(int32_t) && actualIsSignedInt && expectedIsSignedInt;
 }
 
+/// Create a strided rasterizer span from an element pointer, extents, and element strides.
 template <typename T, size_t R>
-Span<T, R> make_mdspan(const py::buffer_info& info) {
+Span<T, R>
+make_mdspan(T* data, const std::array<index_t, R>& extents, const std::array<index_t, R>& strides) {
   using ExtentsType = Kokkos::dextents<index_t, R>;
   using MappingType = Kokkos::layout_stride::mapping<ExtentsType>;
+  return Span<T, R>(data, MappingType(ExtentsType(extents), strides));
+}
 
+template <typename T, size_t R>
+Span<T, R> make_mdspan(const py::buffer_info& info) {
   if (!isCompatibleBufferFormat(info, py::format_descriptor<T>::format())) {
     throw std::runtime_error("Incorrect scalar format in Numpy array.");
   }
@@ -71,7 +77,7 @@ Span<T, R> make_mdspan(const py::buffer_info& info) {
     strides.at(i) = info.strides.at(i) / sizeof(T);
   }
 
-  return Span<T, R>(static_cast<T*>(info.ptr), MappingType(ExtentsType(extents), strides));
+  return make_mdspan<T, R>(static_cast<T*>(info.ptr), extents, strides);
 }
 
 // make_mdspan from pybind11::buffer (calls request() internally - requires GIL)
