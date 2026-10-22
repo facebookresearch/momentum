@@ -8,8 +8,11 @@ from __future__ import annotations
 import unittest
 
 import numpy as np
+import numpy.typing as npt
 import pymomentum.camera as pym_camera  # @manual=:camera
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.renderer as pym_renderer  # @manual=:renderer
+import pymomentum.torch.character as pym_character  # @manual=:gpu_character
 import pymomentum.torch.renderer as torch_renderer  # @manual=:torch_renderer
 import torch
 
@@ -48,6 +51,25 @@ def _make_mesh() -> tuple[np.ndarray, np.ndarray]:
     )
     triangles = np.asarray([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
     return vertices, triangles
+
+
+def _make_character_inputs(
+    device: torch.device | str,
+) -> tuple[pym_character.Character, torch.Tensor, npt.NDArray[np.float32]]:
+    character = pym_character.Character(pym_test_utils.create_test_character()).to(
+        device
+    )
+    parameter_transform = character.parameter_transform.parameter_transform
+    active_parameters = torch.nonzero(parameter_transform.ne(0).any(dim=0)).flatten()
+    if active_parameters.numel() == 0:
+        raise RuntimeError("Test character has no active model parameters")
+    model_parameters = torch.zeros(
+        (2, parameter_transform.shape[1]), dtype=torch.float32, device=device
+    )
+    model_parameters[1, int(active_parameters[0])] = 0.25
+    model_matrix = np.eye(4, dtype=np.float32)
+    model_matrix[2, 3] = 5.0
+    return character, model_parameters, model_matrix
 
 
 class TestTorchRendererCpu(unittest.TestCase):
@@ -114,6 +136,73 @@ class TestTorchRendererCpu(unittest.TestCase):
         self.assertGreater(
             int(torch.count_nonzero(depth_only < torch.finfo(torch.float32).max)), 0
         )
+
+    def test_character_render_matches_fk_skinning_and_explicit_rest_shape(
+        self,
+    ) -> None:
+        character, model_parameters, model_matrix = _make_character_inputs("cpu")
+        model_parameters.requires_grad_(True)
+        skeleton_state = character.model_parameters_to_skeleton_state(
+            model_parameters,
+            use_double_precision=False,
+            backend="torch",
+        )
+        vertices = character.skin_points(
+            skeleton_state,
+            backend="torch",
+        ).contiguous()
+        self.assertFalse(torch.equal(vertices[0], vertices[1]))
+        expected_depth, _ = torch_renderer.rasterize_mesh(
+            vertices,
+            character.mesh.faces,
+            self.camera,
+            model_matrix=model_matrix,
+            back_face_culling=False,
+        )
+
+        actual_depth, triangle_ids = torch_renderer.rasterize_character(
+            character,
+            model_parameters,
+            self.camera,
+            backend="torch",
+            model_matrix=model_matrix,
+            back_face_culling=False,
+        )
+
+        self.assertIsNone(triangle_ids)
+        self.assertFalse(actual_depth.requires_grad)
+        torch.testing.assert_close(actual_depth, expected_depth)
+        covered = actual_depth < torch.finfo(torch.float32).max
+        self.assertTrue(bool(torch.all(torch.count_nonzero(covered, dim=(1, 2)) > 0)))
+
+        shaped_rest_vertices = character.mesh.rest_vertices + torch.tensor(
+            [0.35, 0.0, 0.0]
+        )
+        shaped_vertices = character.skin_points(
+            skeleton_state,
+            shaped_rest_vertices,
+            backend="torch",
+        ).contiguous()
+        expected_shaped_depth, _ = torch_renderer.rasterize_mesh(
+            shaped_vertices,
+            character.mesh.faces,
+            self.camera,
+            model_matrix=model_matrix,
+            back_face_culling=False,
+        )
+        actual_shaped_depth, _ = torch_renderer.rasterize_character(
+            character,
+            model_parameters,
+            self.camera,
+            backend="torch",
+            rest_vertex_positions=shaped_rest_vertices,
+            model_matrix=model_matrix,
+            back_face_culling=False,
+        )
+
+        torch.testing.assert_close(actual_shaped_depth, expected_shaped_depth)
+        shaped_covered = actual_shaped_depth < torch.finfo(torch.float32).max
+        self.assertGreater(int(torch.count_nonzero(covered != shaped_covered)), 0)
 
     def test_cpu_vertex_indices_and_surface_normals(self) -> None:
         vertices = torch.from_numpy(self.vertices[:3].copy())
@@ -383,6 +472,41 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
                         & (gpu_triangle_ids[gpu_covered] < 2)
                     )
                 )
+            )
+
+        def test_cuda_character_render_matches_explicit_fk_and_skinning(self) -> None:
+            character, model_parameters, model_matrix = _make_character_inputs("cuda")
+            skeleton_state = character.model_parameters_to_skeleton_state(
+                model_parameters,
+                use_double_precision=False,
+                backend="auto",
+            )
+            vertices = character.skin_points(
+                skeleton_state,
+                backend="auto",
+            ).contiguous()
+            expected_depth, _ = torch_renderer.rasterize_mesh(
+                vertices,
+                character.mesh.faces,
+                self.camera,
+                model_matrix=model_matrix,
+                back_face_culling=False,
+            )
+
+            actual_depth, triangle_ids = torch_renderer.rasterize_character(
+                character,
+                model_parameters,
+                self.camera,
+                backend="auto",
+                model_matrix=model_matrix,
+                back_face_culling=False,
+            )
+
+            self.assertIsNone(triangle_ids)
+            torch.testing.assert_close(actual_depth, expected_depth)
+            covered = actual_depth < torch.finfo(torch.float32).max
+            self.assertTrue(
+                bool(torch.all(torch.count_nonzero(covered, dim=(1, 2)) > 0))
             )
 
         def test_cuda_vertex_indices_and_surface_normals_match_cpu(self) -> None:
