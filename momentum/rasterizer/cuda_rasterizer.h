@@ -20,10 +20,13 @@ namespace momentum::rasterizer {
 /// Device inputs used by the CUDA rasterizer.
 ///
 /// Buffer sizes are element counts, not byte counts. positionsModel must contain at least
-/// 3 * numVertices floats, and triangles must contain at least 3 * numTriangles indices.
+/// 3 * numVertices floats, normalsModel must contain the same number when provided, and triangles
+/// must contain at least 3 * numTriangles indices.
 struct CudaRasterizerInputs {
   const float* positionsModel = nullptr;
   size_t positionsModelSize = 0;
+  const float* normalsModel = nullptr;
+  size_t normalsModelSize = 0;
   size_t numVertices = 0;
   const int32_t* triangles = nullptr;
   size_t trianglesSize = 0;
@@ -32,37 +35,46 @@ struct CudaRasterizerInputs {
 
 /// Device buffers used by the CUDA rasterizer.
 ///
-/// All buffers use rowStride elements per row. The corresponding size fields are element counts,
-/// not byte counts. Existing zBuffer and triangleIndexBuffer values are preserved where no new
-/// triangle wins the depth test.
+/// All scalar buffers use rowStride elements per row. surfaceNormalsBuffer, when provided, stores
+/// three interleaved floats per pixel and uses 3 * rowStride elements per row. The corresponding
+/// size fields are element counts, not byte counts. Existing output values are preserved where no
+/// new triangle wins the depth test. zBuffer must be non-null; triangle, vertex, and normal outputs
+/// are optional and written in a conditional second pass. For non-tied depth values, every
+/// requested attribute corresponds to finalized depth. Exact-depth ties are unspecified and may mix
+/// independently written attributes from tied triangles.
 struct CudaRasterizerBuffers {
-  uint64_t* visibilityBuffer = nullptr;
-  size_t visibilityBufferSize = 0;
   float* zBuffer = nullptr;
   size_t zBufferSize = 0;
   int32_t* triangleIndexBuffer = nullptr;
   size_t triangleIndexBufferSize = 0;
+  int32_t* vertexIndexBuffer = nullptr;
+  size_t vertexIndexBufferSize = 0;
+  float* surfaceNormalsBuffer = nullptr;
+  size_t surfaceNormalsBufferSize = 0;
   int64_t rowStride = 0;
 };
 
 /// Device buffers used by batched CUDA rasterization.
 ///
-/// Each image uses rowStride elements per row and imageStride elements between batch entries. The
-/// corresponding size fields are element counts, not byte counts, and must cover the final image's
-/// rows from each buffer pointer. Existing zBuffer and triangleIndexBuffer values are preserved
-/// where no new triangle wins the depth test.
+/// Each image uses rowStride scalar elements per row and imageStride scalar elements between batch
+/// entries. surfaceNormalsBuffer uses three times those strides. The corresponding size fields are
+/// element counts, not byte counts, and must cover the final image's rows from each buffer pointer.
+/// Existing output values are preserved where no new triangle wins the depth test. Optional outputs
+/// have the same exact-depth tie semantics as CudaRasterizerBuffers.
 struct CudaBatchedRasterizerBuffers {
-  uint64_t* visibilityBuffer = nullptr;
-  size_t visibilityBufferSize = 0;
   float* zBuffer = nullptr;
   size_t zBufferSize = 0;
   int32_t* triangleIndexBuffer = nullptr;
   size_t triangleIndexBufferSize = 0;
+  int32_t* vertexIndexBuffer = nullptr;
+  size_t vertexIndexBufferSize = 0;
+  float* surfaceNormalsBuffer = nullptr;
+  size_t surfaceNormalsBufferSize = 0;
   int64_t rowStride = 0;
   int64_t imageStride = 0;
 };
 
-/// Rasterize a triangle mesh into CUDA-resident depth and triangle-index buffers.
+/// Rasterize a triangle mesh into CUDA-resident output buffers.
 ///
 /// The input arrays must be contiguous CUDA buffers with shapes [numVertices, 3] and
 /// [numTriangles, 3]. The function launches work asynchronously on stream. The camera object and
@@ -73,7 +85,7 @@ struct CudaBatchedRasterizerBuffers {
 /// @param camera Camera used for projection.
 /// @param modelMatrix Additional model transform.
 /// @param nearClip Per-pixel near clipping distance; must be positive.
-/// @param buffers CUDA output and scratch buffers.
+/// @param buffers CUDA output buffers.
 /// @param backfaceCulling Whether to discard back-facing triangles.
 /// @param depthOffset Value added to depth before the depth test and write.
 /// @param stream CUDA stream used for all launches.
@@ -90,16 +102,17 @@ void rasterizeMeshCuda(
 /// Rasterize a batch of triangle meshes with shared topology and camera.
 ///
 /// inputs.positionsModel must be a contiguous CUDA buffer with shape
-/// [batchSize, inputs.numVertices, 3]. The triangle buffer, camera, and model matrix are shared by
-/// every batch entry. Work for the entire batch is launched asynchronously in three kernels on
-/// stream.
+/// [batchSize, inputs.numVertices, 3]. inputs.normalsModel must match it when provided. The
+/// triangle buffer, camera, and model matrix are shared by every batch entry. The depth pass for
+/// the entire batch uses one kernel launch; a second batched launch occurs only when an optional
+/// output is requested.
 ///
 /// @param inputs CUDA input buffers, capacities, and mesh dimensions.
 /// @param batchSize Number of meshes; must be positive and at most 65535.
 /// @param camera Camera used for every batch entry.
 /// @param modelMatrix Additional model transform shared by every batch entry.
 /// @param nearClip Per-pixel near clipping distance; must be positive.
-/// @param buffers Batched CUDA output and scratch buffers.
+/// @param buffers Batched CUDA output buffers.
 /// @param backfaceCulling Whether to discard back-facing triangles.
 /// @param depthOffset Value added to depth before the depth test and write.
 /// @param stream CUDA stream used for all launches.

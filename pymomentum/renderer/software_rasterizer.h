@@ -53,7 +53,7 @@ void rasterizeMesh(
 /// @param triangles Shared contiguous int32 triangle indices with shape [numTriangles, 3].
 /// @param camera Camera shared by every batch entry.
 /// @param zBuffer Batched depth outputs with shape [batch, height, width].
-/// @param triangleIndexBuffer Batched triangle-index outputs with the same shape.
+/// @param triangleIndexBuffer Optional batched triangle-index outputs with the same shape.
 /// @param modelMatrix Optional model matrix shared by every batch entry.
 /// @param backfaceCulling Whether to discard back-facing triangles.
 /// @param nearClip Per-pixel near clipping distance.
@@ -63,7 +63,7 @@ void rasterizeMeshes(
     const ContiguousArray<int32_t>& triangles,
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
-    const pybind11::buffer& triangleIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -75,7 +75,7 @@ void rasterizeWireframe(
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& rgbBuffer,
-    float width,
+    float thickness,
     const std::optional<Eigen::Vector3f>& color,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,

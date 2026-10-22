@@ -339,7 +339,7 @@ Notes:
 :param triangles: Shared contiguous int32 triangle indices with shape ``(n_triangles, 3)``.
 :param camera: Camera shared by every batch entry.
 :param z_buffer: Batched float32 depth buffer with shape ``(batch, height, width)``.
-:param triangle_index_buffer: Batched int32 triangle-index buffer with matching shape and strides.
+:param triangle_index_buffer: Optional batched int32 triangle-index buffer with matching shape and strides.
 :param model_matrix: Optional model transformation matrix shared by every batch entry.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
@@ -349,7 +349,7 @@ Notes:
       py::arg("triangles"),
       py::arg("camera"),
       py::arg("z_buffer"),
-      py::arg("triangle_index_buffer"),
+      py::arg("triangle_index_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
       py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
       py::arg("back_face_culling") = true,
