@@ -12,6 +12,7 @@
 #include <momentum/camera/camera.h>
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/rasterizer.h>
 #include <momentum/rasterizer/text_rasterizer.h>
 
@@ -21,6 +22,7 @@
 #include <Eigen/Core>
 
 #include <optional>
+#include <tuple>
 #include <utility>
 
 namespace py = pybind11;
@@ -580,6 +582,90 @@ has two radius values, one for the start and end of the capsule, and the ends of
       py::arg("image_offset") = std::optional<Eigen::Vector2f>{},
       py::arg("length_subdivisions") = 16,
       py::arg("radius_subdivisions") = 16);
+
+  m.def(
+      "create_sphere_mesh",
+      &momentum::rasterizer::makeSphere,
+      R"(Create the canonical triangle mesh used to rasterize spheres.
+
+:param subdivision_level: Number of recursive icosphere subdivisions.
+:return: A :class:`pymomentum.geometry.Mesh` centered at the origin with unit radius.
+)",
+      py::arg("subdivision_level") = 2);
+
+  m.def(
+      "create_arrow_mesh",
+      [](int lengthSubdivisions, int radiusSubdivisions) {
+        return momentum::rasterizer::makeArrow(
+            radiusSubdivisions, lengthSubdivisions, 0.05f, 0.2f, 0.4f, 0.6f);
+      },
+      R"(Create the canonical triangle mesh used to rasterize transform axes.
+
+The arrow points along its local positive x axis and has unit total length.
+
+:param length_subdivisions: Number of subdivisions along the arrow shaft.
+:param radius_subdivisions: Number of subdivisions around the arrow radius.
+:return: A :class:`pymomentum.geometry.Mesh` in canonical arrow coordinates.
+)",
+      py::arg("length_subdivisions") = 16,
+      py::arg("radius_subdivisions") = 16);
+
+  m.def(
+      "create_capsule_mesh",
+      [](int lengthSubdivisions,
+         int radiusSubdivisions,
+         float startRadius,
+         float endRadius,
+         float length) {
+        return momentum::rasterizer::makeCapsule(
+            radiusSubdivisions, lengthSubdivisions, startRadius, endRadius, length);
+      },
+      R"(Create the canonical triangle mesh used to rasterize capsules.
+
+The capsule extends along its local x axis with independently sized spherical ends.
+
+:param length_subdivisions: Number of subdivisions along the central body.
+:param radius_subdivisions: Number of subdivisions around the capsule radius.
+:param start_radius: Radius of the spherical cap at local x zero.
+:param end_radius: Radius of the spherical cap at the other end.
+:param length: Distance between the centers of the two spherical ends.
+:return: A :class:`pymomentum.geometry.Mesh` in capsule-local coordinates.
+)",
+      py::arg("length_subdivisions") = 16,
+      py::arg("radius_subdivisions") = 16,
+      py::arg("start_radius") = 1.0f,
+      py::arg("end_radius") = 1.0f,
+      py::arg("length") = 1.0f);
+
+  m.def(
+      "create_cylinder_mesh",
+      [](int lengthSubdivisions, int radiusSubdivisions) {
+        return momentum::rasterizer::makeCylinder(radiusSubdivisions, lengthSubdivisions);
+      },
+      R"(Create the canonical triangle mesh used to rasterize cylinders.
+
+The cylinder extends from zero to one along its local x axis and has unit radius.
+
+:param length_subdivisions: Number of subdivisions along the cylinder length.
+:param radius_subdivisions: Number of subdivisions around the cylinder radius.
+:return: A :class:`pymomentum.geometry.Mesh` in canonical cylinder coordinates.
+)",
+      py::arg("length_subdivisions") = 16,
+      py::arg("radius_subdivisions") = 16);
+
+  m.def(
+      "create_octahedron_mesh",
+      [](float radius, float midFraction) {
+        return std::get<0>(momentum::rasterizer::makeOctahedron(radius, midFraction));
+      },
+      R"(Create the canonical two-pyramid mesh used for skeleton bones.
+
+:param radius: Half-width of the shared pyramid base relative to the local x-axis length.
+:param mid_fraction: Position of the shared base along the local x axis.
+:return: A :class:`pymomentum.geometry.Mesh` extending from zero to one along x.
+)",
+      py::arg("radius") = 0.15f,
+      py::arg("mid_fraction") = 0.1f);
 
   py::enum_<SkeletonStyle>(
       m,
