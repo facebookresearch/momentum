@@ -16,12 +16,14 @@ namespace momentum::rasterizer::detail {
 
 inline constexpr int32_t kCudaRasterizerThreadsPerBlock = 256;
 
+/// Camera intrinsics models implemented by the CUDA projection path.
 enum class CudaCameraModel : int32_t {
   Pinhole,
   OpenCV,
   OpenCVFisheye,
 };
 
+/// Trivially copyable camera parameters passed to CUDA kernels.
 struct CudaCamera {
   CudaCameraModel model = CudaCameraModel::Pinhole;
   int32_t imageWidth = 0;
@@ -36,6 +38,7 @@ struct CudaCamera {
   float worldToEye[12] = {};
 };
 
+/// Launch the three CUDA kernels for one mesh.
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
     size_t numVertices,
@@ -46,6 +49,24 @@ cudaError_t launchCudaRasterizeMesh(
     float depthOffset,
     bool backfaceCulling,
     int64_t rowStride,
+    uint64_t* visibilityBuffer,
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    cudaStream_t stream);
+
+/// Launch the three CUDA kernels for a batch with shared topology and camera.
+cudaError_t launchCudaRasterizeMeshes(
+    const float* positionsModel,
+    size_t batchSize,
+    size_t numVertices,
+    const int32_t* triangles,
+    size_t numTriangles,
+    const CudaCamera& camera,
+    float nearClip,
+    float depthOffset,
+    bool backfaceCulling,
+    int64_t rowStride,
+    int64_t imageStride,
     uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer,
