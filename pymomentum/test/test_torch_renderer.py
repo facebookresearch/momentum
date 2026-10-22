@@ -60,10 +60,15 @@ class TestTorchRendererCpu(unittest.TestCase):
         triangle_ids = torch_renderer.create_index_buffer(
             self.camera, device=torch.device("cpu")
         )
+        surface_normals = torch_renderer.create_surface_normals_buffer(
+            self.camera, device="cpu"
+        )
         self.assertEqual(tuple(depth.shape), (48, 63))
         self.assertEqual(tuple(triangle_ids.shape), (48, 63))
+        self.assertEqual(tuple(surface_normals.shape), (48, 63, 3))
         self.assertEqual(depth.stride(), (64, 1))
         self.assertEqual(triangle_ids.stride(), (64, 1))
+        self.assertEqual(surface_normals.stride(), (64 * 3, 3, 1))
         self.assertEqual(depth.dtype, torch.float32)
         self.assertEqual(triangle_ids.dtype, torch.int32)
         self.assertEqual(float(depth[0, 0]), torch.finfo(torch.float32).max)
@@ -79,7 +84,7 @@ class TestTorchRendererCpu(unittest.TestCase):
         )
 
         self.assertEqual(returned_depth.data_ptr(), depth.data_ptr())
-        self.assertEqual(returned_triangle_ids.data_ptr(), triangle_ids.data_ptr())
+        self.assertIs(returned_triangle_ids, triangle_ids)
         self.assertEqual(int(triangle_ids[20, 32]), 1)
         self.assertAlmostEqual(float(depth[20, 32]), 1.0, places=5)
         self.assertEqual(int(triangle_ids[16, 24]), 17)
@@ -100,6 +105,42 @@ class TestTorchRendererCpu(unittest.TestCase):
         self.assertEqual(int(wide_triangle_ids[20, 32]), 1)
         self.assertAlmostEqual(float(wide_depth[20, 32]), 1.0, places=5)
 
+        depth_only, no_triangle_ids = torch_renderer.rasterize_mesh(
+            torch.from_numpy(self.vertices),
+            torch.from_numpy(self.triangles),
+            self.camera,
+        )
+        self.assertIsNone(no_triangle_ids)
+        self.assertGreater(
+            int(torch.count_nonzero(depth_only < torch.finfo(torch.float32).max)), 0
+        )
+
+    def test_cpu_vertex_indices_and_surface_normals(self) -> None:
+        vertices = torch.from_numpy(self.vertices[:3].copy())
+        normals = torch.tensor([[0.0, 0.0, -1.0]]).repeat(3, 1)
+        triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+        vertex_ids = torch_renderer.create_index_buffer(self.camera, device="cpu")
+        surface_normals = torch_renderer.create_surface_normals_buffer(
+            self.camera, device="cpu"
+        )
+
+        depth, _ = torch_renderer.rasterize_mesh(
+            vertices,
+            triangles,
+            self.camera,
+            vertex_normals=normals,
+            vertex_index_buffer=vertex_ids,
+            surface_normals_buffer=surface_normals,
+        )
+
+        covered = depth < torch.finfo(torch.float32).max
+        self.assertGreater(int(torch.count_nonzero(covered)), 0)
+        self.assertEqual(set(vertex_ids[covered].tolist()), {0, 1, 2})
+        torch.testing.assert_close(
+            surface_normals[covered],
+            torch.tensor([0.0, 0.0, -1.0]).expand(int(torch.count_nonzero(covered)), 3),
+        )
+
     def test_batched_cpu_matches_individual_renders(self) -> None:
         vertices = torch.from_numpy(self.vertices)
         triangles = torch.from_numpy(self.triangles)
@@ -107,21 +148,30 @@ class TestTorchRendererCpu(unittest.TestCase):
             [vertices, vertices + torch.tensor([0.1, 0.0, 0.0])]
         )
 
-        batch_depth, batch_triangle_ids = torch_renderer.rasterize_mesh(
+        batch_triangle_ids = torch_renderer.create_index_buffer(
+            self.camera, batch_size=2, device="cpu"
+        )
+        batch_depth, returned_batch_triangle_ids = torch_renderer.rasterize_mesh(
             batched_vertices,
             triangles,
             self.camera,
+            triangle_index_buffer=batch_triangle_ids,
         )
+
+        self.assertIs(returned_batch_triangle_ids, batch_triangle_ids)
 
         self.assertEqual(tuple(batch_depth.shape), (2, 48, 63))
         self.assertEqual(batch_depth.stride(), (48 * 64, 64, 1))
         self.assertEqual(batch_triangle_ids.stride(), (48 * 64, 64, 1))
         for frame in range(2):
-            depth, triangle_ids = torch_renderer.rasterize_mesh(
+            triangle_ids = torch_renderer.create_index_buffer(self.camera, device="cpu")
+            depth, returned_triangle_ids = torch_renderer.rasterize_mesh(
                 batched_vertices[frame].contiguous(),
                 triangles,
                 self.camera,
+                triangle_index_buffer=triangle_ids,
             )
+            self.assertIs(returned_triangle_ids, triangle_ids)
             torch.testing.assert_close(batch_depth[frame], depth)
             torch.testing.assert_close(batch_triangle_ids[frame], triangle_ids)
 
@@ -289,16 +339,24 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
             model_matrix[0, 3] = 0.1
             model_matrix[2, 3] = 0.3
             model_matrix[3, 0] = 0.02
-            cpu_depth, cpu_triangle_ids = torch_renderer.rasterize_mesh(
+            cpu_triangle_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cpu"
+            )
+            cpu_depth, _ = torch_renderer.rasterize_mesh(
                 torch.from_numpy(self.vertices),
                 torch.from_numpy(self.triangles),
                 self.camera,
+                triangle_index_buffer=cpu_triangle_ids,
                 model_matrix=model_matrix,
             )
-            gpu_depth, gpu_triangle_ids = torch_renderer.rasterize_mesh(
+            gpu_triangle_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cuda"
+            )
+            gpu_depth, _ = torch_renderer.rasterize_mesh(
                 torch.from_numpy(self.vertices).cuda(),
                 torch.from_numpy(self.triangles).cuda(),
                 self.camera,
+                triangle_index_buffer=gpu_triangle_ids,
                 model_matrix=model_matrix,
             )
             gpu_depth = gpu_depth.cpu()
@@ -312,41 +370,156 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
                 int(torch.count_nonzero(cpu_covered != gpu_covered)), 4
             )
             common = cpu_covered & gpu_covered
-            same_triangle = common & (cpu_triangle_ids == gpu_triangle_ids)
             torch.testing.assert_close(
-                cpu_depth[same_triangle],
-                gpu_depth[same_triangle],
+                cpu_depth[common],
+                gpu_depth[common],
                 atol=2e-4,
                 rtol=0.0,
             )
-            self.assertLessEqual(int(torch.count_nonzero(common & ~same_triangle)), 4)
+            self.assertTrue(
+                bool(
+                    torch.all(
+                        (gpu_triangle_ids[gpu_covered] >= 0)
+                        & (gpu_triangle_ids[gpu_covered] < 2)
+                    )
+                )
+            )
+
+        def test_cuda_vertex_indices_and_surface_normals_match_cpu(self) -> None:
+            vertices_cpu = torch.from_numpy(self.vertices[:3].copy())
+            triangles_cpu = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+            normals_cpu = torch.tensor([[1.0, 2.0, 3.0]], dtype=torch.float32)
+            normals_cpu = torch.nn.functional.normalize(normals_cpu, dim=1).repeat(3, 1)
+            model_matrix = np.eye(4, dtype=np.float32)
+            model_matrix[0, 0] = 1.5
+            model_matrix[1, 1] = 0.75
+            model_matrix[2, 2] = 1.2
+            model_matrix[0, 1] = 0.2
+
+            cpu_vertex_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cpu"
+            )
+            cpu_surface_normals = torch_renderer.create_surface_normals_buffer(
+                self.camera, device="cpu"
+            )
+            cpu_depth, _ = torch_renderer.rasterize_mesh(
+                vertices_cpu,
+                triangles_cpu,
+                self.camera,
+                vertex_normals=normals_cpu,
+                vertex_index_buffer=cpu_vertex_ids,
+                surface_normals_buffer=cpu_surface_normals,
+                model_matrix=model_matrix,
+            )
+
+            vertices_gpu = vertices_cpu.cuda()
+            triangles_gpu = triangles_cpu.cuda()
+            normals_gpu = normals_cpu.cuda()
+            gpu_vertex_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cuda"
+            )
+            gpu_surface_normals = torch_renderer.create_surface_normals_buffer(
+                self.camera, device="cuda"
+            )
+            gpu_depth, _ = torch_renderer.rasterize_mesh(
+                vertices_gpu,
+                triangles_gpu,
+                self.camera,
+                vertex_normals=normals_gpu,
+                vertex_index_buffer=gpu_vertex_ids,
+                surface_normals_buffer=gpu_surface_normals,
+                model_matrix=model_matrix,
+            )
+            gpu_depth = gpu_depth.cpu()
+            gpu_vertex_ids = gpu_vertex_ids.cpu()
+            gpu_surface_normals = gpu_surface_normals.cpu()
+
+            cpu_covered = cpu_depth < torch.finfo(torch.float32).max
+            gpu_covered = gpu_depth < torch.finfo(torch.float32).max
+            common = cpu_covered & gpu_covered
+            self.assertGreater(int(torch.count_nonzero(common)), 0)
+            self.assertLessEqual(
+                int(torch.count_nonzero(cpu_covered != gpu_covered)), 4
+            )
+            torch.testing.assert_close(
+                cpu_surface_normals[common],
+                gpu_surface_normals[common],
+                atol=2e-4,
+                rtol=0.0,
+            )
+            self.assertLessEqual(
+                int(
+                    torch.count_nonzero(
+                        cpu_vertex_ids[common] != gpu_vertex_ids[common]
+                    )
+                ),
+                4,
+            )
 
         def test_batched_cuda_matches_individual_renders(self) -> None:
-            vertices = torch.from_numpy(self.vertices).cuda()
-            triangles = torch.from_numpy(self.triangles).cuda()
+            vertices = torch.from_numpy(self.vertices[:3].copy()).cuda()
+            triangles = torch.from_numpy(self.triangles[:1].copy()).cuda()
+            normals = torch.tensor([[0.0, 0.0, -1.0]], device="cuda").repeat(3, 1)
             offsets = torch.tensor(
                 [[-0.1, 0.0, 0.0], [0.0, 0.0, 0.0], [0.1, 0.0, 0.0]],
                 device="cuda",
             )
             batched_vertices = vertices.unsqueeze(0) + offsets[:, None, :]
+            batched_normals = normals.unsqueeze(0).repeat(3, 1, 1)
+            batch_triangle_ids = torch_renderer.create_index_buffer(
+                self.camera, batch_size=3, device="cuda"
+            )
+            batch_vertex_ids = torch_renderer.create_index_buffer(
+                self.camera, batch_size=3, device="cuda"
+            )
+            batch_surface_normals = torch_renderer.create_surface_normals_buffer(
+                self.camera, batch_size=3, device="cuda"
+            )
 
-            batch_depth, batch_triangle_ids = torch_renderer.rasterize_mesh(
+            batch_depth, returned_batch_triangle_ids = torch_renderer.rasterize_mesh(
                 batched_vertices,
                 triangles,
                 self.camera,
+                vertex_normals=batched_normals,
+                triangle_index_buffer=batch_triangle_ids,
+                vertex_index_buffer=batch_vertex_ids,
+                surface_normals_buffer=batch_surface_normals,
             )
+
+            self.assertIs(returned_batch_triangle_ids, batch_triangle_ids)
 
             self.assertEqual(tuple(batch_depth.shape), (3, 48, 63))
             self.assertEqual(batch_depth.stride(), (48 * 64, 64, 1))
             self.assertEqual(batch_triangle_ids.stride(), (48 * 64, 64, 1))
+            self.assertEqual(
+                batch_surface_normals.stride(), (48 * 64 * 3, 64 * 3, 3, 1)
+            )
             for frame in range(3):
-                depth, triangle_ids = torch_renderer.rasterize_mesh(
+                triangle_ids = torch_renderer.create_index_buffer(
+                    self.camera, device="cuda"
+                )
+                vertex_ids = torch_renderer.create_index_buffer(
+                    self.camera, device="cuda"
+                )
+                surface_normals = torch_renderer.create_surface_normals_buffer(
+                    self.camera, device="cuda"
+                )
+                depth, returned_triangle_ids = torch_renderer.rasterize_mesh(
                     batched_vertices[frame].contiguous(),
                     triangles,
                     self.camera,
+                    vertex_normals=batched_normals[frame].contiguous(),
+                    triangle_index_buffer=triangle_ids,
+                    vertex_index_buffer=vertex_ids,
+                    surface_normals_buffer=surface_normals,
                 )
+                self.assertIs(returned_triangle_ids, triangle_ids)
                 torch.testing.assert_close(batch_depth[frame], depth)
                 torch.testing.assert_close(batch_triangle_ids[frame], triangle_ids)
+                torch.testing.assert_close(batch_vertex_ids[frame], vertex_ids)
+                torch.testing.assert_close(
+                    batch_surface_normals[frame], surface_normals
+                )
 
         def test_current_stream_preallocated_outputs_and_device_validation(
             self,
@@ -375,8 +548,8 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
             stream.synchronize()
 
             self.assertEqual(returned_depth.data_ptr(), depth.data_ptr())
-            self.assertEqual(returned_triangle_ids.data_ptr(), triangle_ids.data_ptr())
-            self.assertEqual(int(triangle_ids[20, 32]), 1)
+            self.assertIs(returned_triangle_ids, triangle_ids)
+            self.assertIn(int(triangle_ids[20, 32]), (0, 1))
             self.assertAlmostEqual(float(depth[20, 32]), 1.0, places=5)
             self.assertEqual(int(triangle_ids[16, 24]), 17)
             self.assertAlmostEqual(float(depth[16, 24]), 0.5, places=5)
@@ -423,7 +596,43 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
                     z_buffer=undersized_batch_depth,
                 )
 
-        def test_native_backend_default_outputs_are_padded(self) -> None:
+            normal_row_stride = 3 * depth.stride(0)
+            undersized_normal_storage = torch.empty(
+                self.camera.image_height * normal_row_stride - 1,
+                dtype=torch.float32,
+                device=vertices.device,
+            )
+            undersized_normals = undersized_normal_storage.as_strided(
+                (self.camera.image_height, self.camera.image_width, 3),
+                (normal_row_stride, 3, 1),
+            )
+            with self.assertRaisesRegex(RuntimeError, "backing storage"):
+                torch_renderer.rasterize_mesh(
+                    vertices,
+                    triangles,
+                    self.camera,
+                    surface_normals_buffer=undersized_normals,
+                )
+
+            normal_image_stride = 3 * image_stride
+            undersized_batch_normal_storage = torch.empty(
+                2 * normal_image_stride - 1,
+                dtype=torch.float32,
+                device=vertices.device,
+            )
+            undersized_batch_normals = undersized_batch_normal_storage.as_strided(
+                (2, self.camera.image_height, self.camera.image_width, 3),
+                (normal_image_stride, normal_row_stride, 3, 1),
+            )
+            with self.assertRaisesRegex(RuntimeError, "backing storage"):
+                torch_renderer.rasterize_mesh(
+                    torch.stack((vertices, vertices)),
+                    triangles,
+                    self.camera,
+                    surface_normals_buffer=undersized_batch_normals,
+                )
+
+        def test_native_backend_default_output_is_depth_only_and_padded(self) -> None:
             depth, triangle_ids = pym_renderer_cuda.rasterize_mesh(
                 torch.from_numpy(self.vertices).cuda(),
                 torch.from_numpy(self.triangles).cuda(),
@@ -431,9 +640,8 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
             )
 
             self.assertEqual(tuple(depth.shape), (48, 63))
-            self.assertEqual(tuple(triangle_ids.shape), (48, 63))
+            self.assertIsNone(triangle_ids)
             self.assertEqual(depth.stride(), (64, 1))
-            self.assertEqual(triangle_ids.stride(), (64, 1))
             self.assertEqual(float(depth[0, 0]), torch.finfo(torch.float32).max)
 
         def test_invalid_triangle_indices_are_ignored(self) -> None:
@@ -442,10 +650,14 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():
                 dtype=torch.int32,
                 device="cuda",
             )
-            depth, triangle_ids = torch_renderer.rasterize_mesh(
+            triangle_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cuda"
+            )
+            depth, _ = torch_renderer.rasterize_mesh(
                 torch.from_numpy(self.vertices[:3]).cuda(),
                 triangles,
                 self.camera,
+                triangle_index_buffer=triangle_ids,
             )
 
             covered = depth < torch.finfo(torch.float32).max

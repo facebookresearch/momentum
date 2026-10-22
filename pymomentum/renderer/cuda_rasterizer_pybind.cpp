@@ -56,13 +56,14 @@ size_t availableStorageElements(const at::Tensor& tensor, const char* name) {
   return storageElements - static_cast<size_t>(storageOffset);
 }
 
-void validateBatchedVertexTensor(const at::Tensor& tensor) {
-  TORCH_CHECK(tensor.is_cuda(), "vertex_positions must be a CUDA tensor");
-  TORCH_CHECK(tensor.scalar_type() == at::kFloat, "vertex_positions must have dtype Float");
+void validateBatchedVertexTensor(const at::Tensor& tensor, const char* name) {
+  TORCH_CHECK(tensor.is_cuda(), name, " must be a CUDA tensor");
+  TORCH_CHECK(tensor.scalar_type() == at::kFloat, name, " must have dtype Float");
   TORCH_CHECK(
       tensor.dim() == 3 && tensor.size(0) > 0 && tensor.size(2) == 3,
-      "vertex_positions must have shape [batch, n, 3] with a non-empty batch");
-  TORCH_CHECK(tensor.is_contiguous(), "vertex_positions must be contiguous");
+      name,
+      " must have shape [batch, n, 3] with a non-empty batch");
+  TORCH_CHECK(tensor.is_contiguous(), name, " must be contiguous");
 }
 
 size_t validateOutputTensor(
@@ -148,12 +149,101 @@ size_t validateBatchedOutputTensor(
   return availableElements;
 }
 
-std::tuple<at::Tensor, at::Tensor> rasterizeMeshCuda(
+size_t validateSurfaceNormalsTensor(
+    const at::Tensor& tensor,
+    const at::Device& device,
+    int64_t height,
+    int64_t width,
+    int64_t depthRowStride) {
+  TORCH_CHECK(tensor.device() == device, "surface_normals_buffer must be on the CUDA input device");
+  TORCH_CHECK(tensor.scalar_type() == at::kFloat, "surface_normals_buffer must have dtype Float");
+  TORCH_CHECK(
+      tensor.dim() == 3 && tensor.size(0) == height && tensor.size(1) == width &&
+          tensor.size(2) == 3,
+      "surface_normals_buffer must have shape [height, width, 3]");
+  TORCH_CHECK(
+      depthRowStride >= 0 && depthRowStride <= std::numeric_limits<int64_t>::max() / 3,
+      "surface_normals_buffer required storage size overflows");
+  TORCH_CHECK(
+      tensor.stride(2) == 1 && tensor.stride(1) == 3 && tensor.stride(0) == 3 * depthRowStride,
+      "surface_normals_buffer must use the same padded rows as z_buffer");
+  const auto rowStride = static_cast<size_t>(depthRowStride);
+  const auto imageHeight = static_cast<size_t>(height);
+  TORCH_CHECK(
+      rowStride <= std::numeric_limits<size_t>::max() / imageHeight &&
+          imageHeight * rowStride <= std::numeric_limits<size_t>::max() / 3,
+      "surface_normals_buffer required storage size overflows");
+  const size_t requiredElements = 3 * imageHeight * rowStride;
+  const size_t availableElements = availableStorageElements(tensor, "surface_normals_buffer");
+  TORCH_CHECK(
+      availableElements >= requiredElements,
+      "surface_normals_buffer backing storage has ",
+      availableElements,
+      " elements from the data pointer; at least ",
+      requiredElements,
+      " are required by its shape and strides");
+  return availableElements;
+}
+
+size_t validateBatchedSurfaceNormalsTensor(
+    const at::Tensor& tensor,
+    const at::Device& device,
+    int64_t batchSize,
+    int64_t height,
+    int64_t width,
+    int64_t depthImageStride,
+    int64_t depthRowStride) {
+  TORCH_CHECK(tensor.device() == device, "surface_normals_buffer must be on the CUDA input device");
+  TORCH_CHECK(tensor.scalar_type() == at::kFloat, "surface_normals_buffer must have dtype Float");
+  TORCH_CHECK(
+      tensor.dim() == 4 && tensor.size(0) == batchSize && tensor.size(1) == height &&
+          tensor.size(2) == width && tensor.size(3) == 3,
+      "surface_normals_buffer must have shape [batch, height, width, 3]");
+  TORCH_CHECK(
+      depthRowStride >= 0 && depthImageStride >= 0 &&
+          depthRowStride <= std::numeric_limits<int64_t>::max() / 3 &&
+          depthImageStride <= std::numeric_limits<int64_t>::max() / 3,
+      "surface_normals_buffer required storage size overflows");
+  TORCH_CHECK(
+      tensor.stride(3) == 1 && tensor.stride(2) == 3 && tensor.stride(1) == 3 * depthRowStride &&
+          tensor.stride(0) == 3 * depthImageStride,
+      "surface_normals_buffer must use the same padded images as z_buffer");
+  const auto rowStride = static_cast<size_t>(depthRowStride);
+  const auto imageStride = static_cast<size_t>(depthImageStride);
+  const auto imageHeight = static_cast<size_t>(height);
+  const auto batchCount = static_cast<size_t>(batchSize);
+  TORCH_CHECK(
+      rowStride <= std::numeric_limits<size_t>::max() / imageHeight,
+      "surface_normals_buffer required storage size overflows");
+  const size_t imageRowsSize = imageHeight * rowStride;
+  TORCH_CHECK(
+      batchCount - 1 <= (std::numeric_limits<size_t>::max() - imageRowsSize) / imageStride,
+      "surface_normals_buffer required storage size overflows");
+  const size_t requiredScalarElements = (batchCount - 1) * imageStride + imageRowsSize;
+  TORCH_CHECK(
+      requiredScalarElements <= std::numeric_limits<size_t>::max() / 3,
+      "surface_normals_buffer required storage size overflows");
+  const size_t requiredElements = 3 * requiredScalarElements;
+  const size_t availableElements = availableStorageElements(tensor, "surface_normals_buffer");
+  TORCH_CHECK(
+      availableElements >= requiredElements,
+      "surface_normals_buffer backing storage has ",
+      availableElements,
+      " elements from the data pointer; at least ",
+      requiredElements,
+      " are required by its shape and strides");
+  return availableElements;
+}
+
+std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshCuda(
     const at::Tensor& vertexPositions,
     const at::Tensor& triangles,
     const momentum::Camera& camera,
+    const std::optional<at::Tensor>& vertexNormals,
     const std::optional<at::Tensor>& zBuffer,
     const std::optional<at::Tensor>& triangleIndexBuffer,
+    const std::optional<at::Tensor>& vertexIndexBuffer,
+    const std::optional<at::Tensor>& surfaceNormalsBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -163,6 +253,15 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshCuda(
   TORCH_CHECK(
       triangles.device() == vertexPositions.device(),
       "triangles must be on the same CUDA device as vertex_positions");
+  if (vertexNormals.has_value()) {
+    validateInputTensor(*vertexNormals, "vertex_normals", at::kFloat, 3);
+    TORCH_CHECK(
+        vertexNormals->device() == vertexPositions.device(),
+        "vertex_normals must be on the same CUDA device as vertex_positions");
+    TORCH_CHECK(
+        vertexNormals->size(0) == vertexPositions.size(0),
+        "vertex_normals must match vertex_positions shape");
+  }
   TORCH_CHECK(nearClip > 0.0f, "near_clip must be positive");
 
   const int64_t height = camera.imageHeight();
@@ -172,31 +271,45 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshCuda(
   const c10::cuda::CUDAGuard deviceGuard(device);
   const cudaStream_t stream = c10::cuda::getCurrentCUDAStream(device.index()).stream();
   const auto floatOptions = vertexPositions.options().dtype(at::kFloat);
-  const auto intOptions = vertexPositions.options().dtype(at::kInt);
-  const auto visibilityOptions = vertexPositions.options().dtype(at::kLong);
 
   const int64_t paddedWidth = ((width + 7) / 8) * 8;
   at::Tensor depth = zBuffer.has_value()
       ? *zBuffer
       : at::full({height, paddedWidth}, std::numeric_limits<float>::max(), floatOptions)
             .narrow(1, 0, width);
-  at::Tensor triangleIndex = triangleIndexBuffer.has_value()
-      ? *triangleIndexBuffer
-      : at::full({height, paddedWidth}, -1, intOptions).narrow(1, 0, width);
+  std::optional<at::Tensor> triangleIndex = triangleIndexBuffer;
   const size_t depthBufferSize =
       validateOutputTensor(depth, "z_buffer", device, at::kFloat, height, width);
-  const size_t triangleIndexBufferSize =
-      validateOutputTensor(triangleIndex, "triangle_index_buffer", device, at::kInt, height, width);
-  TORCH_CHECK(
-      depth.sizes() == triangleIndex.sizes() && depth.strides() == triangleIndex.strides(),
-      "z_buffer and triangle_index_buffer must have the same shape and strides");
-
-  at::Tensor visibility = at::empty({height, depth.stride(0)}, visibilityOptions);
+  size_t triangleIndexBufferSize = 0;
+  if (triangleIndex.has_value()) {
+    triangleIndexBufferSize = validateOutputTensor(
+        *triangleIndex, "triangle_index_buffer", device, at::kInt, height, width);
+    TORCH_CHECK(
+        triangleIndex->strides() == depth.strides(),
+        "triangle_index_buffer must have the same strides as z_buffer");
+  }
+  size_t vertexIndexBufferSize = 0;
+  if (vertexIndexBuffer.has_value()) {
+    vertexIndexBufferSize = validateOutputTensor(
+        *vertexIndexBuffer, "vertex_index_buffer", device, at::kInt, height, width);
+    TORCH_CHECK(
+        vertexIndexBuffer->strides() == depth.strides(),
+        "vertex_index_buffer must have the same strides as z_buffer");
+  }
+  size_t surfaceNormalsBufferSize = 0;
+  if (surfaceNormalsBuffer.has_value()) {
+    surfaceNormalsBufferSize =
+        validateSurfaceNormalsTensor(*surfaceNormalsBuffer, device, height, width, depth.stride(0));
+  }
 
   momentum::rasterizer::rasterizeMeshCuda(
       momentum::rasterizer::CudaRasterizerInputs{
           .positionsModel = vertexPositions.const_data_ptr<float>(),
           .positionsModelSize = static_cast<size_t>(vertexPositions.numel()),
+          .normalsModel =
+              vertexNormals.has_value() ? vertexNormals->const_data_ptr<float>() : nullptr,
+          .normalsModelSize =
+              vertexNormals.has_value() ? static_cast<size_t>(vertexNormals->numel()) : 0,
           .numVertices = static_cast<size_t>(vertexPositions.size(0)),
           .triangles = triangles.const_data_ptr<int32_t>(),
           .trianglesSize = static_cast<size_t>(triangles.numel()),
@@ -206,12 +319,19 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshCuda(
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
       momentum::rasterizer::CudaRasterizerBuffers{
-          .visibilityBuffer = reinterpret_cast<uint64_t*>(visibility.mutable_data_ptr<int64_t>()),
-          .visibilityBufferSize = static_cast<size_t>(visibility.numel()),
           .zBuffer = depth.mutable_data_ptr<float>(),
           .zBufferSize = depthBufferSize,
-          .triangleIndexBuffer = triangleIndex.mutable_data_ptr<int32_t>(),
+          .triangleIndexBuffer =
+              triangleIndex.has_value() ? triangleIndex->mutable_data_ptr<int32_t>() : nullptr,
           .triangleIndexBufferSize = triangleIndexBufferSize,
+          .vertexIndexBuffer = vertexIndexBuffer.has_value()
+              ? vertexIndexBuffer->mutable_data_ptr<int32_t>()
+              : nullptr,
+          .vertexIndexBufferSize = vertexIndexBufferSize,
+          .surfaceNormalsBuffer = surfaceNormalsBuffer.has_value()
+              ? surfaceNormalsBuffer->mutable_data_ptr<float>()
+              : nullptr,
+          .surfaceNormalsBufferSize = surfaceNormalsBufferSize,
           .rowStride = depth.stride(0),
       },
       backfaceCulling,
@@ -221,21 +341,33 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshCuda(
   return {std::move(depth), std::move(triangleIndex)};
 }
 
-std::tuple<at::Tensor, at::Tensor> rasterizeMeshesCuda(
+std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshesCuda(
     const at::Tensor& vertexPositions,
     const at::Tensor& triangles,
     const momentum::Camera& camera,
+    const std::optional<at::Tensor>& vertexNormals,
     const std::optional<at::Tensor>& zBuffer,
     const std::optional<at::Tensor>& triangleIndexBuffer,
+    const std::optional<at::Tensor>& vertexIndexBuffer,
+    const std::optional<at::Tensor>& surfaceNormalsBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
     float depthOffset) {
-  validateBatchedVertexTensor(vertexPositions);
+  validateBatchedVertexTensor(vertexPositions, "vertex_positions");
   validateInputTensor(triangles, "triangles", at::kInt, 3);
   TORCH_CHECK(
       triangles.device() == vertexPositions.device(),
       "triangles must be on the same CUDA device as vertex_positions");
+  if (vertexNormals.has_value()) {
+    validateBatchedVertexTensor(*vertexNormals, "vertex_normals");
+    TORCH_CHECK(
+        vertexNormals->device() == vertexPositions.device(),
+        "vertex_normals must be on the same CUDA device as vertex_positions");
+    TORCH_CHECK(
+        vertexNormals->sizes() == vertexPositions.sizes(),
+        "vertex_normals must match vertex_positions shape");
+  }
   TORCH_CHECK(nearClip > 0.0f, "near_clip must be positive");
 
   const int64_t batchSize = vertexPositions.size(0);
@@ -247,29 +379,44 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshesCuda(
   const c10::cuda::CUDAGuard deviceGuard(device);
   const cudaStream_t stream = c10::cuda::getCurrentCUDAStream(device.index()).stream();
   const auto floatOptions = vertexPositions.options().dtype(at::kFloat);
-  const auto intOptions = vertexPositions.options().dtype(at::kInt);
-  const auto visibilityOptions = vertexPositions.options().dtype(at::kLong);
 
   at::Tensor depth = zBuffer.has_value()
       ? *zBuffer
       : at::full({batchSize, height, paddedWidth}, std::numeric_limits<float>::max(), floatOptions)
             .narrow(2, 0, width);
-  at::Tensor triangleIndex = triangleIndexBuffer.has_value()
-      ? *triangleIndexBuffer
-      : at::full({batchSize, height, paddedWidth}, -1, intOptions).narrow(2, 0, width);
+  std::optional<at::Tensor> triangleIndex = triangleIndexBuffer;
   const size_t depthBufferSize =
       validateBatchedOutputTensor(depth, "z_buffer", device, at::kFloat, batchSize, height, width);
-  const size_t triangleIndexBufferSize = validateBatchedOutputTensor(
-      triangleIndex, "triangle_index_buffer", device, at::kInt, batchSize, height, width);
-  TORCH_CHECK(
-      depth.sizes() == triangleIndex.sizes() && depth.strides() == triangleIndex.strides(),
-      "z_buffer and triangle_index_buffer must have the same shape and strides");
+  size_t triangleIndexBufferSize = 0;
+  if (triangleIndex.has_value()) {
+    triangleIndexBufferSize = validateBatchedOutputTensor(
+        *triangleIndex, "triangle_index_buffer", device, at::kInt, batchSize, height, width);
+    TORCH_CHECK(
+        triangleIndex->strides() == depth.strides(),
+        "triangle_index_buffer must have the same strides as z_buffer");
+  }
+  size_t vertexIndexBufferSize = 0;
+  if (vertexIndexBuffer.has_value()) {
+    vertexIndexBufferSize = validateBatchedOutputTensor(
+        *vertexIndexBuffer, "vertex_index_buffer", device, at::kInt, batchSize, height, width);
+    TORCH_CHECK(
+        vertexIndexBuffer->strides() == depth.strides(),
+        "vertex_index_buffer must have the same strides as z_buffer");
+  }
+  size_t surfaceNormalsBufferSize = 0;
+  if (surfaceNormalsBuffer.has_value()) {
+    surfaceNormalsBufferSize = validateBatchedSurfaceNormalsTensor(
+        *surfaceNormalsBuffer, device, batchSize, height, width, depth.stride(0), depth.stride(1));
+  }
 
-  at::Tensor visibility = at::empty({batchSize, depth.stride(0)}, visibilityOptions);
   momentum::rasterizer::rasterizeMeshesCuda(
       momentum::rasterizer::CudaRasterizerInputs{
           .positionsModel = vertexPositions.const_data_ptr<float>(),
           .positionsModelSize = static_cast<size_t>(vertexPositions.numel()),
+          .normalsModel =
+              vertexNormals.has_value() ? vertexNormals->const_data_ptr<float>() : nullptr,
+          .normalsModelSize =
+              vertexNormals.has_value() ? static_cast<size_t>(vertexNormals->numel()) : 0,
           .numVertices = static_cast<size_t>(vertexPositions.size(1)),
           .triangles = triangles.const_data_ptr<int32_t>(),
           .trianglesSize = static_cast<size_t>(triangles.numel()),
@@ -280,12 +427,19 @@ std::tuple<at::Tensor, at::Tensor> rasterizeMeshesCuda(
       modelMatrix.value_or(Eigen::Matrix4f::Identity()),
       nearClip,
       momentum::rasterizer::CudaBatchedRasterizerBuffers{
-          .visibilityBuffer = reinterpret_cast<uint64_t*>(visibility.mutable_data_ptr<int64_t>()),
-          .visibilityBufferSize = static_cast<size_t>(visibility.numel()),
           .zBuffer = depth.mutable_data_ptr<float>(),
           .zBufferSize = depthBufferSize,
-          .triangleIndexBuffer = triangleIndex.mutable_data_ptr<int32_t>(),
+          .triangleIndexBuffer =
+              triangleIndex.has_value() ? triangleIndex->mutable_data_ptr<int32_t>() : nullptr,
           .triangleIndexBufferSize = triangleIndexBufferSize,
+          .vertexIndexBuffer = vertexIndexBuffer.has_value()
+              ? vertexIndexBuffer->mutable_data_ptr<int32_t>()
+              : nullptr,
+          .vertexIndexBufferSize = vertexIndexBufferSize,
+          .surfaceNormalsBuffer = surfaceNormalsBuffer.has_value()
+              ? surfaceNormalsBuffer->mutable_data_ptr<float>()
+              : nullptr,
+          .surfaceNormalsBufferSize = surfaceNormalsBufferSize,
           .rowStride = depth.stride(1),
           .imageStride = depth.stride(0),
       },
@@ -309,27 +463,33 @@ PYBIND11_MODULE(_renderer_cuda, module) {
   module.def(
       "rasterize_mesh",
       &pymomentum::rasterizeMeshCuda,
-      R"(Rasterize a triangle mesh into CUDA-resident depth and triangle-index tensors.
+      R"(Rasterize a triangle mesh into CUDA-resident output tensors.
 
-This initial CUDA path is non-differentiable and supports depth testing plus triangle IDs. It uses the current PyTorch CUDA stream and may update caller-provided output tensors in place. Callers must establish stream ordering when inputs were produced on a different stream.
+This non-differentiable CUDA path atomically updates depth on the current PyTorch CUDA stream. It launches a second pass only when a triangle-index, vertex-index, or surface-normal output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified and may mix attributes from tied triangles. Callers must establish stream ordering when inputs were produced on a different stream.
 
 :param vertex_positions: Contiguous CUDA float32 tensor with shape ``(n_vertices, 3)``.
 :param triangles: Contiguous CUDA int32 tensor with shape ``(n_triangles, 3)``.
 :param camera: Camera used to transform and project vertices.
+:param vertex_normals: Optional contiguous CUDA float32 tensor matching ``vertex_positions``. Face normals are used when omitted.
 :param z_buffer: Optional CUDA float32 tensor with shape ``(height, width)`` and unit column stride. Existing depth values participate in the depth test.
-:param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and row stride as ``z_buffer``. Existing values are preserved where no new triangle wins.
+:param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and row stride as ``z_buffer``. No triangle-index tensor is allocated when omitted.
+:param vertex_index_buffer: Optional CUDA int32 output tensor with the same shape and strides as ``z_buffer``.
+:param surface_normals_buffer: Optional CUDA float32 output tensor with shape ``(height, width, 3)`` and matching padded rows.
 :param model_matrix: Optional model transformation matrix.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
 :param depth_offset: Value added to rasterized depth before depth testing.
-:return: Tuple containing the depth and triangle-index tensors.
+:return: Tuple containing depth and the provided triangle-index tensor, or ``None`` when omitted.
 )",
       py::arg("vertex_positions"),
       py::arg("triangles"),
       py::arg("camera"),
       py::kw_only(),
+      py::arg("vertex_normals") = std::nullopt,
       py::arg("z_buffer") = std::nullopt,
       py::arg("triangle_index_buffer") = std::nullopt,
+      py::arg("vertex_index_buffer") = std::nullopt,
+      py::arg("surface_normals_buffer") = std::nullopt,
       py::arg("model_matrix") = std::nullopt,
       py::arg("back_face_culling") = true,
       py::arg("near_clip") = 0.1f,
@@ -340,25 +500,31 @@ This initial CUDA path is non-differentiable and supports depth testing plus tri
       &pymomentum::rasterizeMeshesCuda,
       R"(Rasterize a batch of triangle meshes with shared topology and camera.
 
-This non-differentiable CUDA path renders the entire batch with three kernel launches on the current PyTorch CUDA stream. Each batch entry has independent depth and triangle-index outputs. The triangle topology, camera, and model matrix are shared across the batch.
+This non-differentiable CUDA path renders the entire batch with one depth kernel launch on the current PyTorch CUDA stream. It launches a second batched pass only when a triangle-index, vertex-index, or surface-normal output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified. The triangle topology, camera, and model matrix are shared across the batch.
 
 :param vertex_positions: Contiguous CUDA float32 tensor with shape ``(batch, n_vertices, 3)``.
 :param triangles: Contiguous CUDA int32 tensor with shape ``(n_triangles, 3)`` shared by the batch.
 :param camera: Camera shared by every batch entry.
+:param vertex_normals: Optional contiguous CUDA float32 tensor matching ``vertex_positions``. Face normals are used when omitted.
 :param z_buffer: Optional CUDA float32 tensor with shape ``(batch, height, width)`` and unit column stride. Existing depth values participate in the depth test.
-:param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and strides as ``z_buffer``.
+:param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and strides as ``z_buffer``. No tensor is allocated when omitted.
+:param vertex_index_buffer: Optional CUDA int32 output tensor with the same shape and strides as ``z_buffer``.
+:param surface_normals_buffer: Optional CUDA float32 output tensor with shape ``(batch, height, width, 3)`` and matching padded images.
 :param model_matrix: Optional model transformation matrix shared by every batch entry.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
 :param depth_offset: Value added to rasterized depth before depth testing.
-:return: Tuple containing batched depth and triangle-index tensors.
+:return: Tuple containing batched depth and the provided triangle-index tensor, or ``None`` when omitted.
 )",
       py::arg("vertex_positions"),
       py::arg("triangles"),
       py::arg("camera"),
       py::kw_only(),
+      py::arg("vertex_normals") = std::nullopt,
       py::arg("z_buffer") = std::nullopt,
       py::arg("triangle_index_buffer") = std::nullopt,
+      py::arg("vertex_index_buffer") = std::nullopt,
+      py::arg("surface_normals_buffer") = std::nullopt,
       py::arg("model_matrix") = std::nullopt,
       py::arg("back_face_culling") = true,
       py::arg("near_clip") = 0.1f,

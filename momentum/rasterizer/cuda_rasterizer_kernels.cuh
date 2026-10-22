@@ -14,8 +14,6 @@
 
 namespace momentum::rasterizer::detail {
 
-inline constexpr int32_t kCudaRasterizerThreadsPerBlock = 256;
-
 /// Camera intrinsics models implemented by the CUDA projection path.
 enum class CudaCameraModel : int32_t {
   Pinhole,
@@ -36,11 +34,13 @@ struct CudaCamera {
   float maxRSquared = 0.0f;
   float modelToWorld[16] = {};
   float worldToEye[12] = {};
+  float normalToEye[9] = {};
 };
 
-/// Launch the three CUDA kernels for one mesh.
+/// Launch the CUDA rasterization kernel for one mesh.
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
+    const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
     size_t numTriangles,
@@ -49,14 +49,16 @@ cudaError_t launchCudaRasterizeMesh(
     float depthOffset,
     bool backfaceCulling,
     int64_t rowStride,
-    uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
     cudaStream_t stream);
 
-/// Launch the three CUDA kernels for a batch with shared topology and camera.
+/// Launch the CUDA rasterization kernel for a batch with shared topology and camera.
 cudaError_t launchCudaRasterizeMeshes(
     const float* positionsModel,
+    const float* normalsModel,
     size_t batchSize,
     size_t numVertices,
     const int32_t* triangles,
@@ -67,9 +69,10 @@ cudaError_t launchCudaRasterizeMeshes(
     bool backfaceCulling,
     int64_t rowStride,
     int64_t imageStride,
-    uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
     cudaStream_t stream);
 
 } // namespace momentum::rasterizer::detail
