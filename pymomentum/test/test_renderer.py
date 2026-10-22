@@ -14,6 +14,68 @@ from numpy.typing import NDArray
 
 
 class TestRendering(unittest.TestCase):
+    def test_primitive_mesh_factories(self) -> None:
+        sphere = pym_renderer.create_sphere_mesh(subdivision_level=1)
+        sphere_vertices = np.asarray(sphere.vertices)
+        np.testing.assert_allclose(
+            np.linalg.vector_norm(sphere_vertices, axis=1), 1.0, atol=1e-6
+        )
+
+        cylinder = pym_renderer.create_cylinder_mesh(
+            length_subdivisions=8, radius_subdivisions=12
+        )
+        cylinder_vertices = np.asarray(cylinder.vertices)
+        np.testing.assert_allclose(
+            [cylinder_vertices[:, 0].min(), cylinder_vertices[:, 0].max()],
+            [0.0, 1.0],
+            atol=1e-6,
+        )
+        np.testing.assert_allclose(
+            np.linalg.vector_norm(cylinder_vertices[:, 1:], axis=1).max(),
+            1.0,
+            atol=1e-6,
+        )
+
+        capsule = pym_renderer.create_capsule_mesh(
+            length_subdivisions=8,
+            radius_subdivisions=12,
+            start_radius=0.2,
+            end_radius=0.35,
+            length=0.7,
+        )
+        capsule_vertices = np.asarray(capsule.vertices)
+        np.testing.assert_allclose(
+            [capsule_vertices[:, 0].min(), capsule_vertices[:, 0].max()],
+            [-0.2, 1.05],
+            atol=1e-6,
+        )
+
+        arrow = pym_renderer.create_arrow_mesh(
+            length_subdivisions=8, radius_subdivisions=12
+        )
+        arrow_vertices = np.asarray(arrow.vertices)
+        np.testing.assert_allclose(
+            [arrow_vertices[:, 0].min(), arrow_vertices[:, 0].max()],
+            [0.0, 1.0],
+            atol=1e-6,
+        )
+        np.testing.assert_allclose(
+            np.linalg.vector_norm(arrow_vertices[:, 1:], axis=1).max(),
+            0.2,
+            atol=1e-6,
+        )
+
+        octahedron = pym_renderer.create_octahedron_mesh(radius=0.3, mid_fraction=0.2)
+        octahedron_vertices = np.asarray(octahedron.vertices)
+        np.testing.assert_allclose(
+            [octahedron_vertices[:, 0].min(), octahedron_vertices[:, 0].max()],
+            [0.0, 1.0],
+            atol=1e-6,
+        )
+        np.testing.assert_allclose(
+            np.abs(octahedron_vertices[:, 1:]).max(), 0.3, atol=1e-6
+        )
+
     def test_lighting(self) -> None:
         """Test that directional lighting works."""
 
