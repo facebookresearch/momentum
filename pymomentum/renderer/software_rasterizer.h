@@ -47,6 +47,28 @@ void rasterizeMesh(
     float depthOffset,
     const std::optional<Eigen::Vector2f>& imageOffset);
 
+/// Rasterize a batch of meshes with shared topology and camera in parallel.
+///
+/// @param positions Contiguous float positions with shape [batch, numVertices, 3].
+/// @param triangles Shared contiguous int32 triangle indices with shape [numTriangles, 3].
+/// @param camera Camera shared by every batch entry.
+/// @param zBuffer Batched depth outputs with shape [batch, height, width].
+/// @param triangleIndexBuffer Batched triangle-index outputs with the same shape.
+/// @param modelMatrix Optional model matrix shared by every batch entry.
+/// @param backfaceCulling Whether to discard back-facing triangles.
+/// @param nearClip Per-pixel near clipping distance.
+/// @param depthOffset Value added to depth before depth testing.
+void rasterizeMeshes(
+    const ContiguousArray<float>& positions,
+    const ContiguousArray<int32_t>& triangles,
+    const momentum::Camera& camera,
+    const pybind11::buffer& zBuffer,
+    const pybind11::buffer& triangleIndexBuffer,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    bool backfaceCulling,
+    float nearClip,
+    float depthOffset);
+
 void rasterizeWireframe(
     const ContiguousArray<float>& positions,
     const ContiguousArray<int32_t>& triangles,

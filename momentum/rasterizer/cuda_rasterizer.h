@@ -45,6 +45,23 @@ struct CudaRasterizerBuffers {
   int64_t rowStride = 0;
 };
 
+/// Device buffers used by batched CUDA rasterization.
+///
+/// Each image uses rowStride elements per row and imageStride elements between batch entries. The
+/// corresponding size fields are element counts, not byte counts, and must cover the final image's
+/// rows from each buffer pointer. Existing zBuffer and triangleIndexBuffer values are preserved
+/// where no new triangle wins the depth test.
+struct CudaBatchedRasterizerBuffers {
+  uint64_t* visibilityBuffer = nullptr;
+  size_t visibilityBufferSize = 0;
+  float* zBuffer = nullptr;
+  size_t zBufferSize = 0;
+  int32_t* triangleIndexBuffer = nullptr;
+  size_t triangleIndexBufferSize = 0;
+  int64_t rowStride = 0;
+  int64_t imageStride = 0;
+};
+
 /// Rasterize a triangle mesh into CUDA-resident depth and triangle-index buffers.
 ///
 /// The input arrays must be contiguous CUDA buffers with shapes [numVertices, 3] and
@@ -66,6 +83,33 @@ void rasterizeMeshCuda(
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
     CudaRasterizerBuffers buffers,
+    bool backfaceCulling = true,
+    float depthOffset = 0.0f,
+    cudaStream_t stream = nullptr);
+
+/// Rasterize a batch of triangle meshes with shared topology and camera.
+///
+/// inputs.positionsModel must be a contiguous CUDA buffer with shape
+/// [batchSize, inputs.numVertices, 3]. The triangle buffer, camera, and model matrix are shared by
+/// every batch entry. Work for the entire batch is launched asynchronously in three kernels on
+/// stream.
+///
+/// @param inputs CUDA input buffers, capacities, and mesh dimensions.
+/// @param batchSize Number of meshes; must be positive and at most 65535.
+/// @param camera Camera used for every batch entry.
+/// @param modelMatrix Additional model transform shared by every batch entry.
+/// @param nearClip Per-pixel near clipping distance; must be positive.
+/// @param buffers Batched CUDA output and scratch buffers.
+/// @param backfaceCulling Whether to discard back-facing triangles.
+/// @param depthOffset Value added to depth before the depth test and write.
+/// @param stream CUDA stream used for all launches.
+void rasterizeMeshesCuda(
+    CudaRasterizerInputs inputs,
+    size_t batchSize,
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix,
+    float nearClip,
+    CudaBatchedRasterizerBuffers buffers,
     bool backfaceCulling = true,
     float depthOffset = 0.0f,
     cudaStream_t stream = nullptr);

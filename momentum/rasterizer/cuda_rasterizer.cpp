@@ -79,12 +79,13 @@ detail::CudaCamera makeCudaCamera(const Camera& camera, const Eigen::Matrix4f& m
 
 } // namespace
 
-void rasterizeMeshCuda(
+void rasterizeMeshesCuda(
     CudaRasterizerInputs inputs,
+    size_t batchSize,
     const Camera& camera,
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
-    CudaRasterizerBuffers buffers,
+    CudaBatchedRasterizerBuffers buffers,
     bool backfaceCulling,
     float depthOffset,
     cudaStream_t stream) {
@@ -92,19 +93,28 @@ void rasterizeMeshCuda(
   const size_t numVertices = inputs.numVertices;
   const auto* triangles = inputs.triangles;
   const size_t numTriangles = inputs.numTriangles;
+  MT_THROW_IF(batchSize == 0 || batchSize > 65535, "CUDA rasterizer batch size is out of range");
   MT_THROW_IF(nearClip <= 0.0f, "Near clip must be positive");
   MT_THROW_IF(
       camera.imageWidth() <= 0 || camera.imageHeight() <= 0, "Camera image must be non-empty");
   MT_THROW_IF(buffers.rowStride < camera.imageWidth(), "CUDA rasterizer row stride is too small");
-  MT_THROW_IF(buffers.visibilityBuffer == nullptr, "CUDA visibility buffer is null");
-  MT_THROW_IF(buffers.zBuffer == nullptr, "CUDA z buffer is null");
-  MT_THROW_IF(buffers.triangleIndexBuffer == nullptr, "CUDA triangle-index buffer is null");
   const auto imageHeight = static_cast<size_t>(camera.imageHeight());
   const auto rowStride = static_cast<size_t>(buffers.rowStride);
   MT_THROW_IF(
       rowStride > std::numeric_limits<size_t>::max() / imageHeight,
       "CUDA rasterizer output size overflows");
-  const size_t requiredBufferSize = imageHeight * rowStride;
+  const size_t imageRowsSize = imageHeight * rowStride;
+  MT_THROW_IF(
+      buffers.imageStride < 0 || static_cast<size_t>(buffers.imageStride) < imageRowsSize,
+      "CUDA rasterizer image stride is too small");
+  const auto imageStride = static_cast<size_t>(buffers.imageStride);
+  MT_THROW_IF(
+      batchSize - 1 > (std::numeric_limits<size_t>::max() - imageRowsSize) / imageStride,
+      "CUDA rasterizer output size overflows");
+  const size_t requiredBufferSize = (batchSize - 1) * imageStride + imageRowsSize;
+  MT_THROW_IF(buffers.visibilityBuffer == nullptr, "CUDA visibility buffer is null");
+  MT_THROW_IF(buffers.zBuffer == nullptr, "CUDA z buffer is null");
+  MT_THROW_IF(buffers.triangleIndexBuffer == nullptr, "CUDA triangle-index buffer is null");
   MT_THROW_IF(
       buffers.visibilityBufferSize < requiredBufferSize,
       "CUDA visibility buffer has {} elements; at least {} are required",
@@ -124,7 +134,12 @@ void rasterizeMeshCuda(
       numVertices > std::numeric_limits<size_t>::max() / 3 ||
           numTriangles > std::numeric_limits<size_t>::max() / 3,
       "CUDA mesh input size overflows");
-  const size_t requiredPositionElements = 3 * numVertices;
+  const size_t positionElementsPerMesh = 3 * numVertices;
+  MT_THROW_IF(
+      positionElementsPerMesh > 0 &&
+          batchSize > std::numeric_limits<size_t>::max() / positionElementsPerMesh,
+      "CUDA mesh input size overflows");
+  const size_t requiredPositionElements = batchSize * positionElementsPerMesh;
   const size_t requiredTriangleElements = 3 * numTriangles;
   MT_THROW_IF(numVertices > 0 && positionsModel == nullptr, "CUDA positions buffer is null");
   MT_THROW_IF(numTriangles > 0 && triangles == nullptr, "CUDA triangle buffer is null");
@@ -166,8 +181,9 @@ void rasterizeMeshCuda(
       device);
 
   throwIfCudaError(
-      detail::launchCudaRasterizeMesh(
+      detail::launchCudaRasterizeMeshes(
           positionsModel,
+          batchSize,
           numVertices,
           triangles,
           numTriangles,
@@ -176,11 +192,48 @@ void rasterizeMeshCuda(
           depthOffset,
           backfaceCulling,
           buffers.rowStride,
+          buffers.imageStride,
           buffers.visibilityBuffer,
           buffers.zBuffer,
           buffers.triangleIndexBuffer,
           stream),
-      "CUDA rasterizer launch");
+      "Batched CUDA rasterizer launch");
+}
+
+void rasterizeMeshCuda(
+    CudaRasterizerInputs inputs,
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix,
+    float nearClip,
+    CudaRasterizerBuffers buffers,
+    bool backfaceCulling,
+    float depthOffset,
+    cudaStream_t stream) {
+  const int64_t imageHeight = camera.imageHeight();
+  MT_THROW_IF(imageHeight <= 0 || buffers.rowStride < 0, "CUDA rasterizer output size is invalid");
+  MT_THROW_IF(
+      buffers.rowStride > std::numeric_limits<int64_t>::max() / imageHeight,
+      "CUDA rasterizer output size overflows");
+  const int64_t imageStride = imageHeight * buffers.rowStride;
+  rasterizeMeshesCuda(
+      inputs,
+      1,
+      camera,
+      modelMatrix,
+      nearClip,
+      CudaBatchedRasterizerBuffers{
+          .visibilityBuffer = buffers.visibilityBuffer,
+          .visibilityBufferSize = buffers.visibilityBufferSize,
+          .zBuffer = buffers.zBuffer,
+          .zBufferSize = buffers.zBufferSize,
+          .triangleIndexBuffer = buffers.triangleIndexBuffer,
+          .triangleIndexBufferSize = buffers.triangleIndexBufferSize,
+          .rowStride = buffers.rowStride,
+          .imageStride = imageStride,
+      },
+      backfaceCulling,
+      depthOffset,
+      stream);
 }
 
 } // namespace momentum::rasterizer

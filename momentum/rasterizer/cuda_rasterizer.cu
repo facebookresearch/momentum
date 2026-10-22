@@ -12,6 +12,8 @@
 namespace momentum::rasterizer::detail {
 namespace {
 
+constexpr int32_t kRasterThreadsPerBlock = 32;
+
 struct TriangleSetup {
   float u[3];
   float v[3];
@@ -112,6 +114,7 @@ __global__ void initializeVisibilityKernel(
     int32_t imageWidth,
     int32_t imageHeight,
     int64_t rowStride,
+    int64_t imageStride,
     const float* zBuffer,
     uint64_t* visibilityBuffer) {
   const int64_t pixel = static_cast<int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
@@ -120,9 +123,10 @@ __global__ void initializeVisibilityKernel(
     return;
   }
 
+  const int64_t batchOffset = static_cast<int64_t>(blockIdx.y) * imageStride;
   const int32_t y = static_cast<int32_t>(pixel / imageWidth);
   const int32_t x = static_cast<int32_t>(pixel - static_cast<int64_t>(y) * imageWidth);
-  const int64_t offset = static_cast<int64_t>(y) * rowStride + x;
+  const int64_t offset = batchOffset + static_cast<int64_t>(y) * rowStride + x;
   const float existingDepth = zBuffer[offset];
   visibilityBuffer[offset] =
       isnan(existingDepth) ? 0 : static_cast<uint64_t>(floatToOrderedUint(existingDepth)) << 32;
@@ -138,8 +142,12 @@ __global__ void rasterizeVisibilityKernel(
     float depthOffset,
     bool backfaceCulling,
     int64_t rowStride,
+    int64_t imageStride,
     uint64_t* visibilityBuffer) {
+  const size_t batchIndex = blockIdx.y;
   const size_t triangleIndex = blockIdx.x;
+  positionsModel += 3 * batchIndex * numVertices;
+  visibilityBuffer += static_cast<int64_t>(batchIndex) * imageStride;
   if (triangleIndex >= numTriangles) {
     return;
   }
@@ -228,6 +236,7 @@ __global__ void resolveVisibilityKernel(
     int32_t imageWidth,
     int32_t imageHeight,
     int64_t rowStride,
+    int64_t imageStride,
     const uint64_t* visibilityBuffer,
     float* zBuffer,
     int32_t* triangleIndexBuffer) {
@@ -237,9 +246,10 @@ __global__ void resolveVisibilityKernel(
     return;
   }
 
+  const int64_t batchOffset = static_cast<int64_t>(blockIdx.y) * imageStride;
   const int32_t y = static_cast<int32_t>(pixel / imageWidth);
   const int32_t x = static_cast<int32_t>(pixel - static_cast<int64_t>(y) * imageWidth);
-  const int64_t offset = static_cast<int64_t>(y) * rowStride + x;
+  const int64_t offset = batchOffset + static_cast<int64_t>(y) * rowStride + x;
   const uint64_t key = visibilityBuffer[offset];
   const uint32_t triangleKey = static_cast<uint32_t>(key);
   if (triangleKey == 0) {
@@ -251,6 +261,74 @@ __global__ void resolveVisibilityKernel(
 }
 
 } // namespace
+
+cudaError_t launchCudaRasterizeMeshes(
+    const float* positionsModel,
+    size_t batchSize,
+    size_t numVertices,
+    const int32_t* triangles,
+    size_t numTriangles,
+    const CudaCamera& camera,
+    float nearClip,
+    float depthOffset,
+    bool backfaceCulling,
+    int64_t rowStride,
+    int64_t imageStride,
+    uint64_t* visibilityBuffer,
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    cudaStream_t stream) {
+  const int64_t numPixels = static_cast<int64_t>(camera.imageWidth) * camera.imageHeight;
+  const int32_t pixelBlocks = static_cast<int32_t>(
+      (numPixels + kCudaRasterizerThreadsPerBlock - 1) / kCudaRasterizerThreadsPerBlock);
+  const uint32_t batchGridSize = static_cast<uint32_t>(batchSize);
+
+  initializeVisibilityKernel<<<
+      dim3(static_cast<uint32_t>(pixelBlocks), batchGridSize),
+      kCudaRasterizerThreadsPerBlock,
+      0,
+      stream>>>(
+      camera.imageWidth, camera.imageHeight, rowStride, imageStride, zBuffer, visibilityBuffer);
+  if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
+    return error;
+  }
+
+  if (numTriangles > 0) {
+    rasterizeVisibilityKernel<<<
+        dim3(static_cast<uint32_t>(numTriangles), batchGridSize),
+        kRasterThreadsPerBlock,
+        0,
+        stream>>>(
+        positionsModel,
+        numVertices,
+        triangles,
+        numTriangles,
+        camera,
+        nearClip,
+        depthOffset,
+        backfaceCulling,
+        rowStride,
+        imageStride,
+        visibilityBuffer);
+    if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
+      return error;
+    }
+  }
+
+  resolveVisibilityKernel<<<
+      dim3(static_cast<uint32_t>(pixelBlocks), batchGridSize),
+      kCudaRasterizerThreadsPerBlock,
+      0,
+      stream>>>(
+      camera.imageWidth,
+      camera.imageHeight,
+      rowStride,
+      imageStride,
+      visibilityBuffer,
+      zBuffer,
+      triangleIndexBuffer);
+  return cudaGetLastError();
+}
 
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
@@ -266,45 +344,22 @@ cudaError_t launchCudaRasterizeMesh(
     float* zBuffer,
     int32_t* triangleIndexBuffer,
     cudaStream_t stream) {
-  const int64_t numPixels = static_cast<int64_t>(camera.imageWidth) * camera.imageHeight;
-  const int32_t pixelBlocks = static_cast<int32_t>(
-      (numPixels + kCudaRasterizerThreadsPerBlock - 1) / kCudaRasterizerThreadsPerBlock);
-
-  initializeVisibilityKernel<<<pixelBlocks, kCudaRasterizerThreadsPerBlock, 0, stream>>>(
-      camera.imageWidth, camera.imageHeight, rowStride, zBuffer, visibilityBuffer);
-  if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
-    return error;
-  }
-
-  if (numTriangles > 0) {
-    rasterizeVisibilityKernel<<<
-        static_cast<uint32_t>(numTriangles),
-        kCudaRasterizerThreadsPerBlock,
-        0,
-        stream>>>(
-        positionsModel,
-        numVertices,
-        triangles,
-        numTriangles,
-        camera,
-        nearClip,
-        depthOffset,
-        backfaceCulling,
-        rowStride,
-        visibilityBuffer);
-    if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
-      return error;
-    }
-  }
-
-  resolveVisibilityKernel<<<pixelBlocks, kCudaRasterizerThreadsPerBlock, 0, stream>>>(
-      camera.imageWidth,
-      camera.imageHeight,
+  return launchCudaRasterizeMeshes(
+      positionsModel,
+      1,
+      numVertices,
+      triangles,
+      numTriangles,
+      camera,
+      nearClip,
+      depthOffset,
+      backfaceCulling,
       rowStride,
+      static_cast<int64_t>(camera.imageHeight) * rowStride,
       visibilityBuffer,
       zBuffer,
-      triangleIndexBuffer);
-  return cudaGetLastError();
+      triangleIndexBuffer,
+      stream);
 }
 
 } // namespace momentum::rasterizer::detail

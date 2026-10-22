@@ -14,6 +14,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -267,6 +268,82 @@ TEST(CudaRasterizerTest, DepthAndTriangleIdsMatchCpuForSupportedCameras) {
   }
 }
 
+TEST(CudaRasterizerTest, BatchedRenderingMatchesIndependentRenders) {
+  const MeshInputs firstMesh = makeOverlappingTriangles();
+  MeshInputs secondMesh = firstMesh;
+  for (Eigen::Index index = 0; index < secondMesh.positions.size(); index += 3) {
+    secondMesh.positions[index] += 0.15f;
+  }
+
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(63, 48, 40.0f, 38.0f, 31.5f, 24.0f));
+  const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
+  const int64_t imageStride = static_cast<int64_t>(camera.imageHeight()) * rowStride;
+  constexpr size_t kBatchSize = 2;
+  const size_t bufferSize = kBatchSize * static_cast<size_t>(imageStride);
+  std::vector<float> positions(
+      static_cast<size_t>(firstMesh.positions.size() + secondMesh.positions.size()));
+  std::copy(
+      firstMesh.positions.data(),
+      firstMesh.positions.data() + firstMesh.positions.size(),
+      positions.begin());
+  std::copy(
+      secondMesh.positions.data(),
+      secondMesh.positions.data() + secondMesh.positions.size(),
+      positions.begin() + firstMesh.positions.size());
+  std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
+  std::vector<int32_t> initialTriangleIndex(bufferSize, -1);
+
+  DeviceBuffer<float> devicePositions(positions.size());
+  DeviceBuffer<int32_t> deviceTriangles(static_cast<size_t>(firstMesh.triangles.size()));
+  DeviceBuffer<uint64_t> visibility(bufferSize);
+  DeviceBuffer<float> depth(bufferSize);
+  DeviceBuffer<int32_t> triangleIndex(bufferSize);
+  devicePositions.copyFromHost(positions.data());
+  deviceTriangles.copyFromHost(firstMesh.triangles.data());
+  depth.copyFromHost(initialDepth.data());
+  triangleIndex.copyFromHost(initialTriangleIndex.data());
+
+  rasterizeMeshesCuda(
+      CudaRasterizerInputs{
+          .positionsModel = devicePositions.data(),
+          .positionsModelSize = positions.size(),
+          .numVertices = static_cast<size_t>(firstMesh.positions.size() / 3),
+          .triangles = deviceTriangles.data(),
+          .trianglesSize = static_cast<size_t>(firstMesh.triangles.size()),
+          .numTriangles = static_cast<size_t>(firstMesh.triangles.size() / 3),
+      },
+      kBatchSize,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      CudaBatchedRasterizerBuffers{
+          .visibilityBuffer = visibility.data(),
+          .visibilityBufferSize = bufferSize,
+          .zBuffer = depth.data(),
+          .zBufferSize = bufferSize,
+          .triangleIndexBuffer = triangleIndex.data(),
+          .triangleIndexBufferSize = bufferSize,
+          .rowStride = rowStride,
+          .imageStride = imageStride,
+      });
+  throwIfCudaError(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+
+  const std::vector<float> batchDepth = depth.copyToHost();
+  const std::vector<int32_t> batchTriangleIndex = triangleIndex.copyToHost();
+  for (const auto& [batchIndex, mesh] :
+       std::vector<std::pair<size_t, const MeshInputs*>>{{0, &firstMesh}, {1, &secondMesh}}) {
+    const CudaRenderResult independent = renderCuda(*mesh, camera);
+    const size_t begin = batchIndex * static_cast<size_t>(imageStride);
+    EXPECT_EQ(
+        std::vector<float>(batchDepth.begin() + begin, batchDepth.begin() + begin + imageStride),
+        independent.depth);
+    EXPECT_EQ(
+        std::vector<int32_t>(
+            batchTriangleIndex.begin() + begin, batchTriangleIndex.begin() + begin + imageStride),
+        independent.triangleIndex);
+  }
+}
+
 TEST(CudaRasterizerTest, TieBreakAndNegativeDepthOffsetAreDeterministic) {
   MeshInputs mesh;
   mesh.positions.resize(9);
@@ -380,6 +457,52 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   inputs = validInputs;
   inputs.trianglesSize = 2;
   expectRejected(inputs, validBuffers);
+  buffers = validBuffers;
+  buffers.rowStride = std::numeric_limits<int64_t>::max();
+  expectRejected(validInputs, buffers);
+
+  constexpr size_t kBatchSize = 2;
+  const size_t batchedBufferSize = kBatchSize * bufferSize;
+  float batchedPositions[6]{};
+  const CudaRasterizerInputs validBatchedInputs{
+      .positionsModel = batchedPositions,
+      .positionsModelSize = 6,
+      .numVertices = 1,
+      .triangles = triangles,
+      .trianglesSize = 3,
+      .numTriangles = 1,
+  };
+  const CudaBatchedRasterizerBuffers validBatchedBuffers{
+      .visibilityBuffer = &visibility,
+      .visibilityBufferSize = batchedBufferSize,
+      .zBuffer = &depth,
+      .zBufferSize = batchedBufferSize,
+      .triangleIndexBuffer = &triangleIndex,
+      .triangleIndexBufferSize = batchedBufferSize,
+      .rowStride = rowStride,
+      .imageStride = static_cast<int64_t>(bufferSize),
+  };
+  const auto expectBatchedRejected = [&](CudaRasterizerInputs inputs,
+                                         CudaBatchedRasterizerBuffers batchedBuffers) {
+    EXPECT_THROW(
+        rasterizeMeshesCuda(
+            inputs, kBatchSize, camera, Eigen::Matrix4f::Identity(), 0.1f, batchedBuffers),
+        std::runtime_error);
+  };
+
+  auto batchedBuffers = validBatchedBuffers;
+  batchedBuffers.visibilityBufferSize = batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
+  batchedBuffers = validBatchedBuffers;
+  batchedBuffers.zBufferSize = batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
+  batchedBuffers = validBatchedBuffers;
+  batchedBuffers.triangleIndexBufferSize = batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
+
+  inputs = validBatchedInputs;
+  inputs.positionsModelSize = 5;
+  expectBatchedRejected(inputs, validBatchedBuffers);
 }
 
 } // namespace
