@@ -23,13 +23,19 @@
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/rasterizer.h>
 
+#include <dispenso/parallel_for.h>
 #include <drjit/packet.h>
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 
+#include <array>
+#include <cstdint>
+#include <limits>
 #include <optional>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace py = pybind11;
 
@@ -39,6 +45,70 @@ using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
 using rasterizer_detail::validateRasterizerBuffers;
+
+namespace {
+
+constexpr size_t kMaxBufferBaseDepth = 64;
+
+size_t availableBufferBytes(
+    const py::buffer& buffer,
+    const py::buffer_info& bufferInfo,
+    const char* name) {
+  auto owner = py::reinterpret_borrow<py::object>(buffer);
+  std::unordered_set<PyObject*> visited;
+  for (size_t depth = 0; py::hasattr(owner, "base"); ++depth) {
+    MT_THROW_IF(
+        depth >= kMaxBufferBaseDepth,
+        "{} backing storage base chain exceeds {} objects",
+        name,
+        kMaxBufferBaseDepth);
+    MT_THROW_IF(
+        !visited.insert(owner.ptr()).second,
+        "{} backing storage base chain contains a cycle",
+        name);
+    py::object base = owner.attr("base");
+    if (base.is_none()) {
+      break;
+    }
+    owner = std::move(base);
+  }
+
+  size_t ownerBytes = 0;
+  uintptr_t ownerAddress = 0;
+  if (py::hasattr(owner, "untyped_storage") && py::hasattr(owner, "storage_offset") &&
+      py::hasattr(owner, "element_size") && py::hasattr(owner, "data_ptr")) {
+    const auto storageBytes = owner.attr("untyped_storage")().attr("nbytes")().cast<size_t>();
+    const auto storageOffset = owner.attr("storage_offset")().cast<size_t>();
+    const auto elementSize = owner.attr("element_size")().cast<size_t>();
+    MT_THROW_IF(
+        elementSize == 0 || storageOffset > storageBytes / elementSize,
+        "{} has an invalid backing storage offset",
+        name);
+    ownerBytes = storageBytes - storageOffset * elementSize;
+    ownerAddress = owner.attr("data_ptr")().cast<uintptr_t>();
+  } else if (PyObject_CheckBuffer(owner.ptr()) != 0) {
+    const py::buffer_info ownerInfo = py::reinterpret_borrow<py::buffer>(owner).request();
+    MT_THROW_IF(
+        ownerInfo.size < 0 || ownerInfo.itemsize <= 0 ||
+            static_cast<size_t>(ownerInfo.size) >
+                std::numeric_limits<size_t>::max() / static_cast<size_t>(ownerInfo.itemsize),
+        "{} backing storage size overflows",
+        name);
+    ownerBytes = static_cast<size_t>(ownerInfo.size) * static_cast<size_t>(ownerInfo.itemsize);
+    ownerAddress = reinterpret_cast<uintptr_t>(ownerInfo.ptr);
+  } else {
+    MT_THROW("{} backing storage size cannot be determined", name);
+  }
+
+  const auto dataAddress = reinterpret_cast<uintptr_t>(bufferInfo.ptr);
+  MT_THROW_IF(
+      dataAddress < ownerAddress || dataAddress - ownerAddress > ownerBytes,
+      "{} data pointer is outside its backing storage",
+      name);
+  return ownerBytes - (dataAddress - ownerAddress);
+}
+
+} // namespace
 
 // rasterize with CameraData3d which considers distortion
 void rasterizeMesh(
@@ -169,6 +239,145 @@ void rasterizeMesh(
       backfaceCulling,
       depthOffset,
       imageOffset.value_or(Eigen::Vector2f::Zero()));
+}
+
+void rasterizeMeshes(
+    const ContiguousArray<float>& positions,
+    const ContiguousArray<int32_t>& triangles,
+    const momentum::Camera& camera,
+    const pybind11::buffer& zBuffer,
+    const pybind11::buffer& triangleIndexBuffer,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    bool backfaceCulling,
+    float nearClip,
+    float depthOffset) {
+  if (nearClip <= 0) {
+    throw std::runtime_error("near_clip should be positive.");
+  }
+
+  const py::buffer_info positionsInfo = positions.request();
+  const py::buffer_info trianglesInfo = triangles.request();
+  const py::buffer_info zBufferInfo = zBuffer.request();
+  const py::buffer_info triangleIndexInfo = triangleIndexBuffer.request();
+  MT_THROW_IF(
+      positionsInfo.ndim != 3 || positionsInfo.shape[0] <= 0 || positionsInfo.shape[2] != 3,
+      "positions must have shape [batch, numVertices, 3]");
+  MT_THROW_IF(
+      trianglesInfo.ndim != 2 || trianglesInfo.shape[1] != 3,
+      "triangles must have shape [numTriangles, 3]");
+  MT_THROW_IF(
+      !rasterizer_detail::isCompatibleBufferFormat(
+          zBufferInfo, py::format_descriptor<float>::format()) ||
+          !rasterizer_detail::isCompatibleBufferFormat(
+              triangleIndexInfo, py::format_descriptor<int32_t>::format()),
+      "Batched rasterizer outputs have incorrect data types");
+
+  const int64_t batchSize = positionsInfo.shape[0];
+  const int64_t imageHeight = camera.imageHeight();
+  const int64_t imageWidth = camera.imageWidth();
+  MT_THROW_IF(imageHeight <= 0 || imageWidth <= 0, "Camera image must be non-empty");
+  const std::vector<py::ssize_t> expectedOutputShape{batchSize, imageHeight, imageWidth};
+  MT_THROW_IF(
+      zBufferInfo.ndim != 3 || zBufferInfo.shape != expectedOutputShape,
+      "z_buffer must have shape [{}, {}, {}]",
+      batchSize,
+      imageHeight,
+      imageWidth);
+  MT_THROW_IF(
+      triangleIndexInfo.ndim != 3 || triangleIndexInfo.shape != expectedOutputShape,
+      "triangle_index_buffer must have shape [{}, {}, {}]",
+      batchSize,
+      imageHeight,
+      imageWidth);
+  MT_THROW_IF(
+      zBufferInfo.strides != triangleIndexInfo.strides,
+      "Batched rasterizer outputs must have matching strides");
+
+  const int64_t rowStride = zBufferInfo.strides[1] / static_cast<int64_t>(sizeof(float));
+  const int64_t imageStride = zBufferInfo.strides[0] / static_cast<int64_t>(sizeof(float));
+  MT_THROW_IF(
+      zBufferInfo.strides[2] != sizeof(float) || rowStride < imageWidth,
+      "Batched rasterizer outputs have invalid strides");
+  MT_THROW_IF(
+      imageHeight > std::numeric_limits<int64_t>::max() / rowStride,
+      "Batched rasterizer output size overflows");
+  MT_THROW_IF(
+      imageStride < imageHeight * rowStride, "Batched rasterizer outputs have invalid strides");
+  const int64_t imageRowsSize = imageHeight * rowStride;
+  MT_THROW_IF(
+      batchSize - 1 > (std::numeric_limits<int64_t>::max() - imageRowsSize) / imageStride,
+      "Batched rasterizer output size overflows");
+  const int64_t requiredElements = (batchSize - 1) * imageStride + imageRowsSize;
+  MT_THROW_IF(
+      static_cast<uint64_t>(requiredElements) > std::numeric_limits<size_t>::max() / sizeof(float),
+      "Batched rasterizer output byte size overflows");
+  const size_t requiredBytes = static_cast<size_t>(requiredElements) * sizeof(float);
+  MT_THROW_IF(
+      availableBufferBytes(zBuffer, zBufferInfo, "z_buffer") < requiredBytes,
+      "z_buffer backing storage is too small");
+  MT_THROW_IF(
+      availableBufferBytes(triangleIndexBuffer, triangleIndexInfo, "triangle_index_buffer") <
+          requiredBytes,
+      "triangle_index_buffer backing storage is too small");
+  MT_THROW_IF(
+      reinterpret_cast<uintptr_t>(zBufferInfo.ptr) % momentum::kSimdAlignment != 0 ||
+          reinterpret_cast<uintptr_t>(triangleIndexInfo.ptr) % momentum::kSimdAlignment != 0 ||
+          zBufferInfo.strides[0] % momentum::kSimdAlignment != 0 ||
+          triangleIndexInfo.strides[0] % momentum::kSimdAlignment != 0 ||
+          zBufferInfo.strides[1] % momentum::kSimdAlignment != 0 ||
+          triangleIndexInfo.strides[1] % momentum::kSimdAlignment != 0,
+      "Batched rasterizer outputs must be SIMD-aligned");
+
+  if (positionsInfo.ptr == nullptr || zBufferInfo.ptr == nullptr ||
+      triangleIndexInfo.ptr == nullptr ||
+      (trianglesInfo.shape[0] > 0 && trianglesInfo.ptr == nullptr)) {
+    MT_THROW("Batched rasterizer tensors must have storage");
+  }
+
+  auto* positionsData = static_cast<float*>(positionsInfo.ptr);
+  auto* zBufferData = static_cast<float*>(zBufferInfo.ptr);
+  auto* triangleIndexData = static_cast<int32_t*>(triangleIndexInfo.ptr);
+  const int64_t positionStride = positionsInfo.strides[0] / static_cast<int64_t>(sizeof(float));
+  const int64_t numPositionValues = positionsInfo.shape[1] * positionsInfo.shape[2];
+  auto trianglesMap = bufferToEigenMap<int32_t>(trianglesInfo);
+  const Eigen::Matrix4f modelMatrixValue = modelMatrix.value_or(Eigen::Matrix4f::Identity());
+  const std::array<momentum::rasterizer::index_t, 2> imageExtents{imageHeight, imageWidth};
+  const std::array<momentum::rasterizer::index_t, 2> imageStrides{rowStride, 1};
+  Eigen::VectorXf emptyFloat;
+  Eigen::VectorXi emptyInt;
+
+  pybind11::gil_scoped_release release;
+  // The waiting parallel_for overload captures worker exceptions in its
+  // internal TaskSet and rethrows them on this calling thread.
+  dispenso::parallel_for(int64_t(0), batchSize, [&](int64_t frame) {
+    drjit::scoped_flush_denormals flushDenorm(true);
+    Eigen::Map<Eigen::VectorXf> positionsMap(
+        positionsData + frame * positionStride, numPositionValues);
+    auto depth =
+        make_mdspan<float, 2>(zBufferData + frame * imageStride, imageExtents, imageStrides);
+    auto triangleIndex = make_mdspan<int32_t, 2>(
+        triangleIndexData + frame * imageStride, imageExtents, imageStrides);
+    momentum::rasterizer::rasterizeMesh(
+        positionsMap,
+        emptyFloat,
+        trianglesMap,
+        emptyFloat,
+        emptyInt,
+        emptyFloat,
+        camera,
+        modelMatrixValue,
+        nearClip,
+        momentum::rasterizer::PhongMaterial{},
+        depth,
+        {},
+        {},
+        {},
+        triangleIndex,
+        {},
+        backfaceCulling,
+        depthOffset,
+        Eigen::Vector2f::Zero());
+  });
 }
 
 void rasterizeWireframe(
