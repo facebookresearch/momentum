@@ -115,11 +115,16 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.alpha_matte"><code class="docutils literal notranslate"><span class="pre">alpha_matte()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_arrow_mesh"><code class="docutils literal notranslate"><span class="pre">create_arrow_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_camera_for_body"><code class="docutils literal notranslate"><span class="pre">create_camera_for_body()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_camera_for_hand"><code class="docutils literal notranslate"><span class="pre">create_camera_for_hand()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_capsule_mesh"><code class="docutils literal notranslate"><span class="pre">create_capsule_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_cylinder_mesh"><code class="docutils literal notranslate"><span class="pre">create_cylinder_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_index_buffer"><code class="docutils literal notranslate"><span class="pre">create_index_buffer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_octahedron_mesh"><code class="docutils literal notranslate"><span class="pre">create_octahedron_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_rgb_buffer"><code class="docutils literal notranslate"><span class="pre">create_rgb_buffer()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_shadow_projection_matrix"><code class="docutils literal notranslate"><span class="pre">create_shadow_projection_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_sphere_mesh"><code class="docutils literal notranslate"><span class="pre">create_sphere_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.create_z_buffer"><code class="docutils literal notranslate"><span class="pre">create_z_buffer()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.rasterize_camera_frustum"><code class="docutils literal notranslate"><span class="pre">rasterize_camera_frustum()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.renderer.rasterize_capsules"><code class="docutils literal notranslate"><span class="pre">rasterize_capsules()</span></code></a></li>
@@ -477,6 +482,24 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_arrow_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_arrow_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_arrow_mesh" title="Link to this definition"></a></dt>
+<dd><p>Create the canonical triangle mesh used to rasterize transform axes.</p>
+<p>The arrow points along its local positive x axis and has unit total length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length_subdivisions</strong> – Number of subdivisions along the arrow shaft.</p></li>
+<li><p><strong>radius_subdivisions</strong> – Number of subdivisions around the arrow radius.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mesh</span></code></a> in canonical arrow coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.renderer.create_camera_for_body">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_camera_for_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="geometry.html#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focal_length_mm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizontal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="camera.html#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_camera_for_body" title="Link to this definition"></a></dt>
 <dd><p>Create a camera that roughly faces the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.</p>
@@ -517,6 +540,45 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_capsule_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_capsule_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_capsule_mesh" title="Link to this definition"></a></dt>
+<dd><p>Create the canonical triangle mesh used to rasterize capsules.</p>
+<p>The capsule extends along its local x axis with independently sized spherical ends.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length_subdivisions</strong> – Number of subdivisions along the central body.</p></li>
+<li><p><strong>radius_subdivisions</strong> – Number of subdivisions around the capsule radius.</p></li>
+<li><p><strong>start_radius</strong> – Radius of the spherical cap at local x zero.</p></li>
+<li><p><strong>end_radius</strong> – Radius of the spherical cap at the other end.</p></li>
+<li><p><strong>length</strong> – Distance between the centers of the two spherical ends.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mesh</span></code></a> in capsule-local coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_cylinder_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_cylinder_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_subdivisions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_cylinder_mesh" title="Link to this definition"></a></dt>
+<dd><p>Create the canonical triangle mesh used to rasterize cylinders.</p>
+<p>The cylinder extends from zero to one along its local x axis and has unit radius.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length_subdivisions</strong> – Number of subdivisions along the cylinder length.</p></li>
+<li><p><strong>radius_subdivisions</strong> – Number of subdivisions around the cylinder radius.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mesh</span></code></a> in canonical cylinder coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.renderer.create_index_buffer">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_index_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="camera.html#pymomentum.camera.Camera" title="pymomentum.camera.Camera"><span class="pre">pymomentum.camera.Camera</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.int32</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.renderer.create_index_buffer" title="Link to this definition"></a></dt>
 <dd><p>Creates a padded buffer suitable for storing triangle or vertex indices during rasterization.</p>
@@ -526,6 +588,23 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>An integer numpy array with shape (height, padded_width) suitable for passing in as an index buffer to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">rasterize()</span></code> function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_octahedron_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_octahedron_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.15000000596046448</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mid_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.10000000149011612</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_octahedron_mesh" title="Link to this definition"></a></dt>
+<dd><p>Create the canonical two-pyramid mesh used for skeleton bones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> – Half-width of the shared pyramid base relative to the local x-axis length.</p></li>
+<li><p><strong>mid_fraction</strong> – Position of the shared base along the local x axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mesh</span></code></a> extending from zero to one along x.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -562,6 +641,20 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a 4x4 matrix that can be passed to the rasterizer function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.renderer.create_sphere_mesh">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.renderer.</span></span><span class="sig-name descname"><span class="pre">create_sphere_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdivision_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><span class="pre">pymomentum.geometry.Mesh</span></a></span></span><a class="headerlink" href="#pymomentum.renderer.create_sphere_mesh" title="Link to this definition"></a></dt>
+<dd><p>Create the canonical triangle mesh used to rasterize spheres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>subdivision_level</strong> – Number of recursive icosphere subdivisions.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="geometry.html#pymomentum.geometry.Mesh" title="pymomentum.geometry.Mesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymomentum.geometry.Mesh</span></code></a> centered at the origin with unit radius.</p>
 </dd>
 </dl>
 </dd></dl>
