@@ -294,6 +294,41 @@ TEST_F(UsdIoTest, SaveAndLoadRoundTrip_SkinWeights) {
   }
 }
 
+TEST_F(UsdIoTest, MalformedSkinWeightsAreIgnored) {
+  auto tempFile = temporaryFile("momentum_usd_malformed_skinweights", ".usda");
+  saveUsd(tempFile.path(), testCharacter);
+
+  auto stage = UsdStage::Open(tempFile.path().string());
+  ASSERT_TRUE(stage);
+  bool foundSkinnedMesh = false;
+  for (const auto& prim : stage->Traverse()) {
+    if (!prim.IsA<UsdGeomMesh>()) {
+      continue;
+    }
+
+    UsdSkelBindingAPI bindingAPI(prim);
+    VtArray<float> jointWeights;
+    ASSERT_TRUE(bindingAPI.GetJointWeightsAttr().Get(&jointWeights));
+    ASSERT_FALSE(jointWeights.empty());
+    jointWeights.resize(jointWeights.size() - 1);
+    ASSERT_TRUE(bindingAPI.GetJointWeightsAttr().Set(jointWeights));
+    foundSkinnedMesh = true;
+    break;
+  }
+  ASSERT_TRUE(foundSkinnedMesh);
+  stage->Save();
+
+  const Character character = loadUsdCharacter(tempFile.path());
+
+  ASSERT_NE(character.mesh, nullptr);
+  ASSERT_NE(character.skinWeights, nullptr);
+  EXPECT_EQ(
+      character.skinWeights->weight.rows(),
+      static_cast<Eigen::Index>(character.mesh->vertices.size()));
+  EXPECT_TRUE(character.skinWeights->index.isZero());
+  EXPECT_TRUE(character.skinWeights->weight.isZero());
+}
+
 TEST_F(UsdIoTest, SaveAndLoadRoundTrip_NonTrivialPreRotation) {
   // Create a character with non-identity preRotations to verify the bug fix
   auto character = createTestCharacter();

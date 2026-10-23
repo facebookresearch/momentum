@@ -393,12 +393,28 @@ void addSkinWeights(
     const fx::gltf::Primitive& primitive,
     const std::vector<size_t>& nodeToObjectMap,
     const size_t kNumVertices,
-    SkinWeights_u& skinWeights) {
-  const auto kVertexOffset = skinWeights->index.rows();
-  skinWeights->index.conservativeResize(kVertexOffset + kNumVertices, Eigen::NoChange);
-  skinWeights->weight.conservativeResize(kVertexOffset + kNumVertices, Eigen::NoChange);
-  skinWeights->index.bottomRows(kNumVertices).setZero();
-  skinWeights->weight.bottomRows(kNumVertices).setZero();
+    SkinWeights& skinWeights) {
+  const auto kVertexOffset = skinWeights.index.rows();
+  skinWeights.index.conservativeResize(kVertexOffset + kNumVertices, Eigen::NoChange);
+  skinWeights.weight.conservativeResize(kVertexOffset + kNumVertices, Eigen::NoChange);
+  skinWeights.index.bottomRows(kNumVertices).setZero();
+  skinWeights.weight.bottomRows(kNumVertices).setZero();
+
+  const auto canonicalizeNewRows = [&]() {
+    std::vector<std::vector<size_t>> indices(kNumVertices);
+    std::vector<std::vector<float>> weights(kNumVertices);
+    for (size_t v = 0; v < kNumVertices; ++v) {
+      for (size_t i = 0; i < kMaxSkinJoints; ++i) {
+        indices[v].push_back(skinWeights.index(kVertexOffset + v, i));
+        weights[v].push_back(skinWeights.weight(kVertexOffset + v, i));
+      }
+    }
+
+    SkinWeights sortedSkinWeights;
+    sortedSkinWeights.set(indices, weights);
+    skinWeights.index.bottomRows(kNumVertices) = sortedSkinWeights.index;
+    skinWeights.weight.bottomRows(kNumVertices) = sortedSkinWeights.weight;
+  };
 
   // load skinning in batches of 4 indices/weights at a time (up to 8)
   for (size_t i = 0; i < 2; i++) {
@@ -423,10 +439,12 @@ void addSkinWeights(
       weightsData = loadWeightsFromAccessor(model, weightsAttribute->second);
       if (weightsData.empty()) {
         MT_LOGW("No skinning weights read");
+        canonicalizeNewRows();
         return;
       }
     } else {
       MT_LOGW_IF(i == 0, "No skinning weights stored on primitive");
+      canonicalizeNewRows();
       return;
     }
 
@@ -444,6 +462,7 @@ void addSkinWeights(
           "Inconsistent data: {} vertices are skinned but mesh has {} vertices",
           jointIndices.size(),
           kNumVertices);
+      canonicalizeNewRows();
       return;
     }
 
@@ -461,14 +480,15 @@ void addSkinWeights(
         MT_CHECK(nodeIdx < nodeToObjectMap.size(), "{}: {}", nodeIdx, nodeToObjectMap.size());
         const auto& jointIndex = nodeToObjectMap[nodeIdx];
         if (jointIndex != kInvalidIndex) {
-          skinWeights->index(kVertexOffset + v, i * 4 + d) = (uint32_t)jointIndex;
-          skinWeights->weight(kVertexOffset + v, i * 4 + d) = skinWeight;
+          skinWeights.index(kVertexOffset + v, i * 4 + d) = (uint32_t)jointIndex;
+          skinWeights.weight(kVertexOffset + v, i * 4 + d) = skinWeight;
         } else {
           MT_LOGW("Invalid joint index encountered when reading skinning weights");
         }
       }
     }
   }
+  canonicalizeNewRows();
 }
 
 std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
@@ -510,7 +530,7 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
       // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
         const auto kNumVertices = addMesh(model, primitive, resultMesh);
-        addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, skinWeights);
+        addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, *skinWeights);
         addBlendShapes(model, primitive, blendShape);
         MT_CHECK(
             resultMesh->vertices.size() == skinWeights->index.rows(),
