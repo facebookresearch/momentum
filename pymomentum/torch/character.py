@@ -132,10 +132,11 @@ class Skeleton(torch.nn.Module):
                 - [6] log2 scale factor
 
         Returns:
-            TRS transform tuple (translation, rotation_matrix, scale) where:
-                - translation: Local joint translations, shape (batch_size, num_joints, 3)
-                - rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
-                - scale: Local joint scales, shape (batch_size, num_joints, 1)
+            A TRS transform tuple ``(translation, rotation_matrix, scale)`` where
+
+            - ``translation``: Local joint translations, shape (batch_size, num_joints, 3)
+            - ``rotation_matrix``: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+            - ``scale``: Local joint scales, shape (batch_size, num_joints, 1)
 
         Raises:
             RuntimeError: If the character has no skeleton
@@ -181,10 +182,11 @@ class Skeleton(torch.nn.Module):
                 - [6] log2 scale factor
 
         Returns:
-            TRS transform tuple (translation, rotation_matrix, scale) where:
-                - translation: Global joint translations, shape (batch_size, num_joints, 3)
-                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
-                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+            A TRS transform tuple ``(translation, rotation_matrix, scale)`` where
+
+            - ``translation``: Global joint translations, shape (batch_size, num_joints, 3)
+            - ``rotation_matrix``: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+            - ``scale``: Global joint scales, shape (batch_size, num_joints, 1)
 
         Raises:
             RuntimeError: If the character has no skeleton
@@ -229,10 +231,11 @@ class Skeleton(torch.nn.Module):
                 - scale: Local joint scales, shape (batch_size, num_joints, 1)
 
         Returns:
-            TRS transform tuple (translation, rotation_matrix, scale) where:
-                - translation: Global joint translations, shape (batch_size, num_joints, 3)
-                - rotation_matrix: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
-                - scale: Global joint scales, shape (batch_size, num_joints, 1)
+            A TRS transform tuple ``(translation, rotation_matrix, scale)`` where
+
+            - ``translation``: Global joint translations, shape (batch_size, num_joints, 3)
+            - ``rotation_matrix``: Global joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+            - ``scale``: Global joint scales, shape (batch_size, num_joints, 1)
 
         Note:
             This function uses the TRS backend for efficient forward kinematics computation.
@@ -272,10 +275,11 @@ class Skeleton(torch.nn.Module):
                 - scale: Global joint scales, shape (batch_size, num_joints, 1)
 
         Returns:
-            TRS transform tuple (translation, rotation_matrix, scale) where:
-                - translation: Local joint translations, shape (batch_size, num_joints, 3)
-                - rotation_matrix: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
-                - scale: Local joint scales, shape (batch_size, num_joints, 1)
+            A TRS transform tuple ``(translation, rotation_matrix, scale)`` where
+
+            - ``translation``: Local joint translations, shape (batch_size, num_joints, 3)
+            - ``rotation_matrix``: Local joint rotations as 3x3 matrices, shape (batch_size, num_joints, 3, 3)
+            - ``scale``: Local joint scales, shape (batch_size, num_joints, 1)
 
         Note:
             For root joints (parent index == -1), the global transform is returned as-is

@@ -56,12 +56,13 @@ def global_trs_state_from_local_trs_state_impl(
     global transformation to produce the joint's global transformation.
 
     The TRS representation uses separate tensors for each transformation component:
+
     - Translation (3D): translation vector [tx, ty, tz]
     - Rotation (3x3): rotation matrix
     - Scale (1D): uniform scale factor [s]
 
-    Forward Kinematics Formula:
-    For each joint j with parent p in the kinematic hierarchy:
+    Forward kinematics formula, for each joint j with parent p in the kinematic hierarchy::
+
         s_global_j = s_parent * s_local_j
         R_global_j = R_parent * R_local_j
         t_global_j = t_parent + s_parent * R_parent * t_local_j
@@ -83,12 +84,14 @@ def global_trs_state_from_local_trs_state_impl(
             accumulated floating-point errors.
 
     Returns:
-        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
-        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
-        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
-        intermediate_results: List of (t, r, s) tuples from the forward pass.
-            Required for efficient gradient computation during backpropagation.
-            Empty if save_intermediate_results=False.
+        A tuple ``(global_state_t, global_state_r, global_state_s, intermediate_results)`` where
+
+        - ``global_state_t``: Global joint translations, shape (batch_size, num_joints, 3).
+        - ``global_state_r``: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        - ``global_state_s``: Global joint scales, shape (batch_size, num_joints, 1).
+        - ``intermediate_results``: List of (t, r, s) tuples from the forward pass.
+          Required for efficient gradient computation during backpropagation.
+          Empty if save_intermediate_results=False.
 
     Note:
         This function is JIT-compiled for performance. The prefix multiplication approach
@@ -97,7 +100,7 @@ def global_trs_state_from_local_trs_state_impl(
 
     See Also:
         :func:`global_trs_state_from_local_trs_state`: User-facing wrapper with autodiff
-        :func:`local_trs_state_from_joint_params`: Convert joint parameters to local states
+        :func:`get_local_state_from_joint_params`: Convert joint parameters to local states
     """
     dtype = local_state_t.dtype
     with th.no_grad():
@@ -174,10 +177,12 @@ def global_trs_state_from_local_trs_state_no_grad(
         use_double_precision: Whether to use float64 for numerical stability
 
     Returns:
-        global_state_t: Global joint translations, shape (batch_size, num_joints, 3)
-        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3)
-        global_state_s: Global joint scales, shape (batch_size, num_joints, 1)
-        intermediate_results: List of (t, r, s) tuples from forward pass
+        A tuple ``(global_state_t, global_state_r, global_state_s, intermediate_results)`` where
+
+        - ``global_state_t``: Global joint translations, shape (batch_size, num_joints, 3)
+        - ``global_state_r``: Global joint rotations, shape (batch_size, num_joints, 3, 3)
+        - ``global_state_s``: Global joint scales, shape (batch_size, num_joints, 1)
+        - ``intermediate_results``: List of (t, r, s) tuples from forward pass
 
     See Also:
         :func:`global_trs_state_from_local_trs_state_impl`: Implementation function
@@ -209,37 +214,39 @@ def global_trs_state_from_local_trs_state_backprop(
     r"""
     The backward pass of fk_from_local_state_no_grad.
 
-    during backprop, we have
-    \partial L/\partial tl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial tl_i
-    \partial L/\partial sl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial sl_i + \sum_j \partial L/\partial sg_j * \partial tg_j/\partial sl_i
-    \partial L/\partial rl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial rl_i + \sum_j \partial L/\partial rg_j * \partial tg_j/\partial rl_i
+    Derivation::
 
-    however, if we naively do this, sum_j is very expensive (and the jacobian is very sparse).
+        during backprop, we have
+        \partial L/\partial tl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial tl_i
+        \partial L/\partial sl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial sl_i + \sum_j \partial L/\partial sg_j * \partial tg_j/\partial sl_i
+        \partial L/\partial rl_i = \sum_j \partial L/\partial tg_j * \partial tg_j/\partial rl_i + \sum_j \partial L/\partial rg_j * \partial tg_j/\partial rl_i
 
-    consider how we do prefix multiplication during forward:
-    assume the chain order is [0, 1, 2, 3]
+        however, if we naively do this, sum_j is very expensive (and the jacobian is very sparse).
 
-    forward (source <- target)
+        consider how we do prefix multiplication during forward:
+        assume the chain order is [0, 1, 2, 3]
 
-    level 0: [1, 3] <- [0, 2]
-    now the chain is [0, 01, 2, 23]
+        forward (source <- target)
 
-    level 1: [2, 3] <- [1, 1]
-    now the chain is [0, 01, 012, 0123]
+        level 0: [1, 3] <- [0, 2]
+        now the chain is [0, 01, 2, 23]
 
-    now consider backward, for level 0 we need to cast
-    {
-        g(s1), g(s1s2), g(s1s2s3), g(s1s2s3s4);
-        g(R1), g(R1R2), g(R1R2R3), g(R1R2R3R4);
-        g(t1), g(t1+s1R1t2), g(s1+s1R2t2+s1R1s2R2t3), ...
-    }
-    into
-    {
-        g(s1), g(s1s2), g(s3), g(s3s4);
-        g(R1), g(R1R2), g(R3), g(R3R4);
-        g(t1), g(t1+s1R1t2), g(t3), g(t3+s3R3t4)
-    }
-    which is actually in reverse order of forward levels.
+        level 1: [2, 3] <- [1, 1]
+        now the chain is [0, 01, 012, 0123]
+
+        now consider backward, for level 0 we need to cast
+        {
+            g(s1), g(s1s2), g(s1s2s3), g(s1s2s3s4);
+            g(R1), g(R1R2), g(R1R2R3), g(R1R2R3R4);
+            g(t1), g(t1+s1R1t2), g(s1+s1R2t2+s1R1s2R2t3), ...
+        }
+        into
+        {
+            g(s1), g(s1s2), g(s3), g(s3s4);
+            g(R1), g(R1R2), g(R3), g(R3R4);
+            g(t1), g(t1+s1R1t2), g(t3), g(t3+s3R3t4)
+        }
+        which is actually in reverse order of forward levels.
     """
     dtype = joint_state_t.dtype
     if use_double_precision:
@@ -448,9 +455,11 @@ def global_trs_state_from_local_trs_state(
         prefix_mul_indices: List of [child_index, parent_index] tensor pairs defining the kinematic hierarchy traversal order.
 
     Returns:
-        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
-        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
-        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
+        A tuple ``(global_state_t, global_state_r, global_state_s)`` where
+
+        - ``global_state_t``: Global joint translations, shape (batch_size, num_joints, 3).
+        - ``global_state_r``: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        - ``global_state_s``: Global joint scales, shape (batch_size, num_joints, 1).
 
     Note:
         When called within torch.jit.script or torch.jit.trace context, uses the JIT-compiled
@@ -459,7 +468,7 @@ def global_trs_state_from_local_trs_state(
 
     See Also:
         :func:`global_trs_state_from_local_trs_state_impl`: JIT implementation
-        :func:`local_trs_state_from_joint_params`: Convert joint parameters to local states
+        :func:`get_local_state_from_joint_params`: Convert joint parameters to local states
     """
     if th.jit.is_tracing() or th.jit.is_scripting():
         (
@@ -511,9 +520,11 @@ def global_trs_state_from_local_trs_state_forward_only(
         prefix_mul_indices: List of [child_index, parent_index] tensor pairs.
 
     Returns:
-        global_state_t: Global joint translations, shape (batch_size, num_joints, 3).
-        global_state_r: Global joint rotations, shape (batch_size, num_joints, 3, 3).
-        global_state_s: Global joint scales, shape (batch_size, num_joints, 1).
+        A tuple ``(global_state_t, global_state_r, global_state_s)`` where
+
+        - ``global_state_t``: Global joint translations, shape (batch_size, num_joints, 3).
+        - ``global_state_r``: Global joint rotations, shape (batch_size, num_joints, 3, 3).
+        - ``global_state_s``: Global joint scales, shape (batch_size, num_joints, 1).
 
     See Also:
         :func:`global_trs_state_from_local_trs_state`: Main user-facing function with autograd
@@ -549,16 +560,10 @@ def skinning(
     vert_indices_flattened: th.Tensor,
 ) -> th.Tensor:
     r"""
-    LBS skinning formula as is in lbs_pytorch:
-    https://ghe.oculus-rep.com/ydong142857/lbs_pytorch
+    Linear blend skinning (LBS) of a template mesh using TRS joint transforms::
 
-    TODO: we might want to change skinning to double precision
-    with current float32 formulation the numerical error is bigger than 1e-3 level
-    (but smaller than 1e-2 level)
-
-    Basically,
-    y_i = \sum_j w_ij (s_j * r_j * (r0_j * x_i + t0_j) + t_j)
-    where \sum_j w_ij = 1, \forall i
+        y_i = \sum_j w_ij (s_j * r_j * (r0_j * x_i + t0_j) + t_j)
+        where \sum_j w_ij = 1, \forall i
 
     Args:
         template: (B, V, 3) LBS template
@@ -566,8 +571,7 @@ def skinning(
         r: (B, J, 3, 3) Rotation of the joints
         s: (B, J, 1) Scale of the joints
         t0: (J, 3) Translation of inverse bind pose
-        r0: (J, 3, 3) Rotation of inverse bind pose
-        (for our setting, s0 == 1)
+        r0: (J, 3, 3) Rotation of inverse bind pose (the inverse bind pose scale is assumed to be 1)
         skin_indices_flattened: (N, ) LBS skinning nbr joint indices
         skin_weights_flattened: (N, ) LBS skinning nbr joint weights
         vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
@@ -575,6 +579,8 @@ def skinning(
     Returns:
         skinned: (B, V, 3) Skinned mesh
     """
+    # TODO: consider double precision; with the current float32 formulation the numerical
+    # error is above the 1e-3 level (but below 1e-2).
     batch_size = t.shape[0]
     if template.shape[0] != batch_size:
         template = template[None, ...].expand(batch_size, -1, -1)
@@ -612,19 +618,15 @@ def multi_topology_skinning(
     vert_indices_flattened: th.Tensor,
 ) -> th.Tensor:
     r"""
-    LBS skinning formula as is in lbs_pytorch:
-    https://ghe.oculus-rep.com/ydong142857/lbs_pytorch
+    Linear blend skinning (LBS) of template meshes with different topologies.
 
-    The difference here is that we assume that the flattened indices are for multiple
+    The difference from :func:`skinning` is that we assume that the flattened indices are for multiple
     topologies. So vert_indices_flattened needs to flattened with the batch dimension.
 
-    TODO: we might want to change skinning to double precision
-    with current float32 formulation the numerical error is bigger than 1e-3 level
-    (but smaller than 1e-2 level)
+    The skinning formula is::
 
-    Basically,
-    y_i = \sum_j w_ij (s_j * r_j * (r0_j * x_i + t0_j) + t_j)
-    where \sum_j w_ij = 1, \forall i
+        y_i = \sum_j w_ij (s_j * r_j * (r0_j * x_i + t0_j) + t_j)
+        where \sum_j w_ij = 1, \forall i
 
     Args:
         template: (B, V, 3) LBS template
@@ -632,8 +634,7 @@ def multi_topology_skinning(
         r: (B, J, 3, 3) Rotation of the joints
         s: (B, J, 1) Scale of the joints
         t0: (J, 3) Translation of inverse bind pose
-        r0: (J, 3, 3) Rotation of inverse bind pose
-        (for our setting, s0 == 1)
+        r0: (J, 3, 3) Rotation of inverse bind pose (the inverse bind pose scale is assumed to be 1)
         skin_indices_flattened: (N, ) LBS skinning nbr joint indices
         skin_weights_flattened: (N, ) LBS skinning nbr joint weights
         vert_indices_flattened: (N, ) LBS skinning nbr corresponding vertex indices
@@ -641,6 +642,8 @@ def multi_topology_skinning(
     Returns:
         skinned: (B, V, 3) Skinned mesh
     """
+    # TODO: consider double precision; with the current float32 formulation the numerical
+    # error is above the 1e-3 level (but below 1e-2).
     batch_size = t.shape[0]
     if template.shape[0] != batch_size:
         template = template[None, ...].expand(batch_size, -1, -1)
@@ -777,9 +780,11 @@ def get_local_state_from_joint_params(
             always has identity [0, I, 1] transformation.
 
     Returns:
-        local_state_t: [batch_size, num_joints, 3]
-        local_state_r: [batch_size, num_joints, 3, 3]
-        local_state_s: [batch_size, num_joints, 1]
+        A tuple ``(local_state_t, local_state_r, local_state_s)`` where
+
+        - ``local_state_t``: [batch_size, num_joints, 3]
+        - ``local_state_r``: [batch_size, num_joints, 3, 3]
+        - ``local_state_s``: [batch_size, num_joints, 1]
     """
     if len(joint_params.shape) == 2:
         # reshape joint_params as (batch_size, num_joints, 7)

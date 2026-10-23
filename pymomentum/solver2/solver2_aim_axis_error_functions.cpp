@@ -82,7 +82,7 @@ void defAimErrorFunction(py::module_& m, const char* name, const char* descripti
       :param local_point: The origin of the local ray.
       :param local_dir: The direction of the local ray.
       :param global_target: The global aim target.
-      :param parent_index: The index of the parent joint.
+      :param parent: The index of the parent joint.
       :param weight: The weight of the constraint.
       :param name: The name of the constraint (for debugging).)",
           py::arg("local_point"),

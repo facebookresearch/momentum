@@ -226,7 +226,7 @@ PYBIND11_MODULE(renderer, m) {
 :param focal_length_mm: 35mm-equivalent focal length; e.g. focal_length_mm=50 corresponds to a "normal" lens.  Specified in millimeters because this is what photographers use.
 :param horizontal: whether the cameras are placed horizontally, assuming the Y axis is the world up direction.
 :param camera_angle: what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.
-:return: a :class:`Camera`.)",
+:return: a :class:`pymomentum.camera.Camera`.)",
       py::arg("character"),
       py::arg("skeleton_states"),
       py::arg("image_height"),
@@ -243,7 +243,7 @@ PYBIND11_MODULE(renderer, m) {
 :param wrist_transformation: (4 x 4) numpy.ndarray wrist transformation matrix. The translation (column 3) is in millimeters and will be converted to centimeters internally.
 :param image_height: Height of the target image.
 :param image_width: Width of the target image.
-:return: a :class:`Camera`.)",
+:return: a :class:`pymomentum.camera.Camera`.)",
       py::arg("wrist_transformation"),
       py::arg("image_height"),
       py::arg("image_width"));
@@ -251,10 +251,10 @@ PYBIND11_MODULE(renderer, m) {
   m.def(
       "triangulate",
       &triangulate,
-      R"(triangulate the polygon mesh.
+      R"(Triangulate a polygon mesh.
 
-:param faceOffests: numpy.ndarray defining the starting and end points of each polygon
-:param facesIndices: numpy.ndarray of the face indices to vertex
+:param face_indices: numpy.ndarray of vertex indices for all polygons, concatenated.
+:param face_offsets: numpy.ndarray defining the start and end of each polygon in ``face_indices``.
 )",
       py::arg("face_indices"),
       py::arg("face_offsets"));
@@ -289,7 +289,7 @@ PYBIND11_MODULE(renderer, m) {
 Notes:
 
 * You can rasterize multiple meshes to the same depth buffer by calling this function multiple times.
-* To simplify the SIMD implementation, the width of the depth buffer must be a multiple of 8.  If you want to render a resolution that is not a multiple of 8, allocate an appropriately padded depth buffer (e.g. using :meth:`create_rasterizer_buffers`) and then extract the smaller image at the end.
+* To simplify the SIMD implementation, the width of the depth buffer must be a multiple of 8.  If you want to render a resolution that is not a multiple of 8, allocate an appropriately padded depth buffer (e.g. using :func:`create_z_buffer` and :func:`create_rgb_buffer`) and then extract the smaller image at the end.
 
 :param vertex_positions: (nVert x 3) Tensor of vertex positions.
 :param vertex_normals: (nVert x 3) Tensor of vertex normals.
@@ -867,7 +867,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 :param camera: Camera to render from.
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
 :param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
-:param width: Width of the lines, currently is the same across all lines.
+:param thickness: Thickness of the lines, currently is the same across all lines.
 :param color: Line color, currently is shared across all lines.
 :param near_clip: Clip any triangles closer than this depth.  Defaults to 0.1.
 :param depth_offset: Offset the depth values.  Nonzero values can be used to render something slightly in front of something else and avoid depth fighting.  Defaults to 0.
@@ -971,7 +971,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 
 :param camera: Camera to render from.
 
-:return: A z_buffer numpy array with shape (height, padded_width) suitable for use in the :meth:`rasterize` function.
+:return: A z_buffer numpy array with shape (height, padded_width) suitable for use in the rasterization functions such as :func:`rasterize_mesh`.
 )",
       py::arg("camera"),
       py::arg("far_clip") = FLT_MAX);
@@ -984,7 +984,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 :param camera: Camera to render from.
 :param background_color: Background color, defaults to all-black (0, 0, 0).
 
-:return: A rgb_buffer numpy array with shape (height, padded_width, 3) suitable for use in the :meth:`rasterize` function. After rasterization, use `rgb_buffer[:, 0 : camera.image_width, :]` to get the rendered image.
+:return: A rgb_buffer numpy array with shape (height, padded_width, 3) suitable for use in the rasterization functions such as :func:`rasterize_mesh`. After rasterization, use `rgb_buffer[:, 0 : camera.image_width, :]` to get the rendered image.
 )",
       py::arg("camera"),
       py::arg("background_color") = std::optional<Eigen::Vector3f>{});
@@ -996,7 +996,7 @@ See detailed notes under :meth:`rasterize_mesh`, above.
 
 :param camera: Camera to render from.
 
-:return: An integer numpy array with shape (height, padded_width) suitable for passing in as an index buffer to the :meth:`rasterize` function.
+:return: An integer numpy array with shape (height, padded_width) suitable for passing in as an index buffer to the rasterization functions such as :func:`rasterize_mesh`.
 )",
       py::arg("camera"));
 

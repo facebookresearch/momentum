@@ -412,11 +412,12 @@ Each PPCA model is a Gaussian with mean mu and covariance (sigma^2*I + W*W^T).
       .def(
           py::init(&createMppcaModel),
           R"(Construct an Mppca model from numpy arrays.
+
 :param pi: The (nModels) mixture weights
 :param mu: The (nModels x dimension) mean vectors.
-:param W: The (nModels x dimension x nParams) weight matrices.
-:param sigma2: The (nModels) squared sigma uniform variance parameters.
-:param names: The (nDimension) names of the affected parameters.
+:param W: The (nModels x nPCA x dimension) weight matrices.
+:param sigma: The (nModels) standard deviations of the uniform (isotropic) part of the covariance; these are squared internally.
+:param names: The (dimension) names of the affected parameters.
 )",
           py::arg("pi"),
           py::arg("mu"),
@@ -437,7 +438,7 @@ Each PPCA model is a Gaussian with mean mu and covariance (sigma^2*I + W*W^T).
 Each PPCA model a Gaussian N(mu, cov) where the covariance matrix is
 (sigma*sigma*I + W * W^T).  pi is the mixture weight for this particular Gaussian.
 
-Note that mu is a vector of length :meth:`dimension` and W is a matrix of dimension :meth:`dimension` x q
+Note that mu is a vector of length :attr:`n_dimension` and W is a matrix of dimension :attr:`n_dimension` x q
 where q is the dimensionality of the PCA subspace.
 
 The resulting arrays are as follows:
@@ -956,7 +957,7 @@ Use this function when you already have the character loaded separately and only
 For loading both character and motion together, use :meth:`Character.load_gltf_with_motion`.
 
 Unless you can guarantee that the parameters in the motion files match your existing character,
-you will likely want to retarget the parameters using the :meth:`mapParameters` function.
+you will likely want to retarget the parameters using the :func:`map_model_parameters` function.
 
 :parameter gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [motionData, motionParameterNames, identityData, identityParameterNames]. Does NOT include the character or FPS.
@@ -1454,7 +1455,7 @@ texcoord_lines with proper index remapping and compaction.
       R"(Strips out unused parameters from the parameter transform.
 
 :param character: Full-body character.
-:param activeParameters: A boolean numpy array marking which parameters should be retained.
+:param active_parameters: A boolean numpy array marking which parameters should be retained.
 :return: A new character whose parameter transform only includes the marked parameters.)",
       py::arg("character"),
       py::arg("active_parameters"));
