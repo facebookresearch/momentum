@@ -149,35 +149,41 @@ size_t validateBatchedOutputTensor(
   return availableElements;
 }
 
-size_t validateSurfaceNormalsTensor(
+size_t validateVectorOutputTensor(
     const at::Tensor& tensor,
+    const char* name,
     const at::Device& device,
     int64_t height,
     int64_t width,
     int64_t depthRowStride) {
-  TORCH_CHECK(tensor.device() == device, "surface_normals_buffer must be on the CUDA input device");
-  TORCH_CHECK(tensor.scalar_type() == at::kFloat, "surface_normals_buffer must have dtype Float");
+  TORCH_CHECK(tensor.device() == device, name, " must be on the CUDA input device");
+  TORCH_CHECK(tensor.scalar_type() == at::kFloat, name, " must have dtype Float");
   TORCH_CHECK(
       tensor.dim() == 3 && tensor.size(0) == height && tensor.size(1) == width &&
           tensor.size(2) == 3,
-      "surface_normals_buffer must have shape [height, width, 3]");
+      name,
+      " must have shape [height, width, 3]");
   TORCH_CHECK(
       depthRowStride >= 0 && depthRowStride <= std::numeric_limits<int64_t>::max() / 3,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   TORCH_CHECK(
       tensor.stride(2) == 1 && tensor.stride(1) == 3 && tensor.stride(0) == 3 * depthRowStride,
-      "surface_normals_buffer must use the same padded rows as z_buffer");
+      name,
+      " must use the same padded rows as z_buffer");
   const auto rowStride = static_cast<size_t>(depthRowStride);
   const auto imageHeight = static_cast<size_t>(height);
   TORCH_CHECK(
       rowStride <= std::numeric_limits<size_t>::max() / imageHeight &&
           imageHeight * rowStride <= std::numeric_limits<size_t>::max() / 3,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   const size_t requiredElements = 3 * imageHeight * rowStride;
-  const size_t availableElements = availableStorageElements(tensor, "surface_normals_buffer");
+  const size_t availableElements = availableStorageElements(tensor, name);
   TORCH_CHECK(
       availableElements >= requiredElements,
-      "surface_normals_buffer backing storage has ",
+      name,
+      " backing storage has ",
       availableElements,
       " elements from the data pointer; at least ",
       requiredElements,
@@ -185,49 +191,57 @@ size_t validateSurfaceNormalsTensor(
   return availableElements;
 }
 
-size_t validateBatchedSurfaceNormalsTensor(
+size_t validateBatchedVectorOutputTensor(
     const at::Tensor& tensor,
+    const char* name,
     const at::Device& device,
     int64_t batchSize,
     int64_t height,
     int64_t width,
     int64_t depthImageStride,
     int64_t depthRowStride) {
-  TORCH_CHECK(tensor.device() == device, "surface_normals_buffer must be on the CUDA input device");
-  TORCH_CHECK(tensor.scalar_type() == at::kFloat, "surface_normals_buffer must have dtype Float");
+  TORCH_CHECK(tensor.device() == device, name, " must be on the CUDA input device");
+  TORCH_CHECK(tensor.scalar_type() == at::kFloat, name, " must have dtype Float");
   TORCH_CHECK(
       tensor.dim() == 4 && tensor.size(0) == batchSize && tensor.size(1) == height &&
           tensor.size(2) == width && tensor.size(3) == 3,
-      "surface_normals_buffer must have shape [batch, height, width, 3]");
+      name,
+      " must have shape [batch, height, width, 3]");
   TORCH_CHECK(
       depthRowStride >= 0 && depthImageStride >= 0 &&
           depthRowStride <= std::numeric_limits<int64_t>::max() / 3 &&
           depthImageStride <= std::numeric_limits<int64_t>::max() / 3,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   TORCH_CHECK(
       tensor.stride(3) == 1 && tensor.stride(2) == 3 && tensor.stride(1) == 3 * depthRowStride &&
           tensor.stride(0) == 3 * depthImageStride,
-      "surface_normals_buffer must use the same padded images as z_buffer");
+      name,
+      " must use the same padded images as z_buffer");
   const auto rowStride = static_cast<size_t>(depthRowStride);
   const auto imageStride = static_cast<size_t>(depthImageStride);
   const auto imageHeight = static_cast<size_t>(height);
   const auto batchCount = static_cast<size_t>(batchSize);
   TORCH_CHECK(
       rowStride <= std::numeric_limits<size_t>::max() / imageHeight,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   const size_t imageRowsSize = imageHeight * rowStride;
   TORCH_CHECK(
       batchCount - 1 <= (std::numeric_limits<size_t>::max() - imageRowsSize) / imageStride,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   const size_t requiredScalarElements = (batchCount - 1) * imageStride + imageRowsSize;
   TORCH_CHECK(
       requiredScalarElements <= std::numeric_limits<size_t>::max() / 3,
-      "surface_normals_buffer required storage size overflows");
+      name,
+      " required storage size overflows");
   const size_t requiredElements = 3 * requiredScalarElements;
-  const size_t availableElements = availableStorageElements(tensor, "surface_normals_buffer");
+  const size_t availableElements = availableStorageElements(tensor, name);
   TORCH_CHECK(
       availableElements >= requiredElements,
-      "surface_normals_buffer backing storage has ",
+      name,
+      " backing storage has ",
       availableElements,
       " elements from the data pointer; at least ",
       requiredElements,
@@ -244,6 +258,7 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshCuda(
     const std::optional<at::Tensor>& triangleIndexBuffer,
     const std::optional<at::Tensor>& vertexIndexBuffer,
     const std::optional<at::Tensor>& surfaceNormalsBuffer,
+    const std::optional<at::Tensor>& barycentricCoordinatesBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -298,8 +313,18 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshCuda(
   }
   size_t surfaceNormalsBufferSize = 0;
   if (surfaceNormalsBuffer.has_value()) {
-    surfaceNormalsBufferSize =
-        validateSurfaceNormalsTensor(*surfaceNormalsBuffer, device, height, width, depth.stride(0));
+    surfaceNormalsBufferSize = validateVectorOutputTensor(
+        *surfaceNormalsBuffer, "surface_normals_buffer", device, height, width, depth.stride(0));
+  }
+  size_t barycentricCoordinatesBufferSize = 0;
+  if (barycentricCoordinatesBuffer.has_value()) {
+    barycentricCoordinatesBufferSize = validateVectorOutputTensor(
+        *barycentricCoordinatesBuffer,
+        "barycentric_coordinates_buffer",
+        device,
+        height,
+        width,
+        depth.stride(0));
   }
 
   momentum::rasterizer::rasterizeMeshCuda(
@@ -332,6 +357,10 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshCuda(
               ? surfaceNormalsBuffer->mutable_data_ptr<float>()
               : nullptr,
           .surfaceNormalsBufferSize = surfaceNormalsBufferSize,
+          .barycentricCoordinatesBuffer = barycentricCoordinatesBuffer.has_value()
+              ? barycentricCoordinatesBuffer->mutable_data_ptr<float>()
+              : nullptr,
+          .barycentricCoordinatesBufferSize = barycentricCoordinatesBufferSize,
           .rowStride = depth.stride(0),
       },
       backfaceCulling,
@@ -350,6 +379,7 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshesCuda(
     const std::optional<at::Tensor>& triangleIndexBuffer,
     const std::optional<at::Tensor>& vertexIndexBuffer,
     const std::optional<at::Tensor>& surfaceNormalsBuffer,
+    const std::optional<at::Tensor>& barycentricCoordinatesBuffer,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -405,8 +435,27 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshesCuda(
   }
   size_t surfaceNormalsBufferSize = 0;
   if (surfaceNormalsBuffer.has_value()) {
-    surfaceNormalsBufferSize = validateBatchedSurfaceNormalsTensor(
-        *surfaceNormalsBuffer, device, batchSize, height, width, depth.stride(0), depth.stride(1));
+    surfaceNormalsBufferSize = validateBatchedVectorOutputTensor(
+        *surfaceNormalsBuffer,
+        "surface_normals_buffer",
+        device,
+        batchSize,
+        height,
+        width,
+        depth.stride(0),
+        depth.stride(1));
+  }
+  size_t barycentricCoordinatesBufferSize = 0;
+  if (barycentricCoordinatesBuffer.has_value()) {
+    barycentricCoordinatesBufferSize = validateBatchedVectorOutputTensor(
+        *barycentricCoordinatesBuffer,
+        "barycentric_coordinates_buffer",
+        device,
+        batchSize,
+        height,
+        width,
+        depth.stride(0),
+        depth.stride(1));
   }
 
   momentum::rasterizer::rasterizeMeshesCuda(
@@ -440,6 +489,10 @@ std::tuple<at::Tensor, std::optional<at::Tensor>> rasterizeMeshesCuda(
               ? surfaceNormalsBuffer->mutable_data_ptr<float>()
               : nullptr,
           .surfaceNormalsBufferSize = surfaceNormalsBufferSize,
+          .barycentricCoordinatesBuffer = barycentricCoordinatesBuffer.has_value()
+              ? barycentricCoordinatesBuffer->mutable_data_ptr<float>()
+              : nullptr,
+          .barycentricCoordinatesBufferSize = barycentricCoordinatesBufferSize,
           .rowStride = depth.stride(1),
           .imageStride = depth.stride(0),
       },
@@ -465,7 +518,7 @@ PYBIND11_MODULE(_renderer_cuda, module) {
       &pymomentum::rasterizeMeshCuda,
       R"(Rasterize a triangle mesh into CUDA-resident output tensors.
 
-This non-differentiable CUDA path atomically updates depth on the current PyTorch CUDA stream. It launches a second pass only when a triangle-index, vertex-index, or surface-normal output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified and may mix attributes from tied triangles. Callers must establish stream ordering when inputs were produced on a different stream.
+This non-differentiable CUDA path atomically updates depth on the current PyTorch CUDA stream. It launches a second pass only when a triangle-index, vertex-index, surface-normal, or barycentric-coordinate output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified and may mix attributes from tied triangles. Callers must establish stream ordering when inputs were produced on a different stream.
 
 :param vertex_positions: Contiguous CUDA float32 tensor with shape ``(n_vertices, 3)``.
 :param triangles: Contiguous CUDA int32 tensor with shape ``(n_triangles, 3)``.
@@ -475,6 +528,7 @@ This non-differentiable CUDA path atomically updates depth on the current PyTorc
 :param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and row stride as ``z_buffer``. No triangle-index tensor is allocated when omitted.
 :param vertex_index_buffer: Optional CUDA int32 output tensor with the same shape and strides as ``z_buffer``.
 :param surface_normals_buffer: Optional CUDA float32 output tensor with shape ``(height, width, 3)`` and matching padded rows.
+:param barycentric_coordinates_buffer: Optional CUDA float32 output tensor with shape ``(height, width, 3)`` and matching padded rows. Stores perspective-correct triangle barycentric coordinates.
 :param model_matrix: Optional model transformation matrix.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
@@ -490,6 +544,7 @@ This non-differentiable CUDA path atomically updates depth on the current PyTorc
       py::arg("triangle_index_buffer") = std::nullopt,
       py::arg("vertex_index_buffer") = std::nullopt,
       py::arg("surface_normals_buffer") = std::nullopt,
+      py::arg("barycentric_coordinates_buffer") = std::nullopt,
       py::arg("model_matrix") = std::nullopt,
       py::arg("back_face_culling") = true,
       py::arg("near_clip") = 0.1f,
@@ -500,7 +555,7 @@ This non-differentiable CUDA path atomically updates depth on the current PyTorc
       &pymomentum::rasterizeMeshesCuda,
       R"(Rasterize a batch of triangle meshes with shared topology and camera.
 
-This non-differentiable CUDA path renders the entire batch with one depth kernel launch on the current PyTorch CUDA stream. It launches a second batched pass only when a triangle-index, vertex-index, or surface-normal output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified. The triangle topology, camera, and model matrix are shared across the batch.
+This non-differentiable CUDA path renders the entire batch with one depth kernel launch on the current PyTorch CUDA stream. It launches a second batched pass only when a triangle-index, vertex-index, surface-normal, or barycentric-coordinate output is provided. For non-tied depths, every requested attribute corresponds to finalized depth; exact-depth ties are unspecified. The triangle topology, camera, and model matrix are shared across the batch.
 
 :param vertex_positions: Contiguous CUDA float32 tensor with shape ``(batch, n_vertices, 3)``.
 :param triangles: Contiguous CUDA int32 tensor with shape ``(n_triangles, 3)`` shared by the batch.
@@ -510,6 +565,7 @@ This non-differentiable CUDA path renders the entire batch with one depth kernel
 :param triangle_index_buffer: Optional CUDA int32 tensor with the same shape and strides as ``z_buffer``. No tensor is allocated when omitted.
 :param vertex_index_buffer: Optional CUDA int32 output tensor with the same shape and strides as ``z_buffer``.
 :param surface_normals_buffer: Optional CUDA float32 output tensor with shape ``(batch, height, width, 3)`` and matching padded images.
+:param barycentric_coordinates_buffer: Optional CUDA float32 output tensor with shape ``(batch, height, width, 3)`` and matching padded images. Stores perspective-correct triangle barycentric coordinates.
 :param model_matrix: Optional model transformation matrix shared by every batch entry.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
@@ -525,6 +581,7 @@ This non-differentiable CUDA path renders the entire batch with one depth kernel
       py::arg("triangle_index_buffer") = std::nullopt,
       py::arg("vertex_index_buffer") = std::nullopt,
       py::arg("surface_normals_buffer") = std::nullopt,
+      py::arg("barycentric_coordinates_buffer") = std::nullopt,
       py::arg("model_matrix") = std::nullopt,
       py::arg("back_face_culling") = true,
       py::arg("near_clip") = 0.1f,

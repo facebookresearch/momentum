@@ -35,13 +35,13 @@ struct CudaRasterizerInputs {
 
 /// Device buffers used by the CUDA rasterizer.
 ///
-/// All scalar buffers use rowStride elements per row. surfaceNormalsBuffer, when provided, stores
-/// three interleaved floats per pixel and uses 3 * rowStride elements per row. The corresponding
+/// All scalar buffers use rowStride elements per row. Three-channel buffers, when provided, store
+/// three interleaved floats per pixel and use 3 * rowStride elements per row. The corresponding
 /// size fields are element counts, not byte counts. Existing output values are preserved where no
-/// new triangle wins the depth test. zBuffer must be non-null; triangle, vertex, and normal outputs
-/// are optional and written in a conditional second pass. For non-tied depth values, every
-/// requested attribute corresponds to finalized depth. Exact-depth ties are unspecified and may mix
-/// independently written attributes from tied triangles.
+/// new triangle wins the depth test. zBuffer must be non-null; triangle, vertex, normal, and
+/// barycentric outputs are optional and written in a conditional second pass. For non-tied depth
+/// values, every requested attribute corresponds to finalized depth. Exact-depth ties are
+/// unspecified and may mix independently written attributes from tied triangles.
 struct CudaRasterizerBuffers {
   float* zBuffer = nullptr;
   size_t zBufferSize = 0;
@@ -51,6 +51,8 @@ struct CudaRasterizerBuffers {
   size_t vertexIndexBufferSize = 0;
   float* surfaceNormalsBuffer = nullptr;
   size_t surfaceNormalsBufferSize = 0;
+  float* barycentricCoordinatesBuffer = nullptr;
+  size_t barycentricCoordinatesBufferSize = 0;
   int64_t rowStride = 0;
 };
 
@@ -70,6 +72,8 @@ struct CudaBatchedRasterizerBuffers {
   size_t vertexIndexBufferSize = 0;
   float* surfaceNormalsBuffer = nullptr;
   size_t surfaceNormalsBufferSize = 0;
+  float* barycentricCoordinatesBuffer = nullptr;
+  size_t barycentricCoordinatesBufferSize = 0;
   int64_t rowStride = 0;
   int64_t imageStride = 0;
 };

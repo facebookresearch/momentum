@@ -791,6 +791,87 @@ class TestTorchRendererCpu(unittest.TestCase):
                 triangle_ids,
             )
 
+    def test_render_mesh_matches_cpu_renderer_with_texture(self) -> None:
+        vertices = torch.from_numpy(self.vertices[:3].copy())
+        triangles = torch.from_numpy(self.triangles[:1].copy())
+        normals = torch.tensor([[0.0, 0.0, -1.0]], dtype=torch.float32).repeat(3, 1)
+        texture_coordinates = torch.tensor(
+            [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0]], dtype=torch.float32
+        )
+        texture = torch.tensor(
+            [
+                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+                [[0.0, 0.0, 1.0], [1.0, 1.0, 1.0]],
+            ],
+            dtype=torch.float32,
+        )
+        material = pym_renderer.PhongMaterial(
+            diffuse_color=np.ones(3, dtype=np.float32)
+        )
+        light = pym_renderer.Light.create_ambient_light(np.ones(3, dtype=np.float32))
+
+        expected_depth = pym_renderer.create_z_buffer(self.camera)
+        expected_rgb = pym_renderer.create_rgb_buffer(self.camera)
+        pym_renderer.rasterize_mesh(
+            vertices.numpy(),
+            normals.numpy(),
+            triangles.numpy(),
+            self.camera,
+            expected_depth,
+            expected_rgb,
+            material=pym_renderer.PhongMaterial(
+                diffuse_color=np.ones(3, dtype=np.float32),
+                diffuse_texture=texture.numpy(),
+            ),
+            texture_coordinates=texture_coordinates.numpy(),
+            lights=[light],
+        )
+        depth, rgb = torch_renderer.render_mesh(
+            vertices,
+            triangles,
+            self.camera,
+            vertex_normals=normals,
+            texture_coordinates=texture_coordinates,
+            diffuse_texture=texture,
+            material=material,
+            lights=[light],
+        )
+
+        torch.testing.assert_close(depth, torch.from_numpy(expected_depth))
+        torch.testing.assert_close(rgb, torch.from_numpy(expected_rgb))
+
+    def test_checkerboard_matches_cpu_renderer(self) -> None:
+        camera = pym_camera.Camera(
+            pym_camera.PinholeIntrinsicsModel(64, 48, 55.0, 55.0, 32.0, 24.0)
+        ).look_at(
+            np.asarray([4.0, 3.0, -5.0], dtype=np.float32),
+            np.asarray([0.0, 0.0, 0.0], dtype=np.float32),
+            np.asarray([0.0, 1.0, 0.0], dtype=np.float32),
+        )
+        light = pym_renderer.Light.create_ambient_light(np.ones(3, dtype=np.float32))
+        expected_depth = pym_renderer.create_z_buffer(camera)
+        expected_rgb = pym_renderer.create_rgb_buffer(camera)
+        pym_renderer.rasterize_checkerboard(
+            camera,
+            expected_depth,
+            expected_rgb,
+            lights=[light],
+            width=50.0,
+            num_checks=10,
+            subdivisions=2,
+        )
+
+        depth, rgb = torch_renderer.rasterize_checkerboard(
+            camera,
+            lights=[light],
+            width=50.0,
+            num_checks=10,
+            subdivisions=2,
+        )
+
+        torch.testing.assert_close(depth, torch.from_numpy(expected_depth))
+        torch.testing.assert_close(rgb, torch.from_numpy(expected_rgb))
+
 
 # Gate the whole class so pytest cannot collect CUDA tests when the backend or
 # runtime device is unavailable.
@@ -800,6 +881,132 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():  # noqa: C901 - suite-
         def setUp(self) -> None:
             self.camera = _make_camera()
             self.vertices, self.triangles = _make_mesh()
+
+        def test_cuda_barycentrics_reconstruct_depth(self) -> None:
+            vertices = torch.from_numpy(self.vertices[:3].copy()).cuda()
+            triangles = torch.from_numpy(self.triangles[:1].copy()).cuda()
+            triangle_ids = torch_renderer.create_index_buffer(
+                self.camera, device="cuda"
+            )
+            barycentrics = torch_renderer.create_barycentric_coordinates_buffer(
+                self.camera, device="cuda"
+            )
+
+            depth, _ = torch_renderer.rasterize_mesh(
+                vertices,
+                triangles,
+                self.camera,
+                triangle_index_buffer=triangle_ids,
+                barycentric_coordinates_buffer=barycentrics,
+            )
+
+            covered = triangle_ids >= 0
+            self.assertGreater(int(torch.count_nonzero(covered)), 0)
+            torch.testing.assert_close(
+                barycentrics[covered].sum(dim=-1),
+                torch.ones_like(depth[covered]),
+                atol=2e-6,
+                rtol=0.0,
+            )
+            reconstructed_depth = torch.sum(
+                barycentrics[covered] * vertices[:, 2], dim=-1
+            )
+            torch.testing.assert_close(
+                reconstructed_depth, depth[covered], atol=2e-6, rtol=0.0
+            )
+
+        def test_cuda_textured_render_and_checkerboard_match_cpu(self) -> None:
+            vertices = torch.from_numpy(self.vertices[:3].copy())
+            triangles = torch.from_numpy(self.triangles[:1].copy())
+            normals = torch.tensor([[0.0, 0.0, -1.0]], dtype=torch.float32).repeat(3, 1)
+            texture_coordinates = torch.tensor(
+                [[0.0, 0.0], [0.0, 1.0], [1.0, 0.0]], dtype=torch.float32
+            )
+            texture = torch.tensor(
+                [
+                    [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+                    [[0.0, 0.0, 1.0], [1.0, 1.0, 1.0]],
+                ],
+                dtype=torch.float32,
+            )
+            material = pym_renderer.PhongMaterial(
+                diffuse_color=np.ones(3, dtype=np.float32),
+                specular_color=np.asarray([0.2, 0.3, 0.4], dtype=np.float32),
+                specular_exponent=12.0,
+            )
+            lights = [
+                pym_renderer.Light.create_ambient_light(
+                    np.asarray([0.15, 0.2, 0.25], dtype=np.float32)
+                ),
+                pym_renderer.Light.create_point_light(
+                    np.asarray([0.5, -0.5, 0.5], dtype=np.float32),
+                    np.asarray([0.7, 0.6, 0.5], dtype=np.float32),
+                ),
+                pym_renderer.Light.create_directional_light(
+                    np.asarray([0.3, 0.1, 1.0], dtype=np.float32),
+                    np.asarray([0.2, 0.3, 0.4], dtype=np.float32),
+                ),
+            ]
+            cpu_depth, cpu_rgb = torch_renderer.render_mesh(
+                vertices,
+                triangles,
+                self.camera,
+                vertex_normals=normals,
+                texture_coordinates=texture_coordinates,
+                diffuse_texture=texture,
+                material=material,
+                lights=lights,
+            )
+            gpu_depth, gpu_rgb = torch_renderer.render_mesh(
+                vertices.cuda(),
+                triangles.cuda(),
+                self.camera,
+                vertex_normals=normals.cuda(),
+                texture_coordinates=texture_coordinates.cuda(),
+                diffuse_texture=texture.cuda(),
+                material=material,
+                lights=lights,
+            )
+            common = (cpu_depth < torch.finfo(torch.float32).max) & (
+                gpu_depth.cpu() < torch.finfo(torch.float32).max
+            )
+            self.assertGreater(int(torch.count_nonzero(common)), 0)
+            torch.testing.assert_close(
+                gpu_rgb.cpu()[common], cpu_rgb[common], atol=2e-4, rtol=0.0
+            )
+
+            camera = pym_camera.Camera(
+                pym_camera.PinholeIntrinsicsModel(64, 48, 55.0, 55.0, 32.0, 24.0)
+            ).look_at(
+                np.asarray([4.0, 3.0, -5.0], dtype=np.float32),
+                np.asarray([0.0, 0.0, 0.0], dtype=np.float32),
+                np.asarray([0.0, 1.0, 0.0], dtype=np.float32),
+            )
+            cpu_checker_depth, cpu_checker_rgb = torch_renderer.rasterize_checkerboard(
+                camera,
+                lights=[lights[0]],
+                width=50.0,
+                num_checks=10,
+                subdivisions=2,
+            )
+            gpu_checker_depth, gpu_checker_rgb = torch_renderer.rasterize_checkerboard(
+                camera,
+                device="cuda",
+                lights=[lights[0]],
+                width=50.0,
+                num_checks=10,
+                subdivisions=2,
+            )
+            common_checker = (cpu_checker_depth < torch.finfo(torch.float32).max) & (
+                gpu_checker_depth.cpu() < torch.finfo(torch.float32).max
+            )
+            self.assertGreater(int(torch.count_nonzero(common_checker)), 0)
+            torch.testing.assert_close(
+                gpu_checker_rgb.cpu()[common_checker],
+                cpu_checker_rgb[common_checker],
+                atol=2e-4,
+                rtol=0.0,
+            )
 
         def test_render_state_accepts_unindexed_cuda_device(self) -> None:
             state = torch_renderer.RenderState("cuda")
@@ -1021,6 +1228,47 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():  # noqa: C901 - suite-
             covered = actual_depth < torch.finfo(torch.float32).max
             self.assertTrue(
                 bool(torch.all(torch.count_nonzero(covered, dim=(1, 2)) > 0))
+            )
+
+        def test_cuda_character_shading_matches_cpu(self) -> None:
+            cpu_character, cpu_parameters, model_matrix = _make_character_inputs("cpu")
+            gpu_character, gpu_parameters, _ = _make_character_inputs("cuda")
+            material = pym_renderer.PhongMaterial(
+                diffuse_color=np.asarray([0.2, 0.5, 0.9], dtype=np.float32)
+            )
+            lights = [
+                pym_renderer.Light.create_ambient_light(
+                    np.asarray([0.4, 0.5, 0.6], dtype=np.float32)
+                )
+            ]
+
+            cpu_depth, cpu_rgb = torch_renderer.render_character(
+                cpu_character,
+                cpu_parameters,
+                self.camera,
+                material=material,
+                lights=lights,
+                model_matrix=model_matrix,
+                back_face_culling=False,
+            )
+            gpu_depth, gpu_rgb = torch_renderer.render_character(
+                gpu_character,
+                gpu_parameters,
+                self.camera,
+                material=material,
+                lights=lights,
+                model_matrix=model_matrix,
+                back_face_culling=False,
+            )
+
+            common = (cpu_depth < torch.finfo(torch.float32).max) & (
+                gpu_depth.cpu() < torch.finfo(torch.float32).max
+            )
+            self.assertTrue(
+                bool(torch.all(torch.count_nonzero(common, dim=(1, 2)) > 0))
+            )
+            torch.testing.assert_close(
+                gpu_rgb.cpu()[common], cpu_rgb[common], atol=2e-4, rtol=0.0
             )
 
         def test_cuda_vertex_indices_and_surface_normals_match_cpu(self) -> None:

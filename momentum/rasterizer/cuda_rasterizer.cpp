@@ -159,6 +159,18 @@ void rasterizeMeshesCuda(
       buffers.surfaceNormalsBufferSize,
       requiredNormalBufferSize);
   MT_THROW_IF(
+      buffers.barycentricCoordinatesBuffer != nullptr &&
+          requiredBufferSize > std::numeric_limits<size_t>::max() / 3,
+      "CUDA barycentric-coordinate buffer size overflows");
+  const size_t requiredBarycentricBufferSize =
+      buffers.barycentricCoordinatesBuffer == nullptr ? 0 : 3 * requiredBufferSize;
+  MT_THROW_IF(
+      buffers.barycentricCoordinatesBuffer != nullptr &&
+          buffers.barycentricCoordinatesBufferSize < requiredBarycentricBufferSize,
+      "CUDA barycentric-coordinate buffer has {} elements; at least {} are required",
+      buffers.barycentricCoordinatesBufferSize,
+      requiredBarycentricBufferSize);
+  MT_THROW_IF(
       numVertices > std::numeric_limits<size_t>::max() / 3 ||
           numTriangles > std::numeric_limits<size_t>::max() / 3,
       "CUDA mesh input size overflows");
@@ -222,6 +234,7 @@ void rasterizeMeshesCuda(
           buffers.triangleIndexBuffer,
           buffers.vertexIndexBuffer,
           buffers.surfaceNormalsBuffer,
+          buffers.barycentricCoordinatesBuffer,
           stream),
       "Batched CUDA rasterizer launch");
 }
@@ -256,6 +269,8 @@ void rasterizeMeshCuda(
           .vertexIndexBufferSize = buffers.vertexIndexBufferSize,
           .surfaceNormalsBuffer = buffers.surfaceNormalsBuffer,
           .surfaceNormalsBufferSize = buffers.surfaceNormalsBufferSize,
+          .barycentricCoordinatesBuffer = buffers.barycentricCoordinatesBuffer,
+          .barycentricCoordinatesBufferSize = buffers.barycentricCoordinatesBufferSize,
           .rowStride = buffers.rowStride,
           .imageStride = imageStride,
       },

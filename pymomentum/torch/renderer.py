@@ -97,6 +97,57 @@ def create_index_buffer(
     return storage[..., : camera.image_width]
 
 
+def _create_vector_buffer(
+    camera: pym_camera.Camera,
+    *,
+    batch_size: int | None,
+    device: torch.device | str | None,
+    fill_value: float,
+) -> torch.Tensor:
+    if batch_size is not None and batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    image_shape = (camera.image_height, _padded_width(camera), 3)
+    storage_shape = image_shape if batch_size is None else (batch_size, *image_shape)
+    storage = torch.full(
+        storage_shape,
+        fill_value,
+        dtype=torch.float32,
+        device=torch.device("cpu") if device is None else device,
+    )
+    return storage[..., : camera.image_width, :]
+
+
+def create_rgb_buffer(
+    camera: pym_camera.Camera,
+    *,
+    background_color: torch.Tensor | None = None,
+    batch_size: int | None = None,
+    device: torch.device | str | None = None,
+) -> torch.Tensor:
+    """Create a padded float32 RGB buffer on the requested device.
+
+    :param camera: Camera defining the output dimensions.
+    :param background_color: Optional float32 tensor with shape ``(3,)`` on the requested device.
+    :param batch_size: Optional positive batch dimension.
+    :param device: Torch device for the result. Defaults to CPU.
+    :return: A padded ``(height, width, 3)`` or ``(batch, height, width, 3)`` tensor.
+    """
+    result = _create_vector_buffer(
+        camera, batch_size=batch_size, device=device, fill_value=0.0
+    )
+    if background_color is not None:
+        if (
+            background_color.dtype != torch.float32
+            or background_color.device != result.device
+            or tuple(background_color.shape) != (3,)
+        ):
+            raise RuntimeError(
+                "background_color must be a float32 tensor with shape (3,) on the output device"
+            )
+        result.copy_(background_color)
+    return result
+
+
 def create_surface_normals_buffer(
     camera: pym_camera.Camera,
     *,
@@ -110,16 +161,29 @@ def create_surface_normals_buffer(
     :param device: Torch device for the result. Defaults to CPU.
     :return: A ``(height, width, 3)`` or ``(batch, height, width, 3)`` tensor backed by padded storage.
     """
-    if batch_size is not None and batch_size <= 0:
-        raise ValueError("batch_size must be positive")
-    image_shape = (camera.image_height, _padded_width(camera), 3)
-    storage_shape = image_shape if batch_size is None else (batch_size, *image_shape)
-    storage = torch.zeros(
-        storage_shape,
-        dtype=torch.float32,
-        device=torch.device("cpu") if device is None else device,
+    return _create_vector_buffer(
+        camera, batch_size=batch_size, device=device, fill_value=0.0
     )
-    return storage[..., : camera.image_width, :]
+
+
+def create_barycentric_coordinates_buffer(
+    camera: pym_camera.Camera,
+    *,
+    batch_size: int | None = None,
+    device: torch.device | str | None = None,
+) -> torch.Tensor:
+    """Create a padded float32 barycentric-coordinate buffer.
+
+    The CUDA rasterizer writes perspective-correct triangle barycentric coordinates.
+
+    :param camera: Camera defining the output dimensions.
+    :param batch_size: Optional positive batch dimension.
+    :param device: Torch device for the result. Defaults to CPU.
+    :return: A ``(height, width, 3)`` or ``(batch, height, width, 3)`` tensor backed by padded storage.
+    """
+    return _create_vector_buffer(
+        camera, batch_size=batch_size, device=device, fill_value=0.0
+    )
 
 
 def _validate_vertex_positions(
@@ -193,32 +257,31 @@ def _validate_output_tensor(
         )
 
 
-def _validate_surface_normals_buffer(
+def _validate_vector_output_buffer(
     tensor: torch.Tensor,
+    name: str,
     camera: pym_camera.Camera,
     device: torch.device,
     batch_size: int | None,
     depth: torch.Tensor,
 ) -> None:
     if tensor.device != device:
-        raise RuntimeError(f"surface_normals_buffer must be on device {device}")
+        raise RuntimeError(f"{name} must be on device {device}")
     if tensor.dtype != torch.float32:
-        raise RuntimeError("surface_normals_buffer must have dtype torch.float32")
+        raise RuntimeError(f"{name} must have dtype torch.float32")
     image_shape = (camera.image_height, camera.image_width, 3)
     expected_shape = image_shape if batch_size is None else (batch_size, *image_shape)
     if tuple(tensor.shape) != expected_shape:
-        raise RuntimeError(f"surface_normals_buffer must have shape {expected_shape}")
+        raise RuntimeError(f"{name} must have shape {expected_shape}")
     expected_strides = (
         (3 * depth.stride(0), 3, 1)
         if batch_size is None
         else (3 * depth.stride(0), 3 * depth.stride(1), 3, 1)
     )
     if tensor.stride() != expected_strides:
-        raise RuntimeError(
-            "surface_normals_buffer must use the same padded storage as z_buffer"
-        )
+        raise RuntimeError(f"{name} must use the same padded storage as z_buffer")
     if tensor.storage_offset() % _BUFFER_ALIGNMENT != 0:
-        raise RuntimeError("surface_normals_buffer data pointer must be aligned")
+        raise RuntimeError(f"{name} data pointer must be aligned")
     row_stride = depth.stride(-2)
     if batch_size is None:
         required_elements = 3 * camera.image_height * row_stride
@@ -230,7 +293,7 @@ def _validate_surface_normals_buffer(
     available_elements = storage_elements - tensor.storage_offset()
     if available_elements < required_elements:
         raise RuntimeError(
-            f"surface_normals_buffer backing storage has {available_elements} elements from the data pointer; "
+            f"{name} backing storage has {available_elements} elements from the data pointer; "
             f"at least {required_elements} are required by its shape and strides"
         )
 
@@ -245,6 +308,7 @@ def rasterize_mesh(  # noqa: C901
     triangle_index_buffer: torch.Tensor | None = None,
     vertex_index_buffer: torch.Tensor | None = None,
     surface_normals_buffer: torch.Tensor | None = None,
+    barycentric_coordinates_buffer: torch.Tensor | None = None,
     model_matrix: npt.NDArray[np.float32] | None = None,
     back_face_culling: bool = True,
     near_clip: float = 0.1,
@@ -271,6 +335,7 @@ def rasterize_mesh(  # noqa: C901
     :param triangle_index_buffer: Optional padded int32 triangle-index output. No triangle-index buffer is allocated when omitted.
     :param vertex_index_buffer: Optional padded int32 closest-vertex buffer to update in place.
     :param surface_normals_buffer: Optional padded float32 eye-space normal buffer with a final dimension of three.
+    :param barycentric_coordinates_buffer: Optional padded float32 CUDA output buffer with a final dimension of three. Stores perspective-correct triangle barycentric coordinates; CPU tensors are not supported.
     :param model_matrix: Optional host-side float32 model transformation matrix shared across the batch.
     :param back_face_culling: Whether to discard back-facing triangles.
     :param near_clip: Per-pixel near clipping distance.
@@ -335,9 +400,27 @@ def rasterize_mesh(  # noqa: C901
                 "vertex_index_buffer must have the same strides as z_buffer"
             )
     if surface_normals_buffer is not None:
-        _validate_surface_normals_buffer(
-            surface_normals_buffer, camera, device, batch_size, depth
+        _validate_vector_output_buffer(
+            surface_normals_buffer,
+            "surface_normals_buffer",
+            camera,
+            device,
+            batch_size,
+            depth,
         )
+    if barycentric_coordinates_buffer is not None:
+        _validate_vector_output_buffer(
+            barycentric_coordinates_buffer,
+            "barycentric_coordinates_buffer",
+            camera,
+            device,
+            batch_size,
+            depth,
+        )
+        if device.type != "cuda":
+            raise RuntimeError(
+                "barycentric_coordinates_buffer is only supported for CUDA tensors"
+            )
 
     if device.type == "cuda":
         renderer_cuda = _load_renderer_cuda()
@@ -355,6 +438,7 @@ def rasterize_mesh(  # noqa: C901
             triangle_index_buffer=triangle_index,
             vertex_index_buffer=vertex_index_buffer,
             surface_normals_buffer=surface_normals_buffer,
+            barycentric_coordinates_buffer=barycentric_coordinates_buffer,
             model_matrix=model_matrix,
             back_face_culling=back_face_culling,
             near_clip=near_clip,
@@ -443,6 +527,437 @@ def rasterize_mesh(  # noqa: C901
     return depth, triangle_index
 
 
+def _validate_optional_mesh_attribute(
+    tensor: torch.Tensor | None,
+    name: str,
+    device: torch.device,
+    dtype: torch.dtype,
+    shape_suffix: tuple[int, ...],
+) -> None:
+    if tensor is None:
+        return
+    if tensor.device != device or tensor.dtype != dtype:
+        raise RuntimeError(f"{name} must have dtype {dtype} on device {device}")
+    if tensor.ndim != len(shape_suffix) + 1 or tuple(tensor.shape[1:]) != shape_suffix:
+        raise RuntimeError(f"{name} has an invalid shape")
+    if not tensor.is_contiguous():
+        raise RuntimeError(f"{name} must be contiguous")
+
+
+def _material_with_device_textures(
+    material: pym_renderer.PhongMaterial,
+    diffuse_texture: torch.Tensor | None,
+    emissive_texture: torch.Tensor | None,
+) -> pym_renderer.PhongMaterial:
+    return pym_renderer.PhongMaterial(
+        diffuse_color=np.asarray(material.diffuse_color, dtype=np.float32),
+        specular_color=np.asarray(material.specular_color, dtype=np.float32),
+        specular_exponent=material.specular_exponent,
+        emissive_color=np.asarray(material.emissive_color, dtype=np.float32),
+        diffuse_texture=(
+            diffuse_texture.detach().numpy() if diffuse_texture is not None else None
+        ),
+        emissive_texture=(
+            emissive_texture.detach().numpy() if emissive_texture is not None else None
+        ),
+    )
+
+
+def _sample_texture(texture: torch.Tensor, uv: torch.Tensor) -> torch.Tensor:
+    height, width, _ = texture.shape
+    pixel = torch.clamp(uv, 0.0, 1.0) * torch.tensor(
+        [width - 1, height - 1], dtype=torch.float32, device=uv.device
+    )
+    low = torch.floor(pixel).to(torch.int64)
+    high = torch.minimum(
+        low + 1,
+        torch.tensor([width - 1, height - 1], dtype=torch.int64, device=uv.device),
+    )
+    offset = pixel - low.to(torch.float32)
+    low_x, low_y = low.unbind(dim=-1)
+    high_x, high_y = high.unbind(dim=-1)
+    x_weight = offset[:, 0:1]
+    y_weight = offset[:, 1:2]
+    return (
+        (1.0 - x_weight) * (1.0 - y_weight) * texture[low_y, low_x]
+        + (1.0 - x_weight) * y_weight * texture[high_y, low_x]
+        + x_weight * (1.0 - y_weight) * texture[low_y, high_x]
+        + x_weight * y_weight * texture[high_y, high_x]
+    )
+
+
+def _eye_space_vertices(
+    vertices: torch.Tensor,
+    camera: pym_camera.Camera,
+    model_matrix: npt.NDArray[np.float32] | None,
+) -> torch.Tensor:
+    model = (
+        np.eye(4, dtype=np.float32)
+        if model_matrix is None
+        else np.asarray(model_matrix, dtype=np.float32)
+    )
+    eye_from_model = torch.tensor(
+        np.asarray(camera.T_eye_from_world, dtype=np.float32) @ model,
+        dtype=torch.float32,
+        device=vertices.device,
+    )
+    homogeneous = torch.cat((vertices, torch.ones_like(vertices[..., :1])), dim=-1)
+    transformed = torch.einsum("ij,...vj->...vi", eye_from_model, homogeneous)
+    return transformed[..., :3] / transformed[..., 3:4]
+
+
+def _shade_cuda_mesh(
+    vertex_positions: torch.Tensor,
+    triangles: torch.Tensor,
+    camera: pym_camera.Camera,
+    triangle_indices: torch.Tensor,
+    barycentric_coordinates: torch.Tensor,
+    surface_normals: torch.Tensor,
+    rgb: torch.Tensor,
+    material: pym_renderer.PhongMaterial,
+    lights: list[pym_renderer.Light] | None,
+    model_matrix: npt.NDArray[np.float32] | None,
+    texture_coordinates: torch.Tensor | None,
+    texture_triangles: torch.Tensor | None,
+    per_vertex_diffuse_color: torch.Tensor | None,
+    diffuse_texture: torch.Tensor | None,
+    emissive_texture: torch.Tensor | None,
+) -> None:
+    covered = triangle_indices >= 0
+    triangle_ids = triangle_indices[covered].to(torch.int64)
+    bary = barycentric_coordinates[covered]
+    triangle_vertices = triangles.to(torch.int64)[triangle_ids]
+    eye_vertices = _eye_space_vertices(vertex_positions, camera, model_matrix)
+    if vertex_positions.ndim == 2:
+        positions = eye_vertices[triangle_vertices]
+    else:
+        batch_indices = torch.nonzero(covered, as_tuple=False)[:, 0]
+        positions = eye_vertices[batch_indices[:, None], triangle_vertices]
+    position = torch.sum(positions * bary[..., None], dim=1)
+    normal = surface_normals[covered]
+
+    diffuse_color = torch.tensor(
+        np.asarray(material.diffuse_color, dtype=np.float32),
+        dtype=torch.float32,
+        device=rgb.device,
+    ).expand(position.shape[0], 3)
+    if per_vertex_diffuse_color is not None:
+        vertex_colors = per_vertex_diffuse_color[triangle_vertices]
+        diffuse_color = torch.sum(vertex_colors * bary[..., None], dim=1)
+
+    uv = None
+    if texture_coordinates is not None:
+        texture_topology = triangles if texture_triangles is None else texture_triangles
+        texture_vertex_indices = texture_topology.to(torch.int64)[triangle_ids]
+        uv = torch.sum(
+            texture_coordinates[texture_vertex_indices] * bary[..., None], dim=1
+        )
+    if diffuse_texture is not None:
+        if uv is None:
+            raise RuntimeError("diffuse_texture requires texture_coordinates")
+        diffuse_color = _sample_texture(diffuse_texture, uv)
+
+    shaded = (
+        torch.tensor(
+            np.asarray(material.emissive_color, dtype=np.float32),
+            dtype=torch.float32,
+            device=rgb.device,
+        )
+        .expand(position.shape[0], 3)
+        .clone()
+    )
+    if emissive_texture is not None:
+        if uv is None:
+            raise RuntimeError("emissive_texture requires texture_coordinates")
+        shaded += _sample_texture(emissive_texture, uv)
+
+    eye_lights = (
+        [
+            pym_renderer.Light.create_point_light(
+                np.zeros(3, dtype=np.float32), np.ones(3, dtype=np.float32)
+            )
+        ]
+        if not lights
+        else [light.transform(camera.T_eye_from_world) for light in lights]
+    )
+    specular_array = np.asarray(material.specular_color, dtype=np.float32)
+    specular_color = torch.tensor(
+        specular_array,
+        dtype=torch.float32,
+        device=rgb.device,
+    )
+    has_specular = material.specular_exponent != 0.0 and bool(
+        np.any(specular_array != 0.0)
+    )
+    view_vector = torch.nn.functional.normalize(-position, dim=-1)
+    for light in eye_lights:
+        light_color = torch.tensor(
+            np.asarray(light.color, dtype=np.float32),
+            dtype=torch.float32,
+            device=rgb.device,
+        )
+        if light.type == pym_renderer.LightType.Ambient:
+            shaded += diffuse_color * light_color
+            continue
+        light_position = torch.tensor(
+            np.asarray(light.position, dtype=np.float32),
+            dtype=torch.float32,
+            device=rgb.device,
+        )
+        light_vector = (
+            -light_position.expand_as(position)
+            if light.type == pym_renderer.LightType.Directional
+            else torch.nn.functional.normalize(light_position - position, dim=-1)
+        )
+        intensity = torch.clamp(torch.sum(light_vector * normal, dim=-1), 0.0, 1.0)
+        shaded += intensity[:, None] * diffuse_color * light_color
+        if has_specular:
+            reflected = (
+                2.0 * torch.sum(light_vector * normal, dim=-1, keepdim=True) * normal
+            )
+            reflected -= light_vector
+            specular_intensity = torch.clamp(
+                torch.sum(reflected * view_vector, dim=-1), 0.0, 1.0
+            ).pow(material.specular_exponent)
+            shaded += specular_intensity[:, None] * specular_color * light_color
+    rgb[covered] = torch.clamp(shaded, 0.0, 1.0)
+
+
+@torch.no_grad()
+def render_mesh(  # noqa: C901 - validates and dispatches one cohesive public operation
+    vertex_positions: torch.Tensor,
+    triangles: torch.Tensor,
+    camera: pym_camera.Camera,
+    *,
+    vertex_normals: torch.Tensor | None = None,
+    texture_coordinates: torch.Tensor | None = None,
+    texture_triangles: torch.Tensor | None = None,
+    per_vertex_diffuse_color: torch.Tensor | None = None,
+    diffuse_texture: torch.Tensor | None = None,
+    emissive_texture: torch.Tensor | None = None,
+    material: pym_renderer.PhongMaterial | None = None,
+    lights: list[pym_renderer.Light] | None = None,
+    z_buffer: torch.Tensor | None = None,
+    rgb_buffer: torch.Tensor | None = None,
+    model_matrix: npt.NDArray[np.float32] | None = None,
+    back_face_culling: bool = True,
+    near_clip: float = 0.1,
+    depth_offset: float = 0.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Rasterize and shade a mesh using device-resident Torch geometry and textures.
+
+    ``material`` and ``lights`` use the established renderer configuration objects. CUDA shading
+    consumes perspective-correct barycentric coordinates from the native rasterizer; CPU rendering
+    delegates to :mod:`pymomentum.renderer`.
+
+    :param vertex_positions: Float32 vertex positions with shape ``(vertices, 3)`` or
+        ``(batch, vertices, 3)``.
+    :param triangles: Shared int32 triangle indices with shape ``(triangles, 3)``.
+    :param camera: Camera used to project the mesh.
+    :param vertex_normals: Optional float32 normals matching ``vertex_positions``. Geometric normals
+        are used when omitted.
+    :param texture_coordinates: Optional float32 UV coordinates with shape ``(coordinates, 2)``.
+    :param texture_triangles: Optional int32 UV indices matching ``triangles``. Mesh triangle indices
+        are used when omitted.
+    :param per_vertex_diffuse_color: Optional float32 RGB colors with shape ``(vertices, 3)``.
+    :param diffuse_texture: Optional contiguous float32 tensor with shape ``(height, width, 3)``.
+    :param emissive_texture: Optional contiguous float32 tensor with shape ``(height, width, 3)``.
+    :param material: Host-side Phong material configuration. Texture maps must be supplied through
+        the tensor arguments rather than embedded NumPy arrays.
+    :param lights: Optional host-side lights in world space.
+    :param z_buffer: Optional caller-owned depth buffer.
+    :param rgb_buffer: Optional caller-owned RGB buffer.
+    :param model_matrix: Optional host-side model transformation matrix.
+    :param back_face_culling: Whether to discard back-facing triangles.
+    :param near_clip: Positive eye-space near clipping distance.
+    :param depth_offset: Value added to rasterized depth.
+    :return: The depth and RGB buffers.
+    """
+    _validate_vertex_positions(vertex_positions)
+    _validate_triangles(triangles)
+    device = vertex_positions.device
+    if triangles.device != device:
+        raise RuntimeError("triangles must be on the same device as vertex_positions")
+    if vertex_normals is not None:
+        _validate_vertex_positions(vertex_normals, "vertex_normals")
+        if vertex_normals.device != device:
+            raise RuntimeError(
+                "vertex_normals must be on the same device as vertex_positions"
+            )
+        if vertex_normals.shape != vertex_positions.shape:
+            raise RuntimeError("vertex_normals must match vertex_positions shape")
+    for tensor, name, dtype, suffix in (
+        (texture_coordinates, "texture_coordinates", torch.float32, (2,)),
+        (texture_triangles, "texture_triangles", torch.int32, (3,)),
+        (per_vertex_diffuse_color, "per_vertex_diffuse_color", torch.float32, (3,)),
+    ):
+        _validate_optional_mesh_attribute(tensor, name, device, dtype, suffix)
+    for texture, name in (
+        (diffuse_texture, "diffuse_texture"),
+        (emissive_texture, "emissive_texture"),
+    ):
+        if texture is not None and (
+            texture.device != device
+            or texture.dtype != torch.float32
+            or texture.ndim != 3
+            or texture.shape[0] == 0
+            or texture.shape[1] == 0
+            or texture.shape[2] != 3
+            or not texture.is_contiguous()
+        ):
+            raise RuntimeError(
+                f"{name} must be a contiguous float32 tensor with shape (height, width, 3) on device {device}"
+            )
+    if texture_triangles is not None:
+        if texture_triangles.shape != triangles.shape:
+            raise RuntimeError("texture_triangles must match triangles shape")
+        if texture_coordinates is None:
+            raise RuntimeError("texture_triangles require texture_coordinates")
+        if bool(
+            torch.any(
+                (texture_triangles < 0)
+                | (texture_triangles >= texture_coordinates.shape[0])
+            )
+        ):
+            raise RuntimeError("texture_triangles contain an out-of-range index")
+    if (
+        per_vertex_diffuse_color is not None
+        and per_vertex_diffuse_color.shape != vertex_positions.shape[-2:]
+    ):
+        raise RuntimeError("per_vertex_diffuse_color must match unbatched vertex shape")
+    if per_vertex_diffuse_color is not None and diffuse_texture is not None:
+        raise RuntimeError(
+            "per_vertex_diffuse_color and diffuse_texture cannot both be provided"
+        )
+    if (
+        texture_coordinates is not None
+        and texture_triangles is None
+        and texture_coordinates.shape[0] != vertex_positions.shape[-2]
+    ):
+        raise RuntimeError(
+            "texture_coordinates must match vertices when texture_triangles is omitted"
+        )
+    if (
+        diffuse_texture is not None or emissive_texture is not None
+    ) and texture_coordinates is None:
+        raise RuntimeError("texture maps require texture_coordinates")
+
+    batch_size = int(vertex_positions.shape[0]) if vertex_positions.ndim == 3 else None
+    depth = (
+        z_buffer
+        if z_buffer is not None
+        else create_z_buffer(camera, batch_size=batch_size, device=device)
+    )
+    rgb = (
+        rgb_buffer
+        if rgb_buffer is not None
+        else create_rgb_buffer(camera, batch_size=batch_size, device=device)
+    )
+    _validate_output_tensor(
+        depth, "z_buffer", camera, device, torch.float32, batch_size
+    )
+    _validate_vector_output_buffer(rgb, "rgb_buffer", camera, device, batch_size, depth)
+    current_material = (
+        material if material is not None else pym_renderer.PhongMaterial()
+    )
+    if current_material.has_texture_map:
+        raise RuntimeError(
+            "PhongMaterial texture maps are not supported by torch.renderer; pass texture maps as device tensors"
+        )
+
+    if device.type == "cpu":
+        cpu_material = _material_with_device_textures(
+            current_material, diffuse_texture, emissive_texture
+        )
+        positions = vertex_positions.detach().numpy()
+        normals = (
+            vertex_normals.detach().numpy() if vertex_normals is not None else None
+        )
+        for frame in range(1 if batch_size is None else batch_size):
+            pym_renderer.rasterize_mesh(
+                positions if batch_size is None else positions[frame],
+                normals
+                if batch_size is None
+                else (normals[frame] if normals is not None else None),
+                triangles.detach().numpy(),
+                camera,
+                cast(
+                    Buffer,
+                    depth.detach().numpy()
+                    if batch_size is None
+                    else depth[frame].detach().numpy(),
+                ),
+                cast(
+                    Buffer,
+                    rgb.detach().numpy()
+                    if batch_size is None
+                    else rgb[frame].detach().numpy(),
+                ),
+                material=cpu_material,
+                texture_coordinates=(
+                    texture_coordinates.detach().numpy()
+                    if texture_coordinates is not None
+                    else None
+                ),
+                texture_triangles=(
+                    texture_triangles.detach().numpy()
+                    if texture_triangles is not None
+                    else None
+                ),
+                per_vertex_diffuse_color=(
+                    per_vertex_diffuse_color.detach().numpy()
+                    if per_vertex_diffuse_color is not None
+                    else None
+                ),
+                lights=lights,
+                model_matrix=model_matrix,
+                back_face_culling=back_face_culling,
+                near_clip=near_clip,
+                depth_offset=depth_offset,
+            )
+        return depth, rgb
+
+    triangle_indices = create_index_buffer(camera, batch_size=batch_size, device=device)
+    barycentric_coordinates = create_barycentric_coordinates_buffer(
+        camera, batch_size=batch_size, device=device
+    )
+    surface_normals = create_surface_normals_buffer(
+        camera, batch_size=batch_size, device=device
+    )
+    rasterize_mesh(
+        vertex_positions,
+        triangles,
+        camera,
+        vertex_normals=vertex_normals,
+        z_buffer=depth,
+        triangle_index_buffer=triangle_indices,
+        surface_normals_buffer=surface_normals,
+        barycentric_coordinates_buffer=barycentric_coordinates,
+        model_matrix=model_matrix,
+        back_face_culling=back_face_culling,
+        near_clip=near_clip,
+        depth_offset=depth_offset,
+    )
+    _shade_cuda_mesh(
+        vertex_positions,
+        triangles,
+        camera,
+        triangle_indices,
+        barycentric_coordinates,
+        surface_normals,
+        rgb,
+        current_material,
+        lights,
+        model_matrix,
+        texture_coordinates,
+        texture_triangles,
+        per_vertex_diffuse_color,
+        diffuse_texture,
+        emissive_texture,
+    )
+    return depth, rgb
+
+
 @dataclass(frozen=True)
 class _PrimitiveMesh:
     vertices: torch.Tensor
@@ -461,17 +976,15 @@ def _compute_vertex_normals(
     vertices: torch.Tensor, triangles: torch.Tensor
 ) -> torch.Tensor:
     triangle_indices = triangles.to(dtype=torch.int64)
-    triangle_vertices = vertices.index_select(0, triangle_indices.flatten()).view(
-        -1, 3, 3
-    )
+    triangle_vertices = vertices[..., triangle_indices, :]
     face_normals = torch.linalg.cross(
-        triangle_vertices[:, 1] - triangle_vertices[:, 0],
-        triangle_vertices[:, 2] - triangle_vertices[:, 0],
+        triangle_vertices[..., 1, :] - triangle_vertices[..., 0, :],
+        triangle_vertices[..., 2, :] - triangle_vertices[..., 0, :],
         dim=-1,
     )
     normals = torch.zeros_like(vertices)
     for corner in range(3):
-        normals.index_add_(0, triangle_indices[:, corner], face_normals)
+        normals.index_add_(-2, triangle_indices[:, corner], face_normals)
     return normals / torch.clamp_min(
         torch.linalg.vector_norm(normals, dim=-1, keepdim=True), 1e-12
     )
@@ -495,7 +1008,9 @@ class RenderState:
 
     def __init__(self, device: torch.device | str | None = None) -> None:
         self.device = _canonical_device("cpu" if device is None else device)
-        self._primitive_meshes: dict[tuple[object, ...], _PrimitiveMesh] = {}
+        self._primitive_meshes: OrderedDict[tuple[object, ...], _PrimitiveMesh] = (
+            OrderedDict()
+        )
         self._instance_triangles: OrderedDict[
             tuple[tuple[object, ...], int], torch.Tensor
         ] = OrderedDict()
@@ -520,6 +1035,7 @@ class RenderState:
     ) -> _PrimitiveMesh:
         cached = self._primitive_meshes.get(key)
         if cached is not None:
+            self._primitive_meshes.move_to_end(key)
             return cached
 
         mesh = factory()
@@ -539,6 +1055,9 @@ class RenderState:
         )
         cached = _PrimitiveMesh(vertices, normals, triangles)
         self._primitive_meshes[key] = cached
+        self._primitive_meshes.move_to_end(key)
+        while len(self._primitive_meshes) > _EXPANDED_TRIANGLE_CACHE_SIZE:
+            self._primitive_meshes.popitem(last=False)
         return cached
 
     def _triangles_for_instances(
@@ -1560,6 +2079,279 @@ def rasterize_character(
         triangle_index_buffer=triangle_index_buffer,
         vertex_index_buffer=vertex_index_buffer,
         surface_normals_buffer=surface_normals_buffer,
+        model_matrix=model_matrix,
+        back_face_culling=back_face_culling,
+        near_clip=near_clip,
+        depth_offset=depth_offset,
+    )
+
+
+def _checkerboard_mesh(
+    width: float,
+    num_checks: int,
+    subdivisions: int,
+    parity: int,
+    device: torch.device,
+) -> _PrimitiveMesh:
+    positions = []
+    triangles = []
+    grid_size = num_checks * subdivisions
+    width_float32 = np.float32(width)
+    coordinates = [
+        float(
+            np.float32(
+                width_float32
+                * np.float32(
+                    np.float32(index) / np.float32(grid_size) - np.float32(0.5)
+                )
+            )
+        )
+        for index in range(grid_size + 1)
+    ]
+    for check_x in range(num_checks):
+        for check_z in range(num_checks):
+            if (check_x + check_z) % 2 != parity:
+                continue
+            offset = len(positions)
+            row_size = subdivisions + 1
+            for sub_x in range(row_size):
+                for sub_z in range(row_size):
+                    positions.append(
+                        (
+                            coordinates[check_x * subdivisions + sub_x],
+                            0.0,
+                            coordinates[check_z * subdivisions + sub_z],
+                        )
+                    )
+                    if sub_x > 0 and sub_z > 0:
+                        current = offset + sub_x * row_size + sub_z
+                        previous_row = current - row_size
+                        triangles.append((current, previous_row - 1, previous_row))
+                        triangles.append((current, current - 1, previous_row - 1))
+    vertices = torch.tensor(positions, dtype=torch.float32, device=device)
+    normals = torch.zeros_like(vertices)
+    normals[:, 1] = 1.0
+    return _PrimitiveMesh(
+        vertices=vertices,
+        normals=normals,
+        triangles=torch.tensor(triangles, dtype=torch.int32, device=device),
+    )
+
+
+@torch.no_grad()
+def rasterize_checkerboard(
+    camera: pym_camera.Camera,
+    *,
+    device: torch.device | str | None = None,
+    state: RenderState | None = None,
+    z_buffer: torch.Tensor | None = None,
+    rgb_buffer: torch.Tensor | None = None,
+    material1: pym_renderer.PhongMaterial | None = None,
+    material2: pym_renderer.PhongMaterial | None = None,
+    lights: list[pym_renderer.Light] | None = None,
+    model_matrix: npt.NDArray[np.float32] | None = None,
+    back_face_culling: bool = True,
+    near_clip: float = 0.1,
+    depth_offset: float = 0.0,
+    width: float = 50.0,
+    num_checks: int = 10,
+    subdivisions: int = 1,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Rasterize and shade a checkerboard floor in the x-z plane.
+
+    Static checker geometry is cached in ``state``. CPU tensors delegate shading to the existing
+    renderer; CUDA tensors use native CUDA rasterization and Torch Phong shading.
+
+    :param camera: Camera used to project the checkerboard.
+    :param device: Output device when ``z_buffer`` is not supplied.
+    :param state: Optional per-device cache for checker geometry.
+    :param z_buffer: Optional caller-owned depth buffer.
+    :param rgb_buffer: Optional caller-owned RGB buffer.
+    :param material1: Material for the first checker parity.
+    :param material2: Material for the second checker parity.
+    :param lights: Optional host-side lights in world space.
+    :param model_matrix: Optional host-side model transformation matrix.
+    :param back_face_culling: Whether to discard back-facing triangles.
+    :param near_clip: Positive eye-space near clipping distance.
+    :param depth_offset: Value added to rasterized depth.
+    :param width: Full checkerboard width in model units.
+    :param num_checks: Number of checks along each axis.
+    :param subdivisions: Triangle subdivisions per check edge.
+    :return: The depth and RGB buffers.
+    """
+    if width <= 0.0:
+        raise ValueError("width must be positive")
+    if num_checks <= 0:
+        raise ValueError("num_checks must be positive")
+    if subdivisions <= 0:
+        raise ValueError("subdivisions must be positive")
+    if z_buffer is not None and device is not None:
+        requested_device = _canonical_device(device)
+        if requested_device != z_buffer.device:
+            raise RuntimeError("device must match z_buffer.device")
+    output_device = _canonical_device(
+        z_buffer.device
+        if z_buffer is not None
+        else ("cpu" if device is None else device)
+    )
+    render_state = _resolve_render_state(output_device, state)
+    depth = (
+        z_buffer
+        if z_buffer is not None
+        else create_z_buffer(camera, device=output_device)
+    )
+    rgb = (
+        rgb_buffer
+        if rgb_buffer is not None
+        else create_rgb_buffer(camera, device=output_device)
+    )
+    materials = (
+        material1
+        if material1 is not None
+        else pym_renderer.PhongMaterial(np.full(3, 0.8, dtype=np.float32)),
+        material2
+        if material2 is not None
+        else pym_renderer.PhongMaterial(np.full(3, 0.5, dtype=np.float32)),
+    )
+    for parity, material in enumerate(materials):
+        key = ("checkerboard", width, num_checks, subdivisions, parity)
+        mesh = render_state._primitive_meshes.get(key)
+        if mesh is None:
+            mesh = _checkerboard_mesh(
+                width, num_checks, subdivisions, parity, output_device
+            )
+            render_state._primitive_meshes[key] = mesh
+            render_state._primitive_meshes.move_to_end(key)
+            while len(render_state._primitive_meshes) > _EXPANDED_TRIANGLE_CACHE_SIZE:
+                render_state._primitive_meshes.popitem(last=False)
+        else:
+            render_state._primitive_meshes.move_to_end(key)
+        depth, rgb = render_mesh(
+            mesh.vertices,
+            mesh.triangles,
+            camera,
+            vertex_normals=mesh.normals,
+            material=material,
+            lights=lights,
+            z_buffer=depth,
+            rgb_buffer=rgb,
+            model_matrix=model_matrix,
+            back_face_culling=back_face_culling,
+            near_clip=near_clip,
+            depth_offset=depth_offset,
+        )
+    return depth, rgb
+
+
+@torch.no_grad()
+def apply_hard_shadow(
+    shadow_depth: torch.Tensor,
+    rgb_buffer: torch.Tensor,
+    *,
+    opacity: float = 0.4,
+) -> torch.Tensor:
+    """Darken pixels covered by a projected-shadow depth render in place.
+
+    :param shadow_depth: Depth-only rendering of geometry transformed by a shadow projection.
+    :param rgb_buffer: Caller-owned RGB buffer to darken.
+    :param opacity: Fraction of covered RGB intensity to remove.
+    :return: ``rgb_buffer`` after in-place compositing.
+    """
+    if shadow_depth.device != rgb_buffer.device:
+        raise RuntimeError("shadow_depth and rgb_buffer must be on the same device")
+    if shadow_depth.dtype != torch.float32 or rgb_buffer.dtype != torch.float32:
+        raise RuntimeError("shadow_depth and rgb_buffer must have dtype torch.float32")
+    if rgb_buffer.shape != (*shadow_depth.shape, 3):
+        raise RuntimeError(
+            "rgb_buffer shape must equal shadow_depth shape plus three channels"
+        )
+    if not 0.0 <= opacity <= 1.0:
+        raise ValueError("opacity must be in [0, 1]")
+    covered = shadow_depth < torch.finfo(torch.float32).max
+    rgb_buffer[covered] *= 1.0 - opacity
+    return rgb_buffer
+
+
+@torch.no_grad()
+def render_character(
+    character: Character,
+    model_parameters: torch.Tensor,
+    camera: pym_camera.Camera,
+    *,
+    backend: str = "auto",
+    rest_vertex_positions: torch.Tensor | None = None,
+    diffuse_texture: torch.Tensor | None = None,
+    emissive_texture: torch.Tensor | None = None,
+    material: pym_renderer.PhongMaterial | None = None,
+    lights: list[pym_renderer.Light] | None = None,
+    z_buffer: torch.Tensor | None = None,
+    rgb_buffer: torch.Tensor | None = None,
+    model_matrix: npt.NDArray[np.float32] | None = None,
+    back_face_culling: bool = True,
+    near_clip: float = 0.1,
+    depth_offset: float = 0.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Pose, skin, rasterize, and shade a Torch character.
+
+    :param character: Torch character providing geometry, skinning, and topology.
+    :param model_parameters: Float32 model parameters with shape ``(parameters,)`` or
+        ``(batch, parameters)``.
+    :param camera: Camera used to project the character.
+    :param backend: Forward-kinematics and skinning backend.
+    :param rest_vertex_positions: Optional replacement rest-pose vertices.
+    :param diffuse_texture: Optional contiguous float32 device texture.
+    :param emissive_texture: Optional contiguous float32 device texture.
+    :param material: Host-side Phong material configuration.
+    :param lights: Optional host-side lights in world space.
+    :param z_buffer: Optional caller-owned depth buffer.
+    :param rgb_buffer: Optional caller-owned RGB buffer.
+    :param model_matrix: Optional host-side model transformation matrix.
+    :param back_face_culling: Whether to discard back-facing triangles.
+    :param near_clip: Positive eye-space near clipping distance.
+    :param depth_offset: Value added to rasterized depth.
+    :return: The depth and RGB buffers.
+    """
+    _validate_character_inputs(character, model_parameters)
+    unbatched = model_parameters.ndim == 1
+    batched_parameters = (
+        model_parameters.unsqueeze(0) if unbatched else model_parameters
+    )
+    rest_vertices = _character_rest_vertices(
+        character, model_parameters, rest_vertex_positions
+    )
+    skeleton_state = character.model_parameters_to_skeleton_state(
+        batched_parameters,
+        use_double_precision=False,
+        backend=backend,
+    )
+    vertices = character.skin_points(
+        skeleton_state,
+        rest_vertices,
+        backend=backend,
+    ).contiguous()
+    if unbatched:
+        vertices = vertices[0]
+    faces = cast(torch.Tensor, character.mesh.faces)
+    vertex_normals = _compute_vertex_normals(vertices, faces)
+    texture_coordinates = cast(torch.Tensor, character.mesh.texcoords)
+    texture_triangles = cast(torch.Tensor, character.mesh.texcoord_faces)
+    return render_mesh(
+        vertices,
+        faces,
+        camera,
+        vertex_normals=vertex_normals,
+        texture_coordinates=(
+            texture_coordinates if texture_coordinates.numel() > 0 else None
+        ),
+        texture_triangles=(
+            texture_triangles if texture_triangles.numel() > 0 else None
+        ),
+        diffuse_texture=diffuse_texture,
+        emissive_texture=emissive_texture,
+        material=material,
+        lights=lights,
+        z_buffer=z_buffer,
+        rgb_buffer=rgb_buffer,
         model_matrix=model_matrix,
         back_face_culling=back_face_culling,
         near_clip=near_clip,
