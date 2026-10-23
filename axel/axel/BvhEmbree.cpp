@@ -46,6 +46,12 @@ void logEmbreeError(void* /*userPtr*/, RTCError err, const char* msg) {
       XR_LOGE("CANCELLED: {}", msg);
       break;
     }
+#if RTC_VERSION >= 40300
+    case RTC_ERROR_LEVEL_ZERO_RAYTRACING_SUPPORT_MISSING: {
+      XR_LOGE("LEVEL_ZERO_RAYTRACING_SUPPORT_MISSING: {}", msg);
+      break;
+    }
+#endif
     case RTC_ERROR_NONE: {
       break; // There's no error.
     }
