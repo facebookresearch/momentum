@@ -12,9 +12,14 @@
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/image.h>
 #include <momentum/rasterizer/rasterizer.h>
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
+#include <limits>
+#include <random>
+#include <span>
 
 using namespace momentum;
 using namespace momentum::rasterizer;
@@ -248,6 +253,366 @@ TEST(SoftwareRasterizer, SkipsTextureExtractionWhenTextureMapMissing) {
   mesh.texcoord_faces = {Eigen::Vector3i(3, 1, 0)};
 
   EXPECT_NO_THROW(rasterizeValidationMesh(mesh));
+}
+
+namespace {
+
+// A triangle given directly by its window coordinates and eye-space depths.
+struct WindowTriangle {
+  std::array<Eigen::Vector2f, 3> window{};
+  std::array<float, 3> depth{};
+};
+
+// Interpolation of a window-space triangle at a pixel, evaluated in double
+// precision from the exact vertex coordinates.
+struct ReferenceInterpolation {
+  Eigen::Vector3d screenBary; // Affine (screen-space) barycentrics; determine coverage.
+  Eigen::Vector3d bary; // Perspective-correct barycentrics.
+  double depth;
+};
+
+ReferenceInterpolation referenceInterpolation(const WindowTriangle& tri, double x, double y) {
+  const auto edge = [&](int i, int j) {
+    const Eigen::Vector2d a = tri.window[i].cast<double>();
+    const Eigen::Vector2d b = tri.window[j].cast<double>();
+    return (b.x() - a.x()) * (y - a.y()) - (b.y() - a.y()) * (x - a.x());
+  };
+  const Eigen::Vector3d edges(edge(1, 2), edge(2, 0), edge(0, 1));
+  const Eigen::Vector3d screenBary = edges / edges.sum();
+  const Eigen::Vector3d perspective(
+      screenBary[0] / tri.depth[0], screenBary[1] / tri.depth[1], screenBary[2] / tri.depth[2]);
+  return {
+      .screenBary = screenBary,
+      .bary = perspective / perspective.sum(),
+      .depth = 1.0 / perspective.sum()};
+}
+
+// Thin triangles far from the image origin, with widths from 0.1 down to 1e-4
+// pixels and strongly varying depth.  Depths are powers of two so that, with
+// an identity-intrinsics pinhole camera, the window coordinates are exact.
+std::vector<WindowTriangle> makeThinWindowTriangles(int count) {
+  std::mt19937 rng(12345);
+  const auto uniform = [&]() { return static_cast<double>(rng()) / 4294967296.0; };
+  std::vector<WindowTriangle> result;
+  for (int k = 0; k < count; ++k) {
+    const double angle = twopi<double>() * uniform();
+    const double length = 1.0 + 6.0 * uniform();
+    const double width = std::pow(10.0, -1.0 - 3.0 * uniform()) * (k % 2 == 0 ? 1.0 : -1.0);
+    const double apexOffset = -0.3 + 0.6 * uniform();
+    const Eigen::Vector2d dir(std::cos(angle), std::sin(angle));
+    const Eigen::Vector2d normal(-dir.y(), dir.x());
+    // Place the base edge so that a pixel center lies within or just outside
+    // the triangle:
+    const Eigen::Vector2d pixel(
+        std::round(280.0 + 40.0 * uniform()), std::round(560.0 + 80.0 * uniform()));
+    const Eigen::Vector2d center = pixel - width * (-0.5 + 2.0 * uniform()) * normal;
+    WindowTriangle tri;
+    tri.window = {
+        (center - 0.5 * length * dir).cast<float>(),
+        (center + 0.5 * length * dir).cast<float>(),
+        (center + apexOffset * length * dir + width * normal).cast<float>()};
+    const std::array<float, 3> depths = {64.0f, 128.0f, 256.0f};
+    tri.depth = {depths[k % 3], depths[(k + 1) % 3], depths[(k + 2) % 3]};
+    result.push_back(tri);
+  }
+  return result;
+}
+
+// Renders a single triangle with per-vertex colors and normals equal to the
+// basis vectors, so the RGB buffer holds the interpolated barycentrics.
+void rasterizeBasisTriangle(
+    std::span<const Eigen::Vector3f> vertices,
+    const Eigen::Vector3i& face,
+    const Camera& camera,
+    Span2f zBuffer,
+    Span3f rgbBuffer,
+    Span3f normalBuffer,
+    Span2i triangleIndexBuffer) {
+  Eigen::VectorXf colors(9);
+  colors << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  const std::vector<Eigen::Vector3f> normals = {
+      Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), Eigen::Vector3f::UnitZ()};
+  const std::vector<Eigen::Vector3i> faces = {face};
+  rasterizeMesh(
+      vertices,
+      normals,
+      faces,
+      {},
+      {},
+      colors,
+      camera,
+      Eigen::Matrix4f::Identity(),
+      0.1f,
+      PhongMaterial{},
+      zBuffer,
+      rgbBuffer,
+      normalBuffer,
+      {},
+      triangleIndexBuffer,
+      std::vector<Light>{createAmbientLight()},
+      false);
+}
+
+} // namespace
+
+TEST(SoftwareRasterizer, ThinTrianglesMatchExactInterpolation) {
+  // With unit focal length and a zero principal point, window coordinates are
+  // exactly x/z and y/z.
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(448, 768, 1.0f, 1.0f, 0.0f, 0.0f));
+  auto zBuffer = makeRasterizerZBuffer(camera);
+  auto rgbBuffer = makeRasterizerRGBBuffer(camera);
+  auto normalBuffer = makeRasterizerRGBBuffer(camera);
+  auto triangleIndexBuffer = makeRasterizerIndexBuffer(camera);
+
+  size_t nCovered = 0;
+  for (const auto& tri : makeThinWindowTriangles(1000)) {
+    std::vector<Eigen::Vector3f> vertices;
+    for (int i = 0; i < 3; ++i) {
+      const float z = tri.depth[i];
+      vertices.emplace_back(tri.window[i].x() * z, tri.window[i].y() * z, z);
+    }
+    rasterizeBasisTriangle(
+        vertices,
+        Eigen::Vector3i(0, 1, 2),
+        camera,
+        zBuffer.view(),
+        rgbBuffer.view(),
+        normalBuffer.view(),
+        triangleIndexBuffer.view());
+
+    Eigen::AlignedBox2f bounds;
+    for (const auto& p : tri.window) {
+      bounds.extend(p);
+    }
+    const Eigen::Vector2d e1 = (tri.window[1] - tri.window[0]).cast<double>();
+    const Eigen::Vector2d e2 = (tri.window[2] - tri.window[0]).cast<double>();
+    const double doubleArea = std::abs(e1.x() * e2.y() - e1.y() * e2.x());
+    // FP32 evaluation of the edge functions over the scanned pixels can't
+    // resolve barycentrics better than about eps * extent^2 / (2 * area),
+    // independent of where the triangle lies in the image.  Coverage is
+    // conservative by that error bound, and the scanned range includes SIMD
+    // packet padding (at most 16 pixels):
+    const auto tolerance = [&](double extent) {
+      return std::max(
+          4.0 * std::numeric_limits<float>::epsilon() * extent * extent / doubleArea, 1e-6);
+    };
+    const double baryTol = tolerance(bounds.sizes().maxCoeff() + 1.0);
+    const double coverageTol = tolerance(bounds.sizes().maxCoeff() + 16.0);
+    const auto [minDepth, maxDepth] = std::ranges::minmax_element(tri.depth);
+    const double depthRange = *maxDepth - *minDepth;
+
+    for (int y = std::floor(bounds.min().y()) - 2; y <= std::ceil(bounds.max().y()) + 2; ++y) {
+      for (int x = std::floor(bounds.min().x()) - 2; x <= std::ceil(bounds.max().x()) + 2; ++x) {
+        const auto ref = referenceInterpolation(tri, x, y);
+        const double minScreenBary = ref.screenBary.minCoeff();
+        if (triangleIndexBuffer(y, x) != 0) {
+          EXPECT_LT(minScreenBary, 0) << "Missed interior pixel (" << x << ", " << y << ")";
+          continue;
+        }
+
+        ++nCovered;
+        EXPECT_GE(minScreenBary, -coverageTol)
+            << "Covered exterior pixel (" << x << ", " << y << ")";
+        for (int c = 0; c < 3; ++c) {
+          EXPECT_TRUE(std::isfinite(normalBuffer(y, x, c)));
+        }
+        EXPECT_GE(zBuffer(y, x), *minDepth - coverageTol * depthRange);
+        EXPECT_LE(zBuffer(y, x), *maxDepth + coverageTol * depthRange);
+        if (minScreenBary >= 0) {
+          for (int c = 0; c < 3; ++c) {
+            EXPECT_NEAR(rgbBuffer(y, x, c), ref.bary[c], baryTol);
+          }
+          EXPECT_NEAR(zBuffer(y, x), ref.depth, baryTol * depthRange);
+        }
+
+        zBuffer(y, x) = FLT_MAX;
+        triangleIndexBuffer(y, x) = -1;
+      }
+    }
+  }
+  // Roughly half of the triangles are constructed to cover a pixel center:
+  EXPECT_GT(nCovered, 300);
+}
+
+TEST(SoftwareRasterizer, NearlyDegenerateTrianglesHaveExactCoverage) {
+  // Triangles only a few ulps wide, along lines through pixel centers, so the
+  // coverage of those pixel centers is decided by the last bits of the vertex
+  // coordinates.  Triangles along horizontal lines are exactly degenerate and
+  // must not cover anything.
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(448, 768, 1.0f, 1.0f, 0.0f, 0.0f));
+  auto zBuffer = makeRasterizerZBuffer(camera);
+  auto rgbBuffer = makeRasterizerRGBBuffer(camera);
+  auto normalBuffer = makeRasterizerRGBBuffer(camera);
+  auto triangleIndexBuffer = makeRasterizerIndexBuffer(camera);
+
+  std::mt19937 rng(7);
+  const auto uniform = [&]() { return static_cast<double>(rng()) / 4294967296.0; };
+  size_t nInside = 0;
+  for (int k = 0; k < 1000; ++k) {
+    const double angle = (k % 4 == 0) ? 0.0
+        : (k % 4 == 1)                ? 0.25 * pi<double>()
+                                      : twopi<double>() * uniform();
+    const double length = 1.0 + 30.0 * uniform();
+    const Eigen::Vector2d dir(std::cos(angle), std::sin(angle));
+    const Eigen::Vector2d center(
+        std::round(280.0 + 40.0 * uniform()), std::round(560.0 + 80.0 * uniform()));
+    WindowTriangle tri;
+    tri.window = {
+        (center - 0.5 * length * dir).cast<float>(),
+        (center + 0.5 * length * dir).cast<float>(),
+        (center + (uniform() - 0.5) * length * dir).cast<float>()};
+    const int nudges = 1 + (k / 4) % 4;
+    for (int s = 0; s < nudges; ++s) {
+      tri.window[2].x() = std::nextafter(tri.window[2].x(), (k % 2 == 0) ? 1e9f : -1e9f);
+    }
+    tri.depth = {64.0f, 128.0f, 256.0f};
+
+    std::vector<Eigen::Vector3f> vertices;
+    for (int i = 0; i < 3; ++i) {
+      const float z = tri.depth[i];
+      vertices.emplace_back(tri.window[i].x() * z, tri.window[i].y() * z, z);
+    }
+    rasterizeBasisTriangle(
+        vertices,
+        Eigen::Vector3i(0, 1, 2),
+        camera,
+        zBuffer.view(),
+        rgbBuffer.view(),
+        normalBuffer.view(),
+        triangleIndexBuffer.view());
+
+    const Eigen::Vector2d e1 = (tri.window[1] - tri.window[0]).cast<double>();
+    const Eigen::Vector2d e2 = (tri.window[2] - tri.window[0]).cast<double>();
+    const bool degenerate = e1.x() * e2.y() - e1.y() * e2.x() == 0;
+    Eigen::AlignedBox2f bounds;
+    for (const auto& p : tri.window) {
+      bounds.extend(p);
+    }
+    for (int y = std::floor(bounds.min().y()) - 2; y <= std::ceil(bounds.max().y()) + 2; ++y) {
+      for (int x = std::floor(bounds.min().x()) - 2; x <= std::ceil(bounds.max().x()) + 2; ++x) {
+        const bool covered = triangleIndexBuffer(y, x) == 0;
+        if (degenerate) {
+          EXPECT_FALSE(covered) << "Degenerate triangle covers (" << x << ", " << y << ")";
+          continue;
+        }
+        const double minScreenBary = referenceInterpolation(tri, x, y).screenBary.minCoeff();
+        if (minScreenBary > 0) {
+          ++nInside;
+          EXPECT_TRUE(covered) << "Missed interior pixel (" << x << ", " << y << ")";
+        }
+        if (!covered) {
+          continue;
+        }
+#if defined(__FMA__) || defined(__AVX2__) || defined(__aarch64__)
+        // With fused multiply-add, the edge values are accurate enough to
+        // decide coverage and keep the depth in range.
+        EXPECT_GE(minScreenBary, -1e-6) << "Covered exterior pixel (" << x << ", " << y << ")";
+        EXPECT_GE(zBuffer(y, x), 64.0f);
+        EXPECT_LE(zBuffer(y, x), 256.0f);
+#endif
+        for (int c = 0; c < 3; ++c) {
+          EXPECT_TRUE(std::isfinite(normalBuffer(y, x, c)));
+        }
+        zBuffer(y, x) = FLT_MAX;
+        triangleIndexBuffer(y, x) = -1;
+      }
+    }
+  }
+  EXPECT_GT(nInside, 300);
+}
+
+TEST(SoftwareRasterizer, NearDegenerateTrianglesProduceFiniteFragments) {
+  // Thin triangles from a production failure where FP32 cancellation in the
+  // interpolants produced zero barycentrics (and hence NaN normals) for
+  // fragments that passed the coverage and depth tests.
+  const std::vector<Eigen::Vector3f> vertices = {
+      Eigen::Vector3f(6.124031066894531f, 24.24877166748047f, 162.6909637451172f),
+      Eigen::Vector3f(6.06937837600708f, 24.291336059570312f, 162.6158905029297f),
+      Eigen::Vector3f(5.991206169128418f, 24.390331268310547f, 162.7111053466797f)};
+  std::vector<Eigen::Vector3f> perturbed = vertices;
+  perturbed[0].y() = 24.248756408691406f;
+
+  struct Case {
+    float fx;
+    std::span<const Eigen::Vector3f> vertices;
+    Eigen::Vector3i face;
+  };
+  const std::vector<Case> cases = {
+      {1289.2694091796875f, vertices, Eigen::Vector3i(0, 1, 2)},
+      {1289.2694091796875f, perturbed, Eigen::Vector3i(0, 2, 1)},
+      {1289.269287109375f, perturbed, Eigen::Vector3i(0, 2, 1)}};
+  for (const auto& c : cases) {
+    const Camera camera(
+        std::make_shared<PinholeIntrinsicsModel>(448, 768, c.fx, 1244.3544921875f, 224.0f, 384.0f));
+    auto zBuffer = makeRasterizerZBuffer(camera);
+    auto rgbBuffer = makeRasterizerRGBBuffer(camera);
+    auto normalBuffer = makeRasterizerRGBBuffer(camera);
+    auto triangleIndexBuffer = makeRasterizerIndexBuffer(camera);
+    rasterizeBasisTriangle(
+        c.vertices,
+        c.face,
+        camera,
+        zBuffer.view(),
+        rgbBuffer.view(),
+        normalBuffer.view(),
+        triangleIndexBuffer.view());
+
+    for (int y = 0; y < camera.imageHeight(); ++y) {
+      for (int x = 0; x < camera.imageWidth(); ++x) {
+        if (triangleIndexBuffer(y, x) != 0) {
+          continue;
+        }
+        EXPECT_GE(zBuffer(y, x), 162.6158905029297f);
+        EXPECT_LE(zBuffer(y, x), 162.7111053466797f);
+        float baryTotal = 0;
+        for (int k = 0; k < 3; ++k) {
+          baryTotal += rgbBuffer(y, x, k);
+          EXPECT_TRUE(std::isfinite(normalBuffer(y, x, k)));
+        }
+        EXPECT_NEAR(baryTotal, 1.0f, 1e-5f);
+      }
+    }
+  }
+}
+
+TEST(SoftwareRasterizer, ClosedMeshHasNoCracks) {
+  // Pixel centers that lie on an edge shared by two triangles must be covered
+  // by at least one of them.
+  const int width = 1920;
+  const int height = 1080;
+  const Camera camera(
+      std::make_shared<PinholeIntrinsicsModel>(width, height, 1500.0f, 1500.0f, 960.0f, 540.0f));
+  for (const int subdivisions : {3, 5, 7}) {
+    Mesh mesh = makeSphere(subdivisions);
+    for (auto& v : mesh.vertices) {
+      v = 0.5f * v + Eigen::Vector3f(0.4f, 0.1f, 3.0f);
+    }
+    auto zBuffer = makeRasterizerZBuffer(camera);
+    auto triangleIndexBuffer = makeRasterizerIndexBuffer(camera);
+    rasterizeMesh(
+        mesh,
+        camera,
+        Eigen::Matrix4f::Identity(),
+        0.1f,
+        PhongMaterial{},
+        zBuffer.view(),
+        {},
+        {},
+        {},
+        triangleIndexBuffer.view());
+
+    size_t nCracks = 0;
+    for (int y = 1; y + 1 < height; ++y) {
+      for (int x = 1; x + 1 < width; ++x) {
+        if (triangleIndexBuffer(y, x) < 0 && triangleIndexBuffer(y - 1, x) >= 0 &&
+            triangleIndexBuffer(y + 1, x) >= 0 && triangleIndexBuffer(y, x - 1) >= 0 &&
+            triangleIndexBuffer(y, x + 1) >= 0) {
+          ++nCracks;
+        }
+      }
+    }
+    EXPECT_EQ(nCracks, 0) << "subdivisions=" << subdivisions;
+  }
 }
 
 TEST(SoftwareRasterizer, OneQuad) {

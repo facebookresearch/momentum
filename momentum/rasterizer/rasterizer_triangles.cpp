@@ -24,6 +24,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -51,35 +52,151 @@ namespace {
 // very expensive.  Now, the only reason we care about the specific
 // homogeneous coordinates is to get perspective-correct
 // interpolation.  We're therefore going to solve the issue by
-// computing new pseudo-eye coordinates that ignore distortion,
-// using only the focal length:
-inline Matrix3fP createVertexMatrix(
+// computing new pseudo-eye coordinates that ignore distortion.
+//
+// Any invertible affine change of window coordinates applied to both the
+// vertices and the pixel samples leaves the barycentrics and the interpolated
+// depth unchanged, so the pseudo-eye coordinates are built from window
+// coordinates relative to an integer pixel origin near the triangle (the
+// corner of its clipped bounding box).  Relative to the image origin, the
+// per-pixel FP32 edge-function evaluation suffers cancellation proportional to
+// the triangle's distance from that origin; relative to the triangle, it is
+// proportional only to the triangle's own extent.  The window coordinates are
+// widened before subtracting the origin so that the rows are exact, and shared
+// vertices describe the same point in adjacent triangles with different
+// origins.  Scaling by the focal length would cancel out of the barycentrics
+// and depth, so window coordinates are used directly.
+inline Matrix3dP createVertexMatrix(
     const std::array<Vector3fP, 3>& p_tri_window,
-    const Camera& camera) {
-  Matrix3fP result;
+    const IntP& originX,
+    const IntP& originY) {
+  const DoubleP x0(originX);
+  const DoubleP y0(originY);
+  Matrix3dP result;
   for (int i = 0; i < 3; ++i) {
-    // Pseudo-eye coordinates constructed by just multiplying with fx and
-    // ignoring distortion:
-    result(i, 0) = p_tri_window[i].x() / camera.fx() * p_tri_window[i].z();
-    result(i, 1) = p_tri_window[i].y() / camera.fy() * p_tri_window[i].z();
-    result(i, 2) = p_tri_window[i].z();
+    const DoubleP z(p_tri_window[i].z());
+    result(i, 0) = (DoubleP(p_tri_window[i].x()) - x0) * z;
+    result(i, 1) = (DoubleP(p_tri_window[i].y()) - y0) * z;
+    result(i, 2) = z;
   }
   return result;
 }
 
 #if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
-inline Matrix3f createVertexMatrix(
-    const std::array<Vector3f, 3>& p_tri_window,
-    const Camera& camera) {
-  Matrix3f result;
+inline Matrix3d
+createVertexMatrix(const std::array<Vector3f, 3>& p_tri_window, int32_t originX, int32_t originY) {
+  Matrix3d result;
   for (int i = 0; i < 3; ++i) {
-    result(i, 0) = p_tri_window[i].x() / camera.fx() * p_tri_window[i].z();
-    result(i, 1) = p_tri_window[i].y() / camera.fy() * p_tri_window[i].z();
-    result(i, 2) = p_tri_window[i].z();
+    const double z = p_tri_window[i].z();
+    result(i, 0) = (double(p_tri_window[i].x()) - originX) * z;
+    result(i, 1) = (double(p_tri_window[i].y()) - originY) * z;
+    result(i, 2) = z;
   }
   return result;
 }
 #endif
+
+// Whether drjit::fmadd on FP32 packets rounds once.
+#if defined(DRJIT_X86_FMA) || defined(DRJIT_ARM_FMA)
+constexpr bool kHasFusedMultiplyAdd = true;
+#else
+constexpr bool kHasFusedMultiplyAdd = false;
+#endif
+
+// Per-triangle edge-function setup; see createEdgeFunctions.
+template <typename Double>
+struct EdgeFunctions {
+  drjit::Matrix<Double, 3> coefficients;
+  drjit::Array<Double, 3> thresholds;
+  drjit::mask_t<Double> valid;
+};
+
+// Row i of the coefficient matrix maps a pixel sample relative to the vertex
+// matrix origin, (x - originX, y - originY, 1), to the i-th perspective-correct
+// barycentric scaled by 1/w.  Since the barycentrics sum to one, 1/w is the
+// sum of the three edge values; computing it that way keeps w and the
+// barycentrics consistent, so a sample whose edge values all vanish gets an
+// infinite w and is rejected instead of producing zero barycentrics.  The rows
+// are the cross products of pairs of vertex-matrix rows divided by the
+// determinant (i.e. the inverse transpose), computed from the exact FP64 vertex
+// matrix.
+//
+// The thresholds are minus a bound on the error of each edge value, as
+// evaluated by rasterizeOneTriangle, over the scanned pixel range (including
+// SIMD padding).  Adjacent triangles evaluate a shared edge with independent
+// rounding, so with a zero threshold a pixel center on the edge can be
+// rejected by both; with these thresholds, the triangle whose exact edge value
+// is nonnegative always accepts it.  The bound covers the FP64 cross products
+// and the FP32 evaluation; the latter is dominated by eps^2 terms when fmadd
+// is fused and by eps terms otherwise.  The thresholds are thus far smaller
+// than the edge values' typical magnitude, and don't measurably dilate even
+// nearly degenerate triangles.
+//
+// A triangle is valid if its determinant is distinguishable from zero and the
+// coefficients and the largest edge values over the scanned range are finite
+// in FP32.  This rejects degenerate triangles before rasterization rather
+// than relying on the per-pixel w test to catch infinite or NaN coefficients.
+template <typename Double, typename Int>
+EdgeFunctions<Double> createEdgeFunctions(
+    const drjit::Matrix<Double, 3>& vertexMatrix,
+    const Int& startX,
+    const Int& endX,
+    const Int& startY,
+    const Int& endY) {
+  using Vector = drjit::Array<Double, 3>;
+  using Float = drjit::float32_array_t<Double>;
+  constexpr double floatEps = std::numeric_limits<float>::epsilon();
+  constexpr double doubleEps = std::numeric_limits<double>::epsilon();
+  constexpr double evaluationError =
+      kHasFusedMultiplyAdd ? 4.0 * floatEps * floatEps + 4.0 * doubleEps : 4.0 * floatEps;
+
+  const std::array<Vector, 3> rows = {
+      vertexMatrix.entry(0), vertexMatrix.entry(1), vertexMatrix.entry(2)};
+  const std::array<Vector, 3> absRows = {
+      drjit::abs(rows[0]), drjit::abs(rows[1]), drjit::abs(rows[2])};
+  // Bounds on the local pixel coordinates.  The y bound is at least one so
+  // that the bound on the edge values also bounds each coefficient.
+  const Double maxLocalX(endX - startX + static_cast<int32_t>(kSimdPacketSize));
+  const Double maxLocalY(endY - startY + 1);
+
+  // The cross products, and bounds on the magnitudes of their products:
+  std::array<Vector, 3> cross;
+  std::array<Vector, 3> crossMagnitude;
+  for (int i = 0; i < 3; ++i) {
+    const int j = (i + 1) % 3;
+    const int k = (i + 2) % 3;
+    cross[i] = drjit::cross(rows[j], rows[k]);
+    const Vector& a = absRows[j];
+    const Vector& b = absRows[k];
+    crossMagnitude[i] = Vector(
+        drjit::fmadd(a.y(), b.z(), a.z() * b.y()),
+        drjit::fmadd(a.z(), b.x(), a.x() * b.z()),
+        drjit::fmadd(a.x(), b.y(), a.y() * b.x()));
+  }
+  const Double det = drjit::dot(rows[0], cross[0]);
+  const Double detError = 4.0 * doubleEps * drjit::dot(absRows[0], crossMagnitude[0]);
+  const Double invDet = Double(1.0) / det;
+  const Double absInvDet = drjit::abs(invDet);
+
+  EdgeFunctions<Double> result;
+  // The determinant is twice the projected triangle's area times the product
+  // of the vertex depths; a triangle whose determinant is within rounding
+  // error of zero is (numerically) degenerate.
+  result.valid = drjit::abs(det) > detError;
+  for (int i = 0; i < 3; ++i) {
+    const Vector coefficients = cross[i] * invDet;
+    result.coefficients.entry(i) = coefficients;
+
+    const Double crossError = 4.0 * doubleEps * absInvDet *
+        (crossMagnitude[i].x() * maxLocalX + crossMagnitude[i].y() * maxLocalY +
+         crossMagnitude[i].z());
+    const Double maxEdgeValue = drjit::abs(coefficients.x()) * maxLocalX +
+        drjit::abs(coefficients.y()) * maxLocalY + drjit::abs(coefficients.z());
+    result.thresholds[i] = -(evaluationError * maxEdgeValue + crossError);
+    result.valid = result.valid && drjit::isfinite(Float(maxEdgeValue));
+  }
+  return result;
+}
 
 inline Vector3fP reflect(const Vector3fP& v, const Vector3fP& n) {
   const FloatP dotProd = drjit::dot(v, n);
@@ -150,15 +267,7 @@ Matrix3f toUniformMat(const Eigen::Vector3f& v) {
   return {v.x(), v.x(), v.x(), v.y(), v.y(), v.y(), v.z(), v.z(), v.z()};
 }
 
-inline auto isAllFinite(const Vector3dP& v) {
-  return drjit::isfinite(v.x()) && drjit::isfinite(v.y()) && drjit::isfinite(v.z());
-}
-
 #if MOMENTUM_RASTERIZER_USE_SCALAR_TRIANGLE_SETUP
-inline bool isAllFinite(const Vector3d& v) {
-  return std::isfinite(v.x()) && std::isfinite(v.y()) && std::isfinite(v.z());
-}
-
 inline int32_t floorClippedToImage(float value, int32_t maxValue) {
   return static_cast<int32_t>(std::floor(std::clamp(value, 0.0f, static_cast<float>(maxValue))));
 }
@@ -253,7 +362,9 @@ inline Vector3fP shade(
   return result;
 }
 
-inline void shadeAndWriteRgb(
+// Force inlining: otherwise the compiler may outline the shading, which costs
+// ~20% on shaded renders.
+DRJIT_INLINE void shadeAndWriteRgb(
     const Vector3fP& bary,
     const FloatP::MaskType& finalMask,
     const Matrix3f& uv,
@@ -304,13 +415,13 @@ inline void shadeAndWriteRgb(
 inline void rasterizeOneTriangle(
     const int32_t triangleIndex,
     const Eigen::Vector3i& triangle,
-    const SimdCamera& camera,
     int32_t startX,
     int32_t endX,
     int32_t startY,
     int32_t endY,
-    const Vector3f& recipWInterp,
-    const Matrix3f& vertexMatrixInverse,
+    const Matrix3d& edgeFunctions,
+    const Vector3f& edgeThresholds,
+    const Vector3f& vertexDepths,
     const Matrix3f& p_eye,
     const Matrix3f& n_eye,
     const Matrix3f& uv,
@@ -329,46 +440,73 @@ inline void rasterizeOneTriangle(
   const int startX_block = startX / kSimdPacketSize;
   const int endX_block = endX / kSimdPacketSize;
 
+  // Each edge function is evaluated per pixel as slope * x + intercept, where
+  // the x slope and the scanline intercept (computed in FP64 once per row) are
+  // split into FP32 high and low parts.  The FMA computes slope * x + intercept
+  // exactly before rounding, so the cancellation between the two terms costs
+  // no precision and the edge values are accurate relative to their own
+  // magnitude rather than to the magnitude of the terms.
+  const Vector3d slope(edgeFunctions(0, 0), edgeFunctions(1, 0), edgeFunctions(2, 0));
+  const Vector3d rowSlope(edgeFunctions(0, 1), edgeFunctions(1, 1), edgeFunctions(2, 1));
+  const Vector3d rowConstant(edgeFunctions(0, 2), edgeFunctions(1, 2), edgeFunctions(2, 2));
+  const Vector3f slopeHi(slope);
+  const Vector3f slopeLo(slope - Vector3d(slopeHi));
+
+  const Vector2f depthDelta(
+      vertexDepths.y() - vertexDepths.x(), vertexDepths.z() - vertexDepths.x());
+
   const bool hasDiffuseMap = !material.diffuseTextureMap.empty();
   const bool hasEmissiveMap = !material.emissiveTextureMap.empty();
   const bool hasDiffuse = !material.diffuseColor.isZero() || hasDiffuseMap;
   const bool hasSpecular = !material.specularColor.isZero() && material.specularExponent != 0;
 
-  const float fx = camera.fx();
-  const float fy = camera.fy();
-
   for (int32_t y = startY; y <= endY; ++y) {
+    const Vector3d intercept = drjit::fmadd(rowSlope, Vector3d(double(y - startY)), rowConstant);
+    const Vector3f interceptHi(intercept);
+    const Vector3f interceptLo(intercept - Vector3d(interceptHi));
     for (int32_t xBlock = startX_block; xBlock <= endX_block; ++xBlock) {
       const int32_t xOffset = xBlock * kSimdPacketSize;
 
-      // See notes in createVertexMatrix for how this interpolator gets used:
-      const FloatP p_ndc_x = (drjit::arange<FloatP>() + (float)xOffset) / fx;
-      const float p_ndc_y = y / fy;
+      // See notes in createVertexMatrix and createEdgeFunctions for how these
+      // interpolators get used.  Pixel coordinates relative to the bounding
+      // box corner are small integers and hence exact in FP32:
+      const FloatP p_local_x = drjit::arange<FloatP>() + (float)(xOffset - startX);
+      const Vector3fP edges = drjit::fmadd(Vector3fP(slopeHi), p_local_x, Vector3fP(interceptHi)) +
+          drjit::fmadd(Vector3fP(slopeLo), p_local_x, Vector3fP(interceptLo));
 
-      const FloatP recipW =
-          recipWInterp.x() * p_ndc_x + recipWInterp.y() * p_ndc_y + recipWInterp.z();
-
-      // Need to maximize accuracy here so it's not safe to use the fast reciprocal:
-      const FloatP w = 1.0f / recipW;
-
-      // Points behind the camera (with negative z) shouldn't get rendered:
-      const auto inFrontOfCameraMask = drjit::isfinite(w) && (w > nearClip);
-      if (!drjit::any(inFrontOfCameraMask)) {
+      // The barycentrics have the signs of the edge values wherever w > 0, so
+      // coverage can be tested before the division:
+      const auto baryMask =
+          (edges.x() >= edgeThresholds.x() && edges.y() >= edgeThresholds.y() &&
+           edges.z() >= edgeThresholds.z());
+      if (!drjit::any(baryMask)) {
         continue;
       }
 
-      // convert screen xyw to barycentrics
-      //    bary_x = edge0.dot(p_ndc) * w
-      //           = w * (edge0.x() * p_ndc.x() + edge0.y() * p_ndc.y() +
-      //           edge0.z() * 1)
-      const Vector3fP bary = w * (vertexMatrixInverse * Vector3fP(p_ndc_x, p_ndc_y, 1.0f));
+      // Need to maximize accuracy here so it's not safe to use the fast reciprocal:
+      const FloatP w = 1.0f / (edges.x() + edges.y() + edges.z());
 
-      // Set the bits that are less than 0:
-      const auto baryMask = (bary.x() >= 0 && bary.y() >= 0 && bary.z() >= 0);
+      // Points behind the camera (with negative z) shouldn't get rendered:
+      const auto inFrontOfCameraMask = drjit::isfinite(w) && (w > nearClip);
+      if (!drjit::any(inFrontOfCameraMask && baryMask)) {
+        continue;
+      }
+
+      const Vector3fP bary = w * edges;
+
+      // The depth is equal to w in exact arithmetic, but interpolating it from
+      // the vertex depths cancels most of the rounding error that the edge
+      // values share for thin triangles.  The barycentrics can be negative only
+      // down to the coverage thresholds, so the depth stays within the
+      // triangle's depth range up to that tolerance.  The offsets from the
+      // first vertex depth are accumulated before adding it, to round only
+      // once at its magnitude:
+      const FloatP depth = vertexDepths.x() +
+          drjit::fmadd(bary.y(), FloatP(depthDelta.x()), bary.z() * depthDelta.y());
 
       const auto blockOffset = y * zBufferRowStride + xOffset;
       const auto zBufferOrig = drjit::load_aligned<FloatP>(zBufferPtr + blockOffset);
-      const FloatP zOffset = w + depthOffset;
+      const FloatP zOffset = depth + depthOffset;
 
       const auto zBufferMask = zOffset < zBufferOrig;
 
@@ -651,17 +789,6 @@ void rasterizeMeshImpScalarTriangleLoop(
       continue;
     }
 
-    const Matrix3f vertexMatrix = createVertexMatrix(p_tri_window, camera);
-    const Matrix3d vertexMatrixInverse = drjit::inverse(Matrix3d(vertexMatrix));
-
-    const Vector3d recipWInterp(
-        vertexMatrixInverse(0, 0) + vertexMatrixInverse(0, 1) + vertexMatrixInverse(0, 2),
-        vertexMatrixInverse(1, 0) + vertexMatrixInverse(1, 1) + vertexMatrixInverse(1, 2),
-        vertexMatrixInverse(2, 0) + vertexMatrixInverse(2, 1) + vertexMatrixInverse(2, 2));
-    if (!isAllFinite(recipWInterp)) {
-      continue;
-    }
-
     if (p_tri_window[0].z() < nearClip && p_tri_window[1].z() < nearClip &&
         p_tri_window[2].z() < nearClip) {
       continue;
@@ -676,19 +803,25 @@ void rasterizeMeshImpScalarTriangleLoop(
     const int32_t endY = ceilClippedToImage(
         std::max({p_tri_window[0].y(), p_tri_window[1].y(), p_tri_window[2].y()}), imageHeight - 1);
 
+    const auto edgeFunctions = createEdgeFunctions(
+        createVertexMatrix(p_tri_window, startX, startY), startX, endX, startY, endY);
+    if (!edgeFunctions.valid) {
+      continue;
+    }
+
     const Matrix3f n_tri_eye =
         computeTriangleEyeNormals(normals_world, normalMatrix, p_tri_eye, triangle);
 
     rasterizeOneTriangle(
         static_cast<int32_t>(iTriangle),
         triangle,
-        cameraSimd,
         startX,
         endX,
         startY,
         endY,
-        Vector3f(recipWInterp),
-        drjit::transpose(Matrix3f(vertexMatrixInverse)),
+        edgeFunctions.coefficients,
+        Vector3f(edgeFunctions.thresholds),
+        Vector3f(p_tri_window[0].z(), p_tri_window[1].z(), p_tri_window[2].z()),
         p_tri_eye,
         n_tri_eye,
         getTextureAttributes(
@@ -839,24 +972,6 @@ void rasterizeMeshImp(
       }
     }
 
-    // This is the vertex interpolation matrix, where we map from
-    // homgeneous coordinates to interpolate texture coordinates, etc.  See
-    // note above about its construction:
-    const Matrix3fP vertexMatrix = createVertexMatrix(p_tri_window, camera);
-    // Use double precision here for extra precision, otherwise we get holes in
-    // the mesh since the inverse function uses a relatively numerically
-    // unstable algorithm using determinants since it's easy to SIMD.
-    const Matrix3dP vertexMatrixInverse = drjit::inverse(Matrix3dP(vertexMatrix));
-
-    const Vector3dP recipWInterp(
-        vertexMatrixInverse(0, 0) + vertexMatrixInverse(0, 1) + vertexMatrixInverse(0, 2),
-        vertexMatrixInverse(1, 0) + vertexMatrixInverse(1, 1) + vertexMatrixInverse(1, 2),
-        vertexMatrixInverse(2, 0) + vertexMatrixInverse(2, 1) + vertexMatrixInverse(2, 2));
-    validTriangles = validTriangles && isAllFinite(recipWInterp);
-    if (!drjit::any(validTriangles)) {
-      continue;
-    }
-
     const auto behindCamera = p_tri_window[0].z() < nearClip && p_tri_window[1].z() < nearClip &&
         p_tri_window[2].z() < nearClip;
     validTriangles = validTriangles && ~behindCamera;
@@ -884,6 +999,21 @@ void rasterizeMeshImp(
         0,
         imageHeight - 1));
 
+    // This is the vertex interpolation matrix, where we map from
+    // homgeneous coordinates to interpolate texture coordinates, etc.  See
+    // note above about its construction.  Use double precision for the
+    // inverse, otherwise we get holes in the mesh since the inverse function
+    // uses a relatively numerically unstable algorithm using determinants
+    // since it's easy to SIMD.
+    const auto edgeFunctions = createEdgeFunctions(
+        createVertexMatrix(p_tri_window, startX, startY), startX, endX, startY, endY);
+    validTriangles = validTriangles && IntP::MaskType(edgeFunctions.valid);
+    if (!drjit::any(validTriangles)) {
+      continue;
+    }
+    const Vector3fP edgeThresholds(edgeFunctions.thresholds);
+    const Vector3fP vertexDepths(p_tri_window[0].z(), p_tri_window[1].z(), p_tri_window[2].z());
+
     const Matrix3fP n_tri_eye = computeTriangleEyeNormals(
         normals_world, cameraSimd, p_tri_eye, triangles_cur, triangleMask);
 
@@ -901,13 +1031,13 @@ void rasterizeMeshImp(
       rasterizeOneTriangle(
           iTriangle,
           triangle,
-          cameraSimd,
           startX[triOffset],
           endX[triOffset],
           startY[triOffset],
           endY[triOffset],
-          extractSingleElement(recipWInterp, triOffset),
-          drjit::transpose(extractSingleElement(vertexMatrixInverse, triOffset)),
+          extractSingleElement(edgeFunctions.coefficients, triOffset),
+          extractSingleElement(edgeThresholds, triOffset),
+          extractSingleElement(vertexDepths, triOffset),
           extractSingleElement(p_tri_eye, triOffset),
           extractSingleElement(n_tri_eye, triOffset),
           getTextureAttributes(
@@ -1042,20 +1172,6 @@ void rasterizeSplatsImp(
       const std::array<Vector3fP, 3> p_tri_window = {
           p_quad_window[triangle.x()], p_quad_window[triangle.y()], p_quad_window[triangle.z()]};
 
-      auto validTriangles = validSplats;
-      // See above for explanation of the vertex interpolation matrix.
-      const Matrix3fP vertexMatrix = createVertexMatrix(p_tri_window, camera);
-      const Matrix3dP vertexMatrixInverse = drjit::inverse(Matrix3dP(vertexMatrix));
-      const Vector3dP recipWInterp(
-          vertexMatrixInverse(0, 0) + vertexMatrixInverse(0, 1) + vertexMatrixInverse(0, 2),
-          vertexMatrixInverse(1, 0) + vertexMatrixInverse(1, 1) + vertexMatrixInverse(1, 2),
-          vertexMatrixInverse(2, 0) + vertexMatrixInverse(2, 1) + vertexMatrixInverse(2, 2));
-
-      validTriangles = validTriangles && isAllFinite(recipWInterp);
-      if (!drjit::any(validTriangles)) {
-        continue;
-      }
-
       // Compute the bounds of the triangle in screen space:
       const IntP startX = drjit::floor2int<IntP, FloatP>(drjit::clip(
           drjit::minimum(
@@ -1079,6 +1195,16 @@ void rasterizeSplatsImp(
           0,
           imageHeight - 1));
 
+      // See above for explanation of the vertex interpolation matrix.
+      const auto edgeFunctions = createEdgeFunctions(
+          createVertexMatrix(p_tri_window, startX, startY), startX, endX, startY, endY);
+      const auto validTriangles = validSplats && IntP::MaskType(edgeFunctions.valid);
+      if (!drjit::any(validTriangles)) {
+        continue;
+      }
+      const Vector3fP edgeThresholds(edgeFunctions.thresholds);
+      const Vector3fP vertexDepths(p_tri_window[0].z(), p_tri_window[1].z(), p_tri_window[2].z());
+
       const Matrix3fP pos_eye_tri =
           fromColumns(p_quad_eye[triangle.x()], p_quad_eye[triangle.y()], p_quad_eye[triangle.z()]);
 
@@ -1097,13 +1223,13 @@ void rasterizeSplatsImp(
         rasterizeOneTriangle(
             iTriangle,
             triangle,
-            cameraSimd,
             startX[triOffset],
             endX[triOffset],
             startY[triOffset],
             endY[triOffset],
-            extractSingleElement(recipWInterp, triOffset),
-            drjit::transpose(extractSingleElement(vertexMatrixInverse, triOffset)),
+            extractSingleElement(edgeFunctions.coefficients, triOffset),
+            extractSingleElement(edgeThresholds, triOffset),
+            extractSingleElement(vertexDepths, triOffset),
             extractSingleElement(pos_eye_tri, triOffset),
             extractSingleElement(n_eye_tri, triOffset),
             texCoords_tri,
