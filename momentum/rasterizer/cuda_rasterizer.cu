@@ -9,6 +9,8 @@
 
 #include <cuda_runtime.h>
 
+#include <cfloat>
+
 namespace momentum::rasterizer::detail {
 namespace {
 
@@ -20,7 +22,13 @@ struct TriangleSetup {
   float3 eye[3];
   float3 normal[3];
   int32_t vertexIndex[3];
+  float edgeSlopeHi[3];
+  float edgeSlopeLo[3];
+  double edgeRowSlope[3];
+  double edgeConstant[3];
+  float edgeThreshold[3];
   float denominator;
+  int32_t robustEdges;
   int32_t minX;
   int32_t maxX;
   int32_t minY;
@@ -154,6 +162,138 @@ __device__ bool projectPoint(
   return isfinite(u) && isfinite(v);
 }
 
+__device__ __forceinline__ void rasterizeFragment(
+    const TriangleSetup& setup,
+    size_t triangleIndex,
+    int32_t x,
+    int32_t y,
+    float lambda0,
+    float lambda1,
+    float lambda2,
+    float nearClip,
+    float depthOffset,
+    bool writeDepth,
+    int64_t rowStride,
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer) {
+  const float reciprocalDepth =
+      lambda0 / setup.eye[0].z + lambda1 / setup.eye[1].z + lambda2 / setup.eye[2].z;
+  const float depth = 1.0f / reciprocalDepth;
+  if (!(depth > nearClip) || !isfinite(depth)) {
+    return;
+  }
+
+  const float outputDepth = depth + depthOffset;
+  if (!isfinite(outputDepth)) {
+    return;
+  }
+
+  const int64_t offset = static_cast<int64_t>(y) * rowStride + x;
+  if (writeDepth) {
+    atomicMinDepth(zBuffer + offset, outputDepth);
+    return;
+  }
+
+  // Both passes execute this same runtime-parameterized kernel, so a given
+  // fragment recomputes the same depth bits. Exact matching avoids races
+  // between attributes from different triangles at nearly equal depths.
+  if (__float_as_uint(zBuffer[offset]) != __float_as_uint(outputDepth)) {
+    return;
+  }
+
+  if (triangleIndexBuffer != nullptr) {
+    atomicExch(triangleIndexBuffer + offset, static_cast<int32_t>(triangleIndex));
+  }
+  const float bary0 = lambda0 * depth / setup.eye[0].z;
+  const float bary1 = lambda1 * depth / setup.eye[1].z;
+  const float bary2 = lambda2 * depth / setup.eye[2].z;
+  if (vertexIndexBuffer != nullptr) {
+    const int32_t vertexIndex = bary0 > bary1 && bary0 > bary2
+        ? setup.vertexIndex[0]
+        : (bary1 > bary2 ? setup.vertexIndex[1] : setup.vertexIndex[2]);
+    atomicExch(vertexIndexBuffer + offset, vertexIndex);
+  }
+  if (surfaceNormalsBuffer != nullptr) {
+    const float3 normal = normalizeVector(make_float3(
+        bary0 * setup.normal[0].x + bary1 * setup.normal[1].x + bary2 * setup.normal[2].x,
+        bary0 * setup.normal[0].y + bary1 * setup.normal[1].y + bary2 * setup.normal[2].y,
+        bary0 * setup.normal[0].z + bary1 * setup.normal[1].z + bary2 * setup.normal[2].z));
+    float* output = surfaceNormalsBuffer + 3 * offset;
+    atomicWriteFloat(output, normal.x);
+    atomicWriteFloat(output + 1, normal.y);
+    atomicWriteFloat(output + 2, normal.z);
+  }
+  if (barycentricCoordinatesBuffer != nullptr) {
+    float* output = barycentricCoordinatesBuffer + 3 * offset;
+    atomicWriteFloat(output, bary0);
+    atomicWriteFloat(output + 1, bary1);
+    atomicWriteFloat(output + 2, bary2);
+  }
+}
+
+__device__ __noinline__ void rasterizeRobustTriangle(
+    const TriangleSetup& setup,
+    size_t triangleIndex,
+    float nearClip,
+    float depthOffset,
+    bool writeDepth,
+    int64_t rowStride,
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer) {
+  for (int32_t y = setup.minY; y <= setup.maxY; ++y) {
+    const double localY = double(y - setup.minY);
+    float rowInterceptHi[3];
+    float rowInterceptLo[3];
+    for (int32_t edge = 0; edge < 3; ++edge) {
+      const double intercept = fma(setup.edgeRowSlope[edge], localY, setup.edgeConstant[edge]);
+      rowInterceptHi[edge] = float(intercept);
+      rowInterceptLo[edge] = float(intercept - double(rowInterceptHi[edge]));
+    }
+
+    for (int32_t x = setup.minX + threadIdx.x; x <= setup.maxX; x += blockDim.x) {
+      const float localX = float(x - setup.minX);
+      float edgeValue[3];
+      for (int32_t edge = 0; edge < 3; ++edge) {
+        edgeValue[edge] = fmaf(setup.edgeSlopeHi[edge], localX, rowInterceptHi[edge]) +
+            fmaf(setup.edgeSlopeLo[edge], localX, rowInterceptLo[edge]);
+      }
+      if (edgeValue[0] < setup.edgeThreshold[0] || edgeValue[1] < setup.edgeThreshold[1] ||
+          edgeValue[2] < setup.edgeThreshold[2]) {
+        continue;
+      }
+
+      const float edgeSum = edgeValue[0] + edgeValue[1] + edgeValue[2];
+      if (!(edgeSum > 0.0f) || !isfinite(edgeSum)) {
+        continue;
+      }
+      const float inverseEdgeSum = 1.0f / edgeSum;
+      rasterizeFragment(
+          setup,
+          triangleIndex,
+          x,
+          y,
+          edgeValue[0] * inverseEdgeSum,
+          edgeValue[1] * inverseEdgeSum,
+          edgeValue[2] * inverseEdgeSum,
+          nearClip,
+          depthOffset,
+          writeDepth,
+          rowStride,
+          zBuffer,
+          triangleIndexBuffer,
+          vertexIndexBuffer,
+          surfaceNormalsBuffer,
+          barycentricCoordinatesBuffer);
+    }
+  }
+}
+
 __global__ void rasterizeKernel(
     const float* positionsModel,
     const float* normalsModel,
@@ -234,21 +374,106 @@ __global__ void rasterizeKernel(
     }
 
     if (setup.valid) {
+      // Widen projected-coordinate differences before forming the determinant.
+      // The FP64 error bound rejects results that are indistinguishable from
+      // zero after the two products and their sum are rounded.
+      const double term0 =
+          (double(setup.v[1]) - double(setup.v[2])) * (double(setup.u[0]) - double(setup.u[2]));
+      const double term1 =
+          (double(setup.u[2]) - double(setup.u[1])) * (double(setup.v[0]) - double(setup.v[2]));
+      const double denominator = term0 + term1;
+      const double denominatorError = 4.0 * DBL_EPSILON * (fabs(term0) + fabs(term1));
+      setup.valid &= isfinite(denominator) && fabs(denominator) > denominatorError;
+      if (backfaceCulling) {
+        setup.valid &= denominator < 0.0;
+      }
+
       setup.denominator = (setup.v[1] - setup.v[2]) * (setup.u[0] - setup.u[2]) +
           (setup.u[2] - setup.u[1]) * (setup.v[0] - setup.v[2]);
-      setup.valid &= isfinite(setup.denominator) && setup.denominator != 0.0f;
-      if (backfaceCulling) {
-        setup.valid &= setup.denominator < 0.0f;
-      }
 
       const float minU = fminf(setup.u[0], fminf(setup.u[1], setup.u[2]));
       const float maxU = fmaxf(setup.u[0], fmaxf(setup.u[1], setup.u[2]));
       const float minV = fminf(setup.v[0], fminf(setup.v[1], setup.v[2]));
       const float maxV = fmaxf(setup.v[0], fmaxf(setup.v[1], setup.v[2]));
-      setup.minX = max(0, min(camera.imageWidth - 1, static_cast<int32_t>(floorf(minU))));
-      setup.maxX = max(0, min(camera.imageWidth - 1, static_cast<int32_t>(ceilf(maxU))));
-      setup.minY = max(0, min(camera.imageHeight - 1, static_cast<int32_t>(floorf(minV))));
-      setup.maxY = max(0, min(camera.imageHeight - 1, static_cast<int32_t>(ceilf(maxV))));
+      setup.minX =
+          static_cast<int32_t>(floorf(fminf(fmaxf(minU, 0.0f), float(camera.imageWidth - 1))));
+      setup.maxX =
+          static_cast<int32_t>(ceilf(fminf(fmaxf(maxU, 0.0f), float(camera.imageWidth - 1))));
+      setup.minY =
+          static_cast<int32_t>(floorf(fminf(fmaxf(minV, 0.0f), float(camera.imageHeight - 1))));
+      setup.maxY =
+          static_cast<int32_t>(ceilf(fminf(fmaxf(maxV, 0.0f), float(camera.imageHeight - 1))));
+
+      double maxFastEdgeScale = 0.0;
+      for (int32_t edge = 0; edge < 3; ++edge) {
+        const int32_t first = (edge + 1) % 3;
+        const int32_t second = (edge + 2) % 3;
+        const double maxDistanceX = fmax(
+            fmax(
+                fabs(double(setup.minX) - double(setup.u[first])),
+                fabs(double(setup.maxX) - double(setup.u[first]))),
+            fmax(
+                fabs(double(setup.minX) - double(setup.u[second])),
+                fabs(double(setup.maxX) - double(setup.u[second]))));
+        const double maxDistanceY = fmax(
+            fmax(
+                fabs(double(setup.minY) - double(setup.v[first])),
+                fabs(double(setup.maxY) - double(setup.v[first]))),
+            fmax(
+                fabs(double(setup.minY) - double(setup.v[second])),
+                fabs(double(setup.maxY) - double(setup.v[second]))));
+        const double edgeScale =
+            fabs(double(setup.v[first]) - double(setup.v[second])) * maxDistanceX +
+            fabs(double(setup.u[second]) - double(setup.u[first])) * maxDistanceY;
+        maxFastEdgeScale = fmax(maxFastEdgeScale, edgeScale);
+      }
+      constexpr double kRobustEdgeCondition = 16.0 * double(FLT_EPSILON);
+      setup.robustEdges = fabs(denominator) <= kRobustEdgeCondition * maxFastEdgeScale;
+      if (!setup.robustEdges) {
+        setup.valid &= isfinite(setup.denominator) && setup.denominator != 0.0f;
+      }
+
+      if (setup.robustEdges) {
+        const double orientation = denominator < 0.0 ? -1.0 : 1.0;
+        const double maxLocalX = double(setup.maxX - setup.minX);
+        const double maxLocalY = double(setup.maxY - setup.minY);
+        // Evaluate robust edges in bounding-box-local coordinates. Splitting the
+        // x slope and each FP64 row intercept into FP32 high and low parts keeps
+        // the pixel loop on FP32 fused multiply-adds. The edge threshold bounds
+        // setup and split-evaluation rounding on this path.
+        constexpr double kSplitEvaluationError = 4.0 * double(FLT_EPSILON) * double(FLT_EPSILON);
+        constexpr double kDoubleSetupError = 4.0 * DBL_EPSILON;
+        for (int32_t edge = 0; edge < 3; ++edge) {
+          const int32_t first = (edge + 1) % 3;
+          const int32_t second = (edge + 2) % 3;
+          const double slope = orientation * (double(setup.v[first]) - double(setup.v[second]));
+          const double rowSlope = orientation * (double(setup.u[second]) - double(setup.u[first]));
+          const double firstAnchorDistance = fabs(double(setup.minX) - double(setup.u[first])) +
+              fabs(double(setup.minY) - double(setup.v[first]));
+          const double secondAnchorDistance = fabs(double(setup.minX) - double(setup.u[second])) +
+              fabs(double(setup.minY) - double(setup.v[second]));
+          const bool useFirstAnchor = firstAnchorDistance < secondAnchorDistance ||
+              (firstAnchorDistance == secondAnchorDistance &&
+               (setup.u[first] < setup.u[second] ||
+                (setup.u[first] == setup.u[second] && setup.v[first] < setup.v[second])));
+          const int32_t anchor = useFirstAnchor ? first : second;
+          const double localVertexX = double(setup.minX) - double(setup.u[anchor]);
+          const double localVertexY = double(setup.minY) - double(setup.v[anchor]);
+          const double constant = fma(slope, localVertexX, rowSlope * localVertexY);
+          setup.edgeSlopeHi[edge] = float(slope);
+          setup.edgeSlopeLo[edge] = float(slope - double(setup.edgeSlopeHi[edge]));
+          setup.edgeRowSlope[edge] = rowSlope;
+          setup.edgeConstant[edge] = constant;
+          const double maxEdgeValue =
+              fabs(slope) * maxLocalX + fabs(rowSlope) * maxLocalY + fabs(constant);
+          const double setupMagnitude =
+              fabs(slope) * fabs(localVertexX) + fabs(rowSlope) * fabs(localVertexY);
+          const double edgeError = kSplitEvaluationError * maxEdgeValue +
+              kDoubleSetupError * (setupMagnitude + maxEdgeValue);
+          setup.edgeThreshold[edge] = float(-edgeError);
+          setup.valid &= isfinite(float(maxEdgeValue)) && isfinite(setup.edgeThreshold[edge]);
+        }
+      }
     }
   }
   __syncthreads();
@@ -257,79 +482,58 @@ __global__ void rasterizeKernel(
     return;
   }
 
-  const int32_t boxWidth = setup.maxX - setup.minX + 1;
-  const int32_t boxHeight = setup.maxY - setup.minY + 1;
-  const int64_t boxPixels = static_cast<int64_t>(boxWidth) * boxHeight;
-  for (int64_t boxPixel = threadIdx.x; boxPixel < boxPixels; boxPixel += blockDim.x) {
-    const int32_t y = setup.minY + static_cast<int32_t>(boxPixel / boxWidth);
-    const int32_t x = setup.minX + static_cast<int32_t>(boxPixel % boxWidth);
-    const float pixelX = static_cast<float>(x);
-    const float pixelY = static_cast<float>(y);
-
-    const float lambda0 = ((setup.v[1] - setup.v[2]) * (pixelX - setup.u[2]) +
-                           (setup.u[2] - setup.u[1]) * (pixelY - setup.v[2])) /
-        setup.denominator;
-    const float lambda1 = ((setup.v[2] - setup.v[0]) * (pixelX - setup.u[2]) +
-                           (setup.u[0] - setup.u[2]) * (pixelY - setup.v[2])) /
-        setup.denominator;
-    const float lambda2 = 1.0f - lambda0 - lambda1;
-    if (lambda0 < 0.0f || lambda1 < 0.0f || lambda2 < 0.0f) {
-      continue;
-    }
-
-    const float reciprocalDepth =
-        lambda0 / setup.eye[0].z + lambda1 / setup.eye[1].z + lambda2 / setup.eye[2].z;
-    const float depth = 1.0f / reciprocalDepth;
-    if (!(depth > nearClip) || !isfinite(depth)) {
-      continue;
-    }
-
-    const float outputDepth = depth + depthOffset;
-    if (!isfinite(outputDepth)) {
-      continue;
-    }
-
-    const int64_t offset = static_cast<int64_t>(y) * rowStride + x;
-    if (writeDepth) {
-      atomicMinDepth(zBuffer + offset, outputDepth);
-    } else {
-      // Both passes execute this same runtime-parameterized kernel, so a given
-      // fragment recomputes the same depth bits. Exact matching avoids races
-      // between attributes from different triangles at nearly equal depths.
-      if (__float_as_uint(zBuffer[offset]) != __float_as_uint(outputDepth)) {
+  if (!setup.robustEdges) {
+    const int32_t boxWidth = setup.maxX - setup.minX + 1;
+    const int32_t boxHeight = setup.maxY - setup.minY + 1;
+    const int64_t boxPixels = static_cast<int64_t>(boxWidth) * boxHeight;
+    for (int64_t boxPixel = threadIdx.x; boxPixel < boxPixels; boxPixel += blockDim.x) {
+      const int32_t y = setup.minY + static_cast<int32_t>(boxPixel / boxWidth);
+      const int32_t x = setup.minX + static_cast<int32_t>(boxPixel % boxWidth);
+      const float pixelX = static_cast<float>(x);
+      const float pixelY = static_cast<float>(y);
+      const float lambda0 = ((setup.v[1] - setup.v[2]) * (pixelX - setup.u[2]) +
+                             (setup.u[2] - setup.u[1]) * (pixelY - setup.v[2])) /
+          setup.denominator;
+      const float lambda1 = ((setup.v[2] - setup.v[0]) * (pixelX - setup.u[2]) +
+                             (setup.u[0] - setup.u[2]) * (pixelY - setup.v[2])) /
+          setup.denominator;
+      const float lambda2 = 1.0f - lambda0 - lambda1;
+      if (lambda0 < 0.0f || lambda1 < 0.0f || lambda2 < 0.0f) {
         continue;
       }
-
-      if (triangleIndexBuffer != nullptr) {
-        atomicExch(triangleIndexBuffer + offset, static_cast<int32_t>(triangleIndex));
-      }
-      const float bary0 = lambda0 * depth / setup.eye[0].z;
-      const float bary1 = lambda1 * depth / setup.eye[1].z;
-      const float bary2 = lambda2 * depth / setup.eye[2].z;
-      if (vertexIndexBuffer != nullptr) {
-        const int32_t vertexIndex = bary0 > bary1 && bary0 > bary2
-            ? setup.vertexIndex[0]
-            : (bary1 > bary2 ? setup.vertexIndex[1] : setup.vertexIndex[2]);
-        atomicExch(vertexIndexBuffer + offset, vertexIndex);
-      }
-      if (surfaceNormalsBuffer != nullptr) {
-        const float3 normal = normalizeVector(make_float3(
-            bary0 * setup.normal[0].x + bary1 * setup.normal[1].x + bary2 * setup.normal[2].x,
-            bary0 * setup.normal[0].y + bary1 * setup.normal[1].y + bary2 * setup.normal[2].y,
-            bary0 * setup.normal[0].z + bary1 * setup.normal[1].z + bary2 * setup.normal[2].z));
-        float* output = surfaceNormalsBuffer + 3 * offset;
-        atomicWriteFloat(output, normal.x);
-        atomicWriteFloat(output + 1, normal.y);
-        atomicWriteFloat(output + 2, normal.z);
-      }
-      if (barycentricCoordinatesBuffer != nullptr) {
-        float* output = barycentricCoordinatesBuffer + 3 * offset;
-        atomicWriteFloat(output, bary0);
-        atomicWriteFloat(output + 1, bary1);
-        atomicWriteFloat(output + 2, bary2);
-      }
+      rasterizeFragment(
+          setup,
+          triangleIndex,
+          x,
+          y,
+          lambda0,
+          lambda1,
+          lambda2,
+          nearClip,
+          depthOffset,
+          writeDepth,
+          rowStride,
+          zBuffer,
+          triangleIndexBuffer,
+          vertexIndexBuffer,
+          surfaceNormalsBuffer,
+          barycentricCoordinatesBuffer);
     }
+    return;
   }
+
+  rasterizeRobustTriangle(
+      setup,
+      triangleIndex,
+      nearClip,
+      depthOffset,
+      writeDepth,
+      rowStride,
+      zBuffer,
+      triangleIndexBuffer,
+      vertexIndexBuffer,
+      surfaceNormalsBuffer,
+      barycentricCoordinatesBuffer);
 }
 
 } // namespace
