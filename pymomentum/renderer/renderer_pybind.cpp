@@ -69,6 +69,10 @@ PYBIND11_MODULE(renderer, m) {
           [](momentum::rasterizer::PhongMaterial& mat, const float exponent) {
             mat.specularExponent = exponent;
           })
+      .def_property_readonly(
+          "has_texture_map",
+          &momentum::rasterizer::PhongMaterial::hasTextureMap,
+          "Whether this material contains an embedded NumPy texture map.")
       .def(py::init<>())
       .def(
           py::init(

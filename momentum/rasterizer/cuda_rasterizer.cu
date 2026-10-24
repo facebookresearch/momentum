@@ -170,7 +170,8 @@ __global__ void rasterizeKernel(
     float* zBuffer,
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
-    float* surfaceNormalsBuffer) {
+    float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer) {
   const size_t batchIndex = blockIdx.y;
   const size_t triangleIndex = blockIdx.x;
   positionsModel += 3 * batchIndex * numVertices;
@@ -186,6 +187,9 @@ __global__ void rasterizeKernel(
   }
   if (surfaceNormalsBuffer != nullptr) {
     surfaceNormalsBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
+  }
+  if (barycentricCoordinatesBuffer != nullptr) {
+    barycentricCoordinatesBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
   }
   if (triangleIndex >= numTriangles) {
     return;
@@ -318,6 +322,12 @@ __global__ void rasterizeKernel(
         atomicWriteFloat(output + 1, normal.y);
         atomicWriteFloat(output + 2, normal.z);
       }
+      if (barycentricCoordinatesBuffer != nullptr) {
+        float* output = barycentricCoordinatesBuffer + 3 * offset;
+        atomicWriteFloat(output, bary0);
+        atomicWriteFloat(output + 1, bary1);
+        atomicWriteFloat(output + 2, bary2);
+      }
     }
   }
 }
@@ -341,6 +351,7 @@ cudaError_t launchCudaRasterizeMeshes(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer,
     cudaStream_t stream) {
   if (numTriangles == 0) {
     return cudaSuccess;
@@ -363,13 +374,14 @@ cudaError_t launchCudaRasterizeMeshes(
       zBuffer,
       triangleIndexBuffer,
       vertexIndexBuffer,
-      surfaceNormalsBuffer);
+      surfaceNormalsBuffer,
+      barycentricCoordinatesBuffer);
   if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
     return error;
   }
 
   if (triangleIndexBuffer != nullptr || vertexIndexBuffer != nullptr ||
-      surfaceNormalsBuffer != nullptr) {
+      surfaceNormalsBuffer != nullptr || barycentricCoordinatesBuffer != nullptr) {
     rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
         positionsModel,
         normalsModel,
@@ -386,7 +398,8 @@ cudaError_t launchCudaRasterizeMeshes(
         zBuffer,
         triangleIndexBuffer,
         vertexIndexBuffer,
-        surfaceNormalsBuffer);
+        surfaceNormalsBuffer,
+        barycentricCoordinatesBuffer);
     return cudaGetLastError();
   }
   return cudaSuccess;
@@ -407,6 +420,7 @@ cudaError_t launchCudaRasterizeMesh(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer,
     cudaStream_t stream) {
   return launchCudaRasterizeMeshes(
       positionsModel,
@@ -425,6 +439,7 @@ cudaError_t launchCudaRasterizeMesh(
       triangleIndexBuffer,
       vertexIndexBuffer,
       surfaceNormalsBuffer,
+      barycentricCoordinatesBuffer,
       stream);
 }
 

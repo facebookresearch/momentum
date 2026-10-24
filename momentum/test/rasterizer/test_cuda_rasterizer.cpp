@@ -207,6 +207,7 @@ struct CudaAttributeRenderResult {
   std::vector<int32_t> triangleIndex;
   std::vector<int32_t> vertexIndex;
   std::vector<float> surfaceNormals;
+  std::vector<float> barycentricCoordinates;
   int64_t rowStride = 0;
 };
 
@@ -220,6 +221,7 @@ CudaAttributeRenderResult renderCudaAttributes(
   std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
   std::vector<int32_t> initialIndex(bufferSize, -1);
   std::vector<float> initialNormals(3 * bufferSize, 0.0f);
+  std::vector<float> initialBarycentrics(3 * bufferSize, 0.0f);
 
   DeviceBuffer<float> positions(static_cast<size_t>(mesh.positions.size()));
   DeviceBuffer<int32_t> triangles(static_cast<size_t>(mesh.triangles.size()));
@@ -232,12 +234,14 @@ CudaAttributeRenderResult renderCudaAttributes(
   DeviceBuffer<int32_t> triangleIndex(bufferSize);
   DeviceBuffer<int32_t> vertexIndex(bufferSize);
   DeviceBuffer<float> surfaceNormals(3 * bufferSize);
+  DeviceBuffer<float> barycentricCoordinates(3 * bufferSize);
   positions.copyFromHost(mesh.positions.data());
   triangles.copyFromHost(mesh.triangles.data());
   depth.copyFromHost(initialDepth.data());
   triangleIndex.copyFromHost(initialIndex.data());
   vertexIndex.copyFromHost(initialIndex.data());
   surfaceNormals.copyFromHost(initialNormals.data());
+  barycentricCoordinates.copyFromHost(initialBarycentrics.data());
 
   rasterizeMeshCuda(
       CudaRasterizerInputs{
@@ -262,6 +266,8 @@ CudaAttributeRenderResult renderCudaAttributes(
           .vertexIndexBufferSize = bufferSize,
           .surfaceNormalsBuffer = surfaceNormals.data(),
           .surfaceNormalsBufferSize = 3 * bufferSize,
+          .barycentricCoordinatesBuffer = barycentricCoordinates.data(),
+          .barycentricCoordinatesBufferSize = 3 * bufferSize,
           .rowStride = rowStride,
       });
   throwIfCudaError(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
@@ -271,6 +277,7 @@ CudaAttributeRenderResult renderCudaAttributes(
       .triangleIndex = triangleIndex.copyToHost(),
       .vertexIndex = vertexIndex.copyToHost(),
       .surfaceNormals = surfaceNormals.copyToHost(),
+      .barycentricCoordinates = barycentricCoordinates.copyToHost(),
       .rowStride = rowStride,
   };
 }
@@ -312,6 +319,15 @@ TEST(CudaRasterizerTest, WritesVertexIndicesAndInverseTransposeSurfaceNormals) {
       EXPECT_NEAR(result.surfaceNormals[3 * offset], expectedNormal.x(), 1e-5f);
       EXPECT_NEAR(result.surfaceNormals[3 * offset + 1], expectedNormal.y(), 1e-5f);
       EXPECT_NEAR(result.surfaceNormals[3 * offset + 2], expectedNormal.z(), 1e-5f);
+      const Eigen::Vector3f barycentric(
+          result.barycentricCoordinates[3 * offset],
+          result.barycentricCoordinates[3 * offset + 1],
+          result.barycentricCoordinates[3 * offset + 2]);
+      EXPECT_NEAR(barycentric.sum(), 1.0f, 1e-6f);
+      EXPECT_GE(barycentric.minCoeff(), -1e-6f);
+      const Eigen::Vector3f eyeDepths = modelMatrix(2, 2) *
+          Eigen::Vector3f(mesh.positions[2], mesh.positions[5], mesh.positions[8]);
+      EXPECT_NEAR(barycentric.dot(eyeDepths), result.depth[offset], 1e-5f);
     }
   }
   EXPECT_GT(coveredPixels, 0);
@@ -577,6 +593,7 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   int32_t triangleIndex = -1;
   int32_t vertexIndex = -1;
   float surfaceNormal = 0.0f;
+  float barycentricCoordinate = 0.0f;
   const CudaRasterizerBuffers validBuffers{
       .zBuffer = &depth,
       .zBufferSize = bufferSize,
@@ -586,6 +603,8 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
       .vertexIndexBufferSize = bufferSize,
       .surfaceNormalsBuffer = &surfaceNormal,
       .surfaceNormalsBufferSize = 3 * bufferSize,
+      .barycentricCoordinatesBuffer = &barycentricCoordinate,
+      .barycentricCoordinatesBufferSize = 3 * bufferSize,
       .rowStride = rowStride,
   };
   float positions[3]{};
@@ -628,6 +647,9 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   buffers.surfaceNormalsBufferSize = 3 * bufferSize - 1;
   expectRejected(validInputs, buffers);
   buffers = validBuffers;
+  buffers.barycentricCoordinatesBufferSize = 3 * bufferSize - 1;
+  expectRejected(validInputs, buffers);
+  buffers = validBuffers;
   buffers.rowStride = std::numeric_limits<int64_t>::max();
   expectRejected(validInputs, buffers);
 
@@ -651,6 +673,8 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
       .vertexIndexBufferSize = batchedBufferSize,
       .surfaceNormalsBuffer = &surfaceNormal,
       .surfaceNormalsBufferSize = 3 * batchedBufferSize,
+      .barycentricCoordinatesBuffer = &barycentricCoordinate,
+      .barycentricCoordinatesBufferSize = 3 * batchedBufferSize,
       .rowStride = rowStride,
       .imageStride = static_cast<int64_t>(bufferSize),
   };
@@ -681,6 +705,9 @@ TEST(CudaRasterizerTest, RejectsUndersizedBuffersBeforeLaunch) {
   expectBatchedRejected(validBatchedInputs, batchedBuffers);
   batchedBuffers = validBatchedBuffers;
   batchedBuffers.surfaceNormalsBufferSize = 3 * batchedBufferSize - 1;
+  expectBatchedRejected(validBatchedInputs, batchedBuffers);
+  batchedBuffers = validBatchedBuffers;
+  batchedBuffers.barycentricCoordinatesBufferSize = 3 * batchedBufferSize - 1;
   expectBatchedRejected(validBatchedInputs, batchedBuffers);
 }
 

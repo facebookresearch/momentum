@@ -53,6 +53,7 @@ cudaError_t launchCudaRasterizeMesh(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer,
     cudaStream_t stream);
 
 /// Launch the CUDA rasterization kernel for a batch with shared topology and camera.
@@ -73,6 +74,7 @@ cudaError_t launchCudaRasterizeMeshes(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
+    float* barycentricCoordinatesBuffer,
     cudaStream_t stream);
 
 } // namespace momentum::rasterizer::detail
