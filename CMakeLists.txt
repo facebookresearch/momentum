@@ -794,6 +794,8 @@ if(MOMENTUM_BUILD_CUDA_RASTERIZER)
       common
       CUDA::cudart
       Eigen3::Eigen
+    PRIVATE_LINK_LIBRARIES
+      rasterizer
   )
   set_target_properties(rasterizer_cuda PROPERTIES
     CUDA_STANDARD 17

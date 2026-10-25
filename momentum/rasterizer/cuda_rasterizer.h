@@ -17,6 +17,9 @@
 
 namespace momentum::rasterizer {
 
+struct Light;
+struct PhongMaterial;
+
 /// Device inputs used by the CUDA rasterizer.
 ///
 /// Buffer sizes are element counts, not byte counts. positionsModel must contain at least
@@ -33,15 +36,45 @@ struct CudaRasterizerInputs {
   size_t numTriangles = 0;
 };
 
+/// Device-resident mesh attributes and textures used by native CUDA shading.
+///
+/// Texture tensors are contiguous RGB arrays in row-major [height, width, 3] order. Texture
+/// coordinates and per-vertex colors are contiguous arrays with two and three floats per entry,
+/// respectively, and all shading inputs are shared across a batch. textureTriangles may be null to
+/// reuse the mesh triangle topology. material and lightsWorld are host-side configuration consumed
+/// before launch; embedded material texture maps are not supported. An empty light list selects the
+/// default camera light; at most 16 explicit lights are supported.
+struct CudaRasterizerShadingInputs {
+  const float* textureCoordinates = nullptr;
+  size_t textureCoordinatesSize = 0;
+  size_t numTextureCoordinates = 0;
+  const int32_t* textureTriangles = nullptr;
+  size_t textureTrianglesSize = 0;
+  const float* perVertexDiffuseColor = nullptr;
+  size_t perVertexDiffuseColorSize = 0;
+  const float* diffuseTexture = nullptr;
+  size_t diffuseTextureSize = 0;
+  int32_t diffuseTextureHeight = 0;
+  int32_t diffuseTextureWidth = 0;
+  const float* emissiveTexture = nullptr;
+  size_t emissiveTextureSize = 0;
+  int32_t emissiveTextureHeight = 0;
+  int32_t emissiveTextureWidth = 0;
+  const PhongMaterial* material = nullptr;
+  const Light* lightsWorld = nullptr;
+  size_t numLights = 0;
+};
+
 /// Device buffers used by the CUDA rasterizer.
 ///
 /// All scalar buffers use rowStride elements per row. Three-channel buffers, when provided, store
 /// three interleaved floats per pixel and use 3 * rowStride elements per row. The corresponding
 /// size fields are element counts, not byte counts. Existing output values are preserved where no
-/// new triangle wins the depth test. zBuffer must be non-null; triangle, vertex, normal, and
-/// barycentric outputs are optional and written in a conditional second pass. For non-tied depth
-/// values, every requested attribute corresponds to finalized depth. Exact-depth ties are
-/// unspecified and may mix independently written attributes from tied triangles.
+/// new triangle wins the depth test. zBuffer must be non-null; RGB, triangle, vertex, and normal
+/// outputs are optional and written in a conditional second pass. RGB output and shading inputs
+/// must be provided together. For non-tied depth values, every requested output corresponds to
+/// finalized depth. Exact-depth ties are unspecified and may mix independently written outputs from
+/// tied triangles.
 struct CudaRasterizerBuffers {
   float* zBuffer = nullptr;
   size_t zBufferSize = 0;
@@ -51,15 +84,15 @@ struct CudaRasterizerBuffers {
   size_t vertexIndexBufferSize = 0;
   float* surfaceNormalsBuffer = nullptr;
   size_t surfaceNormalsBufferSize = 0;
-  float* barycentricCoordinatesBuffer = nullptr;
-  size_t barycentricCoordinatesBufferSize = 0;
+  float* rgbBuffer = nullptr;
+  size_t rgbBufferSize = 0;
   int64_t rowStride = 0;
 };
 
 /// Device buffers used by batched CUDA rasterization.
 ///
 /// Each image uses rowStride scalar elements per row and imageStride scalar elements between batch
-/// entries. surfaceNormalsBuffer uses three times those strides. The corresponding size fields are
+/// entries. Three-channel outputs use three times those strides. The corresponding size fields are
 /// element counts, not byte counts, and must cover the final image's rows from each buffer pointer.
 /// Existing output values are preserved where no new triangle wins the depth test. Optional outputs
 /// have the same exact-depth tie semantics as CudaRasterizerBuffers.
@@ -72,8 +105,8 @@ struct CudaBatchedRasterizerBuffers {
   size_t vertexIndexBufferSize = 0;
   float* surfaceNormalsBuffer = nullptr;
   size_t surfaceNormalsBufferSize = 0;
-  float* barycentricCoordinatesBuffer = nullptr;
-  size_t barycentricCoordinatesBufferSize = 0;
+  float* rgbBuffer = nullptr;
+  size_t rgbBufferSize = 0;
   int64_t rowStride = 0;
   int64_t imageStride = 0;
 };
@@ -90,6 +123,8 @@ struct CudaBatchedRasterizerBuffers {
 /// @param modelMatrix Additional model transform.
 /// @param nearClip Per-pixel near clipping distance; must be positive.
 /// @param buffers CUDA output buffers.
+/// @param shadingInputs Optional native fragment-shading inputs. Required when rgbBuffer is
+/// present; omit both for depth-only or attribute-only rasterization.
 /// @param backfaceCulling Whether to discard back-facing triangles.
 /// @param depthOffset Value added to depth before the depth test and write.
 /// @param stream CUDA stream used for all launches.
@@ -99,6 +134,7 @@ void rasterizeMeshCuda(
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
     CudaRasterizerBuffers buffers,
+    const CudaRasterizerShadingInputs* shadingInputs = nullptr,
     bool backfaceCulling = true,
     float depthOffset = 0.0f,
     cudaStream_t stream = nullptr);
@@ -117,6 +153,7 @@ void rasterizeMeshCuda(
 /// @param modelMatrix Additional model transform shared by every batch entry.
 /// @param nearClip Per-pixel near clipping distance; must be positive.
 /// @param buffers Batched CUDA output buffers.
+/// @param shadingInputs Optional native fragment-shading inputs shared by the batch.
 /// @param backfaceCulling Whether to discard back-facing triangles.
 /// @param depthOffset Value added to depth before the depth test and write.
 /// @param stream CUDA stream used for all launches.
@@ -127,6 +164,7 @@ void rasterizeMeshesCuda(
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
     CudaBatchedRasterizerBuffers buffers,
+    const CudaRasterizerShadingInputs* shadingInputs = nullptr,
     bool backfaceCulling = true,
     float depthOffset = 0.0f,
     cudaStream_t stream = nullptr);

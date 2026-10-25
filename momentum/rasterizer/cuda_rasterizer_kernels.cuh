@@ -37,6 +37,41 @@ struct CudaCamera {
   float normalToEye[9] = {};
 };
 
+constexpr int32_t kMaxCudaLights = 16;
+
+enum class CudaLightType : int32_t {
+  Point,
+  Directional,
+  Ambient,
+};
+
+struct CudaLight {
+  float3 position = {};
+  float3 color = {};
+  CudaLightType type = CudaLightType::Point;
+};
+
+/// Trivially copyable native fragment-shading parameters passed to CUDA kernels.
+struct CudaShadingParameters {
+  const float* textureCoordinates = nullptr;
+  size_t numTextureCoordinates = 0;
+  const int32_t* textureTriangles = nullptr;
+  const float* perVertexDiffuseColor = nullptr;
+  const float* diffuseTexture = nullptr;
+  int32_t diffuseTextureHeight = 0;
+  int32_t diffuseTextureWidth = 0;
+  const float* emissiveTexture = nullptr;
+  int32_t emissiveTextureHeight = 0;
+  int32_t emissiveTextureWidth = 0;
+  float3 diffuseColor = {};
+  float3 specularColor = {};
+  float specularExponent = 0.0f;
+  float3 emissiveColor = {};
+  CudaLight lights[kMaxCudaLights] = {};
+  int32_t numLights = 0;
+  int32_t enabled = 0;
+};
+
 /// Launch the CUDA rasterization kernel for one mesh.
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
@@ -53,7 +88,8 @@ cudaError_t launchCudaRasterizeMesh(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer,
+    const CudaShadingParameters& shading,
+    float* rgbBuffer,
     cudaStream_t stream);
 
 /// Launch the CUDA rasterization kernel for a batch with shared topology and camera.
@@ -74,7 +110,8 @@ cudaError_t launchCudaRasterizeMeshes(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer,
+    const CudaShadingParameters& shading,
+    float* rgbBuffer,
     cudaStream_t stream);
 
 } // namespace momentum::rasterizer::detail

@@ -368,6 +368,7 @@ if(MOMENTUM_BUILD_CUDA_RASTERIZER AND MOMENTUM_BUILD_TORCH_EXTENSIONS)
       ${CUDAToolkit_INCLUDE_DIRS}
       ${TORCH_INCLUDE_DIRS}
     LINK_LIBRARIES
+      rasterizer
       rasterizer_cuda
       torch_bridge
       ${TORCH_LIBRARIES}
