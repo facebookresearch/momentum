@@ -15,6 +15,7 @@
 #include <Eigen/Geometry>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -82,6 +83,20 @@ MeshInputs makeOverlappingTriangles() {
       -0.4f, 0.4f, 1.0f, 0.4f, -0.4f, 1.0f;
   result.triangles.resize(6);
   result.triangles << 0, 1, 2, 3, 4, 5;
+  return result;
+}
+
+MeshInputs makeWindowTriangle(
+    const std::array<Eigen::Vector2f, 3>& window,
+    const std::array<float, 3>& depth) {
+  MeshInputs result;
+  result.positions.resize(9);
+  for (int32_t vertex = 0; vertex < 3; ++vertex) {
+    result.positions.segment<3>(3 * vertex) = Eigen::Vector3f(
+        window[vertex].x() * depth[vertex], window[vertex].y() * depth[vertex], depth[vertex]);
+  }
+  result.triangles.resize(3);
+  result.triangles << 0, 1, 2;
   return result;
 }
 
@@ -215,7 +230,8 @@ CudaAttributeRenderResult renderCudaAttributes(
     const MeshInputs& mesh,
     const Eigen::VectorXf* normals,
     const Camera& camera,
-    const Eigen::Matrix4f& modelMatrix = Eigen::Matrix4f::Identity()) {
+    const Eigen::Matrix4f& modelMatrix = Eigen::Matrix4f::Identity(),
+    bool backfaceCulling = true) {
   const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
   const size_t bufferSize = static_cast<size_t>(camera.imageHeight()) * rowStride;
   std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
@@ -269,7 +285,8 @@ CudaAttributeRenderResult renderCudaAttributes(
           .barycentricCoordinatesBuffer = barycentricCoordinates.data(),
           .barycentricCoordinatesBufferSize = 3 * bufferSize,
           .rowStride = rowStride,
-      });
+      },
+      backfaceCulling);
   throwIfCudaError(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
 
   return {
@@ -331,6 +348,167 @@ TEST(CudaRasterizerTest, WritesVertexIndicesAndInverseTransposeSurfaceNormals) {
     }
   }
   EXPECT_GT(coveredPixels, 0);
+}
+
+TEST(CudaRasterizerTest, ConditionedEdgesHandleNearDegenerateTriangles) {
+  struct TestCase {
+    std::array<Eigen::Vector2f, 3> window;
+    std::vector<Eigen::Vector2i> expectedPixels;
+  };
+  const std::array<TestCase, 4> cases = {{
+      {
+          .window =
+              {Eigen::Vector2f(28.817873001098633f, 33.81787109375f),
+               Eigen::Vector2f(37.18212890625f, 42.18212890625f),
+               Eigen::Vector2f(36.69539260864258f, 41.695404052734375f)},
+          .expectedPixels =
+              {Eigen::Vector2i(30, 35),
+               Eigen::Vector2i(31, 36),
+               Eigen::Vector2i(32, 37),
+               Eigen::Vector2i(33, 38),
+               Eigen::Vector2i(34, 39),
+               Eigen::Vector2i(35, 40),
+               Eigen::Vector2i(36, 41),
+               Eigen::Vector2i(37, 42)},
+      },
+      {
+          .window =
+              {Eigen::Vector2f(34.674339294433594f, 28.674341201782227f),
+               Eigen::Vector2f(43.325660705566406f, 37.325660705566406f),
+               Eigen::Vector2f(37.590118408203125f, 31.590131759643555f)},
+          .expectedPixels = {},
+      },
+      {
+          .window =
+              {Eigen::Vector2f(25.729915618896484f, 38.729915618896484f),
+               Eigen::Vector2f(28.270084381103516f, 41.270084381103516f),
+               Eigen::Vector2f(27.69745635986328f, 40.69745635986328f)},
+          .expectedPixels = {},
+      },
+      {
+          .window =
+              {Eigen::Vector2f(64.0f, 63.999996185302734f),
+               Eigen::Vector2f(63.999996185302734f, 63.99999237060547f),
+               Eigen::Vector2f(32.0f, 32.0f)},
+          .expectedPixels = {Eigen::Vector2i(32, 32)},
+      },
+  }};
+  const std::array<std::array<int32_t, 3>, 6> permutations = {{
+      {0, 1, 2},
+      {0, 2, 1},
+      {1, 0, 2},
+      {1, 2, 0},
+      {2, 0, 1},
+      {2, 1, 0},
+  }};
+  const std::array<float, 3> depths = {64.0f, 128.0f, 256.0f};
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(64, 64, 1.0f, 1.0f, 0.0f, 0.0f));
+
+  for (const auto& testCase : cases) {
+    for (const auto& permutation : permutations) {
+      MeshInputs mesh = makeWindowTriangle(testCase.window, depths);
+      mesh.triangles << permutation[0], permutation[1], permutation[2];
+      const CudaAttributeRenderResult result =
+          renderCudaAttributes(mesh, nullptr, camera, Eigen::Matrix4f::Identity(), false);
+      EXPECT_EQ(
+          std::count(result.triangleIndex.begin(), result.triangleIndex.end(), 0),
+          static_cast<std::ptrdiff_t>(testCase.expectedPixels.size()));
+
+      for (const Eigen::Vector2i& pixel : testCase.expectedPixels) {
+        const size_t offset = static_cast<size_t>(pixel.y() * result.rowStride + pixel.x());
+        ASSERT_EQ(result.triangleIndex[offset], 0);
+        EXPECT_GE(result.depth[offset], depths.front());
+        EXPECT_LE(result.depth[offset], depths.back());
+        const Eigen::Vector3f barycentric(
+            result.barycentricCoordinates[3 * offset],
+            result.barycentricCoordinates[3 * offset + 1],
+            result.barycentricCoordinates[3 * offset + 2]);
+        EXPECT_TRUE(barycentric.allFinite());
+        EXPECT_NEAR(barycentric.sum(), 1.0f, 1e-5f);
+        EXPECT_GE(barycentric.minCoeff(), -1e-5f);
+        EXPECT_LE(barycentric.maxCoeff(), 1.0f + 1e-5f);
+        const Eigen::Vector3f normal(
+            result.surfaceNormals[3 * offset],
+            result.surfaceNormals[3 * offset + 1],
+            result.surfaceNormals[3 * offset + 2]);
+        EXPECT_TRUE(normal.allFinite());
+      }
+    }
+  }
+}
+
+TEST(CudaRasterizerTest, ConditionedAndFastTrianglesPreserveCoverage) {
+  const std::array<Eigen::Vector2f, 4> window = {
+      Eigen::Vector2f(28.817873001098633f, 33.81787109375f),
+      Eigen::Vector2f(37.18212890625f, 42.18212890625f),
+      Eigen::Vector2f(36.69539260864258f, 41.695404052734375f),
+      Eigen::Vector2f(28.0f, 30.0f),
+  };
+  constexpr float kDepth = 64.0f;
+  MeshInputs mesh;
+  mesh.positions.resize(12);
+  for (int32_t vertex = 0; vertex < 4; ++vertex) {
+    mesh.positions.segment<3>(3 * vertex) =
+        Eigen::Vector3f(window[vertex].x() * kDepth, window[vertex].y() * kDepth, kDepth);
+  }
+  mesh.triangles.resize(6);
+  mesh.triangles << 0, 1, 2, 1, 0, 3;
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(64, 64, 1.0f, 1.0f, 0.0f, 0.0f));
+
+  const CudaAttributeRenderResult result =
+      renderCudaAttributes(mesh, nullptr, camera, Eigen::Matrix4f::Identity(), false);
+  const std::array<Eigen::Vector2i, 18> expectedPixels = {
+      Eigen::Vector2i(28, 30),
+      Eigen::Vector2i(29, 32),
+      Eigen::Vector2i(29, 33),
+      Eigen::Vector2i(30, 33),
+      Eigen::Vector2i(30, 34),
+      Eigen::Vector2i(30, 35),
+      Eigen::Vector2i(31, 34),
+      Eigen::Vector2i(31, 35),
+      Eigen::Vector2i(31, 36),
+      Eigen::Vector2i(32, 36),
+      Eigen::Vector2i(32, 37),
+      Eigen::Vector2i(33, 37),
+      Eigen::Vector2i(33, 38),
+      Eigen::Vector2i(34, 38),
+      Eigen::Vector2i(34, 39),
+      Eigen::Vector2i(35, 40),
+      Eigen::Vector2i(36, 41),
+      Eigen::Vector2i(37, 42),
+  };
+  EXPECT_EQ(
+      std::count_if(
+          result.triangleIndex.begin(),
+          result.triangleIndex.end(),
+          [](int32_t triangleIndex) { return triangleIndex >= 0; }),
+      static_cast<std::ptrdiff_t>(expectedPixels.size()));
+  for (const Eigen::Vector2i& pixel : expectedPixels) {
+    const size_t offset = static_cast<size_t>(pixel.y() * result.rowStride + pixel.x());
+    EXPECT_TRUE(std::isfinite(result.depth[offset]));
+    EXPECT_GE(result.triangleIndex[offset], 0);
+    const Eigen::Vector3f barycentric(
+        result.barycentricCoordinates[3 * offset],
+        result.barycentricCoordinates[3 * offset + 1],
+        result.barycentricCoordinates[3 * offset + 2]);
+    EXPECT_TRUE(barycentric.allFinite());
+    EXPECT_NEAR(barycentric.sum(), 1.0f, 1e-5f);
+    EXPECT_GE(barycentric.minCoeff(), -1e-5f);
+    EXPECT_LE(barycentric.maxCoeff(), 1.0f + 1e-5f);
+  }
+}
+
+TEST(CudaRasterizerTest, RejectsOverflowingFastPathDeterminant) {
+  MeshInputs mesh;
+  mesh.positions.resize(9);
+  mesh.positions << 1e20f, 0.0f, 1.0f, 0.0f, 1e20f, 1.0f, 32.0f, 32.0f, 1.0f;
+  mesh.triangles.resize(3);
+  mesh.triangles << 0, 1, 2;
+  const Camera camera(std::make_shared<PinholeIntrinsicsModel>(64, 64, 1.0f, 1.0f, 0.0f, 0.0f));
+
+  const CudaAttributeRenderResult result =
+      renderCudaAttributes(mesh, nullptr, camera, Eigen::Matrix4f::Identity(), false);
+  EXPECT_EQ(std::count(result.triangleIndex.begin(), result.triangleIndex.end(), 0), 0);
 }
 
 TEST(CudaRasterizerTest, SingularNormalTransformAndZeroNormalsStayFinite) {
