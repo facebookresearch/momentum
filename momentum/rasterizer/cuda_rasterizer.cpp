@@ -9,6 +9,7 @@
 
 #include "momentum/common/exception.h"
 #include "momentum/rasterizer/cuda_rasterizer_kernels.cuh"
+#include "momentum/rasterizer/rasterizer.h"
 
 #include <Eigen/LU>
 
@@ -93,6 +94,70 @@ detail::CudaCamera makeCudaCamera(const Camera& camera, const Eigen::Matrix4f& m
   return result;
 }
 
+detail::CudaLightType toCudaLightType(LightType type) {
+  switch (type) {
+    case LightType::Point:
+      return detail::CudaLightType::Point;
+    case LightType::Directional:
+      return detail::CudaLightType::Directional;
+    case LightType::Ambient:
+      return detail::CudaLightType::Ambient;
+  }
+  MT_THROW("Unknown light type: {}", static_cast<int>(type));
+}
+
+detail::CudaShadingParameters makeCudaShadingParameters(
+    const CudaRasterizerShadingInputs* inputs,
+    const Camera& camera) {
+  detail::CudaShadingParameters result;
+  if (inputs == nullptr) {
+    return result;
+  }
+
+  result.enabled = 1;
+  result.textureCoordinates = inputs->textureCoordinates;
+  result.numTextureCoordinates = inputs->numTextureCoordinates;
+  result.textureTriangles = inputs->textureTriangles;
+  result.perVertexDiffuseColor = inputs->perVertexDiffuseColor;
+  result.diffuseTexture = inputs->diffuseTexture;
+  result.diffuseTextureHeight = inputs->diffuseTextureHeight;
+  result.diffuseTextureWidth = inputs->diffuseTextureWidth;
+  result.emissiveTexture = inputs->emissiveTexture;
+  result.emissiveTextureHeight = inputs->emissiveTextureHeight;
+  result.emissiveTextureWidth = inputs->emissiveTextureWidth;
+
+  const PhongMaterial defaultMaterial;
+  const PhongMaterial& material = inputs->material == nullptr ? defaultMaterial : *inputs->material;
+  result.diffuseColor =
+      float3{material.diffuseColor.x(), material.diffuseColor.y(), material.diffuseColor.z()};
+  result.specularColor =
+      float3{material.specularColor.x(), material.specularColor.y(), material.specularColor.z()};
+  result.specularExponent = material.specularExponent;
+  result.emissiveColor =
+      float3{material.emissiveColor.x(), material.emissiveColor.y(), material.emissiveColor.z()};
+
+  if (inputs->numLights == 0) {
+    result.numLights = 1;
+    result.lights[0] = detail::CudaLight{
+        .position = float3{0.0f, 0.0f, 0.0f},
+        .color = float3{1.0f, 1.0f, 1.0f},
+        .type = detail::CudaLightType::Point,
+    };
+    return result;
+  }
+
+  result.numLights = static_cast<int32_t>(inputs->numLights);
+  for (int32_t index = 0; index < result.numLights; ++index) {
+    const Light lightEye = transformLight(inputs->lightsWorld[index], camera.eyeFromWorld());
+    result.lights[index] = detail::CudaLight{
+        .position = float3{lightEye.position.x(), lightEye.position.y(), lightEye.position.z()},
+        .color = float3{lightEye.color.x(), lightEye.color.y(), lightEye.color.z()},
+        .type = toCudaLightType(lightEye.type),
+    };
+  }
+  return result;
+}
+
 } // namespace
 
 void rasterizeMeshesCuda(
@@ -102,6 +167,7 @@ void rasterizeMeshesCuda(
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
     CudaBatchedRasterizerBuffers buffers,
+    const CudaRasterizerShadingInputs* shadingInputs,
     bool backfaceCulling,
     float depthOffset,
     cudaStream_t stream) {
@@ -147,29 +213,24 @@ void rasterizeMeshesCuda(
       buffers.vertexIndexBufferSize,
       requiredBufferSize);
   MT_THROW_IF(
-      buffers.surfaceNormalsBuffer != nullptr &&
+      (buffers.surfaceNormalsBuffer != nullptr || buffers.rgbBuffer != nullptr) &&
           requiredBufferSize > std::numeric_limits<size_t>::max() / 3,
-      "CUDA surface-normal buffer size overflows");
-  const size_t requiredNormalBufferSize =
-      buffers.surfaceNormalsBuffer == nullptr ? 0 : 3 * requiredBufferSize;
+      "CUDA vector output buffer size overflows");
+  const size_t requiredVectorBufferSize = 3 * requiredBufferSize;
   MT_THROW_IF(
       buffers.surfaceNormalsBuffer != nullptr &&
-          buffers.surfaceNormalsBufferSize < requiredNormalBufferSize,
+          buffers.surfaceNormalsBufferSize < requiredVectorBufferSize,
       "CUDA surface-normal buffer has {} elements; at least {} are required",
       buffers.surfaceNormalsBufferSize,
-      requiredNormalBufferSize);
+      requiredVectorBufferSize);
   MT_THROW_IF(
-      buffers.barycentricCoordinatesBuffer != nullptr &&
-          requiredBufferSize > std::numeric_limits<size_t>::max() / 3,
-      "CUDA barycentric-coordinate buffer size overflows");
-  const size_t requiredBarycentricBufferSize =
-      buffers.barycentricCoordinatesBuffer == nullptr ? 0 : 3 * requiredBufferSize;
+      buffers.rgbBuffer != nullptr && buffers.rgbBufferSize < requiredVectorBufferSize,
+      "CUDA RGB buffer has {} elements; at least {} are required",
+      buffers.rgbBufferSize,
+      requiredVectorBufferSize);
   MT_THROW_IF(
-      buffers.barycentricCoordinatesBuffer != nullptr &&
-          buffers.barycentricCoordinatesBufferSize < requiredBarycentricBufferSize,
-      "CUDA barycentric-coordinate buffer has {} elements; at least {} are required",
-      buffers.barycentricCoordinatesBufferSize,
-      requiredBarycentricBufferSize);
+      (buffers.rgbBuffer == nullptr) != (shadingInputs == nullptr),
+      "CUDA RGB buffer and shading inputs must be provided together");
   MT_THROW_IF(
       numVertices > std::numeric_limits<size_t>::max() / 3 ||
           numTriangles > std::numeric_limits<size_t>::max() / 3,
@@ -204,6 +265,92 @@ void rasterizeMeshesCuda(
       "CUDA rasterizer supports at most {} triangles",
       std::numeric_limits<int32_t>::max());
 
+  if (shadingInputs != nullptr) {
+    MT_THROW_IF(
+        shadingInputs->material != nullptr && shadingInputs->material->hasTextureMap(),
+        "CUDA shading requires device texture tensors instead of embedded material texture maps");
+    MT_THROW_IF(
+        shadingInputs->numLights > static_cast<size_t>(detail::kMaxCudaLights),
+        "CUDA shading supports at most {} lights",
+        detail::kMaxCudaLights);
+    MT_THROW_IF(
+        shadingInputs->numLights > 0 && shadingInputs->lightsWorld == nullptr,
+        "CUDA lights buffer is null");
+    MT_THROW_IF(
+        shadingInputs->perVertexDiffuseColor != nullptr && shadingInputs->diffuseTexture != nullptr,
+        "CUDA shading cannot combine per-vertex diffuse color with a diffuse texture");
+
+    MT_THROW_IF(
+        shadingInputs->numTextureCoordinates > std::numeric_limits<size_t>::max() / 2,
+        "CUDA texture-coordinate size overflows");
+    const size_t requiredTextureCoordinateSize = 2 * shadingInputs->numTextureCoordinates;
+    MT_THROW_IF(
+        shadingInputs->textureCoordinates != nullptr &&
+            shadingInputs->textureCoordinatesSize < requiredTextureCoordinateSize,
+        "CUDA texture-coordinate buffer has {} elements; at least {} are required",
+        shadingInputs->textureCoordinatesSize,
+        requiredTextureCoordinateSize);
+    MT_THROW_IF(
+        shadingInputs->textureCoordinates == nullptr &&
+            (shadingInputs->textureTriangles != nullptr ||
+             shadingInputs->diffuseTexture != nullptr || shadingInputs->emissiveTexture != nullptr),
+        "CUDA texture indices and maps require texture coordinates");
+    MT_THROW_IF(
+        shadingInputs->textureTriangles != nullptr &&
+            shadingInputs->textureTrianglesSize < requiredTriangleElements,
+        "CUDA texture-triangle buffer has {} elements; at least {} are required",
+        shadingInputs->textureTrianglesSize,
+        requiredTriangleElements);
+    MT_THROW_IF(
+        shadingInputs->textureTriangles == nullptr &&
+            shadingInputs->textureCoordinates != nullptr &&
+            shadingInputs->numTextureCoordinates < numVertices,
+        "CUDA texture coordinates must match vertices when texture triangles are omitted");
+    MT_THROW_IF(
+        shadingInputs->perVertexDiffuseColor != nullptr &&
+            shadingInputs->perVertexDiffuseColorSize < positionElementsPerMesh,
+        "CUDA per-vertex color buffer has {} elements; at least {} are required",
+        shadingInputs->perVertexDiffuseColorSize,
+        positionElementsPerMesh);
+
+    const auto validateTexture = [](const float* texture,
+                                    size_t textureSize,
+                                    int32_t height,
+                                    int32_t width,
+                                    const char* name) {
+      if (texture == nullptr) {
+        return;
+      }
+      MT_THROW_IF(height <= 0 || width <= 0, "CUDA {} dimensions must be positive", name);
+      const auto textureHeight = static_cast<size_t>(height);
+      const auto textureWidth = static_cast<size_t>(width);
+      MT_THROW_IF(
+          textureWidth > std::numeric_limits<size_t>::max() / textureHeight ||
+              textureWidth * textureHeight > std::numeric_limits<size_t>::max() / 3,
+          "CUDA {} size overflows",
+          name);
+      const size_t requiredSize = 3 * textureWidth * textureHeight;
+      MT_THROW_IF(
+          textureSize < requiredSize,
+          "CUDA {} has {} elements; at least {} are required",
+          name,
+          textureSize,
+          requiredSize);
+    };
+    validateTexture(
+        shadingInputs->diffuseTexture,
+        shadingInputs->diffuseTextureSize,
+        shadingInputs->diffuseTextureHeight,
+        shadingInputs->diffuseTextureWidth,
+        "diffuse texture");
+    validateTexture(
+        shadingInputs->emissiveTexture,
+        shadingInputs->emissiveTextureSize,
+        shadingInputs->emissiveTextureHeight,
+        shadingInputs->emissiveTextureWidth,
+        "emissive texture");
+  }
+
   int device = 0;
   throwIfCudaError(cudaGetDevice(&device), "CUDA rasterizer device lookup");
   int maxGridDimensionX = 0;
@@ -234,7 +381,8 @@ void rasterizeMeshesCuda(
           buffers.triangleIndexBuffer,
           buffers.vertexIndexBuffer,
           buffers.surfaceNormalsBuffer,
-          buffers.barycentricCoordinatesBuffer,
+          makeCudaShadingParameters(shadingInputs, camera),
+          buffers.rgbBuffer,
           stream),
       "Batched CUDA rasterizer launch");
 }
@@ -245,6 +393,7 @@ void rasterizeMeshCuda(
     const Eigen::Matrix4f& modelMatrix,
     float nearClip,
     CudaRasterizerBuffers buffers,
+    const CudaRasterizerShadingInputs* shadingInputs,
     bool backfaceCulling,
     float depthOffset,
     cudaStream_t stream) {
@@ -269,11 +418,12 @@ void rasterizeMeshCuda(
           .vertexIndexBufferSize = buffers.vertexIndexBufferSize,
           .surfaceNormalsBuffer = buffers.surfaceNormalsBuffer,
           .surfaceNormalsBufferSize = buffers.surfaceNormalsBufferSize,
-          .barycentricCoordinatesBuffer = buffers.barycentricCoordinatesBuffer,
-          .barycentricCoordinatesBufferSize = buffers.barycentricCoordinatesBufferSize,
+          .rgbBuffer = buffers.rgbBuffer,
+          .rgbBufferSize = buffers.rgbBufferSize,
           .rowStride = buffers.rowStride,
           .imageStride = imageStride,
       },
+      shadingInputs,
       backfaceCulling,
       depthOffset,
       stream);

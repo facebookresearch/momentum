@@ -22,6 +22,7 @@ struct TriangleSetup {
   float3 eye[3];
   float3 normal[3];
   int32_t vertexIndex[3];
+  int32_t textureIndex[3];
   float edgeSlopeHi[3];
   float edgeSlopeLo[3];
   double edgeRowSlope[3];
@@ -71,6 +72,53 @@ __device__ float3 cross(float3 first, float3 second) {
       first.y * second.z - first.z * second.y,
       first.z * second.x - first.x * second.z,
       first.x * second.y - first.y * second.x);
+}
+
+__device__ float dot(float3 first, float3 second) {
+  return first.x * second.x + first.y * second.y + first.z * second.z;
+}
+
+__device__ float3 add(float3 first, float3 second) {
+  return make_float3(first.x + second.x, first.y + second.y, first.z + second.z);
+}
+
+__device__ float3 multiply(float3 first, float3 second) {
+  return make_float3(first.x * second.x, first.y * second.y, first.z * second.z);
+}
+
+__device__ float3 multiply(float value, float3 vector) {
+  return make_float3(value * vector.x, value * vector.y, value * vector.z);
+}
+
+__device__ float3
+interpolate(float3 first, float3 second, float3 third, float bary0, float bary1, float bary2) {
+  return make_float3(
+      bary0 * first.x + bary1 * second.x + bary2 * third.x,
+      bary0 * first.y + bary1 * second.y + bary2 * third.y,
+      bary0 * first.z + bary1 * second.z + bary2 * third.z);
+}
+
+__device__ float3 loadTexturePixel(const float* texture, int32_t width, int32_t x, int32_t y) {
+  const int64_t offset = 3 * (static_cast<int64_t>(y) * width + x);
+  return make_float3(texture[offset], texture[offset + 1], texture[offset + 2]);
+}
+
+__device__ float3
+sampleTexture(const float* texture, int32_t height, int32_t width, float u, float v) {
+  const float pixelX = fminf(fmaxf(u, 0.0f), 1.0f) * float(width - 1);
+  const float pixelY = fminf(fmaxf(v, 0.0f), 1.0f) * float(height - 1);
+  const int32_t lowX = static_cast<int32_t>(floorf(pixelX));
+  const int32_t lowY = static_cast<int32_t>(floorf(pixelY));
+  const int32_t highX = min(lowX + 1, width - 1);
+  const int32_t highY = min(lowY + 1, height - 1);
+  const float xWeight = pixelX - float(lowX);
+  const float yWeight = pixelY - float(lowY);
+  return add(
+      add(multiply(
+              (1.0f - xWeight) * (1.0f - yWeight), loadTexturePixel(texture, width, lowX, lowY)),
+          multiply((1.0f - xWeight) * yWeight, loadTexturePixel(texture, width, lowX, highY))),
+      add(multiply(xWeight * (1.0f - yWeight), loadTexturePixel(texture, width, highX, lowY)),
+          multiply(xWeight * yWeight, loadTexturePixel(texture, width, highX, highY))));
 }
 
 __device__ float3 transformNormal(const CudaCamera& camera, float3 normalModel) {
@@ -162,6 +210,99 @@ __device__ bool projectPoint(
   return isfinite(u) && isfinite(v);
 }
 
+__device__ void shadeFragment(
+    const TriangleSetup& setup,
+    float bary0,
+    float bary1,
+    float bary2,
+    const CudaShadingParameters& shading,
+    float3 normal,
+    float* rgbOutput) {
+  float textureU = 0.0f;
+  float textureV = 0.0f;
+  if (shading.textureCoordinates != nullptr &&
+      (shading.diffuseTexture != nullptr || shading.emissiveTexture != nullptr)) {
+    const int32_t first = setup.textureIndex[0];
+    const int32_t second = setup.textureIndex[1];
+    const int32_t third = setup.textureIndex[2];
+    textureU = bary0 * shading.textureCoordinates[2 * first] +
+        bary1 * shading.textureCoordinates[2 * second] +
+        bary2 * shading.textureCoordinates[2 * third];
+    textureV = bary0 * shading.textureCoordinates[2 * first + 1] +
+        bary1 * shading.textureCoordinates[2 * second + 1] +
+        bary2 * shading.textureCoordinates[2 * third + 1];
+  }
+
+  float3 diffuseColor = shading.diffuseColor;
+  if (shading.perVertexDiffuseColor != nullptr) {
+    const float3 first = make_float3(
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[0]],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[0] + 1],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[0] + 2]);
+    const float3 second = make_float3(
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[1]],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[1] + 1],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[1] + 2]);
+    const float3 third = make_float3(
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[2]],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[2] + 1],
+        shading.perVertexDiffuseColor[3 * setup.vertexIndex[2] + 2]);
+    diffuseColor = interpolate(first, second, third, bary0, bary1, bary2);
+  }
+  if (shading.diffuseTexture != nullptr) {
+    diffuseColor = sampleTexture(
+        shading.diffuseTexture,
+        shading.diffuseTextureHeight,
+        shading.diffuseTextureWidth,
+        textureU,
+        textureV);
+  }
+
+  float3 shaded = shading.emissiveColor;
+  if (shading.emissiveTexture != nullptr) {
+    shaded =
+        add(shaded,
+            sampleTexture(
+                shading.emissiveTexture,
+                shading.emissiveTextureHeight,
+                shading.emissiveTextureWidth,
+                textureU,
+                textureV));
+  }
+
+  const float3 position =
+      interpolate(setup.eye[0], setup.eye[1], setup.eye[2], bary0, bary1, bary2);
+  const float3 viewVector = normalizeVector(multiply(-1.0f, position));
+  const bool hasSpecular = shading.specularExponent != 0.0f &&
+      (shading.specularColor.x != 0.0f || shading.specularColor.y != 0.0f ||
+       shading.specularColor.z != 0.0f);
+  for (int32_t index = 0; index < shading.numLights; ++index) {
+    const CudaLight& light = shading.lights[index];
+    if (light.type == CudaLightType::Ambient) {
+      shaded = add(shaded, multiply(diffuseColor, light.color));
+      continue;
+    }
+
+    const float3 lightVector = light.type == CudaLightType::Directional
+        ? multiply(-1.0f, light.position)
+        : normalizeVector(subtract(light.position, position));
+    const float intensity = fminf(fmaxf(dot(lightVector, normal), 0.0f), 1.0f);
+    shaded = add(shaded, multiply(intensity, multiply(diffuseColor, light.color)));
+    if (hasSpecular) {
+      const float3 reflected =
+          subtract(multiply(2.0f * dot(lightVector, normal), normal), lightVector);
+      const float specularIntensity =
+          powf(fminf(fmaxf(dot(reflected, viewVector), 0.0f), 1.0f), shading.specularExponent);
+      shaded =
+          add(shaded, multiply(specularIntensity, multiply(shading.specularColor, light.color)));
+    }
+  }
+
+  atomicWriteFloat(rgbOutput, fminf(fmaxf(shaded.x, 0.0f), 1.0f));
+  atomicWriteFloat(rgbOutput + 1, fminf(fmaxf(shaded.y, 0.0f), 1.0f));
+  atomicWriteFloat(rgbOutput + 2, fminf(fmaxf(shaded.z, 0.0f), 1.0f));
+}
+
 __device__ __forceinline__ void rasterizeFragment(
     const TriangleSetup& setup,
     size_t triangleIndex,
@@ -178,7 +319,8 @@ __device__ __forceinline__ void rasterizeFragment(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer) {
+    const CudaShadingParameters& shading,
+    float* rgbBuffer) {
   const float reciprocalDepth =
       lambda0 / setup.eye[0].z + lambda1 / setup.eye[1].z + lambda2 / setup.eye[2].z;
   const float depth = 1.0f / reciprocalDepth;
@@ -216,21 +358,19 @@ __device__ __forceinline__ void rasterizeFragment(
         : (bary1 > bary2 ? setup.vertexIndex[1] : setup.vertexIndex[2]);
     atomicExch(vertexIndexBuffer + offset, vertexIndex);
   }
+  float3 normal = {};
+  if (surfaceNormalsBuffer != nullptr || shading.enabled) {
+    normal = normalizeVector(
+        interpolate(setup.normal[0], setup.normal[1], setup.normal[2], bary0, bary1, bary2));
+  }
   if (surfaceNormalsBuffer != nullptr) {
-    const float3 normal = normalizeVector(make_float3(
-        bary0 * setup.normal[0].x + bary1 * setup.normal[1].x + bary2 * setup.normal[2].x,
-        bary0 * setup.normal[0].y + bary1 * setup.normal[1].y + bary2 * setup.normal[2].y,
-        bary0 * setup.normal[0].z + bary1 * setup.normal[1].z + bary2 * setup.normal[2].z));
     float* output = surfaceNormalsBuffer + 3 * offset;
     atomicWriteFloat(output, normal.x);
     atomicWriteFloat(output + 1, normal.y);
     atomicWriteFloat(output + 2, normal.z);
   }
-  if (barycentricCoordinatesBuffer != nullptr) {
-    float* output = barycentricCoordinatesBuffer + 3 * offset;
-    atomicWriteFloat(output, bary0);
-    atomicWriteFloat(output + 1, bary1);
-    atomicWriteFloat(output + 2, bary2);
+  if (shading.enabled) {
+    shadeFragment(setup, bary0, bary1, bary2, shading, normal, rgbBuffer + 3 * offset);
   }
 }
 
@@ -245,7 +385,8 @@ __device__ __noinline__ void rasterizeRobustTriangle(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer) {
+    const CudaShadingParameters& shading,
+    float* rgbBuffer) {
   for (int32_t y = setup.minY; y <= setup.maxY; ++y) {
     const double localY = double(y - setup.minY);
     float rowInterceptHi[3];
@@ -289,7 +430,8 @@ __device__ __noinline__ void rasterizeRobustTriangle(
           triangleIndexBuffer,
           vertexIndexBuffer,
           surfaceNormalsBuffer,
-          barycentricCoordinatesBuffer);
+          shading,
+          rgbBuffer);
     }
   }
 }
@@ -311,7 +453,8 @@ __global__ void rasterizeKernel(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer) {
+    CudaShadingParameters shading,
+    float* rgbBuffer) {
   const size_t batchIndex = blockIdx.y;
   const size_t triangleIndex = blockIdx.x;
   positionsModel += 3 * batchIndex * numVertices;
@@ -328,8 +471,8 @@ __global__ void rasterizeKernel(
   if (surfaceNormalsBuffer != nullptr) {
     surfaceNormalsBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
   }
-  if (barycentricCoordinatesBuffer != nullptr) {
-    barycentricCoordinatesBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
+  if (rgbBuffer != nullptr) {
+    rgbBuffer += 3 * static_cast<int64_t>(batchIndex) * imageStride;
   }
   if (triangleIndex >= numTriangles) {
     return;
@@ -351,20 +494,32 @@ __global__ void rasterizeKernel(
           positionsModel[3 * vertexIndex + 2]);
       setup.valid &=
           projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.eye[vertex]);
-      if (!writeDepth) {
-        if (surfaceNormalsBuffer != nullptr && normalsModel != nullptr) {
-          setup.normal[vertex] = transformNormal(
-              camera,
-              make_float3(
-                  normalsModel[3 * vertexIndex],
-                  normalsModel[3 * vertexIndex + 1],
-                  normalsModel[3 * vertexIndex + 2]));
+      if (shading.enabled && shading.textureCoordinates != nullptr &&
+          (shading.diffuseTexture != nullptr || shading.emissiveTexture != nullptr)) {
+        const int32_t textureIndex = shading.textureTriangles == nullptr
+            ? vertexIndex
+            : shading.textureTriangles[3 * triangleIndex + vertex];
+        if (textureIndex < 0 ||
+            static_cast<size_t>(textureIndex) >= shading.numTextureCoordinates) {
+          setup.valid = 0;
+          break;
         }
+        setup.textureIndex[vertex] = textureIndex;
+      }
+      if (!writeDepth && (surfaceNormalsBuffer != nullptr || shading.enabled) &&
+          normalsModel != nullptr) {
+        setup.normal[vertex] = transformNormal(
+            camera,
+            make_float3(
+                normalsModel[3 * vertexIndex],
+                normalsModel[3 * vertexIndex + 1],
+                normalsModel[3 * vertexIndex + 2]));
       }
     }
 
     if (!writeDepth) {
-      if (setup.valid && surfaceNormalsBuffer != nullptr && normalsModel == nullptr) {
+      if (setup.valid && (surfaceNormalsBuffer != nullptr || shading.enabled) &&
+          normalsModel == nullptr) {
         const float3 faceNormal = normalizeVector(
             cross(subtract(setup.eye[1], setup.eye[0]), subtract(setup.eye[2], setup.eye[0])));
         setup.normal[0] = faceNormal;
@@ -517,7 +672,8 @@ __global__ void rasterizeKernel(
           triangleIndexBuffer,
           vertexIndexBuffer,
           surfaceNormalsBuffer,
-          barycentricCoordinatesBuffer);
+          shading,
+          rgbBuffer);
     }
     return;
   }
@@ -533,7 +689,8 @@ __global__ void rasterizeKernel(
       triangleIndexBuffer,
       vertexIndexBuffer,
       surfaceNormalsBuffer,
-      barycentricCoordinatesBuffer);
+      shading,
+      rgbBuffer);
 }
 
 } // namespace
@@ -555,7 +712,8 @@ cudaError_t launchCudaRasterizeMeshes(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer,
+    const CudaShadingParameters& shading,
+    float* rgbBuffer,
     cudaStream_t stream) {
   if (numTriangles == 0) {
     return cudaSuccess;
@@ -579,13 +737,14 @@ cudaError_t launchCudaRasterizeMeshes(
       triangleIndexBuffer,
       vertexIndexBuffer,
       surfaceNormalsBuffer,
-      barycentricCoordinatesBuffer);
+      shading,
+      rgbBuffer);
   if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
     return error;
   }
 
   if (triangleIndexBuffer != nullptr || vertexIndexBuffer != nullptr ||
-      surfaceNormalsBuffer != nullptr || barycentricCoordinatesBuffer != nullptr) {
+      surfaceNormalsBuffer != nullptr || rgbBuffer != nullptr) {
     rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
         positionsModel,
         normalsModel,
@@ -603,7 +762,8 @@ cudaError_t launchCudaRasterizeMeshes(
         triangleIndexBuffer,
         vertexIndexBuffer,
         surfaceNormalsBuffer,
-        barycentricCoordinatesBuffer);
+        shading,
+        rgbBuffer);
     return cudaGetLastError();
   }
   return cudaSuccess;
@@ -624,7 +784,8 @@ cudaError_t launchCudaRasterizeMesh(
     int32_t* triangleIndexBuffer,
     int32_t* vertexIndexBuffer,
     float* surfaceNormalsBuffer,
-    float* barycentricCoordinatesBuffer,
+    const CudaShadingParameters& shading,
+    float* rgbBuffer,
     cudaStream_t stream) {
   return launchCudaRasterizeMeshes(
       positionsModel,
@@ -643,7 +804,8 @@ cudaError_t launchCudaRasterizeMesh(
       triangleIndexBuffer,
       vertexIndexBuffer,
       surfaceNormalsBuffer,
-      barycentricCoordinatesBuffer,
+      shading,
+      rgbBuffer,
       stream);
 }
 
