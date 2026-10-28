@@ -346,6 +346,9 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
     texture_coordinates: torch.Tensor | None = None,
     texture_triangles: torch.Tensor | None = None,
     per_vertex_diffuse_color: torch.Tensor | None = None,
+    eye_space_vertex_positions: torch.Tensor | None = None,
+    projected_vertex_positions: torch.Tensor | None = None,
+    projected_vertex_validity: torch.Tensor | None = None,
     diffuse_texture: torch.Tensor | None = None,
     emissive_texture: torch.Tensor | None = None,
     lights: list[pym_renderer.Light] | None = None,
@@ -368,7 +371,7 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
     :param vertex_normals: Optional float32 normals matching ``vertex_positions``. Geometric normals
         are used when omitted.
     :param triangles: Shared int32 triangle indices with shape ``(triangles, 3)``.
-    :param camera: Camera used to project the mesh.
+    :param camera: Camera supplying image dimensions and the transforms used for normals and lights. Its position transform and projection are bypassed when preprojected positions are supplied.
     :param z_buffer: Required caller-owned depth buffer to update in place.
     :param rgb_buffer: Optional caller-owned RGB buffer. Its presence enables shading.
     :param surface_normals_buffer: Optional caller-owned eye-space surface-normal output.
@@ -380,6 +383,9 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
     :param texture_triangles: Optional int32 UV indices matching ``triangles``. Mesh triangle indices
         are used when omitted.
     :param per_vertex_diffuse_color: Optional float32 RGB colors with shape ``(vertices, 3)``, shared across a batch.
+    :param eye_space_vertex_positions: Optional float32 eye-space positions matching ``vertex_positions``. Must be supplied with ``projected_vertex_positions`` and already include ``model_matrix`` and the camera extrinsics. The original vertex positions then provide shape and topology correspondence; ``model_matrix`` and the camera still transform normals and lights.
+    :param projected_vertex_positions: Optional float32 pixel coordinates with shape ``(vertices, 2)`` or ``(batch, vertices, 2)``. Supplying them bypasses camera projection. Coordinates use the integer-centered, y-down convention of :meth:`pymomentum.camera.IntrinsicsModel.project`; back-face culling uses their winding.
+    :param projected_vertex_validity: Optional boolean mask with shape ``(vertices,)`` or ``(batch, vertices)``. Triangles containing an invalid vertex are rejected.
     :param diffuse_texture: Optional contiguous float32 tensor with shape ``(height, width, 3)``.
     :param emissive_texture: Optional contiguous float32 tensor with shape ``(height, width, 3)``.
     :param lights: Optional host-side lights in world space. CUDA supports at most 16 explicit lights.
@@ -405,6 +411,49 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
             )
         if vertex_normals.shape != vertex_positions.shape:
             raise RuntimeError("vertex_normals must match vertex_positions shape")
+    if (eye_space_vertex_positions is None) != (projected_vertex_positions is None):
+        raise RuntimeError(
+            "eye_space_vertex_positions and projected_vertex_positions must be provided together"
+        )
+    if eye_space_vertex_positions is not None:
+        _validate_vertex_positions(
+            eye_space_vertex_positions, "eye_space_vertex_positions"
+        )
+        if (
+            eye_space_vertex_positions.device != device
+            or eye_space_vertex_positions.shape != vertex_positions.shape
+        ):
+            raise RuntimeError(
+                "eye_space_vertex_positions must match vertex_positions on the same device"
+            )
+        assert projected_vertex_positions is not None
+        expected_projected_shape = (*vertex_positions.shape[:-1], 2)
+        if (
+            projected_vertex_positions.device != device
+            or projected_vertex_positions.dtype != torch.float32
+            or tuple(projected_vertex_positions.shape) != expected_projected_shape
+            or not projected_vertex_positions.is_contiguous()
+        ):
+            raise RuntimeError(
+                "projected_vertex_positions must be contiguous float32 pixel coordinates "
+                f"with shape {expected_projected_shape} on device {device}"
+            )
+    if projected_vertex_validity is not None:
+        if eye_space_vertex_positions is None:
+            raise RuntimeError(
+                "projected_vertex_validity requires preprojected positions"
+            )
+        expected_validity_shape = tuple(vertex_positions.shape[:-1])
+        if (
+            projected_vertex_validity.device != device
+            or projected_vertex_validity.dtype != torch.bool
+            or tuple(projected_vertex_validity.shape) != expected_validity_shape
+            or not projected_vertex_validity.is_contiguous()
+        ):
+            raise RuntimeError(
+                "projected_vertex_validity must be a contiguous boolean tensor "
+                f"with shape {expected_validity_shape} on device {device}"
+            )
     for tensor, name, dtype, suffix in (
         (texture_coordinates, "texture_coordinates", torch.float32, (2,)),
         (texture_triangles, "texture_triangles", torch.int32, (3,)),
@@ -548,6 +597,21 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
                     if triangle_index_buffer is not None
                     else None
                 ),
+                eye_space_vertex_positions=(
+                    eye_space_vertex_positions.detach().numpy()
+                    if eye_space_vertex_positions is not None
+                    else None
+                ),
+                projected_vertex_positions=(
+                    projected_vertex_positions.detach().numpy()
+                    if projected_vertex_positions is not None
+                    else None
+                ),
+                projected_vertex_validity=(
+                    projected_vertex_validity.detach().numpy()
+                    if projected_vertex_validity is not None
+                    else None
+                ),
                 model_matrix=model_matrix,
                 back_face_culling=back_face_culling,
                 near_clip=near_clip,
@@ -561,6 +625,21 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
         positions = vertex_positions.detach().numpy()
         normals = (
             vertex_normals.detach().numpy() if vertex_normals is not None else None
+        )
+        eye_positions = (
+            eye_space_vertex_positions.detach().numpy()
+            if eye_space_vertex_positions is not None
+            else None
+        )
+        projected_positions = (
+            projected_vertex_positions.detach().numpy()
+            if projected_vertex_positions is not None
+            else None
+        )
+        projected_validity = (
+            projected_vertex_validity.detach().numpy()
+            if projected_vertex_validity is not None
+            else None
         )
 
         def frame_buffer(tensor: torch.Tensor | None, frame: int) -> Buffer | None:
@@ -603,6 +682,29 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
                     if per_vertex_diffuse_color is not None
                     else None
                 ),
+                eye_space_vertex_positions=(
+                    eye_positions
+                    if batch_size is None
+                    else (eye_positions[frame] if eye_positions is not None else None)
+                ),
+                projected_vertex_positions=(
+                    projected_positions
+                    if batch_size is None
+                    else (
+                        projected_positions[frame]
+                        if projected_positions is not None
+                        else None
+                    )
+                ),
+                projected_vertex_validity=(
+                    projected_validity
+                    if batch_size is None
+                    else (
+                        projected_validity[frame]
+                        if projected_validity is not None
+                        else None
+                    )
+                ),
                 lights=lights,
                 model_matrix=model_matrix,
                 back_face_culling=back_face_culling,
@@ -626,6 +728,9 @@ def rasterize_mesh(  # noqa: C901 - validates and dispatches one cohesive public
         texture_coordinates=texture_coordinates,
         texture_triangles=texture_triangles,
         per_vertex_diffuse_color=per_vertex_diffuse_color,
+        eye_space_vertex_positions=eye_space_vertex_positions,
+        projected_vertex_positions=projected_vertex_positions,
+        projected_vertex_validity=projected_vertex_validity,
         diffuse_texture=diffuse_texture,
         emissive_texture=emissive_texture,
         lights=[] if lights is None else lights,

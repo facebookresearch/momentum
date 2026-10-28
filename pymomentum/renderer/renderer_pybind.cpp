@@ -304,6 +304,9 @@ Notes:
 :param texture_coordinates: Texture coordinates used with the mesh, indexed by texture_triangles (if present) or triangles otherwise.
 :param texture_triangles: Triangles in texture coordinate space.  Must have the same number of triangles as the triangles input and is assumed to match the regular triangles input if not present.  This allows discontinuities in the texture map without needing to break up the mesh.
 :param per_vertex_diffuse_color: A per-vertex diffuse color to use instead of the material's diffuse color.
+:param eye_space_vertex_positions: Optional eye-space positions with shape ``(n_vertices, 3)``. Must be supplied with ``projected_vertex_positions`` and already include the model and camera transforms. The model matrix and camera still transform normals and lights.
+:param projected_vertex_positions: Optional projected pixel coordinates with shape ``(n_vertices, 2)``. Supplying these coordinates bypasses camera projection. Coordinates use the integer-centered, y-down convention of the camera intrinsics; back-face culling follows their winding.
+:param projected_vertex_validity: Optional boolean validity mask with shape ``(n_vertices,)``. Triangles containing an invalid vertex are rejected.
 :param lights: Lights to use in renderering, in world-space.  If none are given, a default light setup is used.
 :param back_face_culling: Enable back-face culling (speeds up the render).
 :param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
@@ -329,6 +332,9 @@ Notes:
       py::arg("texture_coordinates") = std::optional<pybind11::buffer>{},
       py::arg("texture_triangles") = std::optional<pybind11::buffer>{},
       py::arg("per_vertex_diffuse_color") = std::optional<pybind11::buffer>{},
+      py::arg("eye_space_vertex_positions") = std::optional<pybind11::buffer>{},
+      py::arg("projected_vertex_positions") = std::optional<pybind11::buffer>{},
+      py::arg("projected_vertex_validity") = std::optional<pybind11::buffer>{},
       py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
       py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
       py::arg("back_face_culling") = true,
@@ -346,6 +352,9 @@ Notes:
 :param camera: Camera shared by every batch entry.
 :param z_buffer: Batched float32 depth buffer with shape ``(batch, height, width)``.
 :param triangle_index_buffer: Optional batched int32 triangle-index buffer with matching shape and strides.
+:param eye_space_vertex_positions: Optional contiguous eye-space positions matching ``vertex_positions``.
+:param projected_vertex_positions: Optional contiguous projected pixel coordinates with shape ``(batch, n_vertices, 2)``.
+:param projected_vertex_validity: Optional contiguous boolean validity mask with shape ``(batch, n_vertices)``.
 :param model_matrix: Optional model transformation matrix shared by every batch entry.
 :param back_face_culling: Whether to discard back-facing triangles.
 :param near_clip: Per-pixel near clipping distance.
@@ -357,6 +366,9 @@ Notes:
       py::arg("z_buffer"),
       py::arg("triangle_index_buffer") = std::optional<pybind11::buffer>{},
       py::kw_only(),
+      py::arg("eye_space_vertex_positions") = std::optional<pybind11::buffer>{},
+      py::arg("projected_vertex_positions") = std::optional<pybind11::buffer>{},
+      py::arg("projected_vertex_validity") = std::optional<pybind11::buffer>{},
       py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
       py::arg("back_face_culling") = true,
       py::arg("near_clip") = 0.1f,

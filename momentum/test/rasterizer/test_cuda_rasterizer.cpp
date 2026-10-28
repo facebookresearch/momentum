@@ -163,7 +163,9 @@ CudaRenderResult renderCuda(
     float depthOffset = 0.0f,
     Eigen::Matrix4f modelMatrix = Eigen::Matrix4f::Identity(),
     const std::vector<float>* initialDepthOverride = nullptr,
-    const std::vector<int32_t>* initialTriangleIndexOverride = nullptr) {
+    const std::vector<int32_t>* initialTriangleIndexOverride = nullptr,
+    const Eigen::VectorXf* positionsEyeOverride = nullptr,
+    const Eigen::VectorXf* positionsImageOverride = nullptr) {
   const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
   const size_t bufferSize = static_cast<size_t>(camera.imageHeight()) * rowStride;
   std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
@@ -180,6 +182,23 @@ CudaRenderResult renderCuda(
 
   DeviceBuffer<float> positions(static_cast<size_t>(mesh.positions.size()));
   DeviceBuffer<int32_t> triangles(static_cast<size_t>(mesh.triangles.size()));
+  std::unique_ptr<DeviceBuffer<float>> positionsEye;
+  std::unique_ptr<DeviceBuffer<float>> positionsImage;
+  if ((positionsEyeOverride == nullptr) != (positionsImageOverride == nullptr)) {
+    throw std::invalid_argument("Eye-space and image-space positions must be provided together");
+  }
+  if (positionsEyeOverride != nullptr && positionsImageOverride != nullptr) {
+    if (positionsEyeOverride->size() != mesh.positions.size() ||
+        positionsImageOverride->size() != 2 * mesh.positions.size() / 3) {
+      throw std::invalid_argument("Preprojected positions have the wrong size");
+    }
+    positionsEye =
+        std::make_unique<DeviceBuffer<float>>(static_cast<size_t>(positionsEyeOverride->size()));
+    positionsImage =
+        std::make_unique<DeviceBuffer<float>>(static_cast<size_t>(positionsImageOverride->size()));
+    positionsEye->copyFromHost(positionsEyeOverride->data());
+    positionsImage->copyFromHost(positionsImageOverride->data());
+  }
   DeviceBuffer<float> depth(bufferSize);
   DeviceBuffer<int32_t> triangleIndex(bufferSize);
   positions.copyFromHost(mesh.positions.data());
@@ -191,6 +210,14 @@ CudaRenderResult renderCuda(
       CudaRasterizerInputs{
           .positionsModel = positions.data(),
           .positionsModelSize = static_cast<size_t>(mesh.positions.size()),
+          .positionsEye = positionsEye ? positionsEye->data() : nullptr,
+          .positionsEyeSize = positionsEyeOverride == nullptr
+              ? 0
+              : static_cast<size_t>(positionsEyeOverride->size()),
+          .positionsImage = positionsImage ? positionsImage->data() : nullptr,
+          .positionsImageSize = positionsImageOverride == nullptr
+              ? 0
+              : static_cast<size_t>(positionsImageOverride->size()),
           .numVertices = static_cast<size_t>(mesh.positions.size() / 3),
           .triangles = triangles.data(),
           .trianglesSize = static_cast<size_t>(mesh.triangles.size()),
@@ -216,6 +243,50 @@ CudaRenderResult renderCuda(
       .triangleIndex = triangleIndex.copyToHost(),
       .rowStride = rowStride,
   };
+}
+
+TEST(CudaRasterizerTest, PreprojectedVerticesMatchCameraPath) {
+  const MeshInputs mesh = makeOverlappingTriangles();
+  const Eigen::Matrix4f modelMatrix = makeModelMatrix();
+  for (const auto& [name, camera] : makeTestCameras()) {
+    Eigen::VectorXf positionsEye(mesh.positions.size());
+    Eigen::VectorXf positionsImage(2 * mesh.positions.size() / 3);
+    for (int32_t vertex = 0; vertex < mesh.positions.size() / 3; ++vertex) {
+      const Eigen::Vector4f pointModel(
+          mesh.positions[3 * vertex],
+          mesh.positions[3 * vertex + 1],
+          mesh.positions[3 * vertex + 2],
+          1.0f);
+      const Eigen::Vector4f pointWorldHomogeneous = modelMatrix * pointModel;
+      const Eigen::Vector3f pointWorld =
+          pointWorldHomogeneous.head<3>() / pointWorldHomogeneous.w();
+      const Eigen::Vector3f pointEye = camera.eyeFromWorld() * pointWorld;
+      const auto [pointImage, valid] = camera.intrinsicsModel()->project(pointEye);
+      ASSERT_TRUE(valid) << name;
+      positionsEye.segment<3>(3 * vertex) = pointEye;
+      positionsImage.segment<2>(2 * vertex) = pointImage.head<2>();
+    }
+
+    const CudaRenderResult expected = renderCuda(mesh, camera, 0.0f, modelMatrix);
+    const CudaRenderResult actual = renderCuda(
+        mesh, camera, 0.0f, modelMatrix, nullptr, nullptr, &positionsEye, &positionsImage);
+    ASSERT_EQ(actual.depth.size(), expected.depth.size()) << name;
+    ASSERT_EQ(actual.triangleIndex.size(), expected.triangleIndex.size()) << name;
+    int32_t coverageDifferences = 0;
+    int32_t triangleDifferences = 0;
+    for (size_t index = 0; index < expected.depth.size(); ++index) {
+      const bool expectedCovered = std::isfinite(expected.depth[index]);
+      const bool actualCovered = std::isfinite(actual.depth[index]);
+      coverageDifferences += expectedCovered != actualCovered;
+      triangleDifferences += actual.triangleIndex[index] != expected.triangleIndex[index];
+      if (expectedCovered && actualCovered) {
+        EXPECT_NEAR(actual.depth[index], expected.depth[index], 2e-4f)
+            << name << " pixel " << index;
+      }
+    }
+    EXPECT_LE(coverageDifferences, 4) << name;
+    EXPECT_LE(triangleDifferences, 4) << name;
+  }
 }
 
 struct CudaAttributeRenderResult {
@@ -658,26 +729,64 @@ TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid
   const Camera camera(std::make_shared<PinholeIntrinsicsModel>(63, 48, 40.0f, 38.0f, 31.5f, 24.0f));
   const int64_t rowStride = padImageWidthForRasterizer(camera.imageWidth());
   const int64_t imageStride = static_cast<int64_t>(camera.imageHeight()) * rowStride;
-  constexpr size_t kBatchSize = 2;
+  constexpr size_t kBatchSize = 32;
   const size_t bufferSize = kBatchSize * static_cast<size_t>(imageStride);
-  std::vector<float> positions(
-      static_cast<size_t>(firstMesh.positions.size() + secondMesh.positions.size()));
-  std::copy(
-      firstMesh.positions.data(),
-      firstMesh.positions.data() + firstMesh.positions.size(),
-      positions.begin());
-  std::copy(
-      secondMesh.positions.data(),
-      secondMesh.positions.data() + secondMesh.positions.size(),
-      positions.begin() + firstMesh.positions.size());
+  const size_t positionElementsPerMesh = static_cast<size_t>(firstMesh.positions.size());
+  std::vector<float> positions(kBatchSize * positionElementsPerMesh);
+  const auto preproject = [&camera](const MeshInputs& mesh) {
+    Eigen::VectorXf positionsEye = mesh.positions;
+    Eigen::VectorXf positionsImage(2 * mesh.positions.size() / 3);
+    for (Eigen::Index vertex = 0; vertex < mesh.positions.size() / 3; ++vertex) {
+      const auto [pointImage, valid] =
+          camera.intrinsicsModel()->project(positionsEye.segment<3>(3 * vertex));
+      EXPECT_TRUE(valid);
+      positionsImage.segment<2>(2 * vertex) = pointImage.head<2>();
+    }
+    return std::pair{std::move(positionsEye), std::move(positionsImage)};
+  };
+  const auto [firstPositionsEye, firstPositionsImage] = preproject(firstMesh);
+  const auto [secondPositionsEye, secondPositionsImage] = preproject(secondMesh);
+  const size_t imagePositionElementsPerMesh = static_cast<size_t>(firstPositionsImage.size());
+  std::vector<float> positionsEye(kBatchSize * positionElementsPerMesh);
+  std::vector<float> positionsImage(kBatchSize * imagePositionElementsPerMesh);
+  std::vector<float> normals(kBatchSize * positionElementsPerMesh, 0.0f);
+  for (size_t batchIndex = 0; batchIndex < kBatchSize; ++batchIndex) {
+    const MeshInputs& mesh = batchIndex % 2 == 0 ? firstMesh : secondMesh;
+    const Eigen::VectorXf& meshPositionsEye =
+        batchIndex % 2 == 0 ? firstPositionsEye : secondPositionsEye;
+    const Eigen::VectorXf& meshPositionsImage =
+        batchIndex % 2 == 0 ? firstPositionsImage : secondPositionsImage;
+    std::copy(
+        mesh.positions.data(),
+        mesh.positions.data() + mesh.positions.size(),
+        positions.begin() + batchIndex * positionElementsPerMesh);
+    std::copy(
+        meshPositionsEye.data(),
+        meshPositionsEye.data() + meshPositionsEye.size(),
+        positionsEye.begin() + batchIndex * positionElementsPerMesh);
+    std::copy(
+        meshPositionsImage.data(),
+        meshPositionsImage.data() + meshPositionsImage.size(),
+        positionsImage.begin() + batchIndex * imagePositionElementsPerMesh);
+    for (size_t vertex = 0; vertex < positionElementsPerMesh / 3; ++vertex) {
+      normals[batchIndex * positionElementsPerMesh + 3 * vertex + 2] = 1.0f;
+    }
+  }
   std::vector<float> initialDepth(bufferSize, std::numeric_limits<float>::infinity());
   std::vector<int32_t> initialTriangleIndex(bufferSize, -1);
 
   DeviceBuffer<float> devicePositions(positions.size());
+  DeviceBuffer<float> devicePositionsEye(positionsEye.size());
+  DeviceBuffer<float> devicePositionsImage(positionsImage.size());
+  DeviceBuffer<float> deviceNormals(normals.size());
   DeviceBuffer<int32_t> deviceTriangles(static_cast<size_t>(firstMesh.triangles.size()));
   DeviceBuffer<float> depth(bufferSize);
   DeviceBuffer<int32_t> triangleIndex(bufferSize);
+  DeviceBuffer<float> surfaceNormals(3 * bufferSize);
   devicePositions.copyFromHost(positions.data());
+  devicePositionsEye.copyFromHost(positionsEye.data());
+  devicePositionsImage.copyFromHost(positionsImage.data());
+  deviceNormals.copyFromHost(normals.data());
   deviceTriangles.copyFromHost(firstMesh.triangles.data());
   depth.copyFromHost(initialDepth.data());
   triangleIndex.copyFromHost(initialTriangleIndex.data());
@@ -686,6 +795,12 @@ TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid
       CudaRasterizerInputs{
           .positionsModel = devicePositions.data(),
           .positionsModelSize = positions.size(),
+          .positionsEye = devicePositionsEye.data(),
+          .positionsEyeSize = positionsEye.size(),
+          .positionsImage = devicePositionsImage.data(),
+          .positionsImageSize = positionsImage.size(),
+          .normalsModel = deviceNormals.data(),
+          .normalsModelSize = normals.size(),
           .numVertices = static_cast<size_t>(firstMesh.positions.size() / 3),
           .triangles = deviceTriangles.data(),
           .trianglesSize = static_cast<size_t>(firstMesh.triangles.size()),
@@ -700,6 +815,8 @@ TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid
           .zBufferSize = bufferSize,
           .triangleIndexBuffer = triangleIndex.data(),
           .triangleIndexBufferSize = bufferSize,
+          .surfaceNormalsBuffer = surfaceNormals.data(),
+          .surfaceNormalsBufferSize = 3 * bufferSize,
           .rowStride = rowStride,
           .imageStride = imageStride,
       });
@@ -707,9 +824,22 @@ TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid
 
   const std::vector<float> batchDepth = depth.copyToHost();
   const std::vector<int32_t> batchTriangleIndex = triangleIndex.copyToHost();
-  for (const auto& [batchIndex, mesh] :
-       std::vector<std::pair<size_t, const MeshInputs*>>{{0, &firstMesh}, {1, &secondMesh}}) {
-    const CudaRenderResult independent = renderCuda(*mesh, camera);
+  const std::vector<float> batchSurfaceNormals = surfaceNormals.copyToHost();
+  for (size_t batchIndex = 0; batchIndex < kBatchSize; ++batchIndex) {
+    const MeshInputs& mesh = batchIndex % 2 == 0 ? firstMesh : secondMesh;
+    const Eigen::VectorXf& meshPositionsEye =
+        batchIndex % 2 == 0 ? firstPositionsEye : secondPositionsEye;
+    const Eigen::VectorXf& meshPositionsImage =
+        batchIndex % 2 == 0 ? firstPositionsImage : secondPositionsImage;
+    const CudaRenderResult independent = renderCuda(
+        mesh,
+        camera,
+        0.0f,
+        Eigen::Matrix4f::Identity(),
+        nullptr,
+        nullptr,
+        &meshPositionsEye,
+        &meshPositionsImage);
     const size_t begin = batchIndex * static_cast<size_t>(imageStride);
     EXPECT_EQ(
         std::vector<float>(batchDepth.begin() + begin, batchDepth.begin() + begin + imageStride),
@@ -719,6 +849,10 @@ TEST(CudaRasterizerTest, BatchedDepthMatchesIndependentRendersAndIndicesAreValid
       if (std::isfinite(batchDepth[begin + pixel])) {
         EXPECT_GE(batchId, 0);
         EXPECT_LT(batchId, 2);
+        const size_t normalOffset = 3 * (begin + pixel);
+        EXPECT_FLOAT_EQ(batchSurfaceNormals[normalOffset], 0.0f);
+        EXPECT_FLOAT_EQ(batchSurfaceNormals[normalOffset + 1], 0.0f);
+        EXPECT_FLOAT_EQ(batchSurfaceNormals[normalOffset + 2], 1.0f);
       } else {
         EXPECT_EQ(batchId, -1);
       }
