@@ -279,6 +279,9 @@ void rasterizeMeshCuda(
     const std::optional<at::Tensor>& textureCoordinates,
     const std::optional<at::Tensor>& textureTriangles,
     const std::optional<at::Tensor>& perVertexDiffuseColor,
+    const std::optional<at::Tensor>& eyeSpaceVertexPositions,
+    const std::optional<at::Tensor>& projectedVertexPositions,
+    const std::optional<at::Tensor>& projectedVertexValidity,
     const std::optional<at::Tensor>& diffuseTexture,
     const std::optional<at::Tensor>& emissiveTexture,
     const std::vector<momentum::rasterizer::Light>& lights,
@@ -310,6 +313,65 @@ void rasterizeMeshCuda(
     TORCH_CHECK(
         vertexNormals->device() == device && vertexNormals->sizes() == vertexPositions.sizes(),
         "vertex_normals must match vertex_positions on the CUDA input device");
+  }
+  TORCH_CHECK(
+      eyeSpaceVertexPositions.has_value() == projectedVertexPositions.has_value(),
+      "eye_space_vertex_positions and projected_vertex_positions must be provided together");
+  if (eyeSpaceVertexPositions.has_value()) {
+    if (batched) {
+      validateBatchedVertexTensor(*eyeSpaceVertexPositions, "eye_space_vertex_positions");
+    } else {
+      validateInputTensor(*eyeSpaceVertexPositions, "eye_space_vertex_positions", at::kFloat, 3);
+    }
+    TORCH_CHECK(
+        eyeSpaceVertexPositions->device() == device &&
+            eyeSpaceVertexPositions->sizes() == vertexPositions.sizes(),
+        "eye_space_vertex_positions must match vertex_positions on the CUDA input device");
+
+    TORCH_CHECK(
+        projectedVertexPositions->is_cuda() && projectedVertexPositions->device() == device,
+        "projected_vertex_positions must be on the CUDA input device");
+    TORCH_CHECK(
+        projectedVertexPositions->scalar_type() == at::kFloat,
+        "projected_vertex_positions must have dtype Float");
+    TORCH_CHECK(
+        projectedVertexPositions->is_contiguous(), "projected_vertex_positions must be contiguous");
+    if (batched) {
+      TORCH_CHECK(
+          projectedVertexPositions->dim() == 3 && projectedVertexPositions->size(0) == batchSize &&
+              projectedVertexPositions->size(1) == numVertices &&
+              projectedVertexPositions->size(2) == 2,
+          "projected_vertex_positions must have shape [batch, n, 2]");
+    } else {
+      TORCH_CHECK(
+          projectedVertexPositions->dim() == 2 &&
+              projectedVertexPositions->size(0) == numVertices &&
+              projectedVertexPositions->size(1) == 2,
+          "projected_vertex_positions must have shape [n, 2]");
+    }
+  }
+  TORCH_CHECK(
+      !projectedVertexValidity.has_value() || eyeSpaceVertexPositions.has_value(),
+      "projected_vertex_validity requires preprojected positions");
+  if (projectedVertexValidity.has_value()) {
+    TORCH_CHECK(
+        projectedVertexValidity->is_cuda() && projectedVertexValidity->device() == device,
+        "projected_vertex_validity must be on the CUDA input device");
+    TORCH_CHECK(
+        projectedVertexValidity->scalar_type() == at::kBool,
+        "projected_vertex_validity must have dtype Bool");
+    TORCH_CHECK(
+        projectedVertexValidity->is_contiguous(), "projected_vertex_validity must be contiguous");
+    if (batched) {
+      TORCH_CHECK(
+          projectedVertexValidity->dim() == 2 && projectedVertexValidity->size(0) == batchSize &&
+              projectedVertexValidity->size(1) == numVertices,
+          "projected_vertex_validity must have shape [batch, n]");
+    } else {
+      TORCH_CHECK(
+          projectedVertexValidity->dim() == 1 && projectedVertexValidity->size(0) == numVertices,
+          "projected_vertex_validity must have shape [n]");
+    }
   }
   if (textureCoordinates.has_value()) {
     validateInputTensor(*textureCoordinates, "texture_coordinates", at::kFloat, 2);
@@ -445,6 +507,24 @@ void rasterizeMeshCuda(
   const momentum::rasterizer::CudaRasterizerInputs rasterizerInputs{
       .positionsModel = vertexPositions.const_data_ptr<float>(),
       .positionsModelSize = static_cast<size_t>(vertexPositions.numel()),
+      .positionsEye = eyeSpaceVertexPositions.has_value()
+          ? eyeSpaceVertexPositions->const_data_ptr<float>()
+          : nullptr,
+      .positionsEyeSize = eyeSpaceVertexPositions.has_value()
+          ? static_cast<size_t>(eyeSpaceVertexPositions->numel())
+          : 0,
+      .positionsImage = projectedVertexPositions.has_value()
+          ? projectedVertexPositions->const_data_ptr<float>()
+          : nullptr,
+      .positionsImageSize = projectedVertexPositions.has_value()
+          ? static_cast<size_t>(projectedVertexPositions->numel())
+          : 0,
+      .projectionValidity = projectedVertexValidity.has_value()
+          ? projectedVertexValidity->const_data_ptr<bool>()
+          : nullptr,
+      .projectionValiditySize = projectedVertexValidity.has_value()
+          ? static_cast<size_t>(projectedVertexValidity->numel())
+          : 0,
       .normalsModel = vertexNormals.has_value() ? vertexNormals->const_data_ptr<float>() : nullptr,
       .normalsModelSize =
           vertexNormals.has_value() ? static_cast<size_t>(vertexNormals->numel()) : 0,
@@ -585,6 +665,9 @@ This non-differentiable path mutates every supplied output in place and never al
 :param texture_coordinates: Optional contiguous CUDA float32 UV coordinates with shape ``(n_coordinates, 2)``.
 :param texture_triangles: Optional contiguous CUDA int32 UV indices matching ``triangles``. Mesh topology is reused when omitted.
 :param per_vertex_diffuse_color: Optional contiguous CUDA float32 colors with shape ``(n_vertices, 3)``, shared by every batch entry.
+:param eye_space_vertex_positions: Optional contiguous CUDA float32 eye-space positions matching ``vertex_positions``. Must be supplied with ``projected_vertex_positions`` and already include the model and camera transforms. The model matrix and camera still transform normals and lights.
+:param projected_vertex_positions: Optional contiguous CUDA float32 pixel coordinates with shape ``(n_vertices, 2)`` or ``(batch, n_vertices, 2)``. Supplying them bypasses camera projection. Coordinates use the integer-centered, y-down convention of the camera intrinsics; back-face culling follows their winding.
+:param projected_vertex_validity: Optional contiguous CUDA boolean validity mask with shape ``(n_vertices,)`` or ``(batch, n_vertices)``. Triangles containing an invalid vertex are rejected.
 :param diffuse_texture: Optional contiguous CUDA float32 RGB texture with shape ``(height, width, 3)``.
 :param emissive_texture: Optional contiguous CUDA float32 RGB texture with shape ``(height, width, 3)``.
 :param lights: Host-side lights in world space. An empty list selects the default camera light; at most 16 explicit lights are supported.
@@ -607,6 +690,9 @@ This non-differentiable path mutates every supplied output in place and never al
       py::arg("texture_coordinates") = std::nullopt,
       py::arg("texture_triangles") = std::nullopt,
       py::arg("per_vertex_diffuse_color") = std::nullopt,
+      py::arg("eye_space_vertex_positions") = std::nullopt,
+      py::arg("projected_vertex_positions") = std::nullopt,
+      py::arg("projected_vertex_validity") = std::nullopt,
       py::arg("diffuse_texture") = std::nullopt,
       py::arg("emissive_texture") = std::nullopt,
       py::arg("lights") = std::vector<momentum::rasterizer::Light>{},

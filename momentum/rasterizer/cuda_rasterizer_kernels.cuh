@@ -75,6 +75,9 @@ struct CudaShadingParameters {
 /// Launch the CUDA rasterization kernel for one mesh.
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
     const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
@@ -95,6 +98,9 @@ cudaError_t launchCudaRasterizeMesh(
 /// Launch the CUDA rasterization kernel for a batch with shared topology and camera.
 cudaError_t launchCudaRasterizeMeshes(
     const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
     const float* normalsModel,
     size_t batchSize,
     size_t numVertices,

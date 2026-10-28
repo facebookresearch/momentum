@@ -28,6 +28,7 @@
 #include <span>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace momentum::rasterizer {
@@ -629,7 +630,8 @@ void validateMeshInputs(
     const Eigen::Ref<const Eigen::VectorXf>& textureCoords,
     const Eigen::Ref<const Eigen::Matrix<TriangleT, Eigen::Dynamic, 1>>& textureTriangles,
     const Eigen::Ref<const Eigen::VectorXf>& perVertexDiffuseColor,
-    const PhongMaterial& material) {
+    const PhongMaterial& material,
+    const PreprojectedMeshVertices& preprojectedVertices) {
   const auto nVerts = positions_world.size() / 3;
 
   MT_THROW_IF(
@@ -646,6 +648,18 @@ void validateMeshInputs(
       nVerts * 3 != positions_world.size(),
       "Positions array of size {} is not a multiple of three.",
       positions_world.size());
+
+  const bool hasPreprojectedVertices = !preprojectedVertices.positionsEye.empty() ||
+      !preprojectedVertices.positionsImage.empty() || !preprojectedVertices.validity.empty();
+  MT_THROW_IF(
+      hasPreprojectedVertices &&
+          (preprojectedVertices.positionsEye.size() != 3 * static_cast<size_t>(nVerts) ||
+           preprojectedVertices.positionsImage.size() != 2 * static_cast<size_t>(nVerts)),
+      "Preprojected eye-space and image-space positions must both match the vertex count");
+  MT_THROW_IF(
+      !preprojectedVertices.validity.empty() &&
+          preprojectedVertices.validity.size() != static_cast<size_t>(nVerts),
+      "Preprojected validity must match the vertex count");
 
   validateTriangleIndices<TriangleT>(triangles, nVerts);
   validateTextureInputs<TriangleT>(triangles, textureCoords, textureTriangles, nVerts);
@@ -749,6 +763,7 @@ void rasterizeMeshImpScalarTriangleLoop(
     const std::vector<Light>& lights_eye,
     const PhongMaterial& material,
     const Eigen::Matrix4f& modelMatrix,
+    const PreprojectedMeshVertices& preprojectedVertices,
     bool backfaceCulling,
     float nearClip,
     float depthOffset) {
@@ -765,9 +780,27 @@ void rasterizeMeshImpScalarTriangleLoop(
 
     bool validTriangle = true;
     for (int i = 0; i < 3; ++i) {
-      const Eigen::Vector3f p_model = positions_world.segment<3>(3 * triangle[i]);
-      const Eigen::Vector3f p_eye = transformModelToEye(camera, modelMatrix, p_model);
-      const auto [p_window, validProj] = camera.intrinsicsModel()->project(p_eye);
+      const auto vertexIndex = static_cast<size_t>(triangle[i]);
+      Eigen::Vector3f p_eye;
+      Eigen::Vector3f p_window;
+      bool validProj = false;
+      if (preprojectedVertices.positionsEye.empty()) {
+        const Eigen::Vector3f p_model = positions_world.segment<3>(3 * triangle[i]);
+        p_eye = transformModelToEye(camera, modelMatrix, p_model);
+        std::tie(p_window, validProj) = camera.intrinsicsModel()->project(p_eye);
+      } else {
+        p_eye = Eigen::Vector3f(
+            preprojectedVertices.positionsEye[3 * vertexIndex],
+            preprojectedVertices.positionsEye[3 * vertexIndex + 1],
+            preprojectedVertices.positionsEye[3 * vertexIndex + 2]);
+        const Eigen::Vector2f p_image(
+            preprojectedVertices.positionsImage[2 * vertexIndex],
+            preprojectedVertices.positionsImage[2 * vertexIndex + 1]);
+        p_window = Eigen::Vector3f(p_image.x(), p_image.y(), p_eye.z());
+        validProj =
+            (preprojectedVertices.validity.empty() || preprojectedVertices.validity[vertexIndex]) &&
+            p_eye.allFinite() && p_image.allFinite() && p_eye.z() > 0.0f;
+      }
 
       p_tri_window[i] = toEnokiVec(p_window);
       for (int j = 0; j < 3; ++j) {
@@ -868,7 +901,8 @@ void rasterizeMeshImp(
     bool backfaceCulling,
     float nearClip,
     float depthOffset,
-    Eigen::Vector2f imageOffset) {
+    Eigen::Vector2f imageOffset,
+    const PreprojectedMeshVertices& preprojectedVertices) {
   MT_THROW_IF(nearClip <= 0.0f, "Near clip must be positive");
 
   if (triangles.size() == 0) {
@@ -894,7 +928,8 @@ void rasterizeMeshImp(
       textureCoords,
       textureTriangles,
       perVertexDiffuseColor,
-      material);
+      material,
+      preprojectedVertices);
 
   const bool usePerVertexColor = (perVertexDiffuseColor.size() != 0);
   const bool useTextureCoords = (textureCoords.size() != 0 && material.hasTextureMap());
@@ -935,6 +970,7 @@ void rasterizeMeshImp(
       lights_eye,
       material,
       modelMatrix,
+      preprojectedVertices,
       backfaceCulling,
       nearClip,
       depthOffset);
@@ -946,10 +982,31 @@ void rasterizeMeshImp(
 
     IntP::MaskType validTriangles = triangleMask;
     for (int i = 0; i < 3; ++i) {
-      auto p_world =
-          drjit::gather<Vector3fP>(positions_world.data(), triangles_cur[i], triangleMask);
-      Vector3fP p_eye = cameraSimd.worldToEye(p_world);
-      auto [p_window, validProj] = cameraSimd.eyeToWindow(p_eye);
+      Vector3fP p_eye;
+      Vector3fP p_window;
+      IntP::MaskType validProj;
+      if (preprojectedVertices.positionsEye.empty()) {
+        const auto p_world =
+            drjit::gather<Vector3fP>(positions_world.data(), triangles_cur[i], triangleMask);
+        p_eye = cameraSimd.worldToEye(p_world);
+        std::tie(p_window, validProj) = cameraSimd.eyeToWindow(p_eye);
+      } else {
+        const auto p_image = drjit::gather<Vector2fP>(
+            preprojectedVertices.positionsImage.data(), triangles_cur[i], triangleMask);
+        p_eye = drjit::gather<Vector3fP>(
+            preprojectedVertices.positionsEye.data(), triangles_cur[i], triangleMask);
+        p_window = Vector3fP(p_image.x(), p_image.y(), p_eye.z());
+        validProj = drjit::isfinite(p_image.x()) && drjit::isfinite(p_image.y()) &&
+            drjit::isfinite(p_eye.x()) && drjit::isfinite(p_eye.y()) &&
+            drjit::isfinite(p_eye.z()) && p_eye.z() > 0.0f;
+        if (!preprojectedVertices.validity.empty()) {
+          const auto validity = drjit::gather<drjit::uint8_array_t<IntP>>(
+              reinterpret_cast<const uint8_t*>(preprojectedVertices.validity.data()),
+              triangles_cur[i],
+              triangleMask);
+          validProj = validProj && IntP::MaskType(validity != 0);
+        }
+      }
 
       p_tri_window[i] = p_window;
       for (int j = 0; j < 3; ++j) {
@@ -1271,7 +1328,8 @@ void rasterizeMesh(
     const std::vector<Light>& lights_eye,
     bool backfaceCulling,
     float depthOffset,
-    const Eigen::Vector2f& imageOffset) {
+    const Eigen::Vector2f& imageOffset,
+    const PreprojectedMeshVertices& preprojectedVertices) {
   rasterizeMeshImp<int32_t>(
       positions_world,
       normals_world,
@@ -1291,7 +1349,8 @@ void rasterizeMesh(
       backfaceCulling,
       nearClip,
       depthOffset,
-      imageOffset);
+      imageOffset,
+      preprojectedVertices);
 }
 
 void rasterizeMesh(
@@ -1333,7 +1392,8 @@ void rasterizeMesh(
       backfaceCulling,
       nearClip,
       depthOffset,
-      imageOffset);
+      imageOffset,
+      {});
 }
 
 void rasterizeMesh(
@@ -1370,7 +1430,8 @@ void rasterizeMesh(
       backfaceCulling,
       nearClip,
       depthOffset,
-      imageOffset);
+      imageOffset,
+      {});
 }
 
 void rasterizeMesh(
@@ -1412,7 +1473,8 @@ void rasterizeMesh(
       backfaceCulling,
       nearClip,
       depthOffset,
-      imageOffset);
+      imageOffset,
+      {});
 }
 
 void rasterizeSplats(

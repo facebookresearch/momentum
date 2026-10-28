@@ -126,6 +126,9 @@ void rasterizeMesh(
     std::optional<ContiguousArray<float>> textureCoordinates,
     std::optional<ContiguousArray<int32_t>> textureTriangles,
     std::optional<ContiguousArray<float>> perVertexDiffuseColor,
+    std::optional<ContiguousArray<float>> eyeSpaceVertexPositions,
+    std::optional<ContiguousArray<float>> projectedVertexPositions,
+    std::optional<ContiguousArray<bool>> projectedVertexValidity,
     std::optional<std::vector<momentum::rasterizer::Light>> lights_world,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
@@ -174,6 +177,27 @@ void rasterizeMesh(
         false);
   }
 
+  MT_THROW_IF(
+      eyeSpaceVertexPositions.has_value() != projectedVertexPositions.has_value(),
+      "eye_space_vertex_positions and projected_vertex_positions must be provided together");
+  if (eyeSpaceVertexPositions.has_value()) {
+    checker.validateBuffer(
+        *eyeSpaceVertexPositions,
+        "eye_space_vertex_positions",
+        {nVertsBindingID, 3},
+        {"nVertices", "xyz"},
+        false);
+    checker.validateBuffer(
+        *projectedVertexPositions,
+        "projected_vertex_positions",
+        {nVertsBindingID, 2},
+        {"nVertices", "xy"},
+        false);
+  }
+  MT_THROW_IF(
+      projectedVertexValidity.has_value() && !eyeSpaceVertexPositions.has_value(),
+      "projected_vertex_validity requires preprojected positions");
+
   validateRasterizerBuffers(
       camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
 
@@ -199,6 +223,20 @@ void rasterizeMesh(
   if (perVertexDiffuseColor.has_value()) {
     perVertexColorInfo = perVertexDiffuseColor->request();
   }
+  std::optional<py::buffer_info> eyeSpacePositionsInfo;
+  std::optional<py::buffer_info> projectedPositionsInfo;
+  std::optional<py::buffer_info> projectedValidityInfo;
+  if (eyeSpaceVertexPositions.has_value()) {
+    eyeSpacePositionsInfo = eyeSpaceVertexPositions->request();
+    projectedPositionsInfo = projectedVertexPositions->request();
+  }
+  if (projectedVertexValidity.has_value()) {
+    projectedValidityInfo = projectedVertexValidity->request();
+    MT_THROW_IF(
+        projectedValidityInfo->ndim != 1 ||
+            projectedValidityInfo->shape[0] != positionsInfo.shape[0],
+        "projected_vertex_validity must have shape [nVertices]");
+  }
 
   // Create Eigen maps from buffer data
   Eigen::VectorXf emptyFloatVec;
@@ -209,6 +247,25 @@ void rasterizeMesh(
   auto texCoordsMap = bufferToEigenMap<float>(texCoordsInfo, emptyFloatVec);
   auto texTrianglesMap = bufferToEigenMap<int32_t>(texTrianglesInfo, emptyIntVec);
   auto perVertexColorMap = bufferToEigenMap<float>(perVertexColorInfo, emptyFloatVec);
+
+  momentum::rasterizer::PreprojectedMeshVertices preprojectedVertices;
+  if (eyeSpacePositionsInfo.has_value() && projectedPositionsInfo.has_value()) {
+    MT_THROW_IF(
+        eyeSpacePositionsInfo->ndim != 2 || eyeSpacePositionsInfo->shape[1] != 3 ||
+            projectedPositionsInfo->ndim != 2 || projectedPositionsInfo->shape[1] != 2 ||
+            eyeSpacePositionsInfo->shape[0] != positionsInfo.shape[0] ||
+            projectedPositionsInfo->shape[0] != positionsInfo.shape[0],
+        "Preprojected positions must have shapes [nVertices, 3] and [nVertices, 2]");
+    const auto numVertices = static_cast<size_t>(positionsInfo.shape[0]);
+    preprojectedVertices.positionsEye = std::span<const float>(
+        static_cast<const float*>(eyeSpacePositionsInfo->ptr), 3 * numVertices);
+    preprojectedVertices.positionsImage = std::span<const float>(
+        static_cast<const float*>(projectedPositionsInfo->ptr), 2 * numVertices);
+    if (projectedValidityInfo.has_value()) {
+      preprojectedVertices.validity =
+          std::span<const bool>(static_cast<const bool*>(projectedValidityInfo->ptr), numVertices);
+    }
+  }
 
   // Create mdspans while holding GIL
   auto zBufferMdspan = make_mdspan<float, 2>(zBuffer);
@@ -239,7 +296,8 @@ void rasterizeMesh(
       lights_eye,
       backfaceCulling,
       depthOffset,
-      imageOffset.value_or(Eigen::Vector2f::Zero()));
+      imageOffset.value_or(Eigen::Vector2f::Zero()),
+      preprojectedVertices);
 }
 
 void rasterizeMeshes(
@@ -248,6 +306,9 @@ void rasterizeMeshes(
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
     const std::optional<pybind11::buffer>& triangleIndexBuffer,
+    std::optional<ContiguousArray<float>> eyeSpaceVertexPositions,
+    std::optional<ContiguousArray<float>> projectedVertexPositions,
+    std::optional<ContiguousArray<bool>> projectedVertexValidity,
     const std::optional<Eigen::Matrix4f>& modelMatrix,
     bool backfaceCulling,
     float nearClip,
@@ -264,8 +325,42 @@ void rasterizeMeshes(
     triangleIndexInfo = triangleIndexBuffer->request();
   }
   MT_THROW_IF(
+      eyeSpaceVertexPositions.has_value() != projectedVertexPositions.has_value(),
+      "eye_space_vertex_positions and projected_vertex_positions must be provided together");
+  std::optional<py::buffer_info> eyeSpacePositionsInfo;
+  std::optional<py::buffer_info> projectedPositionsInfo;
+  std::optional<py::buffer_info> projectedValidityInfo;
+  if (eyeSpaceVertexPositions.has_value()) {
+    eyeSpacePositionsInfo = eyeSpaceVertexPositions->request();
+    projectedPositionsInfo = projectedVertexPositions->request();
+  }
+  MT_THROW_IF(
+      projectedVertexValidity.has_value() && !eyeSpaceVertexPositions.has_value(),
+      "projected_vertex_validity requires preprojected positions");
+  if (projectedVertexValidity.has_value()) {
+    projectedValidityInfo = projectedVertexValidity->request();
+  }
+  MT_THROW_IF(
       positionsInfo.ndim != 3 || positionsInfo.shape[0] <= 0 || positionsInfo.shape[2] != 3,
       "positions must have shape [batch, numVertices, 3]");
+  if (eyeSpacePositionsInfo.has_value() && projectedPositionsInfo.has_value()) {
+    MT_THROW_IF(
+        eyeSpacePositionsInfo->ndim != 3 || eyeSpacePositionsInfo->shape != positionsInfo.shape,
+        "eye_space_vertex_positions must match positions");
+    MT_THROW_IF(
+        projectedPositionsInfo->ndim != 3 ||
+            projectedPositionsInfo->shape[0] != positionsInfo.shape[0] ||
+            projectedPositionsInfo->shape[1] != positionsInfo.shape[1] ||
+            projectedPositionsInfo->shape[2] != 2,
+        "projected_vertex_positions must have shape [batch, numVertices, 2]");
+  }
+  if (projectedValidityInfo.has_value()) {
+    MT_THROW_IF(
+        projectedValidityInfo->ndim != 2 ||
+            projectedValidityInfo->shape[0] != positionsInfo.shape[0] ||
+            projectedValidityInfo->shape[1] != positionsInfo.shape[1],
+        "projected_vertex_validity must have shape [batch, numVertices]");
+  }
   MT_THROW_IF(
       trianglesInfo.ndim != 2 || trianglesInfo.shape[1] != 3,
       "triangles must have shape [numTriangles, 3]");
@@ -346,17 +441,30 @@ void rasterizeMeshes(
   }
 
   if (positionsInfo.ptr == nullptr || zBufferInfo.ptr == nullptr ||
+      (eyeSpacePositionsInfo.has_value() && eyeSpacePositionsInfo->ptr == nullptr) ||
+      (projectedPositionsInfo.has_value() && projectedPositionsInfo->ptr == nullptr) ||
+      (projectedValidityInfo.has_value() && projectedValidityInfo->ptr == nullptr) ||
       (triangleIndexInfo.has_value() && triangleIndexInfo->ptr == nullptr) ||
       (trianglesInfo.shape[0] > 0 && trianglesInfo.ptr == nullptr)) {
     MT_THROW("Batched rasterizer tensors must have storage");
   }
 
   auto* positionsData = static_cast<float*>(positionsInfo.ptr);
+  const auto* eyeSpacePositionsData = eyeSpacePositionsInfo.has_value()
+      ? static_cast<const float*>(eyeSpacePositionsInfo->ptr)
+      : nullptr;
+  const auto* projectedPositionsData = projectedPositionsInfo.has_value()
+      ? static_cast<const float*>(projectedPositionsInfo->ptr)
+      : nullptr;
+  const auto* projectedValidityData = projectedValidityInfo.has_value()
+      ? static_cast<const bool*>(projectedValidityInfo->ptr)
+      : nullptr;
   auto* zBufferData = static_cast<float*>(zBufferInfo.ptr);
   auto* triangleIndexData =
       triangleIndexInfo.has_value() ? static_cast<int32_t*>(triangleIndexInfo->ptr) : nullptr;
   const int64_t positionStride = positionsInfo.strides[0] / static_cast<int64_t>(sizeof(float));
-  const int64_t numPositionValues = positionsInfo.shape[1] * positionsInfo.shape[2];
+  const int64_t numVertices = positionsInfo.shape[1];
+  const int64_t numPositionValues = numVertices * positionsInfo.shape[2];
   auto trianglesMap = bufferToEigenMap<int32_t>(trianglesInfo);
   const Eigen::Matrix4f modelMatrixValue = modelMatrix.value_or(Eigen::Matrix4f::Identity());
   const std::array<momentum::rasterizer::index_t, 2> imageExtents{imageHeight, imageWidth};
@@ -373,6 +481,17 @@ void rasterizeMeshes(
         // @lint-ignore NULLSAFECLANG nullable-arithmetic -- Validated before releasing the GIL.
         positionsData + frame * positionStride,
         numPositionValues);
+    momentum::rasterizer::PreprojectedMeshVertices preprojectedVertices;
+    if (eyeSpacePositionsData != nullptr && projectedPositionsData != nullptr) {
+      preprojectedVertices.positionsEye =
+          std::span<const float>(eyeSpacePositionsData + frame * 3 * numVertices, 3 * numVertices);
+      preprojectedVertices.positionsImage =
+          std::span<const float>(projectedPositionsData + frame * 2 * numVertices, 2 * numVertices);
+      if (projectedValidityData != nullptr) {
+        preprojectedVertices.validity =
+            std::span<const bool>(projectedValidityData + frame * numVertices, numVertices);
+      }
+    }
     auto depth = make_mdspan<float, 2>(
         // @lint-ignore NULLSAFECLANG nullable-arithmetic -- Validated before releasing the GIL.
         zBufferData + frame * imageStride,
@@ -401,7 +520,8 @@ void rasterizeMeshes(
         {},
         backfaceCulling,
         depthOffset,
-        Eigen::Vector2f::Zero());
+        Eigen::Vector2f::Zero(),
+        preprojectedVertices);
   });
 }
 
