@@ -18,6 +18,7 @@
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/common/name_utils.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
@@ -931,8 +932,22 @@ struct GltfBuilder::Impl {
 
   Impl();
   fx::gltf::Document document;
-  std::unordered_map<std::string, CharacterData> characterData;
+
+  ExportedNameRegistry<CharacterData> characterData;
   MarkerMesh markerMesh = MarkerMesh::None;
+
+  // The character an addMotion/addSkeletonStates call animates, or nullptr when no name was
+  // requested and nothing was added under character.name; its skeleton must match `character`.
+  CharacterData* resolveCharacterForMotion(
+      const Character& character,
+      const std::string& characterName) {
+    CharacterData* data = characterData.resolve(characterName, character.name);
+    if (data != nullptr) {
+      checkMotionTargetJointCount(
+          character.name, character.skeleton.joints.size(), data->nodeMap.size());
+    }
+    return data;
+  }
 };
 
 GltfBuilder::Impl::Impl() : document(fx::gltf::Document()) {
@@ -950,20 +965,18 @@ GltfBuilder::GltfBuilder(GltfBuilder&&) noexcept = default;
 
 GltfBuilder& GltfBuilder::operator=(GltfBuilder&&) noexcept = default;
 
-void GltfBuilder::addCharacter(
+std::string GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
     const Quaternionf& rotationOffset /*= Quaternionf::Identity()*/,
     const FileSaveOptions& options) {
-  if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
-    // Character already exist. Doesn't allow character with the same name to be saved.
-    // #TODO: proper warning
-    return;
-  }
+  // Insert into the registry only after the character is built, so a failure leaves it unchanged.
+  std::string characterName = impl_->characterData.makeExportedName(character.name);
+  Impl::CharacterData characterData;
   auto& scene = getDefaultScene(impl_->document);
 
   // Add character root node
-  const auto rootNodeIdx = appendNode(impl_->document, character.name);
+  const auto rootNodeIdx = appendNode(impl_->document, characterName);
   MT_CHECK(
       rootNodeIdx >= 0 && rootNodeIdx < impl_->document.nodes.size(),
       "{}: {}",
@@ -974,7 +987,6 @@ void GltfBuilder::addCharacter(
   node.translation = {translation[0], translation[1], translation[2]};
   node.rotation = fromMomentumQuaternionf(rotationOffset);
   scene.nodes.push_back(static_cast<uint32_t>(rootNodeIdx));
-  auto& characterData = impl_->characterData[character.name];
   characterData.rootIndex = rootNodeIdx;
 
   // fill with data
@@ -1010,6 +1022,9 @@ void GltfBuilder::addCharacter(
       def["metadata"] = character.metadata;
     }
   }
+
+  impl_->characterData.insert(characterName, character.name, std::move(characterData));
+  return characterName;
 }
 
 void GltfBuilder::addMesh(const Mesh& mesh, const std::string& name, bool addColor) {
@@ -1036,17 +1051,13 @@ size_t GltfBuilder::getNumCharacters() {
 }
 
 size_t GltfBuilder::getCharacterRootIndex(const std::string& name) {
-  if (impl_->characterData.count(name) == 0) {
-    return kInvalidIndex;
-  }
-  return impl_->characterData[name].rootIndex;
+  const auto* characterData = impl_->characterData.find(name);
+  return characterData != nullptr ? characterData->rootIndex : kInvalidIndex;
 }
 
 size_t GltfBuilder::getNumJoints(const std::string& name) {
-  if (impl_->characterData.count(name) == 0) {
-    return kInvalidIndex;
-  }
-  return impl_->characterData[name].nodeMap.size();
+  const auto* characterData = impl_->characterData.find(name);
+  return characterData != nullptr ? characterData->nodeMap.size() : kInvalidIndex;
 }
 
 void GltfBuilder::setFps(float fps) {
@@ -1070,15 +1081,14 @@ void GltfBuilder::addMotion(
     const IdentityParameters& offsets /*= {}*/,
     const bool addExtensions /*= true*/,
     const std::string& customName /*= "default"*/,
-    std::span<const int64_t> timestamps /*= {}*/) {
+    std::span<const int64_t> timestamps /*= {}*/,
+    const std::string& characterName /*= ""*/) {
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
-  const size_t meshIndex = impl_->characterData[character.name].meshIndex;
+  Impl::CharacterData* resolved = impl_->resolveCharacterForMotion(character, characterName);
+  auto& characterData =
+      resolved != nullptr ? *resolved : *impl_->characterData.find(addCharacter(character));
+  const auto& jointToNodeMap = characterData.nodeMap;
+  const size_t meshIndex = characterData.meshIndex;
   // add motion
   addMotionToModel(
       impl_->document,
@@ -1097,7 +1107,7 @@ void GltfBuilder::addMotion(
       [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
   if (animIter != impl_->document.animations.end()) {
     const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
+    characterData.animationIndices.push_back(animIdx);
   }
 
   // Add timestamps to the FB_momentum extension
@@ -1129,10 +1139,11 @@ float GltfBuilder::getFps() {
 }
 
 std::vector<size_t> GltfBuilder::getCharacterMotions(const std::string& characterName) {
-  if (impl_->characterData.count(characterName) == 0) {
+  const auto* characterData = impl_->characterData.find(characterName);
+  if (characterData == nullptr) {
     return {};
   }
-  return impl_->characterData[characterName].animationIndices;
+  return characterData->animationIndices;
 }
 
 void GltfBuilder::addMarkerSequence(
@@ -1180,14 +1191,13 @@ void GltfBuilder::addSkeletonStates(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::string& customName) {
+    const std::string& customName,
+    const std::string& characterName) {
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
+  Impl::CharacterData* resolved = impl_->resolveCharacterForMotion(character, characterName);
+  auto& characterData =
+      resolved != nullptr ? *resolved : *impl_->characterData.find(addCharacter(character));
+  const auto& jointToNodeMap = characterData.nodeMap;
 
   // add motion from skeleton states
   addSkeletonStatesToModel(
@@ -1199,7 +1209,7 @@ void GltfBuilder::addSkeletonStates(
       [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
   if (animIter != impl_->document.animations.end()) {
     const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
+    characterData.animationIndices.push_back(animIdx);
   }
 }
 
