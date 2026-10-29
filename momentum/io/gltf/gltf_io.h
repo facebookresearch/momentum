@@ -23,13 +23,18 @@ namespace momentum {
 
 /// Load a glTF character from a document.
 ///
+/// If the scene contains more than one character, the one with the most joints is returned and a
+/// warning is logged; use @ref loadGltfCharacters to load all of them. The character is named after
+/// the top-level node above its skeleton, as in @ref loadGltfCharacters.
+///
 /// @param[in] model The glTF document to load from.
 /// @return The loaded Character object.
 Character loadGltfCharacter(const fx::gltf::Document& model);
 
 /// Load a glTF character from a file path.
 ///
-/// This function assumes the file format is glTF without checking the extension.
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload for multi-character scenes.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return The loaded Character object.
@@ -37,9 +42,43 @@ Character loadGltfCharacter(const filesystem::path& gltfFilename);
 
 /// Load a glTF character from a byte buffer.
 ///
+/// See the @ref fx::gltf::Document overload for multi-character scenes.
+///
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return The loaded Character object.
 Character loadGltfCharacter(std::span<const std::byte> byteSpan);
+
+/// Load every character of a glTF document.
+///
+/// A file written by GltfBuilder yields one character per addCharacter() call, with the name it was
+/// exported under. Other files yield one character per independent skinned skeleton, named after
+/// its top-level node, so names need not be unique. A character gets the skinned meshes whose skin
+/// starts at one of its joints; unskinned meshes are added only when the scene has one character.
+///
+/// @note The parameter transform, parameter limits, parameter sets, pose constraints and metadata
+/// come from the document-level momentum extension, which holds a single rig, so they only fit
+/// characters that share it.
+///
+/// @param[in] model The glTF document to load from.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model);
+
+/// Load every character of a glTF file.
+///
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename);
+
+/// Load every character of a glTF byte buffer.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] byteSpan The buffer containing the glTF data.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan);
 
 /// Load motion data from a glTF file.
 ///
