@@ -45,10 +45,19 @@ namespace {
 
 using namespace momentum;
 
-void loadGlobalExtensions(const fx::gltf::Document& model, Character& character) {
+// Load the rig (parameter transform, limits, parameter sets, pose constraints and metadata) from
+// the character's root node, where GltfBuilder stores each character's own copy, or else from the
+// document, which holds a single copy.
+void loadCharacterExtensions(
+    const fx::gltf::Document& model,
+    uint32_t rootNode,
+    Character& character) {
   try {
-    // load additional momentum data if present
-    const auto& def = findMomentumExtension(model.extensionsAndExtras);
+    const nlohmann::json& globalDef = findMomentumExtension(model.extensionsAndExtras);
+    const nlohmann::json& nodeDef = rootNode < model.nodes.size()
+        ? findMomentumExtension(model.nodes[rootNode].extensionsAndExtras)
+        : globalDef;
+    const nlohmann::json& def = nodeDef.contains("transform") ? nodeDef : globalDef;
 
     if (def.count("transform") > 0) {
       character.parameterTransform = parameterTransformFromJson(character, def["transform"]);
@@ -160,7 +169,7 @@ Character buildCharacter(
     result.skinWeights = bindMeshToJoint(result.mesh, 0);
   }
 
-  loadGlobalExtensions(model, result);
+  loadCharacterExtensions(model, rootNode, result);
 
   // Finalize jointMap and inverseBind pose
   result.resetJointMap();
@@ -225,6 +234,12 @@ std::vector<Character> loadModelAndCharacters(
       input, [](const fx::gltf::Document& model) { return loadGltfCharacters(model); });
 }
 
+std::tuple<std::vector<CharacterMotion>, float> loadModelAndCharactersWithMotion(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  return loadFromInput(
+      input, [](const fx::gltf::Document& model) { return loadGltfCharactersWithMotion(model); });
+}
+
 fx::gltf::Document makeCharacterDocument(
     const Character& character,
     const float fps,
@@ -263,6 +278,34 @@ fx::gltf::Document makeCharacterDocument(
 
 namespace momentum {
 
+namespace {
+
+// The momentum "motion" object in `extensionsAndExtras`, or nullptr.
+const nlohmann::json* findMotion(const nlohmann::json& extensionsAndExtras) {
+  const auto& def = findMomentumExtension(extensionsAndExtras);
+  const auto motion = def.find("motion");
+  return motion == def.end() ? nullptr : &*motion;
+}
+
+} // namespace
+
+const nlohmann::json&
+getCharacterMotionJson(const fx::gltf::Document& model, uint32_t rootNode, bool isOnlyCharacter) {
+  static const nlohmann::json kNoMotion = nlohmann::json::object();
+  if (rootNode < model.nodes.size()) {
+    if (const auto* motion = findMotion(model.nodes[rootNode].extensionsAndExtras)) {
+      return *motion;
+    }
+  }
+  if (!isOnlyCharacter || std::ranges::any_of(model.nodes, [](const fx::gltf::Node& node) {
+        return findMotion(node.extensionsAndExtras) != nullptr;
+      })) {
+    return kNoMotion;
+  }
+  const auto* motion = findMotion(model.extensionsAndExtras);
+  return motion != nullptr ? *motion : kNoMotion;
+}
+
 std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Document& model) {
   try {
     const auto sceneParentMap = buildSceneParentMap(model);
@@ -282,21 +325,25 @@ std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Doc
   }
 }
 
-Character loadGltfCharacterInternal(
-    const fx::gltf::Document& model,
-    std::vector<size_t>& nodeToObjectMap) {
-  auto characters = loadGltfCharactersInternal(model);
+CharacterWithNodeMap& selectGltfCharacter(std::vector<CharacterWithNodeMap>& characters) {
   MT_THROW_IF(characters.empty(), "Unable to load gltf : no character found in the file.");
   MT_LOGW_IF(
       characters.size() > 1,
       "glTF file contains {} characters; loading the one with the most joints. Use "
       "loadGltfCharacters() to load all of them.",
       characters.size());
-  auto loaded = std::ranges::max_element(characters, {}, [](const CharacterWithNodeMap& entry) {
+  return *std::ranges::max_element(characters, {}, [](const CharacterWithNodeMap& entry) {
     return entry.character.skeleton.joints.size();
   });
-  nodeToObjectMap = std::move(loaded->nodeToObjectMap);
-  return std::move(loaded->character);
+}
+
+Character loadGltfCharacterInternal(
+    const fx::gltf::Document& model,
+    std::vector<size_t>& nodeToObjectMap) {
+  auto characters = loadGltfCharactersInternal(model);
+  auto& loaded = selectGltfCharacter(characters);
+  nodeToObjectMap = std::move(loaded.nodeToObjectMap);
+  return std::move(loaded.character);
 }
 
 Character loadGltfCharacter(const fx::gltf::Document& model) {
@@ -328,6 +375,45 @@ std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename) 
 
 std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan) {
   return loadModelAndCharacters(byteSpan);
+}
+
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    const fx::gltf::Document& model) {
+  auto characters = loadGltfCharactersInternal(model);
+  std::vector<CharacterMotion> result;
+  result.reserve(characters.size());
+  for (auto& entry : characters) {
+    const auto& motionJson = getCharacterMotionJson(model, entry.rootNode, characters.size() == 1);
+    const auto [motion, identity] = getMotionFromJson(model, motionJson);
+    CharacterMotion characterMotion;
+    characterMotion.motion = mapMotionToCharacter(motion, entry.character);
+    if (std::get<1>(identity).size() != 0) {
+      characterMotion.identity = mapIdentityToCharacter(identity, entry.character);
+    }
+    characterMotion.timestamps = motionJson.value("timestamps", std::vector<int64_t>{});
+    if (!characterMotion.timestamps.empty() &&
+        characterMotion.timestamps.size() != static_cast<size_t>(characterMotion.motion.cols())) {
+      MT_LOGW(
+          "glTF character '{}' has {} timestamps for {} motion frames; ignoring the timestamps.",
+          entry.character.name,
+          characterMotion.timestamps.size(),
+          characterMotion.motion.cols());
+      characterMotion.timestamps.clear();
+    }
+    characterMotion.character = std::move(entry.character);
+    result.push_back(std::move(characterMotion));
+  }
+  return {std::move(result), loadFpsFromModel(model)};
+}
+
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    const filesystem::path& gltfFilename) {
+  return loadModelAndCharactersWithMotion(gltfFilename);
+}
+
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    std::span<const std::byte> byteSpan) {
+  return loadModelAndCharactersWithMotion(byteSpan);
 }
 
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(

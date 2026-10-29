@@ -186,7 +186,9 @@ model parameters that animate the character over time.
 :param offsets: Optional identity parameters as a tuple of (joint_names, offset_data).
                 Offset data should be a vector with shape [n_joints * 7].
 :param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param custom_name: Custom name for the animation in the GLTF file.
+:param custom_name: Name of the glTF animation that receives the motion. Motions added with the
+    same name share one animation, which glTF viewers play as one clip, so give the characters of
+    one recording the same name.
 :param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
@@ -223,7 +225,9 @@ per-joint transforms that define the character's pose over time.
                        Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
                        translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
                        in (x,y,z,w) format, and s is scale.
-:param custom_name: Custom name for the animation in the GLTF file.
+:param custom_name: Name of the glTF animation that receives the motion. Motions added with the
+    same name share one animation, which glTF viewers play as one clip, so give the characters of
+    one recording the same name.
 :param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.)",
           py::arg("character"),
           py::arg("fps"),
