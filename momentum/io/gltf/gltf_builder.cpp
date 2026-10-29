@@ -636,7 +636,8 @@ void addMotionToModel(
   bool fullAnimation = false;
   if (addExtension) {
     auto& def = addMomentumExtension(model.extensionsAndExtras);
-    // store motion array and offsets as metadata
+    // store motion array and offsets as metadata, replacing those of an earlier call
+    def["motion"] = nlohmann::json::object();
     def["motion"]["nframes"] = numFrames;
     if (!parameterNames.empty() && motion.size() > 0) {
       def["motion"]["parameterNames"] = parameterNames;
@@ -1012,15 +1013,21 @@ std::string GltfBuilder::addCharacter(
     }
   }
   if (options.extensions) {
-    auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
-    parameterTransformToJson(character, def["transform"]);
-    parameterLimitsToJson(character, def["parameterLimits"]);
-    parameterSetsToJson(character, def["parameterSet"]);
-    poseConstraintsToJson(character, def["poseConstraints"]);
-    // add metadata if it exists
+    nlohmann::json rig = nlohmann::json::object();
+    parameterTransformToJson(character, rig["transform"]);
+    parameterLimitsToJson(character, rig["parameterLimits"]);
+    parameterSetsToJson(character, rig["parameterSet"]);
+    poseConstraintsToJson(character, rig["poseConstraints"]);
     if (!character.metadata.empty()) {
-      def["metadata"] = character.metadata;
+      rig["metadata"] = character.metadata;
     }
+    // The document holds a single rig, so each character's rig is also stored on its root node.
+    // The rig of each added character replaces the document-level rig; metadata is optional, so
+    // an earlier character's metadata must not remain.
+    auto& documentExtension = addMomentumExtension(impl_->document.extensionsAndExtras);
+    documentExtension.erase("metadata");
+    documentExtension.update(rig);
+    addMomentumExtension(impl_->document.nodes[rootNodeIdx].extensionsAndExtras).update(rig);
   }
 
   impl_->characterData.insert(characterName, character.name, std::move(characterData));
@@ -1083,6 +1090,12 @@ void GltfBuilder::addMotion(
     const std::string& customName /*= "default"*/,
     std::span<const int64_t> timestamps /*= {}*/,
     const std::string& characterName /*= ""*/) {
+  const auto& motionMatrix = std::get<1>(motion);
+  MT_THROW_IF(
+      !timestamps.empty() && timestamps.size() != motionMatrix.cols(),
+      "Timestamps size {} does not match motion size {}",
+      timestamps.size(),
+      motionMatrix.cols());
   setFps(fps);
   Impl::CharacterData* resolved = impl_->resolveCharacterForMotion(character, characterName);
   auto& characterData =
@@ -1112,16 +1125,24 @@ void GltfBuilder::addMotion(
 
   // Add timestamps to the FB_momentum extension
   if (!timestamps.empty()) {
-    const auto& motionMatrix = std::get<1>(motion);
-    MT_THROW_IF(
-        timestamps.size() != motionMatrix.cols(),
-        "Timestamps size {} does not match motion size {}",
-        timestamps.size(),
-        motionMatrix.cols());
     auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
     // Store timestamps as a JSON array in the motion section
     // The field definition follows the format of addMotionToModel above
     def["motion"]["timestamps"] = std::vector<int64_t>(timestamps.begin(), timestamps.end());
+  }
+
+  // The document holds a single motion, so each character's motion is also stored on its root node.
+  // A motion without identity keeps the identity stored earlier for the same character.
+  if (addExtensions && motionMatrix.cols() > 0) {
+    auto& documentMotion = addMomentumExtension(impl_->document.extensionsAndExtras)["motion"];
+    auto& nodeMotion = addMomentumExtension(
+        impl_->document.nodes[characterData.rootIndex].extensionsAndExtras)["motion"];
+    if (!documentMotion.contains("offsets") && nodeMotion.is_object() &&
+        nodeMotion.contains("offsets")) {
+      documentMotion["jointNames"] = nodeMotion["jointNames"];
+      documentMotion["offsets"] = nodeMotion["offsets"];
+    }
+    nodeMotion = documentMotion;
   }
 }
 
