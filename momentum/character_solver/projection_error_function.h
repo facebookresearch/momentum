@@ -105,6 +105,10 @@ class ProjectionErrorFunctionT : public momentum::SkeletonErrorFunctionT<T> {
     return constraints_.at(index);
   }
 
+  /// Default constant weight in MarkerErrorFunction. This can be used for backwards compatibility
+  /// in setWeight().
+  static constexpr T kLegacyWeight = 1e-4;
+
  protected:
   std::vector<ProjectionConstraintDataT<T>> constraints_;
 
