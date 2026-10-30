@@ -7,6 +7,8 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/character_state.h>
+#include <momentum/character/skeleton_state.h>
+#include <momentum/common/exception.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
@@ -18,7 +20,10 @@
 #include <rerun.hpp>
 
 #include <algorithm>
+#include <map>
+#include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace rerun;
@@ -87,13 +92,16 @@ float validateMarkerSequence(
     const MarkerSequence& markers,
     bool hasMotion,
     size_t nFrames,
-    float motionFps) {
+    float motionFps,
+    size_t numCharacters) {
   if (!hasMotion) {
     MT_LOGE("No character motion in the file. Using fps from the marker sequence.");
     return markers.fps;
   }
 
-  if (markers.frames.size() != nFrames) {
+  // With several characters nFrames is the longest motion, so a mismatch says nothing about any
+  // particular character; only compare when there is one character to compare against.
+  if (numCharacters == 1 && markers.frames.size() != nFrames) {
     MT_LOGW("Has {} marker frames but {} motion frames.", markers.frames.size(), nFrames);
   }
   if (motionFps != markers.fps) {
@@ -135,9 +143,11 @@ selectMotionFrames(size_t firstFrame, size_t lastFrame, size_t stride, size_t nF
   return sel;
 }
 
-/// Batch log model parameters using send_columns for all selected frames.
+/// Batch log model parameters using send_columns for all selected frames, under the per-character
+/// stream prefix `worldPrefix` (e.g. "world_params/character_0").
 void batchLogModelParams(
     const RecordingStream& rec,
+    const std::string& worldPrefix,
     std::span<const std::string> paramNames,
     const Eigen::MatrixXf& motion,
     const FrameSelection& sel) {
@@ -149,12 +159,14 @@ void batchLogModelParams(
     selectedParams.col(i) = motion.col(sel.cols[i]);
   }
   logModelParamsColumns(
-      rec, "world_params", "model_params", paramNames, selectedParams, sel.indices, sel.logTimes);
+      rec, worldPrefix, "model_params", paramNames, selectedParams, sel.indices, sel.logTimes);
 }
 
-/// Batch log joint parameters collected during the frame loop.
+/// Batch log joint parameters collected during the frame loop, under the per-character stream
+/// prefix `worldPrefix` (e.g. "world_params/character_0").
 void batchLogJointParams(
     const RecordingStream& rec,
+    const std::string& worldPrefix,
     std::span<const std::string> jointNames,
     const Eigen::MatrixXf& allJointParams,
     size_t nCollected,
@@ -164,7 +176,7 @@ void batchLogJointParams(
   }
   logJointParamsColumns(
       rec,
-      "world_params",
+      worldPrefix,
       "joint_params",
       jointNames,
       allJointParams.leftCols(nCollected),
@@ -172,7 +184,55 @@ void batchLogJointParams(
       std::span<const double>(sel.logTimes.data(), nCollected));
 }
 
-/// Run the GLB viewer with the given options.
+/// Everything the frame loop needs for one character.
+struct CharacterPlayback {
+  std::string entityPath;
+  std::string paramsPrefix;
+  std::string correspondencePath;
+  std::vector<std::string> jointNames;
+  std::map<std::string, size_t> locatorLookup;
+  FrameSelection sel;
+  CharacterParameters params;
+  // One state per character: CharacterState caches the posed mesh of the character it last posed.
+  CharacterState state;
+  // Joint parameters per frame for a character played from its glTF animation channels.
+  Eigen::MatrixXf jointMotion;
+  // Frames of momentum motion or channel motion; the character holds its last pose after them.
+  size_t numFrames = 0;
+  Eigen::MatrixXf jointParams;
+  size_t numJointParamFrames = 0;
+};
+
+/// The joint motion of each character without momentum motion, read from the glTF animation
+/// channels. Channel keys are played one per frame, as GltfBuilder samples them.
+std::vector<Eigen::MatrixXf> loadChannelJointMotion(
+    const std::string& glbFile,
+    std::span<const CharacterMotion> characters) {
+  const auto animated = loadGltfCharactersWithSkeletonStates(glbFile);
+  // Both loaders find the characters of a file in the same order.
+  MT_THROW_IF(
+      animated.size() != characters.size(),
+      "Loaded {} characters with animation channels but {} with motion from {}",
+      animated.size(),
+      characters.size(),
+      glbFile);
+  std::vector<Eigen::MatrixXf> jointMotion(characters.size());
+  size_t nextIndex = 0;
+  for (const CharacterMotion& cm : characters) {
+    const size_t i = nextIndex++;
+    const auto& states = animated.at(i).skeletonStates;
+    if (cm.motion.cols() > 0 || states.empty()) {
+      continue;
+    }
+    auto& joints = jointMotion.at(i);
+    joints.resize(cm.character.parameterTransform.numJointParameters(), states.size());
+    for (size_t iFrame = 0; iFrame < states.size(); ++iFrame) {
+      joints.col(iFrame) = skeletonStateToJointParameters(states[iFrame], cm.character.skeleton).v;
+    }
+  }
+  return jointMotion;
+}
+
 int run(const Options& options) {
   // Validate file extension
   const filesystem::path filePath(options.glbFile);
@@ -189,29 +249,66 @@ int run(const Options& options) {
   redirectLogsToRerun(rec);
   rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
-  // Load character and motion data
-  const auto [character, motion, offsets, cFps] = loadCharacterWithMotion(options.glbFile);
-  const size_t nFrames = motion.cols();
-  const bool hasMotion = nFrames > 0;
+  // Load every character in the scene together with its own motion.
+  auto [characters, cFps] = loadGltfCharactersWithMotion(options.glbFile);
+  if (characters.empty()) {
+    // Not fatal: a file may hold only a marker sequence, which is still worth displaying.
+    MT_LOGW("No character found in {}.", fileName);
+  }
   auto fps = cFps;
 
-  CharacterState charState;
-  CharacterParameters charParams;
-  charParams.offsets = offsets;
+  // A file not written by momentum keeps its animation in glTF animation channels rather than in
+  // momentum motion. Play those channels, as joint parameters, for the characters without momentum
+  // motion.
+  std::vector<CharacterPlayback> playback(characters.size());
+  if (std::ranges::any_of(
+          characters, [](const CharacterMotion& cm) { return cm.motion.cols() == 0; })) {
+    try {
+      auto jointMotion = loadChannelJointMotion(options.glbFile, characters);
+      for (size_t i = 0; i < playback.size(); ++i) {
+        playback.at(i).jointMotion = std::move(jointMotion.at(i));
+      }
+    } catch (const std::exception& e) {
+      MT_LOGW(
+          "Unable to play the glTF animation channels of {}: {}. Characters without momentum "
+          "motion show their identity pose.",
+          fileName,
+          e.what());
+    }
+  }
 
-  // Log the static template when there is no motion
-  if (!hasMotion) {
-    charParams.pose = Eigen::VectorXf::Zero(character.parameterTransform.numAllModelParameters());
-    charState.set(
-        charParams,
-        character,
+  // The frame range spans the longest motion.
+  size_t nFrames = 0;
+  for (size_t i = 0; i < characters.size(); ++i) {
+    auto& pc = playback.at(i);
+    pc.numFrames =
+        static_cast<size_t>(std::max(characters[i].motion.cols(), pc.jointMotion.cols()));
+    nFrames = std::max(nFrames, pc.numFrames);
+  }
+  const bool hasMotion = nFrames > 0;
+
+  // Start every character at its rest pose. That is all a character without motion shows, and it
+  // gives the marker correspondence a locator state before a character's motion starts.
+  for (size_t i = 0; i < characters.size(); ++i) {
+    const auto& cm = characters[i];
+    auto& pc = playback.at(i);
+    pc.entityPath = "world/character/" + std::to_string(i);
+    pc.paramsPrefix = "world_params/character_" + std::to_string(i);
+    pc.correspondencePath = "world/markers/correspondence/character_" + std::to_string(i);
+    pc.params.offsets = cm.identity;
+    pc.params.pose = Eigen::VectorXf::Zero(cm.character.parameterTransform.numAllModelParameters());
+    pc.state.set(
+        pc.params,
+        cm.character,
         true /*updateMesh*/,
         true /*updateCollision*/,
         false /*applyLimits*/);
-    logCharacter(rec, "world/character", character, charState);
+    if (pc.numFrames == 0) {
+      logCharacter(rec, pc.entityPath, cm.character, pc.state);
+    }
   }
 
-  // Load and validate marker sequence
+  // Load and validate the marker sequence, which belongs to the scene rather than to a character.
   const auto markers = loadMarkerSequence(options.glbFile);
   const size_t nMarkerFrames = markers.frames.size();
   const bool hasMarkers = nMarkerFrames > 0;
@@ -219,7 +316,7 @@ int run(const Options& options) {
   std::string markerStreamName;
   if (hasMarkers) {
     markerStreamName = "world/markers/" + (markers.name.empty() ? "positions" : markers.name);
-    fps = validateMarkerSequence(markers, hasMotion, nFrames, fps);
+    fps = validateMarkerSequence(markers, hasMotion, nFrames, fps, characters.size());
   }
 
   if (!hasMotion && !hasMarkers) {
@@ -227,64 +324,84 @@ int run(const Options& options) {
   }
 
   // Log parameter names and pre-compute batch frame selection
-  const auto& modelParamNames = character.parameterTransform.name;
-  const auto jointNames = character.skeleton.getJointNames();
-  if (options.logParams && hasMotion) {
-    logModelParamNames(rec, "world_params", "model_params", modelParamNames);
-  }
-  if (options.logJoints && hasMotion) {
-    logJointParamNames(rec, "world_params", "joint_params", jointNames);
-  }
-
-  const auto locatorLookup = buildLocatorLookup(character);
   const auto [firstFrame, lastFrame] = computeFrameRange(options, nFrames, nMarkerFrames);
-  const auto sel = selectMotionFrames(firstFrame, lastFrame, options.stride, nFrames, fps);
-
-  if (options.logParams) {
-    batchLogModelParams(rec, modelParamNames, motion, sel);
+  for (size_t i = 0; i < characters.size(); ++i) {
+    const auto& cm = characters[i];
+    auto& pc = playback.at(i);
+    pc.jointNames = cm.character.skeleton.getJointNames();
+    pc.locatorLookup = buildLocatorLookup(cm.character);
+    pc.sel = selectMotionFrames(firstFrame, lastFrame, options.stride, pc.numFrames, fps);
+    if (pc.numFrames == 0) {
+      continue;
+    }
+    const auto& modelParamNames = cm.character.parameterTransform.name;
+    if (options.logParams && cm.motion.cols() > 0) {
+      logModelParamNames(rec, pc.paramsPrefix, "model_params", modelParamNames);
+      batchLogModelParams(rec, pc.paramsPrefix, modelParamNames, cm.motion, pc.sel);
+    }
+    if (options.logJoints) {
+      logJointParamNames(rec, pc.paramsPrefix, "joint_params", pc.jointNames);
+    }
   }
 
-  // Frame loop: log character and marker data per frame, collect joint params
-  Eigen::MatrixXf allJointParams;
-  size_t jointParamFrameIdx = 0;
-
+  // Frame loop: log the marker frame, then each character's pose and its marker correspondence.
   for (size_t iFrame = firstFrame; iFrame < lastFrame; iFrame += options.stride) {
     rec.set_time_sequence("frame_index", iFrame);
     momentum::setTimeSeconds(rec, "time", (float)iFrame / fps);
 
-    if (iFrame < nFrames) {
-      charParams.pose = motion.col(iFrame);
-      charState.set(
-          charParams,
-          character,
-          true /*updateMesh*/,
-          true /*updateCollision*/,
-          false /*applyLimits*/);
-      logCharacter(rec, "world/character", character, charState);
-
-      if (options.logJoints) {
-        const auto& jp = charState.skeletonState.jointParameters.v;
-        if (allJointParams.cols() == 0) {
-          allJointParams.resize(jp.size(), sel.cols.size());
-        }
-        allJointParams.col(jointParamFrameIdx++) = jp;
-      }
-    }
-
     if (iFrame < nMarkerFrames) {
       logMarkers(rec, markerStreamName, markers.frames.at(iFrame));
-      logMarkerLocatorCorrespondence(
-          rec,
-          "world/markers/correspondence",
-          locatorLookup,
-          charState.locatorState,
-          markers.frames.at(iFrame),
-          3.0f);
+    }
+
+    for (size_t i = 0; i < characters.size(); ++i) {
+      const auto& cm = characters[i];
+      auto& pc = playback.at(i);
+
+      // A character keeps its last pose after its motion ends. A character whose motion ends
+      // before the first frame shows its last pose from the first frame on.
+      const bool inMotion = iFrame < pc.numFrames;
+      if (inMotion || (iFrame == firstFrame && pc.numFrames > 0)) {
+        const auto frame = static_cast<Eigen::Index>(std::min(iFrame, pc.numFrames - 1));
+        // Joint motion goes through the offsets, on top of the zero pose set up above.
+        if (cm.motion.cols() > 0) {
+          pc.params.pose = cm.motion.col(frame);
+        } else {
+          pc.params.offsets = pc.jointMotion.col(frame);
+        }
+        pc.state.set(
+            pc.params,
+            cm.character,
+            true /*updateMesh*/,
+            true /*updateCollision*/,
+            false /*applyLimits*/);
+        logCharacter(rec, pc.entityPath, cm.character, pc.state);
+
+        if (options.logJoints && inMotion) {
+          const auto& jp = pc.state.skeletonState.jointParameters.v;
+          if (pc.jointParams.cols() == 0) {
+            pc.jointParams.resize(jp.size(), pc.sel.cols.size());
+          }
+          pc.jointParams.col(pc.numJointParamFrames++) = jp;
+        }
+      }
+
+      if (iFrame < nMarkerFrames) {
+        logMarkerLocatorCorrespondence(
+            rec,
+            pc.correspondencePath,
+            pc.locatorLookup,
+            pc.state.locatorState,
+            markers.frames.at(iFrame),
+            3.0f);
+      }
     }
   }
 
   if (options.logJoints) {
-    batchLogJointParams(rec, jointNames, allJointParams, jointParamFrameIdx, sel);
+    for (const auto& pc : playback) {
+      batchLogJointParams(
+          rec, pc.paramsPrefix, pc.jointNames, pc.jointParams, pc.numJointParamFrames, pc.sel);
+    }
   }
 
   return EXIT_SUCCESS;
