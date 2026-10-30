@@ -416,6 +416,39 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
   return loadModelAndCharactersWithMotion(byteSpan);
 }
 
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    const fx::gltf::Document& model) {
+  auto characters = loadGltfCharactersInternal(model);
+  std::vector<CharacterSkeletonStates> result;
+  result.reserve(characters.size());
+  for (auto& entry : characters) {
+    CharacterSkeletonStates loaded;
+    const auto* animation =
+        findAnimationForCharacter(model, entry.character, entry.nodeToObjectMap);
+    if (animation != nullptr) {
+      std::tie(loaded.skeletonStates, loaded.timestamps) =
+          loadSkeletonStatesForCharacter(model, *animation, entry.character, entry.nodeToObjectMap);
+    }
+    loaded.character = std::move(entry.character);
+    result.push_back(std::move(loaded));
+  }
+  return result;
+}
+
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    const filesystem::path& gltfFilename) {
+  return loadFromInput(gltfFilename, [](const fx::gltf::Document& model) {
+    return loadGltfCharactersWithSkeletonStates(model);
+  });
+}
+
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    std::span<const std::byte> byteSpan) {
+  return loadFromInput(byteSpan, [](const fx::gltf::Document& model) {
+    return loadGltfCharactersWithSkeletonStates(model);
+  });
+}
+
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
     const filesystem::path& gltfFilename) {
   // ---------------------------------------------
