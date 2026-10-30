@@ -39,6 +39,22 @@ Character loadOpenFbxCharacter(
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
+/// Implementation of loadFbxCharacters(); see fbx_io.h.
+std::vector<Character> loadOpenFbxCharacters(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Implementation of loadFbxCharacters(); see fbx_io.h.
+std::vector<Character> loadOpenFbxCharacters(
+    std::span<const std::byte> inputData,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMotion(
     const filesystem::path& inputPath,
