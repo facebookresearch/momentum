@@ -123,7 +123,7 @@ keywords = [
     "motion-capture",
     "character-animation",
     "robotics",
-{% if build_torch_extensions %}
+{% if build_torch_extensions or tag == "core" %}
     "torch",
 {% endif %}
 ]
@@ -149,7 +149,7 @@ dependencies = [
 {% if tag == "core" %}
     "numpy>=1.20.0",
 {% else %}
-    # The add-on contributes only Torch-backed modules to the core namespace.
+    # The add-on contributes only compiled Torch extensions to the core namespace.
     "pymomentum-core>={{ core_version_min }},<{{ core_version_max }}",
 {% if tag != "gpu" %}
     # PyTorch version constraints - platform and Python version specific
@@ -176,6 +176,7 @@ dependencies = [
 # Opt-in extras. Visualization stacks are large and have transitive deps
 # users may not want; keep them out of the default install.
 [project.optional-dependencies]
+torch = ["torch>=1.13"]
 rerun = ["rerun-sdk>=0.23.3,<0.34"]
 viser = ["viser>=1.0.24,<2"]
 {% endif %}
