@@ -345,14 +345,14 @@ void writeUserProperties(::fbxsdk::FbxNode* node, const FbxUserProperties& userP
 
 } // namespace
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Character& character,
     const std::string& name,
     float fps,
     const MatrixXf& jointParams,
     const FbxUserProperties& userProperties) {
   MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
-  addAnimatedMesh(
+  return addAnimatedMesh(
       *character.mesh,
       name,
       fps,
@@ -362,7 +362,7 @@ void FbxBuilder::addAnimatedMesh(
       userProperties);
 }
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Mesh& mesh,
     const std::string& name,
     float fps,
@@ -376,10 +376,15 @@ void FbxBuilder::addAnimatedMesh(
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
+  // Reserve the name before the nodes exist, so a failure below cannot leave a node whose name a
+  // later character reuses.
+  const std::string meshName = impl_->characters.makeExportedName(name);
+  impl_->characters.reserve(meshName);
+
   // Create mesh node directly under scene root (no skeleton)
   const auto numVertices = static_cast<int>(mesh.vertices.size());
-  ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, name.c_str());
-  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, (name + "_geo").c_str());
+  ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, meshName.c_str());
+  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, (meshName + "_geo").c_str());
   lMesh->SetControlPointCount(numVertices);
   lMesh->InitNormals(numVertices);
   for (int i = 0; i < numVertices; i++) {
@@ -478,6 +483,8 @@ void FbxBuilder::addAnimatedMesh(
     }
     curve->KeyModifyEnd();
   }
+
+  return meshName;
 }
 
 void FbxBuilder::addMarkerSequence(float fps, std::span<const std::vector<Marker>> markerSequence) {
@@ -554,7 +561,7 @@ void FbxBuilder::addMotionWithJointParams(
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Character&,
     const std::string&,
     float,
@@ -563,7 +570,7 @@ void FbxBuilder::addAnimatedMesh(
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Mesh&,
     const std::string&,
     float,
