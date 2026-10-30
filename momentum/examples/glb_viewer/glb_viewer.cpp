@@ -12,14 +12,15 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
-#include <momentum/gui/rerun/logging_redirect.h>
 #include <momentum/gui/rerun/rerun_compat.h>
+#include <momentum/gui/rerun/rerun_sink.h>
 #include <momentum/io/gltf/gltf_io.h>
 
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <span>
 #include <string>
@@ -35,6 +36,7 @@ struct Options {
   std::string glbFile;
   LogLevel logLevel = LogLevel::Info;
   std::string title;
+  RerunSinkOptions rerunSink;
   bool logParams = false;
   bool logJoints = false;
   size_t stride = 1;
@@ -48,6 +50,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       ->required()
       ->check(CLI::ExistingFile);
   app.add_option("--title", opt->title, "Title in viewer (default to be filename)");
+  addRerunSinkOptions(app, opt->rerunSink);
   app.add_option(
          "--stride", opt->stride, "Stride to subsample the motion for high frequency captures")
       ->default_val(opt->stride)
@@ -245,8 +248,7 @@ int run(const Options& options) {
   // Set up Rerun recording stream
   const std::string title = options.title.empty() ? fileName : options.title;
   const auto rec = RecordingStream(title);
-  rec.spawn().exit_on_failure();
-  redirectLogsToRerun(rec);
+  openRerunSink(rec, options.rerunSink);
   rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
   // Load every character in the scene together with its own motion.
@@ -417,10 +419,10 @@ int main(int argc, char* argv[]) {
     setLogLevel(options->logLevel);
     return run(*options);
   } catch (const std::exception& e) {
-    MT_LOGE("Exception thrown. Error: {}", e.what());
+    std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;
   } catch (...) {
-    MT_LOGE("Exception thrown. Unknown error.");
+    std::cerr << "Exception thrown. Unknown error.\n";
     return EXIT_FAILURE;
   }
 }
