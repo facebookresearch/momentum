@@ -16,10 +16,25 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <optional>
+
 namespace py = pybind11;
 namespace mm = momentum;
 
 namespace pymomentum {
+
+namespace {
+
+// A Python motion (numFrames x numParameters) in the momentum layout (numParameters x numFrames);
+// empty when the motion is not given or has no values.
+mm::MatrixXf toMomentumLayout(const std::optional<Eigen::MatrixXf>& motion) {
+  if (!motion.has_value() || motion->size() == 0) {
+    return {};
+  }
+  return motion->transpose();
+}
+
+} // namespace
 
 void registerFbxBuilderBindings(pybind11::module& m) {
   py::class_<mm::FbxBuilder>(
@@ -83,16 +98,12 @@ root, so it inherits the skeleton's animation without needing skin weights.
              const std::optional<Eigen::MatrixXf>& motion,
              const std::optional<Eigen::VectorXf>& offsets,
              const std::string& characterName) {
-            // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
-            mm::MatrixXf transposedMotion;
-            if (motion.has_value() && motion->size() > 0) {
-              transposedMotion = motion->transpose();
-            }
-            mm::VectorXf actualOffsets;
-            if (offsets.has_value()) {
-              actualOffsets = offsets.value();
-            }
-            builder.addMotion(character, fps, transposedMotion, actualOffsets, characterName);
+            builder.addMotion(
+                character,
+                fps,
+                toMomentumLayout(motion),
+                offsets.value_or(mm::VectorXf()),
+                characterName);
           },
           R"(Add model-parameter animation for a previously added character.
 
@@ -116,12 +127,8 @@ curves. Also extracts and animates blend shape weights when applicable.
              double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const std::string& characterName) {
-            // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
-            mm::MatrixXf transposedJointParams;
-            if (jointParams.has_value() && jointParams->size() > 0) {
-              transposedJointParams = jointParams->transpose();
-            }
-            builder.addMotionWithJointParams(character, fps, transposedJointParams, characterName);
+            builder.addMotionWithJointParams(
+                character, fps, toMomentumLayout(jointParams), characterName);
           },
           R"(Add joint-parameter animation for a previously added character.
 
@@ -144,12 +151,8 @@ This is useful for rigid bodies or characters with simple parameterization.
              double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const mm::FbxUserProperties& userProperties) {
-            mm::MatrixXf transposedJointParams;
-            if (jointParams.has_value() && jointParams->size() > 0) {
-              transposedJointParams = jointParams->transpose();
-            }
             return builder.addAnimatedMesh(
-                character, name, fps, transposedJointParams, userProperties);
+                character, name, fps, toMomentumLayout(jointParams), userProperties);
           },
           R"(Add an animated mesh (no skeleton) to the scene.
 
@@ -182,15 +185,11 @@ as a simple animated mesh without any skeleton hierarchy.
              const std::optional<Eigen::MatrixXf>& jointParams,
              const std::optional<Eigen::Vector3f>& translationOffset,
              const mm::FbxUserProperties& userProperties) {
-            mm::MatrixXf transposedJointParams;
-            if (jointParams.has_value() && jointParams->size() > 0) {
-              transposedJointParams = jointParams->transpose();
-            }
             return builder.addAnimatedMesh(
                 mesh,
                 name,
                 fps,
-                transposedJointParams,
+                toMomentumLayout(jointParams),
                 translationOffset.value_or(Eigen::Vector3f::Zero()),
                 userProperties);
           },
