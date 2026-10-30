@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <momentum/character/character.h>
 #include <momentum/character/marker.h>
 #include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
@@ -16,6 +17,7 @@
 #include <fx/gltf.h>
 #include <span>
 
+#include <cstdint>
 #include <tuple>
 #include <vector>
 
@@ -23,13 +25,18 @@ namespace momentum {
 
 /// Load a glTF character from a document.
 ///
+/// If the scene contains more than one character, the one with the most joints is returned and a
+/// warning is logged; use @ref loadGltfCharacters to load all of them. The character is named after
+/// the top-level node above its skeleton, as in @ref loadGltfCharacters.
+///
 /// @param[in] model The glTF document to load from.
 /// @return The loaded Character object.
 Character loadGltfCharacter(const fx::gltf::Document& model);
 
 /// Load a glTF character from a file path.
 ///
-/// This function assumes the file format is glTF without checking the extension.
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload for multi-character scenes.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return The loaded Character object.
@@ -37,11 +44,94 @@ Character loadGltfCharacter(const filesystem::path& gltfFilename);
 
 /// Load a glTF character from a byte buffer.
 ///
+/// See the @ref fx::gltf::Document overload for multi-character scenes.
+///
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return The loaded Character object.
 Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 
+/// Load every character of a glTF document.
+///
+/// A file written by GltfBuilder yields one character per addCharacter() call, with the name it was
+/// exported under. Other files yield one character per independent skinned skeleton, named after
+/// its top-level node, so names need not be unique. A character gets the skinned meshes whose skin
+/// starts at one of its joints; unskinned meshes are added only when the scene has one character.
+///
+/// @note The parameter transform, parameter limits, parameter sets, pose constraints and metadata
+/// are read from the character's root node, where GltfBuilder stores each character's own copy.
+/// Files without that copy have a single document-level rig, which every character then uses.
+///
+/// @param[in] model The glTF document to load from.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model);
+
+/// Load every character of a glTF file.
+///
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename);
+
+/// Load every character of a glTF byte buffer.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] byteSpan The buffer containing the glTF data.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan);
+
+/// A character loaded with its motion by @ref loadGltfCharactersWithMotion.
+struct CharacterMotion {
+  /// The loaded character.
+  Character character;
+  /// Model parameters, shaped (numAllModelParameters x numFrames); no columns if the character has
+  /// no motion.
+  MatrixXf motion;
+  /// Identity (offset) joint parameters; empty if the file stores none for the character.
+  JointParameters identity;
+  /// Per-frame timestamps (usually in microseconds), one per motion column; empty if the file
+  /// stores none, or if their count differs from the number of frames (a warning is logged).
+  std::vector<int64_t> timestamps;
+};
+
+/// Load every character of a glTF document with its motion.
+///
+/// Characters are those of @ref loadGltfCharacters. Each character's model-parameter motion,
+/// identity and timestamps are read from its root node, where GltfBuilder stores them. A scene
+/// with a single character, where no node stores a motion, falls back to the document-level
+/// motion, which is all that files written before per-character motion carry.
+///
+/// @param[in] model The glTF document to load from.
+/// @return The characters with their motion, and the frame rate of the document.
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    const fx::gltf::Document& model);
+
+/// Load every character of a glTF file with its motion.
+///
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return The characters with their motion, and the frame rate of the document.
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    const filesystem::path& gltfFilename);
+
+/// Load every character of a glTF byte buffer with its motion.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] byteSpan The buffer containing the glTF data.
+/// @return The characters with their motion, and the frame rate of the document.
+std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
+    std::span<const std::byte> byteSpan);
+
 /// Load motion data from a glTF file.
+///
+/// This function reads the document-level motion, which in a multi-character file belongs to the
+/// character whose motion was added last; use @ref loadGltfCharactersWithMotion to get every
+/// character's motion.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return A tuple containing the motion parameters, identity parameters, and fps.
@@ -50,7 +140,9 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
 
 /// Load per-frame timestamps from a glTF file.
 ///
-/// This function loads timestamps that were saved using GltfBuilder::addMotion.
+/// This function loads timestamps that were saved using GltfBuilder::addMotion. It reads the
+/// document-level motion, which in a multi-character file belongs to the character whose motion was
+/// added last; use @ref loadGltfCharactersWithMotion to get every character's timestamps.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return A vector of per-frame timestamps (usually in microseconds).
@@ -62,6 +154,9 @@ std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename);
 /// represented in model parameters and the identity vector is represented as joint parameters.
 /// This function assumes the file format is glTF without checking the extension.
 ///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
+///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return A tuple containing the loaded Character object, the motion represented in model
 /// parameters, the identity vector represented as joint parameters, and the fps.
@@ -69,6 +164,9 @@ std::tuple<Character, MatrixXf, momentum::JointParameters, float> loadCharacterW
     const filesystem::path& gltfFilename);
 
 /// Load a glTF character from a buffer.
+///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
 ///
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return A tuple containing the loaded Character object, the motion represented in model
@@ -84,6 +182,9 @@ std::tuple<Character, MatrixXf, momentum::JointParameters, float> loadCharacterW
 /// transform. The scale parameters from the identity vector are integrated into the motion data
 /// for each frame.
 ///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
+///
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return A tuple containing the loaded Character object, the motion represented in model
 /// parameters with scales applied, the identity parameters as model parameters, and the fps.
@@ -97,6 +198,9 @@ loadCharacterWithMotionModelParameterScales(std::span<const std::byte> byteSpan)
 /// preferred over the deprecated method of storing scales in an offset vector in the parameter
 /// transform. The scale parameters from the identity vector are integrated into the motion data
 /// for each frame.
+///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return A tuple containing the loaded Character object, the motion represented in model
@@ -137,6 +241,9 @@ loadCharacterWithSkeletonStates(const filesystem::path& gltfFilename);
 /// different character but you want to apply it to your character. This function assumes the file
 /// format is glTF without checking the extension.
 ///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
+///
 /// @param[in] gltfFilename The path to the glTF motion file.
 /// @param[in] character The Character object to map the motion onto.
 /// @return A tuple containing the motion represented in model parameters, the identity vector
@@ -151,6 +258,9 @@ std::tuple<MatrixXf, JointParameters, float> loadMotionOnCharacter(
 /// This function loads motion data from a buffer and maps it onto the input character by matching
 /// joint names and parameter names. This is useful when the motion was saved with a different
 /// character but you want to apply it to your character.
+///
+/// For a multi-character file, it reads the character with the most joints and that character's
+/// own motion; use @ref loadGltfCharactersWithMotion to load every character.
 ///
 /// @param[in] byteSpan The buffer containing the glTF motion data.
 /// @param[in] character The Character object to map the motion onto.
