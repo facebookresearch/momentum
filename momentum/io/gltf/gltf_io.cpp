@@ -27,6 +27,7 @@
 #include "momentum/io/gltf/gltf_skeleton_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
@@ -459,22 +460,20 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
 std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) {
   try {
     fx::gltf::Document model = loadGltfDocument(gltfFilename);
-    const auto& def = findMomentumExtension(model.extensionsAndExtras);
+    const auto* motion = findMotion(model.extensionsAndExtras);
 
     // Check if motion section exists and has timestamps
-    if (def.count("motion") == 0) {
+    if (motion == nullptr) {
       MT_LOGW("No motion data found in gltf file when loading timestamps");
       return {};
     }
-
-    const auto& motion = def["motion"];
-    if (!motion.contains("timestamps")) {
+    if (!motion->contains("timestamps")) {
       MT_LOGW("No timestamps found in gltf file");
       return {};
     }
 
     // Extract timestamps from the JSON array
-    return motion["timestamps"].get<std::vector<int64_t>>();
+    return motion->at("timestamps").get<std::vector<int64_t>>();
   } catch (const std::exception& err) {
     MT_THROW(
         "Unable to load timestamps from gltf file '{}'. Error: {}",
