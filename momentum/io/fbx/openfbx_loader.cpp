@@ -18,6 +18,7 @@
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/fbx/marker_property_names.h"
 #include "momentum/io/fbx/polygon_data.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
