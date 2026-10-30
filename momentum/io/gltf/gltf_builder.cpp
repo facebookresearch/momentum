@@ -310,72 +310,39 @@ void addActorAnimationToModel(
     return;
   }
 
-  // create arrays for data
-  const float kLowConfidence = 1e-3;
-  std::map<std::string, size_t> markerNameToIndex;
-  std::vector<std::string> markerNames;
-  std::vector<std::vector<float>> timestamps;
-  std::vector<std::vector<Vector3f>> markerPositions;
-  std::vector<std::vector<Vector3f>> markerConf;
-  for (size_t i = 0; i < markerSequence.size(); i++) {
-    const float timestamp = static_cast<float>(i) / fps;
-    for (const auto& marker : markerSequence[i]) {
-      if (marker.occluded || marker.confidence < kLowConfidence) {
-        continue;
-      }
-
-      // create new array if marker is unknown
-      if (markerNameToIndex.count(marker.name) == 0) {
-        const auto index = timestamps.size();
-        timestamps.emplace_back();
-        markerPositions.emplace_back();
-        markerConf.emplace_back();
-        markerNameToIndex[marker.name] = index;
-        markerNames.emplace_back(marker.name);
-      }
-
-      // get index
-      const auto& index = markerNameToIndex.at(marker.name);
-      MT_THROW_IF(
-          index >= timestamps.size() || index >= markerPositions.size() ||
-              index >= markerConf.size(),
-          "Marker index {} exceeds container size",
-          index);
-      timestamps[index].push_back(timestamp);
-      markerPositions[index].push_back(fromMomentumVec3f(marker.pos.cast<float>()));
-      markerConf[index].push_back(Vector3f::Ones() * marker.confidence);
-    }
-  }
+  // Observations with a lower confidence are left out.
+  constexpr float kLowConfidence = 1e-3;
+  const std::vector<MarkerTrack> tracks = groupMarkerTracks(markerSequence, kLowConfidence);
 
   // add data to gltf document
   auto& scene = getDefaultScene(model);
   auto& animation = addMomentumAnimationToModel(model, animName);
 
-  MT_CHECK(
-      (markerNames.size() == timestamps.size()) && (markerNames.size() == markerPositions.size()) &&
-      (markerNames.size() == markerNameToIndex.size()) &&
-      (markerNames.size() == markerConf.size()));
+  for (const MarkerTrack& track : tracks) {
+    std::vector<float> timestamps;
+    std::vector<Vector3f> positions;
+    std::vector<Vector3f> scales;
+    timestamps.reserve(track.frames.size());
+    positions.reserve(track.frames.size());
+    scales.reserve(track.frames.size());
+    for (size_t k = 0; k < track.frames.size(); ++k) {
+      timestamps.push_back(static_cast<float>(track.frames[k]) / fps);
+      positions.push_back(fromMomentumVec3f(track.positions[k].cast<float>()));
+      scales.emplace_back(Vector3f::Ones() * track.confidences[k]);
+    }
 
-  for (size_t j = 0; j < markerConf.size(); j++) {
     // create marker
     const auto nodeIndex = static_cast<int32_t>(model.nodes.size());
     model.nodes.emplace_back();
     auto& node = model.nodes.back();
     scene.nodes.push_back(nodeIndex);
-    node.name = markerNames[j];
+    node.name = track.name;
     node.translation = {0.0f, 0.0f, 0.0f};
     node.scale = {1.0f, 1.0f, 1.0f};
     addMomentumExtension(node.extensionsAndExtras)["type"] = "marker";
     // for convenience, save confidence as a flat float array so we don't need to parse animation
     // channels
-    {
-      std::vector<float> confValues;
-      confValues.reserve(markerConf[j].size());
-      for (const auto& v : markerConf[j]) {
-        confValues.push_back(v[0]);
-      }
-      addMomentumExtension(node.extensionsAndExtras)["confidence"] = confValues;
-    }
+    addMomentumExtension(node.extensionsAndExtras)["confidence"] = track.confidences;
     switch (markerMesh) {
       case GltfBuilder::MarkerMesh::UnitCube: {
         auto newMeshIdx = addMeshToModel(model, kUnitCubeRed, true);
@@ -389,26 +356,23 @@ void addActorAnimationToModel(
     }
 
     // create animation channel
-    const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps[j]);
-    if (!timestamps[j].empty() && !model.accessors.empty() &&
-        timestampIdx < model.accessors.size()) {
-      model.accessors[timestampIdx].min.emplace_back(timestamps[j].front());
-      model.accessors[timestampIdx].max.emplace_back(timestamps[j].back());
+    const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps);
+    if (!timestamps.empty() && !model.accessors.empty() && timestampIdx < model.accessors.size()) {
+      model.accessors[timestampIdx].min.emplace_back(timestamps.front());
+      model.accessors[timestampIdx].max.emplace_back(timestamps.back());
     }
 
     // translation
     animation.channels.emplace_back();
     auto& tchannel = animation.channels.back();
-    tchannel.sampler =
-        // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
-        createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
+    tchannel.sampler = createSampler<const Vector3f>(model, animation, positions, timestampIdx);
     tchannel.target.node = nodeIndex;
     tchannel.target.path = "translation";
 
     // scale -- for visualization purpose only
     animation.channels.emplace_back();
     auto& schannel = animation.channels.back();
-    schannel.sampler = createSampler<const Vector3f>(model, animation, markerConf[j], timestampIdx);
+    schannel.sampler = createSampler<const Vector3f>(model, animation, scales, timestampIdx);
     schannel.target.node = nodeIndex;
     schannel.target.path = "scale";
   }
