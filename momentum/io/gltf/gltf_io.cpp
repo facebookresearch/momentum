@@ -499,27 +499,12 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotion(
   return loadCharacterWithMotionCommon(byteSpan);
 }
 
-std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
-    const filesystem::path& gltfFilename) {
-  // Read the file into a buffer
-  std::ifstream file(gltfFilename, std::ios::binary | std::ios::ate);
-  MT_THROW_IF(!file.is_open(), "Unable to open file: {}", gltfFilename.string());
+namespace {
 
-  const std::streamsize size = file.tellg();
-  file.seekg(0, std::ios::beg);
-
-  std::vector<std::byte> buffer(size);
-  if (!file.read(reinterpret_cast<char*>(buffer.data()), size)) {
-    MT_THROW("Unable to read file: {}", gltfFilename.string());
-  }
-
-  // Delegate to the byteSpan overload to avoid code duplication
-  return loadCharacterWithMotionModelParameterScales(std::span<const std::byte>(buffer));
-}
-
-std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
-    std::span<const std::byte> byteSpan) {
-  auto [character, motion, jointIdentity, fps] = loadCharacterWithMotionCommon(byteSpan, true);
+std::tuple<Character, MatrixXf, ModelParameters, float>
+loadCharacterWithMotionModelParameterScalesCommon(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  auto [character, motion, jointIdentity, fps] = loadCharacterWithMotionCommon(input, true);
   MT_THROW_IF(
       motion.rows() != character.parameterTransform.numAllModelParameters(),
       "Mismatch between character and motion; character has {} model parameters while motion has {}.",
@@ -529,6 +514,18 @@ std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionM
   auto modelIdentity =
       applyModelParameterScales(character.parameterTransform, motion, jointIdentity);
   return {character, motion, modelIdentity, fps};
+}
+
+} // namespace
+
+std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
+    const filesystem::path& gltfFilename) {
+  return loadCharacterWithMotionModelParameterScalesCommon(gltfFilename);
+}
+
+std::tuple<Character, MatrixXf, ModelParameters, float> loadCharacterWithMotionModelParameterScales(
+    std::span<const std::byte> byteSpan) {
+  return loadCharacterWithMotionModelParameterScalesCommon(byteSpan);
 }
 
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
