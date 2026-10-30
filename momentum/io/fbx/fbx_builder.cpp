@@ -209,38 +209,9 @@ std::string FbxBuilder::addRigidBody(
   if (options.mesh && character.mesh != nullptr) {
     // Create mesh node with vertices, normals, and UVs but no skin deformer.
     // Parent it under the target joint so it moves rigidly with that joint.
-    const auto numVertices = static_cast<int>(character.mesh->vertices.size());
     ::fbxsdk::FbxNode* meshNode =
         ::fbxsdk::FbxNode::Create(impl_->scene, (characterName + "_mesh").c_str());
-    ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, "mesh");
-    lMesh->SetControlPointCount(numVertices);
-    lMesh->InitNormals(numVertices);
-    for (int i = 0; i < numVertices; i++) {
-      FbxVector4 point(
-          character.mesh->vertices[i].x(),
-          character.mesh->vertices[i].y(),
-          character.mesh->vertices[i].z());
-      FbxVector4 normal(
-          character.mesh->normals[i].x(),
-          character.mesh->normals[i].y(),
-          character.mesh->normals[i].z());
-      lMesh->SetControlPointAt(point, normal, i);
-    }
-    writePolygonsToFbxMesh(*character.mesh, lMesh);
-    lMesh->BuildMeshEdgeArray();
-    meshNode->SetNodeAttribute(lMesh);
-
-    // Add texture coordinates
-    if (!character.mesh->texcoords.empty()) {
-      const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-      lMesh->InitTextureUV(0, uvType);
-      lMesh->InitTextureUVIndices(
-          ::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-      for (const auto& texcoords : character.mesh->texcoords) {
-        lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-      }
-      writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
-    }
+    writeMeshGeometry(*character.mesh, impl_->scene, meshNode, "mesh");
 
     // No skin deformer — parent mesh under target joint for rigid body behavior
     if (meshParentNode != nullptr) {
@@ -428,30 +399,8 @@ std::string FbxBuilder::addAnimatedMesh(
   impl_->characters.reserve(meshName);
 
   // Create mesh node directly under scene root (no skeleton)
-  const auto numVertices = static_cast<int>(mesh.vertices.size());
   ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, meshName.c_str());
-  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, (meshName + "_geo").c_str());
-  lMesh->SetControlPointCount(numVertices);
-  lMesh->InitNormals(numVertices);
-  for (int i = 0; i < numVertices; i++) {
-    lMesh->SetControlPointAt(
-        FbxVector4(mesh.vertices[i].x(), mesh.vertices[i].y(), mesh.vertices[i].z()),
-        FbxVector4(mesh.normals[i].x(), mesh.normals[i].y(), mesh.normals[i].z()),
-        i);
-  }
-  writePolygonsToFbxMesh(mesh, lMesh);
-  lMesh->BuildMeshEdgeArray();
-  meshNode->SetNodeAttribute(lMesh);
-
-  if (!mesh.texcoords.empty()) {
-    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-    lMesh->InitTextureUV(0, uvType);
-    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-    for (const auto& texcoords : mesh.texcoords) {
-      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-    }
-    writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
-  }
+  writeMeshGeometry(mesh, impl_->scene, meshNode, (meshName + "_geo").c_str());
 
   writeUserProperties(meshNode, userProperties);
 

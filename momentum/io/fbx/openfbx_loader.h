@@ -17,10 +17,6 @@
 
 namespace momentum {
 
-// Custom property names for identifying Momentum-specific FBX nodes
-constexpr const char* kMomentumMarkersRootProperty = "Momentum_Markers_Root";
-constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
-
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
 // Permissive mode allows loading mesh-only characters (without skin weights).
