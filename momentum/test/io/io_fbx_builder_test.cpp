@@ -402,3 +402,89 @@ TEST(FbxBuilderTest, LoadCharactersWithObjects) {
   ASSERT_EQ(characters[1].skeleton.joints.size(), 1);
   expectRigidlyBound(characters[1], 0, object.mesh->vertices);
 }
+
+namespace {
+
+// Expect `motion` on `loaded` to pose every joint as `expectedMotion` poses it on `expected`.
+void expectSameJointTransforms(
+    const Character& loaded,
+    const MatrixXf& motion,
+    const Skeleton& expected,
+    const MatrixXf& expectedMotion) {
+  ASSERT_EQ(motion.cols(), expectedMotion.cols());
+  for (Eigen::Index f = 0; f < motion.cols(); ++f) {
+    const SkeletonState state(JointParameters(motion.col(f)), loaded.skeleton);
+    const SkeletonState expectedState(JointParameters(expectedMotion.col(f)), expected);
+    for (size_t j = 0; j < expected.joints.size(); ++j) {
+      EXPECT_TRUE(
+          state.jointState[j].transform.isApprox(expectedState.jointState[j].transform, 1e-4f))
+          << "frame " << f << ", joint " << j;
+    }
+  }
+}
+
+} // namespace
+
+TEST(FbxBuilderTest, LoadMultipleCharactersWithMotion) {
+  const Character prop = createTestCharacter(3);
+  const Character object = createTestCharacter(3);
+  const Vector3f objectOffset(0.5f, 1.0f, -2.0f);
+  MatrixXf propMotion = MatrixXf::Zero(prop.parameterTransform.numJointParameters(), 5);
+  for (Eigen::Index f = 0; f < propMotion.cols(); ++f) {
+    propMotion(1, f) = 0.2f * f;
+  }
+
+  const float fps = 30.0f;
+  const auto outFile = temporaryFile("builder_multi_motion", "fbx");
+  {
+    FbxBuilder builder;
+    const std::string propName = builder.addRigidBody(prop, "prop");
+    builder.addMotionWithJointParams(prop, fps, propMotion, propName);
+    builder.addAnimatedMesh(*object.mesh, "object", fps, objectMotion(), objectOffset);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, loadedFps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 2);
+  EXPECT_NEAR(loadedFps, fps, 1e-3f);
+
+  // Each character reads only the curves on its own joints from the shared animation stack.
+  const auto& [loadedProp, propTakes] = characters[0];
+  ASSERT_EQ(propTakes.size(), 1);
+  expectSameJointTransforms(loadedProp, propTakes[0], prop.skeleton, propMotion);
+
+  Skeleton objectSkeleton;
+  objectSkeleton.joints.emplace_back();
+  objectSkeleton.joints[0].translationOffset = objectOffset;
+  const auto& [loadedObject, objectTakes] = characters[1];
+  ASSERT_EQ(objectTakes.size(), 1);
+  expectSameJointTransforms(loadedObject, objectTakes[0], objectSkeleton, objectMotion());
+}
+
+TEST(FbxBuilderTest, CharacterNoStackAnimatesGetsEmptyTakes) {
+  const Character body = createTestCharacter(3);
+  const Character prop = createTestCharacter(3);
+  MatrixXf bodyMotion = MatrixXf::Zero(body.parameterTransform.numJointParameters(), 5);
+  for (Eigen::Index f = 0; f < bodyMotion.cols(); ++f) {
+    bodyMotion(1, f) = 0.2f * f;
+  }
+
+  const auto outFile = temporaryFile("builder_one_animated", "fbx");
+  {
+    FbxBuilder builder;
+    const std::string bodyName = builder.addCharacter(body);
+    builder.addMotionWithJointParams(body, 30.0f, bodyMotion, bodyName);
+    builder.addRigidBody(prop, "prop");
+    builder.save(outFile.path());
+  }
+
+  // The takes are index-aligned across characters, so the unanimated prop gets an empty take.
+  const auto [characters, fps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 2);
+  const auto& [loadedBody, bodyTakes] = characters[0];
+  ASSERT_EQ(bodyTakes.size(), 1);
+  EXPECT_EQ(bodyTakes[0].cols(), bodyMotion.cols());
+  const auto& [loadedProp, propTakes] = characters[1];
+  ASSERT_EQ(propTakes.size(), 1);
+  EXPECT_EQ(propTakes[0].cols(), 0);
+}
