@@ -246,6 +246,12 @@ void FbxBuilder::addMotion(
   if (motion.cols() == 0) {
     return;
   }
+  MT_THROW_IF(
+      motion.rows() != character.parameterTransform.numAllModelParameters(),
+      "Motion for character '{}' has {} rows, but the character has {} model parameters.",
+      character.name,
+      motion.rows(),
+      character.parameterTransform.numAllModelParameters());
 
   // Convert model params to joint params via CharacterState
   CharacterParameters params;
@@ -299,6 +305,12 @@ void FbxBuilder::addMotionWithJointParams(
   if (jointParams.cols() == 0) {
     return;
   }
+  MT_THROW_IF(
+      jointParams.rows() != character.parameterTransform.numJointParameters(),
+      "Joint parameters for character '{}' have {} rows, but the character has {} joint parameters.",
+      character.name,
+      jointParams.rows(),
+      character.parameterTransform.numJointParameters());
 
   createAnimationCurves(
       character,
@@ -372,6 +384,10 @@ std::string FbxBuilder::addAnimatedMesh(
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
   MT_THROW_IF(jointParams.cols() == 0, "jointParams is empty");
+  MT_THROW_IF(
+      jointParams.rows() < 6,
+      "jointParams has {} rows, but an animated mesh needs the 6 translation and rotation rows.",
+      jointParams.rows());
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
@@ -434,8 +450,9 @@ std::string FbxBuilder::addAnimatedMesh(
       jointParamToFbx(jointParams(4, 0), 4, rootJoint),
       jointParamToFbx(jointParams(5, 0), 5, rootJoint));
   meshNode->LclRotation.Set(staticRot);
-  const Eigen::Index scaleRow = std::min(static_cast<Eigen::Index>(6), jointParams.rows() - 1);
-  const float staticScale = jointParamToFbx(jointParams(scaleRow, 0), 6, rootJoint);
+  // Without a scale row, the mesh keeps unit scale (scale parameter 0).
+  const float scaleParam = jointParams.rows() > 6 ? jointParams(6, 0) : 0.0f;
+  const float staticScale = jointParamToFbx(scaleParam, 6, rootJoint);
   meshNode->LclScaling.Set(FbxDouble3(staticScale, staticScale, staticScale));
 
   // Only create curve nodes and curves for non-constant channels to avoid

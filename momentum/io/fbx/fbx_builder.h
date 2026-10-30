@@ -109,7 +109,9 @@ class FbxBuilder final {
   ///
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
-  /// @param motion Model parameters matrix with shape (nFrames x nModelParams).
+  /// @param motion Model parameters with shape (nModelParams x nFrames), one column per frame. The
+  /// number of rows must be character.parameterTransform.numAllModelParameters(); otherwise the
+  /// function throws.
   /// @param offsets Identity/offset parameters for the bind pose.
   /// @param characterName Name returned by addCharacter() or addRigidBody() of the character to
   /// animate. When empty, the character added from character.name that kept that name, or else the
@@ -128,7 +130,9 @@ class FbxBuilder final {
   ///
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
-  /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  /// @param jointParams Joint parameters with shape (nJointParams x nFrames), one column per frame.
+  /// The number of rows must be character.parameterTransform.numJointParameters(); otherwise the
+  /// function throws.
   /// @param characterName Name of the character to animate; see addMotion().
   void addMotionWithJointParams(
       const Character& character,
@@ -145,7 +149,9 @@ class FbxBuilder final {
   /// @param character The character providing the mesh geometry.
   /// @param name Requested name for the mesh node.
   /// @param fps Animation frame rate in frames per second.
-  /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  /// @param jointParams Joint parameters with shape (nJointParams x nFrames), one column per frame.
+  /// Only the first joint's rows are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit
+  /// scale without it). Fewer than 6 rows throws.
   /// @param userProperties User-defined properties to write onto the mesh node,
   ///   surfaced by DCC tools as the object's custom attributes.
   /// @return The unique name the mesh node is exported under (see the class notes).
@@ -166,7 +172,9 @@ class FbxBuilder final {
   /// @param mesh The mesh geometry.
   /// @param name Requested name for the mesh node.
   /// @param fps Animation frame rate in frames per second.
-  /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
+  /// @param jointParams Joint parameters with shape (nJointParams x nFrames), one column per frame.
+  /// Only the first joint's rows are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit
+  /// scale without it). Fewer than 6 rows throws.
   /// @param translationOffset Rest-pose translation offset added to the
   ///   translation channels (defaults to zero).
   /// @param userProperties User-defined properties to write onto the mesh node,
