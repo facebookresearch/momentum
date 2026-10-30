@@ -19,6 +19,7 @@
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/fbx/marker_property_names.h"
 #include "momentum/io/file_save_options.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
@@ -35,10 +36,10 @@
 #undef isnan
 #endif
 
+#include <array>
 #include <span>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace momentum::fbx_internal {
 
@@ -184,21 +185,10 @@ inline SkeletonNodeResult createSkeletonNodes(
 inline void addPhysicalProperties(
     const Character& character,
     const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap) {
-  std::unordered_set<size_t> seenJoints;
-  for (const auto& jointProperties : character.physicalProperties) {
-    const size_t jointIndex =
-        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
-
-    MT_THROW_IF(
-        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
-        "Physical properties entry references unknown joint '{}'",
-        jointProperties.jointName);
-    MT_THROW_IF(
-        !seenJoints.insert(jointIndex).second,
-        "Multiple physical properties entries resolve to joint '{}' (index {})",
-        character.skeleton.joints.at(jointIndex).name,
-        jointIndex);
-
+  const std::vector<size_t> jointIndices =
+      resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+  for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+    const size_t jointIndex = jointIndices[entry];
     const auto nodeIt = jointToNodeMap.find(jointIndex);
     MT_THROW_IF(
         nodeIt == jointToNodeMap.end() || nodeIt->second == nullptr,
@@ -206,7 +196,8 @@ inline void addPhysicalProperties(
         character.skeleton.joints.at(jointIndex).name);
 
     ::fbxsdk::FbxProperty::Create(nodeIt->second, ::fbxsdk::FbxStringDT, "physicalProperties")
-        .Set(FbxString(jointPhysicalPropertiesToJsonString(jointProperties).c_str()));
+        .Set(FbxString(
+            jointPhysicalPropertiesToJsonString(character.physicalProperties.at(entry)).c_str()));
   }
 }
 
@@ -214,14 +205,17 @@ inline void addPhysicalProperties(
 // Metadata, locators, collision geometry
 // ============================================================================
 
-inline void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character) {
+inline void addMetaData(
+    ::fbxsdk::FbxNode* skeletonRootNode,
+    const Character& character,
+    const std::string& exportedName) {
   if (skeletonRootNode != nullptr) {
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
         .Set(FbxString(character.metadata.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "RigName")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
   }
 }
 
@@ -374,66 +368,45 @@ struct JointCurveSetup {
   std::vector<size_t> animCurvesIndex;
 };
 
-// Set up animation curves for each active joint parameter.
+// Set up the animation curves of the joint parameters that a motion writes: every parameter when
+// skipActiveJointParamCheck; otherwise each parameter that a model parameter drives, that has a
+// nonzero value in some frame (such as an identity offset on a parameter that no model parameter
+// drives), or that already has a curve in the layer, so that a later motion replaces its keys.
 inline JointCurveSetup setupJointAnimCurves(
     const Character& character,
     const std::vector<::fbxsdk::FbxNode*>& skeletonNodes,
     ::fbxsdk::FbxAnimLayer* animBaseLayer,
+    const MatrixXf& jointValues,
     const bool skipActiveJointParamCheck) {
   const auto& aj = character.parameterTransform.activeJointParams;
+  constexpr std::array<const char*, 3> kComponents = {
+      FBXSDK_CURVENODE_COMPONENT_X, FBXSDK_CURVENODE_COMPONENT_Y, FBXSDK_CURVENODE_COMPONENT_Z};
 
   JointCurveSetup setup;
   setup.animCurves.resize(character.skeleton.joints.size() * 9, nullptr);
 
   for (size_t i = 0; i < character.skeleton.joints.size(); i++) {
-    const size_t jointIndex = i * kParametersPerJoint;
-    const size_t index = i * 9;
-    skeletonNodes[i]->LclTranslation.GetCurveNode(true);
-    // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
-    if (skipActiveJointParamCheck || aj[jointIndex + 0]) {
-      setup.animCurves[index + 0] = skeletonNodes[i]->LclTranslation.GetCurve(
-          animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      setup.animCurvesIndex.push_back(index + 0);
+    // FBX curves 0-2 animate the translation, 3-5 the rotation and 6-8 the scale, whose three
+    // components all come from the joint's one scale parameter.
+    const std::array<::fbxsdk::FbxPropertyT<::fbxsdk::FbxDouble3>*, 3> properties = {
+        &skeletonNodes[i]->LclTranslation,
+        &skeletonNodes[i]->LclRotation,
+        &skeletonNodes[i]->LclScaling};
+    for (size_t curve = 0; curve < 9; curve++) {
+      auto& property = *properties[curve / 3];
+      property.GetCurveNode(true);
+      const size_t parameter = i * kParametersPerJoint + std::min(curve, size_t(6));
+      // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
+      const bool written = skipActiveJointParamCheck || aj[parameter] ||
+          (jointValues.row(parameter).array() != 0.0f).any() ||
+          property.GetCurve(animBaseLayer, kComponents[curve % 3], false) != nullptr;
+      // NOLINTEND(facebook-hte-LocalUncheckedArrayBounds)
+      if (written) {
+        setup.animCurves[i * 9 + curve] =
+            property.GetCurve(animBaseLayer, kComponents[curve % 3], true);
+        setup.animCurvesIndex.push_back(i * 9 + curve);
+      }
     }
-    if (skipActiveJointParamCheck || aj[jointIndex + 1]) {
-      setup.animCurves[index + 1] = skeletonNodes[i]->LclTranslation.GetCurve(
-          animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      setup.animCurvesIndex.push_back(index + 1);
-    }
-    if (skipActiveJointParamCheck || aj[jointIndex + 2]) {
-      setup.animCurves[index + 2] = skeletonNodes[i]->LclTranslation.GetCurve(
-          animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      setup.animCurvesIndex.push_back(index + 2);
-    }
-    skeletonNodes[i]->LclRotation.GetCurveNode(true);
-    if (skipActiveJointParamCheck || aj[jointIndex + 3]) {
-      setup.animCurves[index + 3] =
-          skeletonNodes[i]->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      setup.animCurvesIndex.push_back(index + 3);
-    }
-    if (skipActiveJointParamCheck || aj[jointIndex + 4]) {
-      setup.animCurves[index + 4] =
-          skeletonNodes[i]->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      setup.animCurvesIndex.push_back(index + 4);
-    }
-    if (skipActiveJointParamCheck || aj[jointIndex + 5]) {
-      setup.animCurves[index + 5] =
-          skeletonNodes[i]->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      setup.animCurvesIndex.push_back(index + 5);
-    }
-    skeletonNodes[i]->LclScaling.GetCurveNode(true);
-    if (skipActiveJointParamCheck || aj[jointIndex + 6]) {
-      setup.animCurves[index + 6] =
-          skeletonNodes[i]->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      setup.animCurvesIndex.push_back(index + 6);
-      setup.animCurves[index + 7] =
-          skeletonNodes[i]->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      setup.animCurvesIndex.push_back(index + 7);
-      setup.animCurves[index + 8] =
-          skeletonNodes[i]->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      setup.animCurvesIndex.push_back(index + 8);
-    }
-    // NOLINTEND(facebook-hte-LocalUncheckedArrayBounds)
   }
 
   return setup;
@@ -449,12 +422,10 @@ inline void createAnimationCurves(
     const bool skipActiveJointParamCheck) {
   setFrameRate(scene, framerate);
 
-  const auto& aj = character.parameterTransform.activeJointParams;
-
   auto [animStack, animBaseLayer] = getOrCreateAnimStackAndLayer(scene, "Skeleton Animation Stack");
 
-  auto [animCurves, animCurvesIndex] =
-      setupJointAnimCurves(character, skeletonNodes, animBaseLayer, skipActiveJointParamCheck);
+  auto [animCurves, animCurvesIndex] = setupJointAnimCurves(
+      character, skeletonNodes, animBaseLayer, jointValues, skipActiveJointParamCheck);
 
   ::fbxsdk::FbxTime time;
   for (const auto ai : animCurvesIndex) {
@@ -462,13 +433,12 @@ inline void createAnimationCurves(
     const size_t jointOffset = ai % 9;
     const size_t parameterIndex =
         jointIndex * kParametersPerJoint + std::min(jointOffset, size_t(6));
-    if (!skipActiveJointParamCheck && aj[parameterIndex] == 0) {
-      continue;
-    }
 
     // NOLINTBEGIN(facebook-hte-LocalUncheckedArrayBounds)
     const auto& joint = character.skeleton.joints[jointIndex];
     animCurves[ai]->KeyModifyBegin();
+    // The keys of an earlier motion of the character are replaced, not merged.
+    animCurves[ai]->KeyClear();
     for (size_t f = 0; f < jointValues.cols(); f++) {
       time.SetSecondDouble(static_cast<double>(f) / framerate);
       const float jointVal = jointParamToFbx(jointValues(parameterIndex, f), jointOffset, joint);
@@ -578,6 +548,40 @@ inline void writeTextureUVIndicesToFbxMesh(
   }
 }
 
+// Write the geometry of `mesh` as a new FbxMesh named `geometryName` and attach it to `meshNode`:
+// the vertices with their normals, the polygons, and the texture coordinates (v flipped, as FBX
+// expects) when the mesh has any. Skinning and blend shapes are left to the caller.
+inline ::fbxsdk::FbxMesh* writeMeshGeometry(
+    const Mesh& mesh,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxNode* meshNode,
+    const char* geometryName) {
+  const auto numVertices = static_cast<int>(mesh.vertices.size());
+  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, geometryName);
+  lMesh->SetControlPointCount(numVertices);
+  lMesh->InitNormals(numVertices);
+  for (int i = 0; i < numVertices; i++) {
+    lMesh->SetControlPointAt(
+        FbxVector4(mesh.vertices[i].x(), mesh.vertices[i].y(), mesh.vertices[i].z()),
+        FbxVector4(mesh.normals[i].x(), mesh.normals[i].y(), mesh.normals[i].z()),
+        i);
+  }
+  writePolygonsToFbxMesh(mesh, lMesh);
+  lMesh->BuildMeshEdgeArray();
+  meshNode->SetNodeAttribute(lMesh);
+
+  if (!mesh.texcoords.empty()) {
+    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
+    lMesh->InitTextureUV(0, uvType);
+    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
+    for (const auto& texcoords : mesh.texcoords) {
+      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
+    }
+    writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
+  }
+  return lMesh;
+}
+
 // ============================================================================
 // Mesh with blend shapes
 // ============================================================================
@@ -655,6 +659,7 @@ inline void createBlendShapeAnimationCurves(
     }
 
     curve->KeyModifyBegin();
+    curve->KeyClear();
     for (Eigen::Index f = 0; f < weights.cols(); f++) {
       ::fbxsdk::FbxTime time;
       time.SetSecondDouble(static_cast<double>(f) / framerate);
@@ -676,36 +681,9 @@ inline MeshBlendShapeResult createMeshNode(
     Permissive permissive,
     const std::string& meshName = "body_mesh") {
   MeshBlendShapeResult result;
-  const auto numVertices = static_cast<int>(character.mesh.get()->vertices.size());
+  const auto numVertices = static_cast<int>(character.mesh->vertices.size());
   ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(scene, meshName.c_str());
-  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, "mesh");
-  lMesh->SetControlPointCount(numVertices);
-  lMesh->InitNormals(numVertices);
-  for (int i = 0; i < numVertices; i++) {
-    FbxVector4 point(
-        character.mesh.get()->vertices[i].x(),
-        character.mesh.get()->vertices[i].y(),
-        character.mesh.get()->vertices[i].z());
-    FbxVector4 normal(
-        character.mesh.get()->normals[i].x(),
-        character.mesh.get()->normals[i].y(),
-        character.mesh.get()->normals[i].z());
-    lMesh->SetControlPointAt(point, normal, i);
-  }
-  writePolygonsToFbxMesh(*character.mesh, lMesh);
-  lMesh->BuildMeshEdgeArray();
-  meshNode->SetNodeAttribute(lMesh);
-
-  // Add texture coordinates
-  if (!character.mesh->texcoords.empty()) {
-    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-    lMesh->InitTextureUV(0, uvType);
-    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-    for (const auto& texcoords : character.mesh->texcoords) {
-      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-    }
-    writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
-  }
+  ::fbxsdk::FbxMesh* lMesh = writeMeshGeometry(*character.mesh, scene, meshNode, "mesh");
 
   // Add skinning
   MT_THROW_IF(
@@ -790,10 +768,6 @@ inline MatrixXf extractFaceExpressionWeights(const Character& character, const M
 // Marker nodes
 // ============================================================================
 
-// Custom property names for marker identification
-constexpr const char* kMomentumMarkersRootProperty = "Momentum_Markers_Root";
-constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
-
 inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
     ::fbxsdk::FbxScene* scene,
     std::span<const std::vector<Marker>> markerSequence,
@@ -812,41 +786,12 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
   ::fbxsdk::FbxProperty::Create(markersRootNode, ::fbxsdk::FbxBoolDT, kMomentumMarkersRootProperty)
       .Set(true);
 
-  std::map<std::string, size_t> markerNameToIndex;
-  std::vector<std::string> markerNames;
-  std::vector<std::vector<float>> timestamps;
-  std::vector<std::vector<Vector3d>> markerPositions;
-
-  for (size_t frameIndex = 0; frameIndex < markerSequence.size(); ++frameIndex) {
-    const float timestamp = static_cast<float>(frameIndex) / static_cast<float>(framerate);
-    for (const auto& marker : markerSequence[frameIndex]) {
-      if (marker.occluded) {
-        continue;
-      }
-
-      if (markerNameToIndex.count(marker.name) == 0) {
-        const auto index = timestamps.size();
-        timestamps.emplace_back();
-        markerPositions.emplace_back();
-        markerNameToIndex[marker.name] = index;
-        markerNames.emplace_back(marker.name);
-      }
-
-      const auto& index = markerNameToIndex.at(marker.name);
-      MT_THROW_IF(
-          index >= timestamps.size() || index >= markerPositions.size(),
-          "Marker index {} exceeds container size",
-          index);
-      timestamps[index].push_back(timestamp);
-      markerPositions[index].push_back(marker.pos);
-    }
-  }
-
-  for (const auto& markerName : markerNames) {
-    ::fbxsdk::FbxMarker* markerAttribute = ::fbxsdk::FbxMarker::Create(scene, markerName.c_str());
+  const std::vector<MarkerTrack> tracks = groupMarkerTracks(markerSequence);
+  for (const MarkerTrack& track : tracks) {
+    ::fbxsdk::FbxMarker* markerAttribute = ::fbxsdk::FbxMarker::Create(scene, track.name.c_str());
     markerAttribute->Look.Set(::fbxsdk::FbxMarker::ELook::eHardCross);
 
-    ::fbxsdk::FbxNode* markerNode = ::fbxsdk::FbxNode::Create(scene, markerName.c_str());
+    ::fbxsdk::FbxNode* markerNode = ::fbxsdk::FbxNode::Create(scene, track.name.c_str());
     markerNode->SetNodeAttribute(markerAttribute);
 
     ::fbxsdk::FbxProperty::Create(markerNode, ::fbxsdk::FbxBoolDT, kMomentumMarkerProperty)
@@ -859,14 +804,11 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
 
   scene->GetRootNode()->AddChild(markersRootNode);
 
-  if (!timestamps.empty() && !timestamps[0].empty()) {
+  if (!tracks.empty()) {
     auto [animStack, animBaseLayer] = getOrCreateAnimStackAndLayer(scene, "Marker Animation Stack");
 
-    for (size_t j = 0; j < markerNames.size(); ++j) {
-      if (timestamps[j].empty()) {
-        continue;
-      }
-
+    for (size_t j = 0; j < tracks.size(); ++j) {
+      const MarkerTrack& track = tracks[j];
       auto* markerNode = markerNodes.at(j);
 
       markerNode->LclTranslation.GetCurveNode(animBaseLayer, true);
@@ -881,16 +823,11 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
       curveY->KeyModifyBegin();
       curveZ->KeyModifyBegin();
 
-      for (size_t k = 0; k < timestamps[j].size(); ++k) {
-        MT_THROW_IF(
-            j >= markerPositions.size() || k >= markerPositions[j].size(),
-            "Marker position index out of bounds: j={}, k={}",
-            j,
-            k);
+      for (size_t k = 0; k < track.frames.size(); ++k) {
         ::fbxsdk::FbxTime time;
-        time.SetSecondDouble(timestamps[j][k]);
+        time.SetSecondDouble(static_cast<float>(track.frames[k]) / static_cast<float>(framerate));
 
-        const auto& pos = markerPositions[j][k];
+        const auto& pos = track.positions[k];
 
         const auto keyIndexX = curveX->KeyAdd(time);
         curveX->KeySet(keyIndexX, time, static_cast<float>(pos.x()));
