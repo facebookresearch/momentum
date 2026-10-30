@@ -15,6 +15,7 @@
 #include "momentum/character/inverse_parameter_transform.h"
 #include "momentum/character/joint.h"
 #include "momentum/character/skeleton.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
@@ -406,6 +407,22 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
   return loadModelAndCharactersWithMotion(byteSpan);
 }
 
+namespace {
+
+// The skeleton states of a loaded character from the first animation that animates it, with their
+// frame times; both are empty when no animation animates it.
+std::tuple<std::vector<SkeletonState>, std::vector<float>> loadCharacterAnimation(
+    const fx::gltf::Document& model,
+    const CharacterWithNodeMap& entry) {
+  const auto* animation = findAnimationForCharacter(model, entry.character, entry.nodeToObjectMap);
+  if (animation == nullptr) {
+    return {};
+  }
+  return loadSkeletonStatesForCharacter(model, *animation, entry.character, entry.nodeToObjectMap);
+}
+
+} // namespace
+
 std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
     const fx::gltf::Document& model) {
   auto characters = loadGltfCharactersInternal(model);
@@ -413,12 +430,7 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
   result.reserve(characters.size());
   for (auto& entry : characters) {
     CharacterSkeletonStates loaded;
-    const auto* animation =
-        findAnimationForCharacter(model, entry.character, entry.nodeToObjectMap);
-    if (animation != nullptr) {
-      std::tie(loaded.skeletonStates, loaded.timestamps) =
-          loadSkeletonStatesForCharacter(model, *animation, entry.character, entry.nodeToObjectMap);
-    }
+    std::tie(loaded.skeletonStates, loaded.timestamps) = loadCharacterAnimation(model, entry);
     loaded.character = std::move(entry.character);
     result.push_back(std::move(loaded));
   }
@@ -436,6 +448,37 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
     std::span<const std::byte> byteSpan) {
   return loadFromInput(byteSpan, [](const fx::gltf::Document& model) {
     return loadGltfCharactersWithSkeletonStates(model);
+  });
+}
+
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& model) {
+  std::vector<MatrixXf> motions;
+  for (const auto& entry : loadGltfCharactersInternal(model)) {
+    // One character's skeleton states at a time, so they are freed before the next character's.
+    const auto [states, timestamps] = loadCharacterAnimation(model, entry);
+    const Character& character = entry.character;
+    MatrixXf& motion = motions.emplace_back(
+        character.parameterTransform.numJointParameters(),
+        static_cast<Eigen::Index>(states.size()));
+    for (size_t frame = 0; frame < states.size(); ++frame) {
+      // The loader sets each joint's local transform from the channels, so this reads them as they
+      // are rather than recomputing them from the world transforms.
+      motion.col(static_cast<Eigen::Index>(frame)) =
+          skeletonStateToJointParameters(states[frame], character.skeleton).v;
+    }
+  }
+  return motions;
+}
+
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(const filesystem::path& gltfFilename) {
+  return loadFromInput(gltfFilename, [](const fx::gltf::Document& model) {
+    return loadGltfCharactersChannelMotion(model);
+  });
+}
+
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(std::span<const std::byte> byteSpan) {
+  return loadFromInput(byteSpan, [](const fx::gltf::Document& model) {
+    return loadGltfCharactersChannelMotion(model);
   });
 }
 

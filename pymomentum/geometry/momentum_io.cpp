@@ -432,6 +432,38 @@ std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
   return toCharacterSkelStateTuples(std::move(loaded));
 }
 
+namespace {
+
+// Transposes each motion to (numFrames x numJointParameters); a motion without frames becomes
+// std::nullopt.
+std::vector<std::optional<RowMatrixf>> toFrameMajorMotions(
+    const std::vector<Eigen::MatrixXf>& motions) {
+  std::vector<std::optional<RowMatrixf>> result;
+  result.reserve(motions.size());
+  for (const auto& motion : motions) {
+    if (motion.cols() == 0) {
+      result.emplace_back(std::nullopt);
+    } else {
+      result.emplace_back(RowMatrixf(motion.transpose()));
+    }
+  }
+  return result;
+}
+
+} // namespace
+
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotion(
+    const std::string& gltfFilename) {
+  return toFrameMajorMotions(
+      momentum::loadGltfCharactersChannelMotion(filesystem::path(gltfFilename)));
+}
+
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotionFromBytes(
+    const pybind11::bytes& gltfBytes) {
+  return toFrameMajorMotions(
+      momentum::loadGltfCharactersChannelMotion(toSpan<std::byte>(gltfBytes)));
+}
+
 std::string toGLTF(const momentum::Character& character) {
   nlohmann::json j = momentum::makeCharacterDocument(character);
   return j.dump();
