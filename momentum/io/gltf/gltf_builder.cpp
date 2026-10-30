@@ -702,7 +702,7 @@ std::vector<size_t> addSkeletonToModel(
     // create new node
     const auto nodeIndex = appendNode(model, joint.name);
     auto& node = model.nodes[nodeIndex];
-    if (i == 0) {
+    if (joint.parent == kInvalidIndex) {
       if (modelRootNodeIndex != kInvalidIndex && modelRootNodeIndex < model.nodes.size()) {
         model.nodes[modelRootNodeIndex].children.push_back(static_cast<int32_t>(nodeIndex));
       } else {
