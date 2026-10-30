@@ -717,11 +717,12 @@ std::vector<size_t> addSkeletonToModel(
   return jointToNodeMap;
 }
 
+// Collision geometry exists only in the momentum extension, so it is written only with the
+// extension.
 void addCollisionsToModel(
     fx::gltf::Document& model,
     const Character& character,
-    const std::vector<size_t>& jointToNodeMap,
-    bool addExtensions) {
+    const std::vector<size_t>& jointToNodeMap) {
   // add all collision objects to node list
   if (character.collision) {
     for (size_t i = 0; i < character.collision->size(); i++) {
@@ -746,23 +747,21 @@ void addCollisionsToModel(
       node.translation = {translation[0], translation[1], translation[2]};
 
       // add extra properties
-      if (addExtensions) {
-        auto& extension = addMomentumExtension(node.extensionsAndExtras);
-        if (col.type == CollisionPrimitiveType::TaperedCapsule) {
-          extension["type"] = "collision_capsule";
-          extension["length"] = col.length;
-          extension["radius"] = col.radius;
-        } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
-          extension["type"] = "collision_ellipsoid";
-          extension["radii"] = col.ellipsoidRadii;
-        } else if (col.type == CollisionPrimitiveType::Box) {
-          extension["type"] = "collision_box";
-          extension["halfExtents"] = col.boxHalfExtents;
-        } else {
-          MT_THROW(
-              "Unsupported collision primitive type {} while writing glTF collision geometry",
-              static_cast<int>(col.type));
-        }
+      auto& extension = addMomentumExtension(node.extensionsAndExtras);
+      if (col.type == CollisionPrimitiveType::TaperedCapsule) {
+        extension["type"] = "collision_capsule";
+        extension["length"] = col.length;
+        extension["radius"] = col.radius;
+      } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
+        extension["type"] = "collision_ellipsoid";
+        extension["radii"] = col.ellipsoidRadii;
+      } else if (col.type == CollisionPrimitiveType::Box) {
+        extension["type"] = "collision_box";
+        extension["halfExtents"] = col.boxHalfExtents;
+      } else {
+        MT_THROW(
+            "Unsupported collision primitive type {} while writing glTF collision geometry",
+            static_cast<int>(col.type));
       }
     }
   }
@@ -957,8 +956,8 @@ std::string GltfBuilder::addCharacter(
   // fill with data
   characterData.nodeMap =
       addSkeletonToModel(impl_->document, character, options.extensions, rootNodeIdx);
-  if (options.collisions) {
-    addCollisionsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
+  if (options.collisions && options.extensions) {
+    addCollisionsToModel(impl_->document, character, characterData.nodeMap);
   }
   if (options.locators) {
     addLocatorsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
