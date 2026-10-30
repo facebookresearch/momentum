@@ -50,6 +50,15 @@ void initDefaultScene(fx::gltf::Document& model) {
   return model.scenes.at(0);
 }
 
+// Remove the channels of `animation` that animate one of `nodes`, so that the motion a character
+// gets next replaces the channels of its earlier motion.
+void removeChannelsOfNodes(fx::gltf::Animation& animation, std::span<const size_t> nodes) {
+  std::erase_if(animation.channels, [&](const fx::gltf::Animation::Channel& channel) {
+    return channel.target.node >= 0 &&
+        std::ranges::find(nodes, static_cast<size_t>(channel.target.node)) != nodes.end();
+  });
+}
+
 fx::gltf::Animation& addMomentumAnimationToModel(
     fx::gltf::Document& model,
     const std::string& nameIn = "default") {
@@ -248,6 +257,16 @@ void addMorphWeightsToModel(
     timestamps[iFrame] = static_cast<float>(iFrame) / fps;
   }
   if (!useChannel) {
+    // A motion without blend-shape weights still replaces the weights of the earlier motion, unless
+    // that leaves the animation without channels, which glTF does not allow.
+    const auto animation =
+        std::ranges::find(model.animations, motionName, &fx::gltf::Animation::name);
+    if (animation != model.animations.end() &&
+        std::ranges::any_of(animation->channels, [&](const fx::gltf::Animation::Channel& channel) {
+          return channel.target.node != static_cast<int32_t>(meshIndex);
+        })) {
+      removeChannelsOfNodes(*animation, std::span<const size_t>(&meshIndex, 1));
+    }
     return;
   }
 
@@ -259,6 +278,7 @@ void addMorphWeightsToModel(
     model.accessors[timestampIdx].max.emplace_back(timestamps.back());
   }
 
+  removeChannelsOfNodes(animation, std::span<const size_t>(&meshIndex, 1));
   animation.channels.emplace_back();
   auto& channel = animation.channels.back();
   channel.sampler = createSampler<const float>(
@@ -532,6 +552,7 @@ void addSkeletonStatesToModel(
 
   // add data to gltf document
   auto& animation = addMomentumAnimationToModel(model, motionName);
+  removeChannelsOfNodes(animation, jointToNodeMap);
   const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps);
   if (!timestamps.empty() && !model.accessors.empty() && timestampIdx < model.accessors.size()) {
     model.accessors[timestampIdx].min.emplace_back(timestamps.front());
@@ -904,13 +925,25 @@ struct GltfBuilder::Impl {
     return *data;
   }
 
-  // Record the animation named `animationName`, which an add call has just written, as a motion
-  // of the character.
+  // Record the animation named `animationName`, which an add call has just written to, as a motion
+  // of the character, once, and only if it animates one of the character's nodes.
   void recordAnimation(CharacterData& data, const std::string& animationName) {
     const auto animation =
         std::ranges::find(document.animations, animationName, &fx::gltf::Animation::name);
-    if (animation != document.animations.end()) {
-      data.animationIndices.push_back(static_cast<size_t>(animation - document.animations.begin()));
+    if (animation == document.animations.end()) {
+      return;
+    }
+    const auto index = static_cast<size_t>(animation - document.animations.begin());
+    const bool animatesCharacter =
+        std::ranges::any_of(animation->channels, [&](const fx::gltf::Animation::Channel& channel) {
+          const auto node = static_cast<size_t>(channel.target.node);
+          return channel.target.node >= 0 &&
+              (node == data.meshIndex ||
+               std::ranges::find(data.nodeMap, node) != data.nodeMap.end());
+        });
+    if (animatesCharacter &&
+        std::ranges::find(data.animationIndices, index) == data.animationIndices.end()) {
+      data.animationIndices.push_back(index);
     }
   }
 };

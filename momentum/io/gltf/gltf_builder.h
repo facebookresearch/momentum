@@ -84,7 +84,8 @@ class GltfBuilder final {
   ///
   /// The momentum extension keeps one motion per character, so adding another motion to the same
   /// character replaces the stored model parameters and timestamps, and the identity if @p offsets
-  /// is not empty. A motion without frames stores nothing, not even the identity.
+  /// is not empty. It also replaces the channels of the character's joints and mesh in the
+  /// animation named @p customName. A motion without frames stores nothing, not even the identity.
   ///
   /// @param[in] character The character to add motion for.
   /// @param[in] fps Frame rate of the motion in frames per second. It must match the frame rate of
@@ -112,6 +113,9 @@ class GltfBuilder final {
 
   /// Add a skeleton states to the provided character. If addCharacter is not called before adding
   /// the skeleton states, the character will be automatically added with the default settings.
+  ///
+  /// Skeleton states replace the channels of the character's joints in the animation named
+  /// @p customName. The blend-shape weights channel that an earlier addMotion() wrote stays.
   ///
   /// @param[in] fps Frame rate of the skeleton states in frames per second; see setFps(). The
   /// animation keys are stored in seconds, so the skeleton states keep their timing even if the
