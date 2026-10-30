@@ -12,6 +12,9 @@
 #include "momentum/common/log.h"
 #include "momentum/io/fbx/openfbx_loader.h"
 
+#include <algorithm>
+#include <numeric>
+
 #ifdef MOMENTUM_WITH_FBX_SDK
 #include "momentum/character/skeleton_state.h"
 #include "momentum/io/fbx/fbx_builder.h"
@@ -115,6 +118,55 @@ MarkerSequence loadFbxMarkerSequence(const filesystem::path& filename, bool stri
 
 MarkerSequence loadFbxMarkerSequence(std::span<const std::byte> inputSpan, bool stripNamespaces) {
   return loadOpenFbxMarkerSequence(inputSpan, stripNamespaces);
+}
+
+std::vector<MatrixXf> joinTakesOnSharedTimeline(
+    std::span<const std::vector<MatrixXf>> takesPerCharacter) {
+  std::vector<Eigen::Index> takeLengths;
+  for (const auto& takes : takesPerCharacter) {
+    takeLengths.resize(std::max(takeLengths.size(), takes.size()), 0);
+    auto length = takeLengths.begin();
+    for (const MatrixXf& take : takes) {
+      *length = std::max(*length, take.cols());
+      ++length;
+    }
+  }
+  const Eigen::Index numFrames =
+      std::accumulate(takeLengths.begin(), takeLengths.end(), Eigen::Index{0});
+
+  std::vector<MatrixXf> joined;
+  joined.reserve(takesPerCharacter.size());
+  for (const auto& takes : takesPerCharacter) {
+    const auto animated =
+        std::ranges::find_if(takes, [](const MatrixXf& take) { return take.cols() > 0; });
+    if (animated == takes.end()) {
+      joined.emplace_back();
+      continue;
+    }
+    VectorXf pose = VectorXf::Zero(animated->rows());
+    MatrixXf motion(pose.size(), numFrames);
+    Eigen::Index frame = 0;
+    auto take = takes.begin();
+    for (const Eigen::Index length : takeLengths) {
+      const Eigen::Index takeFrames = take != takes.end() ? take->cols() : 0;
+      if (takeFrames > 0) {
+        MT_THROW_IF(
+            take->rows() != pose.size(),
+            "The takes of one character have {} and {} joint parameters.",
+            take->rows(),
+            pose.size());
+        motion.middleCols(frame, takeFrames) = *take;
+        pose = take->col(takeFrames - 1);
+      }
+      motion.middleCols(frame + takeFrames, length - takeFrames).colwise() = pose;
+      frame += length;
+      if (take != takes.end()) {
+        ++take;
+      }
+    }
+    joined.push_back(std::move(motion));
+  }
+  return joined;
 }
 
 #ifdef MOMENTUM_WITH_FBX_SDK
