@@ -73,7 +73,6 @@
 #include <mutex>
 #include <span>
 #include <thread>
-#include <unordered_set>
 #include <vector>
 
 // Import USD namespace
@@ -252,21 +251,10 @@ void savePhysicalPropertiesToUsd(
       !physicalPropertiesScope.GetPrim().IsValid(),
       "Failed to define physical properties scope on USD stage");
 
-  std::unordered_set<size_t> seenJoints;
-  for (const auto& jointProperties : character.physicalProperties) {
-    const size_t jointIndex =
-        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
-
-    MT_THROW_IF(
-        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
-        "Physical properties entry references unknown joint '{}'",
-        jointProperties.jointName);
-    MT_THROW_IF(
-        !seenJoints.insert(jointIndex).second,
-        "Multiple physical properties entries resolve to joint '{}' (index {})",
-        character.skeleton.joints.at(jointIndex).name,
-        jointIndex);
-
+  const std::vector<size_t> jointIndices =
+      resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+  for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+    const size_t jointIndex = jointIndices[entry];
     const std::string& jointName = character.skeleton.joints.at(jointIndex).name;
     const std::string primName =
         sanitizePrimName(jointName + "_physical_properties_" + std::to_string(jointIndex));
@@ -279,7 +267,7 @@ void savePhysicalPropertiesToUsd(
 
     prim.CreateAttribute(_tokens->momentumJoint, SdfValueTypeNames->String).Set(jointName);
     prim.CreateAttribute(_tokens->momentumPhysicalProperties, SdfValueTypeNames->String)
-        .Set(jointPhysicalPropertiesToJsonString(jointProperties));
+        .Set(jointPhysicalPropertiesToJsonString(character.physicalProperties.at(entry)));
   }
 }
 

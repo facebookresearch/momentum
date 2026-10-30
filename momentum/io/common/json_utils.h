@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace momentum {
 
@@ -141,5 +142,12 @@ JointPhysicalProperties jointPhysicalPropertiesFromJson(
     const std::string& json,
     const std::string& jointName,
     size_t jointIndex);
+
+/// Warn when the metadata of a character read from a file is not valid JSON. The loaders keep such
+/// metadata as the file holds it, so the caller sees exactly what the file held.
+///
+/// @param metadata The metadata string.
+/// @param format The file format, named in the warning, for example "FBX".
+void warnIfMetadataIsNotJson(const std::string& metadata, std::string_view format);
 
 } // namespace momentum

@@ -302,4 +302,17 @@ int32_t createSampler(
   return index;
 }
 
+/// Give @p document a buffer if it has none.
+///
+/// A document whose characters have no mesh and no motion has no buffer, but fx::gltf saves and
+/// loads only documents with at least one buffer of at least one byte. The added buffer holds four
+/// zero bytes that nothing references.
+inline void ensureDocumentHasBuffer(fx::gltf::Document& document) {
+  if (document.buffers.empty()) {
+    auto& buffer = document.buffers.emplace_back();
+    buffer.data.resize(4, 0);
+    buffer.byteLength = static_cast<uint32_t>(buffer.data.size());
+  }
+}
+
 } // namespace momentum
