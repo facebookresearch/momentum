@@ -230,6 +230,23 @@ loadFBXCharactersWithMotionFromBytes(
           stripNamespaces));
 }
 
+std::vector<std::optional<Eigen::MatrixXf>> joinFbxTakesOnSharedTimeline(
+    std::vector<std::vector<Eigen::MatrixXf>> takesPerCharacter) {
+  for (auto& takes : takesPerCharacter) {
+    transposeMotionInPlace(takes);
+  }
+  std::vector<std::optional<Eigen::MatrixXf>> result;
+  result.reserve(takesPerCharacter.size());
+  for (auto& motion : momentum::joinTakesOnSharedTimeline(takesPerCharacter)) {
+    if (motion.cols() == 0) {
+      result.emplace_back(std::nullopt);
+    } else {
+      result.emplace_back(motion.transpose());
+    }
+  }
+  return result;
+}
+
 momentum::Character loadConfigFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes) {

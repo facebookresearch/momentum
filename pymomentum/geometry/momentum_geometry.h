@@ -110,6 +110,12 @@ loadFBXCharactersWithMotionFromBytes(
     bool loadBlendShapes = false,
     bool stripNamespaces = true);
 
+/// Join the takes of every character into one motion each; see
+/// momentum::joinTakesOnSharedTimeline(). Takes and motions are (numFrames x numJointParameters);
+/// a character that no take animates gets std::nullopt.
+std::vector<std::optional<Eigen::MatrixXf>> joinFbxTakesOnSharedTimeline(
+    std::vector<std::vector<Eigen::MatrixXf>> takesPerCharacter);
+
 momentum::Character loadLocatorsFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes);
