@@ -10,6 +10,7 @@
 #include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/collision_geometry_state.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/character/types.h"
 #include "momentum/common/exception.h"
@@ -17,6 +18,7 @@
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/fbx/marker_property_names.h"
 #include "momentum/io/fbx/polygon_data.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_limits_io.h"
@@ -26,16 +28,18 @@
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
-#include <nlohmann/json.hpp>
 #include <ofbx.h>
 #include <gsl/span_ext>
 
+#include <array>
 #include <cmath>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <numeric>
+#include <optional>
 #include <set>
+#include <span>
 #include <unordered_map>
 #include <variant>
 
@@ -546,6 +550,30 @@ Eigen::Quaterniond computeLocalRotation(
   return localRot;
 }
 
+// Create the joint for an FBX node; its static local transform becomes the joint's offset.
+Joint createJoint(const ofbx::Object& node, const size_t parent, Permissive permissive) {
+  const std::string jointName = node.name;
+  validateAndLogRotation(&node, jointName, permissive);
+  const Eigen::Quaterniond localRot = computeLocalRotation(&node, jointName, permissive);
+
+  const auto preRotEuler = node.getPreRotation();
+  const Eigen::Quaterniond preRotation =
+      fbxEulerRotationToQuat(preRotEuler, ofbx::RotationOrder::EULER_XYZ) * localRot;
+
+  MT_LOGE_IF(
+      toEigen(node.getPostRotation()).head<3>().norm() > 1e-8,
+      "{}: Node {} has nonzero post-rotation; it will be ignored.",
+      __func__,
+      jointName);
+
+  Joint joint;
+  joint.name = jointName;
+  joint.parent = parent;
+  joint.preRotation = preRotation.cast<float>();
+  joint.translationOffset = toEigen(node.getLocalTranslation()).cast<float>();
+  return joint;
+}
+
 void parseSkeleton(
     const ofbx::Object* curSkelNode,
     const size_t parent,
@@ -561,7 +589,6 @@ void parseSkeleton(
   }
 
   const auto type = curSkelNode->getType();
-  const std::string jointName = curSkelNode->name;
 
   if (type == ofbx::Object::Type::NULL_NODE) {
     auto* res = resolveProperty(*curSkelNode, "col_type");
@@ -582,28 +609,8 @@ void parseSkeleton(
     return;
   }
 
-  validateAndLogRotation(curSkelNode, jointName, permissive);
-  const Eigen::Quaterniond localRot = computeLocalRotation(curSkelNode, jointName, permissive);
-
-  const auto preRotEuler = curSkelNode->getPreRotation();
-  const Eigen::Quaterniond preRotation =
-      fbxEulerRotationToQuat(preRotEuler, ofbx::RotationOrder::EULER_XYZ) * localRot;
-
-  MT_LOGE_IF(
-      toEigen(curSkelNode->getPostRotation()).head<3>().norm() > 1e-8,
-      "{}: Node {} has nonzero post-rotation; it will be ignored.",
-      __func__,
-      jointName);
-
-  const auto translationOffset = curSkelNode->getLocalTranslation();
-
-  Joint joint;
-  joint.name = jointName;
-  joint.parent = parent;
-  joint.preRotation = preRotation.cast<float>();
-  joint.translationOffset = toEigen(translationOffset).cast<float>();
   const size_t jointIndex = skeleton.joints.size();
-  skeleton.joints.push_back(joint);
+  skeleton.joints.push_back(createJoint(*curSkelNode, parent, permissive));
   fbxObjects.push_back(curSkelNode);
 
   int i = 0;
@@ -809,6 +816,11 @@ void parseBlendShapes(
 
 using VertexBoneWithWeight = std::tuple<size_t, size_t, double>;
 
+// The inverse of the bind transform that a skin cluster gives its linked joint.
+Eigen::Affine3f clusterInverseBind(const ofbx::Cluster& cluster) {
+  return toEigen(cluster.getTransformLinkMatrix()).inverse().cast<float>();
+}
+
 void collectClusterWeights(
     const ofbx::Skin* fbxskin,
     const std::unordered_map<const ofbx::Object*, size_t>& boneMap,
@@ -822,17 +834,19 @@ void collectClusterWeights(
     MT_CHECK(cluster != nullptr);
 
     const auto* bone = cluster->getLink();
+    MT_THROW_IF(
+        bone == nullptr, "Cluster {} in mesh {} has no linked bone.", cluster->name, meshName);
     const auto fbxJointItr = boneMap.find(bone);
     MT_THROW_IF(
         fbxJointItr == boneMap.end(),
-        "Cluster {} references invalid bone: {}",
+        "Cluster {} in mesh {} references bone {} outside the selected character skeleton.",
         cluster->name,
+        meshName,
         bone->name);
 
     const size_t boneIndex = fbxJointItr->second;
     if (boneIndex < inverseBindPoseTransforms.size()) {
-      inverseBindPoseTransforms[boneIndex] =
-          toEigen(cluster->getTransformLinkMatrix()).inverse().cast<float>();
+      inverseBindPoseTransforms[boneIndex] = clusterInverseBind(*cluster);
     }
 
     const auto* skinning_indices_element = findChild(cluster->element, "Indexes");
@@ -951,6 +965,46 @@ void assignSkinWeights(
   }
 }
 
+// Attach the unskinned mesh just appended at vertexOffset rigidly to `joint`, whose node is
+// `jointNode` and whose inverse bind transform is `inverseBind`: weight its vertices fully on the
+// joint, and move them from the mesh node's space to the joint's bind pose, where skinning expects
+// them. The mesh keeps its place relative to the joint node in the scene.
+void bindRigidMesh(
+    const ofbx::Mesh& meshRoot,
+    const ofbx::Object& jointNode,
+    const Eigen::Affine3f& inverseBind,
+    size_t vertexOffset,
+    size_t joint,
+    Mesh& mesh,
+    std::unique_ptr<SkinWeights>& skinWeights) {
+  MT_CHECK(
+      vertexOffset <= mesh.vertices.size(),
+      "Vertex offset {} past the {} mesh vertices",
+      vertexOffset,
+      mesh.vertices.size());
+  const Eigen::Affine3f meshInJoint =
+      (toEigen(jointNode.getGlobalTransform()).inverse() * toEigen(meshRoot.getGlobalTransform()))
+          .cast<float>();
+  const Eigen::Affine3f bindTransform = inverseBind.inverse() * meshInJoint;
+  const auto vertices = std::span(mesh.vertices).subspan(vertexOffset);
+  std::vector<VertexBoneWithWeight> weights;
+  weights.reserve(vertices.size());
+  size_t iVertex = 0;
+  for (auto& vertex : vertices) {
+    vertex = bindTransform * vertex;
+    weights.emplace_back(iVertex++, joint, 1.0);
+  }
+  assignSkinWeights(weights, skinWeights, vertexOffset, vertices.size(), meshRoot.name);
+}
+
+// The joint that an unskinned mesh moves rigidly with, and the inverse bind transform to bind the
+// mesh with.
+struct RigidBinding {
+  size_t joint = kInvalidIndex;
+  Eigen::Affine3f inverseBind = Eigen::Affine3f::Identity();
+};
+
+// Append an FBX mesh to `mesh`. A mesh without a skin is bound with `rigid` when it is given.
 void parseSkinnedModel(
     const ofbx::Mesh* meshRoot,
     const std::vector<const ofbx::Object*>& boneFbxNodes,
@@ -959,7 +1013,8 @@ void parseSkinnedModel(
     TransformationList& inverseBindPoseTransforms,
     BlendShape_p& blendShape,
     Permissive permissive,
-    LoadBlendShapes loadBlendShapes) {
+    LoadBlendShapes loadBlendShapes,
+    const std::optional<RigidBinding>& rigid = std::nullopt) {
   const auto* geometry = meshRoot->getGeometry();
   const auto& geomElement = geometry->element;
 
@@ -1022,6 +1077,17 @@ void parseSkinnedModel(
   }
 
   const auto* fbxskin = geometry->getSkin();
+  if (!fbxskin && rigid.has_value()) {
+    bindRigidMesh(
+        *meshRoot,
+        *boneFbxNodes.at(rigid->joint),
+        rigid->inverseBind,
+        vertexOffset,
+        rigid->joint,
+        mesh,
+        skinWeights);
+    return;
+  }
   if (!fbxskin) {
     MT_THROW_IF(
         permissive == Permissive::No,
@@ -1108,6 +1174,7 @@ MatrixXf parseAnimation(
   if (skeletonAnimCurves.empty()) {
     return {};
   }
+  MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX animation: unknown scene frame rate {}", fps);
 
   const double totalSeconds = getMaxSeconds(skeletonAnimCurves);
   const size_t numFrames = ceil(totalSeconds * fps) + 1;
@@ -1322,6 +1389,8 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
     return result;
   }
 
+  MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX markers: unknown scene frame rate {}", fps);
+
   // Determine the total number of frames based on marker animation only
   const double totalSeconds = getMaxSeconds(markerAnimCurves);
   const size_t numFrames = std::ceil(totalSeconds * fps) + 1;
@@ -1400,20 +1469,30 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
   return result;
 }
 
-std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
+// Deleter for the OpenFBX scene handle so it can be owned by a std::unique_ptr with a nameable
+// type.
+struct OfbxSceneDeleter {
+  void operator()(ofbx::IScene* scene) const {
+    scene->destroy();
+  }
+};
+
+using OfbxScenePtr = std::unique_ptr<ofbx::IScene, OfbxSceneDeleter>;
+
+// Load an OpenFBX scene from a byte buffer with the load flags every FBX loader uses, and
+// optionally strip namespaces. Animations are ignored unless loadAnim is set. The result is never
+// null; a scene that cannot be read or has no root node throws.
+OfbxScenePtr loadOfbxScene(
     const std::span<const std::byte> inputData,
-    KeepLocators keepLocators,
-    bool loadAnim,
-    Permissive permissive,
-    LoadBlendShapes loadBlendShapes,
-    bool stripNamespaces) {
+    const bool loadAnim,
+    const LoadBlendShapes loadBlendShapes,
+    const bool stripNamespaces) {
   auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
   const size_t length = fbxCharDataRaw.size();
   MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
 
-  auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
-  // We don't currently use blend shapes for anything and they can be very
-  // expensive to load. Ignore stuff in the scene that we don't support.
+  // Ignore what the loaders do not support. Blend shapes can be very expensive to load, so they
+  // are read only when requested.
   auto loadFlags = ofbx::LoadFlags::IGNORE_CAMERAS | ofbx::LoadFlags::IGNORE_LIGHTS |
       ofbx::LoadFlags::IGNORE_VIDEOS | ofbx::LoadFlags::IGNORE_MATERIALS;
   if (loadBlendShapes == LoadBlendShapes::No) {
@@ -1422,11 +1501,13 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   if (!loadAnim) {
     loadFlags |= ofbx::LoadFlags::IGNORE_ANIMATIONS;
   }
-  std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
-      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(length), (ofbx::u16)loadFlags),
-      ofbx_deleter);
-  MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
-  MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
+  OfbxScenePtr scene(
+      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(length), (ofbx::u16)loadFlags));
+  if (scene == nullptr) {
+    MT_THROW("Error reading FBX scene data. Error: {}", ofbx::getError());
+  }
+  MT_THROW_IF(
+      scene->getRoot() == nullptr, "FBX scene has no root node. Error: {}", ofbx::getError());
 
   if (stripNamespaces) {
     // Strip all namespaces from all node names in the scene
@@ -1438,88 +1519,465 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
     }
   }
 
-  const auto [skeleton, jointFbxNodes, locators, collision] =
-      parseSkeleton(scene->getRoot(), {}, permissive);
+  return scene;
+}
 
-  std::string name;
-  std::string metadata = "{}"; // empty json string
-  if (!jointFbxNodes.empty()) {
-    auto* resName = resolveProperty(*jointFbxNodes[0], "name");
-    if (resName != nullptr) {
-      name = resolveStringProperty(*jointFbxNodes[0], "name");
-    }
-    auto* resMeta = resolveProperty(*jointFbxNodes[0], "metadata");
-    if (resMeta != nullptr) {
-      metadata = resolveStringProperty(*jointFbxNodes[0], "metadata");
-    }
+// The frame rate of the scene. Versions of OpenFBX that know the FBX time modes only up to the
+// custom frame rate, such as 0.9, report -1 for the later ones (96, 72, 59.94 and 119.88 frames per
+// second, time modes 15 to 18), which the FBX SDK writes, for example for motion at 72 or 96 frames
+// per second. Any other unknown time mode gives -1.
+float sceneFrameRate(const ofbx::IScene& scene) {
+  constexpr int kFirstLaterTimeMode = 15;
+  constexpr std::array<float, 4> kLaterFrameRates = {
+      96.0f, 72.0f, 60000.0f / 1001.0f, 120000.0f / 1001.0f};
+  const float frameRate = scene.getSceneFrameRate();
+  const ofbx::GlobalSettings* settings = scene.getGlobalSettings();
+  if (frameRate > 0.0f || settings == nullptr) {
+    return frameRate;
   }
-  // ensure metadata is valid JSON
-  try {
-    auto json = nlohmann::json::parse(metadata);
-  } catch (const nlohmann::json::parse_error& e) {
-    MT_LOGW("Failed to parse metadata: {}", e.what());
-  }
+  const int timeMode = static_cast<int>(settings->TimeMode) - kFirstLaterTimeMode;
+  return timeMode >= 0 && timeMode < static_cast<int>(kLaterFrameRates.size())
+      ? kLaterFrameRates[timeMode]
+      : frameRate;
+}
 
-  TransformationList inverseBindPoseTransforms;
-  for (const auto& j : jointFbxNodes) {
-    Eigen::Affine3d mat = Eigen::Affine3d::Identity();
-    if (j) {
-      mat = toEigen(j->getGlobalTransform());
-    }
-    inverseBindPoseTransforms.push_back(mat.inverse().cast<float>());
-  }
-
+// Parse state for one loaded character: the skeleton and the meshes/skin/collision belonging to it.
+// The multi-character loaders fill one of these per top-level skeleton or rigid object outside a
+// skeleton; the singular loader fills a single one covering the whole scene, so both share the
+// steps below.
+struct FbxCharacterParse {
+  Skeleton skeleton;
+  std::vector<const ofbx::Object*> jointFbxNodes;
+  LocatorList locators;
+  CollisionGeometry collision;
   Mesh mesh;
   std::unique_ptr<SkinWeights> skinWeights;
   BlendShape_p blendShape;
+  TransformationList inverseBindPose;
+  std::string name;
+  std::string metadata = "{}"; // empty json string
+};
 
-  for (int iMesh = 0; iMesh < scene->getMeshCount(); ++iMesh) {
+// Recover the character's name and metadata from its root joint node. Metadata that is not valid
+// JSON is warned about but kept verbatim (see warnIfMetadataIsNotJson()).
+void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
+  MT_CHECK(
+      cp.jointFbxNodes.empty() || cp.jointFbxNodes.front() != nullptr,
+      "FBX character has a null root joint node.");
+  if (!cp.jointFbxNodes.empty()) {
+    if (resolveProperty(*cp.jointFbxNodes.front(), "name") != nullptr) {
+      cp.name = resolveStringProperty(*cp.jointFbxNodes.front(), "name");
+    } else if (fallbackToNodeName) {
+      cp.name = cp.jointFbxNodes.front()->name;
+    }
+    if (resolveProperty(*cp.jointFbxNodes.front(), "metadata") != nullptr) {
+      cp.metadata = resolveStringProperty(*cp.jointFbxNodes.front(), "metadata");
+    }
+  }
+  warnIfMetadataIsNotJson(cp.metadata, "FBX");
+}
+
+// The multi-character loaders bind each joint at its rest pose, so that a reader that rebuilds the
+// bind pose from the skeleton, such as the glTF loader, skins the character the same way. Joints
+// that a skin cluster links to get the cluster's bind transform instead (see parseFbxCharacters).
+void computeRestInverseBindPose(FbxCharacterParse& cp) {
+  const SkeletonState restState(
+      JointParameters::Zero(cp.skeleton.joints.size() * kParametersPerJoint),
+      cp.skeleton,
+      /*computeDeriv=*/false);
+  cp.inverseBindPose.clear();
+  cp.inverseBindPose.reserve(restState.jointState.size());
+  for (const auto& jointState : restState.jointState) {
+    cp.inverseBindPose.push_back(jointState.transform.toAffine3().inverse());
+  }
+}
+
+void computeInverseBindPose(FbxCharacterParse& cp) {
+  cp.inverseBindPose.reserve(cp.jointFbxNodes.size());
+  for (const auto* jointNode : cp.jointFbxNodes) {
+    Eigen::Affine3d mat = Eigen::Affine3d::Identity();
+    if (jointNode != nullptr) {
+      mat = toEigen(jointNode->getGlobalTransform());
+    }
+    cp.inverseBindPose.push_back(mat.inverse().cast<float>());
+  }
+}
+
+std::vector<const ofbx::AnimationStack*> collectReadableAnimationStacks(const ofbx::IScene& scene) {
+  const int numAnimStacks = scene.getAnimationStackCount();
+  std::vector<const ofbx::AnimationStack*> stacks;
+  stacks.reserve(numAnimStacks);
+  for (int iAnim = 0; iAnim < numAnimStacks; ++iAnim) {
+    const ofbx::AnimationStack* stack = scene.getAnimationStack(iAnim);
+    if (stack == nullptr) {
+      MT_LOGW("Skipping FBX animation stack {}: the scene reports it as null.", iAnim);
+      continue;
+    }
+    stacks.push_back(stack);
+  }
+  return stacks;
+}
+
+// Extract this character's joint-parameter motion from every readable animation stack, scoped to
+// its own joints. An entry is empty when its stack animates none of this character's joints.
+std::vector<MatrixXf> parseAnimationStacks(
+    std::span<const ofbx::AnimationStack* const> stacks,
+    const FbxCharacterParse& cp,
+    float frameRate,
+    Permissive permissive) {
+  std::vector<MatrixXf> motions;
+  motions.reserve(stacks.size());
+  for (const ofbx::AnimationStack* stack : stacks) {
+    motions.emplace_back(
+        parseAnimation(stack, cp.jointFbxNodes, cp.skeleton, frameRate, permissive));
+  }
+  return motions;
+}
+
+// Build a Character from a parsed character: updates the parse's mesh normals and moves its inverse
+// bind pose out; the rest is copied. Shared by the singular and multi-character loaders.
+Character buildCharacterFromParse(
+    FbxCharacterParse&& cp,
+    KeepLocators keepLocators,
+    const ParameterTransform& parameterTransform) {
+  cp.mesh.updateNormals();
+  Character character(
+      cp.skeleton,
+      parameterTransform,
+      ParameterLimits(),
+      keepLocators == KeepLocators::Yes ? cp.locators : LocatorList(),
+      &cp.mesh,
+      cp.skinWeights.get(),
+      cp.collision.empty() ? nullptr : &cp.collision,
+      nullptr,
+      cp.blendShape,
+      {}, // faceExpressionBlendShapes
+      cp.name, // nameIn
+      {}, // inverseBindPose
+      {}, // skinnedLocators
+      cp.metadata);
+  character.resetJointMap();
+  character.inverseBindPose = std::move(cp.inverseBindPose);
+  character.physicalProperties =
+      loadPhysicalPropertiesFromNodes(character.skeleton, cp.jointFbxNodes);
+  return character;
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    bool loadAnim,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  const OfbxScenePtr scenePtr =
+      loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);
+  ofbx::IScene& scene = *scenePtr;
+
+  // Singular load: every skeleton in the scene is merged into one character (unlike
+  // parseFbxCharacters, which keeps each top-level skeleton and rigid object separate).
+  FbxCharacterParse cp;
+  std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =
+      parseSkeleton(scene.getRoot(), {}, permissive);
+  fillNameAndMetadata(cp, /*fallbackToNodeName=*/false);
+  computeInverseBindPose(cp);
+
+  // Likewise, every mesh in the scene belongs to that one character.
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
     parseSkinnedModel(
-        scene->getMesh(iMesh),
-        jointFbxNodes,
-        mesh,
-        skinWeights,
-        inverseBindPoseTransforms,
-        blendShape,
+        scene.getMesh(iMesh),
+        cp.jointFbxNodes,
+        cp.mesh,
+        cp.skinWeights,
+        cp.inverseBindPose,
+        cp.blendShape,
         permissive,
         loadBlendShapes);
   }
-  mesh.updateNormals();
 
   std::vector<MatrixXf> jointParamMotions;
   if (loadAnim) {
-    for (int iAnim = 0; iAnim < scene->getAnimationStackCount(); ++iAnim) {
-      const ofbx::AnimationStack* stack = scene->getAnimationStack(iAnim);
-      if (stack != nullptr) {
-        jointParamMotions.emplace_back(
-            parseAnimation(stack, jointFbxNodes, skeleton, scene->getSceneFrameRate(), permissive));
+    const auto stacks = collectReadableAnimationStacks(scene);
+    jointParamMotions = parseAnimationStacks(stacks, cp, sceneFrameRate(scene), permissive);
+  }
+
+  const auto parameterTransform =
+      ParameterTransform::empty(cp.skeleton.joints.size() * kParametersPerJoint);
+  return {
+      buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),
+      jointParamMotions,
+      sceneFrameRate(scene)};
+}
+
+// The character, and the joint within it, of each parsed character's joint nodes.
+struct JointOwner {
+  size_t character = kInvalidIndex;
+  size_t joint = kInvalidIndex;
+};
+using JointOwnerMap = std::unordered_map<const ofbx::Object*, JointOwner>;
+
+JointOwnerMap buildJointOwnerMap(std::span<const FbxCharacterParse> characters) {
+  JointOwnerMap jointOwner;
+  size_t iChar = 0;
+  for (const auto& character : characters) {
+    size_t iJoint = 0;
+    for (const auto* jointNode : character.jointFbxNodes) {
+      jointOwner.emplace(jointNode, JointOwner{.character = iChar, .joint = iJoint++});
+    }
+    ++iChar;
+  }
+  return jointOwner;
+}
+
+// The character a scene mesh belongs to. A skinned mesh belongs to the character that one of its
+// skin clusters links to (joint is then kInvalidIndex); an unskinned mesh moves rigidly with the
+// nearest joint at or above its node. Both fields are kInvalidIndex when there is no owner.
+JointOwner findMeshOwner(const ofbx::Mesh& mesh, const JointOwnerMap& jointOwner) {
+  const auto* skin = mesh.getGeometry()->getSkin();
+  if (skin != nullptr) {
+    // The first cluster's link can be null or outside every character while a later one resolves.
+    for (int c = 0; c < skin->getClusterCount(); ++c) {
+      const auto* cluster = skin->getCluster(c);
+      const auto it = cluster != nullptr ? jointOwner.find(cluster->getLink()) : jointOwner.end();
+      if (it != jointOwner.end()) {
+        return {.character = it->second.character, .joint = kInvalidIndex};
+      }
+    }
+    return {};
+  }
+
+  for (const ofbx::Object* node = &mesh; node != nullptr; node = node->getParent()) {
+    const auto it = jointOwner.find(node);
+    if (it != jointOwner.end()) {
+      return it->second;
+    }
+  }
+  return {};
+}
+
+// Whether `object` is a mesh node without a skin, which moves rigidly with its node.
+bool isRigidMesh(const ofbx::Object& object) {
+  if (object.getType() != ofbx::Object::Type::MESH) {
+    return false;
+  }
+  const auto* geometry = static_cast<const ofbx::Mesh&>(object).getGeometry();
+  return geometry != nullptr && geometry->getSkin() == nullptr;
+}
+
+// Collect the nodes that each root a character, descending through grouping NULL_NODEs: every
+// LIMB_NODE that roots a skeleton, and every unskinned mesh outside a skeleton, which is a rigid
+// object such as one written by FbxBuilder::addAnimatedMesh.
+void collectCharacterRootObjects(
+    const ofbx::Object& node,
+    std::vector<const ofbx::Object*>& roots) {
+  int i = 0;
+  while (const ofbx::Object* child = node.resolveObjectLink(i++)) {
+    const auto type = child->getType();
+    if (type == ofbx::Object::Type::LIMB_NODE || isRigidMesh(*child)) {
+      roots.push_back(child);
+    } else if (type == ofbx::Object::Type::NULL_NODE) {
+      collectCharacterRootObjects(*child, roots);
+    }
+  }
+}
+
+// Parse every character of the scene into its own FbxCharacterParse: one per skeleton root and one
+// per rigid object (a one-joint skeleton on the mesh node). Each scene mesh goes to the character
+// that owns it. The scene must outlive the result, which points into it.
+std::vector<FbxCharacterParse>
+parseFbxCharacters(ofbx::IScene& scene, Permissive permissive, LoadBlendShapes loadBlendShapes) {
+  // Parsing each skeleton from its own root object, rather than by name, keeps two same-named roots
+  // from merging into one skeleton.
+  std::vector<const ofbx::Object*> rootObjects;
+  collectCharacterRootObjects(*scene.getRoot(), rootObjects);
+  std::vector<FbxCharacterParse> characters;
+  characters.reserve(rootObjects.size());
+  for (const ofbx::Object* root : rootObjects) {
+    FbxCharacterParse cp;
+    if (isRigidMesh(*root)) {
+      cp.skeleton.joints.push_back(createJoint(*root, kInvalidIndex, permissive));
+      cp.jointFbxNodes.push_back(root);
+    } else {
+      parseSkeleton(
+          root,
+          kInvalidIndex,
+          cp.skeleton,
+          cp.jointFbxNodes,
+          cp.collision,
+          cp.locators,
+          permissive);
+    }
+    if (cp.jointFbxNodes.empty()) {
+      continue;
+    }
+
+    fillNameAndMetadata(cp, /*fallbackToNodeName=*/true);
+    computeRestInverseBindPose(cp);
+    characters.push_back(std::move(cp));
+  }
+
+  const JointOwnerMap jointOwner = buildJointOwnerMap(characters);
+  // Set the bind transforms that skin clusters give their joints before any mesh is parsed: a rigid
+  // mesh is bound with its joint's final bind transform, whatever the mesh order.
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
+    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
+    const ofbx::Skin* skin = mesh != nullptr && mesh->getGeometry() != nullptr
+        ? mesh->getGeometry()->getSkin()
+        : nullptr;
+    for (int c = 0; skin != nullptr && c < skin->getClusterCount(); ++c) {
+      const ofbx::Cluster* cluster = skin->getCluster(c);
+      const auto it = cluster != nullptr ? jointOwner.find(cluster->getLink()) : jointOwner.end();
+      if (it != jointOwner.end()) {
+        characters.at(it->second.character).inverseBindPose.at(it->second.joint) =
+            clusterInverseBind(*cluster);
       }
     }
   }
+  // collectClusterWeights writes these transforms again, mesh by mesh, and ends with the same
+  // values. When two clusters give one joint different transforms, the value at a rigid mesh's
+  // place in the mesh order is not the final one, so rigid meshes are bound with these values.
+  std::vector<TransformationList> finalInverseBindPose;
+  finalInverseBindPose.reserve(characters.size());
+  for (const auto& cp : characters) {
+    finalInverseBindPose.push_back(cp.inverseBindPose);
+  }
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
+    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
+    if (mesh == nullptr || mesh->getGeometry() == nullptr) {
+      continue;
+    }
+    const JointOwner owner = findMeshOwner(*mesh, jointOwner);
+    if (owner.character == kInvalidIndex) {
+      MT_THROW_IF(
+          permissive == Permissive::No,
+          "FBX mesh '{}' belongs to no character: its skin links to no joint, or no joint is above "
+          "it. Load in permissive mode to skip it.",
+          mesh->name);
+      MT_LOGW(
+          "Skipping FBX mesh '{}': unable to determine which character it belongs to.", mesh->name);
+      continue;
+    }
+    auto& cp = characters.at(owner.character);
+    std::optional<RigidBinding> rigid;
+    if (owner.joint != kInvalidIndex) {
+      rigid = RigidBinding{
+          .joint = owner.joint,
+          .inverseBind = finalInverseBindPose.at(owner.character).at(owner.joint)};
+    }
+    try {
+      parseSkinnedModel(
+          mesh,
+          cp.jointFbxNodes,
+          cp.mesh,
+          cp.skinWeights,
+          cp.inverseBindPose,
+          cp.blendShape,
+          permissive,
+          loadBlendShapes,
+          rigid);
+    } catch (const std::exception& e) {
+      MT_THROW(
+          "Failed to parse FBX mesh '{}' for character '{}': {}", mesh->name, cp.name, e.what());
+    }
+  }
 
-  Character result(
-      skeleton,
-      ParameterTransform::empty(skeleton.joints.size() * kParametersPerJoint),
-      ParameterLimits(),
-      keepLocators == KeepLocators::Yes ? locators : LocatorList(),
-      &mesh,
-      skinWeights.get(),
-      collision.empty() ? nullptr : &collision,
-      nullptr,
-      blendShape,
-      {}, // faceExpressionBlendShapes
-      name, // nameIn
-      {}, // inverseBindPose
-      {}, // skinnedLocators
-      metadata);
-  result.resetJointMap();
-  result.inverseBindPose = inverseBindPoseTransforms;
-  result.physicalProperties = loadPhysicalPropertiesFromNodes(result.skeleton, jointFbxNodes);
+  return characters;
+}
 
-  return {result, jointParamMotions, scene->getSceneFrameRate()};
+// The multi-character loaders give each character an identity parameter transform, so that its
+// joint-parameter motion is also valid model-parameter motion.
+Character buildMultiCharacterFromParse(FbxCharacterParse&& cp, KeepLocators keepLocators) {
+  const auto parameterTransform = ParameterTransform::identity(cp.skeleton.getJointNames());
+  return buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform);
+}
+
+// Load every character of the scene. With loadAnim, each character also gets one joint-parameter
+// motion per readable animation stack; without it, the animation curves are not loaded and every
+// character gets no motion.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float> loadCharactersWithTakes(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    bool loadAnim,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  const OfbxScenePtr scene = loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);
+  std::vector<FbxCharacterParse> characters =
+      parseFbxCharacters(*scene, permissive, loadBlendShapes);
+  const auto stacks = loadAnim ? collectReadableAnimationStacks(*scene)
+                               : std::vector<const ofbx::AnimationStack*>();
+  const float frameRate = sceneFrameRate(*scene);
+
+  std::vector<std::pair<Character, std::vector<MatrixXf>>> result;
+  result.reserve(characters.size());
+  for (auto& cp : characters) {
+    // The scene's characters share the stacks; each character reads the curves on its own joints.
+    auto takes = parseAnimationStacks(stacks, cp, frameRate, permissive);
+    result.emplace_back(
+        buildMultiCharacterFromParse(std::move(cp), keepLocators), std::move(takes));
+  }
+  return {std::move(result), frameRate};
 }
 
 } // namespace
+
+std::vector<Character> loadOpenFbxCharacters(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  auto characters = std::get<0>(loadCharactersWithTakes(
+      inputData, keepLocators, /*loadAnim=*/false, permissive, loadBlendShapes, stripNamespaces));
+  std::vector<Character> result;
+  result.reserve(characters.size());
+  for (auto& entry : characters) {
+    result.push_back(std::move(entry.first));
+  }
+  return result;
+}
+
+std::vector<Character> loadOpenFbxCharacters(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  auto buffer = readFileToBuffer(inputPath);
+  return loadOpenFbxCharacters(
+      gsl::as_bytes(gsl::make_span(buffer)),
+      keepLocators,
+      permissive,
+      loadBlendShapes,
+      stripNamespaces);
+}
+
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadCharactersWithTakes(
+      inputData, keepLocators, /*loadAnim=*/true, permissive, loadBlendShapes, stripNamespaces);
+}
+
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  auto buffer = readFileToBuffer(inputPath);
+  return loadOpenFbxCharactersWithMotion(
+      gsl::as_bytes(gsl::make_span(buffer)),
+      keepLocators,
+      permissive,
+      loadBlendShapes,
+      stripNamespaces);
+}
 
 Character loadOpenFbxCharacter(
     const std::span<const std::byte> inputData,
@@ -1574,34 +2032,10 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbxCharacterWithMoti
 MarkerSequence loadOpenFbxMarkerSequence(
     std::span<const std::byte> inputData,
     bool stripNamespaces) {
-  auto fbxCharDataRaw = cast_span<const unsigned char>(inputData);
-  const size_t length = fbxCharDataRaw.size();
-  MT_THROW_IF(length > INT32_MAX, "File too large for OpenFBX.");
-
-  auto ofbx_deleter = [](ofbx::IScene* s) { s->destroy(); };
-  // We don't currently use blend shapes for anything and they can be very
-  // expensive to load. Ignore stuff in the scene that we don't support.
-  auto loadFlags = ofbx::LoadFlags::IGNORE_CAMERAS | ofbx::LoadFlags::IGNORE_LIGHTS |
-      ofbx::LoadFlags::IGNORE_VIDEOS | ofbx::LoadFlags::IGNORE_MATERIALS |
-      ofbx::LoadFlags::IGNORE_BLEND_SHAPES;
-
-  std::unique_ptr<ofbx::IScene, decltype(ofbx_deleter)> scene(
-      ofbx::load(fbxCharDataRaw.data(), static_cast<int32_t>(length), (ofbx::u16)loadFlags),
-      ofbx_deleter);
-  MT_THROW_IF(!scene, "Error reading FBX scene data. Error: {}", ofbx::getError());
-  MT_THROW_IF(!scene->getRoot(), "FBX scene has no root node. Error: {}", ofbx::getError());
-
-  if (stripNamespaces) {
-    // Strip all namespaces from all node names in the scene
-    for (int i = 0; i < scene->getAllObjectCount(); ++i) {
-      const ofbx::Object* obj = scene->getAllObjects()[i];
-      if (obj && obj->name[0] != '\0') {
-        stripNamespace(obj);
-      }
-    }
-  }
-
-  return parseMarkerSequence(scene.get(), scene->getRoot(), scene->getSceneFrameRate());
+  // Markers need the animation curves, so load with animations enabled; blend shapes are unused.
+  const OfbxScenePtr scene =
+      loadOfbxScene(inputData, /*loadAnim=*/true, LoadBlendShapes::No, stripNamespaces);
+  return parseMarkerSequence(scene.get(), scene->getRoot(), sceneFrameRate(*scene));
 }
 
 MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
