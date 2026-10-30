@@ -33,6 +33,9 @@ using RowMatrixf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 momentum::Character loadGLTFCharacterFromFile(const std::string& path);
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
 
+std::vector<momentum::Character> loadGLTFCharactersFromFile(const std::string& path);
+std::vector<momentum::Character> loadGLTFCharactersFromBytes(const pybind11::bytes& bytes);
+
 /// Utility function to transpose motion parameters for C++ internal format
 momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters);
 
@@ -99,6 +102,19 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes);
+
+// Per-character motion exposed to Python: (character, motion [nFrames x nParams], identity,
+// timestamps). The motion is transposed from momentum's internal (nParams x nFrames) layout to
+// match pymomentum's convention. The timestamps are per character, which the singular
+// load_motion_timestamps cannot reach in a multi-character file.
+using CharacterWithMotion =
+    std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, std::vector<int64_t>>;
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotion(
+    const std::string& gltfFilename);
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotionFromBytes(
+    const pybind11::bytes& gltfBytes);
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionModelParameterScales(const std::string& gltfFilename);
