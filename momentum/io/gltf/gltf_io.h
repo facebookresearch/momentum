@@ -9,6 +9,7 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/marker.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/io/file_save_options.h>
@@ -127,6 +128,48 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
 std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
     std::span<const std::byte> byteSpan);
 
+/// A character loaded with its animation by @ref loadGltfCharactersWithSkeletonStates.
+struct CharacterSkeletonStates {
+  /// The loaded character.
+  Character character;
+  /// One skeleton state per frame; empty if no animation targets the character. Only the joint
+  /// transforms are set.
+  std::vector<SkeletonState> skeletonStates;
+  /// Frame times in seconds, one per skeleton state.
+  std::vector<float> timestamps;
+};
+
+/// Load every character of a glTF document with its animation as skeleton states.
+///
+/// Characters are those of @ref loadGltfCharacters. Each character is read from the first
+/// animation with a translation, rotation or scale channel on one of its joints, and only from the
+/// channels that target its joints. This reads the standard glTF animation channels, so it also
+/// works for files that have no momentum motion.
+///
+/// @param[in] model The glTF document to load from.
+/// @return One entry per character, in the order of @ref loadGltfCharacters.
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    const fx::gltf::Document& model);
+
+/// Load every character of a glTF file with its animation as skeleton states.
+///
+/// This function assumes the file format is glTF without checking the extension. See the
+/// @ref fx::gltf::Document overload.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return One entry per character, in the order of @ref loadGltfCharacters.
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    const filesystem::path& gltfFilename);
+
+/// Load every character of a glTF byte buffer with its animation as skeleton states.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] byteSpan The buffer containing the glTF data.
+/// @return One entry per character, in the order of @ref loadGltfCharacters.
+std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
+    std::span<const std::byte> byteSpan);
+
 /// Load motion data from a glTF file.
 ///
 /// This function reads the document-level motion, which in a multi-character file belongs to the
@@ -215,6 +258,10 @@ loadCharacterWithMotionModelParameterScales(const filesystem::path& gltfFilename
 /// the file to be saved using momentum's custom glTF extension for model parameters. However, the
 /// resulting skeleton states may be harder to work with than model parameters.
 ///
+/// For a multi-character file, it reads the character with the most joints, from the first
+/// animation with a translation, rotation or scale channel on one of its joints; use
+/// @ref loadGltfCharactersWithSkeletonStates to load every character.
+///
 /// @param[in] byteSpan The buffer containing the glTF character data.
 /// @return A tuple containing the loaded Character object, a vector of skeleton states for each
 /// frame, and a vector of timestamps.
@@ -227,6 +274,10 @@ loadCharacterWithSkeletonStates(std::span<const std::byte> byteSpan);
 /// parameters. Unlike the other loadCharacterWithMotion functions, this function does not require
 /// the file to be saved using momentum's custom glTF extension for model parameters. However, the
 /// resulting skeleton states may be harder to work with than model parameters.
+///
+/// For a multi-character file, it reads the character with the most joints, from the first
+/// animation with a translation, rotation or scale channel on one of its joints; use
+/// @ref loadGltfCharactersWithSkeletonStates to load every character.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
 /// @return A tuple containing the loaded Character object, a vector of skeleton states for each
