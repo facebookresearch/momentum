@@ -45,6 +45,93 @@ Character loadFbxCharacter(
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
+/// Load every character of an FBX scene.
+///
+/// Unlike loadFbxCharacter, which merges the whole scene into one Character, this returns one
+/// Character per skeleton root (a LIMB_NODE, also under grouping NULL_NODEs) and one per unskinned
+/// mesh outside a skeleton, such as an object written by FbxBuilder::addAnimatedMesh, which becomes
+/// a one-joint character. A skinned mesh goes to the character its skin links to. An unskinned mesh
+/// in a skeleton, such as one written by FbxBuilder::addRigidBody, is bound rigidly to the nearest
+/// joint above it. Each character has an identity parameter transform. No animation is loaded.
+///
+/// @note The name comes from the root joint's `name` property when present, otherwise from the root
+/// node name. The singular loader leaves the name empty when that property is absent.
+///
+/// @param inputPath Path to the FBX file.
+/// @param keepLocators Turns Nulls in the transform hierarchy into Locators when Yes.
+/// @param permissive When Yes, loads joints with unsupported rotation settings and skips a mesh
+/// that belongs to no character, with a warning. When No, such a mesh makes the load fail.
+/// @param loadBlendShapes Loads blend shapes when Yes.
+/// @param stripNamespaces Removes namespaces from node names when true. True by default.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadFbxCharacters(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Load every character of an FBX scene from an in-memory buffer.
+///
+/// See the filename overload.
+///
+/// @param inputSpan Buffer holding the FBX file contents.
+/// @param keepLocators Turns Nulls in the transform hierarchy into Locators when Yes.
+/// @param permissive When Yes, loads joints with unsupported rotation settings and skips a mesh
+/// that belongs to no character, with a warning. When No, such a mesh makes the load fail.
+/// @param loadBlendShapes Loads blend shapes when Yes.
+/// @param stripNamespaces Removes namespaces from node names when true. True by default.
+/// @return One Character per character in the scene, in scene order.
+std::vector<Character> loadFbxCharacters(
+    std::span<const std::byte> inputSpan,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Load every character of an FBX scene together with its motion.
+///
+/// Characters are those of loadFbxCharacters. Each character's motion holds one joint-parameter
+/// matrix per readable animation stack, in stack order, read only from the curves on its own
+/// joints. The lists are index-aligned across characters; a matrix is empty when its stack does not
+/// animate the character. Column i of every matrix is the pose at i / fps seconds, so the matrices
+/// of one stack share their frame times; each matrix ends at the last key on its character's own
+/// joints, so the matrices of one stack can have different frame counts.
+///
+/// @param inputPath Path to the FBX file.
+/// @param keepLocators Turns Nulls in the transform hierarchy into Locators when Yes.
+/// @param permissive When Yes, loads joints with unsupported rotation settings and skips a mesh
+/// that belongs to no character, with a warning. When No, such a mesh makes the load fail.
+/// @param loadBlendShapes Loads blend shapes when Yes.
+/// @param stripNamespaces Removes namespaces from node names when true. True by default.
+/// @return The characters, each with its per-stack motion, and the scene frame rate.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadFbxCharactersWithMotion(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Load every character of an FBX scene together with its motion, from an in-memory buffer.
+///
+/// See the filename overload.
+///
+/// @param inputSpan Buffer holding the FBX file contents.
+/// @param keepLocators Turns Nulls in the transform hierarchy into Locators when Yes.
+/// @param permissive When Yes, loads joints with unsupported rotation settings and skips a mesh
+/// that belongs to no character, with a warning. When No, such a mesh makes the load fail.
+/// @param loadBlendShapes Loads blend shapes when Yes.
+/// @param stripNamespaces Removes namespaces from node names when true. True by default.
+/// @return The characters, each with its per-stack motion, and the scene frame rate.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadFbxCharactersWithMotion(
+    std::span<const std::byte> inputSpan,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
