@@ -75,7 +75,8 @@ struct FileSaveOptions {
   /// Include locators in the output (default: true)
   bool locators = true;
 
-  /// Include collision geometry in the output (default: true)
+  /// Include collision geometry in the output (default: true). glTF stores it only with the
+  /// momentum extension (see `extensions`).
   bool collisions = true;
 
   /// Include blend shapes in the output (default: true)
@@ -96,7 +97,8 @@ struct FileSaveOptions {
   // ---- GLTF-Specific Options ----
 
   /// Enable GLTF extensions (default: true)
-  /// Only used for GLTF output
+  /// Only used for GLTF output. Without the momentum extension, the file stores no rig, collision
+  /// geometry or joint marks, and stores locators as small cube meshes.
   bool extensions = true;
 
   /// GLTF file format selection (default: Auto)
