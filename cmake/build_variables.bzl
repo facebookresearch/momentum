@@ -627,6 +627,7 @@ io_gltf_private_headers = [
     "io/gltf/gltf_skeleton_io.h",
     "io/gltf/utils/accessor_utils.h",
     "io/gltf/utils/coordinate_utils.h",
+    "io/gltf/utils/momentum_extension.h",
 ]
 
 io_gltf_sources = [

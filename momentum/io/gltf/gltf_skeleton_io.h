@@ -62,13 +62,6 @@ Locator createLocator(const fx::gltf::Node& node, const nlohmann::json& extensio
 /// @return The created Joint object.
 Joint createJoint(const fx::gltf::Node& node);
 
-/// The FB_momentum extension object in a glTF `extensionsAndExtras` object, or an empty object.
-///
-/// @param[in] extensionsAndExtras The `extensionsAndExtras` of a node, mesh or document.
-/// @return A reference into @p extensionsAndExtras, or to a static empty object.
-[[nodiscard]] const nlohmann::json& findMomentumExtension(
-    const nlohmann::json& extensionsAndExtras);
-
 /// Check if a node is allowed in the skeleton hierarchy.
 ///
 /// The skinned mesh should not exist in the same hierarchy as the skeleton.
