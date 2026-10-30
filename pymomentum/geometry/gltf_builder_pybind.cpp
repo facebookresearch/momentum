@@ -69,16 +69,17 @@ character or instance (e.g. the same character added more than once).)")
           }),
           R"(Create a new GltfBuilder with the specified frame rate.
 
-:param fps: Frame rate in frames per second for animations.)",
+:param fps: Frame rate of the file in frames per second. A glTF file stores one frame rate, and
+    the motion of every character is read back at this frame rate.)",
           py::arg("fps") = 120.0f)
       .def_property(
           "fps",
           &mm::GltfBuilder::getFps,
           &mm::GltfBuilder::setFps,
-          R"(The frame rate in frames per second used for animations.
+          R"(The frame rate of the file in frames per second.
 
-This property controls the timing of all animations added to the GLTF file.
-Setting this value will affect subsequently added motions and animations.
+A glTF file stores one frame rate, which the constructor sets. Setting a different value later
+only logs a warning and keeps the current frame rate.
 
 :type: float)")
       .def(
@@ -180,7 +181,9 @@ will be automatically added with default settings. The motion data contains
 model parameters that animate the character over time.
 
 :param character: The character to add motion for.
-:param fps: Frame rate in frames per second for the motion data.
+:param fps: Frame rate in frames per second for the motion data. It must match the frame rate of
+    the builder (:attr:`fps`, set by the constructor); a different value only logs a warning, and
+    the motion is then read back at the builder's frame rate.
 :param motion: Optional motion parameters as a tuple of (parameter_names, motion_data).
                Motion data should be a matrix with shape [n_frames x n_parameters].
 :param offsets: Optional identity parameters as a tuple of (joint_names, offset_data).
@@ -220,7 +223,9 @@ will be automatically added with default settings. The skeleton states contain
 per-joint transforms that define the character's pose over time.
 
 :param character: The character to add skeleton states for.
-:param fps: Frame rate in frames per second for the skeleton state data.
+:param fps: Frame rate in frames per second for the skeleton state data. The animation keys are
+    stored in seconds, so the skeleton states keep their timing even if the builder has another
+    frame rate (:attr:`fps`).
 :param skeleton_states: Skeleton states as a 3D array with shape [nFrames, nJoints, 8].
                        Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
                        translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
@@ -249,7 +254,9 @@ This method adds motion capture marker data to the GLTF file. The marker data
 represents 3D positions of markers over time, which can be used for motion capture
 analysis or visualization. Optional marker mesh visualization can be added as unit cubes.
 
-:param fps: Frame rate in frames per second for the marker sequence data.
+:param fps: Frame rate in frames per second for the marker sequence data. The marker keys are
+    stored in seconds, so the markers keep their timing even if the builder has another frame rate
+    (:attr:`fps`).
 :param marker_sequence: A 2D list/array with shape [numFrames][numMarkers] containing
                        Marker objects for each frame. Each Marker contains name,
                        position, and occlusion status.
