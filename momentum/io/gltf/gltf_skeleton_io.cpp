@@ -409,8 +409,12 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
         if ((checkId == skinId) || skinSkeletonRoots[checkId].size() > 1) {
           continue;
         }
-        if (std::find(ancestors.begin(), ancestors.end(), skinSkeletonRoots[checkId][0]) !=
-            ancestors.end()) {
+        // Skins with the same root share one skeleton, which the first of them keeps.
+        const uint32_t checkRoot = skinSkeletonRoots[checkId][0];
+        const bool dependent = checkRoot == skinSkeletonRoots[skinId][0]
+            ? checkId < skinId
+            : std::ranges::find(ancestors, checkRoot) != ancestors.end();
+        if (dependent) {
           isIndependent = false;
           break;
         }
