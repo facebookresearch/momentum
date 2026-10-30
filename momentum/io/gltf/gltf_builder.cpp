@@ -930,17 +930,31 @@ struct GltfBuilder::Impl {
   ExportedNameRegistry<CharacterData> characterData;
   MarkerMesh markerMesh = MarkerMesh::None;
 
-  // The character an addMotion/addSkeletonStates call animates, or nullptr when no name was
-  // requested and nothing was added under character.name; its skeleton must match `character`.
-  CharacterData* resolveCharacterForMotion(
+  // The character an addMotion/addSkeletonStates call animates, whose skeleton must match
+  // `character`; when no name was requested and nothing was added under character.name, the
+  // character that `addCharacter` adds and names.
+  template <typename AddCharacter>
+  CharacterData& characterForMotion(
       const Character& character,
-      const std::string& characterName) {
+      const std::string& characterName,
+      AddCharacter&& addCharacter) {
     CharacterData* data = characterData.resolve(characterName, character.name);
-    if (data != nullptr) {
-      checkMotionTargetJointCount(
-          character.name, character.skeleton.joints.size(), data->nodeMap.size());
+    if (data == nullptr) {
+      return *characterData.find(addCharacter());
     }
-    return data;
+    checkMotionTargetJointCount(
+        character.name, character.skeleton.joints.size(), data->nodeMap.size());
+    return *data;
+  }
+
+  // Record the animation named `animationName`, which an add call has just written, as a motion
+  // of the character.
+  void recordAnimation(CharacterData& data, const std::string& animationName) {
+    const auto animation =
+        std::ranges::find(document.animations, animationName, &fx::gltf::Animation::name);
+    if (animation != document.animations.end()) {
+      data.animationIndices.push_back(static_cast<size_t>(animation - document.animations.begin()));
+    }
   }
 };
 
@@ -1090,9 +1104,8 @@ void GltfBuilder::addMotion(
       timestamps.size(),
       motionMatrix.cols());
   setFps(fps);
-  Impl::CharacterData* resolved = impl_->resolveCharacterForMotion(character, characterName);
   auto& characterData =
-      resolved != nullptr ? *resolved : *impl_->characterData.find(addCharacter(character));
+      impl_->characterForMotion(character, characterName, [&] { return addCharacter(character); });
   const auto& jointToNodeMap = characterData.nodeMap;
   const size_t meshIndex = characterData.meshIndex;
   // add motion
@@ -1106,15 +1119,7 @@ void GltfBuilder::addMotion(
       meshIndex,
       addExtensions,
       customName);
-
-  auto animIter = std::find_if(
-      impl_->document.animations.begin(),
-      impl_->document.animations.end(),
-      [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
-  if (animIter != impl_->document.animations.end()) {
-    const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    characterData.animationIndices.push_back(animIdx);
-  }
+  impl_->recordAnimation(characterData, customName);
 
   // Add timestamps to the FB_momentum extension
   if (!timestamps.empty()) {
@@ -1208,23 +1213,13 @@ void GltfBuilder::addSkeletonStates(
     const std::string& customName,
     const std::string& characterName) {
   setFps(fps);
-  Impl::CharacterData* resolved = impl_->resolveCharacterForMotion(character, characterName);
   auto& characterData =
-      resolved != nullptr ? *resolved : *impl_->characterData.find(addCharacter(character));
-  const auto& jointToNodeMap = characterData.nodeMap;
+      impl_->characterForMotion(character, characterName, [&] { return addCharacter(character); });
 
   // add motion from skeleton states
   addSkeletonStatesToModel(
-      impl_->document, character, fps, skeletonStates, jointToNodeMap, customName);
-
-  auto animIter = std::find_if(
-      impl_->document.animations.begin(),
-      impl_->document.animations.end(),
-      [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
-  if (animIter != impl_->document.animations.end()) {
-    const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    characterData.animationIndices.push_back(animIdx);
-  }
+      impl_->document, character, fps, skeletonStates, characterData.nodeMap, customName);
+  impl_->recordAnimation(characterData, customName);
 }
 
 } // namespace momentum
