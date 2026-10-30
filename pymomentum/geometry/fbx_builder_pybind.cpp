@@ -109,11 +109,16 @@ root, so it inherits the skeleton's animation without needing skin weights.
 
 Converts model parameters to joint parameters, then creates animation
 curves. Also extracts and animates blend shape weights when applicable.
+A joint parameter that no model parameter drives gets a curve when its value
+is not zero, such as an offset. A later call for the same character replaces
+its motion; a motion without frames writes nothing and keeps the earlier one.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
 :param motion: Model parameters matrix with shape (nFrames, nModelParams). None for no animation.
-:param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.
+:param offsets: Identity/offset joint parameters, added to the joint parameters of every frame.
+    None keeps the offsets of the character's earlier motion, or uses the bind pose if there is
+    none.
 :param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
@@ -134,6 +139,7 @@ curves. Also extracts and animates blend shape weights when applicable.
 
 Uses joint parameters directly, bypassing the activeJointParams check.
 This is useful for rigid bodies or characters with simple parameterization.
+A later call for the same character replaces its motion.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
