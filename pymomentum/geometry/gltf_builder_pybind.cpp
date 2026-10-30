@@ -165,7 +165,10 @@ node in the scene with the specified name.
 
 If addCharacter has not been called before adding the motion, the character
 will be automatically added with default settings. The motion data contains
-model parameters that animate the character over time.
+model parameters that animate the character over time. Another motion for the
+same character replaces its stored model parameters (and the identity, when
+offsets are given) and the channels of its joints and mesh in the animation
+named custom_name; a motion without frames stores nothing.
 
 :param character: The character to add motion for.
 :param fps: Frame rate in frames per second for the motion data. It must match the frame rate of
@@ -207,7 +210,10 @@ model parameters that animate the character over time.
 
 If addCharacter has not been called before adding the skeleton states, the character
 will be automatically added with default settings. The skeleton states contain
-per-joint transforms that define the character's pose over time.
+per-joint transforms that define the character's pose over time. They replace
+the channels of the character's joints in the animation named custom_name; the
+blend-shape weights channel and the model parameters of an earlier
+:meth:`add_motion` stay.
 
 :param character: The character to add skeleton states for.
 :param fps: Frame rate in frames per second for the skeleton state data. The animation keys are
