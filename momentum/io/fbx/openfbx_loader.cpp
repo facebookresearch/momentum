@@ -1587,6 +1587,37 @@ void computeInverseBindPose(FbxCharacterParse& cp) {
   }
 }
 
+std::vector<const ofbx::AnimationStack*> collectReadableAnimationStacks(const ofbx::IScene& scene) {
+  const int numAnimStacks = scene.getAnimationStackCount();
+  std::vector<const ofbx::AnimationStack*> stacks;
+  stacks.reserve(numAnimStacks);
+  for (int iAnim = 0; iAnim < numAnimStacks; ++iAnim) {
+    const ofbx::AnimationStack* stack = scene.getAnimationStack(iAnim);
+    if (stack == nullptr) {
+      MT_LOGW("Skipping FBX animation stack {}: the scene reports it as null.", iAnim);
+      continue;
+    }
+    stacks.push_back(stack);
+  }
+  return stacks;
+}
+
+// Extract this character's joint-parameter motion from every readable animation stack, scoped to
+// its own joints. An entry is empty when its stack animates none of this character's joints.
+std::vector<MatrixXf> parseAnimationStacks(
+    std::span<const ofbx::AnimationStack* const> stacks,
+    const FbxCharacterParse& cp,
+    float frameRate,
+    Permissive permissive) {
+  std::vector<MatrixXf> motions;
+  motions.reserve(stacks.size());
+  for (const ofbx::AnimationStack* stack : stacks) {
+    motions.emplace_back(
+        parseAnimation(stack, cp.jointFbxNodes, cp.skeleton, frameRate, permissive));
+  }
+  return motions;
+}
+
 // Build a Character from a parsed character: updates the parse's mesh normals and moves its inverse
 // bind pose out; the rest is copied. Shared by the singular and multi-character loaders.
 Character buildCharacterFromParse(
@@ -1650,13 +1681,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
 
   std::vector<MatrixXf> jointParamMotions;
   if (loadAnim) {
-    for (int iAnim = 0; iAnim < scene.getAnimationStackCount(); ++iAnim) {
-      const ofbx::AnimationStack* stack = scene.getAnimationStack(iAnim);
-      if (stack != nullptr) {
-        jointParamMotions.emplace_back(parseAnimation(
-            stack, cp.jointFbxNodes, cp.skeleton, scene.getSceneFrameRate(), permissive));
-      }
-    }
+    const auto stacks = collectReadableAnimationStacks(scene);
+    jointParamMotions = parseAnimationStacks(stacks, cp, scene.getSceneFrameRate(), permissive);
   }
 
   const auto parameterTransform =
@@ -1849,6 +1875,34 @@ Character buildMultiCharacterFromParse(FbxCharacterParse&& cp, KeepLocators keep
   return buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform);
 }
 
+// Load every character of the scene. With loadAnim, each character also gets one joint-parameter
+// motion per readable animation stack; without it, the animation curves are not loaded and every
+// character gets no motion.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float> loadCharactersWithTakes(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    bool loadAnim,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  const OfbxScenePtr scene = loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);
+  std::vector<FbxCharacterParse> characters =
+      parseFbxCharacters(*scene, permissive, loadBlendShapes);
+  const auto stacks = loadAnim ? collectReadableAnimationStacks(*scene)
+                               : std::vector<const ofbx::AnimationStack*>();
+  const float frameRate = scene->getSceneFrameRate();
+
+  std::vector<std::pair<Character, std::vector<MatrixXf>>> result;
+  result.reserve(characters.size());
+  for (auto& cp : characters) {
+    // The scene's characters share the stacks; each character reads the curves on its own joints.
+    auto takes = parseAnimationStacks(stacks, cp, frameRate, permissive);
+    result.emplace_back(
+        buildMultiCharacterFromParse(std::move(cp), keepLocators), std::move(takes));
+  }
+  return {std::move(result), frameRate};
+}
+
 } // namespace
 
 std::vector<Character> loadOpenFbxCharacters(
@@ -1857,18 +1911,13 @@ std::vector<Character> loadOpenFbxCharacters(
     Permissive permissive,
     LoadBlendShapes loadBlendShapes,
     bool stripNamespaces) {
-  // Structure only: load the scene with animations ignored, then parse each top-level skeleton.
-  const OfbxScenePtr scene =
-      loadOfbxScene(inputData, /*loadAnim=*/false, loadBlendShapes, stripNamespaces);
-  std::vector<FbxCharacterParse> characters =
-      parseFbxCharacters(*scene, permissive, loadBlendShapes);
-
+  auto characters = std::get<0>(loadCharactersWithTakes(
+      inputData, keepLocators, /*loadAnim=*/false, permissive, loadBlendShapes, stripNamespaces));
   std::vector<Character> result;
   result.reserve(characters.size());
-  for (auto& cp : characters) {
-    result.push_back(buildMultiCharacterFromParse(std::move(cp), keepLocators));
+  for (auto& entry : characters) {
+    result.push_back(std::move(entry.first));
   }
-
   return result;
 }
 
@@ -1880,6 +1929,33 @@ std::vector<Character> loadOpenFbxCharacters(
     bool stripNamespaces) {
   auto buffer = readFileToBuffer(inputPath);
   return loadOpenFbxCharacters(
+      gsl::as_bytes(gsl::make_span(buffer)),
+      keepLocators,
+      permissive,
+      loadBlendShapes,
+      stripNamespaces);
+}
+
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadCharactersWithTakes(
+      inputData, keepLocators, /*loadAnim=*/true, permissive, loadBlendShapes, stripNamespaces);
+}
+
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  auto buffer = readFileToBuffer(inputPath);
+  return loadOpenFbxCharactersWithMotion(
       gsl::as_bytes(gsl::make_span(buffer)),
       keepLocators,
       permissive,
