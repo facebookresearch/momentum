@@ -214,14 +214,17 @@ inline void addPhysicalProperties(
 // Metadata, locators, collision geometry
 // ============================================================================
 
-inline void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character) {
+inline void addMetaData(
+    ::fbxsdk::FbxNode* skeletonRootNode,
+    const Character& character,
+    const std::string& exportedName) {
   if (skeletonRootNode != nullptr) {
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
         .Set(FbxString(character.metadata.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "RigName")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
   }
 }
 
