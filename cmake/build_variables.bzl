@@ -525,6 +525,7 @@ diff_ik_test_sources = [
 
 io_common_public_headers = [
     "io/common/gsl_utils.h",
+    "io/common/name_utils.h",
     "io/common/stream_utils.h",
 ]
 
@@ -542,6 +543,7 @@ io_json_utils_sources = [
 
 io_common_test_sources = [
     "test/io/common/json_utils_test.cpp",
+    "test/io/common/name_utils_test.cpp",
     "test/io/common/stream_utils_test.cpp",
 ]
 
@@ -625,6 +627,7 @@ io_gltf_private_headers = [
     "io/gltf/gltf_skeleton_io.h",
     "io/gltf/utils/accessor_utils.h",
     "io/gltf/utils/coordinate_utils.h",
+    "io/gltf/utils/momentum_extension.h",
 ]
 
 io_gltf_sources = [
@@ -881,10 +884,22 @@ rerun_sources = [
     "gui/rerun/logging_redirect.cpp",
 ]
 
+rerun_sink_public_headers = [
+    "gui/rerun/rerun_sink.h",
+]
+
+rerun_sink_sources = [
+    "gui/rerun/rerun_sink.cpp",
+]
+
 rerun_test_sources = [
     "test/gui/rerun/eigen_adapters_test.cpp",
     "test/gui/rerun/logger_test.cpp",
     "test/gui/rerun/rerun_compat_test.cpp",
+]
+
+rerun_sink_test_sources = [
+    "test/gui/rerun/rerun_sink_test.cpp",
 ]
 
 #==========
