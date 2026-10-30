@@ -132,6 +132,21 @@ loadFbxCharactersWithMotion(
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
+/// Join the takes of every character, as loadFbxCharactersWithMotion() returns them, into one
+/// motion per character on a timeline shared by all characters.
+///
+/// Take i starts at the same frame for every character. A character whose take is shorter, or that
+/// the take does not animate, holds its last pose until the take ends; before its first animated
+/// frame, that is its rest pose (zero joint parameters).
+///
+/// @param takesPerCharacter The takes of every character, index-aligned across characters; each
+/// take has shape (numJointParameters x numFrames), and a take without frames does not animate the
+/// character.
+/// @return One motion per character, of shape (numJointParameters x numFrames) with the same frame
+/// count for every character; empty for a character that no take animates.
+std::vector<MatrixXf> joinTakesOnSharedTimeline(
+    std::span<const std::vector<MatrixXf>> takesPerCharacter);
+
 // Permissive mode allows loading mesh-only characters (without skin weights).
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
