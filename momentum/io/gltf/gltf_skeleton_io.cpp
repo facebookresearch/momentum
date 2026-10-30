@@ -13,6 +13,7 @@
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
 #include <limits>
@@ -20,23 +21,7 @@
 
 namespace momentum {
 
-const nlohmann::json& findMomentumExtension(const nlohmann::json& extensionsAndExtras) {
-  static const nlohmann::json kEmpty = nlohmann::json::object();
-  const auto extensions = extensionsAndExtras.find("extensions");
-  if (extensions == extensionsAndExtras.end()) {
-    return kEmpty;
-  }
-  const auto momentum = extensions->find("FB_momentum");
-  return momentum == extensions->end() ? kEmpty : *momentum;
-}
-
 namespace {
-
-bool hasMomentumExtension(const fx::gltf::Document& model) {
-  bool hasExtension = model.extensionsAndExtras.count("extensions") != 0 &&
-      model.extensionsAndExtras["extensions"].count("FB_momentum") != 0;
-  return hasExtension;
-}
 
 [[nodiscard]] std::vector<uint32_t> getAncestorsIncludingSelf(
     uint32_t nodeId,
@@ -335,7 +320,7 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
 
   // GltfBuilder marks joints with the momentum extension and puts each character under its own
   // scene root, so every scene root with a marked joint below it is one character.
-  if (hasMomentumExtension(model)) {
+  if (hasMomentumExtension(model.extensionsAndExtras)) {
     std::vector<bool> hasMarkedJoint(model.nodes.size(), false);
     for (size_t nodeId = 0; nodeId < model.nodes.size(); ++nodeId) {
       if (findMomentumExtension(model.nodes[nodeId].extensionsAndExtras)
@@ -458,7 +443,7 @@ loadHierarchyForRoots(
   LocatorList locators;
   PhysicalProperties physicalProperties;
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
-  const bool useExtension = hasMomentumExtension(model);
+  const bool useExtension = hasMomentumExtension(model.extensionsAndExtras);
   std::vector<bool> visited(model.nodes.size(), false);
 
   for (const auto& rootNode : skeletonRoots) {

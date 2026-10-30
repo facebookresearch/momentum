@@ -22,6 +22,7 @@
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
@@ -38,14 +39,6 @@
 namespace {
 
 using namespace momentum;
-
-nlohmann::json& addMomentumExtension(nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") == 0 ||
-      extensionsAndExtras["extensions"].count("FB_momentum") == 0) {
-    extensionsAndExtras["extensions"]["FB_momentum"] = nlohmann::json::object();
-  }
-  return extensionsAndExtras["extensions"]["FB_momentum"];
-}
 
 void initDefaultScene(fx::gltf::Document& model) {
   model.scene = 0;
@@ -372,7 +365,7 @@ void addActorAnimationToModel(
     node.name = markerNames[j];
     node.translation = {0.0f, 0.0f, 0.0f};
     node.scale = {1.0f, 1.0f, 1.0f};
-    node.extensionsAndExtras["extensions"]["FB_momentum"]["type"] = "marker";
+    addMomentumExtension(node.extensionsAndExtras)["type"] = "marker";
     // for convenience, save confidence as a flat float array so we don't need to parse animation
     // channels
     {
@@ -381,7 +374,7 @@ void addActorAnimationToModel(
       for (const auto& v : markerConf[j]) {
         confValues.push_back(v[0]);
       }
-      node.extensionsAndExtras["extensions"]["FB_momentum"]["confidence"] = confValues;
+      addMomentumExtension(node.extensionsAndExtras)["confidence"] = confValues;
     }
     switch (markerMesh) {
       case GltfBuilder::MarkerMesh::UnitCube: {
@@ -952,7 +945,7 @@ struct GltfBuilder::Impl {
 };
 
 GltfBuilder::Impl::Impl() : document(fx::gltf::Document()) {
-  document.extensionsUsed.emplace_back("FB_momentum");
+  document.extensionsUsed.emplace_back(kMomentumExtensionName);
 }
 
 GltfBuilder::GltfBuilder() {
