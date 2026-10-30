@@ -10,36 +10,28 @@
 #include "momentum/character/joint.h"
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
 #include <limits>
+#include <span>
 
 namespace momentum {
 
 namespace {
 
-constexpr auto kInvalidNodeId = std::numeric_limits<uint32_t>::max();
-
-bool hasMomentumExtension(const fx::gltf::Document& model) {
-  bool hasExtension = model.extensionsAndExtras.count("extensions") != 0 &&
-      model.extensionsAndExtras["extensions"].count("FB_momentum") != 0;
-  return hasExtension;
-}
-
-nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") != 0 &&
-      extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
-    return extensionsAndExtras["extensions"]["FB_momentum"];
-  } else {
-    return nlohmann::json::object();
-  }
+// Whether `node` is a joint that GltfBuilder marked with the momentum extension.
+[[nodiscard]] bool isMarkedJoint(const fx::gltf::Node& node) {
+  return findMomentumExtension(node.extensionsAndExtras).value("type", std::string()) ==
+      "skeleton_joint";
 }
 
 [[nodiscard]] std::vector<uint32_t> getAncestorsIncludingSelf(
     uint32_t nodeId,
-    const std::vector<uint32_t>& parents) {
+    std::span<const uint32_t> parents) {
   auto ancestors = std::vector<uint32_t>();
   auto curNode = nodeId;
   while (curNode != kInvalidNodeId) {
@@ -53,7 +45,7 @@ nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
 [[nodiscard]] uint32_t findClosestCommonAncestor(
     const uint32_t node1,
     const uint32_t node2,
-    const std::vector<uint32_t>& parents) {
+    std::span<const uint32_t> parents) {
   const auto ancestors1 = getAncestorsIncludingSelf(node1, parents);
   const auto ancestors2 = getAncestorsIncludingSelf(node2, parents);
   const auto maxNumIter = std::min(ancestors1.size(), ancestors2.size());
@@ -73,9 +65,9 @@ nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
 // nodeToObjectMap for query. nodeToObjectMap stores mapping from node index to joint index,
 // if the node is a joint. If it's a collision capsule or locator,
 // stores the index in the collision volume array or locator array.
-// If no extension is present in the glb file, right now we will load every not-skinned node as a
-// joint. #TODO: correctly load hierarchy from the skinning information if no momentum extension is
-// in the file.
+// If no node of the document is a marked joint, every node without a mesh is loaded as a joint.
+// #TODO: correctly load hierarchy from the skinning information if no momentum extension is in the
+// file.
 void loadHierarchyRecursive(
     const fx::gltf::Document& model,
     const int nodeId,
@@ -85,17 +77,23 @@ void loadHierarchyRecursive(
     LocatorList& locators,
     PhysicalProperties& physicalProperties,
     std::vector<size_t>& nodeToObjectMap,
-    bool useExtension) {
+    bool useExtension,
+    std::vector<bool>& visited) {
   MT_THROW_IF(
       (nodeId < 0) || (nodeId >= model.nodes.size()),
       "Invalid node id found in the gltf hierarchy: {}",
       nodeId);
+  // A malformed document can link a node from several parents or in a cycle; load it only once.
+  if (visited.at(nodeId)) {
+    return;
+  }
+  visited.at(nodeId) = true;
   const auto& node = model.nodes[nodeId];
   if (!isHierarchyNode(node)) {
     return;
   }
 
-  const auto& extension = getMomentumExtension(node.extensionsAndExtras);
+  const auto& extension = findMomentumExtension(node.extensionsAndExtras);
   const std::string type = extension.value("type", "");
   MT_CHECK(nodeId < nodeToObjectMap.size(), "id: {}, size: {}", nodeId, nodeToObjectMap.size());
   MT_CHECK(
@@ -171,7 +169,8 @@ void loadHierarchyRecursive(
         locators,
         physicalProperties,
         nodeToObjectMap,
-        useExtension);
+        useExtension,
+        visited);
   }
 }
 
@@ -277,29 +276,79 @@ bool isHierarchyNode(const fx::gltf::Node& node) {
   return (node.skin < 0) && (node.camera < 0);
 }
 
-std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document& model) {
-  MT_CHECK(model.scene < model.scenes.size(), "{}: {}", model.scene, model.scenes.size());
-  // If no skinned mesh is present, consider the scene root nodes as skeleton roots.
-  if (model.meshes.empty() || model.skins.empty()) {
-    std::vector<uint32_t> roots = model.scenes[model.scene].nodes;
-    return {roots};
-  }
-
-  // Build a parent map for ancestor query
+std::vector<uint32_t> buildSceneParentMap(const fx::gltf::Document& model) {
   auto parentMap = std::vector<uint32_t>(model.nodes.size(), kInvalidNodeId);
-  auto nodeStack = model.scenes[model.scene].nodes;
-  while (!nodeStack.empty()) {
-    std::vector<uint32_t> nextStack;
-    for (const auto& nodeId : nodeStack) {
-      // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
-      const auto& node = model.nodes[nodeId];
-      nextStack.reserve(nextStack.size() + node.children.size());
-      nextStack.insert(nextStack.end(), node.children.begin(), node.children.end());
-      for (auto child : model.nodes[nodeId].children) {
-        parentMap[child] = nodeId;
+  if (model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size()) {
+    return parentMap;
+  }
+  // Each node is queued at most once, after its parent, so following parents always ends at a root.
+  std::vector<bool> queued(model.nodes.size(), false);
+  std::vector<uint32_t> queue;
+  for (const uint32_t root : model.scenes.at(model.scene).nodes) {
+    if (root < queued.size() && !queued.at(root)) {
+      queued.at(root) = true;
+      queue.push_back(root);
+    }
+  }
+  for (size_t i = 0; i < queue.size(); ++i) {
+    const uint32_t parent = queue.at(i);
+    for (const int32_t child : model.nodes.at(parent).children) {
+      if (child < 0 || static_cast<size_t>(child) >= queued.size() || queued.at(child)) {
+        continue;
+      }
+      queued.at(child) = true;
+      parentMap.at(child) = parent;
+      queue.push_back(static_cast<uint32_t>(child));
+    }
+  }
+  return parentMap;
+}
+
+uint32_t getTopLevelAncestor(uint32_t nodeId, std::span<const uint32_t> parentMap) {
+  if (nodeId >= parentMap.size()) {
+    return kInvalidNodeId;
+  }
+  while (parentMap[nodeId] != kInvalidNodeId) {
+    nodeId = parentMap[nodeId];
+  }
+  return nodeId;
+}
+
+std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> sceneParentMap) {
+  MT_THROW_IF(
+      model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size(),
+      "Invalid glTF scene index {} for {} scene(s)",
+      model.scene,
+      model.scenes.size());
+  const auto& sceneRoots = model.scenes.at(model.scene).nodes;
+
+  // GltfBuilder marks joints with the momentum extension and puts each character under its own
+  // scene root, so every scene root with a marked joint below it is one character.
+  if (hasMomentumExtension(model.extensionsAndExtras)) {
+    std::vector<bool> hasMarkedJoint(model.nodes.size(), false);
+    for (size_t nodeId = 0; nodeId < model.nodes.size(); ++nodeId) {
+      if (isMarkedJoint(model.nodes[nodeId])) {
+        const uint32_t root = getTopLevelAncestor(static_cast<uint32_t>(nodeId), sceneParentMap);
+        hasMarkedJoint.at(root) = true;
       }
     }
-    nodeStack.swap(nextStack);
+    std::vector<std::vector<uint32_t>> characterRoots;
+    for (const uint32_t root : sceneRoots) {
+      if (root < hasMarkedJoint.size() && hasMarkedJoint.at(root)) {
+        hasMarkedJoint.at(root) = false;
+        characterRoots.push_back({root});
+      }
+    }
+    if (!characterRoots.empty()) {
+      return characterRoots;
+    }
+  }
+
+  // If no skinned mesh is present, consider the scene root nodes as skeleton roots.
+  if (model.meshes.empty() || model.skins.empty()) {
+    return {sceneRoots};
   }
 
   // Assumption: all the joints in the skin are directly connected (i.e. no non-joint node in
@@ -311,13 +360,17 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
     const auto& skin = model.skins[skinId];
     auto& roots = skinSkeletonRoots[skinId];
     for (const auto jointId : skin.joints) {
-      // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
-      const auto parentId = parentMap[jointId];
+      if (jointId >= sceneParentMap.size()) {
+        // Malformed glTF: the skin references a node outside the scene.
+        MT_LOGW("Skipping out-of-range joint {} in glTF skin {}.", jointId, skinId);
+        continue;
+      }
+      const auto parentId = sceneParentMap[jointId];
       auto parentIter = std::find(skin.joints.begin(), skin.joints.end(), parentId);
       if (parentIter == skin.joints.end()) {
         bool foundSibling = false;
         for (auto& root : roots) {
-          auto commonAncestor = findClosestCommonAncestor(jointId, root, parentMap);
+          auto commonAncestor = findClosestCommonAncestor(jointId, root, sceneParentMap);
           if (commonAncestor != kInvalidNodeId) {
             root = commonAncestor;
             foundSibling = true;
@@ -345,7 +398,7 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(const fx::gltf::Document&
       auto& roots = result[skinId];
       roots = skinSkeletonRoots[skinId];
     } else {
-      auto ancestors = getAncestorsIncludingSelf(skinSkeletonRoots[skinId][0], parentMap);
+      auto ancestors = getAncestorsIncludingSelf(skinSkeletonRoots[skinId][0], sceneParentMap);
       bool isIndependent = true;
       for (auto checkId = 0; checkId < model.skins.size(); checkId++) {
         MT_CHECK(
@@ -386,20 +439,21 @@ std::tuple<
     LocatorList,
     PhysicalProperties,
     std::vector<size_t>>
-loadHierarchy(const fx::gltf::Document& model) {
+loadHierarchyForRoots(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> skeletonRoots,
+    uint32_t characterRootNode) {
   JointList joints;
   auto collision = std::make_unique<CollisionGeometry>();
   LocatorList locators;
   PhysicalProperties physicalProperties;
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
-  const bool useExtension = hasMomentumExtension(model);
+  // GltfBuilder marks every joint when it writes the momentum extension, and writes a
+  // document-level extension (the frame rate of a motion) even without it, so the marks decide.
+  const bool useExtension = std::ranges::any_of(model.nodes, isMarkedJoint);
+  std::vector<bool> visited(model.nodes.size(), false);
 
-  // Currently only the first found skeleton is used
-  // #TODO: support multiple characters in the file, and use the skin information stored in
-  // CharacterInfo.
-  auto skeletonRoots = gatherSkeletonRoots(model);
-  MT_CHECK(skeletonRoots.size() == 1, "{}", skeletonRoots.size());
-  for (const auto& rootNode : skeletonRoots[0]) {
+  for (const auto& rootNode : skeletonRoots) {
     loadHierarchyRecursive(
         model,
         rootNode,
@@ -409,13 +463,15 @@ loadHierarchy(const fx::gltf::Document& model) {
         locators,
         physicalProperties,
         nodeToObjectMap,
-        useExtension);
+        useExtension,
+        visited);
     if (!joints.empty()) {
       break;
     }
   }
   MT_THROW_IF(model.nodes.empty(), "No valid node found in the gltf file.");
-  std::string name = model.nodes.at(0).name;
+  std::string name =
+      characterRootNode < model.nodes.size() ? model.nodes[characterRootNode].name : std::string();
 
   std::sort(collision->begin(), collision->end(), [](const auto& c1, const auto& c2) {
     int c1Parent = c1.parent == kInvalidIndex ? -1 : static_cast<int>(c1.parent);

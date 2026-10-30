@@ -8,12 +8,14 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
-#include <momentum/gui/rerun/logging_redirect.h>
 #include <momentum/gui/rerun/rerun_compat.h>
+#include <momentum/gui/rerun/rerun_sink.h>
 #include <momentum/io/marker/c3d_io.h>
 
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
+
+#include <iostream>
 
 using namespace rerun;
 using namespace momentum;
@@ -21,6 +23,7 @@ using namespace momentum;
 namespace {
 
 struct Options {
+  RerunSinkOptions rerunSink;
   std::string c3dFile;
   bool plot = false;
 };
@@ -32,6 +35,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       ->check(CLI::ExistingFile);
   app.add_flag("--plot", opt->plot, "Draw 2D plots of marker trajectories (very slow)")
       ->default_val(opt->plot);
+  addRerunSinkOptions(app, opt->rerunSink);
   return opt;
 }
 
@@ -52,8 +56,7 @@ int main(int argc, char* argv[]) {
     const auto sequences = loadC3d(options->c3dFile);
 
     const auto rec = RecordingStream(fileName);
-    rec.spawn().exit_on_failure();
-    redirectLogsToRerun(rec);
+    openRerunSink(rec, options->rerunSink);
 
     rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
@@ -95,10 +98,10 @@ int main(int argc, char* argv[]) {
       }
     }
   } catch (const std::exception& e) {
-    MT_LOGE("Exception thrown. Error: {}", e.what());
+    std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;
   } catch (...) {
-    MT_LOGE("Exception thrown. Unknown error.");
+    std::cerr << "Exception thrown. Unknown error.\n";
     return EXIT_FAILURE;
   }
 
