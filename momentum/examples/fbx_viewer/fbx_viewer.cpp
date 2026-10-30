@@ -58,7 +58,8 @@ void logMotion(
     const MatrixXf& motion,
     float fps,
     const std::string& entityPath,
-    const std::string& paramsPrefix,
+    const std::string& worldParamsPrefix,
+    const std::string& jointParamsPrefix,
     bool logJoints) {
   CharacterParameters charParams;
   charParams.pose.v.setZero(character.parameterTransform.numAllModelParameters());
@@ -66,7 +67,7 @@ void logMotion(
   CharacterState charState;
   const std::vector<std::string> jointNames = character.skeleton.getJointNames();
   if (logJoints) {
-    logJointParamNames(rec, paramsPrefix, "joint_params", jointNames);
+    logJointParamNames(rec, worldParamsPrefix, jointParamsPrefix, jointNames);
   }
 
   // A file without animation can have a zero frame rate.
@@ -96,7 +97,7 @@ void logMotion(
           static_cast<int64_t>(iFrame), time, charState.skeletonState.jointParameters.v);
     }
   }
-  jointParams.send(rec, paramsPrefix, jointNames);
+  jointParams.send(rec, worldParamsPrefix, jointParamsPrefix, jointNames);
 }
 
 } // namespace
@@ -149,6 +150,7 @@ int main(int argc, char* argv[]) {
           fps,
           "world/character/" + std::to_string(iChar),
           "world_params/character_" + std::to_string(iChar),
+          "joint_params/character_" + std::to_string(iChar),
           options->logJoints);
     }
   } catch (const std::exception& e) {
