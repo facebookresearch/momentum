@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace momentum {
@@ -47,7 +48,8 @@ std::string makeUniqueName(const std::string& requestedName, const T& existingNa
 /// empty requested name resolves to the entry added from the source name that kept that name, or
 /// else to the first entry added from the source name, which keeps calls that do not pass the
 /// returned name working. A character exported under the empty name is thus reachable with that
-/// name.
+/// name. An exported object that is not a character, such as an FBX animated mesh, reserves its
+/// name so that no character is exported under it.
 ///
 /// @tparam T Per-entry payload.
 template <typename T>
@@ -57,7 +59,7 @@ class ExportedNameRegistry {
   /// (see makeUniqueName). Does not change the registry, so a caller can finish building an entry
   /// before it calls insert().
   [[nodiscard]] std::string makeExportedName(const std::string& requestedName) const {
-    std::string exportedName = makeUniqueName(requestedName, entries_);
+    std::string exportedName = makeUniqueName(requestedName, usedNames_);
     if (exportedName != requestedName) {
       MT_LOGW(
           "Exported name '{}' is already in use; exporting as '{}'.", requestedName, exportedName);
@@ -73,7 +75,15 @@ class ExportedNameRegistry {
     if (!inserted && exportedName == sourceName) {
       it->second = exportedName;
     }
+    usedNames_.insert(exportedName);
     return entries_.insert_or_assign(exportedName, std::move(entry)).first->second;
+  }
+
+  /// Reserve @p exportedName, as returned by makeExportedName(), for an exported object that is not
+  /// a character. makeExportedName() then does not return it, and resolve() and find() do not
+  /// return an entry for it.
+  void reserve(const std::string& exportedName) {
+    usedNames_.insert(exportedName);
   }
 
   /// The entry a request selects: the entry exported as @p exportedName when it is not empty
@@ -104,6 +114,8 @@ class ExportedNameRegistry {
  private:
   std::unordered_map<std::string, T> entries_;
   std::unordered_map<std::string, std::string> defaultExportedNameBySourceName_;
+  // Every exported name: the names of the entries and the reserved names.
+  std::unordered_set<std::string> usedNames_;
 };
 
 /// Throw unless motion for @p characterName, a character with @p motionJointCount joints, fits the

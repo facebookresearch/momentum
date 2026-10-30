@@ -72,3 +72,12 @@ TEST(NameUtilsTest, RegistryUnknownExplicitNameThrows) {
   registry.insert(registry.makeExportedName("body"), "body", 0);
   EXPECT_THROW((void)registry.resolve("missing", "body"), std::runtime_error);
 }
+
+TEST(NameUtilsTest, RegistryReservedNameIsTakenButSelectsNothing) {
+  ExportedNameRegistry<int> registry;
+  registry.reserve(registry.makeExportedName("mug"));
+  EXPECT_EQ(registry.makeExportedName("mug"), "mug_1");
+  EXPECT_EQ(registry.find("mug"), nullptr);
+  EXPECT_EQ(registry.resolve("", "mug"), nullptr);
+  EXPECT_EQ(registry.size(), 0);
+}
