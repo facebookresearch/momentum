@@ -49,6 +49,9 @@ struct FbxBuilder::Impl {
 
   ExportedNameRegistry<CharacterData> characters;
 
+  // The namespace prefix of every node in the saved file, with its trailing ':'; empty for none.
+  std::string fbxNamespace;
+
   Impl() {
     manager = ::fbxsdk::FbxManager::Create();
     auto* ios = ::fbxsdk::FbxIOSettings::Create(manager, IOSROOT);
@@ -71,6 +74,25 @@ struct FbxBuilder::Impl {
   Impl& operator=(const Impl&) = delete;
   Impl(Impl&&) = delete;
   Impl& operator=(Impl&&) = delete;
+
+  // The namespace prefix an add call requests, with its trailing ':'; empty for none. Throws if it
+  // differs from the namespace of the file, which an earlier call set. The call stores it only
+  // after it succeeds, so a failed call leaves the namespace unchanged.
+  [[nodiscard]] std::string checkNamespace(std::string_view requested) const {
+    if (requested.empty()) {
+      return {};
+    }
+    std::string prefix(requested);
+    if (prefix.back() != ':') {
+      prefix += ':';
+    }
+    MT_THROW_IF(
+        !fbxNamespace.empty() && fbxNamespace != prefix,
+        "FBX namespace '{}' differs from '{}', which an earlier call set; a file has one namespace.",
+        prefix,
+        fbxNamespace);
+    return prefix;
+  }
 
   // The character an addMotion* call animates; its skeleton must match `character`.
   CharacterData& resolveCharacterForMotion(
@@ -96,6 +118,7 @@ FbxBuilder& FbxBuilder::operator=(FbxBuilder&&) noexcept = default;
 std::string FbxBuilder::addCharacter(const Character& character, const FileSaveOptions& options) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
+  std::string namespacePrefix = impl_->checkNamespace(options.fbxNamespace);
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
@@ -142,6 +165,9 @@ std::string FbxBuilder::addCharacter(const Character& character, const FileSaveO
       characterName,
       character.name,
       {.skeletonResult = std::move(skeletonResult), .meshResult = std::move(meshResult)});
+  if (!namespacePrefix.empty()) {
+    impl_->fbxNamespace = std::move(namespacePrefix);
+  }
   return characterName;
 }
 
@@ -152,6 +178,7 @@ std::string FbxBuilder::addRigidBody(
     const FileSaveOptions& options) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
+  std::string namespacePrefix = impl_->checkNamespace(options.fbxNamespace);
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
@@ -230,12 +257,15 @@ std::string FbxBuilder::addRigidBody(
       characterName,
       character.name,
       {.skeletonResult = std::move(skeletonResult), .meshResult = std::move(meshResult)});
+  if (!namespacePrefix.empty()) {
+    impl_->fbxNamespace = std::move(namespacePrefix);
+  }
   return characterName;
 }
 
 void FbxBuilder::addMotion(
     const Character& character,
-    float fps,
+    double fps,
     const MatrixXf& motion,
     const VectorXf& offsets,
     const std::string& characterName) {
@@ -295,7 +325,7 @@ void FbxBuilder::addMotion(
 
 void FbxBuilder::addMotionWithJointParams(
     const Character& character,
-    float fps,
+    double fps,
     const MatrixXf& jointParams,
     const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
@@ -360,7 +390,7 @@ void writeUserProperties(::fbxsdk::FbxNode* node, const FbxUserProperties& userP
 std::string FbxBuilder::addAnimatedMesh(
     const Character& character,
     const std::string& name,
-    float fps,
+    double fps,
     const MatrixXf& jointParams,
     const FbxUserProperties& userProperties) {
   MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
@@ -377,7 +407,7 @@ std::string FbxBuilder::addAnimatedMesh(
 std::string FbxBuilder::addAnimatedMesh(
     const Mesh& mesh,
     const std::string& name,
-    float fps,
+    double fps,
     const MatrixXf& jointParams,
     const Vector3f& translationOffset,
     const FbxUserProperties& userProperties) {
@@ -504,7 +534,9 @@ std::string FbxBuilder::addAnimatedMesh(
   return meshName;
 }
 
-void FbxBuilder::addMarkerSequence(float fps, std::span<const std::vector<Marker>> markerSequence) {
+void FbxBuilder::addMarkerSequence(
+    double fps,
+    std::span<const std::vector<Marker>> markerSequence) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
   if (!markerSequence.empty()) {
@@ -526,6 +558,7 @@ void FbxBuilder::save(const filesystem::path& filename) {
       "Unable to initialize fbx exporter: {}",
       lExporter->GetStatus().GetErrorString());
 
+  prependNamespaceToAllNodes(impl_->scene->GetRootNode(), impl_->fbxNamespace);
   lExporter->Export(impl_->scene);
   lExporter->Destroy();
 
@@ -563,7 +596,7 @@ FbxBuilder::addRigidBody(const Character&, const std::string&, size_t, const Fil
 
 void FbxBuilder::addMotion(
     const Character&,
-    float,
+    double,
     const MatrixXf&,
     const VectorXf&,
     const std::string&) {
@@ -572,7 +605,7 @@ void FbxBuilder::addMotion(
 
 void FbxBuilder::addMotionWithJointParams(
     const Character&,
-    float,
+    double,
     const MatrixXf&,
     const std::string&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
@@ -581,7 +614,7 @@ void FbxBuilder::addMotionWithJointParams(
 std::string FbxBuilder::addAnimatedMesh(
     const Character&,
     const std::string&,
-    float,
+    double,
     const MatrixXf&,
     const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
@@ -590,14 +623,14 @@ std::string FbxBuilder::addAnimatedMesh(
 std::string FbxBuilder::addAnimatedMesh(
     const Mesh&,
     const std::string&,
-    float,
+    double,
     const MatrixXf&,
     const Vector3f&,
     const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addMarkerSequence(float, std::span<const std::vector<Marker>>) {
+void FbxBuilder::addMarkerSequence(double, std::span<const std::vector<Marker>>) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
