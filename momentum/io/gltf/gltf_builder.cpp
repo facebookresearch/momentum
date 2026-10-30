@@ -702,19 +702,12 @@ std::vector<size_t> addSkeletonToModel(
   std::vector<size_t> jointToNodeMap;
   std::unordered_map<size_t, const JointPhysicalProperties*> physicalPropertiesByJoint;
   if (updateExtension) {
-    physicalPropertiesByJoint.reserve(character.physicalProperties.size());
-    for (const JointPhysicalProperties& properties : character.physicalProperties) {
-      const size_t jointIndex = resolvePhysicalPropertiesJointIndex(properties, character.skeleton);
-      MT_THROW_IF(
-          jointIndex == kInvalidIndex,
-          "Physical properties entry references unknown joint '{}'",
-          properties.jointName);
-      const auto emplaceResult = physicalPropertiesByJoint.emplace(jointIndex, &properties);
-      MT_THROW_IF(
-          !emplaceResult.second,
-          "Multiple physical properties entries resolve to joint '{}' (index {})",
-          character.skeleton.joints.at(jointIndex).name,
-          jointIndex);
+    const std::vector<size_t> jointIndices =
+        resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+    physicalPropertiesByJoint.reserve(jointIndices.size());
+    for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+      physicalPropertiesByJoint.emplace(
+          jointIndices[entry], &character.physicalProperties.at(entry));
     }
   }
 

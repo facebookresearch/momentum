@@ -35,6 +35,29 @@ size_t resolvePhysicalPropertiesJointIndex(
   return kInvalidIndex;
 }
 
+std::vector<size_t> resolvePhysicalPropertiesJointIndices(
+    const PhysicalProperties& physicalProperties,
+    const Skeleton& skeleton) {
+  std::vector<size_t> jointIndices;
+  jointIndices.reserve(physicalProperties.size());
+  std::vector<bool> jointHasEntry(skeleton.joints.size(), false);
+  for (const auto& properties : physicalProperties) {
+    const size_t jointIndex = resolvePhysicalPropertiesJointIndex(properties, skeleton);
+    MT_THROW_IF(
+        jointIndex == kInvalidIndex,
+        "Physical properties entry references unknown joint '{}'",
+        properties.jointName);
+    MT_THROW_IF(
+        jointHasEntry.at(jointIndex),
+        "Multiple physical properties entries resolve to joint '{}' (index {})",
+        skeleton.joints.at(jointIndex).name,
+        jointIndex);
+    jointHasEntry.at(jointIndex) = true;
+    jointIndices.push_back(jointIndex);
+  }
+  return jointIndices;
+}
+
 namespace {
 
 Skeleton scale(const Skeleton& skel, float scale) {
