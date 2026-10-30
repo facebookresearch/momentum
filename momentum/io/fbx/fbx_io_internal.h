@@ -19,6 +19,7 @@
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/fbx/marker_property_names.h"
 #include "momentum/io/file_save_options.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/mesh.h"
@@ -38,7 +39,6 @@
 #include <span>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace momentum::fbx_internal {
 
@@ -184,21 +184,10 @@ inline SkeletonNodeResult createSkeletonNodes(
 inline void addPhysicalProperties(
     const Character& character,
     const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap) {
-  std::unordered_set<size_t> seenJoints;
-  for (const auto& jointProperties : character.physicalProperties) {
-    const size_t jointIndex =
-        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
-
-    MT_THROW_IF(
-        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
-        "Physical properties entry references unknown joint '{}'",
-        jointProperties.jointName);
-    MT_THROW_IF(
-        !seenJoints.insert(jointIndex).second,
-        "Multiple physical properties entries resolve to joint '{}' (index {})",
-        character.skeleton.joints.at(jointIndex).name,
-        jointIndex);
-
+  const std::vector<size_t> jointIndices =
+      resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+  for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+    const size_t jointIndex = jointIndices[entry];
     const auto nodeIt = jointToNodeMap.find(jointIndex);
     MT_THROW_IF(
         nodeIt == jointToNodeMap.end() || nodeIt->second == nullptr,
@@ -206,7 +195,8 @@ inline void addPhysicalProperties(
         character.skeleton.joints.at(jointIndex).name);
 
     ::fbxsdk::FbxProperty::Create(nodeIt->second, ::fbxsdk::FbxStringDT, "physicalProperties")
-        .Set(FbxString(jointPhysicalPropertiesToJsonString(jointProperties).c_str()));
+        .Set(FbxString(
+            jointPhysicalPropertiesToJsonString(character.physicalProperties.at(entry)).c_str()));
   }
 }
 
@@ -214,14 +204,17 @@ inline void addPhysicalProperties(
 // Metadata, locators, collision geometry
 // ============================================================================
 
-inline void addMetaData(::fbxsdk::FbxNode* skeletonRootNode, const Character& character) {
+inline void addMetaData(
+    ::fbxsdk::FbxNode* skeletonRootNode,
+    const Character& character,
+    const std::string& exportedName) {
   if (skeletonRootNode != nullptr) {
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
         .Set(FbxString(character.metadata.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "RigName")
-        .Set(FbxString(character.name.c_str()));
+        .Set(FbxString(exportedName.c_str()));
   }
 }
 
@@ -578,6 +571,40 @@ inline void writeTextureUVIndicesToFbxMesh(
   }
 }
 
+// Write the geometry of `mesh` as a new FbxMesh named `geometryName` and attach it to `meshNode`:
+// the vertices with their normals, the polygons, and the texture coordinates (v flipped, as FBX
+// expects) when the mesh has any. Skinning and blend shapes are left to the caller.
+inline ::fbxsdk::FbxMesh* writeMeshGeometry(
+    const Mesh& mesh,
+    ::fbxsdk::FbxScene* scene,
+    ::fbxsdk::FbxNode* meshNode,
+    const char* geometryName) {
+  const auto numVertices = static_cast<int>(mesh.vertices.size());
+  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, geometryName);
+  lMesh->SetControlPointCount(numVertices);
+  lMesh->InitNormals(numVertices);
+  for (int i = 0; i < numVertices; i++) {
+    lMesh->SetControlPointAt(
+        FbxVector4(mesh.vertices[i].x(), mesh.vertices[i].y(), mesh.vertices[i].z()),
+        FbxVector4(mesh.normals[i].x(), mesh.normals[i].y(), mesh.normals[i].z()),
+        i);
+  }
+  writePolygonsToFbxMesh(mesh, lMesh);
+  lMesh->BuildMeshEdgeArray();
+  meshNode->SetNodeAttribute(lMesh);
+
+  if (!mesh.texcoords.empty()) {
+    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
+    lMesh->InitTextureUV(0, uvType);
+    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
+    for (const auto& texcoords : mesh.texcoords) {
+      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
+    }
+    writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
+  }
+  return lMesh;
+}
+
 // ============================================================================
 // Mesh with blend shapes
 // ============================================================================
@@ -676,36 +703,9 @@ inline MeshBlendShapeResult createMeshNode(
     Permissive permissive,
     const std::string& meshName = "body_mesh") {
   MeshBlendShapeResult result;
-  const auto numVertices = static_cast<int>(character.mesh.get()->vertices.size());
+  const auto numVertices = static_cast<int>(character.mesh->vertices.size());
   ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(scene, meshName.c_str());
-  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(scene, "mesh");
-  lMesh->SetControlPointCount(numVertices);
-  lMesh->InitNormals(numVertices);
-  for (int i = 0; i < numVertices; i++) {
-    FbxVector4 point(
-        character.mesh.get()->vertices[i].x(),
-        character.mesh.get()->vertices[i].y(),
-        character.mesh.get()->vertices[i].z());
-    FbxVector4 normal(
-        character.mesh.get()->normals[i].x(),
-        character.mesh.get()->normals[i].y(),
-        character.mesh.get()->normals[i].z());
-    lMesh->SetControlPointAt(point, normal, i);
-  }
-  writePolygonsToFbxMesh(*character.mesh, lMesh);
-  lMesh->BuildMeshEdgeArray();
-  meshNode->SetNodeAttribute(lMesh);
-
-  // Add texture coordinates
-  if (!character.mesh->texcoords.empty()) {
-    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-    lMesh->InitTextureUV(0, uvType);
-    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-    for (const auto& texcoords : character.mesh->texcoords) {
-      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-    }
-    writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
-  }
+  ::fbxsdk::FbxMesh* lMesh = writeMeshGeometry(*character.mesh, scene, meshNode, "mesh");
 
   // Add skinning
   MT_THROW_IF(
@@ -789,10 +789,6 @@ inline MatrixXf extractFaceExpressionWeights(const Character& character, const M
 // ============================================================================
 // Marker nodes
 // ============================================================================
-
-// Custom property names for marker identification
-constexpr const char* kMomentumMarkersRootProperty = "Momentum_Markers_Root";
-constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
 
 inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
     ::fbxsdk::FbxScene* scene,
