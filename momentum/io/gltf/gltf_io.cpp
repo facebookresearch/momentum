@@ -86,7 +86,7 @@ void loadCharacterExtensions(
       }
     }
   } catch (std::runtime_error& err) {
-    MT_THROW("Unable to load gltf : {}", err.what());
+    MT_THROW("{}", gltfLoadErrorMessage(err.what()));
   }
 }
 
@@ -178,50 +178,6 @@ Character buildCharacter(
   return result;
 }
 
-fx::gltf::Document loadModel(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
-  fx::gltf::Document model;
-  // Files up to 4 GB, the glb limit (its sizes are uint32).
-  constexpr uint32_t kMax = std::numeric_limits<uint32_t>::max();
-  constexpr fx::gltf::ReadQuotas kQuotas = {8, kMax, kMax};
-
-  std::visit(
-      [&](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, filesystem::path>) {
-          // Read first 4 chars for file sensing (https://docs.fileformat.com/3d/glb/)
-          // It is ASCII string "glTF", and can be used to identify data as Binary glTF
-          std::string magic;
-          std::ifstream infile(arg);
-          MT_THROW_IF(!infile.is_open(), "Unable to open: {}", arg.string());
-          std::copy_n(std::istreambuf_iterator<char>(infile.rdbuf()), 4, std::back_inserter(magic));
-          if (magic == "glTF") {
-            model = fx::gltf::LoadFromBinary(arg.string(), kQuotas);
-          } else {
-            model = fx::gltf::LoadFromText(arg.string(), kQuotas);
-          }
-        } else if constexpr (std::is_same_v<T, std::span<const std::byte>>) {
-          ispanstream inputStream(arg);
-          model = fx::gltf::LoadFromBinary(inputStream, "", kQuotas);
-        }
-      },
-      input);
-
-  return model;
-}
-
-// Load the document from `input` and pass it to `loadFromDocument`, adding context to any error.
-template <typename LoadFromDocument>
-auto loadFromInput(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input,
-    LoadFromDocument&& loadFromDocument) {
-  try {
-    return loadFromDocument(loadModel(input));
-  } catch (std::runtime_error& err) {
-    MT_THROW("Unable to load gltf : {}", err.what());
-  }
-}
-
 Character loadModelAndCharacter(
     const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   return loadFromInput(
@@ -278,6 +234,44 @@ fx::gltf::Document makeCharacterDocument(
 
 namespace momentum {
 
+fx::gltf::Document loadGltfDocument(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  fx::gltf::Document model;
+  // Files up to 4 GB, the glb limit (its sizes are uint32).
+  constexpr uint32_t kMax = std::numeric_limits<uint32_t>::max();
+  constexpr fx::gltf::ReadQuotas kQuotas = {
+      .MaxBufferCount = 8, .MaxFileSize = kMax, .MaxBufferByteLength = kMax};
+
+  std::visit(
+      [&](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, filesystem::path>) {
+          // Read first 4 chars for file sensing (https://docs.fileformat.com/3d/glb/)
+          // It is ASCII string "glTF", and can be used to identify data as Binary glTF
+          std::string magic;
+          std::ifstream infile(arg);
+          MT_THROW_IF(!infile.is_open(), "Unable to open: {}", arg.string());
+          std::copy_n(std::istreambuf_iterator<char>(infile.rdbuf()), 4, std::back_inserter(magic));
+          if (magic == "glTF") {
+            model = fx::gltf::LoadFromBinary(arg.string(), kQuotas);
+          } else {
+            model = fx::gltf::LoadFromText(arg.string(), kQuotas);
+          }
+        } else if constexpr (std::is_same_v<T, std::span<const std::byte>>) {
+          ispanstream inputStream(arg);
+          model = fx::gltf::LoadFromBinary(inputStream, "", kQuotas);
+        }
+      },
+      input);
+
+  return model;
+}
+
+std::string gltfLoadErrorMessage(std::string_view what) {
+  constexpr std::string_view kContext = "Unable to load gltf : ";
+  return what.starts_with(kContext) ? std::string(what) : std::string(kContext) + std::string(what);
+}
+
 namespace {
 
 // The momentum "motion" object in `extensionsAndExtras`, or nullptr.
@@ -321,7 +315,7 @@ std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Doc
     }
     return characters;
   } catch (std::runtime_error& err) {
-    MT_THROW("Unable to load gltf : {}", err.what());
+    MT_THROW("{}", gltfLoadErrorMessage(err.what()));
   }
 }
 
@@ -455,7 +449,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
   // load model, parse motion data
   // ---------------------------------------------
   try {
-    fx::gltf::Document model = loadModel(gltfFilename);
+    fx::gltf::Document model = loadGltfDocument(gltfFilename);
     return loadMotionFromModel(model);
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf from file '{}'. Error: {}", gltfFilename.string(), err.what());
@@ -464,7 +458,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
 
 std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) {
   try {
-    fx::gltf::Document model = loadModel(gltfFilename);
+    fx::gltf::Document model = loadGltfDocument(gltfFilename);
     const auto& def = findMomentumExtension(model.extensionsAndExtras);
 
     // Check if motion section exists and has timestamps
@@ -662,11 +656,11 @@ MarkerSequence loadMarkerSequenceFromModel(fx::gltf::Document model) {
 } // namespace
 
 MarkerSequence loadMarkerSequence(const filesystem::path& filename) {
-  return loadMarkerSequenceFromModel(loadModel(filename));
+  return loadMarkerSequenceFromModel(loadGltfDocument(filename));
 }
 
 MarkerSequence loadMarkerSequence(std::span<const std::byte> byteSpan) {
-  return loadMarkerSequenceFromModel(loadModel(byteSpan));
+  return loadMarkerSequenceFromModel(loadGltfDocument(byteSpan));
 }
 
 void saveGltfCharacter(
