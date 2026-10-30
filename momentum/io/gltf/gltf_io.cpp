@@ -743,6 +743,7 @@ std::vector<std::byte> saveCharacterToBytes(
       character, fps, motion, offsets, markerSequence, kEmbedResources, options, timestamps);
 
   std::ostringstream output(std::ios::binary | std::ios::out);
+  ensureDocumentHasBuffer(model);
   fx::gltf::Save(model, output, {}, true);
   const auto view = output.str();
   const auto n = view.size();

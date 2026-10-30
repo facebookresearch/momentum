@@ -828,6 +828,7 @@ void saveDocument(
   }
 
   try {
+    ensureDocumentHasBuffer(model);
     // Check if the parent directory of the file exists. If the parent directory does not exist
     // and is not an empty string (which means the file is in the current working directory),
     // create it. This is necessary because fx::gltf::Save throws an exception if the directory
