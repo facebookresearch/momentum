@@ -151,6 +151,8 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - load_gltf_with_motion_from_bytes(gltf_bytes)
   // - load_gltf_with_motion_model_parameter_scales(path)
   // - load_gltf_with_motion_model_parameter_scales_from_bytes(gltf_bytes)
+  // - load_gltf_characters_with_skel_states(gltf_filename)
+  // - load_gltf_characters_with_skel_states_from_bytes(gltf_bytes)
   // - load_gltf_with_skel_states(path)
   // - load_gltf_with_skel_states_from_bytes(gltf_bytes)
   // - load_urdf(urdf_filename)
@@ -966,6 +968,10 @@ own motion; use :meth:`load_gltf_characters_with_motion` to load every character
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
+For a multi-character file, this returns the character with the most joints, read from the first
+animation with a translation, rotation or scale channel on one of its joints; use
+:meth:`load_gltf_characters_with_skel_states` to load every character.
+
 :param gltf_bytes: The bytes of a gltf file.
 :return: a tuple [Character, skel_states, fps], where skel_states is the tensor [nFrames x nJoints x 8].
         )",
@@ -978,10 +984,43 @@ support the proprietary momentum motion format for storing model parameters in G
 and doesn't require that the Character have a valid parameter transform.  Unlike :meth:`load_gltf_with_motion`, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.
 
+For a multi-character file, this returns the character with the most joints, read from the first
+animation with a translation, rotation or scale channel on one of its joints; use
+:meth:`load_gltf_characters_with_skel_states` to load every character.
+
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, skel_states, timestamps], where skel_states is the tensor [n_frames x n_joints x 8] and timestamps is [n_frames]
           )",
           py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_characters_with_skel_states",
+          &loadGLTFCharactersWithSkelStates,
+          R"(Load every character in a gltf file with its animation as skeleton states.
+
+Multi-character counterpart of :meth:`load_gltf_with_skel_states`. It reads the standard gltf
+animation channels, so it also works for files without momentum motion. Each character is read from
+the first animation with a translation, rotation or scale channel on one of its joints, and only
+from the channels that target its joints; a character that no such animation drives comes back with
+no frames.
+
+:param gltf_filename: A .gltf/.glb file; e.g. scene.glb.
+:return: A list of per-character tuples ``(character, skel_states, timestamps)``, in the order of
+         :meth:`load_gltf_characters`, where ``skel_states`` is a numpy array of shape
+         ``(n_frames, n_joints, 8)`` and ``timestamps`` is a list of per-frame times in seconds.
+          )",
+          py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_characters_with_skel_states_from_bytes",
+          &loadGLTFCharactersWithSkelStatesFromBytes,
+          R"(Load every character with its animation as skeleton states from a gltf byte array.
+
+This is the byte-array version of :meth:`load_gltf_characters_with_skel_states`.
+
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: A list of per-character tuples ``(character, skel_states, timestamps)``, as in
+         :meth:`load_gltf_characters_with_skel_states`.
+          )",
+          py::arg("gltf_bytes"))
       .def_static(
           "load_motion_timestamps",
           &loadMotionTimestamps,
