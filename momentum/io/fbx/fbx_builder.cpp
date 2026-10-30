@@ -42,6 +42,8 @@ struct FbxBuilder::Impl {
   struct CharacterData {
     SkeletonNodeResult skeletonResult;
     MeshBlendShapeResult meshResult;
+    // The offsets of the character's last motion that had them; empty before.
+    VectorXf offsets;
   };
 
   ::fbxsdk::FbxManager* manager = nullptr;
@@ -242,7 +244,7 @@ void FbxBuilder::addMotion(
     const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
-  const auto& charData = impl_->resolveCharacterForMotion(character, characterName);
+  auto& charData = impl_->resolveCharacterForMotion(character, characterName);
 
   if (motion.cols() == 0) {
     return;
@@ -254,10 +256,14 @@ void FbxBuilder::addMotion(
       motion.rows(),
       character.parameterTransform.numAllModelParameters());
 
-  // Convert model params to joint params via CharacterState
-  CharacterParameters params;
+  // Convert model params to joint params via CharacterState. A motion without offsets uses those
+  // of the character's earlier motion, as GltfBuilder does.
   if (offsets.size() == character.parameterTransform.numJointParameters()) {
-    params.offsets = offsets;
+    charData.offsets = offsets;
+  }
+  CharacterParameters params;
+  if (charData.offsets.size() == character.parameterTransform.numJointParameters()) {
+    params.offsets = charData.offsets;
   } else {
     params.offsets = character.parameterTransform.bindPose();
   }
