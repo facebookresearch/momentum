@@ -173,6 +173,36 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
 std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
     std::span<const std::byte> byteSpan);
 
+/// Load the motion that the glTF animation channels give every character of a document, as joint
+/// parameters.
+///
+/// These are the skeleton states of @ref loadGltfCharactersWithSkeletonStates converted to joint
+/// parameters; each channel key is one frame. Files written by other tools keep their animation in
+/// these channels rather than in momentum's motion data.
+///
+/// @param[in] model The glTF document to load from.
+/// @return One motion per character, in the order of @ref loadGltfCharacters, of shape
+/// (numJointParameters x numFrames); it has no columns when no channel animates the character.
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& model);
+
+/// Load the motion that the glTF animation channels give every character of a file, as joint
+/// parameters.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] gltfFilename The path to the glTF file.
+/// @return One motion per character, in the order of @ref loadGltfCharacters.
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(const filesystem::path& gltfFilename);
+
+/// Load the motion that the glTF animation channels give every character of a byte buffer, as
+/// joint parameters.
+///
+/// See the @ref fx::gltf::Document overload.
+///
+/// @param[in] byteSpan The buffer containing the glTF data.
+/// @return One motion per character, in the order of @ref loadGltfCharacters.
+std::vector<MatrixXf> loadGltfCharactersChannelMotion(std::span<const std::byte> byteSpan);
+
 /// Load motion data from a glTF file.
 ///
 /// This function reads the document-level motion, which in a multi-character file belongs to the
