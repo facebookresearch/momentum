@@ -147,28 +147,15 @@ node in the scene with the specified name.
              const std::string& characterName) {
             // Apply same validation and transposition as
             // saveGLTFCharacterToFile
-            mm::MotionParameters transposedMotion;
             if (motion.has_value()) {
-              const auto& [parameters, poses] = motion.value();
-              MT_THROW_IF(
-                  poses.cols() != parameters.size(),
-                  "Expected motion parameters to be n_frames x {}, but got {} x {}",
-                  parameters.size(),
-                  poses.rows(),
-                  poses.cols());
-            }
-
-            mm::IdentityParameters identityParams;
-            if (offsets.has_value()) {
-              const auto& [names, params] = offsets.value();
-              identityParams = {names, params};
+              pymomentum::checkMotionShape(motion.value());
             }
 
             builder.addMotion(
                 character,
                 fps,
                 pymomentum::transpose(motion.value_or(mm::MotionParameters{})),
-                identityParams,
+                pymomentum::toIdentityParameters(offsets),
                 addExtensions,
                 customName,
                 {},
