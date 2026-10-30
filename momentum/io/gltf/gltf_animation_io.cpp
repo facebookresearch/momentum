@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <fstream>
 #include <limits>
+#include <span>
 
 namespace momentum {
 
@@ -244,15 +245,15 @@ namespace {
 size_t validateAndResolveChannel(
     const fx::gltf::Animation::Channel& channel,
     const fx::gltf::Document& model,
-    const std::vector<size_t>& nodeToObjectMap,
+    std::span<const size_t> nodeToObjectMap,
     const Skeleton& skeleton) {
   if (channel.target.node >= nodeToObjectMap.size() ||
-      nodeToObjectMap.at(channel.target.node) == kInvalidIndex) {
+      nodeToObjectMap[channel.target.node] == kInvalidIndex) {
     return kInvalidIndex;
   }
 
   // Bounds already validated above
-  const auto boneIdx = nodeToObjectMap.at(channel.target.node);
+  const auto boneIdx = nodeToObjectMap[channel.target.node];
   MT_THROW_IF(
       boneIdx >= skeleton.joints.size(),
       "Bone index {} is larger than the number of joints in the skeleton ({})",
@@ -270,8 +271,8 @@ size_t validateAndResolveChannel(
 }
 
 // Reads translation/rotation/scale data from a channel sampler and applies it to skeleton states.
-// Returns false if the channel's target path is unrecognized and should be skipped.
-bool applyChannelDataToStates(
+// A channel with an unrecognized target path is skipped.
+void applyChannelDataToStates(
     const fx::gltf::Document& model,
     const fx::gltf::Animation::Sampler& sampler,
     const std::string& targetPath,
@@ -290,7 +291,7 @@ bool applyChannelDataToStates(
   } else if (targetPath == "scale") {
     scales = copyAccessorBuffer<Vector3f>(model, sampler.output);
   } else {
-    return false;
+    return;
   }
 
   // Validate and store timestamps
@@ -347,8 +348,6 @@ bool applyChannelDataToStates(
       states[i].jointState[boneIdx].localTransform.scale = scales[i].x();
     }
   }
-
-  return true;
 }
 
 // Computes global transforms from local transforms by walking the joint hierarchy.
@@ -367,22 +366,44 @@ void computeGlobalTransforms(const Skeleton& skeleton, std::vector<SkeletonState
 
 } // namespace
 
-std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
-loadCharacterWithSkeletonStatesCommon(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
-  const fx::gltf::Document model = loadModel(input);
-  std::vector<size_t> nodeToObjectMap;
-  Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
+namespace {
 
-  if (model.animations.empty()) {
-    MT_LOGW("No animation found in gltf file");
-    return {character, {}, {}};
-  }
-  if (model.animations.size() > 1) {
-    MT_LOGW("Multiple animations found in gltf file. Only the first one will be used.");
-  }
+// Whether `channel` animates a joint transform, the only channels applyChannelDataToStates reads.
+bool isTransformChannel(const fx::gltf::Animation::Channel& channel) {
+  const auto& path = channel.target.path;
+  return path == "translation" || path == "rotation" || path == "scale";
+}
 
-  const auto& animation = model.animations.front();
+// Whether `animation` has a transform channel that targets one of `character`'s joints.
+bool animatesCharacter(
+    const fx::gltf::Document& model,
+    const fx::gltf::Animation& animation,
+    const Character& character,
+    std::span<const size_t> nodeToObjectMap) {
+  return std::ranges::any_of(animation.channels, [&](const fx::gltf::Animation::Channel& channel) {
+    return isTransformChannel(channel) &&
+        validateAndResolveChannel(channel, model, nodeToObjectMap, character.skeleton) !=
+        kInvalidIndex;
+  });
+}
+
+} // namespace
+
+const fx::gltf::Animation* findAnimationForCharacter(
+    const fx::gltf::Document& model,
+    const Character& character,
+    std::span<const size_t> nodeToObjectMap) {
+  const auto it = std::ranges::find_if(model.animations, [&](const fx::gltf::Animation& animation) {
+    return animatesCharacter(model, animation, character, nodeToObjectMap);
+  });
+  return it == model.animations.end() ? nullptr : &*it;
+}
+
+std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesForCharacter(
+    const fx::gltf::Document& model,
+    const fx::gltf::Animation& animation,
+    const Character& character,
+    std::span<const size_t> nodeToObjectMap) {
   std::vector<float> timestamps;
   std::vector<SkeletonState> states;
 
@@ -393,16 +414,41 @@ loadCharacterWithSkeletonStatesCommon(
       continue;
     }
 
-    const auto& sampler = animation.samplers[channel.sampler];
-    if (!applyChannelDataToStates(
-            model, sampler, channel.target.path, boneIdx, character, states, timestamps)) {
-      continue;
-    }
+    const auto& sampler = animation.samplers.at(channel.sampler);
+    applyChannelDataToStates(
+        model, sampler, channel.target.path, boneIdx, character, states, timestamps);
   }
 
   computeGlobalTransforms(character.skeleton, states);
+  return {std::move(states), std::move(timestamps)};
+}
 
-  return {character, states, timestamps};
+std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
+loadCharacterWithSkeletonStatesCommon(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  const fx::gltf::Document model = loadModel(input);
+  std::vector<size_t> nodeToObjectMap;
+  Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
+
+  const auto* animation = findAnimationForCharacter(model, character, nodeToObjectMap);
+  if (animation == nullptr) {
+    MT_LOGW("No animation of the character found in gltf file");
+    return {std::move(character), std::vector<SkeletonState>(), std::vector<float>()};
+  }
+  // Only the animations after the selected one can also animate the character.
+  const auto later = std::span(model.animations)
+                         .subspan(static_cast<size_t>(animation - model.animations.data()) + 1);
+  if (std::ranges::any_of(later, [&](const fx::gltf::Animation& candidate) {
+        return animatesCharacter(model, candidate, character, nodeToObjectMap);
+      })) {
+    MT_LOGW(
+        "More than one animation in the gltf file animates the character. Only the first one will "
+        "be used.");
+  }
+
+  auto [states, timestamps] =
+      loadSkeletonStatesForCharacter(model, *animation, character, nodeToObjectMap);
+  return {std::move(character), std::move(states), std::move(timestamps)};
 }
 
 } // namespace momentum
