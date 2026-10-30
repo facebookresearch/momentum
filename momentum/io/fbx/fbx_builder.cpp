@@ -8,29 +8,49 @@
 #include "momentum/io/fbx/fbx_builder.h"
 
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 
 #ifdef MOMENTUM_WITH_FBX_SDK
 
 #include "momentum/character/character.h"
 #include "momentum/character/character_state.h"
+#include "momentum/io/common/name_utils.h"
 #include "momentum/io/fbx/fbx_io_internal.h"
 
-#include <unordered_map>
+#include <span>
 
 namespace momentum {
 
 using namespace fbx_internal; // NOLINT(google-build-using-namespace)
 
+namespace {
+
+void prefixSkeletonNodeNames(const std::string& prefix, std::span<::fbxsdk::FbxNode* const> nodes) {
+  for (auto* node : nodes) {
+    MT_THROW_IF(node == nullptr, "Cannot rename a null FBX node");
+    const std::string prefixedName = prefix + ":" + node->GetName();
+    node->SetName(prefixedName.c_str());
+    if (auto* attribute = node->GetNodeAttribute()) {
+      attribute->SetName(prefixedName.c_str());
+    }
+  }
+}
+
+} // namespace
+
 struct FbxBuilder::Impl {
   struct CharacterData {
     SkeletonNodeResult skeletonResult;
     MeshBlendShapeResult meshResult;
-    std::string name;
   };
 
   ::fbxsdk::FbxManager* manager = nullptr;
   ::fbxsdk::FbxScene* scene = nullptr;
-  std::unordered_map<std::string, CharacterData> characters;
+
+  ExportedNameRegistry<CharacterData> characters;
+
+  // The namespace prefix of every node in the saved file, with its trailing ':'; empty for none.
+  std::string fbxNamespace;
 
   Impl() {
     manager = ::fbxsdk::FbxManager::Create();
@@ -54,6 +74,37 @@ struct FbxBuilder::Impl {
   Impl& operator=(const Impl&) = delete;
   Impl(Impl&&) = delete;
   Impl& operator=(Impl&&) = delete;
+
+  // The namespace prefix an add call requests, with its trailing ':'; empty for none. Throws if it
+  // differs from the namespace of the file, which an earlier call set. The call stores it only
+  // after it succeeds, so a failed call leaves the namespace unchanged.
+  [[nodiscard]] std::string checkNamespace(std::string_view requested) const {
+    if (requested.empty()) {
+      return {};
+    }
+    std::string prefix(requested);
+    if (prefix.back() != ':') {
+      prefix += ':';
+    }
+    MT_THROW_IF(
+        !fbxNamespace.empty() && fbxNamespace != prefix,
+        "FBX namespace '{}' differs from '{}', which an earlier call set; a file has one namespace.",
+        prefix,
+        fbxNamespace);
+    return prefix;
+  }
+
+  // The character an addMotion* call animates; its skeleton must match `character`.
+  CharacterData& resolveCharacterForMotion(
+      const Character& character,
+      const std::string& characterName) {
+    CharacterData* charData = characters.resolve(characterName, character.name);
+    MT_THROW_IF(
+        charData == nullptr, "Character '{}' has not been added to the builder", character.name);
+    checkMotionTargetJointCount(
+        character.name, character.skeleton.joints.size(), charData->skeletonResult.nodes.size());
+    return *charData;
+  }
 };
 
 FbxBuilder::FbxBuilder() : impl_(std::make_unique<Impl>()) {}
@@ -64,12 +115,17 @@ FbxBuilder::FbxBuilder(FbxBuilder&&) noexcept = default;
 
 FbxBuilder& FbxBuilder::operator=(FbxBuilder&&) noexcept = default;
 
-void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions& options) {
+std::string FbxBuilder::addCharacter(const Character& character, const FileSaveOptions& options) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
+  std::string namespacePrefix = impl_->checkNamespace(options.fbxNamespace);
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
+
+  // Insert into the registry only after the character is built, so a failure leaves it unchanged.
+  std::string characterName = impl_->characters.makeExportedName(character.name);
+  const bool nameWasDeduped = characterName != character.name;
 
   // Set coordinate system
   ::fbxsdk::FbxAxisSystem axis = toFbx(options.coordSystemInfo);
@@ -77,7 +133,10 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
 
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
-  addMetaData(skeletonResult.rootNode, character);
+  if (nameWasDeduped) {
+    prefixSkeletonNodeNames(characterName, skeletonResult.nodes);
+  }
+  addMetaData(skeletonResult.rootNode, character, characterName);
   addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
   if (options.locators) {
@@ -90,8 +149,10 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
   // Create mesh with blend shapes (parented to scene root = skinned)
   MeshBlendShapeResult meshResult;
   if (options.mesh && character.mesh != nullptr) {
+    // A renamed character's mesh is named after its exported name; otherwise it is "body_mesh".
+    const std::string meshName = nameWasDeduped ? characterName + "_mesh" : "body_mesh";
     meshResult = createMeshNode(
-        character, impl_->scene, root, skeletonResult.jointToNodeMap, options.permissive);
+        character, impl_->scene, root, skeletonResult.jointToNodeMap, options.permissive, meshName);
   }
 
   // Add skeleton to scene root
@@ -100,39 +161,40 @@ void FbxBuilder::addCharacter(const Character& character, const FileSaveOptions&
   }
 
   // Store character data for later animation
-  const std::string& name = character.name;
-  impl_->characters[name] = {std::move(skeletonResult), std::move(meshResult), name};
+  impl_->characters.insert(
+      characterName,
+      character.name,
+      {.skeletonResult = std::move(skeletonResult), .meshResult = std::move(meshResult)});
+  if (!namespacePrefix.empty()) {
+    impl_->fbxNamespace = std::move(namespacePrefix);
+  }
+  return characterName;
 }
 
-void FbxBuilder::addRigidBody(
+std::string FbxBuilder::addRigidBody(
     const Character& character,
     const std::string& name,
     size_t parentJoint,
     const FileSaveOptions& options) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
+  std::string namespacePrefix = impl_->checkNamespace(options.fbxNamespace);
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
-  const std::string charName = name.empty() ? character.name : name;
+  const std::string& requestedName = name.empty() ? character.name : name;
+  std::string characterName = impl_->characters.makeExportedName(requestedName);
 
   // Create skeleton hierarchy
   auto skeletonResult = createSkeletonNodes(character, impl_->scene);
-  addMetaData(skeletonResult.rootNode, character);
-  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
-
-  // Prefix skeleton joint names with charName to avoid collisions when
-  // multiple rigid bodies share the scene (e.g. "root" -> "controller_l:root").
-  if (!name.empty()) {
-    for (auto* node : skeletonResult.nodes) {
-      std::string prefixed = charName + ":" + node->GetName();
-      node->SetName(prefixed.c_str());
-      if (auto* attr = node->GetNodeAttribute()) {
-        attr->SetName(prefixed.c_str());
-      }
-    }
+  // An explicitly named or renamed rigid body prefixes its joint names with the exported name
+  // (e.g. "root" -> "controller_l:root"), so they stay unique in the scene.
+  if (!name.empty() || characterName != character.name) {
+    prefixSkeletonNodeNames(characterName, skeletonResult.nodes);
   }
+  addMetaData(skeletonResult.rootNode, character, characterName);
+  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
 
   // Resolve which joint node to parent the mesh under
   MT_THROW_IF(
@@ -147,38 +209,9 @@ void FbxBuilder::addRigidBody(
   if (options.mesh && character.mesh != nullptr) {
     // Create mesh node with vertices, normals, and UVs but no skin deformer.
     // Parent it under the target joint so it moves rigidly with that joint.
-    const auto numVertices = static_cast<int>(character.mesh->vertices.size());
     ::fbxsdk::FbxNode* meshNode =
-        ::fbxsdk::FbxNode::Create(impl_->scene, (charName + "_mesh").c_str());
-    ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, "mesh");
-    lMesh->SetControlPointCount(numVertices);
-    lMesh->InitNormals(numVertices);
-    for (int i = 0; i < numVertices; i++) {
-      FbxVector4 point(
-          character.mesh->vertices[i].x(),
-          character.mesh->vertices[i].y(),
-          character.mesh->vertices[i].z());
-      FbxVector4 normal(
-          character.mesh->normals[i].x(),
-          character.mesh->normals[i].y(),
-          character.mesh->normals[i].z());
-      lMesh->SetControlPointAt(point, normal, i);
-    }
-    writePolygonsToFbxMesh(*character.mesh, lMesh);
-    lMesh->BuildMeshEdgeArray();
-    meshNode->SetNodeAttribute(lMesh);
-
-    // Add texture coordinates
-    if (!character.mesh->texcoords.empty()) {
-      const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-      lMesh->InitTextureUV(0, uvType);
-      lMesh->InitTextureUVIndices(
-          ::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-      for (const auto& texcoords : character.mesh->texcoords) {
-        lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-      }
-      writeTextureUVIndicesToFbxMesh(*character.mesh, lMesh, uvType);
-    }
+        ::fbxsdk::FbxNode::Create(impl_->scene, (characterName + "_mesh").c_str());
+    writeMeshGeometry(*character.mesh, impl_->scene, meshNode, "mesh");
 
     // No skin deformer — parent mesh under target joint for rigid body behavior
     if (meshParentNode != nullptr) {
@@ -191,25 +224,35 @@ void FbxBuilder::addRigidBody(
     root->AddChild(skeletonResult.rootNode);
   }
 
-  impl_->characters[character.name] = {std::move(skeletonResult), std::move(meshResult), charName};
+  impl_->characters.insert(
+      characterName,
+      character.name,
+      {.skeletonResult = std::move(skeletonResult), .meshResult = std::move(meshResult)});
+  if (!namespacePrefix.empty()) {
+    impl_->fbxNamespace = std::move(namespacePrefix);
+  }
+  return characterName;
 }
 
 void FbxBuilder::addMotion(
     const Character& character,
-    float fps,
+    double fps,
     const MatrixXf& motion,
-    const VectorXf& offsets) {
+    const VectorXf& offsets,
+    const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
-  auto it = impl_->characters.find(character.name);
-  MT_THROW_IF(
-      it == impl_->characters.end(),
-      "Character '{}' has not been added to the builder",
-      character.name);
+  const auto& charData = impl_->resolveCharacterForMotion(character, characterName);
 
   if (motion.cols() == 0) {
     return;
   }
+  MT_THROW_IF(
+      motion.rows() != character.parameterTransform.numAllModelParameters(),
+      "Motion for character '{}' has {} rows, but the character has {} model parameters.",
+      character.name,
+      motion.rows(),
+      character.parameterTransform.numAllModelParameters());
 
   // Convert model params to joint params via CharacterState
   CharacterParameters params;
@@ -233,7 +276,6 @@ void FbxBuilder::addMotion(
     jointValues.col(f) = state.skeletonState.jointParameters.v;
   }
 
-  const auto& charData = it->second;
   if (jointValues.rows() == character.parameterTransform.numJointParameters()) {
     createAnimationCurves(
         character, impl_->scene, charData.skeletonResult.nodes, jointValues, fps, false);
@@ -254,21 +296,23 @@ void FbxBuilder::addMotion(
 
 void FbxBuilder::addMotionWithJointParams(
     const Character& character,
-    float fps,
-    const MatrixXf& jointParams) {
+    double fps,
+    const MatrixXf& jointParams,
+    const std::string& characterName) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
-  auto it = impl_->characters.find(character.name);
-  MT_THROW_IF(
-      it == impl_->characters.end(),
-      "Character '{}' has not been added to the builder",
-      character.name);
+  const auto& charData = impl_->resolveCharacterForMotion(character, characterName);
 
   if (jointParams.cols() == 0) {
     return;
   }
+  MT_THROW_IF(
+      jointParams.rows() != character.parameterTransform.numJointParameters(),
+      "Joint parameters for character '{}' have {} rows, but the character has {} joint parameters.",
+      character.name,
+      jointParams.rows(),
+      character.parameterTransform.numJointParameters());
 
-  const auto& charData = it->second;
   createAnimationCurves(
       character,
       impl_->scene,
@@ -314,14 +358,14 @@ void writeUserProperties(::fbxsdk::FbxNode* node, const FbxUserProperties& userP
 
 } // namespace
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Character& character,
     const std::string& name,
-    float fps,
+    double fps,
     const MatrixXf& jointParams,
     const FbxUserProperties& userProperties) {
   MT_THROW_IF(character.mesh == nullptr, "Character has no mesh");
-  addAnimatedMesh(
+  return addAnimatedMesh(
       *character.mesh,
       name,
       fps,
@@ -331,45 +375,32 @@ void FbxBuilder::addAnimatedMesh(
       userProperties);
 }
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Mesh& mesh,
     const std::string& name,
-    float fps,
+    double fps,
     const MatrixXf& jointParams,
     const Vector3f& translationOffset,
     const FbxUserProperties& userProperties) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
   MT_THROW_IF(!impl_->scene, "FBX scene is null");
   MT_THROW_IF(jointParams.cols() == 0, "jointParams is empty");
+  MT_THROW_IF(
+      jointParams.rows() < 6,
+      "jointParams has {} rows, but an animated mesh needs the 6 translation and rotation rows.",
+      jointParams.rows());
 
   auto* root = impl_->scene->GetRootNode();
   MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
 
-  // Create mesh node directly under scene root (no skeleton)
-  const auto numVertices = static_cast<int>(mesh.vertices.size());
-  ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, name.c_str());
-  ::fbxsdk::FbxMesh* lMesh = ::fbxsdk::FbxMesh::Create(impl_->scene, (name + "_geo").c_str());
-  lMesh->SetControlPointCount(numVertices);
-  lMesh->InitNormals(numVertices);
-  for (int i = 0; i < numVertices; i++) {
-    lMesh->SetControlPointAt(
-        FbxVector4(mesh.vertices[i].x(), mesh.vertices[i].y(), mesh.vertices[i].z()),
-        FbxVector4(mesh.normals[i].x(), mesh.normals[i].y(), mesh.normals[i].z()),
-        i);
-  }
-  writePolygonsToFbxMesh(mesh, lMesh);
-  lMesh->BuildMeshEdgeArray();
-  meshNode->SetNodeAttribute(lMesh);
+  // Reserve the name before the nodes exist, so a failure below cannot leave a node whose name a
+  // later character reuses.
+  const std::string meshName = impl_->characters.makeExportedName(name);
+  impl_->characters.reserve(meshName);
 
-  if (!mesh.texcoords.empty()) {
-    const fbxsdk::FbxLayerElement::EType uvType = fbxsdk::FbxLayerElement::eTextureDiffuse;
-    lMesh->InitTextureUV(0, uvType);
-    lMesh->InitTextureUVIndices(::fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex, uvType);
-    for (const auto& texcoords : mesh.texcoords) {
-      lMesh->AddTextureUV(::fbxsdk::FbxVector2(texcoords[0], 1.0f - texcoords[1]), uvType);
-    }
-    writeTextureUVIndicesToFbxMesh(mesh, lMesh, uvType);
-  }
+  // Create mesh node directly under scene root (no skeleton)
+  ::fbxsdk::FbxNode* meshNode = ::fbxsdk::FbxNode::Create(impl_->scene, meshName.c_str());
+  writeMeshGeometry(mesh, impl_->scene, meshNode, (meshName + "_geo").c_str());
 
   writeUserProperties(meshNode, userProperties);
 
@@ -398,8 +429,9 @@ void FbxBuilder::addAnimatedMesh(
       jointParamToFbx(jointParams(4, 0), 4, rootJoint),
       jointParamToFbx(jointParams(5, 0), 5, rootJoint));
   meshNode->LclRotation.Set(staticRot);
-  const Eigen::Index scaleRow = std::min(static_cast<Eigen::Index>(6), jointParams.rows() - 1);
-  const float staticScale = jointParamToFbx(jointParams(scaleRow, 0), 6, rootJoint);
+  // Without a scale row, the mesh keeps unit scale (scale parameter 0).
+  const float scaleParam = jointParams.rows() > 6 ? jointParams(6, 0) : 0.0f;
+  const float staticScale = jointParamToFbx(scaleParam, 6, rootJoint);
   meshNode->LclScaling.Set(FbxDouble3(staticScale, staticScale, staticScale));
 
   // Only create curve nodes and curves for non-constant channels to avoid
@@ -447,9 +479,13 @@ void FbxBuilder::addAnimatedMesh(
     }
     curve->KeyModifyEnd();
   }
+
+  return meshName;
 }
 
-void FbxBuilder::addMarkerSequence(float fps, std::span<const std::vector<Marker>> markerSequence) {
+void FbxBuilder::addMarkerSequence(
+    double fps,
+    std::span<const std::vector<Marker>> markerSequence) {
   MT_THROW_IF(!impl_, "FbxBuilder has been moved from or already saved");
 
   if (!markerSequence.empty()) {
@@ -471,6 +507,7 @@ void FbxBuilder::save(const filesystem::path& filename) {
       "Unable to initialize fbx exporter: {}",
       lExporter->GetStatus().GetErrorString());
 
+  prependNamespaceToAllNodes(impl_->scene->GetRootNode(), impl_->fbxNamespace);
   lExporter->Export(impl_->scene);
   lExporter->Destroy();
 
@@ -497,46 +534,52 @@ FbxBuilder::FbxBuilder(FbxBuilder&&) noexcept = default;
 
 FbxBuilder& FbxBuilder::operator=(FbxBuilder&&) noexcept = default;
 
-void FbxBuilder::addCharacter(const Character&, const FileSaveOptions&) {
+std::string FbxBuilder::addCharacter(const Character&, const FileSaveOptions&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addRigidBody(
+std::string
+FbxBuilder::addRigidBody(const Character&, const std::string&, size_t, const FileSaveOptions&) {
+  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
+}
+
+void FbxBuilder::addMotion(
+    const Character&,
+    double,
+    const MatrixXf&,
+    const VectorXf&,
+    const std::string&) {
+  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
+}
+
+void FbxBuilder::addMotionWithJointParams(
+    const Character&,
+    double,
+    const MatrixXf&,
+    const std::string&) {
+  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
+}
+
+std::string FbxBuilder::addAnimatedMesh(
     const Character&,
     const std::string&,
-    size_t,
-    const FileSaveOptions&) {
-  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
-}
-
-void FbxBuilder::addMotion(const Character&, float, const MatrixXf&, const VectorXf&) {
-  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
-}
-
-void FbxBuilder::addMotionWithJointParams(const Character&, float, const MatrixXf&) {
-  MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
-}
-
-void FbxBuilder::addAnimatedMesh(
-    const Character&,
-    const std::string&,
-    float,
+    double,
     const MatrixXf&,
     const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addAnimatedMesh(
+std::string FbxBuilder::addAnimatedMesh(
     const Mesh&,
     const std::string&,
-    float,
+    double,
     const MatrixXf&,
     const Vector3f&,
     const FbxUserProperties&) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
-void FbxBuilder::addMarkerSequence(float, std::span<const std::vector<Marker>>) {
+void FbxBuilder::addMarkerSequence(double, std::span<const std::vector<Marker>>) {
   MT_THROW("FbxBuilder requires the Autodesk FBX SDK.");
 }
 
