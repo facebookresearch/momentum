@@ -769,3 +769,31 @@ TEST(FbxBuilderTest, SkeletonWithTwoRootsKeepsBothTrees) {
   EXPECT_EQ(parents, expectedParents);
   EXPECT_EQ(loaded.name, character.name);
 }
+
+TEST(FbxBuilderTest, MotionAndMarkersKeepTheirFrameCount) {
+  const Character character = createTestCharacter(3);
+  const auto numModelParameters = character.parameterTransform.numAllModelParameters();
+  for (const double fps : {25.0, 29.95, 30.0}) {
+    for (Eigen::Index n = 1; n <= 64; ++n) {
+      Marker marker;
+      marker.name = "m";
+      marker.occluded = false;
+      const std::vector<std::vector<Marker>> markers(n, {marker});
+      const auto outFile = temporaryFile("builder_frame_count", "fbx");
+      {
+        FbxBuilder builder;
+        const std::string name = builder.addCharacter(character);
+        builder.addMotion(
+            character, fps, MatrixXf::Constant(numModelParameters, n, 0.1f), {}, name);
+        builder.addMarkerSequence(fps, markers);
+        builder.save(outFile.path());
+      }
+      const auto [characters, loadedFps] = loadFbxCharactersWithMotion(outFile.path());
+      ASSERT_EQ(characters.size(), 1);
+      ASSERT_EQ(characters[0].second.size(), 1);
+      EXPECT_EQ(characters[0].second[0].cols(), n) << n << " frames at " << fps << " fps";
+      EXPECT_EQ(loadFbxMarkerSequence(outFile.path()).frames.size(), n)
+          << n << " marker frames at " << fps << " fps";
+    }
+  }
+}

@@ -1130,6 +1130,14 @@ double getMaxSeconds(const std::vector<const ofbx::AnimationCurveNode*>& curves)
   return ofbx::fbxTimeToSeconds(fbxTime);
 }
 
+// Number of frames that cover `seconds` at `fps`. The keys of a motion at the file's frame rate sit
+// on frames up to tick and float rounding, which must not add a frame.
+size_t frameCount(const double seconds, const float fps) {
+  const double frames = seconds * fps;
+  const double nearest = std::round(frames);
+  return static_cast<size_t>(std::abs(frames - nearest) < 0.01 ? nearest : std::ceil(frames)) + 1;
+}
+
 size_t findJointIndex(
     const ofbx::Object* queryObj,
     const std::vector<const ofbx::Object*>& fbxNodes) {
@@ -1178,8 +1186,7 @@ MatrixXf parseAnimation(
   }
   MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX animation: unknown scene frame rate {}", fps);
 
-  const double totalSeconds = getMaxSeconds(skeletonAnimCurves);
-  const size_t numFrames = ceil(totalSeconds * fps) + 1;
+  const size_t numFrames = frameCount(getMaxSeconds(skeletonAnimCurves), fps);
   motion.setZero(skeleton.joints.size() * kParametersPerJoint, numFrames);
 
   MT_THROW_IF(
@@ -1394,8 +1401,7 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
   MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX markers: unknown scene frame rate {}", fps);
 
   // Determine the total number of frames based on marker animation only
-  const double totalSeconds = getMaxSeconds(markerAnimCurves);
-  const size_t numFrames = std::ceil(totalSeconds * fps) + 1;
+  const size_t numFrames = frameCount(getMaxSeconds(markerAnimCurves), fps);
   result.frames.resize(numFrames);
 
   // Parse animation curves for each marker
