@@ -453,22 +453,23 @@ std::string FbxBuilder::addAnimatedMesh(
       FBXSDK_CURVENODE_COMPONENT_Z,
   };
 
+  const auto isConstant = [&jointParams](const Eigen::Index row) {
+    return (jointParams.row(row).array() == jointParams(row, 0)).all();
+  };
+  // A transform that never changes still gets its translation x curve, so that the motion keeps its
+  // frame count.
+  bool allConstant = true;
+  for (Eigen::Index row = 0; row < std::min<Eigen::Index>(jointParams.rows(), 7); ++row) {
+    allConstant = allConstant && isConstant(row);
+  }
+
   ::fbxsdk::FbxTime time;
   for (size_t c = 0; c < 9; c++) {
     const auto paramRow = static_cast<Eigen::Index>(std::min(c, size_t(6)));
     if (paramRow >= jointParams.rows()) {
       break;
     }
-
-    bool isConstant = true;
-    const float firstVal = jointParams(paramRow, 0);
-    for (Eigen::Index f = 1; f < nFrames; f++) {
-      if (jointParams(paramRow, f) != firstVal) {
-        isConstant = false;
-        break;
-      }
-    }
-    if (isConstant) {
+    if (isConstant(paramRow) && (!allConstant || c != 0)) {
       continue;
     }
 
