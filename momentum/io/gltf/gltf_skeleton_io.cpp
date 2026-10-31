@@ -16,8 +16,8 @@
 #include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
-#include <functional>
 #include <limits>
+#include <numeric>
 #include <span>
 
 namespace momentum {
@@ -62,9 +62,9 @@ namespace {
 }
 
 // DFS the hierarchy graph to reconstruct it.
-// Along the way, save the joints, collision geometry and the locators, as well as a
-// nodeToObjectMap for query. nodeToObjectMap stores mapping from node index to joint index,
-// if the node is a joint. If it's a collision capsule or locator,
+// Along the way, save the joints, collision geometry and the locators, the node of each collision
+// shape and locator, as well as a nodeToObjectMap for query. nodeToObjectMap stores mapping from
+// node index to joint index, if the node is a joint. If it's a collision capsule or locator,
 // stores the index in the collision volume array or locator array.
 // If no node of the document is a marked joint, every node without a mesh is loaded as a joint.
 // #TODO: correctly load hierarchy from the skinning information if no momentum extension is in the
@@ -75,7 +75,9 @@ void loadHierarchyRecursive(
     size_t parentJointId,
     JointList& joints,
     CollisionGeometry_u& collision,
+    std::vector<size_t>& collisionNodes,
     LocatorList& locators,
+    std::vector<size_t>& locatorNodes,
     PhysicalProperties& physicalProperties,
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension,
@@ -112,6 +114,7 @@ void loadHierarchyRecursive(
     auto capsule = createCollisionCapsule(node, extension);
     capsule.parent = parentJointId;
     collision->push_back(capsule);
+    collisionNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = collision->size() - 1;
   } else if (type == "collision_ellipsoid") {
     // Found collision geometry, should be the end node
@@ -122,6 +125,7 @@ void loadHierarchyRecursive(
     auto ellipsoid = createCollisionEllipsoid(node, extension);
     ellipsoid.parent = parentJointId;
     collision->push_back(ellipsoid);
+    collisionNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = collision->size() - 1;
   } else if (type == "collision_box") {
     // Found collision geometry, should be the end node
@@ -132,6 +136,7 @@ void loadHierarchyRecursive(
     auto box = createCollisionBox(node, extension);
     box.parent = parentJointId;
     collision->push_back(box);
+    collisionNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = collision->size() - 1;
   } else if (type == "locator") {
     // Found locator, should be the end node
@@ -140,6 +145,7 @@ void loadHierarchyRecursive(
     Locator loc = createLocator(node, extension);
     loc.parent = parentJointId;
     locators.push_back(loc);
+    locatorNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = locators.size() - 1;
   } else if ((!useExtension && (node.mesh < 0)) || type == "skeleton_joint") {
     Joint joint = createJoint(node);
@@ -167,12 +173,34 @@ void loadHierarchyRecursive(
         newParentJointId,
         joints,
         collision,
+        collisionNodes,
         locators,
+        locatorNodes,
         physicalProperties,
         nodeToObjectMap,
         useExtension,
         visited);
   }
+}
+
+// Orders the collision shapes or locators `items` by parent joint, keeping their order within a
+// joint, and points the entry of each one's node (`itemNodes`) in `nodeToObjectMap` at its new
+// index. Sorts indices: MSVC's stable sort rejects the 16-byte aligned CollisionPrimitive.
+template <typename T>
+void sortByParentJoint(
+    std::vector<T>& items,
+    std::span<const size_t> itemNodes,
+    std::span<size_t> nodeToObjectMap) {
+  std::vector<size_t> order(items.size());
+  std::iota(order.begin(), order.end(), size_t{0});
+  std::ranges::stable_sort(order, {}, [&items](size_t i) { return items[i].parent; });
+  std::vector<T> sorted;
+  sorted.reserve(items.size());
+  for (const size_t i : order) {
+    nodeToObjectMap[itemNodes[i]] = sorted.size();
+    sorted.push_back(std::move(items[i]));
+  }
+  items = std::move(sorted);
 }
 
 } // namespace
@@ -450,7 +478,9 @@ loadHierarchyForRoots(
     uint32_t characterRootNode) {
   JointList joints;
   auto collision = std::make_unique<CollisionGeometry>();
+  std::vector<size_t> collisionNodes;
   LocatorList locators;
+  std::vector<size_t> locatorNodes;
   PhysicalProperties physicalProperties;
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
   // GltfBuilder marks every joint when it writes the momentum extension, and writes a
@@ -465,7 +495,9 @@ loadHierarchyForRoots(
         kInvalidIndex,
         joints,
         collision,
+        collisionNodes,
         locators,
+        locatorNodes,
         physicalProperties,
         nodeToObjectMap,
         useExtension,
@@ -480,12 +512,8 @@ loadHierarchyForRoots(
 
   // Order the collision geometry and the locators by parent joint, keeping the file order within a
   // joint, as the FBX loader does. Every one has a parent joint (see loadHierarchyRecursive).
-  // Sorts references: MSVC's stable sort rejects the 16-byte aligned CollisionPrimitive.
-  std::vector<std::reference_wrapper<const CollisionPrimitive>> shapes(
-      collision->begin(), collision->end());
-  std::ranges::stable_sort(shapes, {}, &CollisionPrimitive::parent);
-  *collision = CollisionGeometry(shapes.begin(), shapes.end());
-  std::ranges::stable_sort(locators, {}, &Locator::parent);
+  sortByParentJoint(*collision, collisionNodes, nodeToObjectMap);
+  sortByParentJoint(locators, locatorNodes, nodeToObjectMap);
   // remove the collision geometry if it was empty to begin with
   if (collision->empty()) {
     collision.reset();
