@@ -31,6 +31,7 @@
 #include <ofbx.h>
 #include <gsl/span_ext>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <exception>
@@ -41,6 +42,7 @@
 #include <set>
 #include <span>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 
 namespace momentum {
@@ -1641,6 +1643,17 @@ Character buildCharacterFromParse(
     KeepLocators keepLocators,
     const ParameterTransform& parameterTransform) {
   cp.mesh.updateNormals();
+  // Order the locators and the collision geometry by parent joint, keeping the file order within a
+  // joint, as the glTF loader does; parseSkeleton finds them in depth-first order, the locators of
+  // a joint after those of its child joints. Collision shapes without a parent joint come first.
+  std::ranges::stable_sort(cp.locators, {}, &Locator::parent);
+  // Sorts references: MSVC's stable sort rejects the 16-byte aligned CollisionPrimitive.
+  std::vector<std::reference_wrapper<const CollisionPrimitive>> shapes(
+      cp.collision.begin(), cp.collision.end());
+  std::ranges::stable_sort(shapes, {}, [](const CollisionPrimitive& shape) {
+    return std::pair(shape.parent != kInvalidIndex, shape.parent);
+  });
+  cp.collision = CollisionGeometry(shapes.begin(), shapes.end());
   Character character(
       cp.skeleton,
       parameterTransform,

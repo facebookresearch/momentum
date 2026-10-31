@@ -16,6 +16,7 @@
 #include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <span>
 
@@ -477,19 +478,14 @@ loadHierarchyForRoots(
   std::string name =
       characterRootNode < model.nodes.size() ? model.nodes[characterRootNode].name : std::string();
 
-  std::sort(collision->begin(), collision->end(), [](const auto& c1, const auto& c2) {
-    int c1Parent = c1.parent == kInvalidIndex ? -1 : static_cast<int>(c1.parent);
-    int c2Parent = c2.parent == kInvalidIndex ? -1 : static_cast<int>(c2.parent);
-    if (c1Parent != c2Parent) {
-      return c1Parent < c2Parent;
-    }
-    return static_cast<int>(c1.type) < static_cast<int>(c2.type);
-  });
-  std::sort(locators.begin(), locators.end(), [](const Locator& l1, const Locator& l2) {
-    int l1Parent = l1.parent == kInvalidIndex ? -1 : static_cast<int>(l1.parent);
-    int l2Parent = l2.parent == kInvalidIndex ? -1 : static_cast<int>(l2.parent);
-    return l1Parent < l2Parent;
-  });
+  // Order the collision geometry and the locators by parent joint, keeping the file order within a
+  // joint, as the FBX loader does. Every one has a parent joint (see loadHierarchyRecursive).
+  // Sorts references: MSVC's stable sort rejects the 16-byte aligned CollisionPrimitive.
+  std::vector<std::reference_wrapper<const CollisionPrimitive>> shapes(
+      collision->begin(), collision->end());
+  std::ranges::stable_sort(shapes, {}, &CollisionPrimitive::parent);
+  *collision = CollisionGeometry(shapes.begin(), shapes.end());
+  std::ranges::stable_sort(locators, {}, &Locator::parent);
   // remove the collision geometry if it was empty to begin with
   if (collision->empty()) {
     collision.reset();
