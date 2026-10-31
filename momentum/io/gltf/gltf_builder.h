@@ -58,6 +58,9 @@ class GltfBuilder final {
   /// name as the parent of the skeleton root and the character mesh.
   /// positionOffset and rotationOffset can be provided as an initial offset to the character.
   ///
+  /// Give every character of a file the same FileSaveOptions::extensions value: when some character
+  /// of the file has the momentum extension, the loaders read only the characters that have it.
+  ///
   /// @return The unique name the character is exported under (see the class notes).
   std::string addCharacter(
       const Character& character,
@@ -115,7 +118,8 @@ class GltfBuilder final {
   /// the skeleton states, the character will be automatically added with the default settings.
   ///
   /// Skeleton states replace the channels of the character's joints in the animation named
-  /// @p customName. The blend-shape weights channel that an earlier addMotion() wrote stays.
+  /// @p customName. The blend-shape weights channel and the model parameters that an earlier
+  /// addMotion() wrote for the character stay.
   ///
   /// @param[in] fps Frame rate of the skeleton states in frames per second; see setFps(). The
   /// animation keys are stored in seconds, so the skeleton states keep their timing even if the
@@ -131,6 +135,9 @@ class GltfBuilder final {
       const std::string& characterName = "");
 
   /// Add marker data to the file
+  ///
+  /// Observations with a confidence below 0.001 are left out; the confidence of the others is
+  /// stored.
   ///
   /// @param[in] fps The frame rate of the motion capture data in frames per second; see setFps().
   /// @param[in] markerSequence A 2D vector specifying the Marker data (name/position/occlusion) for

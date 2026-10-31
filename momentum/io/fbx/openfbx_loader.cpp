@@ -1206,7 +1206,7 @@ MatrixXf parseAnimation(
 
   std::vector<bool> writtenJoints(skeleton.joints.size() * kParametersPerJoint, false);
 
-  // Curves on the same node will be added together.
+  // When several curve nodes animate one parameter, the last one read sets it (with a warning).
   for (const ofbx::AnimationCurveNode* curveNode : skeletonAnimCurves) {
     // Find the skeleton joint
     const size_t jointIndex = findJointIndex(curveNode->getBone(), boneFbxNodes);
