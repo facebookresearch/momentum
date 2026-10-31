@@ -57,6 +57,14 @@ Character loadFbxCharacter(
 /// @note The name comes from the root joint's `name` property when present, otherwise from the root
 /// node name. The singular loader leaves the name empty when that property is absent.
 ///
+/// @note The joints come in the depth-first order of the file's hierarchy, so a character whose
+/// joints were in another order when it was written comes back reordered, each joint with its name
+/// and parent. The locators and collision shapes come ordered by parent joint, in file order within
+/// a joint. Collision shapes without a parent joint, at the top of the file's hierarchy, are not
+/// read; loadFbxCharacter() reads them, before the other collision shapes. A character written with
+/// several root joints comes back as one character per root, and these loaders throw when its mesh
+/// is skinned to joints under several roots; loadFbxCharacter() reads it as one character.
+///
 /// @param inputPath Path to the FBX file.
 /// @param keepLocators Turns Nulls in the transform hierarchy into Locators when Yes.
 /// @param permissive When Yes, loads joints with unsupported rotation settings and skips a mesh
