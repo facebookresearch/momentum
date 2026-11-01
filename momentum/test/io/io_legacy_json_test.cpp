@@ -19,6 +19,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <array>
+
 using namespace momentum;
 
 class LegacyJsonIOTest : public ::testing::Test {
@@ -178,6 +180,79 @@ TEST_F(LegacyJsonIOTest, RoundTripConversion) {
   // Verify collision geometry
   ASSERT_NE(roundTripCharacter.collision, nullptr);
   compareCollisionGeometry(testCharacter_.collision, roundTripCharacter.collision);
+}
+
+TEST_F(LegacyJsonIOTest, InvalidSkinningOffsetsAreIgnored) {
+  const std::vector<nlohmann::json> invalidOffsets = {
+      nlohmann::json::array(),
+      nlohmann::json::array({0, 2, 1, 3}),
+      nlohmann::json::array({0, 4}),
+      nlohmann::json::array({0, 1, 2}),
+  };
+
+  for (const auto& offsets : invalidOffsets) {
+    SCOPED_TRACE(offsets.dump());
+    nlohmann::json legacyJson = characterToLegacyJson(testCharacter_);
+    legacyJson["SkinnedModel"]["SkinningOffsets"] = offsets;
+
+    const Character character = loadCharacterFromLegacyJsonString(legacyJson.dump());
+
+    ASSERT_NE(character.skinWeights, nullptr);
+    ASSERT_NE(character.mesh, nullptr);
+    EXPECT_EQ(
+        character.skinWeights->index.rows(),
+        static_cast<Eigen::Index>(character.mesh->vertices.size()));
+    EXPECT_EQ(
+        character.skinWeights->weight.rows(),
+        static_cast<Eigen::Index>(character.mesh->vertices.size()));
+    EXPECT_TRUE(character.skinWeights->index.isZero());
+    EXPECT_TRUE(character.skinWeights->weight.isZero());
+  }
+}
+
+TEST_F(LegacyJsonIOTest, MalformedSkinningWeightPairsAreDiscarded) {
+  nlohmann::json legacyJson = characterToLegacyJson(testCharacter_);
+  auto& skinnedModel = legacyJson["SkinnedModel"];
+  skinnedModel["SkinningWeights"] = nlohmann::json::array(
+      {nlohmann::json::array({2.0f, 0.6f}),
+       nlohmann::json::array({3}),
+       nlohmann::json::array({-1, 0.2f}),
+       nlohmann::json::array({4, "invalid"})});
+  skinnedModel["SkinningOffsets"] = nlohmann::json::array({0, 4, 4, 4});
+
+  const Character character = loadCharacterFromLegacyJsonString(legacyJson.dump());
+
+  ASSERT_NE(character.skinWeights, nullptr);
+  EXPECT_EQ(character.skinWeights->index(0, 0), 2);
+  EXPECT_FLOAT_EQ(character.skinWeights->weight(0, 0), 0.6f);
+  EXPECT_TRUE(character.skinWeights->index.row(0).tail<kMaxSkinJoints - 1>().isZero());
+  EXPECT_TRUE(character.skinWeights->weight.row(0).tail<kMaxSkinJoints - 1>().isZero());
+}
+
+TEST_F(LegacyJsonIOTest, SkinningWeightsAreCanonicalized) {
+  nlohmann::json legacyJson = characterToLegacyJson(testCharacter_);
+  auto& skinnedModel = legacyJson["SkinnedModel"];
+  skinnedModel["SkinningWeights"] = nlohmann::json::array(
+      {nlohmann::json::array({0, 0.01f}),
+       nlohmann::json::array({1, 0.20f}),
+       nlohmann::json::array({2, 0.02f}),
+       nlohmann::json::array({0, 0.18f}),
+       nlohmann::json::array({1, 0.03f}),
+       nlohmann::json::array({2, 0.16f}),
+       nlohmann::json::array({0, 0.04f}),
+       nlohmann::json::array({1, 0.14f}),
+       nlohmann::json::array({2, 0.05f}),
+       nlohmann::json::array({0, 0.17f})});
+  skinnedModel["SkinningOffsets"] = nlohmann::json::array({0, 10, 10, 10});
+
+  const Character character = loadCharacterFromLegacyJsonString(legacyJson.dump());
+
+  ASSERT_NE(character.skinWeights, nullptr);
+  const std::array<uint32_t, kMaxSkinJoints> expectedIndices = {1, 0, 0, 2, 1, 2, 0, 1};
+  for (size_t i = 0; i < expectedIndices.size(); ++i) {
+    EXPECT_EQ(character.skinWeights->index(0, i), expectedIndices[i]);
+  }
+  EXPECT_NEAR(character.skinWeights->weight.row(0).sum(), 0.97f, 1e-6f);
 }
 
 TEST_F(LegacyJsonIOTest, SkeletonOnlyConversion) {

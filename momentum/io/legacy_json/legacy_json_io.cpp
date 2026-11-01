@@ -21,7 +21,10 @@
 #include <momentum/math/mesh.h>
 #include <momentum/math/transform.h>
 #include <momentum/math/types.h>
+#include <cmath>
+#include <cstdint>
 #include <fstream>
+#include <limits>
 #include <sstream>
 
 namespace momentum {
@@ -281,21 +284,102 @@ std::pair<Mesh, SkinWeights> legacySkinnedModelToMomentum(
     const auto& skinningOffsets = *skinningOffsetsItr;
 
     if (skinningWeights.is_array() && skinningOffsets.is_array()) {
-      const size_t numVertices = skinningOffsets.size() - 1;
-      skinWeights.index = IndexMatrix::Zero(numVertices, kMaxSkinJoints);
-      skinWeights.weight = WeightMatrix::Zero(numVertices, kMaxSkinJoints);
+      std::vector<size_t> offsets;
+      bool validOffsets = !skinningOffsets.empty();
+      if (!validOffsets) {
+        MT_LOGW("Ignoring skin weights because SkinningOffsets is empty");
+      }
 
-      for (size_t i = 0; i < numVertices; ++i) {
-        size_t start = skinningOffsets[i].get<size_t>();
-        size_t end = skinningOffsets[i + 1].get<size_t>();
-        size_t numInfluences = std::min(end - start, static_cast<size_t>(kMaxSkinJoints));
-
-        for (size_t j = 0; j < numInfluences; ++j) {
-          const auto& pair = skinningWeights[start + j];
-          // Each pair is [joint index, skinning weight]
-          skinWeights.index(i, j) = pair[0].get<uint32_t>();
-          skinWeights.weight(i, j) = pair[1].get<float>();
+      offsets.reserve(skinningOffsets.size());
+      for (size_t i = 0; validOffsets && i < skinningOffsets.size(); ++i) {
+        const auto& offsetValue = skinningOffsets[i];
+        if (!offsetValue.is_number_integer() ||
+            (!offsetValue.is_number_unsigned() && offsetValue.get<int64_t>() < 0)) {
+          MT_LOGW(
+              "Ignoring skin weights because SkinningOffsets[{}] is not a non-negative integer", i);
+          validOffsets = false;
+          break;
         }
+
+        const uint64_t offset = offsetValue.get<uint64_t>();
+        if (offset > skinningWeights.size()) {
+          MT_LOGW(
+              "Ignoring skin weights because SkinningOffsets[{}] ({}) exceeds the number of "
+              "SkinningWeights ({})",
+              i,
+              offset,
+              skinningWeights.size());
+          validOffsets = false;
+          break;
+        }
+        if (!offsets.empty() && offset < offsets.back()) {
+          MT_LOGW(
+              "Ignoring skin weights because SkinningOffsets is not non-decreasing at index {} "
+              "({} follows {})",
+              i,
+              offset,
+              offsets.back());
+          validOffsets = false;
+          break;
+        }
+        offsets.push_back(static_cast<size_t>(offset));
+      }
+
+      if (validOffsets && offsets.size() - 1 != mesh.vertices.size()) {
+        MT_LOGW(
+            "Ignoring skin weights because SkinningOffsets describes {} vertices but the mesh has "
+            "{}",
+            offsets.size() - 1,
+            mesh.vertices.size());
+        validOffsets = false;
+      }
+
+      if (validOffsets) {
+        const size_t numVertices = offsets.size() - 1;
+        std::vector<std::vector<size_t>> indices(numVertices);
+        std::vector<std::vector<float>> weights(numVertices);
+
+        size_t invalidPairCount = 0;
+        for (size_t i = 0; i < numVertices; ++i) {
+          const size_t start = offsets.at(i);
+          const size_t end = offsets.at(i + 1);
+          indices.at(i).reserve(end - start);
+          weights.at(i).reserve(end - start);
+
+          for (size_t j = start; j < end; ++j) {
+            const auto& pair = skinningWeights.at(j);
+            if (!pair.is_array() || pair.size() < 2) {
+              ++invalidPairCount;
+              continue;
+            }
+
+            const auto& jointIndex = pair.at(0);
+            const auto& jointWeight = pair.at(1);
+            if (!jointIndex.is_number() || !jointWeight.is_number()) {
+              ++invalidPairCount;
+              continue;
+            }
+
+            const double jointIndexValue = jointIndex.get<double>();
+            if (!std::isfinite(jointIndexValue) || jointIndexValue < 0.0 ||
+                jointIndexValue > std::numeric_limits<uint32_t>::max() ||
+                std::trunc(jointIndexValue) != jointIndexValue) {
+              ++invalidPairCount;
+              continue;
+            }
+
+            indices.at(i).push_back(static_cast<size_t>(jointIndexValue));
+            weights.at(i).push_back(jointWeight.get<float>());
+          }
+        }
+        if (invalidPairCount > 0) {
+          MT_LOGW("Discarded {} malformed SkinningWeights entries", invalidPairCount);
+        }
+        skinWeights.set(indices, weights);
+      } else {
+        std::vector<std::vector<size_t>> indices(mesh.vertices.size());
+        std::vector<std::vector<float>> weights(mesh.vertices.size());
+        skinWeights.set(indices, weights);
       }
     }
   }
