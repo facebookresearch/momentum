@@ -872,7 +872,7 @@ void floodFillExterior(SignedDistanceField<ScalarType>& sdf) {
     const size_t idx = linearIdx(i, j, k);
     if (!visited[idx] && data[idx] >= ScalarType{0}) {
       visited[idx] = true;
-      queue.push({i, j, k});
+      queue.emplace(i, j, k);
     }
   };
 
@@ -918,7 +918,7 @@ void floodFillExterior(SignedDistanceField<ScalarType>& sdf) {
         const size_t nIdx = linearIdx(ni, nj, nk);
         if (!visited[nIdx] && data[nIdx] >= ScalarType{0}) {
           visited[nIdx] = true;
-          queue.push({ni, nj, nk});
+          queue.emplace(ni, nj, nk);
         }
       }
     }
