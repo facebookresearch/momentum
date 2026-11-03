@@ -826,6 +826,19 @@ if(MOMENTUM_BUILD_RERUN)
       rerun_eigen_adapters
       axel
   )
+
+  mt_library(
+    NAME rerun_sink
+    HEADERS_VARS
+      rerun_sink_public_headers
+    SOURCES_VARS
+      rerun_sink_sources
+    PUBLIC_LINK_LIBRARIES
+      rerun
+      CLI11::CLI11
+    PRIVATE_LINK_LIBRARIES
+      common
+  )
 endif()
 
 #===============================================================================
@@ -1160,6 +1173,14 @@ if(MOMENTUM_BUILD_TESTING)
         rerun
         rerun_eigen_adapters
     )
+
+    mt_test(
+      NAME rerun_sink_test
+      SOURCES_VARS rerun_sink_test_sources
+      LINK_LIBRARIES
+        io_test_helper
+        rerun_sink
+    )
   endif()
 endif()
 
@@ -1192,6 +1213,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_gltf
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
@@ -1202,6 +1224,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_fbx
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
@@ -1212,6 +1235,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_marker
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
@@ -1222,6 +1246,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_urdf
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
@@ -1232,6 +1257,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_bvh
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
@@ -1283,6 +1309,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
       LINK_LIBRARIES
         io_usd
         rerun
+        rerun_sink
         CLI11::CLI11
         rerun_sdk
     )
