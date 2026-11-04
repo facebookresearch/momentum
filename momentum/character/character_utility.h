@@ -31,6 +31,19 @@ enum class CharacterMassScale {
     const JointPhysicalProperties& properties,
     const Skeleton& skeleton);
 
+/// Resolves every physical properties entry to its skeleton joint (see
+/// resolvePhysicalPropertiesJointIndex()), as file writers need before they attach each entry to
+/// its joint.
+///
+/// @param physicalProperties The entries to resolve.
+/// @param skeleton The skeleton the entries refer to.
+/// @return The joint index of every entry, in entry order.
+/// @throws std::runtime_error if an entry resolves to no joint, or two entries resolve to the same
+/// joint (a joint has at most one body).
+[[nodiscard]] std::vector<size_t> resolvePhysicalPropertiesJointIndices(
+    const PhysicalProperties& physicalProperties,
+    const Skeleton& skeleton);
+
 /// Scales the character (mesh and skeleton) by the desired amount.
 ///
 /// Note that this should primarily be used when transforming the character into different units. If
