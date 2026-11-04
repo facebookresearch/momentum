@@ -41,19 +41,19 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
-template <typename T>
-std::span<const T> toSpan(const pybind11::bytes& bytes) {
-  pybind11::gil_scoped_acquire acquire;
-  py::buffer_info info(py::buffer(bytes).request());
-  const T* data = reinterpret_cast<const T*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
+constexpr momentum::KeepLocators keepLocators = momentum::KeepLocators::Yes;
 
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+namespace {
 
-  return std::span<const T>(data, length);
+momentum::Permissive toPermissive(bool permissive) {
+  return permissive ? momentum::Permissive::Yes : momentum::Permissive::No;
 }
 
-constexpr momentum::KeepLocators keepLocators = momentum::KeepLocators::Yes;
+momentum::LoadBlendShapes toLoadBlendShapes(bool loadBlendShapes) {
+  return loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No;
+}
+
+} // namespace
 
 momentum::Character loadFBXCharacterFromFile(
     const std::string& fbxPath,
@@ -65,8 +65,8 @@ momentum::Character loadFBXCharacterFromFile(
   momentum::Character result = momentum::loadFbxCharacter(
       filesystem::path(fbxPath),
       keepLocators,
-      permissive ? momentum::Permissive::Yes : momentum::Permissive::No,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
       stripNamespaces);
   if (configPath && !configPath->empty()) {
     result = loadConfigFromFile(result, *configPath);
@@ -98,8 +98,8 @@ loadFBXCharacterWithMotionFromFile(
   auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       filesystem::path(fbxPath),
       keepLocators,
-      permissive ? momentum::Permissive::Yes : momentum::Permissive::No,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
       stripNamespaces);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
@@ -114,8 +114,8 @@ loadFBXCharacterWithMotionFromBytes(
   auto [character, motion, fps] = momentum::loadFbxCharacterWithMotion(
       toSpan<std::byte>(fbxBytes),
       keepLocators,
-      permissive ? momentum::Permissive::Yes : momentum::Permissive::No,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
       stripNamespaces);
   transposeMotionInPlace(motion);
   return {character, motion, fps};
@@ -166,9 +166,102 @@ momentum::Character loadFBXCharacterFromBytes(
   return momentum::loadFbxCharacter(
       toSpan<std::byte>(bytes),
       keepLocators,
-      permissive ? momentum::Permissive::Yes : momentum::Permissive::No,
-      loadBlendShapes ? momentum::LoadBlendShapes::Yes : momentum::LoadBlendShapes::No,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
       stripNamespaces);
+}
+
+std::vector<momentum::Character> loadFBXCharactersFromFile(
+    const std::string& fbxPath,
+    bool permissive,
+    bool loadBlendShapes,
+    bool stripNamespaces) {
+  return momentum::loadFbxCharacters(
+      filesystem::path(fbxPath),
+      keepLocators,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
+      stripNamespaces);
+}
+
+std::vector<momentum::Character> loadFBXCharactersFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive,
+    bool loadBlendShapes,
+    bool stripNamespaces) {
+  return momentum::loadFbxCharacters(
+      toSpan<std::byte>(bytes),
+      keepLocators,
+      toPermissive(permissive),
+      toLoadBlendShapes(loadBlendShapes),
+      stripNamespaces);
+}
+
+namespace {
+
+using CharactersWithMotion =
+    std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>;
+
+// Transposes every motion to (numFrames x numJointParameters), as the singular loaders do.
+CharactersWithMotion transposeCharacterMotions(CharactersWithMotion&& loaded) {
+  for (auto& characterWithMotion : std::get<0>(loaded)) {
+    transposeMotionInPlace(characterWithMotion.second);
+  }
+  return std::move(loaded);
+}
+
+} // namespace
+
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromFile(
+    const std::string& fbxPath,
+    bool permissive,
+    bool loadBlendShapes,
+    bool stripNamespaces) {
+  return transposeCharacterMotions(
+      momentum::loadFbxCharactersWithMotion(
+          filesystem::path(fbxPath),
+          keepLocators,
+          toPermissive(permissive),
+          toLoadBlendShapes(loadBlendShapes),
+          stripNamespaces));
+}
+
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive,
+    bool loadBlendShapes,
+    bool stripNamespaces) {
+  return transposeCharacterMotions(
+      momentum::loadFbxCharactersWithMotion(
+          toSpan<std::byte>(bytes),
+          keepLocators,
+          toPermissive(permissive),
+          toLoadBlendShapes(loadBlendShapes),
+          stripNamespaces));
+}
+
+std::vector<std::optional<RowMatrixf>> toFrameMajorMotions(
+    const std::vector<Eigen::MatrixXf>& motions) {
+  std::vector<std::optional<RowMatrixf>> result;
+  result.reserve(motions.size());
+  for (const auto& motion : motions) {
+    if (motion.cols() == 0) {
+      result.emplace_back(std::nullopt);
+    } else {
+      result.emplace_back(RowMatrixf(motion.transpose()));
+    }
+  }
+  return result;
+}
+
+std::vector<std::optional<RowMatrixf>> joinFbxTakesOnSharedTimeline(
+    std::vector<std::vector<Eigen::MatrixXf>> takesPerCharacter) {
+  for (auto& takes : takesPerCharacter) {
+    transposeMotionInPlace(takes);
+  }
+  return toFrameMajorMotions(momentum::joinTakesOnSharedTimeline(takesPerCharacter));
 }
 
 momentum::Character loadConfigFromBytes(
