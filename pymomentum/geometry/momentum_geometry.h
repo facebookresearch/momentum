@@ -8,12 +8,14 @@
 #pragma once
 
 #include <momentum/character/character.h>
+#include <momentum/common/exception.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/math/mppca.h>
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
+#include <span>
 #include <string>
 
 namespace pymomentum {
@@ -22,6 +24,23 @@ using RowMatrixf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 using RowMatrixd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 using RowMatrixi = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 using RowMatrixb = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+/// View the contents of a Python bytes object as a span, for handing to a momentum loader.
+///
+/// Acquires the GIL before touching the buffer protocol, so this is safe to call from bindings
+/// registered with `py::call_guard<py::gil_scoped_release>()`. The returned span points into the
+/// bytes object and is only valid while the caller keeps it alive.
+template <typename T>
+std::span<const T> toSpan(const pybind11::bytes& bytes) {
+  pybind11::gil_scoped_acquire acquire;
+  pybind11::buffer_info info(pybind11::buffer(bytes).request());
+  const T* data = reinterpret_cast<const T*>(info.ptr);
+  const auto length = static_cast<size_t>(info.size);
+
+  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+
+  return std::span<const T>(data, length);
+}
 
 momentum::Character loadFBXCharacterFromFile(
     const std::string& fbxPath,
@@ -56,6 +75,52 @@ momentum::Character loadFBXCharacterFromBytes(
     bool permissive = false,
     bool loadBlendShapes = false,
     bool stripNamespaces = true);
+
+/// Load every character of an FBX file; see momentum::loadFbxCharacters().
+std::vector<momentum::Character> loadFBXCharactersFromFile(
+    const std::string& fbxPath,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an in-memory FBX file; see momentum::loadFbxCharacters().
+std::vector<momentum::Character> loadFBXCharactersFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an FBX file with its motion; see
+/// momentum::loadFbxCharactersWithMotion(). Each motion is transposed to (numFrames x
+/// numJointParameters).
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromFile(
+    const std::string& fbxPath,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an in-memory FBX file with its motion; see
+/// momentum::loadFbxCharactersWithMotion(). Each motion is transposed to
+/// (numFrames x numJointParameters).
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Each motion (numJointParameters x numFrames) transposed to (numFrames x numJointParameters), as
+/// Python takes motions; a motion without frames becomes std::nullopt.
+std::vector<std::optional<RowMatrixf>> toFrameMajorMotions(
+    const std::vector<Eigen::MatrixXf>& motions);
+
+/// Join the takes of every character into one motion each; see
+/// momentum::joinTakesOnSharedTimeline(). Takes and motions are (numFrames x numJointParameters);
+/// a character that no take animates gets std::nullopt.
+std::vector<std::optional<RowMatrixf>> joinFbxTakesOnSharedTimeline(
+    std::vector<std::vector<Eigen::MatrixXf>> takesPerCharacter);
+
 momentum::Character loadLocatorsFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes);
