@@ -30,6 +30,13 @@ using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>
 /// and motions for each character.
 /// By default, momentum extension is added to the glb nodes. This is required if you
 /// want to correctly load the exported character back.
+///
+/// @note addCharacter() exports each character under a unique name: character.name, with a numeric
+/// suffix when that name is already in use. Pass the returned name as `characterName` to
+/// addMotion() and addSkeletonStates() to target that character; an empty `characterName` targets
+/// the character added from character.name that kept that name, or else the first one added from
+/// character.name.
+/// loadGltfCharacters() reads every character back under its exported name.
 class GltfBuilder final {
  public:
   GltfBuilder();
@@ -50,7 +57,9 @@ class GltfBuilder final {
   /// Add a character to the scene. Each character will have a root node with the character's
   /// name as the parent of the skeleton root and the character mesh.
   /// positionOffset and rotationOffset can be provided as an initial offset to the character.
-  void addCharacter(
+  ///
+  /// @return The unique name the character is exported under (see the class notes).
+  std::string addCharacter(
       const Character& character,
       const Vector3f& positionOffset = Vector3f::Zero(),
       const Quaternionf& rotationOffset = Quaternionf::Identity(),
@@ -71,6 +80,9 @@ class GltfBuilder final {
   /// @param[in] addExtensions Whether to add momentum extensions to the document.
   /// @param[in] customName Custom name for the animation (default is "default").
   /// @param[in] timestamps Per-frame timestamps. Size should match motion columns.
+  /// @param[in] characterName Name returned by addCharacter() of the character to animate. When
+  /// empty, the character added from character.name that kept that name, or else the first one
+  /// added from character.name, which is added with default settings if there is none.
   void addMotion(
       const Character& character,
       float fps = 120.0f,
@@ -78,15 +90,19 @@ class GltfBuilder final {
       const IdentityParameters& offsets = {},
       bool addExtensions = true,
       const std::string& customName = "default",
-      std::span<const int64_t> timestamps = {});
+      std::span<const int64_t> timestamps = {},
+      const std::string& characterName = "");
 
   /// Add a skeleton states to the provided character. If addCharacter is not called before adding
   /// the skeleton states, the character will be automatically added with the default settings.
+  ///
+  /// @param[in] characterName Name of the character to animate; see addMotion().
   void addSkeletonStates(
       const Character& character,
       float fps,
       std::span<const SkeletonState> skeletonStates,
-      const std::string& customName = "default");
+      const std::string& customName = "default",
+      const std::string& characterName = "");
 
   /// Add marker data to the file
   ///
