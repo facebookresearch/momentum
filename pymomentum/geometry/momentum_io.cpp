@@ -27,18 +27,39 @@ momentum::Character loadGLTFCharacterFromFile(const std::string& path) {
 }
 
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes) {
-  pybind11::buffer_info info(pybind11::buffer(bytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
+  return momentum::loadGltfCharacter(toSpan<std::byte>(bytes));
+}
 
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
+std::vector<momentum::Character> loadGLTFCharactersFromFile(const std::string& path) {
+  return momentum::loadGltfCharacters(path);
+}
 
-  return momentum::loadGltfCharacter(std::span<const std::byte>(data, length));
+std::vector<momentum::Character> loadGLTFCharactersFromBytes(const pybind11::bytes& bytes) {
+  return momentum::loadGltfCharacters(toSpan<std::byte>(bytes));
 }
 
 momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters) {
   const auto& [parameters, poses] = motionParameters;
   return {parameters, poses.transpose()};
+}
+
+void checkMotionShape(const momentum::MotionParameters& motion) {
+  const auto& [parameters, poses] = motion;
+  MT_THROW_IF(
+      poses.cols() != static_cast<Eigen::Index>(parameters.size()),
+      "Expected motion parameters to be n_frames x {}, but got {} x {}",
+      parameters.size(),
+      poses.rows(),
+      poses.cols());
+}
+
+momentum::IdentityParameters toIdentityParameters(
+    const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets) {
+  if (!offsets.has_value()) {
+    return {};
+  }
+  const auto& [names, params] = offsets.value();
+  return {names, params};
 }
 
 std::vector<momentum::SkeletonState> arrayToSkeletonStates(
@@ -118,13 +139,8 @@ void saveGLTFCharacterToFile(
   }
 
   if (motion.has_value()) {
-    const auto& [parameters, poses] = motion.value();
-    MT_THROW_IF(
-        poses.cols() != parameters.size(),
-        "Expected motion parameters to be n_frames x {}, but got {} x {}",
-        parameters.size(),
-        poses.rows(),
-        poses.cols());
+    checkMotionShape(motion.value());
+    const auto& poses = std::get<1>(motion.value());
 
     // Validate timestamps size matches number of frames
     if (timestamps.has_value() && !timestamps->empty()) {
@@ -136,11 +152,7 @@ void saveGLTFCharacterToFile(
     }
   }
 
-  momentum::IdentityParameters identityParams;
-  if (offsets.has_value()) {
-    const auto& [names, params] = offsets.value();
-    identityParams = {names, params};
-  }
+  const momentum::IdentityParameters identityParams = toIdentityParameters(offsets);
 
   momentum::saveGltfCharacter(
       path,
@@ -286,15 +298,39 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes) {
-  pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
   const auto [character, motion, identity, fps] =
-      momentum::loadCharacterWithMotion(std::span<const std::byte>(data, length));
+      momentum::loadCharacterWithMotion(toSpan<std::byte>(gltfBytes));
   return std::make_tuple(character, motion.transpose(), identity.v, fps);
+}
+
+namespace {
+
+std::tuple<std::vector<CharacterWithMotion>, float> toCharacterWithMotionTuples(
+    std::tuple<std::vector<momentum::CharacterMotion>, float>&& loaded) {
+  auto& [characterMotions, fps] = loaded;
+  std::vector<CharacterWithMotion> result;
+  result.reserve(characterMotions.size());
+  for (auto& cm : characterMotions) {
+    result.emplace_back(
+        std::move(cm.character),
+        RowMatrixf(cm.motion.transpose()),
+        std::move(cm.identity.v),
+        std::move(cm.timestamps));
+  }
+  return {std::move(result), fps};
+}
+
+} // namespace
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotion(
+    const std::string& gltfFilename) {
+  return toCharacterWithMotionTuples(momentum::loadGltfCharactersWithMotion(gltfFilename));
+}
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotionFromBytes(
+    const pybind11::bytes& gltfBytes) {
+  return toCharacterWithMotionTuples(
+      momentum::loadGltfCharactersWithMotion(toSpan<std::byte>(gltfBytes)));
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
@@ -306,15 +342,8 @@ loadGLTFCharacterWithMotionModelParameterScales(const std::string& gltfFilename)
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionModelParameterScalesFromBytes(const pybind11::bytes& gltfBytes) {
-  pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
   const auto [character, motion, identity, fps] =
-      momentum::loadCharacterWithMotionModelParameterScales(
-          std::span<const std::byte>(data, length));
+      momentum::loadCharacterWithMotionModelParameterScales(toSpan<std::byte>(gltfBytes));
   return std::make_tuple(character, motion.transpose(), identity.v, fps);
 }
 
@@ -348,20 +377,14 @@ pybind11::array_t<float> skelStatesToTensor(
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes) {
-  pybind11::buffer_info info(pybind11::buffer(gltfBytes).request());
-  const auto* data = reinterpret_cast<const std::byte*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
+  const auto bytes = toSpan<std::byte>(gltfBytes);
   momentum::Character character;
   std::vector<momentum::SkeletonState> states;
   std::vector<float> timestamps;
 
   {
     pybind11::gil_scoped_release release;
-    std::tie(character, states, timestamps) =
-        momentum::loadCharacterWithSkeletonStates(std::span<const std::byte>(data, length));
+    std::tie(character, states, timestamps) = momentum::loadCharacterWithSkeletonStates(bytes);
   }
 
   return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);
@@ -379,6 +402,56 @@ loadGLTFCharacterWithSkelStates(const std::string& gltfFilename) {
   }
 
   return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);
+}
+
+namespace {
+
+// Converts loaded characters to Python tuples; needs the GIL, since skelStatesToTensor allocates
+// numpy arrays.
+std::vector<CharacterWithSkelStates> toCharacterSkelStateTuples(
+    std::vector<momentum::CharacterSkeletonStates>&& loaded) {
+  std::vector<CharacterWithSkelStates> result;
+  result.reserve(loaded.size());
+  for (auto& entry : loaded) {
+    auto tensor = skelStatesToTensor(entry.skeletonStates, entry.character);
+    result.emplace_back(std::move(entry.character), std::move(tensor), std::move(entry.timestamps));
+  }
+  return result;
+}
+
+} // namespace
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStates(
+    const std::string& gltfFilename) {
+  std::vector<momentum::CharacterSkeletonStates> loaded;
+  {
+    pybind11::gil_scoped_release release;
+    loaded = momentum::loadGltfCharactersWithSkeletonStates(gltfFilename);
+  }
+  return toCharacterSkelStateTuples(std::move(loaded));
+}
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
+    const pybind11::bytes& gltfBytes) {
+  const auto span = toSpan<std::byte>(gltfBytes);
+  std::vector<momentum::CharacterSkeletonStates> loaded;
+  {
+    pybind11::gil_scoped_release release;
+    loaded = momentum::loadGltfCharactersWithSkeletonStates(span);
+  }
+  return toCharacterSkelStateTuples(std::move(loaded));
+}
+
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotion(
+    const std::string& gltfFilename) {
+  return toFrameMajorMotions(
+      momentum::loadGltfCharactersChannelMotion(filesystem::path(gltfFilename)));
+}
+
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotionFromBytes(
+    const pybind11::bytes& gltfBytes) {
+  return toFrameMajorMotions(
+      momentum::loadGltfCharactersChannelMotion(toSpan<std::byte>(gltfBytes)));
 }
 
 std::string toGLTF(const momentum::Character& character) {
