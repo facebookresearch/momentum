@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <map>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -169,8 +170,57 @@ void logJointParamsColumns(
     const std::string& worldPrefix,
     const std::string& posePrefix,
     std::span<const std::string> names,
-    const Eigen::MatrixXf& allJointParams,
+    const Eigen::Ref<const Eigen::MatrixXf>& allJointParams,
     std::span<const int64_t> frameIndices,
     std::span<const double> times);
+
+/// Collects the joint parameters of a character frame by frame, to log them all at once with
+/// logJointParamsColumns(), which is much faster than logging each frame.
+class JointParamsRecorder {
+ public:
+  /// Record the joint parameters of one frame.
+  ///
+  /// @param frameIndex The frame's value on the "frame_index" timeline.
+  /// @param time The frame's value on the "time" timeline, in seconds.
+  /// @param jointParams The joint parameters of the frame; every frame must have the same size.
+  void add(int64_t frameIndex, double time, const Eigen::VectorXf& jointParams);
+
+  /// Reserve space for @p numFrames frames of @p numJointParameters values each.
+  void reserve(Eigen::Index numJointParameters, size_t numFrames);
+
+  /// The recorded joint parameters, one column per frame in the order they were added. The view is
+  /// valid until the next call to add() or reserve().
+  [[nodiscard]] Eigen::Map<const Eigen::MatrixXf> jointParams() const;
+
+  /// The frame index of each recorded frame.
+  [[nodiscard]] std::span<const int64_t> frameIndices() const {
+    return frameIndices_;
+  }
+
+  /// The time of each recorded frame, in seconds.
+  [[nodiscard]] std::span<const double> times() const {
+    return times_;
+  }
+
+  /// Log the recorded frames with logJointParamsColumns(), under @p worldPrefix (world and root
+  /// joints) and @p posePrefix (the other joints). Nothing is logged when no frame was recorded.
+  ///
+  /// @param rec The recording stream.
+  /// @param worldPrefix The stream prefix for world (root) joint parameters.
+  /// @param posePrefix The stream prefix for the other joint parameters.
+  /// @param jointNames The joint names of the character.
+  void send(
+      const rerun::RecordingStream& rec,
+      const std::string& worldPrefix,
+      const std::string& posePrefix,
+      std::span<const std::string> jointNames) const;
+
+ private:
+  Eigen::Index numJointParameters_ = 0;
+  // The joint parameters of each recorded frame, one frame after the other.
+  std::vector<float> values_;
+  std::vector<int64_t> frameIndices_;
+  std::vector<double> times_;
+};
 
 } // namespace momentum
