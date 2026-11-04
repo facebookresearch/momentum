@@ -11,14 +11,15 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
-#include <momentum/gui/rerun/logging_redirect.h>
 #include <momentum/gui/rerun/rerun_compat.h>
+#include <momentum/gui/rerun/rerun_sink.h>
 #include <momentum/io/usd/usd_io.h>
 #include <momentum/math/mesh.h>
 
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
 
+#include <iostream>
 #include <string>
 
 using namespace rerun;
@@ -27,6 +28,7 @@ using namespace momentum;
 namespace {
 
 struct Options {
+  RerunSinkOptions rerunSink;
   std::string usdFile;
   LogLevel logLevel = LogLevel::Info;
   std::string title;
@@ -42,6 +44,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       ->default_val(opt->logLevel);
   app.add_flag("--log-joints", opt->logJoints, "Log joint parameters (very slow)")
       ->default_val(opt->logJoints);
+  addRerunSinkOptions(app, opt->rerunSink);
   return opt;
 }
 
@@ -95,9 +98,7 @@ int main(int argc, char* argv[]) {
 
     const std::string title = options->title.empty() ? fileName : options->title;
     const auto rec = RecordingStream(title);
-    rec.spawn().exit_on_failure();
-
-    redirectLogsToRerun(rec);
+    openRerunSink(rec, options->rerunSink);
 
     rec.log_static("world", ViewCoordinates(components::ViewCoordinates::RIGHT_HAND_Z_UP));
 
@@ -131,16 +132,15 @@ int main(int argc, char* argv[]) {
                 .with_colors(rerun::Color(255, 100, 100))
                 .with_labels(jointLabels));
       }
-
     } catch (const std::exception& e) {
       MT_LOGE("Error logging character data: {}", e.what());
       return EXIT_FAILURE;
     }
   } catch (const std::exception& e) {
-    MT_LOGE("Exception thrown. Error: {}", e.what());
+    std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;
   } catch (...) {
-    MT_LOGE("Exception thrown. Unknown error.");
+    std::cerr << "Exception thrown. Unknown error.\n";
     return EXIT_FAILURE;
   }
 
