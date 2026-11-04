@@ -31,6 +31,11 @@ FbxBuilder allows you to incrementally construct an FBX scene by adding
 skinned characters, rigid bodies, motions, and marker data. This is useful
 for creating scenes with multiple characters/objects in a single FBX file.
 
+Character names: ``add_character`` / ``add_rigid_body`` de-duplicate names (appending
+``_1``, ``_2``, ...) and return the exported name, which may differ from ``character.name``.
+Pass that returned name as ``character_name`` to the ``add_motion*`` methods to target a
+specific character or instance (e.g. the same character added more than once).
+
 Note: FBX saving requires the Autodesk FBX SDK and is only available on
 Linux x86_64, Windows x86_64, and macOS.)")
       .def(py::init<>(), R"(Create a new FbxBuilder.)")
@@ -43,7 +48,10 @@ Creates the skeleton hierarchy, mesh with skin deformer, locators,
 collision geometry, and metadata.
 
 :param character: The character to add.
-:param options: File save options controlling mesh, locators, collisions.)",
+:param options: File save options: mesh, locators, collisions, coordinate system and FBX
+    namespace. A non-empty ``fbx_namespace`` prefixes the name of every node in the saved file; a
+    file has one namespace, so a different non-empty namespace in a later call raises an error.
+:return: The exported character name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("options") = mm::FileSaveOptions())
       .def(
@@ -56,10 +64,13 @@ The mesh is parented under the specified joint node instead of the scene
 root, so it inherits the skeleton's animation without needing skin weights.
 
 :param character: The character to add as a rigid body.
-:param name: Optional name override. Uses character.name if empty.
+:param name: Optional requested base name. Uses character.name if empty. A numeric
+    suffix is appended if the resulting name is already in use.
 :param parent_joint: Index of the joint to parent the mesh under. Defaults to 0
     (the root joint).
-:param options: File save options (mesh option is respected).)",
+:param options: File save options: the mesh option and the FBX namespace (see
+    :meth:`add_character`).
+:return: The exported rigid-body name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("name") = "",
           py::arg("parent_joint") = 0,
@@ -68,9 +79,10 @@ root, so it inherits the skeleton's animation without needing skin weights.
           "add_motion",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& motion,
-             const std::optional<Eigen::VectorXf>& offsets) {
+             const std::optional<Eigen::VectorXf>& offsets,
+             const std::string& characterName) {
             // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
             mm::MatrixXf transposedMotion;
             if (motion.has_value() && motion->size() > 0) {
@@ -80,7 +92,7 @@ root, so it inherits the skeleton's animation without needing skin weights.
             if (offsets.has_value()) {
               actualOffsets = offsets.value();
             }
-            builder.addMotion(character, fps, transposedMotion, actualOffsets);
+            builder.addMotion(character, fps, transposedMotion, actualOffsets, characterName);
           },
           R"(Add model-parameter animation for a previously added character.
 
@@ -90,23 +102,26 @@ curves. Also extracts and animates blend shape weights when applicable.
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
 :param motion: Model parameters matrix with shape (nFrames, nModelParams). None for no animation.
-:param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.)",
+:param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.
+:param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
           py::arg("motion") = std::nullopt,
-          py::arg("offsets") = std::nullopt)
+          py::arg("offsets") = std::nullopt,
+          py::arg("character_name") = "")
       .def(
           "add_motion_with_joint_params",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
-             float fps,
-             const std::optional<Eigen::MatrixXf>& jointParams) {
+             double fps,
+             const std::optional<Eigen::MatrixXf>& jointParams,
+             const std::string& characterName) {
             // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
             mm::MatrixXf transposedJointParams;
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addMotionWithJointParams(character, fps, transposedJointParams);
+            builder.addMotionWithJointParams(character, fps, transposedJointParams, characterName);
           },
           R"(Add joint-parameter animation for a previously added character.
 
@@ -115,23 +130,26 @@ This is useful for rigid bodies or characters with simple parameterization.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.)",
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.
+:param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
-          py::arg("joint_params") = std::nullopt)
+          py::arg("joint_params") = std::nullopt,
+          py::arg("character_name") = "")
       .def(
           "add_animated_mesh",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
              const std::string& name,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const mm::FbxUserProperties& userProperties) {
             mm::MatrixXf transposedJointParams;
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addAnimatedMesh(character, name, fps, transposedJointParams, userProperties);
+            return builder.addAnimatedMesh(
+                character, name, fps, transposedJointParams, userProperties);
           },
           R"(Add an animated mesh (no skeleton) to the scene.
 
@@ -140,12 +158,16 @@ the root joint parameters. Use this for props/objects that should appear
 as a simple animated mesh without any skeleton hierarchy.
 
 :param character: The character providing the mesh geometry.
-:param name: Name for the mesh node.
+:param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
-    object's custom attributes.)",
+    object's custom attributes.
+:return: The unique name the mesh node is exported under: ``name``, with a numeric suffix
+    if a character, rigid body or animated mesh already uses it.)",
           py::arg("character"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
@@ -156,7 +178,7 @@ as a simple animated mesh without any skeleton hierarchy.
           [](mm::FbxBuilder& builder,
              const mm::Mesh& mesh,
              const std::string& name,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const std::optional<Eigen::Vector3f>& translationOffset,
              const mm::FbxUserProperties& userProperties) {
@@ -164,7 +186,7 @@ as a simple animated mesh without any skeleton hierarchy.
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addAnimatedMesh(
+            return builder.addAnimatedMesh(
                 mesh,
                 name,
                 fps,
@@ -174,18 +196,22 @@ as a simple animated mesh without any skeleton hierarchy.
           },
           R"(Add an animated mesh from a Mesh object (no Character needed).
 
-Creates a standalone mesh node and animates its transform from joint
-parameters. Only the root transform (first 7 joint params) is used.
+Creates a standalone mesh node and animates its transform from the root joint
+parameters.
 
 :param mesh: The mesh geometry.
-:param name: Name for the mesh node.
+:param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param translation_offset: Rest-pose translation offset added to the translation
     channels (defaults to zero).
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
-    object's custom attributes.)",
+    object's custom attributes.
+:return: The unique name the mesh node is exported under: ``name``, with a numeric suffix
+    if a character, rigid body or animated mesh already uses it.)",
           py::arg("mesh"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
@@ -195,7 +221,7 @@ parameters. Only the root transform (first 7 joint params) is used.
       .def(
           "add_marker_sequence",
           [](mm::FbxBuilder& builder,
-             float fps,
+             double fps,
              const std::vector<std::vector<mm::Marker>>& markerSequence) {
             builder.addMarkerSequence(fps, std::span(markerSequence));
           },

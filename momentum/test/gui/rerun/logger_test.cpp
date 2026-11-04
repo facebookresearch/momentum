@@ -333,6 +333,40 @@ TEST_F(RerunLoggerTest, LogJointParamsColumnsEmpty) {
       *rec_, "test/world", "test/pose", jointNames, emptyParams, frameIndices, times));
 }
 
+// --- JointParamsRecorder tests ---
+
+TEST_F(RerunLoggerTest, JointParamsRecorderKeepsFramesInOrder) {
+  const auto jointNames = character_.skeleton.getJointNames();
+  const auto nJointParams = static_cast<Eigen::Index>(jointNames.size() * kParametersPerJoint);
+  const Eigen::VectorXf first = Eigen::VectorXf::LinSpaced(nJointParams, 0.0f, 1.0f);
+  const Eigen::VectorXf second = Eigen::VectorXf::LinSpaced(nJointParams, 2.0f, -1.0f);
+
+  JointParamsRecorder recorder;
+  recorder.reserve(nJointParams, 2);
+  recorder.add(4, 0.25, first);
+  recorder.add(7, 0.5, second);
+
+  Eigen::MatrixXf expected(nJointParams, 2);
+  expected << first, second;
+  EXPECT_EQ(recorder.jointParams(), expected);
+  EXPECT_EQ(
+      std::vector<int64_t>(recorder.frameIndices().begin(), recorder.frameIndices().end()),
+      (std::vector<int64_t>{4, 7}));
+  EXPECT_EQ(
+      std::vector<double>(recorder.times().begin(), recorder.times().end()),
+      (std::vector<double>{0.25, 0.5}));
+  EXPECT_NO_THROW(recorder.send(*rec_, "test/world", jointNames));
+}
+
+TEST_F(RerunLoggerTest, JointParamsRecorderRejectsAFrameOfAnotherSize) {
+  JointParamsRecorder recorder;
+  recorder.add(0, 0.0, Eigen::VectorXf::Zero(7));
+
+  EXPECT_THROW(recorder.add(1, 0.1, Eigen::VectorXf::Zero(6)), std::runtime_error);
+  EXPECT_EQ(recorder.jointParams().cols(), 1);
+  EXPECT_EQ(recorder.frameIndices().size(), 1);
+}
+
 // --- redirectLogsToRerun tests ---
 
 TEST_F(RerunLoggerTest, RedirectLogsToRerun) {
