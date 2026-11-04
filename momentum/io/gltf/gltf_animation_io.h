@@ -12,6 +12,7 @@
 #include <momentum/common/filesystem.h>
 
 #include <fx/gltf.h>
+#include <nlohmann/json.hpp>
 
 #include <span>
 #include <tuple>
@@ -19,6 +20,16 @@
 #include <vector>
 
 namespace momentum {
+
+/// Read model-parameter motion from a momentum "motion" JSON object, as found in the document-level
+/// momentum extension or on a character's root node.
+///
+/// @param[in] model The glTF document holding the accessors the object refers to.
+/// @param[in] motion The "motion" JSON object.
+/// @return A tuple containing the motion parameters and identity parameters.
+std::tuple<MotionParameters, IdentityParameters> getMotionFromJson(
+    const fx::gltf::Document& model,
+    const nlohmann::json& motion);
 
 /// Get motion parameters from a glTF model.
 ///
@@ -31,6 +42,13 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
 /// @param[in] model The glTF document containing animation data.
 /// @return Estimated FPS, or 0.0f if unable to calculate.
 float calculateFpsFromAnimationData(const fx::gltf::Document& model);
+
+/// Frame rate of a glTF model: the one stored in the momentum extension, else the one estimated
+/// from the animation data, else 120.
+///
+/// @param[in] model The glTF document.
+/// @return The frame rate in frames per second.
+float loadFpsFromModel(const fx::gltf::Document& model);
 
 /// Load motion data from a glTF model.
 ///
