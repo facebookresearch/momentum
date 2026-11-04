@@ -143,6 +143,10 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - load_fbx_with_motion(fbxFilename, permissive, strip_namespaces)
   // - load_fbx_with_motion_from_bytes(fbx_bytes, permissive, strip_namespaces)
   // - load_gltf(path)
+  // - load_gltf_characters(path)
+  // - load_gltf_characters_from_bytes(gltf_bytes)
+  // - load_gltf_characters_with_motion(gltfFilename)
+  // - load_gltf_characters_with_motion_from_bytes(gltf_bytes)
   // - load_gltf_with_motion(gltfFilename)
   // - load_gltf_with_motion_from_bytes(gltf_bytes)
   // - load_gltf_with_motion_model_parameter_scales(path)
@@ -661,8 +665,75 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           &loadGLTFCharacterFromBytes,
           R"(Load a character from a gltf byte array.
 
+If the file has more than one character, this returns the one with the most joints; use
+:meth:`load_gltf_characters` to load all of them.
+
 :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
 :return: a valid :class:`Character`.
+      )",
+          py::arg("gltf_bytes"))
+      .def_static(
+          "load_gltf_characters",
+          &loadGLTFCharactersFromFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character from a gltf file.
+
+Unlike :meth:`load_gltf`, which returns one character (the one with the most joints), this returns
+every character in the scene, in scene order. Each character gets its own rig (parameter transform,
+limits, parameter sets, pose constraints) from its root node; files without that copy have a single
+document-level rig, which every character then uses.
+
+:param path: A .gltf/.glb file; e.g. character_s0.glb.
+:return: A list of :class:`Character`, one per character in the scene.
+      )",
+          py::arg("path"))
+      .def_static(
+          "load_gltf_characters_from_bytes",
+          &loadGLTFCharactersFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character from a gltf byte array.
+
+This is the byte-array version of :meth:`load_gltf_characters`.
+
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: A list of :class:`Character`, one per character in the scene.
+      )",
+          py::arg("gltf_bytes"))
+      .def_static(
+          "load_gltf_characters_with_motion",
+          &loadGLTFCharactersWithMotion,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character together with its own motion from a gltf file.
+
+Each character's motion, identity and timestamps are read from its root node, where
+:class:`GltfBuilder` stores them. A file with a single character, where no node stores a motion,
+falls back to the document-level motion. This is the multi-character counterpart of
+:meth:`load_gltf_with_motion`.
+
+:param gltf_filename: A .gltf/.glb file; e.g. character_s0.glb.
+:return: A tuple ``(characters, fps)`` where ``characters`` is a list of per-character tuples
+         ``(character, motion, identity, timestamps)``: ``character`` is a :class:`Character`,
+         ``motion`` is a numpy array of shape ``(n_frames, n_parameters)``, ``identity`` is a
+         joint-parameter vector (empty if the character has no stored identity), and ``timestamps``
+         is a list of per-frame timestamps (empty if the file stores none). ``fps`` is the
+         document-global frame rate shared by all characters.
+      )",
+          py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_characters_with_motion_from_bytes",
+          &loadGLTFCharactersWithMotionFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character together with its own motion from a gltf byte array.
+
+This is the byte-array version of :meth:`load_gltf_characters_with_motion`.
+
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: A tuple ``(characters, fps)`` where ``characters`` is a list of per-character tuples
+         ``(character, motion, identity, timestamps)``: ``character`` is a :class:`Character`,
+         ``motion`` is a numpy array of shape ``(n_frames, n_parameters)``, ``identity`` is a
+         joint-parameter vector (empty if the character has no stored identity), and ``timestamps``
+         is a list of per-frame timestamps (empty if the file stores none). ``fps`` is the
+         document-global frame rate shared by all characters.
       )",
           py::arg("gltf_bytes"))
       .def_static(
@@ -670,8 +741,11 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
           &loadGLTFCharacterWithMotionFromBytes,
           R"(Load a character and motion from a gltf byte array.
 
+For a multi-character file, this returns the character with the most joints and that character's
+own motion; use :meth:`load_gltf_characters_with_motion` to load every character.
+
   :param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
-  :return: a valid :class:`Character`.
+  :return: a tuple ``(character, motion, identity, fps)``, as in :meth:`load_gltf_with_motion`.
         )",
           py::arg("gltf_bytes"))
       .def_static(
@@ -689,6 +763,9 @@ added back to the scale parameters.
 Use this function when you need the character structure, animation, and identity parameters
 all expressed in model parameter space, which is the natural format for optimization and
 character posing.
+
+For a multi-character file, this returns the character with the most joints and that character's
+own motion; use :meth:`load_gltf_characters_with_motion` to load every character.
 
 :param gltf_filename: Path to the GLTF/GLB file to load.
 :return: A tuple (character, motion, model_identity, fps), where character is the loaded :class:`Character` object,
@@ -872,6 +949,9 @@ For loading ONLY motion data without the character, use :meth:`pymomentum.geomet
 Note that motion can only be read from GLTF files saved using momentum, which stores model parameters
 in a custom extension. For GLTF files saved using other software, use :meth:`load_gltf_with_skel_states`.
 
+For a multi-character file, this returns the character with the most joints and that character's
+own motion; use :meth:`load_gltf_characters_with_motion` to load every character.
+
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: a tuple [Character, motion, identity, fps], where Character is the complete character object,
          motion is the motion matrix [nFrames x nParams], identity is a JointParameter at rest pose,
@@ -907,7 +987,9 @@ support the proprietary momentum motion format for storing model parameters in G
           &loadMotionTimestamps,
           R"(Load per-frame timestamps from a gltf file.
 
-Load timestamps stored in the momentum extension (usually in microseconds).
+Load timestamps stored in the momentum extension (usually in microseconds). This reads the
+document-level motion, which in a multi-character file belongs to the character whose motion was
+added last; use :meth:`load_gltf_characters_with_motion` to get every character's timestamps.
 
 :param gltf_filename: A .gltf file; e.g. character_s0.glb.
 :return: A list of timestamps (int64), one per frame. Empty list if no timestamps found.
@@ -920,6 +1002,9 @@ Load timestamps stored in the momentum extension (usually in microseconds).
           &loadGLTFCharacterFromFile,
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf file.
+
+If the file has more than one character, this returns the one with the most joints; use
+:meth:`load_gltf_characters` to load all of them.
 
 :param path: A .gltf file; e.g. character_s0.glb.
       )",
