@@ -29,6 +29,84 @@ class TestFBX(unittest.TestCase):
             self.character, self.model_params
         )
 
+    def test_fbx_builder_multiple_characters(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        body = pym_test_utils.create_test_character(num_joints=5)
+        prop = pym_test_utils.create_test_character(num_joints=3)
+        prop_model_params = np.zeros(
+            (2, prop.parameter_transform.size), dtype=np.float32
+        )
+        prop_joint_params = prop.parameter_transform.apply(prop_model_params)
+
+        builder = pym_geometry.FbxBuilder()
+        body_name = builder.add_character(body)
+        prop_name = builder.add_rigid_body(prop)
+        self.assertEqual(body_name, "test character")
+        self.assertEqual(prop_name, "test character_1")
+        builder.add_motion_with_joint_params(
+            prop,
+            fps=30.0,
+            joint_params=prop_joint_params,
+            character_name=prop_name,
+        )
+
+        with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            builder.save(temp_file.name)
+            loaded = pym_geometry.Character.load_fbx(
+                temp_file.name,
+                permissive=True,
+                strip_namespaces=False,
+            )
+
+        self.assertEqual(
+            loaded.skeleton.size,
+            body.skeleton.size + prop.skeleton.size,
+        )
+        self.assertEqual(
+            sum(parent == -1 for parent in loaded.skeleton.joint_parents),
+            2,
+        )
+        self.assertIn(
+            f"{prop_name}:{prop.skeleton.joint_names[0]}",
+            loaded.skeleton.joint_names,
+        )
+
+    def test_fbx_builder_duplicate_name_mismatch_raises(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        body = pym_test_utils.create_test_character(num_joints=5)
+        prop = pym_test_utils.create_test_character(num_joints=3)
+        body_joint_params = body.parameter_transform.apply(
+            np.zeros((2, body.parameter_transform.size), dtype=np.float32)
+        )
+
+        builder = pym_geometry.FbxBuilder()
+        body_name = builder.add_character(body)
+        prop_name = builder.add_rigid_body(prop)
+        self.assertEqual(body_name, "test character")
+        self.assertEqual(prop_name, "test character_1")
+
+        # Passing the explicit name of a different-skeleton character (the rigid body, 3 joints)
+        # while animating body (5 joints) must raise.
+        with self.assertRaisesRegex(RuntimeError, "exported character it targets"):
+            builder.add_motion_with_joint_params(
+                body,
+                fps=30.0,
+                joint_params=body_joint_params,
+                character_name=prop_name,
+            )
+
+        # Passing the explicit correct name works.
+        builder.add_motion_with_joint_params(
+            body,
+            fps=30.0,
+            joint_params=body_joint_params,
+            character_name=body_name,
+        )
+
     def test_load_animation(self) -> None:
         """
         Loads a very simple 3-bone chain with animation from FBX and verifies that
@@ -114,6 +192,36 @@ class TestFBX(unittest.TestCase):
         self.assertTrue(
             np.allclose(skel_state_last[joint3][0:3], np.array([4, 0, 0]), atol=1e-5)
         )
+
+    def test_load_fbx_characters_matches_singular_on_single_skeleton(self) -> None:
+        # Loading uses OpenFBX, so unlike the tests that write FBX files this runs in every build.
+        fbx_bytes = pkgutil.get_data(__package__, "resources/animation_test.fbx")
+        assert fbx_bytes is not None
+
+        # Structure: plural returns a one-element list matching the singular loader.
+        single = pym_geometry.Character.load_fbx_from_bytes(fbx_bytes)
+        characters = pym_geometry.Character.load_fbx_characters_from_bytes(fbx_bytes)
+        self.assertEqual(len(characters), 1)
+        self.assertEqual(characters[0].skeleton.size, single.skeleton.size)
+        self.assertEqual(
+            characters[0].skeleton.joint_names, single.skeleton.joint_names
+        )
+
+        # Motion: plural returns a one-element list matching the singular loader.
+        single_char, single_motions, single_fps = (
+            pym_geometry.Character.load_fbx_with_motion_from_bytes(fbx_bytes)
+        )
+        chars, fps = pym_geometry.Character.load_fbx_characters_with_motion_from_bytes(
+            fbx_bytes
+        )
+        self.assertEqual(fps, single_fps)
+        self.assertEqual(len(chars), 1)
+        plural_char, plural_motions = chars[0]
+        self.assertEqual(plural_char.skeleton.size, single_char.skeleton.size)
+        self.assertEqual(len(plural_motions), len(single_motions))
+        for plural_motion, single_motion in zip(plural_motions, single_motions):
+            self.assertEqual(plural_motion.shape, single_motion.shape)
+            self.assertTrue(np.allclose(plural_motion, single_motion, atol=1e-5))
 
     def test_save_motions_with_model_params(self) -> None:
         if not pym_geometry.is_fbxsdk_available():
@@ -466,3 +574,87 @@ class TestFBX(unittest.TestCase):
             marker_sequences = pym_geometry.load_markers(temp_file.name)
             self.assertEqual(len(marker_sequences), 1)
             self.assertEqual(len(marker_sequences[0].frames), 0)
+
+    def test_load_fbx_characters(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        body = pym_test_utils.create_test_character(num_joints=5)
+        prop = pym_test_utils.create_test_character(num_joints=3)
+
+        builder = pym_geometry.FbxBuilder()
+        builder.add_character(body)
+        builder.add_rigid_body(prop)
+
+        with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            builder.save(temp_file.name)
+            characters = pym_geometry.Character.load_fbx_characters(
+                temp_file.name, permissive=True
+            )
+
+        self.assertEqual(
+            [c.skeleton.size for c in characters],
+            [body.skeleton.size, prop.skeleton.size],
+        )
+
+    def test_load_fbx_characters_with_motion(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        small = pym_test_utils.create_test_character(num_joints=3)
+        large = pym_test_utils.create_test_character(num_joints=5)
+
+        n_frames_small = 5
+        n_frames_large = 8
+
+        rng = np.random.default_rng(0)
+        small_joint_params = small.parameter_transform.apply(
+            rng.random(
+                (n_frames_small, small.parameter_transform.size), dtype=np.float32
+            )
+        )
+        large_joint_params = large.parameter_transform.apply(
+            rng.random(
+                (n_frames_large, large.parameter_transform.size), dtype=np.float32
+            )
+        )
+
+        builder = pym_geometry.FbxBuilder()
+        small_name = builder.add_rigid_body(small)
+        large_name = builder.add_rigid_body(large)
+        builder.add_motion_with_joint_params(
+            small,
+            fps=30.0,
+            joint_params=small_joint_params,
+            character_name=small_name,
+        )
+        builder.add_motion_with_joint_params(
+            large,
+            fps=30.0,
+            joint_params=large_joint_params,
+            character_name=large_name,
+        )
+
+        with tempfile.NamedTemporaryFile(suffix=".fbx") as temp_file:
+            builder.save(temp_file.name)
+            chars, fps = pym_geometry.Character.load_fbx_characters_with_motion(
+                temp_file.name,
+                permissive=True,
+                strip_namespaces=False,
+            )
+
+        self.assertAlmostEqual(fps, 30.0, places=3)
+        self.assertEqual(len(chars), 2)
+
+        expected_motions = {
+            small_name: small_joint_params,
+            large_name: large_joint_params,
+        }
+        for character, motions in chars:
+            self.assertEqual(len(motions), 1)
+            self.assertIn(character.name, expected_motions)
+            expected_motion = expected_motions[character.name]
+            self.assertEqual(motions[0].shape, expected_motion.shape)
+            np.testing.assert_allclose(
+                motions[0], expected_motion, rtol=1e-5, atol=1e-4
+            )
