@@ -224,6 +224,36 @@ TEST_F(CharacterUtilityTest, ScaleCharacterPreservesDensityPhysicalProperties) {
       scaledCharacter.physicalProperties, originalPhysicalProperties, scale, massScale);
 }
 
+TEST_F(CharacterUtilityTest, PhysicalPropertiesResolveToJointsInEntryOrder) {
+  // The joint name corrects a stale cached joint index.
+  JointPhysicalProperties stale = makeTestJointPhysicalProperties(character, 3, 1.0f);
+  stale.jointIndex = 1;
+  const PhysicalProperties entries = {
+      makeTestJointPhysicalProperties(character, 2, 2.0f),
+      stale,
+      makeTestJointPhysicalProperties(character, 0, 3.0f)};
+
+  EXPECT_EQ(
+      resolvePhysicalPropertiesJointIndices(entries, character.skeleton),
+      (std::vector<size_t>{2, 3, 0}));
+}
+
+TEST_F(CharacterUtilityTest, PhysicalPropertiesOfUnknownOrRepeatedJointsAreRejected) {
+  JointPhysicalProperties unknown = makeTestJointPhysicalProperties(character, 0, 1.0f);
+  unknown.jointName = "no_such_joint";
+  EXPECT_THROW(
+      (void)resolvePhysicalPropertiesJointIndices({unknown}, character.skeleton),
+      std::runtime_error);
+
+  // Two entries for joint 1: one by its cached index only, one by its name.
+  JointPhysicalProperties byIndex = makeTestJointPhysicalProperties(character, 1, 1.0f);
+  byIndex.jointName.clear();
+  EXPECT_THROW(
+      (void)resolvePhysicalPropertiesJointIndices(
+          {byIndex, makeTestJointPhysicalProperties(character, 1, 2.0f)}, character.skeleton),
+      std::runtime_error);
+}
+
 TEST_F(CharacterUtilityTest, ScaleCharacterRejectsNonPositiveLengthScale) {
   setTestPhysicalProperties(this->character);
 
