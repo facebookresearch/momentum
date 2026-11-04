@@ -54,6 +54,35 @@ def _make_mesh() -> tuple[np.ndarray, np.ndarray]:
     return vertices, triangles
 
 
+def _preproject_vertices(
+    camera: pym_camera.Camera,
+    vertices: np.ndarray,
+    model_matrix: npt.NDArray[np.float32] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    flat_vertices = vertices.reshape(-1, 3)
+    homogeneous = np.concatenate(
+        (flat_vertices, np.ones((flat_vertices.shape[0], 1), dtype=np.float32)),
+        axis=1,
+    )
+    if model_matrix is not None:
+        world_homogeneous = homogeneous @ model_matrix.T
+        world = world_homogeneous[:, :3] / world_homogeneous[:, 3:4]
+        homogeneous = np.concatenate(
+            (world, np.ones((world.shape[0], 1), dtype=np.float32)), axis=1
+        )
+    eye_homogeneous = (
+        homogeneous @ np.asarray(camera.T_eye_from_world, dtype=np.float32).T
+    )
+    eye = eye_homogeneous[:, :3] / eye_homogeneous[:, 3:4]
+    projected = np.asarray(camera.intrinsics_model.project(eye), dtype=np.float32)
+    return (
+        eye.reshape(*vertices.shape[:-1], 3),
+        np.ascontiguousarray(
+            projected[:, :2].reshape(*vertices.shape[:-1], 2), dtype=np.float32
+        ),
+    )
+
+
 def _make_character_inputs(
     device: torch.device | str,
 ) -> tuple[pym_character.Character, torch.Tensor, npt.NDArray[np.float32]]:
@@ -140,6 +169,107 @@ class TestTorchRendererCpu(unittest.TestCase):
         self.assertIsNone(result)
         self.assertGreater(
             int(torch.count_nonzero(depth_only < torch.finfo(torch.float32).max)), 0
+        )
+
+    def test_preprojected_mesh_matches_camera_and_controls_visibility(self) -> None:
+        camera = _make_camera()
+        eye_from_world = np.eye(4, dtype=np.float32)
+        eye_from_world[:3, 3] = np.asarray([0.1, -0.05, 0.2], dtype=np.float32)
+        camera.T_eye_from_world = eye_from_world
+        model_matrix = np.eye(4, dtype=np.float32)
+        model_matrix[0, 0] = 0.9
+        model_matrix[1, 1] = 1.1
+        model_matrix[0, 3] = 0.05
+        model_matrix[2, 3] = 0.1
+        model_matrix[3, 0] = 0.01
+        vertices = torch.from_numpy(self.vertices)
+        triangles = torch.from_numpy(self.triangles)
+        normals = torch.tensor([[0.0, 0.0, -1.0]], dtype=torch.float32).repeat(
+            vertices.shape[0], 1
+        )
+        material = pym_renderer.PhongMaterial(
+            diffuse_color=np.asarray([0.2, 0.5, 0.8], dtype=np.float32)
+        )
+        lights = [
+            pym_renderer.Light.create_ambient_light(
+                np.asarray([0.75, 0.5, 0.25], dtype=np.float32)
+            )
+        ]
+
+        def render(
+            eye_positions: torch.Tensor | None = None,
+            image_positions: torch.Tensor | None = None,
+            validity: torch.Tensor | None = None,
+        ) -> tuple[torch.Tensor, ...]:
+            depth = torch_renderer.create_z_buffer(camera)
+            rgb = torch_renderer.create_rgb_buffer(camera)
+            surface_normals = torch_renderer.create_surface_normals_buffer(camera)
+            vertex_ids = torch_renderer.create_index_buffer(camera)
+            triangle_ids = torch_renderer.create_index_buffer(camera)
+            torch_renderer.rasterize_mesh(
+                vertices,
+                normals,
+                triangles,
+                camera,
+                depth,
+                rgb,
+                surface_normals_buffer=surface_normals,
+                vertex_index_buffer=vertex_ids,
+                triangle_index_buffer=triangle_ids,
+                material=material,
+                lights=lights,
+                model_matrix=model_matrix,
+                eye_space_vertex_positions=eye_positions,
+                projected_vertex_positions=image_positions,
+                projected_vertex_validity=validity,
+            )
+            return depth, rgb, surface_normals, vertex_ids, triangle_ids
+
+        expected = render()
+        eye_numpy, image_numpy = _preproject_vertices(
+            camera, self.vertices, model_matrix
+        )
+        eye = torch.from_numpy(eye_numpy)
+        image = torch.from_numpy(image_numpy)
+        actual = render(eye, image, torch.ones(vertices.shape[0], dtype=torch.bool))
+        torch.testing.assert_close(actual[0], expected[0], rtol=0.0, atol=1e-6)
+        torch.testing.assert_close(actual[1], expected[1], rtol=0.0, atol=1e-6)
+        torch.testing.assert_close(actual[2], expected[2], rtol=0.0, atol=1e-6)
+        torch.testing.assert_close(actual[3], expected[3], rtol=0.0, atol=0.0)
+        torch.testing.assert_close(actual[4], expected[4], rtol=0.0, atol=0.0)
+
+        validity = torch.ones(vertices.shape[0], dtype=torch.bool)
+        validity[3] = False
+        masked = render(eye, image, validity)
+        near_pixels = torch.nonzero(expected[4] == 1, as_tuple=False)
+        sample_y, sample_x = near_pixels[near_pixels.shape[0] // 2]
+        self.assertGreater(
+            float(masked[0][sample_y, sample_x]),
+            float(expected[0][sample_y, sample_x]),
+        )
+        self.assertEqual(int(masked[4][sample_y, sample_x]), 0)
+
+        invalid_eye = eye.clone()
+        invalid_eye[3, 2] = 0.0
+        invalid_depth = render(invalid_eye, image)[0]
+        torch.testing.assert_close(invalid_depth, masked[0])
+        nonfinite_image = image.clone()
+        nonfinite_image[3, 0] = torch.nan
+        nonfinite_depth = render(eye, nonfinite_image)[0]
+        torch.testing.assert_close(nonfinite_depth, masked[0])
+        with self.assertRaisesRegex(RuntimeError, "must be provided together"):
+            render(None, image)
+
+        shifted_image = image.clone()
+        shifted_image[:, 0] += 4.0
+        shifted = render(eye, shifted_image)
+        max_depth = torch.finfo(torch.float32).max
+        expected_columns = torch.nonzero(expected[0] < max_depth, as_tuple=False)[:, 1]
+        shifted_columns = torch.nonzero(shifted[0] < max_depth, as_tuple=False)[:, 1]
+        self.assertAlmostEqual(
+            float(shifted_columns.float().mean() - expected_columns.float().mean()),
+            4.0,
+            places=4,
         )
 
     def test_mesh_primitives_match_cpu_renderer(self) -> None:
@@ -795,6 +925,53 @@ class TestTorchRendererCpu(unittest.TestCase):
             torch.testing.assert_close(batch_depth[frame], depth)
             torch.testing.assert_close(batch_triangle_ids[frame], triangle_ids)
 
+        eye_numpy, image_numpy = _preproject_vertices(
+            self.camera, batched_vertices.numpy()
+        )
+        eye = torch.from_numpy(eye_numpy)
+        image = torch.from_numpy(image_numpy)
+        validity = torch.ones(batched_vertices.shape[:-1], dtype=torch.bool)
+        validity[1, 3] = False
+        projected_batch_depth = torch_renderer.create_z_buffer(
+            self.camera, batch_size=2
+        )
+        projected_batch_ids = torch_renderer.create_index_buffer(
+            self.camera, batch_size=2
+        )
+        torch_renderer.rasterize_mesh(
+            batched_vertices,
+            None,
+            triangles,
+            self.camera,
+            projected_batch_depth,
+            triangle_index_buffer=projected_batch_ids,
+            eye_space_vertex_positions=eye,
+            projected_vertex_positions=image,
+            projected_vertex_validity=validity,
+        )
+        torch.testing.assert_close(projected_batch_depth[0], batch_depth[0])
+        torch.testing.assert_close(projected_batch_ids[0], batch_triangle_ids[0])
+        self.assertGreater(
+            int(torch.count_nonzero(projected_batch_ids[1] != batch_triangle_ids[1])),
+            0,
+        )
+        for frame in range(2):
+            depth = torch_renderer.create_z_buffer(self.camera)
+            triangle_ids = torch_renderer.create_index_buffer(self.camera)
+            torch_renderer.rasterize_mesh(
+                batched_vertices[frame].contiguous(),
+                None,
+                triangles,
+                self.camera,
+                depth,
+                triangle_index_buffer=triangle_ids,
+                eye_space_vertex_positions=eye[frame].contiguous(),
+                projected_vertex_positions=image[frame].contiguous(),
+                projected_vertex_validity=validity[frame].contiguous(),
+            )
+            torch.testing.assert_close(projected_batch_depth[frame], depth)
+            torch.testing.assert_close(projected_batch_ids[frame], triangle_ids)
+
     def test_cpu_factory_aligns_odd_height_images(self) -> None:
         camera = pym_camera.Camera(
             pym_camera.PinholeIntrinsicsModel(
@@ -1159,6 +1336,89 @@ if _CUDA_BACKEND_AVAILABLE and torch.cuda.is_available():  # noqa: C901 - suite-
                 atol=2e-4,
                 rtol=0.0,
             )
+
+        def test_batched_preprojected_cuda_matches_native_projection(self) -> None:
+            first = torch.from_numpy(self.vertices.copy())
+            second = first.clone()
+            second[:, 0] += 0.15
+            second[:, 2] += 0.2
+            vertices_cpu = torch.stack((first, second))
+            vertices = vertices_cpu.cuda()
+            triangles = torch.from_numpy(self.triangles.copy()).cuda()
+            normals = torch.tensor(
+                [[0.0, 0.0, -1.0]], dtype=torch.float32, device="cuda"
+            ).repeat(2, vertices.shape[1], 1)
+            material = pym_renderer.PhongMaterial(
+                diffuse_color=np.asarray([0.4, 0.6, 0.8], dtype=np.float32)
+            )
+            lights = [
+                pym_renderer.Light.create_ambient_light(
+                    np.asarray([0.5, 0.25, 0.75], dtype=np.float32)
+                )
+            ]
+
+            def render(
+                eye_positions: torch.Tensor | None = None,
+                image_positions: torch.Tensor | None = None,
+                validity: torch.Tensor | None = None,
+            ) -> tuple[torch.Tensor, ...]:
+                depth = torch_renderer.create_z_buffer(
+                    self.camera, batch_size=2, device="cuda"
+                )
+                rgb = torch_renderer.create_rgb_buffer(
+                    self.camera, batch_size=2, device="cuda"
+                )
+                surface_normals = torch_renderer.create_surface_normals_buffer(
+                    self.camera, batch_size=2, device="cuda"
+                )
+                vertex_ids = torch_renderer.create_index_buffer(
+                    self.camera, batch_size=2, device="cuda"
+                )
+                triangle_ids = torch_renderer.create_index_buffer(
+                    self.camera, batch_size=2, device="cuda"
+                )
+                torch_renderer.rasterize_mesh(
+                    vertices,
+                    normals,
+                    triangles,
+                    self.camera,
+                    depth,
+                    rgb,
+                    surface_normals_buffer=surface_normals,
+                    vertex_index_buffer=vertex_ids,
+                    triangle_index_buffer=triangle_ids,
+                    material=material,
+                    lights=lights,
+                    eye_space_vertex_positions=eye_positions,
+                    projected_vertex_positions=image_positions,
+                    projected_vertex_validity=validity,
+                )
+                return depth, rgb, surface_normals, vertex_ids, triangle_ids
+
+            expected = render()
+            eye_numpy, image_numpy = _preproject_vertices(
+                self.camera, vertices_cpu.numpy()
+            )
+            eye = torch.from_numpy(eye_numpy).cuda()
+            image = torch.from_numpy(image_numpy).cuda()
+            actual = render(
+                eye,
+                image,
+                torch.ones(vertices.shape[:-1], dtype=torch.bool, device="cuda"),
+            )
+            torch.cuda.synchronize()
+            torch.testing.assert_close(actual[0], expected[0], rtol=0.0, atol=1e-5)
+            torch.testing.assert_close(actual[1], expected[1], rtol=0.0, atol=1e-5)
+            torch.testing.assert_close(actual[2], expected[2], rtol=0.0, atol=1e-5)
+            torch.testing.assert_close(actual[3], expected[3], rtol=0.0, atol=0.0)
+            torch.testing.assert_close(actual[4], expected[4], rtol=0.0, atol=0.0)
+
+            validity = torch.ones(vertices.shape[:-1], dtype=torch.bool, device="cuda")
+            validity[1, 3] = False
+            masked = render(eye, image, validity)
+            self.assertAlmostEqual(float(masked[0][0, 20, 32]), 1.0, places=5)
+            self.assertAlmostEqual(float(masked[0][1, 20, 34]), 2.2, places=4)
+            self.assertEqual(int(masked[4][1, 20, 34]), 0)
 
         def test_batched_cuda_shading_matches_individual_renders(self) -> None:
             first = torch.from_numpy(self.vertices[:3].copy())

@@ -22,45 +22,51 @@ void throwIfCudaError(cudaError_t error, const char* operation) {
   MT_THROW_IF(error != cudaSuccess, "{} failed: {}", operation, cudaGetErrorString(error));
 }
 
-detail::CudaCamera makeCudaCamera(const Camera& camera, const Eigen::Matrix4f& modelMatrix) {
+detail::CudaCamera makeCudaCamera(
+    const Camera& camera,
+    const Eigen::Matrix4f& modelMatrix,
+    bool usePreprojectedVertices) {
   detail::CudaCamera result;
   result.imageWidth = camera.imageWidth();
   result.imageHeight = camera.imageHeight();
   result.fx = camera.fx();
   result.fy = camera.fy();
 
-  const auto* intrinsics = camera.intrinsicsModel().get();
-  if (const auto* pinhole = dynamic_cast<const PinholeIntrinsicsModel*>(intrinsics)) {
-    result.model = detail::CudaCameraModel::Pinhole;
-    result.cx = pinhole->cx();
-    result.cy = pinhole->cy();
-  } else if (const auto* openCV = dynamic_cast<const OpenCVIntrinsicsModel*>(intrinsics)) {
-    result.model = detail::CudaCameraModel::OpenCV;
-    result.cx = openCV->cx();
-    result.cy = openCV->cy();
-    const auto& distortion = openCV->distortionParameters();
-    result.distortion[0] = distortion.k1;
-    result.distortion[1] = distortion.k2;
-    result.distortion[2] = distortion.k3;
-    result.distortion[3] = distortion.k4;
-    result.distortion[4] = distortion.k5;
-    result.distortion[5] = distortion.k6;
-    result.distortion[6] = distortion.p1;
-    result.distortion[7] = distortion.p2;
-    result.distortion[8] = distortion.p3;
-    result.distortion[9] = distortion.p4;
-  } else if (const auto* fisheye = dynamic_cast<const OpenCVFisheyeIntrinsicsModel*>(intrinsics)) {
-    result.model = detail::CudaCameraModel::OpenCVFisheye;
-    result.cx = fisheye->cx();
-    result.cy = fisheye->cy();
-    const auto& distortion = fisheye->distortionParameters();
-    result.distortion[0] = distortion.k1;
-    result.distortion[1] = distortion.k2;
-    result.distortion[2] = distortion.k3;
-    result.distortion[3] = distortion.k4;
-    result.maxRSquared = fisheye->maxRSquared();
-  } else {
-    MT_THROW("CUDA rasterization does not support this camera intrinsics model");
+  if (!usePreprojectedVertices) {
+    const auto* intrinsics = camera.intrinsicsModel().get();
+    if (const auto* pinhole = dynamic_cast<const PinholeIntrinsicsModel*>(intrinsics)) {
+      result.model = detail::CudaCameraModel::Pinhole;
+      result.cx = pinhole->cx();
+      result.cy = pinhole->cy();
+    } else if (const auto* openCV = dynamic_cast<const OpenCVIntrinsicsModel*>(intrinsics)) {
+      result.model = detail::CudaCameraModel::OpenCV;
+      result.cx = openCV->cx();
+      result.cy = openCV->cy();
+      const auto& distortion = openCV->distortionParameters();
+      result.distortion[0] = distortion.k1;
+      result.distortion[1] = distortion.k2;
+      result.distortion[2] = distortion.k3;
+      result.distortion[3] = distortion.k4;
+      result.distortion[4] = distortion.k5;
+      result.distortion[5] = distortion.k6;
+      result.distortion[6] = distortion.p1;
+      result.distortion[7] = distortion.p2;
+      result.distortion[8] = distortion.p3;
+      result.distortion[9] = distortion.p4;
+    } else if (
+        const auto* fisheye = dynamic_cast<const OpenCVFisheyeIntrinsicsModel*>(intrinsics)) {
+      result.model = detail::CudaCameraModel::OpenCVFisheye;
+      result.cx = fisheye->cx();
+      result.cy = fisheye->cy();
+      const auto& distortion = fisheye->distortionParameters();
+      result.distortion[0] = distortion.k1;
+      result.distortion[1] = distortion.k2;
+      result.distortion[2] = distortion.k3;
+      result.distortion[3] = distortion.k4;
+      result.maxRSquared = fisheye->maxRSquared();
+    } else {
+      MT_THROW("CUDA rasterization does not support this camera intrinsics model");
+    }
   }
 
   for (int32_t row = 0; row < 4; ++row) {
@@ -172,6 +178,9 @@ void rasterizeMeshesCuda(
     float depthOffset,
     cudaStream_t stream) {
   const auto* positionsModel = inputs.positionsModel;
+  const auto* positionsEye = inputs.positionsEye;
+  const auto* positionsImage = inputs.positionsImage;
+  const auto* projectionValidity = inputs.projectionValidity;
   const auto* normalsModel = inputs.normalsModel;
   const size_t numVertices = inputs.numVertices;
   const auto* triangles = inputs.triangles;
@@ -241,14 +250,36 @@ void rasterizeMeshesCuda(
           batchSize > std::numeric_limits<size_t>::max() / positionElementsPerMesh,
       "CUDA mesh input size overflows");
   const size_t requiredPositionElements = batchSize * positionElementsPerMesh;
+  const size_t requiredImagePositionElements = batchSize * 2 * numVertices;
+  const size_t requiredValidityElements = batchSize * numVertices;
   const size_t requiredTriangleElements = 3 * numTriangles;
+  const bool usePreprojectedVertices =
+      positionsEye != nullptr || positionsImage != nullptr || projectionValidity != nullptr;
   MT_THROW_IF(numVertices > 0 && positionsModel == nullptr, "CUDA positions buffer is null");
+  MT_THROW_IF(
+      usePreprojectedVertices && (positionsEye == nullptr || positionsImage == nullptr),
+      "CUDA eye-space and image-space positions must be provided together");
   MT_THROW_IF(numTriangles > 0 && triangles == nullptr, "CUDA triangle buffer is null");
   MT_THROW_IF(
       inputs.positionsModelSize < requiredPositionElements,
       "CUDA positions buffer has {} elements; at least {} are required",
       inputs.positionsModelSize,
       requiredPositionElements);
+  MT_THROW_IF(
+      positionsEye != nullptr && inputs.positionsEyeSize < requiredPositionElements,
+      "CUDA eye-space positions buffer has {} elements; at least {} are required",
+      inputs.positionsEyeSize,
+      requiredPositionElements);
+  MT_THROW_IF(
+      positionsImage != nullptr && inputs.positionsImageSize < requiredImagePositionElements,
+      "CUDA image-space positions buffer has {} elements; at least {} are required",
+      inputs.positionsImageSize,
+      requiredImagePositionElements);
+  MT_THROW_IF(
+      projectionValidity != nullptr && inputs.projectionValiditySize < requiredValidityElements,
+      "CUDA projection-validity buffer has {} elements; at least {} are required",
+      inputs.projectionValiditySize,
+      requiredValidityElements);
   MT_THROW_IF(
       normalsModel != nullptr && inputs.normalsModelSize < requiredPositionElements,
       "CUDA normals buffer has {} elements; at least {} are required",
@@ -366,12 +397,15 @@ void rasterizeMeshesCuda(
   throwIfCudaError(
       detail::launchCudaRasterizeMeshes(
           positionsModel,
+          positionsEye,
+          positionsImage,
+          projectionValidity,
           normalsModel,
           batchSize,
           numVertices,
           triangles,
           numTriangles,
-          makeCudaCamera(camera, modelMatrix),
+          makeCudaCamera(camera, modelMatrix, usePreprojectedVertices),
           nearClip,
           depthOffset,
           backfaceCulling,

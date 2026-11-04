@@ -14,6 +14,7 @@
 #include <momentum/rasterizer/geometry.h>
 #include <momentum/rasterizer/tensor.h>
 #include <Eigen/Geometry>
+#include <cstdint>
 #include <optional>
 #include <span>
 
@@ -141,6 +142,23 @@ Light createPointLight(
 /// @return Transformed light
 Light transformLight(const Light& light, const Eigen::Affine3f& xf);
 
+/// Caller-provided eye-space and image-space positions for mesh vertices.
+///
+/// Supplying this data bypasses the camera's position transform and projection while retaining the
+/// camera and model matrix for image dimensions, normal transforms, and lighting. positionsEye and
+/// positionsImage must either both be empty or contain three and two floats per mesh vertex,
+/// respectively. validity is optional; when provided, a triangle is rejected if any of its vertices
+/// is invalid. positionsImage uses the same integer-centered, y-down pixel convention as
+/// IntrinsicsModel::project; back-face culling follows the winding of these supplied coordinates.
+struct PreprojectedMeshVertices {
+  /// Flat xyz vertex positions after applying the model and world-to-eye transforms.
+  std::span<const float> positionsEye;
+  /// Flat xy pixel coordinates corresponding to positionsEye.
+  std::span<const float> positionsImage;
+  /// Optional per-vertex validity flags.
+  std::span<const bool> validity;
+};
+
 /// Pad image width to ensure proper SIMD alignment
 ///
 /// @param width Original image width
@@ -190,6 +208,8 @@ index_t padImageWidthForRasterizer(index_t width);
 /// @param imageOffset Offset within the image by (delta_x, delta_y) pixels. Useful for rendering
 ///        slightly off to the side of the background or another mesh so you can compare the two
 ///        without needing to construct a special camera.
+/// @param preprojectedVertices Optional eye-space and image-space vertex positions. When provided,
+///        the camera's position transform and projection are bypassed.
 ///
 /// For use with Torch tensors, takes the positions/normals/triangles as a flat array of floats
 void rasterizeMesh(
@@ -211,7 +231,8 @@ void rasterizeMesh(
     const std::vector<Light>& lights_eye = {},
     bool backfaceCulling = true,
     float depthOffset = 0,
-    const Eigen::Vector2f& imageOffset = {0, 0});
+    const Eigen::Vector2f& imageOffset = {0, 0},
+    const PreprojectedMeshVertices& preprojectedVertices = {});
 
 /// Rasterize 3D line segments with specified thickness and color
 ///

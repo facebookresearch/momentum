@@ -24,10 +24,18 @@ struct PhongMaterial;
 ///
 /// Buffer sizes are element counts, not byte counts. positionsModel must contain at least
 /// 3 * numVertices floats, normalsModel must contain the same number when provided, and triangles
-/// must contain at least 3 * numTriangles indices.
+/// must contain at least 3 * numTriangles indices. positionsEye and positionsImage must be supplied
+/// together to bypass camera position transformation and projection; they contain three and two
+/// floats per vertex, respectively, and projectionValidity optionally contains one bool per vertex.
 struct CudaRasterizerInputs {
   const float* positionsModel = nullptr;
   size_t positionsModelSize = 0;
+  const float* positionsEye = nullptr;
+  size_t positionsEyeSize = 0;
+  const float* positionsImage = nullptr;
+  size_t positionsImageSize = 0;
+  const bool* projectionValidity = nullptr;
+  size_t projectionValiditySize = 0;
   const float* normalsModel = nullptr;
   size_t normalsModelSize = 0;
   size_t numVertices = 0;

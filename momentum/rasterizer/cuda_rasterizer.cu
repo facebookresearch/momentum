@@ -436,8 +436,75 @@ __device__ __noinline__ void rasterizeRobustTriangle(
   }
 }
 
+__device__ __forceinline__ bool setupTriangleVertex(
+    TriangleSetup& setup,
+    int32_t vertex,
+    size_t triangleIndex,
+    const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
+    const float* normalsModel,
+    size_t numVertices,
+    const int32_t* triangles,
+    const CudaCamera& camera,
+    bool writeDepth,
+    const float* surfaceNormalsBuffer,
+    const CudaShadingParameters& shading) {
+  const int32_t vertexIndex = triangles[3 * triangleIndex + vertex];
+  if (vertexIndex < 0 || static_cast<size_t>(vertexIndex) >= numVertices) {
+    return false;
+  }
+
+  setup.vertexIndex[vertex] = vertexIndex;
+  bool valid;
+  if (positionsEye == nullptr) {
+    const float3 point = make_float3(
+        positionsModel[3 * vertexIndex],
+        positionsModel[3 * vertexIndex + 1],
+        positionsModel[3 * vertexIndex + 2]);
+    valid = projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.eye[vertex]);
+  } else {
+    setup.eye[vertex] = make_float3(
+        positionsEye[3 * vertexIndex],
+        positionsEye[3 * vertexIndex + 1],
+        positionsEye[3 * vertexIndex + 2]);
+    setup.u[vertex] = positionsImage[2 * vertexIndex];
+    setup.v[vertex] = positionsImage[2 * vertexIndex + 1];
+    valid = (projectionValidity == nullptr || projectionValidity[vertexIndex]) &&
+        isfinite(setup.eye[vertex].x) && isfinite(setup.eye[vertex].y) &&
+        isfinite(setup.eye[vertex].z) && setup.eye[vertex].z > 0.0f && isfinite(setup.u[vertex]) &&
+        isfinite(setup.v[vertex]);
+  }
+
+  if (valid && shading.enabled && shading.textureCoordinates != nullptr &&
+      (shading.diffuseTexture != nullptr || shading.emissiveTexture != nullptr)) {
+    const int32_t textureIndex = shading.textureTriangles == nullptr
+        ? vertexIndex
+        : shading.textureTriangles[3 * triangleIndex + vertex];
+    valid = textureIndex >= 0 && static_cast<size_t>(textureIndex) < shading.numTextureCoordinates;
+    if (valid) {
+      setup.textureIndex[vertex] = textureIndex;
+    }
+  }
+  if (valid && !writeDepth && (surfaceNormalsBuffer != nullptr || shading.enabled) &&
+      normalsModel != nullptr) {
+    setup.normal[vertex] = transformNormal(
+        camera,
+        make_float3(
+            normalsModel[3 * vertexIndex],
+            normalsModel[3 * vertexIndex + 1],
+            normalsModel[3 * vertexIndex + 2]));
+  }
+  return valid;
+}
+
+template <bool ParallelVertexSetup>
 __global__ void rasterizeKernel(
     const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
     const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
@@ -458,6 +525,13 @@ __global__ void rasterizeKernel(
   const size_t batchIndex = blockIdx.y;
   const size_t triangleIndex = blockIdx.x;
   positionsModel += 3 * batchIndex * numVertices;
+  if (positionsEye != nullptr) {
+    positionsEye += 3 * batchIndex * numVertices;
+    positionsImage += 2 * batchIndex * numVertices;
+    if (projectionValidity != nullptr) {
+      projectionValidity += batchIndex * numVertices;
+    }
+  }
   if (normalsModel != nullptr) {
     normalsModel += 3 * batchIndex * numVertices;
   }
@@ -479,7 +553,31 @@ __global__ void rasterizeKernel(
   }
 
   __shared__ TriangleSetup setup;
-  if (threadIdx.x == 0) {
+  __shared__ int32_t vertexValid[3];
+  if constexpr (ParallelVertexSetup) {
+    if (threadIdx.x < 3) {
+      const int32_t vertex = threadIdx.x;
+      vertexValid[vertex] = setupTriangleVertex(
+          setup,
+          vertex,
+          triangleIndex,
+          positionsModel,
+          positionsEye,
+          positionsImage,
+          projectionValidity,
+          normalsModel,
+          numVertices,
+          triangles,
+          camera,
+          writeDepth,
+          surfaceNormalsBuffer,
+          shading);
+    }
+    __syncthreads();
+    if (threadIdx.x == 0) {
+      setup.valid = vertexValid[0] && vertexValid[1] && vertexValid[2];
+    }
+  } else if (threadIdx.x == 0) {
     setup.valid = 1;
     for (int32_t vertex = 0; vertex < 3; ++vertex) {
       const int32_t vertexIndex = triangles[3 * triangleIndex + vertex];
@@ -488,12 +586,25 @@ __global__ void rasterizeKernel(
         break;
       }
       setup.vertexIndex[vertex] = vertexIndex;
-      const float3 point = make_float3(
-          positionsModel[3 * vertexIndex],
-          positionsModel[3 * vertexIndex + 1],
-          positionsModel[3 * vertexIndex + 2]);
-      setup.valid &=
-          projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.eye[vertex]);
+      if (positionsEye == nullptr) {
+        const float3 point = make_float3(
+            positionsModel[3 * vertexIndex],
+            positionsModel[3 * vertexIndex + 1],
+            positionsModel[3 * vertexIndex + 2]);
+        setup.valid &=
+            projectPoint(camera, point, setup.u[vertex], setup.v[vertex], setup.eye[vertex]);
+      } else {
+        setup.eye[vertex] = make_float3(
+            positionsEye[3 * vertexIndex],
+            positionsEye[3 * vertexIndex + 1],
+            positionsEye[3 * vertexIndex + 2]);
+        setup.u[vertex] = positionsImage[2 * vertexIndex];
+        setup.v[vertex] = positionsImage[2 * vertexIndex + 1];
+        setup.valid &= (projectionValidity == nullptr || projectionValidity[vertexIndex]) &&
+            isfinite(setup.eye[vertex].x) && isfinite(setup.eye[vertex].y) &&
+            isfinite(setup.eye[vertex].z) && setup.eye[vertex].z > 0.0f &&
+            isfinite(setup.u[vertex]) && isfinite(setup.v[vertex]);
+      }
       if (shading.enabled && shading.textureCoordinates != nullptr &&
           (shading.diffuseTexture != nullptr || shading.emissiveTexture != nullptr)) {
         const int32_t textureIndex = shading.textureTriangles == nullptr
@@ -516,7 +627,9 @@ __global__ void rasterizeKernel(
                 normalsModel[3 * vertexIndex + 2]));
       }
     }
+  }
 
+  if (threadIdx.x == 0) {
     if (!writeDepth) {
       if (setup.valid && (surfaceNormalsBuffer != nullptr || shading.enabled) &&
           normalsModel == nullptr) {
@@ -693,10 +806,88 @@ __global__ void rasterizeKernel(
       rgbBuffer);
 }
 
+cudaError_t launchRasterizeKernel(
+    bool parallelVertexSetup,
+    dim3 grid,
+    const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
+    const float* normalsModel,
+    size_t numVertices,
+    const int32_t* triangles,
+    size_t numTriangles,
+    const CudaCamera& camera,
+    float nearClip,
+    float depthOffset,
+    bool backfaceCulling,
+    bool writeDepth,
+    int64_t rowStride,
+    int64_t imageStride,
+    float* zBuffer,
+    int32_t* triangleIndexBuffer,
+    int32_t* vertexIndexBuffer,
+    float* surfaceNormalsBuffer,
+    const CudaShadingParameters& shading,
+    float* rgbBuffer,
+    cudaStream_t stream) {
+  if (parallelVertexSetup) {
+    rasterizeKernel<true><<<grid, kRasterThreadsPerBlock, 0, stream>>>(
+        positionsModel,
+        positionsEye,
+        positionsImage,
+        projectionValidity,
+        normalsModel,
+        numVertices,
+        triangles,
+        numTriangles,
+        camera,
+        nearClip,
+        depthOffset,
+        backfaceCulling,
+        writeDepth,
+        rowStride,
+        imageStride,
+        zBuffer,
+        triangleIndexBuffer,
+        vertexIndexBuffer,
+        surfaceNormalsBuffer,
+        shading,
+        rgbBuffer);
+  } else {
+    rasterizeKernel<false><<<grid, kRasterThreadsPerBlock, 0, stream>>>(
+        positionsModel,
+        positionsEye,
+        positionsImage,
+        projectionValidity,
+        normalsModel,
+        numVertices,
+        triangles,
+        numTriangles,
+        camera,
+        nearClip,
+        depthOffset,
+        backfaceCulling,
+        writeDepth,
+        rowStride,
+        imageStride,
+        zBuffer,
+        triangleIndexBuffer,
+        vertexIndexBuffer,
+        surfaceNormalsBuffer,
+        shading,
+        rgbBuffer);
+  }
+  return cudaGetLastError();
+}
+
 } // namespace
 
 cudaError_t launchCudaRasterizeMeshes(
     const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
     const float* normalsModel,
     size_t batchSize,
     size_t numVertices,
@@ -720,33 +911,46 @@ cudaError_t launchCudaRasterizeMeshes(
   }
 
   const dim3 grid(static_cast<uint32_t>(numTriangles), static_cast<uint32_t>(batchSize));
-  rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
-      positionsModel,
-      normalsModel,
-      numVertices,
-      triangles,
-      numTriangles,
-      camera,
-      nearClip,
-      depthOffset,
-      backfaceCulling,
-      true,
-      rowStride,
-      imageStride,
-      zBuffer,
-      triangleIndexBuffer,
-      vertexIndexBuffer,
-      surfaceNormalsBuffer,
-      shading,
-      rgbBuffer);
-  if (const cudaError_t error = cudaGetLastError(); error != cudaSuccess) {
+  constexpr size_t kParallelSetupMinBatch = 32;
+  const bool parallelVertexSetup = batchSize >= kParallelSetupMinBatch;
+  if (const cudaError_t error = launchRasterizeKernel(
+          parallelVertexSetup,
+          grid,
+          positionsModel,
+          positionsEye,
+          positionsImage,
+          projectionValidity,
+          normalsModel,
+          numVertices,
+          triangles,
+          numTriangles,
+          camera,
+          nearClip,
+          depthOffset,
+          backfaceCulling,
+          true,
+          rowStride,
+          imageStride,
+          zBuffer,
+          triangleIndexBuffer,
+          vertexIndexBuffer,
+          surfaceNormalsBuffer,
+          shading,
+          rgbBuffer,
+          stream);
+      error != cudaSuccess) {
     return error;
   }
 
   if (triangleIndexBuffer != nullptr || vertexIndexBuffer != nullptr ||
       surfaceNormalsBuffer != nullptr || rgbBuffer != nullptr) {
-    rasterizeKernel<<<grid, kRasterThreadsPerBlock, 0, stream>>>(
+    return launchRasterizeKernel(
+        parallelVertexSetup,
+        grid,
         positionsModel,
+        positionsEye,
+        positionsImage,
+        projectionValidity,
         normalsModel,
         numVertices,
         triangles,
@@ -763,14 +967,17 @@ cudaError_t launchCudaRasterizeMeshes(
         vertexIndexBuffer,
         surfaceNormalsBuffer,
         shading,
-        rgbBuffer);
-    return cudaGetLastError();
+        rgbBuffer,
+        stream);
   }
   return cudaSuccess;
 }
 
 cudaError_t launchCudaRasterizeMesh(
     const float* positionsModel,
+    const float* positionsEye,
+    const float* positionsImage,
+    const bool* projectionValidity,
     const float* normalsModel,
     size_t numVertices,
     const int32_t* triangles,
@@ -789,6 +996,9 @@ cudaError_t launchCudaRasterizeMesh(
     cudaStream_t stream) {
   return launchCudaRasterizeMeshes(
       positionsModel,
+      positionsEye,
+      positionsImage,
+      projectionValidity,
       normalsModel,
       1,
       numVertices,
