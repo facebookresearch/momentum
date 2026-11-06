@@ -16,6 +16,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 #include <iomanip>
 #include <limits>
 #include <random>
@@ -824,6 +825,151 @@ TEST(SoftwareRasterizer, Splats) {
   }
 
   ASSERT_LE(numDepthDifferences, 2);
+}
+
+// Renders a scene with and without an image offset and checks that the offset render is the
+// original render translated by the offset.
+void expectRenderShiftedByImageOffset(
+    const Camera& camera,
+    const std::function<void(Span2f, const Eigen::Vector2f&)>& render) {
+  const Eigen::Vector2i offset(4, 3);
+
+  auto zBuffer = makeRasterizerZBuffer(camera);
+  render(zBuffer.view(), Eigen::Vector2f::Zero());
+
+  auto zBufferShifted = makeRasterizerZBuffer(camera);
+  render(zBufferShifted.view(), offset.cast<float>());
+
+  int numCovered = 0;
+  int numMismatched = 0;
+  for (int y = 0; y < camera.imageHeight(); ++y) {
+    for (int x = 0; x < camera.imageWidth(); ++x) {
+      const int srcX = x - offset.x();
+      const int srcY = y - offset.y();
+      const float expected = (srcX >= 0 && srcY >= 0) ? zBuffer(srcY, srcX) : FLT_MAX;
+      if (zBufferShifted(y, x) < FLT_MAX) {
+        ++numCovered;
+      }
+      if (std::abs(zBufferShifted(y, x) - expected) > 1e-4f) {
+        ++numMismatched;
+      }
+    }
+  }
+
+  EXPECT_GT(numCovered, 10);
+  EXPECT_LE(numMismatched, 2);
+}
+
+TEST(SoftwareRasterizer, ImageOffsetShifts3dPrimitives) {
+  const Camera camera = [] {
+    const int width = 50;
+    const int height = 40;
+    momentum::OpenCVDistortionParametersT<float> distortionParams;
+    return Camera(
+        std::make_shared<OpenCVIntrinsicsModel>(
+            width,
+            height,
+            width / 2.0f,
+            height / 2.0f,
+            width / 2.0f,
+            height / 2.0f,
+            distortionParams));
+  }();
+
+  // triangles need to be clockwise:
+  //  1---3
+  //  | \ |
+  //  0---2
+  const std::vector<Eigen::Vector3f> vertices = {
+      Eigen::Vector3f(-0.4f, -0.4f, 1.4f),
+      Eigen::Vector3f(-0.4f, 0.4f, 1.5f),
+      Eigen::Vector3f(0.4f, -0.4f, 1.6f),
+      Eigen::Vector3f(0.4f, 0.4f, 1.7f)};
+  const std::vector<Eigen::Vector3f> normals(vertices.size(), Eigen::Vector3f::UnitZ());
+  const std::vector<Eigen::Vector3i> triangles = {
+      Eigen::Vector3i(0, 1, 2), Eigen::Vector3i(1, 3, 2)};
+  const std::vector<Eigen::Vector3f> lineEndpoints = {
+      vertices[0], vertices[3], vertices[1], vertices[2]};
+  const Eigen::Matrix4f modelMatrix = Eigen::Matrix4f::Identity();
+  const float nearClip = 0.1f;
+  const Eigen::Vector3f color = Eigen::Vector3f::Ones();
+
+  expectRenderShiftedByImageOffset(camera, [&](Span2f zBuffer, const Eigen::Vector2f& offset) {
+    rasterizeMesh(
+        vertices,
+        normals,
+        triangles,
+        {},
+        {},
+        Eigen::VectorXf{},
+        camera,
+        modelMatrix,
+        nearClip,
+        PhongMaterial{},
+        zBuffer,
+        {},
+        {},
+        {},
+        {},
+        std::vector<Light>{},
+        true,
+        0.0f,
+        offset);
+  });
+
+  expectRenderShiftedByImageOffset(camera, [&](Span2f zBuffer, const Eigen::Vector2f& offset) {
+    rasterizeWireframe(
+        vertices,
+        triangles,
+        camera,
+        modelMatrix,
+        nearClip,
+        color,
+        2.0f,
+        zBuffer,
+        {},
+        true,
+        0.0f,
+        offset);
+  });
+
+  expectRenderShiftedByImageOffset(camera, [&](Span2f zBuffer, const Eigen::Vector2f& offset) {
+    rasterizeLines(
+        lineEndpoints, camera, modelMatrix, nearClip, color, 2.0f, zBuffer, {}, 0.0f, offset);
+  });
+
+  expectRenderShiftedByImageOffset(camera, [&](Span2f zBuffer, const Eigen::Vector2f& offset) {
+    rasterizeCircles(
+        vertices,
+        camera,
+        modelMatrix,
+        nearClip,
+        color,
+        color,
+        1.0f,
+        3.0f,
+        zBuffer,
+        {},
+        0.0f,
+        offset);
+  });
+
+  expectRenderShiftedByImageOffset(camera, [&](Span2f zBuffer, const Eigen::Vector2f& offset) {
+    rasterizeSplats(
+        std::vector<Eigen::Vector3f>{Eigen::Vector3f(0, 0, 1.5f)},
+        std::vector<Eigen::Vector3f>{Eigen::Vector3f::UnitZ()},
+        camera,
+        modelMatrix,
+        nearClip,
+        PhongMaterial{},
+        PhongMaterial{},
+        0.3f,
+        zBuffer,
+        {},
+        std::vector<Light>{},
+        0.0f,
+        offset);
+  });
 }
 
 TEST(SoftwareRasterizer, AlphaMatte) {

@@ -337,8 +337,9 @@ class SimdCamera {
   SimdCamera(
       const Camera& camera,
       const Eigen::Matrix4f& modelMatrix,
-      const Eigen::Vector2f& /*imageOffset*/)
+      const Eigen::Vector2f& imageOffset)
       : _intrinsics(camera.intrinsicsModel()),
+        _imageOffset(imageOffset),
         _modelToWorld_rotation(toEnokiMat(modelMatrix.topLeftCorner<3, 3>())),
         _modelToWorld_translation(toEnokiVec(modelMatrix.block<3, 1>(0, 3))),
         _modelToWorld_row3(toEnokiVec(modelMatrix.block<1, 3>(3, 0))),
@@ -393,7 +394,16 @@ class SimdCamera {
   }
 
   [[nodiscard]] auto eyeToWindow(const Vector3fP& p_eye) const {
-    return _intrinsics->project(p_eye);
+    auto result = _intrinsics->project(p_eye);
+    result.first.x() += _imageOffset.x();
+    result.first.y() += _imageOffset.y();
+    return result;
+  }
+
+  [[nodiscard]] std::pair<Eigen::Vector3f, bool> eyeToWindow(const Eigen::Vector3f& p_eye) const {
+    auto result = _intrinsics->project(p_eye);
+    result.first.head<2>() += _imageOffset;
+    return result;
   }
 
   [[nodiscard]] auto worldToWindow(const Vector3fP& p_world) const {
@@ -402,6 +412,7 @@ class SimdCamera {
 
  private:
   std::shared_ptr<const momentum::IntrinsicsModelT<float>> _intrinsics;
+  const Eigen::Vector2f _imageOffset;
 
   const Matrix3f _modelToWorld_rotation;
   const Vector3f _modelToWorld_translation;
