@@ -767,7 +767,7 @@ void rasterizeMeshImpScalarTriangleLoop(
     for (int i = 0; i < 3; ++i) {
       const Eigen::Vector3f p_model = positions_world.segment<3>(3 * triangle[i]);
       const Eigen::Vector3f p_eye = transformModelToEye(camera, modelMatrix, p_model);
-      const auto [p_window, validProj] = camera.intrinsicsModel()->project(p_eye);
+      const auto [p_window, validProj] = cameraSimd.eyeToWindow(p_eye);
 
       p_tri_window[i] = toEnokiVec(p_window);
       for (int j = 0; j < 3; ++j) {
