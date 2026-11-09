@@ -9,6 +9,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <iterator>
 
 #ifdef _MSC_VER
 #pragma warning(push)
