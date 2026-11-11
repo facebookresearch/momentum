@@ -595,7 +595,6 @@ simply want to apply an identity-specific scale to the character, you should use
 'scale_global' parameter in the :class:`ParameterTransform`.
 
 :return: a new :class:`Character` that has been scaled.
-:param character: The character to be scaled.
 :param scale: The length scale to apply.
 :param mass_scale: The physical mass scaling policy to apply.)",
           py::arg("scale"),
@@ -611,7 +610,6 @@ Note that this is primarily intended for transforming between different spaces (
 If you want to translate/rotate/scale a character, you should preferentially use the model parameters to do so.
 
 :return: a new :class:`Character` that has been transformed.
-:param character: The character to be transformed.
 :param xform: The transform to apply.)",
           py::arg("xform"))
       .def(
@@ -719,13 +717,10 @@ motion's scale parameters.
           "to_gltf",
           &toGLTF,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Serialize a character as a GLTF using dictionary form.
+          R"(Serialize a character (without motion) to a GLTF JSON string.
 
 :param character: A valid character.
-:param fps: Frames per second for describing the motion.
-:param motion: tuple of vector of parameter names and a P X T matrix. P is number of parameters, T is number of frames.
-:param offsets: tuple of vector of joint names and a Vector of size J * 7 (Parameters per joint). Eg. for 3 joints, you would have 21 params.
-:return: a GLTF representation of Character with motion
+:return: The GLTF document for the character, as a JSON string.
       )",
           py::arg("character"))
       // loadFBXCharacterFromFile(fbxFilename, modelFilename, locatorsFilename)
@@ -805,7 +800,6 @@ motion's scale parameters.
           py::call_guard<py::gil_scoped_release>(),
           R"(Load locators from a .locators file.
 
-:param character: The character to map the locators onto.
 :param filename: Filename for the locators.
 :return: A valid :class:`Character`.)",
           py::arg("filename"))
@@ -816,7 +810,6 @@ motion's scale parameters.
           py::call_guard<py::gil_scoped_release>(),
           R"(Load locators from a byte array containing .locators file data.
 
-:param character: The character to map the locators onto.
 :param locator_bytes: A byte array containing the locators.
 :return: A valid :class:`Character`.)",
           py::arg("locator_bytes"))
@@ -844,7 +837,6 @@ The output format matches momentum's canonical .locators JSON produced by the C+
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
 
-:param character: The character containing a valid skeleton.
 :param filename: Filename for the model definition.
 :return: A valid :class:`Character`.)",
           py::arg("filename"))
@@ -853,9 +845,8 @@ The output format matches momentum's canonical .locators JSON produced by the C+
           "load_model_definition_from_bytes",
           &pymomentum::loadConfigFromBytes,
           py::call_guard<py::gil_scoped_release>(),
-          R"(Load a model definition from a .model file.  This defines the parameter transform, model parameters, and joint limits.
+          R"(Load a model definition from a byte array containing .model file data.  This defines the parameter transform, model parameters, and joint limits.
 
-:param character: The character containing a valid skeleton.
 :param model_bytes: Bytes array containing the model definition.
 :return: A valid :class:`Character`.)",
           py::arg("model_bytes"))
@@ -1040,13 +1031,12 @@ shape animation. Use save_fbx() with model parameters to include blend shape ani
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a file. The format is determined by the file extension (.fbx, .glb, .gltf).
 
-    This is a unified interface that automatically selects between FBX and GLTF based on the file extension.
+This is a unified interface that automatically selects between FBX and GLTF based on the file extension.
 
 :param path: Export filename with extension (.fbx, .glb, or .gltf).
 :param character: A Character to be saved to the output file.
 :param fps: [Optional] Frequency in frames per second
 :param motion: [Optional] 2D pose matrix in [n_frames x n_parameters]
-:param offsets: [Optional] Offset array in [(n_joints x n_parameters_per_joint)]
 :param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
 :param options: [Optional] FileSaveOptions for controlling output (mesh, locators, collisions, etc.)
       )",
@@ -1062,14 +1052,14 @@ shape animation. Use save_fbx() with model parameters to include blend shape ani
           py::call_guard<py::gil_scoped_release>(),
           R"(Save a character to a file using skeleton states. The format is determined by the file extension (.fbx, .glb, .gltf).
 
-    This function allows saving a character and its animation using skeleton state matrices instead of model parameters.
+This function allows saving a character and its animation using skeleton state matrices instead of model parameters.
 
-    :param path: Export filename with extension (.fbx, .glb, or .gltf).
-    :param character: A Character to be saved to the output file.
-    :param fps: Frequency in frames per second
-    :param skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
-    :param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
-    )",
+:param path: Export filename with extension (.fbx, .glb, or .gltf).
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second
+:param skel_states: Skeleton states [n_frames x n_joints x n_parameters_per_joint]
+:param markers: [Optional] Additional marker (3d positions) data in [n_frames][n_markers]
+)",
           py::arg("path"),
           py::arg("character"),
           py::arg("fps"),

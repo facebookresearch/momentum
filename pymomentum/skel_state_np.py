@@ -9,8 +9,8 @@ Skeleton State Utilities (NumPy)
 
 NumPy implementation of skeleton state utilities for PyMomentum.
 
-This module mirrors :mod:`skel_state` but uses NumPy arrays instead of PyTorch tensors.
-See :mod:`skel_state` for full documentation on the skeleton state format and operations.
+This module mirrors :mod:`pymomentum.skel_state` but uses NumPy arrays instead of PyTorch tensors.
+See :mod:`pymomentum.skel_state` for full documentation on the skeleton state format and operations.
 
 A skeleton state is a compact 8-dimensional representation of a 3D transformation
 that encodes translation, rotation, and uniform scale. The 8 components are organized as:

@@ -1288,7 +1288,7 @@ Example usage::
       &axel::saveSdfsToMsgpack<float>,
       R"(Save multiple named signed distance fields to a single msgpack file.
 
-Each SDF's :attr:`parent_joint` (if set) is serialized alongside the SDF data.
+Each SDF's :attr:`SignedDistanceField.parent_joint` (if set) is serialized alongside the SDF data.
 Only float32 precision is supported from Python.
 
 :param sdfs: Dictionary mapping names to :class:`SignedDistanceField` objects.
@@ -1309,7 +1309,7 @@ Example usage::
       &axel::loadSdfsFromMsgpack<float>,
       R"(Load multiple named signed distance fields from a single msgpack file.
 
-Each SDF's :attr:`parent_joint` is restored from the file if present.
+Each SDF's :attr:`SignedDistanceField.parent_joint` is restored from the file if present.
 Only float32 precision is supported from Python.
 
 :param path: Input file path.

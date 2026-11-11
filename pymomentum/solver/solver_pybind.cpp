@@ -165,19 +165,19 @@ The IK energy function that is minimized is a sum of squared residual terms, :ma
 We strongly recommend you use named parameters when calling this function as the parameter list is likely to grow over time.
 
 Most tensor arguments can be specified either batched (e.g. [nBatch x nConstraints]) or unbatched (e.g. [nConstraints]).  "Unbatched" tensors will be
-automatically expanded to match the batch dimension.  So, for example, you could pass a tensor of size [nConstraints] for the positionConstraints_parents parameter
-and a tensor of dimension [nBatch x nConstraints x 3] for the position_constraints_targets tensor, and the solver will understand that you mean to use
+automatically expanded to match the batch dimension.  So, for example, you could pass a tensor of size [nConstraints] for the position_cons_parents parameter
+and a tensor of dimension [nBatch x nConstraints x 3] for the position_cons_targets tensor, and the solver will understand that you mean to use
 the same parents across the batch.
 
 All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q = w + xi + yj + zk`.
 
 :return: The model parameters that (locally) minimize the error function, as a (nBatch x nModelParams)-dimension torch.Tensor.
 :param character: Character or list of nBatch Characters to use in the solve.
-:param active_parameters: boolean-valued torch.Tensor with dimension (k), which selects the parameters to be active during the solve.  For example, you might choose to exclude scaling parameters with 'activeParameters=~character.getScalingParameters()'.  Limiting the parameters can also be helpful when dealing with underdetermined problems.
+:param active_parameters: boolean-valued torch.Tensor with dimension (k), which selects the parameters to be active during the solve.  For example, you might choose to exclude scaling parameters by passing the negation of :attr:`pymomentum.geometry.ParameterTransform.scaling_parameters`.  Limiting the parameters can also be helpful when dealing with underdetermined problems.
 :param model_parameters_init: float-valued torch.Tensor which contain the (nBatch x nModelParameters)-dimensional model parameters used to initialize the solve.  This could be important as the solver always converges to a local minimum.
 :param active_error_functions: list of pymomentum.ErrorFunctionType which gives the order of input error function types.
-:param error_function_weights: float-valued torch.Tensor with dimension (nBatch x len(activeErrorFunctions)) which contains a global weight for each active error function. The order of the weights is specified by activeErrorFunctions.
-:param options.linearSolverType: Linear solver used in the Levenberg-Marquardt solve (default: QR).
+:param error_function_weights: float-valued torch.Tensor with dimension (nBatch x len(active_error_functions)) which contains a global weight for each active error function. The order of the weights is specified by active_error_functions.
+:param options.linear_solver: Linear solver used in the Levenberg-Marquardt solve (default: QR).
 :param options.levmar_lambda: Lambda value used to regularize the Levenberg-Marquardt solver (default: 0.01).
 :param options.min_iter: Minimum number of iterations used in the nonlinear Levenberg-Marquardt solve (default: 4).
 :param options.max_iter: Maximum number of iterations used in the nonlinear Levenberg-Marquardt solve (default: 50).
@@ -192,8 +192,8 @@ All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q 
 :param orientation_cons_weights: float-valued torch.Tensor of dimension (nBatch x nConstraints) which contains a per-constraint weight.
 :param orientation_cons_targets: float-valued torch.Tensor of dimension (nBatch x nConstraints x 4) (m x n x 4): Per-constraint world-space orientation targets as quaternions.
 :param pose_prior_model: Mixture-PCA model used by the pose prior.
-    It can either be a :py:class:`pymomentum.geometry.Mpcca`, or it can be a tuple of tensors [pi, mu, W, sigma, param_indices] as described in
-    :math:`pymomentum.geometry.Mppca.to_tensors`.  The former is a bit more efficient during the solve (because there is no need to re-calculate the inverse covariance matrix) but
+    It can either be a :class:`pymomentum.geometry.Mppca`, or it can be a tuple of tensors [pi, mu, W, sigma, param_indices] as described in
+    :meth:`pymomentum.geometry.Mppca.to_arrays`.  The former is a bit more efficient during the solve (because there is no need to re-calculate the inverse covariance matrix) but
     the latter case allows for differentiability.
 :param motion_targets: float-valued torch.Tensor of dimension (nBatch x nModelParams) which contains the model parameter targets for the motionError.
 :param motion_weights: float-valued torch.Tensor of dimension (nBatch x nModelParams) which contain a per-model-parameter weight for the motionError.
@@ -217,7 +217,7 @@ All quaternion parameters use the quaternion order [x, y, z, w], where :math:`q 
 :param vertex_proj_cons_vertices: int-valued torch.Tensor of dimension (nBatch x nConstraints); contains the vertex index for each constraint.
 :param vertex_proj_cons_weights: float-valued torch.Tensor of dimension (nBatch x nConstraints); contains the per-constraint weight for each constraint.
 :param vertex_proj_cons_target_positions: float-valued torch.Tensor of dimension (nBatch x nConstraints x 2); contains the target position.
-:param vertex_proj_cons_target_projections: float-valued torch.Tensor of dimension (nBatch x nConstraints x 4 x 3); containing a 4x3 projection matrix for each constraint.  Note
+:param vertex_proj_cons_projections: float-valued torch.Tensor of dimension (nBatch x nConstraints x 4 x 3); containing a 4x3 projection matrix for each constraint.  Note
     that while you can use a standard pinhole model matrix as the projection matrix, we actually recommend constructing a separate local projection matrix
     for each constraint centered around the camera ray, which is more robust for e.g. fisheye cameras.
 )",
@@ -426,16 +426,16 @@ Batch solve a body multi-frame, or sequence, IK problem, with some parameters un
 A typical use case is to solve for a single body scale plus a per-frame pose given per-frame constraints.
 
 The constraints are the same ones available in :meth:`solve_ik`, except that instead of having tensor dimensions [nBatch x ...] they use tensor dimension
-[nBatch x nFrames x ...].  For example: posConstraint_parents would be [nBatch x nFrames x nConstraints].  Note that you can choose to elide both the
+[nBatch x nFrames x ...].  For example: position_cons_parents would be [nBatch x nFrames x nConstraints].  Note that you can choose to elide both the
 per-batch and per-frame dimension (if you want to share parents across all frames and the entire batch) but you cannot skip one or the other unless nBatch is 1.
 This is to prevent confusing ambiguities in whether you meant sharing across the batch dimension or the frame dimension.
 
 :param character: Character or list of nBatch Characters to use in the solve.
-:param activeParameters: boolean-valued torch.Tensor with dimension (k), which selects all the parameters (both shared and per-frame) to be active during the solve.
-:param sharedParameters: boolean-valued torch.Tensor with dimension (k), which selects all the parameters to be shared across the frames (typically this would be scale or shape parameters).
-:param modelParameters_init: float-valued torch.Tensor which contain the ([nBatch] x nFrames x nModelParameters)-dimensional model parameters used to initialize the solve.  This could be important as the solver always converges to a local minimum.
-:param activeErrorFunctions: list of pymomentum.ErrorFunctionType which gives the order of input error function types.
-:param errorFunctionWeights: float-valued torch.Tensor with dimension (nBatch x nFrames x len(activeErrorFunctions)) which contains a per-frame global weight for each active error function. The order of the weights is specified by activeErrorFunctions.
+:param active_parameters: boolean-valued torch.Tensor with dimension (k), which selects all the parameters (both shared and per-frame) to be active during the solve.
+:param shared_parameters: boolean-valued torch.Tensor with dimension (k), which selects all the parameters to be shared across the frames (typically this would be scale or shape parameters).
+:param model_parameters_init: float-valued torch.Tensor which contain the ([nBatch] x nFrames x nModelParameters)-dimensional model parameters used to initialize the solve.  This could be important as the solver always converges to a local minimum.
+:param active_error_functions: list of pymomentum.ErrorFunctionType which gives the order of input error function types.
+:param error_function_weights: float-valued torch.Tensor with dimension (nBatch x nFrames x len(active_error_functions)) which contains a per-frame global weight for each active error function. The order of the weights is specified by active_error_functions.
 )",
       py::arg("character"),
       py::arg("active_parameters"),
@@ -489,7 +489,7 @@ then the input is likely not in a good shape.
   m.def(
       "reset_solve_ik_statistics",
       &resetSolveIKStatistics,
-      R"(Reset the counters used by :meth:`getSolveIKStatistics`.)");
+      R"(Reset the counters used by :func:`get_solve_ik_statistics`.)");
 
   m.def(
       "get_gradient_statistics",

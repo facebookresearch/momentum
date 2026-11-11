@@ -427,13 +427,13 @@ Uses a generalized loss function that support various forms of losses such as L1
                       name.has_value() ? name->at(iCons) : std::string{}));
             }
           },
-          R"(Adds a new constraint to the error function.
+          R"(Adds multiple constraints to the error function.
 
-:param parent: The index of the joints that are the parents of the locator.
-:param offset: The offset of the locators from the parent joint.
-:param target: The target positions of the locator.
-:param weight: The weight of the constraint.
-:param names: The names of the constraints (for debugging).)",
+:param parent: The indices of the joints that are the parents of the locators.
+:param target: The target positions of the locators.
+:param offset: The offsets of the locators from their parent joints.  Defaults to zero.
+:param weight: The weights of the constraints.  Defaults to 1.
+:param name: The names of the constraints (for debugging).)",
           py::arg("parent"),
           py::kw_only(),
           py::arg("target"),
@@ -969,13 +969,17 @@ computation with Taylor series for small angles.)");
                   weight_acc(iCons));
             }
           },
-          R"(Adds a new constraint to the error function.
+          R"(Adds multiple point-to-triangle constraints to the error function.
 
-  :param parents: The indices of the joints that are the parents of the locators.
-  :param offsets: The offsets of the locators from the parent joints.
-  :param targets: The target positions of the locators.
-  :param weights: The weights of the constraints.
-  :param names: The names of the constraints (for debugging).)",
+Each constraint pulls a source vertex toward a point defined relative to a target triangle:
+``sum_i(bary_i * target_triangle_vertex_i) + depth * target_triangle_normal``.  The constraint
+acts on both the source vertex and the target triangle's vertices.
+
+:param source_vertex_index: A numpy array of size n with the index of each source vertex.
+:param target_triangle_index: A numpy array of shape (n, 3) with the vertex indices of each target triangle.
+:param target_triangle_bary_coord: A numpy array of shape (n, 3) with the barycentric coordinates of the target point within each triangle.
+:param depth: A numpy array of size n with the offset of the target point along the target triangle's normal.
+:param weight: A numpy array of size n with the weight of each constraint.)",
           py::arg("source_vertex_index"),
           py::arg("target_triangle_index"),
           py::arg("target_triangle_bary_coord"),
