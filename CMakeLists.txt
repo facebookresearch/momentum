@@ -778,6 +778,8 @@ mt_library(
     Eigen3::Eigen
     mdspan::mdspan
     Microsoft.GSL::GSL
+  PUBLIC_COMPILE_DEFINITIONS
+    MDSPAN_USE_PAREN_OPERATOR=1
 )
 
 if(MOMENTUM_BUILD_CUDA_RASTERIZER)
