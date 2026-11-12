@@ -1,5 +1,5 @@
 var skinned__locator_8h =
 [
     [ "momentum::SkinnedLocator", "structmomentum_1_1SkinnedLocator.html", "structmomentum_1_1SkinnedLocator" ],
-    [ "SkinnedLocatorList", "skinned__locator_8h.html#a0880456b104920deacb90580faa7dc6c", null ]
+    [ "momentum::SkinnedLocatorList", "namespacemomentum.html#a94522583bce87921f5c3b3f8949c74f2", null ]
 ];

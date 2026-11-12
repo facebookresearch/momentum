@@ -1,15 +1,15 @@
 var collision__geometry_8h =
 [
-    [ "momentum::TaperedCapsuleT< S >", "structmomentum_1_1TaperedCapsuleT.html", "structmomentum_1_1TaperedCapsuleT" ],
-    [ "momentum::CollisionEllipsoidT< S >", "structmomentum_1_1CollisionEllipsoidT.html", "structmomentum_1_1CollisionEllipsoidT" ],
-    [ "momentum::CollisionBoxT< S >", "structmomentum_1_1CollisionBoxT.html", "structmomentum_1_1CollisionBoxT" ],
-    [ "momentum::CollisionPrimitiveT< S >", "structmomentum_1_1CollisionPrimitiveT.html", "structmomentum_1_1CollisionPrimitiveT" ],
-    [ "CollisionGeometry", "collision__geometry_8h.html#a7f43d746798db9b244d37e2566a49b29", null ],
-    [ "CollisionGeometryd", "collision__geometry_8h.html#a11131ef20a3b22e2b81e9334c673c1dc", null ],
-    [ "CollisionGeometryT", "collision__geometry_8h.html#a8a86756de745249de82393279a6cb830", null ],
-    [ "CollisionPrimitiveType", "collision__geometry_8h.html#a8852bc183d42e2782ba33cfa9e0d6176", [
-      [ "TaperedCapsule", "collision__geometry_8h.html#a8852bc183d42e2782ba33cfa9e0d6176a24effac8f5b99ca770d8f0ad5c23279d", null ],
-      [ "Ellipsoid", "collision__geometry_8h.html#a8852bc183d42e2782ba33cfa9e0d6176aeee5397cecd880d16ef7244819aa383d", null ],
-      [ "Box", "collision__geometry_8h.html#a8852bc183d42e2782ba33cfa9e0d6176a3cfce651e667ab85486dd42a8185f98a", null ]
+    [ "momentum::TaperedCapsuleT&lt; S &gt;", "structmomentum_1_1TaperedCapsuleT.html", "structmomentum_1_1TaperedCapsuleT" ],
+    [ "momentum::CollisionEllipsoidT&lt; S &gt;", "structmomentum_1_1CollisionEllipsoidT.html", "structmomentum_1_1CollisionEllipsoidT" ],
+    [ "momentum::CollisionBoxT&lt; S &gt;", "structmomentum_1_1CollisionBoxT.html", "structmomentum_1_1CollisionBoxT" ],
+    [ "momentum::CollisionPrimitiveT&lt; S &gt;", "structmomentum_1_1CollisionPrimitiveT.html", "structmomentum_1_1CollisionPrimitiveT" ],
+    [ "momentum::CollisionGeometry", "namespacemomentum.html#a129626c6a60e43b62c40603e267207d5", null ],
+    [ "momentum::CollisionGeometryd", "namespacemomentum.html#a2eb828d2ad7ab1126f6db9536a6ecfc5", null ],
+    [ "momentum::CollisionGeometryT", "namespacemomentum.html#a42b945a2a110bfc81969b339e19caab9", null ],
+    [ "momentum::CollisionPrimitiveType", "namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176", [
+      [ "momentum::CollisionPrimitiveType::TaperedCapsule", "namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176a24effac8f5b99ca770d8f0ad5c23279d", null ],
+      [ "momentum::CollisionPrimitiveType::Ellipsoid", "namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176aeee5397cecd880d16ef7244819aa383d", null ],
+      [ "momentum::CollisionPrimitiveType::Box", "namespacemomentum.html#a8852bc183d42e2782ba33cfa9e0d6176a3cfce651e667ab85486dd42a8185f98a", null ]
     ] ]
 ];

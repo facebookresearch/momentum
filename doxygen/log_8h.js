@@ -20,16 +20,16 @@ var log_8h =
     [ "MT_LOGW_IF", "log_8h.html#abd90ff00ca31139752fadf7372f37fd0", null ],
     [ "MT_LOGW_ONCE", "log_8h.html#a4ac7d20df2baf72b9510eb9fa4f1a542", null ],
     [ "MT_LOGW_ONCE_IF", "log_8h.html#a8e7e336451fd8d5067f53bc8ff5329f1", null ],
-    [ "LogLevel", "log_8h.html#a0da6407898e254fc522385ff8028bf1b", [
-      [ "Disabled", "log_8h.html#a0da6407898e254fc522385ff8028bf1bab9f5c797ebbf55adccdd8539a65a0241", null ],
-      [ "Error", "log_8h.html#a0da6407898e254fc522385ff8028bf1ba902b0d55fddef6f8d651fe1035b7d4bd", null ],
-      [ "Warning", "log_8h.html#a0da6407898e254fc522385ff8028bf1ba0eaadb4fcb48a0a0ed7bc9868be9fbaa", null ],
-      [ "Info", "log_8h.html#a0da6407898e254fc522385ff8028bf1ba4059b0251f66a18cb56f544728796875", null ],
-      [ "Debug", "log_8h.html#a0da6407898e254fc522385ff8028bf1baa603905470e2a5b8c13e96b579ef0dba", null ],
-      [ "Trace", "log_8h.html#a0da6407898e254fc522385ff8028bf1badd4ec0ac4e58f7c32a01244ae91150b1", null ]
+    [ "momentum::LogLevel", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1b", [
+      [ "momentum::LogLevel::Disabled", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1bab9f5c797ebbf55adccdd8539a65a0241", null ],
+      [ "momentum::LogLevel::Error", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1ba902b0d55fddef6f8d651fe1035b7d4bd", null ],
+      [ "momentum::LogLevel::Warning", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1ba0eaadb4fcb48a0a0ed7bc9868be9fbaa", null ],
+      [ "momentum::LogLevel::Info", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1ba4059b0251f66a18cb56f544728796875", null ],
+      [ "momentum::LogLevel::Debug", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1baa603905470e2a5b8c13e96b579ef0dba", null ],
+      [ "momentum::LogLevel::Trace", "namespacemomentum.html#a0da6407898e254fc522385ff8028bf1badd4ec0ac4e58f7c32a01244ae91150b1", null ]
     ] ],
-    [ "getLogLevel", "log_8h.html#a8b0e16f2dfccdf6250bfee92b33037b1", null ],
-    [ "logLevelMap", "log_8h.html#a894b2833c20102a6a3d6474407397612", null ],
-    [ "setLogLevel", "log_8h.html#a3be3c935268b7b2d3f1fcb448289a757", null ],
-    [ "setLogLevel", "log_8h.html#a4f88c874a3d4553478fe3d7fbfd4e8aa", null ]
+    [ "momentum::getLogLevel", "namespacemomentum.html#a8b0e16f2dfccdf6250bfee92b33037b1", null ],
+    [ "momentum::logLevelMap", "namespacemomentum.html#a894b2833c20102a6a3d6474407397612", null ],
+    [ "momentum::setLogLevel", "namespacemomentum.html#a3be3c935268b7b2d3f1fcb448289a757", null ],
+    [ "momentum::setLogLevel", "namespacemomentum.html#a4f88c874a3d4553478fe3d7fbfd4e8aa", null ]
 ];

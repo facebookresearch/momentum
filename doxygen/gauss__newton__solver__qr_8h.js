@@ -1,5 +1,5 @@
 var gauss__newton__solver__qr_8h =
 [
     [ "momentum::GaussNewtonSolverQROptions", "structmomentum_1_1GaussNewtonSolverQROptions.html", "structmomentum_1_1GaussNewtonSolverQROptions" ],
-    [ "momentum::GaussNewtonSolverQRT< T >", "classmomentum_1_1GaussNewtonSolverQRT.html", "classmomentum_1_1GaussNewtonSolverQRT" ]
+    [ "momentum::GaussNewtonSolverQRT&lt; T &gt;", "classmomentum_1_1GaussNewtonSolverQRT.html", "classmomentum_1_1GaussNewtonSolverQRT" ]
 ];

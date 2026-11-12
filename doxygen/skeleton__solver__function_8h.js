@@ -1,4 +1,4 @@
 var skeleton__solver__function_8h =
 [
-    [ "momentum::SkeletonSolverFunctionT< T >", "classmomentum_1_1SkeletonSolverFunctionT.html", "classmomentum_1_1SkeletonSolverFunctionT" ]
+    [ "momentum::SkeletonSolverFunctionT&lt; T &gt;", "classmomentum_1_1SkeletonSolverFunctionT.html", "classmomentum_1_1SkeletonSolverFunctionT" ]
 ];

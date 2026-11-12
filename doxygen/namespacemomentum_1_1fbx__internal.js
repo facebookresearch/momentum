@@ -1,8 +1,8 @@
 var namespacemomentum_1_1fbx__internal =
 [
+    [ "SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult" ],
     [ "JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", "structmomentum_1_1fbx__internal_1_1JointCurveSetup" ],
     [ "MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult" ],
-    [ "SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult" ],
     [ "addMetaData", "namespacemomentum_1_1fbx__internal.html#af7c3168cb203e33baf92cb83775b55cd", null ],
     [ "addPhysicalProperties", "namespacemomentum_1_1fbx__internal.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c", null ],
     [ "createAnimationCurves", "namespacemomentum_1_1fbx__internal.html#a389c8f8eef8f63ff35f3f5e864523809", null ],

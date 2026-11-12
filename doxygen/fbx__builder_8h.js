@@ -1,6 +1,6 @@
 var fbx__builder_8h =
 [
     [ "momentum::FbxBuilder", "classmomentum_1_1FbxBuilder.html", "classmomentum_1_1FbxBuilder" ],
-    [ "FbxUserProperties", "fbx__builder_8h.html#a296bf543e268b6bb5c0adb577458bd32", null ],
-    [ "FbxUserPropertyValue", "fbx__builder_8h.html#a570780bfa100e3c5f4a3fb20a2f445de", null ]
+    [ "momentum::FbxUserProperties", "namespacemomentum.html#a9426f1fa91f8da23ff8089c7df508409", null ],
+    [ "momentum::FbxUserPropertyValue", "namespacemomentum.html#a37935f3ab0745bca535f31c9e0a661c2", null ]
 ];

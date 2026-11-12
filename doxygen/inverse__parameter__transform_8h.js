@@ -1,7 +1,7 @@
 var inverse__parameter__transform_8h =
 [
-    [ "momentum::InverseParameterTransformT< T >", "structmomentum_1_1InverseParameterTransformT.html", "structmomentum_1_1InverseParameterTransformT" ],
-    [ "InverseParameterTransform", "inverse__parameter__transform_8h.html#af580ab8b50a05c6b8ff1335b57533e67", null ],
-    [ "InverseParameterTransformd", "inverse__parameter__transform_8h.html#aa87cb7194fae5d138dc9a0132907734f", null ],
-    [ "applyModelParameterScales", "inverse__parameter__transform_8h.html#a3137e457f5c7a912c788d66348ce4875", null ]
+    [ "momentum::InverseParameterTransformT&lt; T &gt;", "structmomentum_1_1InverseParameterTransformT.html", "structmomentum_1_1InverseParameterTransformT" ],
+    [ "momentum::InverseParameterTransform", "namespacemomentum.html#aa11f76b6909741bf12ce80d03cfd0e09", null ],
+    [ "momentum::InverseParameterTransformd", "namespacemomentum.html#a72b3b6d32ad912889325e6d234c9279c", null ],
+    [ "momentum::applyModelParameterScales", "namespacemomentum.html#a3137e457f5c7a912c788d66348ce4875", null ]
 ];
