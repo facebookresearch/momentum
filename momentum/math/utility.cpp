@@ -13,6 +13,7 @@
 #include <Eigen/Eigenvalues>
 
 #include <algorithm>
+#include <limits>
 #include <type_traits>
 
 namespace momentum {
@@ -419,9 +420,16 @@ Quaternionf quaternionAverage(momentum::span<const Quaternionf> q, momentum::spa
 
 template <typename T>
 MatrixX<T> pseudoInverse(const MatrixX<T>& mat) {
-  constexpr T pinvtoler = Eps<T>(T(1e-6), T(1e-60)); // choose your tolerance wisely!
   const auto svd = mat.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
   VectorX<T> singularValues_inv = svd.singularValues();
+  const T maxSingularValue = singularValues_inv.size() > 0 ? singularValues_inv(0) : T(0);
+  if (maxSingularValue <= T(0)) {
+    return MatrixX<T>::Zero(mat.cols(), mat.rows());
+  }
+  // Singular values within the SVD's rounding error of zero count as zero. The cutoff scales with
+  // the matrix size and the largest singular value, as in MATLAB's pinv and numpy.linalg.lstsq.
+  const T pinvtoler =
+      T(std::max(mat.rows(), mat.cols())) * std::numeric_limits<T>::epsilon() * maxSingularValue;
   for (int j = 0; j < singularValues_inv.size(); ++j) {
     if (singularValues_inv(j) > pinvtoler) {
       singularValues_inv(j) = T(1.0) / singularValues_inv(j);
