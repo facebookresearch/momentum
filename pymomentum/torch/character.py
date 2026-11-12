@@ -25,6 +25,36 @@ from pymomentum.torch.parameter_limits import ParameterLimits
 from pymomentum.torch.utility import _unsqueeze_joint_params
 
 
+def _use_full_precision_linear(model_parameters: torch.Tensor) -> bool:
+    """Whether a float32 linear on these model parameters could run at reduced
+    precision: TF32 on CUDA (`torch.set_float32_matmul_precision("high")`) or a
+    bf16/fp16 autocast region. Traced and exported graphs keep the plain linear
+    so on-device graphs contain no float64."""
+    if torch.jit.is_tracing() or torch.compiler.is_exporting():
+        return False
+    if model_parameters.dtype == torch.float64:
+        return False
+    device_type = model_parameters.device.type
+    if device_type == "cuda":
+        return True
+    return device_type == "cpu" and torch.is_autocast_enabled(device_type)
+
+
+def _full_precision_linear(
+    model_parameters: torch.Tensor, parameter_transform: torch.Tensor
+) -> torch.Tensor:
+    """`linear(model_parameters, parameter_transform)` evaluated in float64.
+
+    Model parameters carry root translations (~100 cm), so TF32's 10-bit mantissa
+    shifts every joint by ~0.5 mm and bf16 autocast by several mm. Float64 never
+    runs in TF32 and autocast leaves it alone, and the transform is small enough
+    that the cost is negligible."""
+    out_dtype = torch.promote_types(model_parameters.dtype, parameter_transform.dtype)
+    return torch.nn.functional.linear(
+        model_parameters.double(), parameter_transform.double()
+    ).to(out_dtype)
+
+
 class Skeleton(torch.nn.Module):
     def __init__(
         self,
@@ -753,6 +783,15 @@ class ParameterTransform(torch.nn.Module):
         # Spelled as a linear so torch.export does not decompose it into a pair of
         # permutes over the [d, n] buffer, which on an exported graph are re-executed
         # every frame rather than folded away.
+        #
+        # Keep is_scripting() as a standalone early return so the scripting
+        # compiler prunes the full-precision branch below.
+        if torch.jit.is_scripting():
+            return torch.nn.functional.linear(
+                model_parameters, self.parameter_transform
+            )
+        if _use_full_precision_linear(model_parameters):
+            return _full_precision_linear(model_parameters, self.parameter_transform)
         return torch.nn.functional.linear(model_parameters, self.parameter_transform)
 
 
