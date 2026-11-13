@@ -142,6 +142,23 @@ TYPED_TEST(UtilityTest, PseudoInverse) {
     EXPECT_EQ(pinv.cols(), singular.rows());
   }
 
+  // Test with a tall rank-deficient matrix, shaped like a parameter transform with redundant
+  // parameters: vectors in its column space must survive the round trip. The large entries put
+  // the SVD's rounding noise above the old fixed cutoffs and above a cutoff that ignores the
+  // largest singular value.
+  {
+    MatrixX<T> transform = MatrixX<T>::Zero(60, 12);
+    transform.leftCols(10) = this->rng.template uniform<MatrixX<T>>(60, 10, T(-1000), T(1000));
+    transform.col(10) = transform.col(0) + transform.col(1);
+    transform.col(11) = T(2) * transform.col(2) - transform.col(3);
+
+    const MatrixX<T> pinv = pseudoInverse(transform);
+    const VectorX<T> jointParams =
+        transform * this->rng.template uniform<VectorX<T>>(12, T(-1), T(1));
+    EXPECT_LT(
+        (transform * (pinv * jointParams) - jointParams).norm(), T(1e-4) * jointParams.norm());
+  }
+
   // Test with sparse matrix
   {
     SparseMatrix<T> sparse(3, 3);

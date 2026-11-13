@@ -61,7 +61,10 @@ template <typename T = float>
 
 /// Calculates the pseudo-inverse of a matrix
 ///
-/// Uses singular value decomposition (SVD) to compute the Moore-Penrose pseudo-inverse
+/// Uses singular value decomposition (SVD) to compute the Moore-Penrose pseudo-inverse.
+/// Singular values at or below max(rows, cols) * epsilon * the largest singular value count as
+/// zero, so for a rank-deficient matrix `pseudoInverse(A) * b` is the minimum-norm least-squares
+/// solution, and a zero matrix gets a zero pseudo-inverse.
 /// @tparam T The scalar type
 /// @param mat Input matrix
 /// @return The pseudo-inverse of the input matrix

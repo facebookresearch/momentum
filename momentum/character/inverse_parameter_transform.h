@@ -21,10 +21,9 @@ namespace momentum {
 /// passed-in joint parameters. Therefore, the mapping is done in a least squares sense: we find
 /// the model parameters that bring us closest to the passed-in joint parameters under L2.
 ///
-/// @pre The parameter transform must be well-formed, in the sense that it has rank equal to the
-/// number of model parameters. Any sane parameter transform should have this property (if not, it
-/// would be possible to generate the same set of joint parameters with two different model
-/// parameter vectors).
+/// If the parameter transform has rank below the number of model parameters, two different model
+/// parameter vectors can generate the same joint parameters; the mapping then returns the
+/// minimum-norm model parameters among those that fit best.
 template <typename T>
 struct InverseParameterTransformT {
  public:
