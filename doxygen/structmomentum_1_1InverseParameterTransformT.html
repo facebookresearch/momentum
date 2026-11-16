@@ -118,9 +118,9 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
 struct momentum::InverseParameterTransformT&lt; T &gt;</div><p>Maps from joint parameters back to the model parameters. </p>
 <p>Because the joint parameters have a much higher dimensionality (7*nJoints) than the number of model parameters, in general we can't always find a set of model parameters that reproduce the passed-in joint parameters. Therefore, the mapping is done in a least squares sense: we find the model parameters that bring us closest to the passed-in joint parameters under L2.</p>
-<dl class="section pre"><dt>Precondition</dt><dd>The parameter transform must be well-formed, in the sense that it has rank equal to the number of model parameters. Any sane parameter transform should have this property (if not, it would be possible to generate the same set of joint parameters with two different model parameter vectors). </dd></dl>
+<p>If the parameter transform has rank below the number of model parameters, two different model parameter vectors can generate the same joint parameters; the mapping then returns the minimum-norm model parameters among those that fit best. </p>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00029">29</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00028">28</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af2d092e6b60111395439b2066ca7733d" name="af2d092e6b60111395439b2066ca7733d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af2d092e6b60111395439b2066ca7733d">&#9670;&#160;</a></span>InverseParameterTransformT()</h2>
@@ -149,7 +149,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00019">19</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">offsets</a>, <a class="el" href="math_2utility_8cpp_source.html#l00421">momentum::pseudoInverse()</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">pseudoInverseMatrix</a>, and <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">transform</a>.</p>
+<p class="reference">References <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">offsets</a>, <a class="el" href="math_2utility_8cpp_source.html#l00422">momentum::pseudoInverse()</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">pseudoInverseMatrix</a>, and <a class="el" href="inverse__parameter__transform_8h_source.html#l00030">transform</a>.</p>
 
 </div>
 </div>
@@ -184,7 +184,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">26</a> of file <a class="el" href="inverse__parameter__transform_8cpp_source.html">inverse_parameter_transform.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="character_2types_8h_source.html#l00165">momentum::CharacterParametersT&lt; T &gt;::offsets</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">offsets</a>, <a class="el" href="character_2types_8h_source.html#l00161">momentum::CharacterParametersT&lt; T &gt;::pose</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">pseudoInverseMatrix</a>, <a class="el" href="character_2types_8h_source.html#l00087">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">transform</a>, and <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="reference">References <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="character_2types_8h_source.html#l00165">momentum::CharacterParametersT&lt; T &gt;::offsets</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">offsets</a>, <a class="el" href="character_2types_8h_source.html#l00161">momentum::CharacterParametersT&lt; T &gt;::pose</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">pseudoInverseMatrix</a>, <a class="el" href="character_2types_8h_source.html#l00087">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, <a class="el" href="inverse__parameter__transform_8h_source.html#l00030">transform</a>, and <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00043">momentum::applyModelParameterScales()</a>, and <a class="el" href="tracker__utils_8cpp_source.html#l00884">momentum::jointIdentityToModelIdentity()</a>.</p>
 
@@ -217,7 +217,7 @@ template&lt;typename T&gt; </div>
 
 <p>Dimension of the output model parameters vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00044">44</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00043">43</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 </div>
 </div>
@@ -248,7 +248,7 @@ template&lt;typename T&gt; </div>
 
 <p>Dimension of the input joint parameters vector. </p>
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00049">49</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00048">48</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 </div>
 </div>
@@ -267,7 +267,7 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00033">33</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">32</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">apply()</a>, and <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00019">InverseParameterTransformT()</a>.</p>
 
@@ -287,7 +287,7 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00032">32</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">31</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">apply()</a>, and <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00019">InverseParameterTransformT()</a>.</p>
 
@@ -307,7 +307,7 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00031">31</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="inverse__parameter__transform_8h_source.html#l00030">30</a> of file <a class="el" href="inverse__parameter__transform_8h_source.html">inverse_parameter_transform.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">apply()</a>, and <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00019">InverseParameterTransformT()</a>.</p>
 
