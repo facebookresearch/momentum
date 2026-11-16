@@ -294,8 +294,6 @@ void validateKdTree(
     const std::vector<Eigen::Matrix<T, 3, 1>>& normals,
     const std::vector<Eigen::Matrix<T, 4, 1>>& colors,
     const TreeType& kdTree) {
-  using Scalar = SimdKdTree3f::Scalar;
-
   // Do NOT re-seed the global RNG here: the caller already seeded it once and generated the tree
   // points from that stream. Re-seeding to the same value would restart the stream so the random
   // query points below coincide with the tree points (nearest distance 0), which then makes the
@@ -315,7 +313,7 @@ void validateKdTree(
 
   for (size_t i = 0; i < nTests; ++i) {
     const auto queryPoint = momentum::normal<Eigen::Matrix<T, 3, 1>>(0, 3);
-    const Scalar radius = momentum::uniform<float>(0, 5);
+    const auto radius = momentum::uniform<float>(0, 5);
     validateKdTreeSphereQuery(points, kdTree, queryPoint, radius);
   }
 }
