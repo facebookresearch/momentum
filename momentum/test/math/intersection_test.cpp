@@ -7,11 +7,53 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
 #include "momentum/math/intersection.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/random.h"
 
 using namespace momentum;
+
+namespace {
+
+template <typename T>
+MeshT<T> makeMesh(std::vector<Vector3<T>> vertices, std::vector<Vector3<int32_t>> faces) {
+  MeshT<T> mesh;
+  mesh.vertices = std::move(vertices);
+  mesh.faces = std::move(faces);
+  return mesh;
+}
+
+std::vector<std::pair<int32_t, int32_t>> sortedIntersections(
+    std::vector<std::pair<int32_t, int32_t>> intersections) {
+  for (auto& [face0, face1] : intersections) {
+    if (face0 > face1) {
+      std::swap(face0, face1);
+    }
+  }
+  std::ranges::sort(intersections);
+  return intersections;
+}
+
+template <typename T>
+void expectIntersections(
+    const MeshT<T>& mesh,
+    const std::vector<std::pair<int32_t, int32_t>>& expected) {
+  EXPECT_EQ(sortedIntersections(intersectMeshBruteForce(mesh)), expected);
+  EXPECT_EQ(sortedIntersections(intersectMesh(mesh)), expected);
+}
+
+template <typename T>
+class MomentumMeshIntersectionTest : public testing::Test {};
+
+using ScalarTypes = testing::Types<float, double>;
+TYPED_TEST_SUITE(MomentumMeshIntersectionTest, ScalarTypes);
+
+} // namespace
 
 TEST(Momentum_Mesh_Intersection, TriangleIntersection) {
   // Construct non-empty mesh
@@ -116,16 +158,66 @@ TEST(Momentum_Mesh_Intersection, MeshSelfIntersectionRandom) {
       {}, // polyTexcoordFaces
   };
 
-  // check that both brute force and optimized version return the same result
-  std::vector<std::pair<int32_t, int32_t>> intersections = intersectMeshBruteForce(mesh);
-  std::vector<std::pair<int32_t, int32_t>> intersections2 = intersectMesh(mesh);
-  EXPECT_TRUE(intersections.size() == intersections2.size());
-  for (auto& intersection : intersections) {
-    const auto it1 = std::find(intersections2.begin(), intersections2.end(), intersection);
-    const auto it2 = std::find(
-        intersections2.begin(),
-        intersections2.end(),
-        std::pair<int32_t, int32_t>(intersection.second, intersection.first));
-    EXPECT_TRUE(it1 != intersections2.end() || it2 != intersections2.end());
+  EXPECT_EQ(
+      sortedIntersections(intersectMeshBruteForce(mesh)), sortedIntersections(intersectMesh(mesh)));
+}
+
+TYPED_TEST(MomentumMeshIntersectionTest, RejectsPlaneCrossingsOutsideVerticalTriangle) {
+  using T = TypeParam;
+  const MeshT<T> mesh = makeMesh<T>(
+      {{T(0), T(0), T(0)},
+       {T(0), T(1), T(0)},
+       {T(0), T(0), T(1)},
+       {T(-1), T(0.5), T(2)},
+       {T(1), T(0.5), T(2)},
+       {T(1), T(0.5), T(0.5)}},
+      {{0, 1, 2}, {3, 4, 5}});
+
+  expectIntersections(mesh, {});
+}
+
+TYPED_TEST(MomentumMeshIntersectionTest, DetectsIntersectionsAtAnyScale) {
+  using T = TypeParam;
+  constexpr T kSmallScale = std::is_same_v<T, float> ? T(1e-8) : T(1e-18);
+  const std::vector<std::pair<int32_t, int32_t>> expected{{0, 1}};
+
+  for (const T scale : {T(1), kSmallScale}) {
+    const MeshT<T> mesh = makeMesh<T>(
+        {{T(0), T(0), T(0)},
+         {scale, T(0), T(0)},
+         {T(0), scale, T(0)},
+         {T(0), T(0.5) * scale, T(-0.5) * scale},
+         {T(0), T(0.5) * scale, T(0.5) * scale},
+         {scale, T(0.5) * scale, T(0.5) * scale}},
+        {{0, 1, 2}, {3, 4, 5}});
+
+    expectIntersections(mesh, expected);
   }
+}
+
+TYPED_TEST(MomentumMeshIntersectionTest, DetectsInteriorIntersectionWithSharedVertex) {
+  using T = TypeParam;
+  const MeshT<T> mesh = makeMesh<T>(
+      {{T(0), T(0), T(0)},
+       {T(2), T(0), T(0)},
+       {T(0), T(2), T(0)},
+       {T(1), T(1), T(-1)},
+       {T(1), T(1), T(1)}},
+      {{0, 1, 2}, {0, 3, 4}});
+
+  expectIntersections(mesh, {{0, 1}});
+}
+
+TYPED_TEST(MomentumMeshIntersectionTest, IgnoresDegenerateTriangles) {
+  using T = TypeParam;
+  const MeshT<T> mesh = makeMesh<T>(
+      {{T(0), T(0), T(0)},
+       {T(1), T(0), T(0)},
+       {T(2), T(0), T(0)},
+       {T(0.5), T(-1), T(-1)},
+       {T(0.5), T(1), T(-1)},
+       {T(0.5), T(0), T(1)}},
+      {{0, 1, 2}, {3, 4, 5}});
+
+  expectIntersections(mesh, {});
 }
