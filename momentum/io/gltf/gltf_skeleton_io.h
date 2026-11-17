@@ -15,10 +15,16 @@
 #include <fx/gltf.h>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
+#include <limits>
+#include <span>
 #include <tuple>
 #include <vector>
 
 namespace momentum {
+
+/// The node index that marks "no node", for example the parent of a scene root.
+inline constexpr uint32_t kInvalidNodeId = std::numeric_limits<uint32_t>::max();
 
 /// Create a collision capsule from a glTF node.
 ///
@@ -65,22 +71,53 @@ Joint createJoint(const fx::gltf::Node& node);
 /// @return True if the node is a hierarchy node, false otherwise.
 [[nodiscard]] bool isHierarchyNode(const fx::gltf::Node& node);
 
+/// Map each node index to its parent node index, walking the default scene breadth-first.
+///
+/// Each node gets the parent that reaches it first, so the result is a forest even for a malformed
+/// document whose nodes have several parents or form a cycle. Scene roots and nodes not reachable
+/// from the scene map to kInvalidNodeId.
+///
+/// @param[in] model The glTF document.
+/// @return A vector of size `model.nodes.size()` mapping each node index to its parent node index.
+[[nodiscard]] std::vector<uint32_t> buildSceneParentMap(const fx::gltf::Document& model);
+
+/// The scene root above @p nodeId (or @p nodeId itself if it is a scene root).
+///
+/// For a character written by GltfBuilder this is the character's root node, which carries its
+/// name.
+///
+/// @param[in] nodeId The node index.
+/// @param[in] parentMap The parent map from @ref buildSceneParentMap.
+/// @return The node index, or kInvalidNodeId if @p nodeId is out of range.
+[[nodiscard]] uint32_t getTopLevelAncestor(uint32_t nodeId, std::span<const uint32_t> parentMap);
+
 /// Gather skeleton roots from the glTF model.
 ///
 /// Return a vector of roots for each skeleton. Each item represents a skeleton, and for each
-/// skeleton multiple root nodes are allowed.
+/// skeleton multiple root nodes are allowed. When the document marks its joints with the momentum
+/// extension (as GltfBuilder does), each group is one scene root with a marked joint below it, so a
+/// character is found whether or not it has a skinned mesh. Otherwise skeletons are found from the
+/// skins.
 ///
 /// @param[in] model The glTF document.
+/// @param[in] sceneParentMap The parent map from @ref buildSceneParentMap.
 /// @return A vector of vectors containing root node indices for each skeleton.
 [[nodiscard]] std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
-    const fx::gltf::Document& model);
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> sceneParentMap);
 
-/// Load the hierarchy from the model.
+/// Load the hierarchy of one skeleton returned by @ref gatherSkeletonRoots.
 ///
-/// This includes skeleton, collision geometry, locators and a mapping between the nodes and the
-/// objects.
+/// This includes the joints, collision geometry and locators below @p skeletonRoots, and a mapping
+/// from every node index to this character's joint, collision or locator index (kInvalidIndex for
+/// nodes that do not belong to it). Each node is loaded at most once, so a malformed document whose
+/// nodes form a cycle or have several parents still loads.
 ///
 /// @param[in] model The glTF document.
+/// @param[in] skeletonRoots The root node indices of one skeleton.
+/// @param[in] characterRootNode The node whose name is the character's name, usually
+///            getTopLevelAncestor(skeletonRoots.front(), ...). An out-of-range index gives an empty
+///            name.
 /// @return A tuple containing the name, joints, collision geometry, locators, physical properties,
 /// and node-to-object map.
 std::tuple<
@@ -90,7 +127,10 @@ std::tuple<
     LocatorList,
     PhysicalProperties,
     std::vector<size_t>>
-loadHierarchy(const fx::gltf::Document& model);
+loadHierarchyForRoots(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> skeletonRoots,
+    uint32_t characterRootNode);
 
 /// Create a skeleton with only a root joint.
 ///
