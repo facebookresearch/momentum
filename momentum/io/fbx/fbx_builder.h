@@ -37,13 +37,24 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// skinned characters, rigid bodies, motions, and marker data. This is useful
 /// for creating scenes with multiple characters/objects in a single FBX file.
 ///
+/// @note addCharacter() and addRigidBody() export each character under a unique name: the requested
+/// name (character.name, or addRigidBody's `name`), with a numeric suffix when that name is already
+/// in use. The exported name is the character's name in the file. A renamed character's joint and
+/// attribute nodes get the FBX namespace "<exportedName>:" (loaders remove it when stripping
+/// namespaces), and its skinned mesh is "<exportedName>_mesh" instead of "body_mesh". A rigid body
+/// with an explicit `name` also gets the namespace. Pass the returned name as `characterName` to
+/// addMotion() and addMotionWithJointParams() to target that character; an empty `characterName`
+/// targets the character added from character.name that kept that name, or else the first one
+/// added from character.name. loadFbxCharacters() reads
+/// every character back under its exported name.
+///
 /// Example usage:
 /// @code
 ///   FbxBuilder builder;
-///   builder.addCharacter(bodyCharacter);
-///   builder.addMotion(bodyCharacter, fps, motion);
-///   builder.addRigidBody(propCharacter, "controller", 0);
-///   builder.addMotionWithJointParams(propCharacter, fps, jointParams);
+///   const std::string bodyName = builder.addCharacter(bodyCharacter);
+///   builder.addMotion(bodyCharacter, fps, motion, {}, bodyName);
+///   const std::string propName = builder.addRigidBody(propCharacter, "controller", 0);
+///   builder.addMotionWithJointParams(propCharacter, fps, jointParams, propName);
 ///   builder.save("output.fbx");
 /// @endcode
 class FbxBuilder final {
@@ -67,7 +78,10 @@ class FbxBuilder final {
   ///
   /// @param character The character to add.
   /// @param options File save options controlling mesh, locators, collisions.
-  void addCharacter(const Character& character, const FileSaveOptions& options = FileSaveOptions());
+  /// @return The unique name the character is exported under (see the class notes).
+  std::string addCharacter(
+      const Character& character,
+      const FileSaveOptions& options = FileSaveOptions());
 
   /// Add a rigid body (skeleton + mesh parented to a joint, no skinning).
   ///
@@ -76,10 +90,11 @@ class FbxBuilder final {
   /// root, so it inherits the skeleton's animation without needing skin weights.
   ///
   /// @param character The character to add as a rigid body.
-  /// @param name Optional name override. Uses character.name if empty.
+  /// @param name Optional requested base name. Uses character.name if empty.
   /// @param parentJoint Index of the joint to parent the mesh under.
   /// @param options File save options (mesh option is respected).
-  void addRigidBody(
+  /// @return The unique name the rigid body is exported under (see the class notes).
+  std::string addRigidBody(
       const Character& character,
       const std::string& name = "",
       size_t parentJoint = 0,
@@ -95,11 +110,15 @@ class FbxBuilder final {
   /// @param fps Animation frame rate in frames per second.
   /// @param motion Model parameters matrix with shape (nFrames x nModelParams).
   /// @param offsets Identity/offset parameters for the bind pose.
+  /// @param characterName Name returned by addCharacter() or addRigidBody() of the character to
+  /// animate. When empty, the character added from character.name that kept that name, or else the
+  /// first one added from character.name; throws if there is none.
   void addMotion(
       const Character& character,
       float fps,
       const MatrixXf& motion = {},
-      const VectorXf& offsets = {});
+      const VectorXf& offsets = {},
+      const std::string& characterName = "");
 
   /// Add joint-parameter animation for a previously added character.
   ///
@@ -109,7 +128,12 @@ class FbxBuilder final {
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
-  void addMotionWithJointParams(const Character& character, float fps, const MatrixXf& jointParams);
+  /// @param characterName Name of the character to animate; see addMotion().
+  void addMotionWithJointParams(
+      const Character& character,
+      float fps,
+      const MatrixXf& jointParams,
+      const std::string& characterName = "");
 
   /// Add an animated mesh (mesh node with per-frame transform, no skeleton).
   ///
