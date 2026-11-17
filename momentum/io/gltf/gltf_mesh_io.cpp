@@ -12,6 +12,7 @@
 #include "momentum/io/common/json_utils.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
 
@@ -31,15 +32,6 @@ struct MeshBuffers {
   std::vector<Vector3b> colors;
   TextureBuffers texture;
 };
-
-nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") != 0 &&
-      extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
-    return extensionsAndExtras["extensions"]["FB_momentum"];
-  } else {
-    return nlohmann::json::object();
-  }
-}
 
 std::vector<uint32_t> loadIndexBuffer(
     const fx::gltf::Document& model,
@@ -143,7 +135,7 @@ TextureBuffers loadTextureBuffers(
     const size_t numPositions,
     const size_t vertexOffset,
     std::vector<Vector3i>& faces) {
-  const auto extension = getMomentumExtension(primitive);
+  const auto& extension = findMomentumExtension(primitive.extensionsAndExtras);
   if (extension.count("texcoords") > 0 && extension.count("texfaces") > 0) {
     return loadMomentumTextureBuffers(model, extension);
   }
@@ -261,7 +253,7 @@ size_t addBlendShapes(
         std::make_unique<BlendShape>(std::span<const Vector3f>(baseVertices), numNewTargets);
 
     // load blendshape names from extension
-    const auto& extension = getMomentumExtension(primitive.extensionsAndExtras);
+    const auto& extension = findMomentumExtension(primitive.extensionsAndExtras);
     std::vector<std::string> blendShapeNames =
         extension.value("shapeNames", std::vector<std::string>());
 
