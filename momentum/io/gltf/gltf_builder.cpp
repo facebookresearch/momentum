@@ -18,9 +18,11 @@
 #include "momentum/common/filesystem.h"
 #include "momentum/common/log.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/common/name_utils.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 #include "momentum/io/skeleton/locator_io.h"
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
@@ -37,14 +39,6 @@
 namespace {
 
 using namespace momentum;
-
-nlohmann::json& addMomentumExtension(nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") == 0 ||
-      extensionsAndExtras["extensions"].count("FB_momentum") == 0) {
-    extensionsAndExtras["extensions"]["FB_momentum"] = nlohmann::json::object();
-  }
-  return extensionsAndExtras["extensions"]["FB_momentum"];
-}
 
 void initDefaultScene(fx::gltf::Document& model) {
   model.scene = 0;
@@ -316,72 +310,39 @@ void addActorAnimationToModel(
     return;
   }
 
-  // create arrays for data
-  const float kLowConfidence = 1e-3;
-  std::map<std::string, size_t> markerNameToIndex;
-  std::vector<std::string> markerNames;
-  std::vector<std::vector<float>> timestamps;
-  std::vector<std::vector<Vector3f>> markerPositions;
-  std::vector<std::vector<Vector3f>> markerConf;
-  for (size_t i = 0; i < markerSequence.size(); i++) {
-    const float timestamp = static_cast<float>(i) / fps;
-    for (const auto& marker : markerSequence[i]) {
-      if (marker.occluded || marker.confidence < kLowConfidence) {
-        continue;
-      }
-
-      // create new array if marker is unknown
-      if (markerNameToIndex.count(marker.name) == 0) {
-        const auto index = timestamps.size();
-        timestamps.emplace_back();
-        markerPositions.emplace_back();
-        markerConf.emplace_back();
-        markerNameToIndex[marker.name] = index;
-        markerNames.emplace_back(marker.name);
-      }
-
-      // get index
-      const auto& index = markerNameToIndex.at(marker.name);
-      MT_THROW_IF(
-          index >= timestamps.size() || index >= markerPositions.size() ||
-              index >= markerConf.size(),
-          "Marker index {} exceeds container size",
-          index);
-      timestamps[index].push_back(timestamp);
-      markerPositions[index].push_back(fromMomentumVec3f(marker.pos.cast<float>()));
-      markerConf[index].push_back(Vector3f::Ones() * marker.confidence);
-    }
-  }
+  // Observations with a lower confidence are left out.
+  constexpr float kLowConfidence = 1e-3;
+  const std::vector<MarkerTrack> tracks = groupMarkerTracks(markerSequence, kLowConfidence);
 
   // add data to gltf document
   auto& scene = getDefaultScene(model);
   auto& animation = addMomentumAnimationToModel(model, animName);
 
-  MT_CHECK(
-      (markerNames.size() == timestamps.size()) && (markerNames.size() == markerPositions.size()) &&
-      (markerNames.size() == markerNameToIndex.size()) &&
-      (markerNames.size() == markerConf.size()));
+  for (const MarkerTrack& track : tracks) {
+    std::vector<float> timestamps;
+    std::vector<Vector3f> positions;
+    std::vector<Vector3f> scales;
+    timestamps.reserve(track.frames.size());
+    positions.reserve(track.frames.size());
+    scales.reserve(track.frames.size());
+    for (size_t k = 0; k < track.frames.size(); ++k) {
+      timestamps.push_back(static_cast<float>(track.frames[k]) / fps);
+      positions.push_back(fromMomentumVec3f(track.positions[k].cast<float>()));
+      scales.emplace_back(Vector3f::Ones() * track.confidences[k]);
+    }
 
-  for (size_t j = 0; j < markerConf.size(); j++) {
     // create marker
     const auto nodeIndex = static_cast<int32_t>(model.nodes.size());
     model.nodes.emplace_back();
     auto& node = model.nodes.back();
     scene.nodes.push_back(nodeIndex);
-    node.name = markerNames[j];
+    node.name = track.name;
     node.translation = {0.0f, 0.0f, 0.0f};
     node.scale = {1.0f, 1.0f, 1.0f};
-    node.extensionsAndExtras["extensions"]["FB_momentum"]["type"] = "marker";
+    addMomentumExtension(node.extensionsAndExtras)["type"] = "marker";
     // for convenience, save confidence as a flat float array so we don't need to parse animation
     // channels
-    {
-      std::vector<float> confValues;
-      confValues.reserve(markerConf[j].size());
-      for (const auto& v : markerConf[j]) {
-        confValues.push_back(v[0]);
-      }
-      node.extensionsAndExtras["extensions"]["FB_momentum"]["confidence"] = confValues;
-    }
+    addMomentumExtension(node.extensionsAndExtras)["confidence"] = track.confidences;
     switch (markerMesh) {
       case GltfBuilder::MarkerMesh::UnitCube: {
         auto newMeshIdx = addMeshToModel(model, kUnitCubeRed, true);
@@ -395,26 +356,23 @@ void addActorAnimationToModel(
     }
 
     // create animation channel
-    const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps[j]);
-    if (!timestamps[j].empty() && !model.accessors.empty() &&
-        timestampIdx < model.accessors.size()) {
-      model.accessors[timestampIdx].min.emplace_back(timestamps[j].front());
-      model.accessors[timestampIdx].max.emplace_back(timestamps[j].back());
+    const auto timestampIdx = createAccessorBuffer<const float>(model, timestamps);
+    if (!timestamps.empty() && !model.accessors.empty() && timestampIdx < model.accessors.size()) {
+      model.accessors[timestampIdx].min.emplace_back(timestamps.front());
+      model.accessors[timestampIdx].max.emplace_back(timestamps.back());
     }
 
     // translation
     animation.channels.emplace_back();
     auto& tchannel = animation.channels.back();
-    tchannel.sampler =
-        // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
-        createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
+    tchannel.sampler = createSampler<const Vector3f>(model, animation, positions, timestampIdx);
     tchannel.target.node = nodeIndex;
     tchannel.target.path = "translation";
 
     // scale -- for visualization purpose only
     animation.channels.emplace_back();
     auto& schannel = animation.channels.back();
-    schannel.sampler = createSampler<const Vector3f>(model, animation, markerConf[j], timestampIdx);
+    schannel.sampler = createSampler<const Vector3f>(model, animation, scales, timestampIdx);
     schannel.target.node = nodeIndex;
     schannel.target.path = "scale";
   }
@@ -635,7 +593,8 @@ void addMotionToModel(
   bool fullAnimation = false;
   if (addExtension) {
     auto& def = addMomentumExtension(model.extensionsAndExtras);
-    // store motion array and offsets as metadata
+    // store motion array and offsets as metadata, replacing those of an earlier call
+    def["motion"] = nlohmann::json::object();
     def["motion"]["nframes"] = numFrames;
     if (!parameterNames.empty() && motion.size() > 0) {
       def["motion"]["parameterNames"] = parameterNames;
@@ -707,19 +666,12 @@ std::vector<size_t> addSkeletonToModel(
   std::vector<size_t> jointToNodeMap;
   std::unordered_map<size_t, const JointPhysicalProperties*> physicalPropertiesByJoint;
   if (updateExtension) {
-    physicalPropertiesByJoint.reserve(character.physicalProperties.size());
-    for (const JointPhysicalProperties& properties : character.physicalProperties) {
-      const size_t jointIndex = resolvePhysicalPropertiesJointIndex(properties, character.skeleton);
-      MT_THROW_IF(
-          jointIndex == kInvalidIndex,
-          "Physical properties entry references unknown joint '{}'",
-          properties.jointName);
-      const auto emplaceResult = physicalPropertiesByJoint.emplace(jointIndex, &properties);
-      MT_THROW_IF(
-          !emplaceResult.second,
-          "Multiple physical properties entries resolve to joint '{}' (index {})",
-          character.skeleton.joints.at(jointIndex).name,
-          jointIndex);
+    const std::vector<size_t> jointIndices =
+        resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+    physicalPropertiesByJoint.reserve(jointIndices.size());
+    for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+      physicalPropertiesByJoint.emplace(
+          jointIndices[entry], &character.physicalProperties.at(entry));
     }
   }
 
@@ -765,11 +717,12 @@ std::vector<size_t> addSkeletonToModel(
   return jointToNodeMap;
 }
 
+// Collision geometry exists only in the momentum extension, so it is written only with the
+// extension.
 void addCollisionsToModel(
     fx::gltf::Document& model,
     const Character& character,
-    const std::vector<size_t>& jointToNodeMap,
-    bool addExtensions) {
+    const std::vector<size_t>& jointToNodeMap) {
   // add all collision objects to node list
   if (character.collision) {
     for (size_t i = 0; i < character.collision->size(); i++) {
@@ -794,23 +747,21 @@ void addCollisionsToModel(
       node.translation = {translation[0], translation[1], translation[2]};
 
       // add extra properties
-      if (addExtensions) {
-        auto& extension = addMomentumExtension(node.extensionsAndExtras);
-        if (col.type == CollisionPrimitiveType::TaperedCapsule) {
-          extension["type"] = "collision_capsule";
-          extension["length"] = col.length;
-          extension["radius"] = col.radius;
-        } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
-          extension["type"] = "collision_ellipsoid";
-          extension["radii"] = col.ellipsoidRadii;
-        } else if (col.type == CollisionPrimitiveType::Box) {
-          extension["type"] = "collision_box";
-          extension["halfExtents"] = col.boxHalfExtents;
-        } else {
-          MT_THROW(
-              "Unsupported collision primitive type {} while writing glTF collision geometry",
-              static_cast<int>(col.type));
-        }
+      auto& extension = addMomentumExtension(node.extensionsAndExtras);
+      if (col.type == CollisionPrimitiveType::TaperedCapsule) {
+        extension["type"] = "collision_capsule";
+        extension["length"] = col.length;
+        extension["radius"] = col.radius;
+      } else if (col.type == CollisionPrimitiveType::Ellipsoid) {
+        extension["type"] = "collision_ellipsoid";
+        extension["radii"] = col.ellipsoidRadii;
+      } else if (col.type == CollisionPrimitiveType::Box) {
+        extension["type"] = "collision_box";
+        extension["halfExtents"] = col.boxHalfExtents;
+      } else {
+        MT_THROW(
+            "Unsupported collision primitive type {} while writing glTF collision geometry",
+            static_cast<int>(col.type));
       }
     }
   }
@@ -931,12 +882,40 @@ struct GltfBuilder::Impl {
 
   Impl();
   fx::gltf::Document document;
-  std::unordered_map<std::string, CharacterData> characterData;
+
+  ExportedNameRegistry<CharacterData> characterData;
   MarkerMesh markerMesh = MarkerMesh::None;
+
+  // The character an addMotion/addSkeletonStates call animates, whose skeleton must match
+  // `character`; when no name was requested and nothing was added under character.name, the
+  // character that `addCharacter` adds and names.
+  template <typename AddCharacter>
+  CharacterData& characterForMotion(
+      const Character& character,
+      const std::string& characterName,
+      AddCharacter&& addCharacter) {
+    CharacterData* data = characterData.resolve(characterName, character.name);
+    if (data == nullptr) {
+      return *characterData.find(addCharacter());
+    }
+    checkMotionTargetJointCount(
+        character.name, character.skeleton.joints.size(), data->nodeMap.size());
+    return *data;
+  }
+
+  // Record the animation named `animationName`, which an add call has just written, as a motion
+  // of the character.
+  void recordAnimation(CharacterData& data, const std::string& animationName) {
+    const auto animation =
+        std::ranges::find(document.animations, animationName, &fx::gltf::Animation::name);
+    if (animation != document.animations.end()) {
+      data.animationIndices.push_back(static_cast<size_t>(animation - document.animations.begin()));
+    }
+  }
 };
 
 GltfBuilder::Impl::Impl() : document(fx::gltf::Document()) {
-  document.extensionsUsed.emplace_back("FB_momentum");
+  document.extensionsUsed.emplace_back(kMomentumExtensionName);
 }
 
 GltfBuilder::GltfBuilder() {
@@ -950,20 +929,18 @@ GltfBuilder::GltfBuilder(GltfBuilder&&) noexcept = default;
 
 GltfBuilder& GltfBuilder::operator=(GltfBuilder&&) noexcept = default;
 
-void GltfBuilder::addCharacter(
+std::string GltfBuilder::addCharacter(
     const Character& character,
     const Vector3f& positionOffset /*= Vector3f::Zero()*/,
     const Quaternionf& rotationOffset /*= Quaternionf::Identity()*/,
     const FileSaveOptions& options) {
-  if (impl_->characterData.find(character.name) != impl_->characterData.end()) {
-    // Character already exist. Doesn't allow character with the same name to be saved.
-    // #TODO: proper warning
-    return;
-  }
+  // Insert into the registry only after the character is built, so a failure leaves it unchanged.
+  std::string characterName = impl_->characterData.makeExportedName(character.name);
+  Impl::CharacterData characterData;
   auto& scene = getDefaultScene(impl_->document);
 
   // Add character root node
-  const auto rootNodeIdx = appendNode(impl_->document, character.name);
+  const auto rootNodeIdx = appendNode(impl_->document, characterName);
   MT_CHECK(
       rootNodeIdx >= 0 && rootNodeIdx < impl_->document.nodes.size(),
       "{}: {}",
@@ -974,14 +951,13 @@ void GltfBuilder::addCharacter(
   node.translation = {translation[0], translation[1], translation[2]};
   node.rotation = fromMomentumQuaternionf(rotationOffset);
   scene.nodes.push_back(static_cast<uint32_t>(rootNodeIdx));
-  auto& characterData = impl_->characterData[character.name];
   characterData.rootIndex = rootNodeIdx;
 
   // fill with data
   characterData.nodeMap =
       addSkeletonToModel(impl_->document, character, options.extensions, rootNodeIdx);
-  if (options.collisions) {
-    addCollisionsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
+  if (options.collisions && options.extensions) {
+    addCollisionsToModel(impl_->document, character, characterData.nodeMap);
   }
   if (options.locators) {
     addLocatorsToModel(impl_->document, character, characterData.nodeMap, options.extensions);
@@ -1000,16 +976,25 @@ void GltfBuilder::addCharacter(
     }
   }
   if (options.extensions) {
-    auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
-    parameterTransformToJson(character, def["transform"]);
-    parameterLimitsToJson(character, def["parameterLimits"]);
-    parameterSetsToJson(character, def["parameterSet"]);
-    poseConstraintsToJson(character, def["poseConstraints"]);
-    // add metadata if it exists
+    nlohmann::json rig = nlohmann::json::object();
+    parameterTransformToJson(character, rig["transform"]);
+    parameterLimitsToJson(character, rig["parameterLimits"]);
+    parameterSetsToJson(character, rig["parameterSet"]);
+    poseConstraintsToJson(character, rig["poseConstraints"]);
     if (!character.metadata.empty()) {
-      def["metadata"] = character.metadata;
+      rig["metadata"] = character.metadata;
     }
+    // The document holds a single rig, so each character's rig is also stored on its root node.
+    // The rig of each added character replaces the document-level rig; metadata is optional, so
+    // an earlier character's metadata must not remain.
+    auto& documentExtension = addMomentumExtension(impl_->document.extensionsAndExtras);
+    documentExtension.erase("metadata");
+    documentExtension.update(rig);
+    addMomentumExtension(impl_->document.nodes[rootNodeIdx].extensionsAndExtras).update(rig);
   }
+
+  impl_->characterData.insert(characterName, character.name, std::move(characterData));
+  return characterName;
 }
 
 void GltfBuilder::addMesh(const Mesh& mesh, const std::string& name, bool addColor) {
@@ -1036,17 +1021,13 @@ size_t GltfBuilder::getNumCharacters() {
 }
 
 size_t GltfBuilder::getCharacterRootIndex(const std::string& name) {
-  if (impl_->characterData.count(name) == 0) {
-    return kInvalidIndex;
-  }
-  return impl_->characterData[name].rootIndex;
+  const auto* characterData = impl_->characterData.find(name);
+  return characterData != nullptr ? characterData->rootIndex : kInvalidIndex;
 }
 
 size_t GltfBuilder::getNumJoints(const std::string& name) {
-  if (impl_->characterData.count(name) == 0) {
-    return kInvalidIndex;
-  }
-  return impl_->characterData[name].nodeMap.size();
+  const auto* characterData = impl_->characterData.find(name);
+  return characterData != nullptr ? characterData->nodeMap.size() : kInvalidIndex;
 }
 
 void GltfBuilder::setFps(float fps) {
@@ -1070,15 +1051,19 @@ void GltfBuilder::addMotion(
     const IdentityParameters& offsets /*= {}*/,
     const bool addExtensions /*= true*/,
     const std::string& customName /*= "default"*/,
-    std::span<const int64_t> timestamps /*= {}*/) {
+    std::span<const int64_t> timestamps /*= {}*/,
+    const std::string& characterName /*= ""*/) {
+  const auto& motionMatrix = std::get<1>(motion);
+  MT_THROW_IF(
+      !timestamps.empty() && timestamps.size() != motionMatrix.cols(),
+      "Timestamps size {} does not match motion size {}",
+      timestamps.size(),
+      motionMatrix.cols());
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
-  const size_t meshIndex = impl_->characterData[character.name].meshIndex;
+  auto& characterData =
+      impl_->characterForMotion(character, characterName, [&] { return addCharacter(character); });
+  const auto& jointToNodeMap = characterData.nodeMap;
+  const size_t meshIndex = characterData.meshIndex;
   // add motion
   addMotionToModel(
       impl_->document,
@@ -1090,28 +1075,28 @@ void GltfBuilder::addMotion(
       meshIndex,
       addExtensions,
       customName);
-
-  auto animIter = std::find_if(
-      impl_->document.animations.begin(),
-      impl_->document.animations.end(),
-      [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
-  if (animIter != impl_->document.animations.end()) {
-    const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
-  }
+  impl_->recordAnimation(characterData, customName);
 
   // Add timestamps to the FB_momentum extension
   if (!timestamps.empty()) {
-    const auto& motionMatrix = std::get<1>(motion);
-    MT_THROW_IF(
-        timestamps.size() != motionMatrix.cols(),
-        "Timestamps size {} does not match motion size {}",
-        timestamps.size(),
-        motionMatrix.cols());
     auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
     // Store timestamps as a JSON array in the motion section
     // The field definition follows the format of addMotionToModel above
     def["motion"]["timestamps"] = std::vector<int64_t>(timestamps.begin(), timestamps.end());
+  }
+
+  // The document holds a single motion, so each character's motion is also stored on its root node.
+  // A motion without identity keeps the identity stored earlier for the same character.
+  if (addExtensions && motionMatrix.cols() > 0) {
+    auto& documentMotion = addMomentumExtension(impl_->document.extensionsAndExtras)["motion"];
+    auto& nodeMotion = addMomentumExtension(
+        impl_->document.nodes[characterData.rootIndex].extensionsAndExtras)["motion"];
+    if (!documentMotion.contains("offsets") && nodeMotion.is_object() &&
+        nodeMotion.contains("offsets")) {
+      documentMotion["jointNames"] = nodeMotion["jointNames"];
+      documentMotion["offsets"] = nodeMotion["offsets"];
+    }
+    nodeMotion = documentMotion;
   }
 }
 
@@ -1129,10 +1114,11 @@ float GltfBuilder::getFps() {
 }
 
 std::vector<size_t> GltfBuilder::getCharacterMotions(const std::string& characterName) {
-  if (impl_->characterData.count(characterName) == 0) {
+  const auto* characterData = impl_->characterData.find(characterName);
+  if (characterData == nullptr) {
     return {};
   }
-  return impl_->characterData[characterName].animationIndices;
+  return characterData->animationIndices;
 }
 
 void GltfBuilder::addMarkerSequence(
@@ -1180,27 +1166,16 @@ void GltfBuilder::addSkeletonStates(
     const Character& character,
     const float fps,
     std::span<const SkeletonState> skeletonStates,
-    const std::string& customName) {
+    const std::string& customName,
+    const std::string& characterName) {
   setFps(fps);
-  if (impl_->characterData.find(character.name) == impl_->characterData.end()) {
-    // #TODO: Warn about this addition
-    addCharacter(character);
-  }
-
-  const auto& jointToNodeMap = impl_->characterData[character.name].nodeMap;
+  auto& characterData =
+      impl_->characterForMotion(character, characterName, [&] { return addCharacter(character); });
 
   // add motion from skeleton states
   addSkeletonStatesToModel(
-      impl_->document, character, fps, skeletonStates, jointToNodeMap, customName);
-
-  auto animIter = std::find_if(
-      impl_->document.animations.begin(),
-      impl_->document.animations.end(),
-      [&customName](const fx::gltf::Animation& anim) { return anim.name == customName; });
-  if (animIter != impl_->document.animations.end()) {
-    const auto animIdx = static_cast<size_t>(animIter - impl_->document.animations.begin());
-    impl_->characterData[character.name].animationIndices.push_back(animIdx);
-  }
+      impl_->document, character, fps, skeletonStates, characterData.nodeMap, customName);
+  impl_->recordAnimation(characterData, customName);
 }
 
 } // namespace momentum

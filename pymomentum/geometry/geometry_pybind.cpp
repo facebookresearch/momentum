@@ -964,6 +964,25 @@ you will likely want to retarget the parameters using the :meth:`mapParameters` 
       py::arg("gltf_filename"));
 
   m.def(
+      "join_takes_on_shared_timeline",
+      &joinFbxTakesOnSharedTimeline,
+      py::call_guard<py::gil_scoped_release>(),
+      R"(Join the takes of every character, as :meth:`Character.load_fbx_characters_with_motion`
+returns them, into one motion per character on a timeline shared by all characters.
+
+Take ``i`` starts at the same frame for every character. A character whose take is shorter, or
+that the take does not animate, holds its last pose until the take ends; before its first animated
+frame, that is its rest pose (zero joint parameters).
+
+:param takes_per_character: For every character, its takes, index-aligned across characters; each
+    take is a numpy array of shape ``(n_frames, n_joint_parameters)``, and a take without frames does
+    not animate the character.
+:return: One motion per character, a numpy array of shape ``(n_frames, n_joint_parameters)`` with
+    the same frame count for every character, or ``None`` for a character that no take animates.
+      )",
+      py::arg("takes_per_character"));
+
+  m.def(
       "load_obj",
       [](const std::string& path) { return mm::loadObj(path); },
       R"(Load a mesh from a Wavefront OBJ file.

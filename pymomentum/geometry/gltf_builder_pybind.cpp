@@ -55,7 +55,12 @@ void registerGltfBuilderBindings(pybind11::module& m) {
 
 The GltfBuilder allows you to incrementally construct a GLTF scene by adding characters,
 meshes, motions, and marker data. This is useful for creating complex scenes with multiple
-characters or combining different types of data into a single GLTF file.)")
+characters or combining different types of data into a single GLTF file.
+
+Character names: ``add_character`` de-duplicates names (appending ``_1``, ``_2``, ...) and
+returns the exported name, which may differ from ``character.name``. Pass that returned name
+as ``character_name`` to ``add_motion`` / ``add_skeleton_states`` to target a specific
+character or instance (e.g. the same character added more than once).)")
       .def(
           py::init([](float fps) {
             auto builder = std::make_unique<mm::GltfBuilder>();
@@ -64,16 +69,17 @@ characters or combining different types of data into a single GLTF file.)")
           }),
           R"(Create a new GltfBuilder with the specified frame rate.
 
-:param fps: Frame rate in frames per second for animations.)",
+:param fps: Frame rate of the file in frames per second. A glTF file stores one frame rate, and
+    the motion of every character is read back at this frame rate.)",
           py::arg("fps") = 120.0f)
       .def_property(
           "fps",
           &mm::GltfBuilder::getFps,
           &mm::GltfBuilder::setFps,
-          R"(The frame rate in frames per second used for animations.
+          R"(The frame rate of the file in frames per second.
 
-This property controls the timing of all animations added to the GLTF file.
-Setting this value will affect subsequently added motions and animations.
+A glTF file stores one frame rate, which the constructor sets. Setting a different value later
+only logs a warning and keeps the current frame rate.
 
 :type: float)")
       .def(
@@ -96,7 +102,8 @@ Setting this value will affect subsequently added motions and animations.
                 actualRotationOffset[1], // y
                 actualRotationOffset[2]); // z
 
-            builder.addCharacter(character, actualPositionOffset, quaternionOffset, actualOptions);
+            return builder.addCharacter(
+                character, actualPositionOffset, quaternionOffset, actualOptions);
           },
           R"(Add a character to the GLTF scene.
 
@@ -107,10 +114,8 @@ can be provided as an initial transform for the character.
 :param character: The character to add to the scene.
 :param position_offset: Translation offset for the character's root node. Defaults to zero vector if None.
 :param rotation_offset: Rotation offset as a quaternion in (x,y,z,w) format. Defaults to identity quaternion if None.
-:param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param add_collisions: Whether to add collision geometry to the scene.
-:param add_locators: Whether to add locator data to the scene.
-:param add_mesh: Whether to add the character's mesh to the scene.)",
+:param options: File save options controlling extensions, collisions, locators, and meshes.
+:return: The exported character name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("position_offset") = std::nullopt,
           py::arg("rotation_offset") = std::nullopt,
@@ -138,33 +143,23 @@ node in the scene with the specified name.
              const std::optional<mm::MotionParameters>& motion,
              const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets,
              bool addExtensions,
-             const std::string& customName) {
+             const std::string& customName,
+             const std::string& characterName) {
             // Apply same validation and transposition as
             // saveGLTFCharacterToFile
-            mm::MotionParameters transposedMotion;
             if (motion.has_value()) {
-              const auto& [parameters, poses] = motion.value();
-              MT_THROW_IF(
-                  poses.cols() != parameters.size(),
-                  "Expected motion parameters to be n_frames x {}, but got {} x {}",
-                  parameters.size(),
-                  poses.rows(),
-                  poses.cols());
-            }
-
-            mm::IdentityParameters identityParams;
-            if (offsets.has_value()) {
-              const auto& [names, params] = offsets.value();
-              identityParams = {names, params};
+              pymomentum::checkMotionShape(motion.value());
             }
 
             builder.addMotion(
                 character,
                 fps,
                 pymomentum::transpose(motion.value_or(mm::MotionParameters{})),
-                identityParams,
+                pymomentum::toIdentityParameters(offsets),
                 addExtensions,
-                customName);
+                customName,
+                {},
+                characterName);
           },
           R"(Add a motion sequence to the specified character.
 
@@ -173,32 +168,40 @@ will be automatically added with default settings. The motion data contains
 model parameters that animate the character over time.
 
 :param character: The character to add motion for.
-:param fps: Frame rate in frames per second for the motion data.
+:param fps: Frame rate in frames per second for the motion data. It must match the frame rate of
+    the builder (:attr:`fps`, set by the constructor); a different value only logs a warning, and
+    the motion is then read back at the builder's frame rate.
 :param motion: Optional motion parameters as a tuple of (parameter_names, motion_data).
                Motion data should be a matrix with shape [n_frames x n_parameters].
 :param offsets: Optional identity parameters as a tuple of (joint_names, offset_data).
                 Offset data should be a vector with shape [n_joints * 7].
 :param add_extensions: Whether to add momentum extensions to GLTF nodes.
-:param custom_name: Custom name for the animation in the GLTF file.)",
+:param custom_name: Name of the glTF animation that receives the motion. Motions added with the
+    same name share one animation, which glTF viewers play as one clip, so give the characters of
+    one recording the same name.
+:param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
           py::arg("motion") = std::optional<mm::MotionParameters>{},
           py::arg("offsets") = std::optional<mm::IdentityParameters>{},
           py::arg("add_extensions") = true,
-          py::arg("custom_name") = "default")
+          py::arg("custom_name") = "default",
+          py::arg("character_name") = "")
       .def(
           "add_skeleton_states",
           [](mm::GltfBuilder& builder,
              const mm::Character& character,
              float fps,
              const py::array_t<float>& skeletonStates,
-             const std::string& customName) {
+             const std::string& customName,
+             const std::string& characterName) {
             // Use the shared utility function for conversion
             std::vector<mm::SkeletonState> skelStates =
                 pymomentum::arrayToSkeletonStates(skeletonStates, character);
 
             // Call the addSkeletonStates method
-            builder.addSkeletonStates(character, fps, std::span(skelStates), customName);
+            builder.addSkeletonStates(
+                character, fps, std::span(skelStates), customName, characterName);
           },
           R"(Add skeleton states animation to the specified character.
 
@@ -207,16 +210,22 @@ will be automatically added with default settings. The skeleton states contain
 per-joint transforms that define the character's pose over time.
 
 :param character: The character to add skeleton states for.
-:param fps: Frame rate in frames per second for the skeleton state data.
+:param fps: Frame rate in frames per second for the skeleton state data. The animation keys are
+    stored in seconds, so the skeleton states keep their timing even if the builder has another
+    frame rate (:attr:`fps`).
 :param skeleton_states: Skeleton states as a 3D array with shape [nFrames, nJoints, 8].
                        Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
                        translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
                        in (x,y,z,w) format, and s is scale.
-:param custom_name: Custom name for the animation in the GLTF file.)",
+:param custom_name: Name of the glTF animation that receives the motion. Motions added with the
+    same name share one animation, which glTF viewers play as one clip, so give the characters of
+    one recording the same name.
+:param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.)",
           py::arg("character"),
           py::arg("fps"),
           py::arg("skeleton_states"),
-          py::arg("custom_name") = "default")
+          py::arg("custom_name") = "default",
+          py::arg("character_name") = "")
       .def(
           "add_marker_sequence",
           [](mm::GltfBuilder& builder,
@@ -232,7 +241,9 @@ This method adds motion capture marker data to the GLTF file. The marker data
 represents 3D positions of markers over time, which can be used for motion capture
 analysis or visualization. Optional marker mesh visualization can be added as unit cubes.
 
-:param fps: Frame rate in frames per second for the marker sequence data.
+:param fps: Frame rate in frames per second for the marker sequence data. The marker keys are
+    stored in seconds, so the markers keep their timing even if the builder has another frame rate
+    (:attr:`fps`).
 :param marker_sequence: A 2D list/array with shape [numFrames][numMarkers] containing
                        Marker objects for each frame. Each Marker contains name,
                        position, and occlusion status.
