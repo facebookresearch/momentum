@@ -1445,7 +1445,7 @@ def add_character_param_sliders(
 ) -> list[Any]:
     """Build one slider per model parameter of *character*.
 
-    Unbounded parameter limits are clamped via :func:`_normalize_param_limit` so
+    Unbounded parameter limits are clamped to a finite range so
     the sliders stay usable. The caller reads slider values from the returned
     list (e.g. ``np.array([s.value for s in sliders])``) and converts them back
     into model parameters.
