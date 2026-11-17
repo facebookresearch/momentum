@@ -33,6 +33,9 @@ using RowMatrixf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 momentum::Character loadGLTFCharacterFromFile(const std::string& path);
 momentum::Character loadGLTFCharacterFromBytes(const pybind11::bytes& bytes);
 
+std::vector<momentum::Character> loadGLTFCharactersFromFile(const std::string& path);
+std::vector<momentum::Character> loadGLTFCharactersFromBytes(const pybind11::bytes& bytes);
+
 /// Utility function to transpose motion parameters for C++ internal format
 momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters);
 
@@ -100,6 +103,19 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes);
 
+// Per-character motion exposed to Python: (character, motion [nFrames x nParams], identity,
+// timestamps). The motion is transposed from momentum's internal (nParams x nFrames) layout to
+// match pymomentum's convention. The timestamps are per character, which the singular
+// load_motion_timestamps cannot reach in a multi-character file.
+using CharacterWithMotion =
+    std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, std::vector<int64_t>>;
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotion(
+    const std::string& gltfFilename);
+
+std::tuple<std::vector<CharacterWithMotion>, float> loadGLTFCharactersWithMotionFromBytes(
+    const pybind11::bytes& gltfBytes);
+
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionModelParameterScales(const std::string& gltfFilename);
 
@@ -111,6 +127,27 @@ loadGLTFCharacterWithSkelStates(const std::string& gltfFilename);
 
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes);
+
+// Per-character skeleton states exposed to Python: (character, skel_states, timestamps), where
+// skel_states is [nFrames x nJoints x 8] as in the singular loader.
+using CharacterWithSkelStates =
+    std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>;
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStates(
+    const std::string& gltfFilename);
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
+    const pybind11::bytes& gltfBytes);
+
+/// The motion of the glTF animation channels of every character in a file, as joint parameters of
+/// shape (numFrames x numJointParameters); see momentum::loadGltfCharactersChannelMotion(). A
+/// character that no channel animates gets std::nullopt.
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotion(
+    const std::string& gltfFilename);
+
+/// The byte-buffer version of loadGLTFCharactersChannelMotion().
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotionFromBytes(
+    const pybind11::bytes& gltfBytes);
 
 std::string toGLTF(const momentum::Character& character);
 
