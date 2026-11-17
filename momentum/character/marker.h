@@ -9,6 +9,8 @@
 
 #include <momentum/math/types.h>
 
+#include <limits>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -44,5 +46,33 @@ struct MarkerSequence {
   /// Frame rate of the capture, in frames per second.
   float fps = 30.0f;
 };
+
+/// The kept observations of one marker in a marker sequence, in frame order.
+struct MarkerTrack {
+  /// The name of the marker.
+  std::string name;
+
+  /// The frame index of each observation.
+  std::vector<size_t> frames;
+
+  /// The position of the marker in each observation, in centimeters.
+  std::vector<Vector3d> positions;
+
+  /// The confidence of each observation.
+  std::vector<float> confidences;
+};
+
+/// Group the observations of a marker sequence into one track per marker name, in the order of
+/// each name's first kept observation.
+///
+/// Occluded observations, and observations whose confidence is below @p minConfidence, are left
+/// out; a marker without any kept observation gets no track.
+///
+/// @param frames The marker observations of every frame (see MarkerSequence::frames).
+/// @param minConfidence The confidence below which an observation is left out; by default none is.
+/// @return The tracks.
+[[nodiscard]] std::vector<MarkerTrack> groupMarkerTracks(
+    std::span<const std::vector<Marker>> frames,
+    float minConfidence = -std::numeric_limits<float>::infinity());
 
 } // namespace momentum

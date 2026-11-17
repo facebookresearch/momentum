@@ -17,10 +17,6 @@
 
 namespace momentum {
 
-// Custom property names for identifying Momentum-specific FBX nodes
-constexpr const char* kMomentumMarkersRootProperty = "Momentum_Markers_Root";
-constexpr const char* kMomentumMarkerProperty = "Momentum_Marker";
-
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
 // Permissive mode allows loading mesh-only characters (without skin weights).
@@ -34,6 +30,40 @@ Character loadOpenFbxCharacter(
 // Permissive mode allows loading mesh-only characters (without skin weights).
 Character loadOpenFbxCharacter(
     std::span<const std::byte> inputData,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Implementation of loadFbxCharacters(); see fbx_io.h.
+std::vector<Character> loadOpenFbxCharacters(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Implementation of loadFbxCharacters(); see fbx_io.h.
+std::vector<Character> loadOpenFbxCharacters(
+    std::span<const std::byte> inputData,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Implementation of loadFbxCharactersWithMotion(); see fbx_io.h.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    std::span<const std::byte> inputData,
+    KeepLocators keepLocators = KeepLocators::No,
+    Permissive permissive = Permissive::No,
+    LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
+    bool stripNamespaces = true);
+
+/// Implementation of loadFbxCharactersWithMotion(); see fbx_io.h.
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadOpenFbxCharactersWithMotion(
+    const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
     Permissive permissive = Permissive::No,
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
