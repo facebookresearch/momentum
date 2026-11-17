@@ -45,19 +45,10 @@ namespace {
 
 using namespace momentum;
 
-nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") != 0 &&
-      extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
-    return extensionsAndExtras["extensions"]["FB_momentum"];
-  } else {
-    return nlohmann::json::object();
-  }
-}
-
 void loadGlobalExtensions(const fx::gltf::Document& model, Character& character) {
   try {
     // load additional momentum data if present
-    const auto& def = getMomentumExtension(model.extensionsAndExtras);
+    const auto& def = findMomentumExtension(model.extensionsAndExtras);
 
     if (def.count("transform") > 0) {
       character.parameterTransform = parameterTransformFromJson(character, def["transform"]);
@@ -90,10 +81,44 @@ void loadGlobalExtensions(const fx::gltf::Document& model, Character& character)
   }
 }
 
-Character populateCharacterFromModel(
+// The mesh nodes of the character whose node map is `nodeToObjectMap`: each skinned mesh whose skin
+// starts at one of its joints (GltfBuilder writes the skeleton root first), and, when
+// `includeUnskinnedMeshes`, the unskinned meshes, which no particular character owns.
+std::vector<size_t> characterMeshNodes(
     const fx::gltf::Document& model,
+    std::span<const size_t> nodeToObjectMap,
+    bool includeUnskinnedMeshes) {
+  std::vector<size_t> meshNodes;
+  for (size_t nodeId = 0; nodeId < model.nodes.size(); nodeId++) {
+    const auto& node = model.nodes[nodeId];
+    if (node.mesh < 0 || nodeToObjectMap[nodeId] != kInvalidIndex) {
+      continue;
+    }
+    if (node.skin < 0) {
+      if (includeUnskinnedMeshes) {
+        meshNodes.push_back(nodeId);
+      }
+      continue;
+    }
+    const auto skinId = static_cast<size_t>(node.skin);
+    if (skinId >= model.skins.size() || model.skins[skinId].joints.empty()) {
+      continue;
+    }
+    const uint32_t firstJoint = model.skins[skinId].joints.front();
+    if (firstJoint < nodeToObjectMap.size() && nodeToObjectMap[firstJoint] != kInvalidIndex) {
+      meshNodes.push_back(nodeId);
+    }
+  }
+  return meshNodes;
+}
+
+// Build the character whose skeleton starts at `skeletonRoots`, named after `rootNode`.
+Character buildCharacter(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> skeletonRoots,
+    uint32_t rootNode,
+    bool includeUnskinnedMeshes,
     std::vector<size_t>& nodeToObjectMap) {
-  // #TODO: set character name
   Character result;
 
   // ---------------------------------------------
@@ -105,7 +130,7 @@ Character populateCharacterFromModel(
       result.collision,
       result.locators,
       result.physicalProperties,
-      nodeToObjectMap) = loadHierarchy(model);
+      nodeToObjectMap) = loadHierarchyForRoots(model, skeletonRoots, rootNode);
   MT_CHECK(
       nodeToObjectMap.size() == model.nodes.size(),
       "nodeMap: {}, nodes: {}",
@@ -113,19 +138,11 @@ Character populateCharacterFromModel(
       model.nodes.size());
 
   // ---------------------------------------------
-  // load the mesh -- load from the nodes not in the hierarchy, and combine all meshes into one
+  // load the mesh -- combine all meshes of this character into one
   // ---------------------------------------------
-  std::vector<size_t> remainingNodes;
-  remainingNodes.reserve(model.nodes.size());
-  for (auto nodeId = 0; nodeId < nodeToObjectMap.size(); nodeId++) {
-    if (nodeToObjectMap[nodeId] == kInvalidIndex) {
-      remainingNodes.push_back(nodeId);
-    }
-  }
-
   BlendShape_u loadedBlendShape;
-  std::tie(result.mesh, result.skinWeights, loadedBlendShape) =
-      loadSkinnedMesh(model, remainingNodes, nodeToObjectMap);
+  std::tie(result.mesh, result.skinWeights, loadedBlendShape) = loadSkinnedMesh(
+      model, characterMeshNodes(model, nodeToObjectMap, includeUnskinnedMeshes), nodeToObjectMap);
 
   // Set the blendShape if we loaded any
   if (loadedBlendShape != nullptr) {
@@ -155,6 +172,7 @@ Character populateCharacterFromModel(
 fx::gltf::Document loadModel(
     const std::variant<filesystem::path, std::span<const std::byte>>& input) {
   fx::gltf::Document model;
+  // Files up to 4 GB, the glb limit (its sizes are uint32).
   constexpr uint32_t kMax = std::numeric_limits<uint32_t>::max();
   constexpr fx::gltf::ReadQuotas kQuotas = {8, kMax, kMax};
 
@@ -183,19 +201,28 @@ fx::gltf::Document loadModel(
   return model;
 }
 
-Character loadModelAndCharacter(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
-  Character result;
+// Load the document from `input` and pass it to `loadFromDocument`, adding context to any error.
+template <typename LoadFromDocument>
+auto loadFromInput(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input,
+    LoadFromDocument&& loadFromDocument) {
   try {
-    // Set maximum filesize to 4 gigabyte (glb hard limit due to uint32).
-    // Need to fork gltf load to support dynamic loading at some point if files get too big
-    fx::gltf::Document model = loadModel(input);
-    result = loadGltfCharacter(model);
+    return loadFromDocument(loadModel(input));
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
+}
 
-  return result;
+Character loadModelAndCharacter(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  return loadFromInput(
+      input, [](const fx::gltf::Document& model) { return loadGltfCharacter(model); });
+}
+
+std::vector<Character> loadModelAndCharacters(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
+  return loadFromInput(
+      input, [](const fx::gltf::Document& model) { return loadGltfCharacters(model); });
 }
 
 fx::gltf::Document makeCharacterDocument(
@@ -236,20 +263,40 @@ fx::gltf::Document makeCharacterDocument(
 
 namespace momentum {
 
-Character loadGltfCharacterInternal(
-    const fx::gltf::Document& model,
-    std::vector<size_t>& nodeToObjectMap) {
-  // ---------------------------------------------
-  // load Skeleton and Mesh
-  // ---------------------------------------------
-  Character result;
+std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Document& model) {
   try {
-    result = populateCharacterFromModel(model, nodeToObjectMap);
+    const auto sceneParentMap = buildSceneParentMap(model);
+    const auto skeletonRoots = gatherSkeletonRoots(model, sceneParentMap);
+    std::vector<CharacterWithNodeMap> characters;
+    characters.reserve(skeletonRoots.size());
+    for (const auto& roots : skeletonRoots) {
+      auto& entry = characters.emplace_back();
+      entry.rootNode =
+          roots.empty() ? kInvalidNodeId : getTopLevelAncestor(roots.front(), sceneParentMap);
+      entry.character = buildCharacter(
+          model, roots, entry.rootNode, skeletonRoots.size() == 1, entry.nodeToObjectMap);
+    }
+    return characters;
   } catch (std::runtime_error& err) {
     MT_THROW("Unable to load gltf : {}", err.what());
   }
+}
 
-  return result;
+Character loadGltfCharacterInternal(
+    const fx::gltf::Document& model,
+    std::vector<size_t>& nodeToObjectMap) {
+  auto characters = loadGltfCharactersInternal(model);
+  MT_THROW_IF(characters.empty(), "Unable to load gltf : no character found in the file.");
+  MT_LOGW_IF(
+      characters.size() > 1,
+      "glTF file contains {} characters; loading the one with the most joints. Use "
+      "loadGltfCharacters() to load all of them.",
+      characters.size());
+  auto loaded = std::ranges::max_element(characters, {}, [](const CharacterWithNodeMap& entry) {
+    return entry.character.skeleton.joints.size();
+  });
+  nodeToObjectMap = std::move(loaded->nodeToObjectMap);
+  return std::move(loaded->character);
 }
 
 Character loadGltfCharacter(const fx::gltf::Document& model) {
@@ -263,6 +310,24 @@ Character loadGltfCharacter(const filesystem::path& gltfFilename) {
 
 Character loadGltfCharacter(std::span<const std::byte> byteSpan) {
   return loadModelAndCharacter(byteSpan);
+}
+
+std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model) {
+  auto entries = loadGltfCharactersInternal(model);
+  std::vector<Character> characters;
+  characters.reserve(entries.size());
+  std::ranges::transform(entries, std::back_inserter(characters), [](CharacterWithNodeMap& entry) {
+    return std::move(entry.character);
+  });
+  return characters;
+}
+
+std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename) {
+  return loadModelAndCharacters(gltfFilename);
+}
+
+std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan) {
+  return loadModelAndCharacters(byteSpan);
 }
 
 std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
@@ -281,7 +346,7 @@ std::tuple<MotionParameters, IdentityParameters, float> loadMotion(
 std::vector<int64_t> loadMotionTimestamps(const filesystem::path& gltfFilename) {
   try {
     fx::gltf::Document model = loadModel(gltfFilename);
-    const auto& def = getMomentumExtension(model.extensionsAndExtras);
+    const auto& def = findMomentumExtension(model.extensionsAndExtras);
 
     // Check if motion section exists and has timestamps
     if (def.count("motion") == 0) {
@@ -408,7 +473,7 @@ MarkerSequence loadMarkerSequenceFromModel(fx::gltf::Document model) {
     return result;
   }
 
-  const auto& def = getMomentumExtension(model.extensionsAndExtras);
+  const auto& def = findMomentumExtension(model.extensionsAndExtras);
   const float fps = def.value("fps", 120.0f);
   result.fps = fps;
   // TODO: result.name = model.name;
@@ -432,7 +497,7 @@ MarkerSequence loadMarkerSequenceFromModel(fx::gltf::Document model) {
       continue;
     }
 
-    const auto& extension = getMomentumExtension(node.extensionsAndExtras);
+    const auto& extension = findMomentumExtension(node.extensionsAndExtras);
     const std::string type = extension.value("type", "");
     if (type == "marker") {
       // found a marker, get the sampler
