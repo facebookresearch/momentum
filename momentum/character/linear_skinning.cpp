@@ -67,12 +67,8 @@ std::vector<Vector3<T>> applySSD(
           auto& output = result[i];
           output.setZero();
 
-          // Unused influence slots are zero-filled (see `SkinWeights`); the first zero
-          // weight terminates the active influences for this vertex.
-          // TODO: This break assumes used slots are packed contiguously at the front
-          // (no zero gaps before non-zero entries). `SkinWeights::set` enforces this
-          // for ragged inputs, but other loaders may not — consider documenting the
-          // invariant on `SkinWeights` or replacing the break with a continue.
+          // Active weights are sorted and packed before zero-filled unused slots
+          // (see `SkinWeights`), so the first zero terminates this vertex.
           for (size_t j = 0; j < kMaxSkinJoints; j++) {
             const auto& weight = skin.weight(i, j);
             if (weight == 0.0f) {
@@ -206,12 +202,8 @@ void applySSD(
           auto& outputn = outputMesh.normals[i];
           outputn.setZero();
 
-          // Unused influence slots are zero-filled (see `SkinWeights`); the first zero
-          // weight terminates the active influences for this vertex.
-          // TODO: This break assumes used slots are packed contiguously at the front
-          // (no zero gaps before non-zero entries). `SkinWeights::set` enforces this
-          // for ragged inputs, but other loaders may not — consider documenting the
-          // invariant on `SkinWeights` or replacing the break with a continue.
+          // Active weights are sorted and packed before zero-filled unused slots
+          // (see `SkinWeights`), so the first zero terminates this vertex.
           for (size_t j = 0; j < kMaxSkinJoints; j++) {
             const auto& weight = skin.weight(i, j);
             if (weight == 0.0f) {

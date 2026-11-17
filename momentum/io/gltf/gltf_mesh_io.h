@@ -60,7 +60,7 @@ void addSkinWeights(
     const fx::gltf::Primitive& primitive,
     const std::vector<size_t>& nodeToObjectMap,
     size_t kNumVertices,
-    SkinWeights_u& skinWeights);
+    SkinWeights& skinWeights);
 
 /// Load skinned mesh, skin weights, and blend shapes from the model.
 ///
