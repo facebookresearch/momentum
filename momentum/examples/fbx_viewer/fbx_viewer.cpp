@@ -10,13 +10,15 @@
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
-#include <momentum/gui/rerun/logging_redirect.h>
 #include <momentum/gui/rerun/rerun_compat.h>
+#include <momentum/gui/rerun/rerun_sink.h>
 #include <momentum/io/fbx/fbx_io.h>
 
 #include <CLI/CLI.hpp>
 #include <rerun.hpp>
 
+#include <algorithm>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -26,6 +28,7 @@ using namespace momentum;
 namespace {
 
 struct Options {
+  RerunSinkOptions rerunSink;
   std::string fbxFile;
   LogLevel logLevel = LogLevel::Info;
   bool logJoints = false;
@@ -43,7 +46,57 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_flag("--log-joints", opt->logJoints, "Log joint parameters")->default_val(opt->logJoints);
   app.add_flag("--permissive", opt->permissive, "Allow nonstandard file")
       ->default_val(opt->permissive);
+  addRerunSinkOptions(app, opt->rerunSink);
   return opt;
+}
+
+// Log the motion of a character; a motion without frames shows the character's rest pose. FBX
+// motion is joint parameters, which are passed as offsets on a zero pose.
+void logMotion(
+    const RecordingStream& rec,
+    const Character& character,
+    const MatrixXf& motion,
+    float fps,
+    const std::string& entityPath,
+    const std::string& paramsPrefix,
+    bool logJoints) {
+  CharacterParameters charParams;
+  charParams.pose.v.setZero(character.parameterTransform.numAllModelParameters());
+  charParams.offsets.v.setZero(character.parameterTransform.numJointParameters());
+  CharacterState charState;
+  const std::vector<std::string> jointNames = character.skeleton.getJointNames();
+  if (logJoints) {
+    logJointParamNames(rec, paramsPrefix, "joint_params", jointNames);
+  }
+
+  // A file without animation can have a zero frame rate.
+  const double frameDuration = fps > 0.0f ? 1.0 / fps : 0.0;
+  const auto nFrames = std::max<size_t>(motion.cols(), 1);
+  JointParamsRecorder jointParams;
+  if (logJoints) {
+    jointParams.reserve(charParams.offsets.size(), nFrames);
+  }
+  for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
+    const double time = static_cast<double>(iFrame) * frameDuration;
+    rec.set_time_sequence("frame_index", iFrame);
+    momentum::setTimeSeconds(rec, "time", static_cast<float>(time));
+
+    if (motion.cols() > 0) {
+      charParams.offsets = motion.col(iFrame);
+    }
+    charState.set(
+        charParams,
+        character,
+        true /*updateMesh*/,
+        true /*updateCollision*/,
+        false /*updateLimits*/);
+    logCharacter(rec, entityPath, character, charState);
+    if (logJoints) {
+      jointParams.add(
+          static_cast<int64_t>(iFrame), time, charState.skeletonState.jointParameters.v);
+    }
+  }
+  jointParams.send(rec, paramsPrefix, jointNames);
 }
 
 } // namespace
@@ -65,91 +118,44 @@ int main(int argc, char* argv[]) {
     }
 
     const auto rec = RecordingStream(fileName);
-    rec.spawn().exit_on_failure();
-
-    redirectLogsToRerun(rec);
+    openRerunSink(rec, options->rerunSink);
 
     rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
-    const auto [character, motions, fps] = loadFbxCharacterWithMotion(
+    auto [characters, fps] = loadFbxCharactersWithMotion(
         options->fbxFile,
         KeepLocators::Yes,
         options->permissive ? Permissive::Yes : Permissive::No);
-    // Validate the loaded motion
-    if (motions.empty() || (motions.size() == 1 && motions.at(0).cols() == 0)) {
-      MT_LOGW("No motion loaded from file");
+    if (characters.empty()) {
+      MT_LOGW("No characters loaded from file");
     }
 
-    CharacterState charState;
-    CharacterParameters charParams;
-    // fbx motion is represented as JointParameters. We will do a hack here to set it to offsets and
-    // have zero pose.
-    charParams.pose.v.setZero(character.parameterTransform.numAllModelParameters());
-    const std::vector<std::string> jointNames = character.skeleton.getJointNames();
-
-    for (size_t iMotion = 0; iMotion < motions.size(); ++iMotion) {
-      const std::string motionIndex = std::to_string(iMotion);
-      const MatrixXf& motion = motions.at(iMotion);
-      if (options->logJoints) {
-        logJointParamNames(
-            rec, "world_params/" + motionIndex, "joint_params/" + motionIndex, jointNames);
+    // Every character is logged once, with its takes one after another on a shared timeline; a
+    // character that no take animates shows its rest pose once.
+    // The takes are freed once joined, so all motion data is not held twice while logging.
+    const std::vector<MatrixXf> motions = [&characters] {
+      std::vector<std::vector<MatrixXf>> takes;
+      takes.reserve(characters.size());
+      for (auto& [character, characterTakes] : characters) {
+        takes.push_back(std::move(characterTakes));
       }
-
-      const size_t nFrames = motion.cols();
-
-      // Pre-compute time columns for batch scalar logging
-      std::vector<int64_t> frameIndices(nFrames);
-      std::vector<double> logTimes(nFrames);
-      for (size_t i = 0; i < nFrames; ++i) {
-        frameIndices[i] = static_cast<int64_t>(i);
-        logTimes[i] = static_cast<double>(i) / fps;
-      }
-
-      // Prepare matrix for collecting joint parameters during the frame loop
-      Eigen::MatrixXf allJointParams;
-
-      for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
-        // log timeline
-        rec.set_time_sequence("frame_index", iFrame);
-        momentum::setTimeSeconds(rec, "time", (float)iFrame / fps);
-
-        // log character info
-        charParams.offsets = motion.col(iFrame);
-        charState.set(
-            charParams,
-            character,
-            true /*updateMesh*/,
-            true /*updateCollision*/,
-            false /*updateLimits*/);
-        logCharacter(rec, "world/character/" + motionIndex, character, charState);
-
-        // Collect joint params for batch logging after the loop
-        if (options->logJoints) {
-          const auto& jp = charState.skeletonState.jointParameters.v;
-          if (allJointParams.cols() == 0) {
-            allJointParams.resize(jp.size(), nFrames);
-          }
-          allJointParams.col(iFrame) = jp;
-        }
-      }
-
-      // Batch log joint parameters using send_columns (after the frame loop)
-      if (options->logJoints && nFrames > 0) {
-        logJointParamsColumns(
-            rec,
-            "world_params/" + motionIndex,
-            "joint_params/" + motionIndex,
-            jointNames,
-            allJointParams,
-            frameIndices,
-            logTimes);
-      }
+      return joinTakesOnSharedTimeline(takes);
+    }();
+    for (size_t iChar = 0; iChar < characters.size(); ++iChar) {
+      logMotion(
+          rec,
+          characters[iChar].first,
+          motions[iChar],
+          fps,
+          "world/character/" + std::to_string(iChar),
+          "world_params/character_" + std::to_string(iChar),
+          options->logJoints);
     }
   } catch (const std::exception& e) {
-    MT_LOGE("Exception thrown. Error: {}", e.what());
+    std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;
   } catch (...) {
-    MT_LOGE("Exception thrown. Unknown error.");
+    std::cerr << "Exception thrown. Unknown error.\n";
     return EXIT_FAILURE;
   }
 
