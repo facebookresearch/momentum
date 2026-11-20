@@ -8,6 +8,7 @@
 #pragma once
 
 #include "momentum/common/exception.h"
+#include "momentum/io/file_save_options.h"
 
 #include <fx/gltf.h>
 #include <gsl/span_ext>
@@ -263,12 +264,25 @@ inline void setAccessorType<const Matrix4f>(fx::gltf::Accessor& accessor) {
 }
 
 // add animation
+/// Converts the save option to the GLTF sampler interpolation type.
+inline fx::gltf::Animation::Sampler::Type toGltfSamplerType(
+    GltfAnimationInterpolation interpolation) {
+  switch (interpolation) {
+    case GltfAnimationInterpolation::Step:
+      return fx::gltf::Animation::Sampler::Type::Step;
+    case GltfAnimationInterpolation::Linear:
+      return fx::gltf::Animation::Sampler::Type::Linear;
+  }
+  return fx::gltf::Animation::Sampler::Type::Step;
+}
+
 template <typename T>
 int32_t createSampler(
     fx::gltf::Document& model,
     fx::gltf::Animation& anim,
     std::span<T> data,
-    const std::span<float>& timestamps) {
+    const std::span<float>& timestamps,
+    GltfAnimationInterpolation interpolation) {
   MT_CHECK(
       data.size() == timestamps.size(), "data: {}, timestmaps: {}", data.size(), timestamps.size());
 
@@ -276,7 +290,7 @@ int32_t createSampler(
   const auto index = static_cast<int32_t>(anim.samplers.size());
   anim.samplers.emplace_back();
   auto& sampler = anim.samplers.back();
-  sampler.interpolation = fx::gltf::Animation::Sampler::Type::Step;
+  sampler.interpolation = toGltfSamplerType(interpolation);
   sampler.input = createAccessorBuffer(model, timestamps);
   sampler.output = createAccessorBuffer(model, data);
 
@@ -289,12 +303,13 @@ int32_t createSampler(
     fx::gltf::Document& model,
     fx::gltf::Animation& anim,
     std::span<T> data,
-    const int32_t timestampAccessor) {
+    const int32_t timestampAccessor,
+    GltfAnimationInterpolation interpolation) {
   // create new sampler
   const auto index = static_cast<int32_t>(anim.samplers.size());
   anim.samplers.emplace_back();
   auto& sampler = anim.samplers.back();
-  sampler.interpolation = fx::gltf::Animation::Sampler::Type::Step;
+  sampler.interpolation = toGltfSamplerType(interpolation);
   sampler.input = timestampAccessor;
   sampler.output = createAccessorBuffer(model, data);
 
