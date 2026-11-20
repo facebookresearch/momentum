@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string_view>
 
 namespace momentum {
@@ -28,6 +29,21 @@ enum class GltfFileFormat {
   Auto = 0, // The file extension is used for deduction (e.g. ".gltf" --> ASCII)
   Binary = 1, // Binary format (generally .glb)
   Ascii = 2, // ASCII format (generally .gltf)
+};
+
+// ============================================================================
+// GLTF Animation Interpolation
+// ============================================================================
+
+/// How animation samplers written to a GLTF file interpolate between their keys.
+///
+/// Momentum writes one key per frame for joint and blend shape channels. `Step` (the
+/// default) holds each key; `Linear` lets readers that evaluate between frames (e.g. motion
+/// blur or a camera faster than the motion) see the motion between keys. The values at the
+/// keys are the same either way.
+enum class GltfAnimationInterpolation : uint8_t {
+  Step = 0, ///< Hold each key until the next one (GLTF "STEP")
+  Linear = 1, ///< Interpolate between keys (GLTF "LINEAR"; slerp for rotations)
 };
 
 // ============================================================================
@@ -102,6 +118,10 @@ struct FileSaveOptions {
   /// GLTF file format selection (default: Auto)
   /// Only used for GLTF output
   GltfFileFormat gltfFileFormat = GltfFileFormat::Auto;
+
+  /// Interpolation of the joint and blend shape animation samplers (default: Step)
+  /// Marker animation always uses Step. Only used for GLTF output
+  GltfAnimationInterpolation gltfAnimationInterpolation = GltfAnimationInterpolation::Step;
 };
 
 } // namespace momentum

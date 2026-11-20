@@ -61,6 +61,15 @@ class GltfBuilder final {
 
   void setFps(float fps);
 
+  /// Set how the joint and blend shape animation samplers added afterwards interpolate
+  /// between their keys (default: Step). Marker animation always uses Step.
+  ///
+  /// @param[in] interpolation Sampler interpolation for addMotion and addSkeletonStates.
+  void setAnimationInterpolation(GltfAnimationInterpolation interpolation);
+
+  /// @return The sampler interpolation used by addMotion and addSkeletonStates.
+  [[nodiscard]] GltfAnimationInterpolation getAnimationInterpolation() const;
+
   /// Add a motion to the provided character. If addCharacter is not called before adding
   /// the motion, the character will be automatically added with the default settings.
   ///

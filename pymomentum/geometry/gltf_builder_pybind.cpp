@@ -76,6 +76,14 @@ This property controls the timing of all animations added to the GLTF file.
 Setting this value will affect subsequently added motions and animations.
 
 :type: float)")
+      .def_property(
+          "animation_interpolation",
+          &mm::GltfBuilder::getAnimationInterpolation,
+          &mm::GltfBuilder::setAnimationInterpolation,
+          R"(How the joint and blend shape animation samplers of subsequently added motions and
+skeleton states interpolate between their keys (default: Step). Marker animation always uses Step.
+
+:type: :class:`GltfAnimationInterpolation`)")
       .def(
           "add_character",
           [](mm::GltfBuilder& builder,

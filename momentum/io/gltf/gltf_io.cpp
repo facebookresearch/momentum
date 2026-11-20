@@ -206,6 +206,7 @@ fx::gltf::Document makeCharacterDocument(
     bool embedResource,
     const FileSaveOptions& options) {
   GltfBuilder fileBuilder;
+  fileBuilder.setAnimationInterpolation(options.gltfAnimationInterpolation);
 
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
@@ -379,6 +380,7 @@ fx::gltf::Document makeCharacterDocument(
     const FileSaveOptions& options,
     std::span<const int64_t> timestamps) {
   GltfBuilder fileBuilder;
+  fileBuilder.setAnimationInterpolation(options.gltfAnimationInterpolation);
   const auto kCharacterIsEmpty = character.skeleton.joints.empty() && character.mesh == nullptr;
   if (!kCharacterIsEmpty) {
     fileBuilder.addCharacter(character, Vector3f::Zero(), Quaternionf::Identity(), options);
