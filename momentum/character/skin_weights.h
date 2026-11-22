@@ -30,25 +30,28 @@ using WeightMatrix =
 
 /// Linear blend skinning weights for a character mesh: per-vertex joint indices
 /// and influence weights. `index` and `weight` always have the same row count
-/// (one row per vertex) and matching unused-slot conventions.
+/// (one row per vertex). Active weights are positive, sorted in non-increasing
+/// order, and packed before zero-filled unused slots so skinning can stop at the
+/// first zero weight.
 struct SkinWeights {
   /// Joint indices influencing each vertex. Unused slots are set to 0.
   /// Read in conjunction with `weight` — index 0 only contributes when its
   /// matching weight is non-zero.
   IndexMatrix index;
 
-  /// Joint influence weights per vertex. Weights for a vertex are expected to
-  /// sum to 1.0; unused slots are set to 0.0. Loaders/setters do not enforce
-  /// normalization — callers are responsible for normalized input.
+  /// Joint influence weights per vertex. Active weights are finite,
+  /// non-negative, and expected to sum to 1.0; unused slots are 0.0.
   WeightMatrix weight;
 
   /// Populates `index` and `weight` from ragged per-vertex influence lists.
-  /// Each entry of `ind`/`wgt` is one vertex's joints/weights; influences beyond
-  /// `kMaxSkinJoints` are silently dropped, and unused slots are zero-filled.
+  /// Zero-weight, non-finite, and negative influences are discarded with a
+  /// warning. The rest are stable-sorted by descending weight. If a vertex has
+  /// more than `kMaxSkinJoints` positive influences, the largest are retained
+  /// without changing their values; this function does not normalize weights.
+  /// The discarded count is reported in an aggregate warning.
   ///
-  /// @pre `ind.size() == wgt.size()` (checked via MT_CHECK).
-  /// @pre For each vertex i, `wgt[i].size() >= min(ind[i].size(), kMaxSkinJoints)`;
-  ///   shorter weight rows produce out-of-bounds reads.
+  /// @pre `ind.size() == wgt.size()` (checked via `MT_CHECK`).
+  /// @pre `ind[i].size() == wgt[i].size()` for every vertex.
   void set(const std::vector<std::vector<size_t>>& ind, const std::vector<std::vector<float>>& wgt);
 
   /// Approximate equality on `index` and `weight` using Eigen's `isApprox`.

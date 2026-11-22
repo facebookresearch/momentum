@@ -5,11 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "momentum/character/character.h"
 #include "momentum/character/skin_weights.h"
+#include "momentum/test/character/character_helpers.h"
 #include "momentum/test/helpers/expect_throw.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <array>
+#include <limits>
 
 using namespace momentum;
 
@@ -21,14 +26,14 @@ class SkinWeightsTest : public ::testing::Test {
         {0, 1, 2}, // Vertex 0 is influenced by joints 0, 1, 2
         {1, 2, 3}, // Vertex 1 is influenced by joints 1, 2, 3
         {2, 3, 4}, // Vertex 2 is influenced by joints 2, 3, 4
-        {3, 4, 5}, // Vertex 3 is influenced by joints 3, 4, 5
+        {5, 3, 4}, // Vertex 3 is influenced by joints 5, 3, 4
     };
 
     weights = {
         {0.5f, 0.3f, 0.2f}, // Weights for vertex 0
         {0.4f, 0.4f, 0.2f}, // Weights for vertex 1
         {0.6f, 0.2f, 0.2f}, // Weights for vertex 2
-        {0.3f, 0.3f, 0.4f}, // Weights for vertex 3
+        {0.4f, 0.3f, 0.3f}, // Weights for vertex 3
     };
 
     // Create indices and weights that exceed kMaxSkinJoints
@@ -75,15 +80,48 @@ TEST_F(SkinWeightsTest, SetWithValidInputs) {
   }
 }
 
-// Test the set method with inputs that exceed kMaxSkinJoints
+// Test that equal-weight truncation is stable.
 TEST_F(SkinWeightsTest, SetWithLargeInputs) {
   SkinWeights skinWeights;
   skinWeights.set(largeIndices, largeWeights);
 
-  // Check that only kMaxSkinJoints values were set
-  for (size_t j = 0; j < kMaxSkinJoints; j++) {
+  for (size_t j = 0; j < kMaxSkinJoints; ++j) {
     EXPECT_EQ(skinWeights.index(0, j), largeIndices[0][j]);
     EXPECT_FLOAT_EQ(skinWeights.weight(0, j), largeWeights[0][j]);
+  }
+}
+
+TEST_F(SkinWeightsTest, SetKeepsLargestInfluences) {
+  SkinWeights skinWeights;
+  const std::vector<std::vector<size_t>> unsortedIndices = {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
+  const std::vector<std::vector<float>> unsortedWeights = {
+      {0.01f, 0.20f, 0.02f, 0.18f, 0.03f, 0.16f, 0.04f, 0.14f, 0.05f, 0.17f}};
+
+  skinWeights.set(unsortedIndices, unsortedWeights);
+
+  const std::array<uint32_t, kMaxSkinJoints> expectedIndices = {1, 3, 9, 5, 7, 8, 6, 4};
+  for (size_t j = 0; j < expectedIndices.size(); ++j) {
+    EXPECT_EQ(skinWeights.index(0, j), expectedIndices[j]);
+  }
+  EXPECT_NEAR(skinWeights.weight.row(0).sum(), 0.97f, 1e-6f);
+}
+
+TEST_F(SkinWeightsTest, SetSortsAndPacksInfluences) {
+  SkinWeights skinWeights;
+  const std::vector<std::vector<size_t>> unsortedIndices = {{0, 1, 2, 3}};
+  const std::vector<std::vector<float>> unsortedWeights = {{0.2f, 0.0f, 0.5f, 0.3f}};
+
+  skinWeights.set(unsortedIndices, unsortedWeights);
+
+  const std::array<uint32_t, 3> expectedIndices = {2, 3, 0};
+  const std::array<float, 3> expectedWeights = {0.5f, 0.3f, 0.2f};
+  for (size_t j = 0; j < expectedIndices.size(); ++j) {
+    EXPECT_EQ(skinWeights.index(0, j), expectedIndices[j]);
+    EXPECT_FLOAT_EQ(skinWeights.weight(0, j), expectedWeights[j]);
+  }
+  for (size_t j = expectedIndices.size(); j < kMaxSkinJoints; ++j) {
+    EXPECT_EQ(skinWeights.index(0, j), 0);
+    EXPECT_FLOAT_EQ(skinWeights.weight(0, j), 0.0f);
   }
 }
 
@@ -109,6 +147,42 @@ TEST_F(SkinWeightsTest, SetWithDifferentSizedInputs) {
   MOMENTUM_EXPECT_DEATH(
       skinWeights.set(moreIndices, weights),
       "Check 'ind.size\\(\\) == wgt.size\\(\\)' failed: 5 is not 4");
+}
+
+TEST_F(SkinWeightsTest, SetWithDifferentSizedRows) {
+  SkinWeights skinWeights;
+  const std::vector<std::vector<size_t>> rowIndices = {{0, 1}};
+  const std::vector<std::vector<float>> rowWeights = {{1.0f}};
+
+  MOMENTUM_EXPECT_DEATH(
+      skinWeights.set(rowIndices, rowWeights), "Skin weight row 0 has 2 indices but 1 weights");
+}
+
+TEST_F(SkinWeightsTest, SetDiscardsInvalidWeights) {
+  SkinWeights skinWeights;
+  const std::vector<std::vector<size_t>> rowIndices = {{0, 1, 2}};
+  const std::vector<std::vector<float>> rowWeights = {
+      {0.4f, -0.1f, std::numeric_limits<float>::quiet_NaN()}};
+
+  skinWeights.set(rowIndices, rowWeights);
+
+  EXPECT_EQ(skinWeights.index(0, 0), 0);
+  EXPECT_FLOAT_EQ(skinWeights.weight(0, 0), 0.4f);
+  EXPECT_TRUE(skinWeights.index.row(0).tail<kMaxSkinJoints - 1>().isZero());
+  EXPECT_TRUE(skinWeights.weight.row(0).tail<kMaxSkinJoints - 1>().isZero());
+}
+
+TEST(SkinWeightsTestHelper, CreateTestCharacterZeroesUnusedIndices) {
+  const Character character = createTestCharacter();
+  ASSERT_NE(character.skinWeights, nullptr);
+
+  for (Eigen::Index i = 0; i < character.skinWeights->weight.rows(); ++i) {
+    for (Eigen::Index j = 0; j < character.skinWeights->weight.cols(); ++j) {
+      if (character.skinWeights->weight(i, j) == 0.0f) {
+        EXPECT_EQ(character.skinWeights->index(i, j), 0);
+      }
+    }
+  }
 }
 
 // Test the equality operator with identical SkinWeights objects
@@ -246,7 +320,7 @@ TEST_F(SkinWeightsTest, SetWithNonNormalizedWeights) {
   };
 
   std::vector<std::vector<float>> nonNormalizedWeights = {
-      {0.2f, 0.3f, 0.1f}, // Weights sum to 0.6, not 1.0
+      {0.3f, 0.2f, 0.1f}, // Weights sum to 0.6, not 1.0
   };
 
   skinWeights.set(indices, nonNormalizedWeights);
