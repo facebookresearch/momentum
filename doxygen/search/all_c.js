@@ -44,7 +44,7 @@ var searchData=
   ['limittypecount_41',['LimitTypeCount',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83ada30bd1bec664cb5acae3ed319e14f6b',1,'momentum']]],
   ['limitweight_42',['limitWeight',['../structmomentum_1_1Locator.html#ab10fe21e62bd5ff1232950c9888220ca',1,'momentum::Locator']]],
   ['line_43',['Line',['../namespacemomentum.html#a5ea2d4341ab932977f4a0204f87f3a78',1,'momentum']]],
-  ['linear_44',['Linear',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354',1,'momentum']]],
+  ['linear_44',['Linear',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354',1,'momentum::Linear'],['../namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b',1,'momentum::Linear']]],
   ['linear_45',['linear',['../unionmomentum_1_1LimitData.html#a99a888c1ca60239d4db56a6ff4b4f440',1,'momentum::LimitData']]],
   ['linear_5fskinning_2ecpp_46',['linear_skinning.cpp',['../linear__skinning_8cpp.html',1,'']]],
   ['linear_5fskinning_2eh_47',['linear_skinning.h',['../linear__skinning_8h.html',1,'']]],

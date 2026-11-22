@@ -1,5 +1,9 @@
 var NAVTREEINDEX4 =
 {
+"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a891ade9d9e295be639b9d91e3231bb43":[2,0,0,165,12],
+"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a8b2b319a17cfec7c9a363b77f78c0ca7":[1,0,2,166,4],
+"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a8b2b319a17cfec7c9a363b77f78c0ca7":[2,0,0,165,4],
+"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a8cbdd5d4975fbe21bdba9adc9b3a1750":[1,0,2,166,15],
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a8cbdd5d4975fbe21bdba9adc9b3a1750":[2,0,0,165,15],
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html#aa736f46c2c62cfa79b5177129847f4cc":[1,0,2,166,10],
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html#aa736f46c2c62cfa79b5177129847f4cc":[2,0,0,165,10],
@@ -245,9 +249,5 @@ var NAVTREEINDEX4 =
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a6f00f1d305f77b87de89543fbbc77566":[2,0,0,16,7],
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a7434362e1b8e21566e882ced663269e2":[1,0,2,17,16],
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a7434362e1b8e21566e882ced663269e2":[2,0,0,16,16],
-"classmomentum_1_1OnlineBlockHouseholderQR.html#a78c4d0e1102c52550abff2b126b36925":[1,0,2,17,5],
-"classmomentum_1_1OnlineBlockHouseholderQR.html#a78c4d0e1102c52550abff2b126b36925":[2,0,0,16,5],
-"classmomentum_1_1OnlineBlockHouseholderQR.html#a8868807cc1ed3a88da7fc97a4b4f247a":[1,0,2,17,4],
-"classmomentum_1_1OnlineBlockHouseholderQR.html#a8868807cc1ed3a88da7fc97a4b4f247a":[2,0,0,16,4],
-"classmomentum_1_1OnlineBlockHouseholderQR.html#a93f72b22ed07d6b4b2d11969a231f4c9":[1,0,2,17,17]
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a78c4d0e1102c52550abff2b126b36925":[1,0,2,17,5]
 };

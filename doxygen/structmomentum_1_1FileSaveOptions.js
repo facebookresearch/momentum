@@ -5,6 +5,7 @@ var structmomentum_1_1FileSaveOptions =
     [ "coordSystemInfo", "structmomentum_1_1FileSaveOptions.html#a5744bd6f1bbb6c1d37e20808b387d67a", null ],
     [ "extensions", "structmomentum_1_1FileSaveOptions.html#a24f196acc9011a4562184b523745914f", null ],
     [ "fbxNamespace", "structmomentum_1_1FileSaveOptions.html#ac8880de9cf264be9a957935e8eb931b5", null ],
+    [ "gltfAnimationInterpolation", "structmomentum_1_1FileSaveOptions.html#a7808fc009f84f57dfca3297224172c8e", null ],
     [ "gltfFileFormat", "structmomentum_1_1FileSaveOptions.html#adfdaaee1baf83a666eae230bdcd9ce55", null ],
     [ "locators", "structmomentum_1_1FileSaveOptions.html#a502fd85c71bc440575c39a557c1cc5a8", null ],
     [ "mesh", "structmomentum_1_1FileSaveOptions.html#a2d264f561aa6a1d552b08fd0a71089de", null ],

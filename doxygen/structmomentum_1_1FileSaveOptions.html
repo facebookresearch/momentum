@@ -118,12 +118,14 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a24f196acc9011a4562184b523745914f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable GLTF extensions (default: true) Only used for GLTF output.  <br /></td></tr>
 <tr class="memitem:adfdaaee1baf83a666eae230bdcd9ce55" id="r_adfdaaee1baf83a666eae230bdcd9ce55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8">GltfFileFormat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adfdaaee1baf83a666eae230bdcd9ce55">gltfFileFormat</a> = <a class="el" href="namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a06b9281e396db002010bde1de57262eb">GltfFileFormat::Auto</a></td></tr>
 <tr class="memdesc:adfdaaee1baf83a666eae230bdcd9ce55"><td class="mdescLeft">&#160;</td><td class="mdescRight">GLTF file format selection (default: Auto) Only used for GLTF output.  <br /></td></tr>
+<tr class="memitem:a7808fc009f84f57dfca3297224172c8e" id="r_a7808fc009f84f57dfca3297224172c8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7808fc009f84f57dfca3297224172c8e">gltfAnimationInterpolation</a> = <a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d">GltfAnimationInterpolation::Step</a></td></tr>
+<tr class="memdesc:a7808fc009f84f57dfca3297224172c8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolation of the joint and blend shape animation samplers (default: Step) <a class="el" href="structmomentum_1_1Marker.html" title="A single motion capture marker observation (position, occlusion, confidence).">Marker</a> animation always uses Step.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Unified options for saving files in both FBX and GLTF formats. </p>
 <p>This struct consolidates save options that were previously scattered across multiple function parameters. Format-specific options (e.g., FBX coordinate system, GLTF extensions) are included but only used by their respective formats. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00069">69</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00085">85</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="ad89edb3c862d0446891a80850f26adae" name="ad89edb3c862d0446891a80850f26adae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad89edb3c862d0446891a80850f26adae">&#9670;&#160;</a></span>blendShapes</h2>
@@ -139,7 +141,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include blend shapes in the output (default: true). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00082">82</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00098">98</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -157,7 +159,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include collision geometry in the output (default: true). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00079">79</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00095">95</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -175,7 +177,7 @@ Public Attributes</h2></td></tr>
 
 <p>FBX coordinate system configuration (default: Maya Y-up). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00090">90</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00106">106</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -193,9 +195,9 @@ Public Attributes</h2></td></tr>
 
 <p>Enable GLTF extensions (default: true) Only used for GLTF output. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00100">100</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00116">116</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00372">momentum::makeCharacterDocument()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -213,7 +215,28 @@ Public Attributes</h2></td></tr>
 
 <p>Optional namespace prefix for FBX node names (e.g., "ns" becomes "ns:") Only used for FBX output (default: empty = no namespace). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00094">94</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00110">110</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+
+</div>
+</div>
+<a id="a7808fc009f84f57dfca3297224172c8e" name="a7808fc009f84f57dfca3297224172c8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7808fc009f84f57dfca3297224172c8e">&#9670;&#160;</a></span>gltfAnimationInterpolation</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> momentum::FileSaveOptions::gltfAnimationInterpolation = <a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d">GltfAnimationInterpolation::Step</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Interpolation of the joint and blend shape animation samplers (default: Step) <a class="el" href="structmomentum_1_1Marker.html" title="A single motion capture marker observation (position, occlusion, confidence).">Marker</a> animation always uses Step. </p>
+<p>Only used for GLTF output </p>
+
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00124">124</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -231,9 +254,9 @@ Public Attributes</h2></td></tr>
 
 <p>GLTF file format selection (default: Auto) Only used for GLTF output. </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00104">104</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00120">120</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00507">momentum::saveGltfCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00491">momentum::saveGltfCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00509">momentum::saveGltfCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00493">momentum::saveGltfCharacter()</a>.</p>
 
 </div>
 </div>
@@ -251,7 +274,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include locators in the output (default: true). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00076">76</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00092">92</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -269,7 +292,7 @@ Public Attributes</h2></td></tr>
 
 <p>Include mesh geometry in the output (default: true). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00073">73</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00089">89</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -287,7 +310,7 @@ Public Attributes</h2></td></tr>
 
 <p><a class="el" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> mode: allow saving mesh-only characters without skin weights (default: false). </p>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00085">85</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00101">101</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>

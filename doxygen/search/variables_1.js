@@ -10,7 +10,8 @@ var searchData=
   ['adaptivefloorcontact_7',['adaptiveFloorContact',['../structmomentum_1_1CalibrationConfig.html#ad02d5cdc1e77c5fe0e8e8ecb1159bf13',1,'momentum::CalibrationConfig']]],
   ['alpha_5f_8',['alpha_',['../classmomentum_1_1GeneralizedLossT.html#a8bd3714b7eba70b0dc1dafe6affe5f0e',1,'momentum::GeneralizedLossT']]],
   ['animationindices_9',['animationIndices',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a145b0e64fa857b7dfbf9420e8a49a9a4',1,'momentum::GltfBuilder::Impl::CharacterData']]],
-  ['animcurves_10',['animCurves',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a79df6142e3d6b140f18225314ac1b691',1,'momentum::fbx_internal::JointCurveSetup']]],
-  ['animcurvesindex_11',['animCurvesIndex',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a116930f94fb338b46866a9cfc76e2e06',1,'momentum::fbx_internal::JointCurveSetup']]],
-  ['attachedtoskin_12',['attachedToSkin',['../structmomentum_1_1Locator.html#ac55cd892e7a7ab55ee94d9739b2b8ad4',1,'momentum::Locator']]]
+  ['animationinterpolation_10',['animationInterpolation',['../structmomentum_1_1GltfBuilder_1_1Impl.html#a90c49fb5f08aa3f5f71836ae520b7307',1,'momentum::GltfBuilder::Impl']]],
+  ['animcurves_11',['animCurves',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a79df6142e3d6b140f18225314ac1b691',1,'momentum::fbx_internal::JointCurveSetup']]],
+  ['animcurvesindex_12',['animCurvesIndex',['../structmomentum_1_1fbx__internal_1_1JointCurveSetup.html#a116930f94fb338b46866a9cfc76e2e06',1,'momentum::fbx_internal::JointCurveSetup']]],
+  ['attachedtoskin_13',['attachedToSkin',['../structmomentum_1_1Locator.html#ac55cd892e7a7ab55ee94d9739b2b8ad4',1,'momentum::Locator']]]
 ];

@@ -15,6 +15,10 @@ var file__save__options_8h =
       [ "momentum::FbxUpVector::YAxis", "namespacemomentum.html#a7070e8b46c942e99e0fe660b021ba581a2682f2c068498276c0833008c2061603", null ],
       [ "momentum::FbxUpVector::ZAxis", "namespacemomentum.html#a7070e8b46c942e99e0fe660b021ba581aa2832ffb7897e88212c65ce756aa3904", null ]
     ] ],
+    [ "momentum::GltfAnimationInterpolation", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf", [
+      [ "momentum::GltfAnimationInterpolation::Step", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d", null ],
+      [ "momentum::GltfAnimationInterpolation::Linear", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b", null ]
+    ] ],
     [ "momentum::GltfFileFormat", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8", [
       [ "momentum::GltfFileFormat::Auto", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a06b9281e396db002010bde1de57262eb", null ],
       [ "momentum::GltfFileFormat::Binary", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a6ce976e8f061b2b5cfe4d0c50c3405dd", null ],

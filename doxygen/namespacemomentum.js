@@ -2395,6 +2395,10 @@ var namespacemomentum =
       [ "YAxis", "namespacemomentum.html#a7070e8b46c942e99e0fe660b021ba581a2682f2c068498276c0833008c2061603", null ],
       [ "ZAxis", "namespacemomentum.html#a7070e8b46c942e99e0fe660b021ba581aa2832ffb7897e88212c65ce756aa3904", null ]
     ] ],
+    [ "GltfAnimationInterpolation", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf", [
+      [ "Step", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d", null ],
+      [ "Linear", "namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b", null ]
+    ] ],
     [ "GltfFileFormat", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8", [
       [ "Auto", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a06b9281e396db002010bde1de57262eb", null ],
       [ "Binary", "namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a6ce976e8f061b2b5cfe4d0c50c3405dd", null ],
@@ -2633,8 +2637,8 @@ var namespacemomentum =
     [ "createJoint", "namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0", null ],
     [ "createLocator", "namespacemomentum.html#a6212be49f421e6f0ac812c6821a8646a", null ],
     [ "createLocatorCharacter", "namespacemomentum.html#a8672dec18fb662d392c5f2f6f749cf04", null ],
-    [ "createSampler", "namespacemomentum.html#a40d55cd6636a9506da0b2c5e144330a2", null ],
-    [ "createSampler", "namespacemomentum.html#abd885022e1a4a1cb6737ee7e1d0d5708", null ],
+    [ "createSampler", "namespacemomentum.html#aa69a3bb015abd026d4cb42c257dee22a", null ],
+    [ "createSampler", "namespacemomentum.html#af8e329ad2d337a240a035e91d8ed6981", null ],
     [ "createSkeletonWithOnlyRoot", "namespacemomentum.html#a5fa6d9afe8923beb9a71a87461e75a43", null ],
     [ "createSkinnedConstraintData", "namespacemomentum.html#a726e0d65cd7fc1b57c8c9a63dc721afc", null ],
     [ "createSkinnedConstraintData", "namespacemomentum.html#a998aa3659b01fb63c2b53489108f6c7f", null ],
@@ -3085,6 +3089,7 @@ var namespacemomentum =
     [ "times_parameterTransform_times_v", "namespacemomentum.html#a53436820624e74aeace11c89c25ccb0d", null ],
     [ "toCm", "namespacemomentum.html#a696395c265b72a334cc61f3903c52c99", null ],
     [ "toDeg", "namespacemomentum.html#a3f2b81dcd7011fe109445947b18e1005", null ],
+    [ "toGltfSamplerType", "namespacemomentum.html#ad31f63d2e857778e865f7d192010d5ee", null ],
     [ "toJson", "namespacemomentum.html#a5fbedfbb21a5565b976acedaf9068ffb", null ],
     [ "tokenize", "namespacemomentum.html#ab53d9f9a4dfad1f55e473a1ee36a14fa", null ],
     [ "tokenize", "namespacemomentum.html#a9556e994cd3e64fc51c22f3ad0d48e9f", null ],

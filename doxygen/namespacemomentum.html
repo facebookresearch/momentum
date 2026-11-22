@@ -2827,6 +2827,10 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#ab4c06c8408d6bc9e0f322065a9ec93e8a76b8d0dcd02ccaf203c167ced6d7ef31">Ascii</a> = 2
  }</td></tr>
 <tr class="memdesc:ab4c06c8408d6bc9e0f322065a9ec93e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">File format in which the character is saved.  <a href="#ab4c06c8408d6bc9e0f322065a9ec93e8">More...</a><br /></td></tr>
+<tr class="memitem:a7c00483ac5ecf488b4f02041c3d22cbf" id="r_a7c00483ac5ecf488b4f02041c3d22cbf"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> : uint8_t { <a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d">Step</a> = 0
+, <a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b">Linear</a> = 1
+ }</td></tr>
+<tr class="memdesc:a7c00483ac5ecf488b4f02041c3d22cbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">How animation samplers written to a GLTF file interpolate between their keys.  <a href="#a7c00483ac5ecf488b4f02041c3d22cbf">More...</a><br /></td></tr>
 <tr class="memitem:a7070e8b46c942e99e0fe660b021ba581" id="r_a7070e8b46c942e99e0fe660b021ba581"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7070e8b46c942e99e0fe660b021ba581">FbxUpVector</a> { <a class="el" href="#a7070e8b46c942e99e0fe660b021ba581af37dd7d4e7b7d1020e931480f0d8f168">XAxis</a> = 1
 , <a class="el" href="#a7070e8b46c942e99e0fe660b021ba581a2682f2c068498276c0833008c2061603">YAxis</a> = 2
 , <a class="el" href="#a7070e8b46c942e99e0fe660b021ba581aa2832ffb7897e88212c65ce756aa3904">ZAxis</a> = 3
@@ -3636,10 +3640,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a0e01d2e1e0e60926c07e86dfc5bb903d template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e01d2e1e0e60926c07e86dfc5bb903d">setAccessorType&lt; const Vector4b &gt;</a> (fx::gltf::Accessor &amp;accessor)</td></tr>
 <tr class="memitem:a8f3a659ef20071a74421095d21eb2d0f" id="r_a8f3a659ef20071a74421095d21eb2d0f"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
 <tr class="memitem:a8f3a659ef20071a74421095d21eb2d0f template"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8f3a659ef20071a74421095d21eb2d0f">setAccessorType&lt; const Matrix4f &gt;</a> (fx::gltf::Accessor &amp;accessor)</td></tr>
-<tr class="memitem:abd885022e1a4a1cb6737ee7e1d0d5708" id="r_abd885022e1a4a1cb6737ee7e1d0d5708"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:abd885022e1a4a1cb6737ee7e1d0d5708 template"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd885022e1a4a1cb6737ee7e1d0d5708">createSampler</a> (fx::gltf::Document &amp;model, fx::gltf::Animation &amp;anim, std::span&lt; T &gt; data, const std::span&lt; float &gt; &amp;timestamps)</td></tr>
-<tr class="memitem:a40d55cd6636a9506da0b2c5e144330a2" id="r_a40d55cd6636a9506da0b2c5e144330a2"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a40d55cd6636a9506da0b2c5e144330a2 template"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40d55cd6636a9506da0b2c5e144330a2">createSampler</a> (fx::gltf::Document &amp;model, fx::gltf::Animation &amp;anim, std::span&lt; T &gt; data, const int32_t timestampAccessor)</td></tr>
+<tr class="memitem:ad31f63d2e857778e865f7d192010d5ee" id="r_ad31f63d2e857778e865f7d192010d5ee"><td class="memItemLeft" align="right" valign="top">fx::gltf::Animation::Sampler::Type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad31f63d2e857778e865f7d192010d5ee">toGltfSamplerType</a> (<a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> interpolation)</td></tr>
+<tr class="memdesc:ad31f63d2e857778e865f7d192010d5ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the save option to the GLTF sampler interpolation type.  <br /></td></tr>
+<tr class="memitem:af8e329ad2d337a240a035e91d8ed6981" id="r_af8e329ad2d337a240a035e91d8ed6981"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:af8e329ad2d337a240a035e91d8ed6981 template"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8e329ad2d337a240a035e91d8ed6981">createSampler</a> (fx::gltf::Document &amp;model, fx::gltf::Animation &amp;anim, std::span&lt; T &gt; data, const std::span&lt; float &gt; &amp;timestamps, <a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> interpolation)</td></tr>
+<tr class="memitem:aa69a3bb015abd026d4cb42c257dee22a" id="r_aa69a3bb015abd026d4cb42c257dee22a"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:aa69a3bb015abd026d4cb42c257dee22a template"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa69a3bb015abd026d4cb42c257dee22a">createSampler</a> (fx::gltf::Document &amp;model, fx::gltf::Animation &amp;anim, std::span&lt; T &gt; data, const int32_t timestampAccessor, <a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> interpolation)</td></tr>
 <tr class="memitem:a70f1c805ecb6005e0944ee9d03b57a4b" id="r_a70f1c805ecb6005e0944ee9d03b57a4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#ad584410b943fec2eea3e87f385b610b8">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70f1c805ecb6005e0944ee9d03b57a4b">toMomentumVec3f</a> (const std::array&lt; float, 3 &gt; &amp;vec) noexcept</td></tr>
 <tr class="memitem:a729723921289a60f8beb25b8305da4e0" id="r_a729723921289a60f8beb25b8305da4e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#ad584410b943fec2eea3e87f385b610b8">Vector3f</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a729723921289a60f8beb25b8305da4e0">fromMomentumVec3f</a> (const <a class="el" href="#ad584410b943fec2eea3e87f385b610b8">Vector3f</a> &amp;vec) noexcept</td></tr>
 <tr class="memitem:a851bba61cbe390f4f2bc68a3461ffec0" id="r_a851bba61cbe390f4f2bc68a3461ffec0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a851bba61cbe390f4f2bc68a3461ffec0">toMomentumVec3f</a> (std::vector&lt; <a class="el" href="#ad584410b943fec2eea3e87f385b610b8">Vector3f</a> &gt; &amp;vec)</td></tr>
@@ -39217,7 +39223,7 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="a312faa2d1098b0f020193f51f819c024acd5d8803eaa45145192f16041a365ee8" name="a312faa2d1098b0f020193f51f819c024acd5d8803eaa45145192f16041a365ee8"></a>LeftHanded&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00050">50</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00066">66</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -39248,7 +39254,7 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="a29a503e0329818622962588c9a308430a1f8b8916eaa36417b7c4c27e1b69777a" name="a29a503e0329818622962588c9a308430a1f8b8916eaa36417b7c4c27e1b69777a"></a>ParityOdd&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00046">46</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00062">62</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -39280,7 +39286,40 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="a7070e8b46c942e99e0fe660b021ba581aa2832ffb7897e88212c65ce756aa3904" name="a7070e8b46c942e99e0fe660b021ba581aa2832ffb7897e88212c65ce756aa3904"></a>ZAxis&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00039">39</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00055">55</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+
+</div>
+</div>
+<a id="a7c00483ac5ecf488b4f02041c3d22cbf" name="a7c00483ac5ecf488b4f02041c3d22cbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c00483ac5ecf488b4f02041c3d22cbf">&#9670;&#160;</a></span>GltfAnimationInterpolation</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">momentum::GltfAnimationInterpolation</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How animation samplers written to a GLTF file interpolate between their keys. </p>
+<p>Momentum writes one key per frame for joint and blend shape channels. <span class="tt">Step</span> (the default) holds each key; <span class="tt"><a class="el" href="#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354">Linear</a></span> lets readers that evaluate between frames (e.g. motion blur or a camera faster than the motion) see the motion between keys. The values at the keys are the same either way. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d" name="a7c00483ac5ecf488b4f02041c3d22cbfa48c7c41b72e1d678923ce3571aa65b2d"></a>Step&#160;</td><td class="fielddoc"><p>Hold each key until the next one (GLTF "STEP"). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b" name="a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b"></a>Linear&#160;</td><td class="fielddoc"><p>Interpolate between keys (GLTF "LINEAR"; slerp for rotations). </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00044">44</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -39311,7 +39350,7 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="ab4c06c8408d6bc9e0f322065a9ec93e8a76b8d0dcd02ccaf203c167ced6d7ef31" name="ab4c06c8408d6bc9e0f322065a9ec93e8a76b8d0dcd02ccaf203c167ced6d7ef31"></a>Ascii&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00027">27</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00028">28</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -39571,7 +39610,7 @@ template&lt;typename T&gt; </div>
 <tr><td class="fieldname"><a id="a2a7718a853401b9a2e58708e950a7077a93cba07454f06a4a960172bbd6e2a435" name="a2a7718a853401b9a2e58708e950a7077a93cba07454f06a4a960172bbd6e2a435"></a>Yes&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00020">20</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="file__save__options_8h_source.html#l00021">21</a> of file <a class="el" href="file__save__options_8h_source.html">file_save_options.h</a>.</p>
 
 </div>
 </div>
@@ -39937,7 +39976,7 @@ template&lt;typename T, typename SinkFn&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00242">242</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="coordinate__utils_8h_source.html#l00022">toMomentumVec3f()</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="coordinate__utils_8h_source.html#l00022">toMomentumVec3f()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__mesh__io_8cpp_source.html#l00474">loadSkinnedMesh()</a>.</p>
 
@@ -40690,7 +40729,7 @@ template&lt;typename T, typename SinkFn&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00390">390</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, <a class="el" href="character_2types_8h_source.html#l00182">kInvalidIndex</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00362">loadWeightsFromAccessor()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="log_8h_source.html#l00186">MT_LOGW_IF</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, <a class="el" href="character_2types_8h_source.html#l00182">kInvalidIndex</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00362">loadWeightsFromAccessor()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="log_8h_source.html#l00186">MT_LOGW_IF</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__mesh__io_8cpp_source.html#l00474">loadSkinnedMesh()</a>.</p>
 
@@ -41008,7 +41047,7 @@ template&lt;typename T, std::size_t Alignment = alignof(T)&gt; </div>
 
 <p class="reference">References <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00026">momentum::InverseParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="character_2types_8h_source.html#l00161">momentum::CharacterParametersT&lt; T &gt;::pose</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00223">momentum::ParameterTransformT&lt; T &gt;::simplify()</a>, <a class="el" href="character_2types_8h_source.html#l00087">momentum::EigenStrongType&lt; Derived, EigenType &gt;::size()</a>, <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>, and <a class="el" href="character_2types_8h_source.html#l00092">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00336">loadCharacterWithMotionModelParameterScales()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00337">loadCharacterWithMotionModelParameterScales()</a>.</p>
 
 </div>
 </div>
@@ -45143,9 +45182,9 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00055">55</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00056">56</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00017">getComponentSize()</a>, <a class="el" href="accessor__utils_8h_source.html#l00034">getTypeSize()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00018">getComponentSize()</a>, <a class="el" href="accessor__utils_8h_source.html#l00035">getTypeSize()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__mesh__io_8cpp_source.html#l00242">addBlendShapes()</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00390">addSkinWeights()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00073">getMotionFromModel()</a>, and <a class="el" href="gltf__mesh__io_8cpp_source.html#l00362">loadWeightsFromAccessor()</a>.</p>
 
@@ -45172,9 +45211,9 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00089">89</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00090">90</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00017">getComponentSize()</a>, <a class="el" href="accessor__utils_8h_source.html#l00034">getTypeSize()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00018">getComponentSize()</a>, <a class="el" href="accessor__utils_8h_source.html#l00035">getTypeSize()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__mesh__io_8cpp_source.html#l00362">loadWeightsFromAccessor()</a>.</p>
 
@@ -45211,11 +45250,11 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00134">134</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00135">135</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00128">setAccessorType()</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00129">setAccessorType()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00288">createSampler()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00267">createSampler()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00302">createSampler()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00280">createSampler()</a>.</p>
 
 </div>
 </div>
@@ -45722,8 +45761,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="a40d55cd6636a9506da0b2c5e144330a2" name="a40d55cd6636a9506da0b2c5e144330a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40d55cd6636a9506da0b2c5e144330a2">&#9670;&#160;</a></span>createSampler() <span class="overload">[1/2]</span></h2>
+<a id="aa69a3bb015abd026d4cb42c257dee22a" name="aa69a3bb015abd026d4cb42c257dee22a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa69a3bb015abd026d4cb42c257dee22a">&#9670;&#160;</a></span>createSampler() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -45748,19 +45787,24 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const int32_t</td>          <td class="paramname"><span class="paramname"><em>timestampAccessor</em></span>&#160;)</td>
+          <td class="paramtype">const int32_t</td>          <td class="paramname"><span class="paramname"><em>timestampAccessor</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a></td>          <td class="paramname"><span class="paramname"><em>interpolation</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00288">288</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00302">302</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00134">createAccessorBuffer()</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00135">createAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00268">toGltfSamplerType()</a>.</p>
 
 </div>
 </div>
-<a id="abd885022e1a4a1cb6737ee7e1d0d5708" name="abd885022e1a4a1cb6737ee7e1d0d5708"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd885022e1a4a1cb6737ee7e1d0d5708">&#9670;&#160;</a></span>createSampler() <span class="overload">[2/2]</span></h2>
+<a id="af8e329ad2d337a240a035e91d8ed6981" name="af8e329ad2d337a240a035e91d8ed6981"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8e329ad2d337a240a035e91d8ed6981">&#9670;&#160;</a></span>createSampler() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -45785,14 +45829,19 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::span&lt; float &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>timestamps</em></span>&#160;)</td>
+          <td class="paramtype">const std::span&lt; float &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>timestamps</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a></td>          <td class="paramname"><span class="paramname"><em>interpolation</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00267">267</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00280">280</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00134">createAccessorBuffer()</a>, and <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00135">createAccessorBuffer()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, and <a class="el" href="accessor__utils_8h_source.html#l00268">toGltfSamplerType()</a>.</p>
 
 </div>
 </div>
@@ -47778,7 +47827,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="coordinate__utils_8h_source.html#l00062">62</a> of file <a class="el" href="coordinate__utils_8h_source.html">coordinate_utils.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -47888,7 +47937,7 @@ template&lt;typename T&gt; </div>
 
 <p class="reference">References <a class="el" href="coordinate__system_8cpp_source.html#l00135">fromMomentumVector()</a>, and <a class="el" href="coordinate__utils_8h_source.html#l00015">kGltfCoordinateSystem</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -48335,9 +48384,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00017">17</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00018">18</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00089">copyAlignedAccessorBuffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00090">copyAlignedAccessorBuffer()</a>.</p>
 
 </div>
 </div>
@@ -48567,7 +48616,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__animation__io_8cpp_source.html#l00073">73</a> of file <a class="el" href="gltf__animation__io_8cpp_source.html">gltf_animation_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, and <a class="el" href="character_2types_8h_source.html#l00021">kParametersPerJoint</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, and <a class="el" href="character_2types_8h_source.html#l00021">kParametersPerJoint</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00167">loadMotionFromModel()</a>.</p>
 
@@ -48909,9 +48958,9 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00034">34</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00035">35</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00089">copyAlignedAccessorBuffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00090">copyAlignedAccessorBuffer()</a>.</p>
 
 </div>
 </div>
@@ -50505,7 +50554,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00155">155</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00884">jointIdentityToModelIdentity()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00308">loadCharacterWithMotion()</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00884">jointIdentityToModelIdentity()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00309">loadCharacterWithMotion()</a>.</p>
 
 </div>
 </div>
@@ -50665,7 +50714,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00166">166</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00884">jointIdentityToModelIdentity()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00308">loadCharacterWithMotion()</a>, <a class="el" href="character__io_8cpp_source.html#l00103">loadFullCharacter()</a>, <a class="el" href="locator__io_8cpp_source.html#l00059">loadLocators()</a>, <a class="el" href="character_8h_source.html#l00049">momentum::Character::locators</a>, <a class="el" href="app__utils_8h_source.html#l00026">momentum::ModelOptions::locators</a>, <a class="el" href="app__utils_8h_source.html#l00024">momentum::ModelOptions::model</a>, <a class="el" href="parameter__transform_8h_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="app__utils_8h_source.html#l00025">momentum::ModelOptions::parameters</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>, and <a class="el" href="character_2types_8h_source.html#l00092">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
+<p class="reference">References <a class="el" href="tracker__utils_8cpp_source.html#l00884">jointIdentityToModelIdentity()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00309">loadCharacterWithMotion()</a>, <a class="el" href="character__io_8cpp_source.html#l00103">loadFullCharacter()</a>, <a class="el" href="locator__io_8cpp_source.html#l00059">loadLocators()</a>, <a class="el" href="character_8h_source.html#l00049">momentum::Character::locators</a>, <a class="el" href="app__utils_8h_source.html#l00026">momentum::ModelOptions::locators</a>, <a class="el" href="app__utils_8h_source.html#l00024">momentum::ModelOptions::model</a>, <a class="el" href="parameter__transform_8h_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, <a class="el" href="app__utils_8h_source.html#l00025">momentum::ModelOptions::parameters</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>, and <a class="el" href="character_2types_8h_source.html#l00092">momentum::EigenStrongType&lt; Derived, EigenType &gt;::Zero()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00292">processMarkerFile()</a>.</p>
 
@@ -50696,7 +50745,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, the motion represented in model parameters, the identity vector represented as joint parameters, and the fps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00308">308</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00309">309</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>.</p>
 
@@ -50728,7 +50777,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, the motion represented in model parameters, the identity vector represented as joint parameters, and the fps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00313">313</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00314">314</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>.</p>
 
@@ -50765,9 +50814,9 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">194</a> of file <a class="el" href="gltf__animation__io_8cpp_source.html">gltf_animation_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00255">loadGltfCharacter()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00167">loadMotionFromModel()</a>, <a class="el" href="character__utility_8cpp_source.html#l00982">mapIdentityToCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00955">mapMotionToCharacter()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00057">mapParameters()</a>, <a class="el" href="log_8h_source.html#l00186">MT_LOGW_IF</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
+<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00256">loadGltfCharacter()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00167">loadMotionFromModel()</a>, <a class="el" href="character__utility_8cpp_source.html#l00982">mapIdentityToCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00955">mapMotionToCharacter()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00057">mapParameters()</a>, <a class="el" href="log_8h_source.html#l00186">MT_LOGW_IF</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00308">loadCharacterWithMotion()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00313">loadCharacterWithMotion()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00336">loadCharacterWithMotionModelParameterScales()</a>, and <a class="el" href="gltf__animation__io_8cpp_source.html#l00221">loadMotionOnCharacterCommon()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00309">loadCharacterWithMotion()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00314">loadCharacterWithMotion()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00337">loadCharacterWithMotionModelParameterScales()</a>, and <a class="el" href="gltf__animation__io_8cpp_source.html#l00221">loadMotionOnCharacterCommon()</a>.</p>
 
 </div>
 </div>
@@ -50796,11 +50845,11 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, the motion represented in model parameters with scales applied, the identity parameters as model parameters, and the fps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00318">318</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00319">319</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00318">loadCharacterWithMotionModelParameterScales()</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, and <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
+<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00319">loadCharacterWithMotionModelParameterScales()</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, and <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00318">loadCharacterWithMotionModelParameterScales()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00319">loadCharacterWithMotionModelParameterScales()</a>.</p>
 
 </div>
 </div>
@@ -50829,7 +50878,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, the motion represented in model parameters with scales applied, the identity parameters as model parameters, and the fps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00336">336</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00337">337</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="inverse__parameter__transform_8cpp_source.html#l00043">applyModelParameterScales()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::numAllModelParameters()</a>, and <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>.</p>
 
@@ -50860,7 +50909,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, a vector of skeleton states for each frame, and a vector of timestamps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00356">356</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00357">357</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>.</p>
 
@@ -50891,7 +50940,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object, a vector of skeleton states for each frame, and a vector of timestamps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00351">351</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00352">352</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>.</p>
 
@@ -50923,9 +50972,9 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">369</a> of file <a class="el" href="gltf__animation__io_8cpp_source.html">gltf_animation_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00182">kInvalidIndex</a>, <a class="el" href="gltf__io_8cpp_source.html#l00239">loadGltfCharacterInternal()</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="character_2types_8h_source.html#l00182">kInvalidIndex</a>, <a class="el" href="gltf__io_8cpp_source.html#l00240">loadGltfCharacterInternal()</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00356">loadCharacterWithSkeletonStates()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00351">loadCharacterWithSkeletonStates()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00357">loadCharacterWithSkeletonStates()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00352">loadCharacterWithSkeletonStates()</a>.</p>
 
 </div>
 </div>
@@ -51365,7 +51414,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00260">260</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00261">261</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -51393,9 +51442,9 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00255">255</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00256">256</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00239">loadGltfCharacterInternal()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00240">loadGltfCharacterInternal()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>.</p>
 
@@ -51425,7 +51474,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00264">264</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00265">265</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -51459,11 +51508,11 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The loaded <a class="el" href="structmomentum_1_1Character.html" title="A character model with skeletal structure, mesh, and optional components.">Character</a> object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00239">239</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00240">240</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00255">loadGltfCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00256">loadGltfCharacter()</a>.</p>
 
 </div>
 </div>
@@ -51634,7 +51683,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="marker__io_8cpp_source.html#l00032">32</a> of file <a class="el" href="marker__io_8cpp_source.html">marker_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="c3d__io_8cpp_source.html#l00292">loadC3d()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00218">loadFbxMarkerSequence()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00483">loadMarkerSequence()</a>, <a class="el" href="trc__io_8cpp_source.html#l00019">loadTrc()</a>, and <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>.</p>
+<p class="reference">References <a class="el" href="c3d__io_8cpp_source.html#l00292">loadC3d()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00218">loadFbxMarkerSequence()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00485">loadMarkerSequence()</a>, <a class="el" href="trc__io_8cpp_source.html#l00019">loadTrc()</a>, and <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__io_8cpp_source.html#l00056">loadMarkersForMainSubject()</a>, <a class="el" href="marker__io_8cpp_source.html#l00099">loadMarkersForMainSubject()</a>, and <a class="el" href="process__markers_8cpp_source.html#l00292">processMarkerFile()</a>.</p>
 
@@ -51692,7 +51741,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="marker__io_8cpp_source.html#l00069">69</a> of file <a class="el" href="marker__io_8cpp_source.html">marker_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="c3d__io_8cpp_source.html#l00292">loadC3d()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00218">loadFbxMarkerSequence()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00483">loadMarkerSequence()</a>, <a class="el" href="trc__io_8cpp_source.html#l00019">loadTrc()</a>, and <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>.</p>
+<p class="reference">References <a class="el" href="c3d__io_8cpp_source.html#l00292">loadC3d()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00218">loadFbxMarkerSequence()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00485">loadMarkerSequence()</a>, <a class="el" href="trc__io_8cpp_source.html#l00019">loadTrc()</a>, and <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>.</p>
 
 </div>
 </div>
@@ -51721,7 +51770,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="structmomentum_1_1MarkerSequence.html" title="All frames from a single motion capture sequence for one subject (actor).">MarkerSequence</a> object containing the loaded motion capture marker data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00483">483</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00485">485</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="marker__io_8cpp_source.html#l00032">loadMarkers()</a>, and <a class="el" href="marker__io_8cpp_source.html#l00069">loadMarkers()</a>.</p>
 
@@ -51752,7 +51801,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="structmomentum_1_1MarkerSequence.html" title="All frames from a single motion capture sequence for one subject (actor).">MarkerSequence</a> object containing the loaded motion capture marker data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00487">487</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00489">489</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 </div>
 </div>
@@ -52110,7 +52159,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the motion parameters, identity parameters, and fps. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00268">268</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00269">269</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00167">loadMotionFromModel()</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -52144,7 +52193,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00115">calculateFpsFromAnimationData()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00073">getMotionFromModel()</a>, <a class="el" href="log_8h_source.html#l00178">MT_LOGD</a>, <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00268">loadMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00269">loadMotion()</a>.</p>
 
 </div>
 </div>
@@ -52201,7 +52250,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the motion represented in model parameters, the identity vector represented as joint parameters, and the fps. The model parameters and joint parameters are mapped to the input character by name matching. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00360">360</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00361">361</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00221">loadMotionOnCharacterCommon()</a>.</p>
 
@@ -52237,7 +52286,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A tuple containing the motion represented in model parameters, the identity vector represented as joint parameters, and the fps. The model parameters and joint parameters are mapped to the input character by name matching. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00366">366</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00367">367</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00221">loadMotionOnCharacterCommon()</a>.</p>
 
@@ -52276,7 +52325,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="reference">References <a class="el" href="gltf__animation__io_8cpp_source.html#l00194">loadCharacterWithMotionCommon()</a>, <a class="el" href="character__utility_8cpp_source.html#l00982">mapIdentityToCharacter()</a>, and <a class="el" href="character__utility_8cpp_source.html#l00955">mapMotionToCharacter()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00360">loadMotionOnCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00366">loadMotionOnCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00361">loadMotionOnCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00367">loadMotionOnCharacter()</a>.</p>
 
 </div>
 </div>
@@ -52305,7 +52354,7 @@ template&lt;typename T = float&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A vector of per-frame timestamps (usually in microseconds). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00281">281</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00282">282</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -53491,7 +53540,7 @@ template&lt;typename T = float&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="gltf__mesh__io_8cpp_source.html#l00362">362</a> of file <a class="el" href="gltf__mesh__io_8cpp_source.html">gltf_mesh_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00055">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00089">copyAlignedAccessorBuffer()</a>.</p>
+<p class="reference">References <a class="el" href="accessor__utils_8h_source.html#l00056">copyAccessorBuffer()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00090">copyAlignedAccessorBuffer()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="gltf__mesh__io_8cpp_source.html#l00390">addSkinWeights()</a>.</p>
 
@@ -54390,11 +54439,11 @@ template&lt;typename T, std::size_t Alignment = alignof(T), class Deleter = Alig
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A glTF document containing the character data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00372">372</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00373">373</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01138">momentum::GltfBuilder::addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01066">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="file__save__options_8h_source.html#l00100">momentum::FileSaveOptions::extensions</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01164">momentum::GltfBuilder::forceEmbedResources()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01160">momentum::GltfBuilder::getDocument()</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00055">momentum::Character::mesh</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01164">momentum::GltfBuilder::addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01091">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="file__save__options_8h_source.html#l00116">momentum::FileSaveOptions::extensions</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01190">momentum::GltfBuilder::forceEmbedResources()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01186">momentum::GltfBuilder::getDocument()</a>, <a class="el" href="file__save__options_8h_source.html#l00124">momentum::FileSaveOptions::gltfAnimationInterpolation</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00055">momentum::Character::mesh</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01069">momentum::GltfBuilder::setAnimationInterpolation()</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00521">saveCharacterToBytes()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00507">saveGltfCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00491">saveGltfCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00523">saveCharacterToBytes()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00509">saveGltfCharacter()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00493">saveGltfCharacter()</a>.</p>
 
 </div>
 </div>
@@ -55869,7 +55918,7 @@ template&lt;typename T&gt; </div>
 
 <p class="reference">References <a class="el" href="parameter__limits_8h_source.html#l00026">Ellipsoid</a>, <a class="el" href="parameter__limits_8h_source.html#l00027">HalfPlane</a>, <a class="el" href="parameter__limits_8h_source.html#l00030">LimitTypeCount</a>, <a class="el" href="parameter__limits_8h_source.html#l00024">Linear</a>, <a class="el" href="parameter__limits_8h_source.html#l00025">LinearJoint</a>, <a class="el" href="parameter__limits_8h_source.html#l00021">MinMax</a>, <a class="el" href="parameter__limits_8h_source.html#l00022">MinMaxJoint</a>, <a class="el" href="parameter__limits_8h_source.html#l00023">MinMaxJointPassive</a>, <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, <a class="el" href="character_8h_source.html#l00046">momentum::Character::parameterLimits</a>, and <a class="el" href="parameter__limits_8cpp_source.html#l00016">toString()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -55921,7 +55970,7 @@ template&lt;typename T&gt; </div>
 
 <p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="parameter__transform_8h_source.html#l00076">momentum::ParameterTransformT&lt; T &gt;::parameterSets</a>, and <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -55973,7 +56022,7 @@ template&lt;typename T&gt; </div>
 
 <p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00083">momentum::ParameterTransformT&lt; T &gt;::blendShapeParameters</a>, <a class="el" href="parameter__transform_8h_source.html#l00087">momentum::ParameterTransformT&lt; T &gt;::faceExpressionParameters</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00024">kJointParameterNames</a>, <a class="el" href="character_2types_8h_source.html#l00021">kParametersPerJoint</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>, and <a class="el" href="parameter__transform_8h_source.html#l00067">momentum::ParameterTransformT&lt; T &gt;::transform</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -56442,7 +56491,7 @@ template&lt;typename T&gt; </div>
 
 <p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, and <a class="el" href="parameter__transform_8h_source.html#l00079">momentum::ParameterTransformT&lt; T &gt;::poseConstraints</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00953">momentum::GltfBuilder::addCharacter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">momentum::GltfBuilder::addCharacter()</a>.</p>
 
 </div>
 </div>
@@ -58862,7 +58911,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00204">204</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character__io_8h_source.html#l00025">Fbx</a>, <a class="el" href="character__io_8h_source.html#l00026">Gltf</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="fbx__io_8cpp_source.html#l00447">saveFbxWithSkeletonStates()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00491">saveGltfCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00651">saveUsdCharacter()</a>, <a class="el" href="character__io_8h_source.html#l00028">Unknown</a>, and <a class="el" href="character__io_8h_source.html#l00027">Usd</a>.</p>
+<p class="reference">References <a class="el" href="character__io_8h_source.html#l00025">Fbx</a>, <a class="el" href="character__io_8h_source.html#l00026">Gltf</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="fbx__io_8cpp_source.html#l00447">saveFbxWithSkeletonStates()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00493">saveGltfCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00651">saveUsdCharacter()</a>, <a class="el" href="character__io_8h_source.html#l00028">Unknown</a>, and <a class="el" href="character__io_8h_source.html#l00027">Usd</a>.</p>
 
 </div>
 </div>
@@ -58920,7 +58969,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="character__io_8cpp_source.html#l00157">157</a> of file <a class="el" href="character__io_8cpp_source.html">character_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="character__io_8h_source.html#l00025">Fbx</a>, <a class="el" href="character__io_8h_source.html#l00026">Gltf</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="fbx__io_8cpp_source.html#l00424">saveFbx()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00491">saveGltfCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00674">saveUsdCharacterWithMotion()</a>, <a class="el" href="character__io_8h_source.html#l00028">Unknown</a>, and <a class="el" href="character__io_8h_source.html#l00027">Usd</a>.</p>
+<p class="reference">References <a class="el" href="character__io_8h_source.html#l00025">Fbx</a>, <a class="el" href="character__io_8h_source.html#l00026">Gltf</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="fbx__io_8cpp_source.html#l00424">saveFbx()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00493">saveGltfCharacter()</a>, <a class="el" href="usd__io_8cpp_source.html#l00674">saveUsdCharacterWithMotion()</a>, <a class="el" href="character__io_8h_source.html#l00028">Unknown</a>, and <a class="el" href="character__io_8h_source.html#l00027">Usd</a>.</p>
 
 </div>
 </div>
@@ -58984,9 +59033,9 @@ template&lt;typename T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A byte buffer containing the glTF data. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00521">521</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00523">523</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00372">makeCharacterDocument()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__io_8cpp_source.html#l00373">makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -59348,9 +59397,9 @@ template&lt;typename T&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00507">507</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00509">509</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="file__save__options_8h_source.html#l00104">momentum::FileSaveOptions::gltfFileFormat</a>, <a class="el" href="gltf__io_8cpp_source.html#l00372">makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01147">momentum::GltfBuilder::save()</a>.</p>
+<p class="reference">References <a class="el" href="file__save__options_8h_source.html#l00120">momentum::FileSaveOptions::gltfFileFormat</a>, <a class="el" href="gltf__io_8cpp_source.html#l00373">makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01173">momentum::GltfBuilder::save()</a>.</p>
 
 </div>
 </div>
@@ -59419,9 +59468,9 @@ template&lt;typename T&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00491">491</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__io_8cpp_source.html#l00493">493</a> of file <a class="el" href="gltf__io_8cpp_source.html">gltf_io.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="file__save__options_8h_source.html#l00104">momentum::FileSaveOptions::gltfFileFormat</a>, <a class="el" href="gltf__io_8cpp_source.html#l00372">makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01147">momentum::GltfBuilder::save()</a>.</p>
+<p class="reference">References <a class="el" href="file__save__options_8h_source.html#l00120">momentum::FileSaveOptions::gltfFileFormat</a>, <a class="el" href="gltf__io_8cpp_source.html#l00373">makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01173">momentum::GltfBuilder::save()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="character__io_8cpp_source.html#l00204">saveCharacter()</a>, and <a class="el" href="character__io_8cpp_source.html#l00157">saveCharacter()</a>.</p>
 
@@ -59808,7 +59857,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="app__utils_8cpp_source.html#l00195">195</a> of file <a class="el" href="app__utils_8cpp_source.html">app_utils.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01138">momentum::GltfBuilder::addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01066">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00110">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00809">extractParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00035">momentum::SkeletonT&lt; T &gt;::getJointNames()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="gltf__builder_8h_source.html#l00048">momentum::GltfBuilder::None</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00867">removeIdentity()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01147">momentum::GltfBuilder::save()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00424">saveFbx()</a>, <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>, <a class="el" href="gltf__builder_8h_source.html#l00048">momentum::GltfBuilder::UnitCube</a>, and <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01164">momentum::GltfBuilder::addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01091">momentum::GltfBuilder::addMotion()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00110">momentum::ParameterTransformT&lt; T &gt;::apply()</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00809">extractParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00035">momentum::SkeletonT&lt; T &gt;::getJointNames()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00157">momentum::ParameterTransformT&lt; T &gt;::getScalingParameters()</a>, <a class="el" href="parameter__transform_8h_source.html#l00064">momentum::ParameterTransformT&lt; T &gt;::name</a>, <a class="el" href="gltf__builder_8h_source.html#l00048">momentum::GltfBuilder::None</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="tracker__utils_8cpp_source.html#l00867">removeIdentity()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01173">momentum::GltfBuilder::save()</a>, <a class="el" href="fbx__io_8cpp_source.html#l00424">saveFbx()</a>, <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>, <a class="el" href="gltf__builder_8h_source.html#l00048">momentum::GltfBuilder::UnitCube</a>, and <a class="el" href="character_2types_8h_source.html#l00034">momentum::EigenStrongType&lt; Derived, EigenType &gt;::v</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="process__markers_8cpp_source.html#l00292">processMarkerFile()</a>.</p>
 
@@ -60307,11 +60356,11 @@ template&lt;typename T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00128">128</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00129">129</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00134">createAccessorBuffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00135">createAccessorBuffer()</a>.</p>
 
 </div>
 </div>
@@ -60340,7 +60389,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00212">212</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00213">213</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60369,7 +60418,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00206">206</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00207">207</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60398,7 +60447,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00260">260</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00261">261</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60427,7 +60476,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00218">218</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00219">219</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60456,7 +60505,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00236">236</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00237">237</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60485,7 +60534,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00224">224</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00225">225</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60514,7 +60563,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00242">242</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00243">243</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60543,7 +60592,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00254">254</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00255">255</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60572,7 +60621,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00230">230</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00231">231</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -60601,7 +60650,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00248">248</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00249">249</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
 
 </div>
 </div>
@@ -61950,6 +61999,39 @@ template&lt;typename T = float&gt; </div>
 <p class="reference">References <a class="el" href="constants_8h_source.html#l00050">pi()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00251">momentum::fbx_internal::createCollisionGeometryNodes()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00132">momentum::fbx_internal::createSkeletonNodes()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00362">momentum::fbx_internal::jointParamToFbx()</a>, and <a class="el" href="parameter__limits__io_8cpp_source.html#l00715">writeParameterLimits()</a>.</p>
+
+</div>
+</div>
+<a id="ad31f63d2e857778e865f7d192010d5ee" name="ad31f63d2e857778e865f7d192010d5ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad31f63d2e857778e865f7d192010d5ee">&#9670;&#160;</a></span>toGltfSamplerType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">fx::gltf::Animation::Sampler::Type momentum::toGltfSamplerType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a></td>          <td class="paramname"><span class="paramname"><em>interpolation</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Converts the save option to the GLTF sampler interpolation type. </p>
+
+<p class="definition">Definition at line <a class="el" href="accessor__utils_8h_source.html#l00268">268</a> of file <a class="el" href="accessor__utils_8h_source.html">accessor_utils.h</a>.</p>
+
+<p class="reference">References <a class="el" href="file__save__options_8h_source.html#l00046">Linear</a>, and <a class="el" href="file__save__options_8h_source.html#l00045">Step</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="accessor__utils_8h_source.html#l00302">createSampler()</a>, and <a class="el" href="accessor__utils_8h_source.html#l00280">createSampler()</a>.</p>
 
 </div>
 </div>
@@ -65087,7 +65169,7 @@ template&lt;typename T&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="character_2types_8h_source.html#l00182">182</a> of file <a class="el" href="character_2types_8h_source.html">types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="error__function__utils_8h_source.html#l00102">accumulateChainDerivatives()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00230">momentum::detail_sdf_collision::accumulateColliderHierarchyGradient()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00255">momentum::detail_sdf_collision::accumulateColliderHierarchyJacobian()</a>, <a class="el" href="plane__collision__error__function_8cpp_source.html#l00056">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::accumulateGradientAlongChain()</a>, <a class="el" href="plane__collision__error__function_8cpp_source.html#l00081">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::accumulateJacobianAlongChain()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l00036">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateJointGradient()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l00250">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateJointJacobian()</a>, <a class="el" href="vertex__error__function_8cpp_source.html#l00042">momentum::VertexErrorFunctionT&lt; T, Data, FuncDim &gt;::addConstraint()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00031">addGloveBones()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00093">addGloveCalibrationParameters()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00184">momentum::fbx_internal::addPhysicalProperties()</a>, <a class="el" href="character__utility_8cpp_source.html#l00862">addRigidTransformNode()</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00390">addSkinWeights()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01336">buildCalibBodySets()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00108">buildHierarchicalPaths()</a>, <a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#ae00a12869f9ab5e6c791e5045dd89695">momentum::CameraProjectionErrorFunctionT&lt; float &gt;::CameraProjectionErrorFunctionT()</a>, <a class="el" href="classmomentum_1_1CameraVertexProjectionErrorFunctionT.html#ae84f18b3beb8785599b61f0697ce3d29">momentum::CameraVertexProjectionErrorFunctionT&lt; float &gt;::CameraVertexProjectionErrorFunctionT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00132">momentum::CollisionBoxT&lt; float &gt;::CollisionBoxT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00096">momentum::CollisionEllipsoidT&lt; float &gt;::CollisionEllipsoidT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00182">momentum::CollisionPrimitiveT&lt; float &gt;::CollisionPrimitiveT()</a>, <a class="el" href="skeleton_8cpp_source.html#l00097">momentum::SkeletonT&lt; T &gt;::commonAncestor()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00092">momentum::detail_sdf_collision::computeColliderWorldBoundingBox()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00073">momentum::detail_sdf_collision::computeWorldToColliderTransform()</a>, <a class="el" href="fully__differentiable__projection__error__function_8cpp_source.html#l00029">momentum::FullyDifferentiableProjectionErrorFunctionT&lt; T &gt;::constraintGradient_dot()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00219">createCollisionBox()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00180">createCollisionCapsule()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00199">createCollisionEllipsoid()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00251">momentum::fbx_internal::createCollisionGeometryNodes()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00269">createGloveOrientationConstraintData()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00214">createGlovePositionConstraintData()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00267">createJoint()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00237">createLocator()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00228">momentum::fbx_internal::createLocatorNodes()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00132">momentum::fbx_internal::createSkeletonNodes()</a>, <a class="el" href="fully__differentiable__pose__prior__error__function_8cpp_source.html#l00190">momentum::FullyDifferentiablePosePriorErrorFunctionT&lt; T &gt;::d_gradient_d_input_dot()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00156">extractGloveOffsetsFromCharacter()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00044">momentum::detail_sdf_collision::findCommonAncestorForVertex()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00218">momentum::PosePriorErrorFunctionT&lt; T &gt;::getBestFitMode()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01038">momentum::GltfBuilder::getCharacterRootIndex()</a>, <a class="el" href="skeleton_8cpp_source.html#l00045">momentum::SkeletonT&lt; T &gt;::getChildrenJoints()</a>, <a class="el" href="plane__collision__query_8cpp_source.html#l00322">momentum::PlaneCollisionQueryT&lt; T &gt;::getContactPointsByParentWithDetails()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00058">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00083">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="joint__error__function-inl_8h_source.html#l00035">momentum::JointErrorFunctionT&lt; T, AimDataT&lt; T &gt;, 3, 2, 1 &gt;::getError()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00103">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00128">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00190">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00205">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00045">momentum::DistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00095">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00082">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__orientation__error__function_8cpp_source.html#l00103">momentum::JointToJointOrientationErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__position__error__function_8cpp_source.html#l00110">momentum::JointToJointPositionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00095">momentum::PosePriorErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="projection__error__function_8cpp_source.html#l00059">momentum::ProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="sdf__collision__error__function_8h_source.html#l00535">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;::getGradient()</a>, <a class="el" href="sdf__collision__sequence__error__function_8h_source.html#l00411">momentum::SDFCollisionSequenceErrorFunctionT&lt; T, SdfColliderType &gt;::getGradient()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00265">momentum::StateErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="velocity__magnitude__sequence__error__function_8cpp_source.html#l00096">momentum::VelocityMagnitudeSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="vertex__sdf__error__function_8cpp_source.html#l00269">momentum::VertexSDFErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00203">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00248">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00257">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00275">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00122">momentum::DistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00194">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__error__function-inl_8h_source.html#l00179">momentum::JointErrorFunctionT&lt; T, Data, FuncDim, NumVec, NumPos &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00165">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__orientation__error__function_8cpp_source.html#l00209">momentum::JointToJointOrientationErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__position__error__function_8cpp_source.html#l00285">momentum::JointToJointPositionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00147">momentum::PosePriorErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="projection__error__function_8cpp_source.html#l00141">momentum::ProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="sdf__collision__error__function_8h_source.html#l00625">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;::getJacobian()</a>, <a class="el" href="sdf__collision__sequence__error__function_8h_source.html#l00523">momentum::SDFCollisionSequenceErrorFunctionT&lt; T, SdfColliderType &gt;::getJacobian()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00407">momentum::StateErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="velocity__magnitude__sequence__error__function_8cpp_source.html#l00241">momentum::VelocityMagnitudeSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="vertex__sdf__error__function_8cpp_source.html#l00343">momentum::VertexSDFErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="skeleton_8cpp_source.html#l00025">momentum::SkeletonT&lt; T &gt;::getJointIdByName()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00204">momentum::PosePriorErrorFunctionT&lt; T &gt;::getMeanShape()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01045">momentum::GltfBuilder::getNumJoints()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00044">momentum::ParameterTransformT&lt; T &gt;::getParameterIdByName()</a>, <a class="el" href="skeleton_8cpp_source.html#l00073">momentum::SkeletonT&lt; T &gt;::isAncestor()</a>, <a class="el" href="skeleton_8cpp_source.html#l00087">momentum::SkeletonT&lt; T &gt;::isSameOrAdjacentJoints()</a>, <a class="el" href="collision__geometry__state_8h_source.html#l00526">isValidCollisionPair()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00389">loadHierarchy()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00041">momentum::PosePriorErrorFunctionT&lt; T &gt;::loadInternal()</a>, <a class="el" href="locator__io_8cpp_source.html#l00078">loadLocatorsFromBuffer()</a>, <a class="el" href="pose__shape__io_8cpp_source.html#l00020">loadPoseShape()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00127">loadSkeletonFromUsd()</a>, <a class="el" href="locator_8h_source.html#l00048">momentum::Locator::Locator()</a>, <a class="el" href="logger_8cpp_source.html#l00499">logCollisionGeometry()</a>, <a class="el" href="logger_8cpp_source.html#l00125">logJoints()</a>, <a class="el" href="logger_8cpp_source.html#l00078">momentum::detail::makeCollisionBoxLogData()</a>, <a class="el" href="logger_8cpp_source.html#l00051">momentum::detail::makeCollisionEllipsoidLogData()</a>, <a class="el" href="character__utility_8cpp_source.html#l00982">mapIdentityToCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00174">mapMotionToCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00955">mapMotionToCharacter()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00057">mapParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00229">mapParameterTransformJoints()</a>, <a class="el" href="skinning__weight__iterator_8cpp_source.html#l00086">momentum::SkinningWeightIteratorT&lt; T &gt;::next()</a>, <a class="el" href="json__utils_8cpp_source.html#l00120">parameterSetsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00204">parameterTransformFromJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00389">parseParameterSets()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00288">parseParameterTransform()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00458">parsePoseConstraints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00150">poseConstraintsFromJson()</a>, <a class="el" href="transform__pose_8cpp_source.html#l00086">momentum::PoseTransformSolverT&lt; T &gt;::PoseTransformSolverT()</a>, <a class="el" href="character__utility_8cpp_source.html#l00758">removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00572">replaceSkeletonHierarchy()</a>, <a class="el" href="character__utility_8cpp_source.html#l00022">resolvePhysicalPropertiesJointIndex()</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00044">momentum::SDFColliderT&lt; float &gt;::SDFColliderT()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00352">setupGloveErrorFunctions()</a>, <a class="el" href="character_8cpp_source.html#l00413">momentum::Character::simplifySkeleton()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00261">skeletonStateToJointParameters()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00372">skeletonStateToJointParametersRespectingActiveParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00016">momentum::SkeletonT&lt; T &gt;::SkeletonT()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00294">subsetParameterTransform()</a>, <a class="el" href="collision__geometry_8h_source.html#l00049">momentum::TaperedCapsuleT&lt; float &gt;::TaperedCapsuleT()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00186">transformAtoB()</a>, and <a class="el" href="collision__geometry__state_8cpp_source.html#l00028">momentum::CollisionGeometryStateT&lt; T &gt;::updatePrimitive()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="error__function__utils_8h_source.html#l00102">accumulateChainDerivatives()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00230">momentum::detail_sdf_collision::accumulateColliderHierarchyGradient()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00255">momentum::detail_sdf_collision::accumulateColliderHierarchyJacobian()</a>, <a class="el" href="plane__collision__error__function_8cpp_source.html#l00056">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::accumulateGradientAlongChain()</a>, <a class="el" href="plane__collision__error__function_8cpp_source.html#l00081">momentum::PlaneCollisionErrorFunctionT&lt; T &gt;::accumulateJacobianAlongChain()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l00036">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateJointGradient()</a>, <a class="el" href="skeleton__derivative_8cpp_source.html#l00250">momentum::SkeletonDerivativeT&lt; T &gt;::accumulateJointJacobian()</a>, <a class="el" href="vertex__error__function_8cpp_source.html#l00042">momentum::VertexErrorFunctionT&lt; T, Data, FuncDim &gt;::addConstraint()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00031">addGloveBones()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00093">addGloveCalibrationParameters()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00184">momentum::fbx_internal::addPhysicalProperties()</a>, <a class="el" href="character__utility_8cpp_source.html#l00862">addRigidTransformNode()</a>, <a class="el" href="gltf__mesh__io_8cpp_source.html#l00390">addSkinWeights()</a>, <a class="el" href="marker__tracker_8cpp_source.html#l01336">buildCalibBodySets()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00108">buildHierarchicalPaths()</a>, <a class="el" href="classmomentum_1_1CameraProjectionErrorFunctionT.html#ae00a12869f9ab5e6c791e5045dd89695">momentum::CameraProjectionErrorFunctionT&lt; float &gt;::CameraProjectionErrorFunctionT()</a>, <a class="el" href="classmomentum_1_1CameraVertexProjectionErrorFunctionT.html#ae84f18b3beb8785599b61f0697ce3d29">momentum::CameraVertexProjectionErrorFunctionT&lt; float &gt;::CameraVertexProjectionErrorFunctionT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00132">momentum::CollisionBoxT&lt; float &gt;::CollisionBoxT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00096">momentum::CollisionEllipsoidT&lt; float &gt;::CollisionEllipsoidT()</a>, <a class="el" href="collision__geometry_8h_source.html#l00182">momentum::CollisionPrimitiveT&lt; float &gt;::CollisionPrimitiveT()</a>, <a class="el" href="skeleton_8cpp_source.html#l00097">momentum::SkeletonT&lt; T &gt;::commonAncestor()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00092">momentum::detail_sdf_collision::computeColliderWorldBoundingBox()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00073">momentum::detail_sdf_collision::computeWorldToColliderTransform()</a>, <a class="el" href="fully__differentiable__projection__error__function_8cpp_source.html#l00029">momentum::FullyDifferentiableProjectionErrorFunctionT&lt; T &gt;::constraintGradient_dot()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00219">createCollisionBox()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00180">createCollisionCapsule()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00199">createCollisionEllipsoid()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00251">momentum::fbx_internal::createCollisionGeometryNodes()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00269">createGloveOrientationConstraintData()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00214">createGlovePositionConstraintData()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00267">createJoint()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00237">createLocator()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00228">momentum::fbx_internal::createLocatorNodes()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00132">momentum::fbx_internal::createSkeletonNodes()</a>, <a class="el" href="fully__differentiable__pose__prior__error__function_8cpp_source.html#l00190">momentum::FullyDifferentiablePosePriorErrorFunctionT&lt; T &gt;::d_gradient_d_input_dot()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00156">extractGloveOffsetsFromCharacter()</a>, <a class="el" href="sdf__collision__utility_8h_source.html#l00044">momentum::detail_sdf_collision::findCommonAncestorForVertex()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00218">momentum::PosePriorErrorFunctionT&lt; T &gt;::getBestFitMode()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01055">momentum::GltfBuilder::getCharacterRootIndex()</a>, <a class="el" href="skeleton_8cpp_source.html#l00045">momentum::SkeletonT&lt; T &gt;::getChildrenJoints()</a>, <a class="el" href="plane__collision__query_8cpp_source.html#l00322">momentum::PlaneCollisionQueryT&lt; T &gt;::getContactPointsByParentWithDetails()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00058">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00083">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getError()</a>, <a class="el" href="joint__error__function-inl_8h_source.html#l00035">momentum::JointErrorFunctionT&lt; T, AimDataT&lt; T &gt;, 3, 2, 1 &gt;::getError()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00103">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00128">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00190">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getGradient()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00205">momentum::CollisionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00045">momentum::DistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00095">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00082">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__orientation__error__function_8cpp_source.html#l00103">momentum::JointToJointOrientationErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="joint__to__joint__position__error__function_8cpp_source.html#l00110">momentum::JointToJointPositionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00095">momentum::PosePriorErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="projection__error__function_8cpp_source.html#l00059">momentum::ProjectionErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="sdf__collision__error__function_8h_source.html#l00535">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;::getGradient()</a>, <a class="el" href="sdf__collision__sequence__error__function_8h_source.html#l00411">momentum::SDFCollisionSequenceErrorFunctionT&lt; T, SdfColliderType &gt;::getGradient()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00265">momentum::StateErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="velocity__magnitude__sequence__error__function_8cpp_source.html#l00096">momentum::VelocityMagnitudeSequenceErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="vertex__sdf__error__function_8cpp_source.html#l00269">momentum::VertexSDFErrorFunctionT&lt; T &gt;::getGradient()</a>, <a class="el" href="camera__projection__error__function_8cpp_source.html#l00203">momentum::CameraProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="camera__vertex__projection__error__function_8cpp_source.html#l00248">momentum::CameraVertexProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function__stateless_8cpp_source.html#l00257">momentum::CollisionErrorFunctionStatelessT&lt; T &gt;::getJacobian()</a>, <a class="el" href="collision__error__function_8cpp_source.html#l00275">momentum::CollisionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="distance__error__function_8cpp_source.html#l00122">momentum::DistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="finite__difference__sequence__error__function_8cpp_source.html#l00194">momentum::FiniteDifferenceSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__error__function-inl_8h_source.html#l00179">momentum::JointErrorFunctionT&lt; T, Data, FuncDim, NumVec, NumPos &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__distance__error__function_8cpp_source.html#l00165">momentum::JointToJointDistanceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__orientation__error__function_8cpp_source.html#l00209">momentum::JointToJointOrientationErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="joint__to__joint__position__error__function_8cpp_source.html#l00285">momentum::JointToJointPositionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00147">momentum::PosePriorErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="projection__error__function_8cpp_source.html#l00141">momentum::ProjectionErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="sdf__collision__error__function_8h_source.html#l00625">momentum::SDFCollisionErrorFunctionT&lt; T, SdfColliderType &gt;::getJacobian()</a>, <a class="el" href="sdf__collision__sequence__error__function_8h_source.html#l00523">momentum::SDFCollisionSequenceErrorFunctionT&lt; T, SdfColliderType &gt;::getJacobian()</a>, <a class="el" href="state__error__function_8cpp_source.html#l00407">momentum::StateErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="velocity__magnitude__sequence__error__function_8cpp_source.html#l00241">momentum::VelocityMagnitudeSequenceErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="vertex__sdf__error__function_8cpp_source.html#l00343">momentum::VertexSDFErrorFunctionT&lt; T &gt;::getJacobian()</a>, <a class="el" href="skeleton_8cpp_source.html#l00025">momentum::SkeletonT&lt; T &gt;::getJointIdByName()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00204">momentum::PosePriorErrorFunctionT&lt; T &gt;::getMeanShape()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01062">momentum::GltfBuilder::getNumJoints()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00044">momentum::ParameterTransformT&lt; T &gt;::getParameterIdByName()</a>, <a class="el" href="skeleton_8cpp_source.html#l00073">momentum::SkeletonT&lt; T &gt;::isAncestor()</a>, <a class="el" href="skeleton_8cpp_source.html#l00087">momentum::SkeletonT&lt; T &gt;::isSameOrAdjacentJoints()</a>, <a class="el" href="collision__geometry__state_8h_source.html#l00526">isValidCollisionPair()</a>, <a class="el" href="gltf__animation__io_8cpp_source.html#l00369">loadCharacterWithSkeletonStatesCommon()</a>, <a class="el" href="gltf__skeleton__io_8cpp_source.html#l00389">loadHierarchy()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00041">momentum::PosePriorErrorFunctionT&lt; T &gt;::loadInternal()</a>, <a class="el" href="locator__io_8cpp_source.html#l00078">loadLocatorsFromBuffer()</a>, <a class="el" href="pose__shape__io_8cpp_source.html#l00020">loadPoseShape()</a>, <a class="el" href="usd__skeleton__io_8cpp_source.html#l00127">loadSkeletonFromUsd()</a>, <a class="el" href="locator_8h_source.html#l00048">momentum::Locator::Locator()</a>, <a class="el" href="logger_8cpp_source.html#l00499">logCollisionGeometry()</a>, <a class="el" href="logger_8cpp_source.html#l00125">logJoints()</a>, <a class="el" href="logger_8cpp_source.html#l00078">momentum::detail::makeCollisionBoxLogData()</a>, <a class="el" href="logger_8cpp_source.html#l00051">momentum::detail::makeCollisionEllipsoidLogData()</a>, <a class="el" href="character__utility_8cpp_source.html#l00982">mapIdentityToCharacter()</a>, <a class="el" href="mmo__io_8cpp_source.html#l00174">mapMotionToCharacter()</a>, <a class="el" href="character__utility_8cpp_source.html#l00955">mapMotionToCharacter()</a>, <a class="el" href="pose__prior__error__function_8cpp_source.html#l00057">mapParameters()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00229">mapParameterTransformJoints()</a>, <a class="el" href="skinning__weight__iterator_8cpp_source.html#l00086">momentum::SkinningWeightIteratorT&lt; T &gt;::next()</a>, <a class="el" href="json__utils_8cpp_source.html#l00120">parameterSetsFromJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00204">parameterTransformFromJson()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00389">parseParameterSets()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00288">parseParameterTransform()</a>, <a class="el" href="parameter__transform__io_8cpp_source.html#l00458">parsePoseConstraints()</a>, <a class="el" href="json__utils_8cpp_source.html#l00150">poseConstraintsFromJson()</a>, <a class="el" href="transform__pose_8cpp_source.html#l00086">momentum::PoseTransformSolverT&lt; T &gt;::PoseTransformSolverT()</a>, <a class="el" href="character__utility_8cpp_source.html#l00758">removeJoints()</a>, <a class="el" href="character__utility_8cpp_source.html#l00572">replaceSkeletonHierarchy()</a>, <a class="el" href="character__utility_8cpp_source.html#l00022">resolvePhysicalPropertiesJointIndex()</a>, <a class="el" href="sdf__collision__geometry_8h_source.html#l00044">momentum::SDFColliderT&lt; float &gt;::SDFColliderT()</a>, <a class="el" href="glove__utils_8cpp_source.html#l00352">setupGloveErrorFunctions()</a>, <a class="el" href="character_8cpp_source.html#l00413">momentum::Character::simplifySkeleton()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00261">skeletonStateToJointParameters()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00372">skeletonStateToJointParametersRespectingActiveParameters()</a>, <a class="el" href="skeleton_8cpp_source.html#l00016">momentum::SkeletonT&lt; T &gt;::SkeletonT()</a>, <a class="el" href="parameter__transform_8cpp_source.html#l00294">subsetParameterTransform()</a>, <a class="el" href="collision__geometry_8h_source.html#l00049">momentum::TaperedCapsuleT&lt; float &gt;::TaperedCapsuleT()</a>, <a class="el" href="skeleton__state_8cpp_source.html#l00186">transformAtoB()</a>, and <a class="el" href="collision__geometry__state_8cpp_source.html#l00028">momentum::CollisionGeometryStateT&lt; T &gt;::updatePrimitive()</a>.</p>
 
 </div>
 </div>

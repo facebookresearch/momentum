@@ -1,5 +1,9 @@
 var NAVTREEINDEX11 =
 {
+"gauss__newton__solver__sparse_8cpp.html":[3,0,10,3],
+"gauss__newton__solver__sparse_8cpp_source.html":[3,0,10,3],
+"gauss__newton__solver__sparse_8h.html":[3,0,10,4],
+"gauss__newton__solver__sparse_8h_source.html":[3,0,10,4],
 "generalized__loss_8cpp.html":[3,0,8,7],
 "generalized__loss_8cpp_source.html":[3,0,8,7],
 "generalized__loss_8h.html":[3,0,8,8],
@@ -245,9 +249,5 @@ var NAVTREEINDEX11 =
 "namespacemembers_func_l.html":[1,1,1,10],
 "namespacemembers_func_m.html":[1,1,1,11],
 "namespacemembers_func_n.html":[1,1,1,12],
-"namespacemembers_func_o.html":[1,1,1,13],
-"namespacemembers_func_p.html":[1,1,1,14],
-"namespacemembers_func_q.html":[1,1,1,15],
-"namespacemembers_func_r.html":[1,1,1,16],
-"namespacemembers_func_s.html":[1,1,1,17]
+"namespacemembers_func_o.html":[1,1,1,13]
 };

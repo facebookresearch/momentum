@@ -5,7 +5,7 @@ var searchData=
   ['left_2',['Left',['../namespacemomentum.html#a8bc572ee9c4992f6f680715ba62b7bb2a945d5e233cf7d6240f6b783b36a374ff',1,'momentum']]],
   ['lefthanded_3',['LeftHanded',['../namespacemomentum.html#a312faa2d1098b0f020193f51f819c024acd5d8803eaa45145192f16041a365ee8',1,'momentum']]],
   ['limittypecount_4',['LimitTypeCount',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83ada30bd1bec664cb5acae3ed319e14f6b',1,'momentum']]],
-  ['linear_5',['Linear',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354',1,'momentum']]],
+  ['linear_5',['Linear',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83aca5df6b9adf10744e4d47c6a88117354',1,'momentum::Linear'],['../namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbfa32a843da6ea40ab3b17a3421ccdf671b',1,'momentum::Linear']]],
   ['linearjoint_6',['LinearJoint',['../namespacemomentum.html#a9a0f06b01e5e0f7eff9212770dcf3f83aa9a0cebd730427aeaeec2bb9d059feba',1,'momentum']]],
   ['local_7',['Local',['../namespacemomentum.html#ac3b087896c5e77b5bdd4dbbb9ac14eb9a509820290d57f333403f490dde7316f4',1,'momentum']]]
 ];

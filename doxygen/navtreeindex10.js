@@ -1,5 +1,9 @@
 var NAVTREEINDEX10 =
 {
+"classmomentum_1_1io__detail_1_1SectionContent.html#a2b53c000f742a61b1d6d8f1ec1081bfc":[2,0,0,2,1,1],
+"classmomentum_1_1io__detail_1_1SectionContent.html#aa08408c2d07a33e285502ff3e8e9bda6":[1,0,2,3,1,2],
+"classmomentum_1_1io__detail_1_1SectionContent.html#aa08408c2d07a33e285502ff3e8e9bda6":[2,0,0,2,1,2],
+"classmomentum_1_1io__detail_1_1SectionContent.html#abb529bc0034b49ed309e112500b6dfe9":[1,0,2,3,1,3],
 "classmomentum_1_1io__detail_1_1SectionContent.html#abb529bc0034b49ed309e112500b6dfe9":[2,0,0,2,1,3],
 "classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html":[1,0,2,3,1,0],
 "classmomentum_1_1io__detail_1_1SectionContent_1_1LineIterator.html":[2,0,0,2,1,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX10 =
 "gauss__newton__solver__qr_8cpp.html":[3,0,2,24],
 "gauss__newton__solver__qr_8cpp_source.html":[3,0,2,24],
 "gauss__newton__solver__qr_8h.html":[3,0,2,25],
-"gauss__newton__solver__qr_8h_source.html":[3,0,2,25],
-"gauss__newton__solver__sparse_8cpp.html":[3,0,10,3],
-"gauss__newton__solver__sparse_8cpp_source.html":[3,0,10,3],
-"gauss__newton__solver__sparse_8h.html":[3,0,10,4],
-"gauss__newton__solver__sparse_8h_source.html":[3,0,10,4]
+"gauss__newton__solver__qr_8h_source.html":[3,0,2,25]
 };

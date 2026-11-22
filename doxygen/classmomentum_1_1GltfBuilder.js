@@ -15,6 +15,7 @@ var classmomentum_1_1GltfBuilder =
     [ "addMotion", "classmomentum_1_1GltfBuilder.html#a5e553a3fbfbfd9afe9e9129488425138", null ],
     [ "addSkeletonStates", "classmomentum_1_1GltfBuilder.html#ad50ea074e34f1d4abecd94476ab10e41", null ],
     [ "forceEmbedResources", "classmomentum_1_1GltfBuilder.html#ad782f9bdb15b4bbbe18d8dee6c7f7766", null ],
+    [ "getAnimationInterpolation", "classmomentum_1_1GltfBuilder.html#ad55e1cbfa7f9cc2fc6dd24efa1b89a4c", null ],
     [ "getCharacterMotions", "classmomentum_1_1GltfBuilder.html#a761d6311d32e8dcd418e2730f7ecf889", null ],
     [ "getCharacterRootIndex", "classmomentum_1_1GltfBuilder.html#abde2771334fb84d3b2d2f1e5fbdd1b56", null ],
     [ "getDocument", "classmomentum_1_1GltfBuilder.html#a5bc82f434c64146182f65557dddc4b13", null ],
@@ -25,5 +26,6 @@ var classmomentum_1_1GltfBuilder =
     [ "operator=", "classmomentum_1_1GltfBuilder.html#abf58358483e824cd7651e039238e954e", null ],
     [ "operator=", "classmomentum_1_1GltfBuilder.html#a496cb8ec4670226b3bae420ba4f27941", null ],
     [ "save", "classmomentum_1_1GltfBuilder.html#aa5082bfd08cf270262f97a89293269cc", null ],
+    [ "setAnimationInterpolation", "classmomentum_1_1GltfBuilder.html#a357359589eac12356eb4ebca785aee1e", null ],
     [ "setFps", "classmomentum_1_1GltfBuilder.html#aff999cc3c299174f14ecb6eb3c11b0c5", null ]
 ];
