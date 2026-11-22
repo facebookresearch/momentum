@@ -211,6 +211,7 @@ void addMorphWeightsToModel(
     const float fps,
     const MatrixXf& modelParams,
     const size_t meshIndex,
+    const GltfAnimationInterpolation interpolation,
     const std::string& motionName = "default") {
   const size_t numFrames = modelParams.cols();
   if (numFrames == 0) {
@@ -271,7 +272,8 @@ void addMorphWeightsToModel(
       model,
       animation,
       std::span<const float>(weights.data(), numWeights * numFrames),
-      timestampIdx);
+      timestampIdx,
+      interpolation);
   channel.target.node = static_cast<int32_t>(meshIndex);
   channel.target.path = "weights";
 }
@@ -407,14 +409,16 @@ void addActorAnimationToModel(
     auto& tchannel = animation.channels.back();
     tchannel.sampler =
         // NOLINTNEXTLINE(facebook-hte-ParameterUncheckedArrayBounds)
-        createSampler<const Vector3f>(model, animation, markerPositions[j], timestampIdx);
+        createSampler<const Vector3f>(
+            model, animation, markerPositions[j], timestampIdx, GltfAnimationInterpolation::Step);
     tchannel.target.node = nodeIndex;
     tchannel.target.path = "translation";
 
     // scale -- for visualization purpose only
     animation.channels.emplace_back();
     auto& schannel = animation.channels.back();
-    schannel.sampler = createSampler<const Vector3f>(model, animation, markerConf[j], timestampIdx);
+    schannel.sampler = createSampler<const Vector3f>(
+        model, animation, markerConf[j], timestampIdx, GltfAnimationInterpolation::Step);
     schannel.target.node = nodeIndex;
     schannel.target.path = "scale";
   }
@@ -517,6 +521,7 @@ void addSkeletonStatesToModel(
     const float fps,
     std::span<const SkeletonState> skeletonStates,
     std::span<const size_t> jointToNodeMap,
+    const GltfAnimationInterpolation interpolation,
     const std::string& motionName = "default") {
   const auto numFrames = skeletonStates.size();
   if (numFrames == 0) {
@@ -549,6 +554,13 @@ void addSkeletonStatesToModel(
 
       auto localR = skeletonStates[i].jointState[j].localRotation().cast<float>();
       rotation[j][i] = {localR.x(), localR.y(), localR.z(), localR.w()};
+      // q and -q are the same rotation, but readers that interpolate the components
+      // (rather than slerp) would pass through the wrong rotation between keys with
+      // opposite signs, so keep consecutive keys in the same hemisphere.
+      if (interpolation == GltfAnimationInterpolation::Linear && i > 0 &&
+          rotation[j][i].dot(rotation[j][i - 1]) < 0.0f) {
+        rotation[j][i] = -rotation[j][i];
+      }
       if (!(localR.toRotationMatrix() - character.skeleton.joints[j].preRotation.toRotationMatrix())
                .isZero(1e-5f)) {
         useChannel[j][1] = true;
@@ -585,8 +597,8 @@ void addSkeletonStatesToModel(
     if (useChannel[j][0]) {
       animation.channels.emplace_back();
       auto& tchannel = animation.channels.back();
-      tchannel.sampler =
-          createSampler<const Vector3f>(model, animation, translation[j], timestampIdx);
+      tchannel.sampler = createSampler<const Vector3f>(
+          model, animation, translation[j], timestampIdx, interpolation);
       tchannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       tchannel.target.path = "translation";
     }
@@ -594,7 +606,8 @@ void addSkeletonStatesToModel(
     if (useChannel[j][1]) {
       animation.channels.emplace_back();
       auto& rchannel = animation.channels.back();
-      rchannel.sampler = createSampler<const Vector4f>(model, animation, rotation[j], timestampIdx);
+      rchannel.sampler =
+          createSampler<const Vector4f>(model, animation, rotation[j], timestampIdx, interpolation);
       rchannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       rchannel.target.path = "rotation";
     }
@@ -602,7 +615,8 @@ void addSkeletonStatesToModel(
     if (useChannel[j][2]) {
       animation.channels.emplace_back();
       auto& schannel = animation.channels.back();
-      schannel.sampler = createSampler<const Vector3f>(model, animation, scale[j], timestampIdx);
+      schannel.sampler =
+          createSampler<const Vector3f>(model, animation, scale[j], timestampIdx, interpolation);
       schannel.target.node = static_cast<int32_t>(jointToNodeMap[j]);
       schannel.target.path = "scale";
     }
@@ -617,6 +631,7 @@ void addMotionToModel(
     const IdentityParameters& inputIdentity,
     const std::vector<size_t>& jointToNodeMap,
     const size_t meshIndex,
+    const GltfAnimationInterpolation interpolation,
     const bool addExtension = true,
     const std::string& motionName = "default") {
   // disentangle input values for storage
@@ -664,7 +679,7 @@ void addMotionToModel(
         character.parameterTransform.numBlendShapeParameters(),
         meshIndex);
 
-    addMorphWeightsToModel(model, character, fps, motion, meshIndex, motionName);
+    addMorphWeightsToModel(model, character, fps, motion, meshIndex, interpolation, motionName);
   }
 
   // check for valid character and motion before adding joint animation
@@ -687,7 +702,8 @@ void addMotionToModel(
   }
 
   // add skeleton states to model
-  addSkeletonStatesToModel(model, character, fps, skeletonStates, jointToNodeMap, motionName);
+  addSkeletonStatesToModel(
+      model, character, fps, skeletonStates, jointToNodeMap, interpolation, motionName);
 }
 
 size_t appendNode(fx::gltf::Document& document, const std::string& name) {
@@ -933,6 +949,7 @@ struct GltfBuilder::Impl {
   fx::gltf::Document document;
   std::unordered_map<std::string, CharacterData> characterData;
   MarkerMesh markerMesh = MarkerMesh::None;
+  GltfAnimationInterpolation animationInterpolation = GltfAnimationInterpolation::Step;
 };
 
 GltfBuilder::Impl::Impl() : document(fx::gltf::Document()) {
@@ -1049,6 +1066,14 @@ size_t GltfBuilder::getNumJoints(const std::string& name) {
   return impl_->characterData[name].nodeMap.size();
 }
 
+void GltfBuilder::setAnimationInterpolation(GltfAnimationInterpolation interpolation) {
+  impl_->animationInterpolation = interpolation;
+}
+
+GltfAnimationInterpolation GltfBuilder::getAnimationInterpolation() const {
+  return impl_->animationInterpolation;
+}
+
 void GltfBuilder::setFps(float fps) {
   // set frame-rate
   auto& def = addMomentumExtension(impl_->document.extensionsAndExtras);
@@ -1088,6 +1113,7 @@ void GltfBuilder::addMotion(
       offsets,
       jointToNodeMap,
       meshIndex,
+      impl_->animationInterpolation,
       addExtensions,
       customName);
 
@@ -1191,7 +1217,13 @@ void GltfBuilder::addSkeletonStates(
 
   // add motion from skeleton states
   addSkeletonStatesToModel(
-      impl_->document, character, fps, skeletonStates, jointToNodeMap, customName);
+      impl_->document,
+      character,
+      fps,
+      skeletonStates,
+      jointToNodeMap,
+      impl_->animationInterpolation,
+      customName);
 
   auto animIter = std::find_if(
       impl_->document.animations.begin(),

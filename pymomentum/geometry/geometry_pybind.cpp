@@ -154,6 +154,22 @@ PYBIND11_MODULE(geometry, m) {
       .value("Binary", mm::GltfFileFormat::Binary)
       .value("Ascii", mm::GltfFileFormat::Ascii);
 
+  // =====================================================
+  // momentum::GltfAnimationInterpolation enum
+  // Must be defined before FileSaveOptions since FileSaveOptions uses it
+  // =====================================================
+  py::enum_<mm::GltfAnimationInterpolation>(
+      m,
+      "GltfAnimationInterpolation",
+      "How GLTF animation samplers interpolate between their keys (default: Step). The values "
+      "at the keys are the same either way; Linear lets readers that evaluate between frames "
+      "see the motion.")
+      .value("Step", mm::GltfAnimationInterpolation::Step, "Hold each key until the next one.")
+      .value(
+          "Linear",
+          mm::GltfAnimationInterpolation::Linear,
+          "Interpolate between keys (slerp for rotations).");
+
   // We need to forward-declare classes so that if we refer to them they get
   // typed correctly; otherwise we end up with "momentum::Locator" in the
   // docstrings/type descriptors.
@@ -795,7 +811,8 @@ The resulting arrays are as follows:
                       mm::FbxCoordSystemInfo coordSystemInfo,
                       std::string_view fbxNamespace,
                       bool extensions,
-                      mm::GltfFileFormat gltfFileFormat) {
+                      mm::GltfFileFormat gltfFileFormat,
+                      mm::GltfAnimationInterpolation gltfAnimationInterpolation) {
             mm::FileSaveOptions options;
             options.mesh = mesh;
             options.locators = locators;
@@ -806,6 +823,7 @@ The resulting arrays are as follows:
             options.fbxNamespace = fbxNamespace;
             options.extensions = extensions;
             options.gltfFileFormat = gltfFileFormat;
+            options.gltfAnimationInterpolation = gltfAnimationInterpolation;
             return options;
           }),
           py::arg("mesh") = true,
@@ -817,6 +835,7 @@ The resulting arrays are as follows:
           py::arg("fbx_namespace") = "",
           py::arg("extensions") = true,
           py::arg("gltf_file_format") = mm::GltfFileFormat::Auto,
+          py::arg("gltf_animation_interpolation") = mm::GltfAnimationInterpolation::Step,
           R"(Create FileSaveOptions with custom settings.
 
 :param mesh: Include mesh geometry in the output (default: True)
@@ -827,7 +846,8 @@ The resulting arrays are as follows:
 :param coord_system_info: FBX coordinate system configuration (default: Maya Y-up)
 :param fbx_namespace: Optional namespace prefix for FBX node names (default: empty)
 :param extensions: Enable GLTF extensions (default: True)
-:param gltf_file_format: GLTF file format selection (default: Auto))
+:param gltf_file_format: GLTF file format selection (default: Auto)
+:param gltf_animation_interpolation: Interpolation of the joint and blend shape animation samplers, see :class:`GltfAnimationInterpolation` (default: Step))
           )")
       .def_readwrite(
           "mesh", &mm::FileSaveOptions::mesh, "Include mesh geometry in the output (default: true)")
@@ -866,6 +886,11 @@ The resulting arrays are as follows:
           "gltf_file_format",
           &mm::FileSaveOptions::gltfFileFormat,
           "GLTF file format selection (default: Auto), only used for GLTF output")
+      .def_readwrite(
+          "gltf_animation_interpolation",
+          &mm::FileSaveOptions::gltfAnimationInterpolation,
+          "Interpolation of the joint and blend shape animation samplers (default: Step); marker "
+          "animation always uses Step. Only used for GLTF output")
       .def("__repr__", [](const mm::FileSaveOptions& opts) {
         std::string gltfFormatStr;
         switch (opts.gltfFileFormat) {
@@ -934,7 +959,8 @@ The resulting arrays are as follows:
 
         return fmt::format(
             "FileSaveOptions(mesh={}, locators={}, collisions={}, blend_shapes={}, permissive={}, "
-            "coord_system_info={}, fbx_namespace='{}', extensions={}, gltf_file_format={})",
+            "coord_system_info={}, fbx_namespace='{}', extensions={}, gltf_file_format={}, "
+            "gltf_animation_interpolation={})",
             opts.mesh,
             opts.locators,
             opts.collisions,
@@ -943,7 +969,9 @@ The resulting arrays are as follows:
             coordSystemInfoStr,
             opts.fbxNamespace,
             opts.extensions,
-            gltfFormatStr);
+            gltfFormatStr,
+            opts.gltfAnimationInterpolation == mm::GltfAnimationInterpolation::Linear ? "Linear"
+                                                                                      : "Step");
       });
 
   // loadMotion(gltfFilename)
