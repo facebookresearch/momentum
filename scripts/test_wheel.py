@@ -20,6 +20,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+from demote_gnu_unique_symbols import count_unique_symbols
+
 WHEEL_PREFIX_BY_TYPE = {
     "core": "pymomentum_core-",
     "cpu": "pymomentum_cpu-",
@@ -101,11 +103,22 @@ def check_wheel_contents(
     """Check that core and Torch add-on wheels own disjoint payloads."""
     with zipfile.ZipFile(wheel_file) as archive:
         names = {name for name in archive.namelist() if not name.endswith("/")}
+        private_libstdcxx = [
+            name
+            for name in names
+            if Path(name).name.startswith("libstdc++-pymomentum.so")
+            and count_unique_symbols(archive.read(name))
+        ]
     package_files = {name for name in names if name.startswith("pymomentum/")}
     if any(name.startswith(("include/", "lib/", "bin/", "share/")) for name in names):
         raise RuntimeError(f"{wheel_file.name} contains C++ SDK files")
     if any("geometry_test_utils" in name for name in names):
         raise RuntimeError(f"{wheel_file.name} contains test-only bindings")
+    if private_libstdcxx:
+        raise RuntimeError(
+            f"{private_libstdcxx} has STB_GNU_UNIQUE symbols, so it can bind to "
+            "another libstdc++ in the process"
+        )
 
     torch_paths = {
         "pymomentum/quaternion.py",

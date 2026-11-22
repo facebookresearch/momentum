@@ -24,6 +24,7 @@ on:
       - "pixi.toml"
       - "pymomentum/**"
       - "pyproject-pypi.toml.j2"
+      - "scripts/demote_gnu_unique_symbols.py"
       - "scripts/detect_container_engine.sh"
       - "scripts/generate_pyproject.py"
       - "scripts/*wheel*.py"
