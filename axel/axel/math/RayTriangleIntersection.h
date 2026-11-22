@@ -11,6 +11,11 @@
 
 namespace axel {
 
+/// Intersects the parametric line `beginRay + t * direction` with a triangle.
+///
+/// Despite the function name, intersections with negative `tOut` are reported; callers that need a
+/// ray or segment must bound `tOut` themselves. Zero-length directions, degenerate triangles, and
+/// near-parallel lines return false using a scale-invariant angular tolerance.
 template <typename T>
 bool rayTriangleIntersect(
     const Eigen::Vector3<T>& beginRay,
@@ -21,6 +26,8 @@ bool rayTriangleIntersect(
     Eigen::Vector3<T>& intersectionPoint,
     T& tOut);
 
+/// Intersects the same parametric line and also returns triangle barycentric coordinates `u` and
+/// `v`; the third coordinate is `1 - u - v`.
 template <typename T>
 bool rayTriangleIntersect(
     const Eigen::Vector3<T>& beginRay,

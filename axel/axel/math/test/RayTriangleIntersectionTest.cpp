@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <perception/test_helpers/EigenChecks.h>
 
+#include <type_traits>
+
 #include "axel/common/Constants.h"
 #include "axel/math/RayTriangleIntersection.h"
 
@@ -15,6 +17,12 @@ namespace axel::test {
 namespace {
 
 using ::axel::detail::eps;
+
+template <typename T>
+class RayTriangleIntersectionTypedTest : public testing::Test {};
+
+using ScalarTypes = testing::Types<float, double>;
+TYPED_TEST_SUITE(RayTriangleIntersectionTypedTest, ScalarTypes);
 
 TEST(RayTriangleIntersectionTest, Basic) {
   Eigen::Vector3d collisionPoint;
@@ -129,6 +137,31 @@ TEST(RaytracingUtilsTest, rayTriangleIntersect_noHit) {
       Eigen::Vector3d(12.5, 5., 2.5),
       hitPoint,
       t));
+}
+
+TYPED_TEST(RayTriangleIntersectionTypedTest, IsScaleInvariant) {
+  using T = TypeParam;
+  constexpr T kScale = std::is_same_v<T, float> ? T(1e-4) : T(1e-8);
+  Eigen::Vector3<T> intersectionPoint;
+  T t = T(0);
+  T u = T(0);
+  T v = T(0);
+
+  ASSERT_TRUE(rayTriangleIntersect(
+      Eigen::Vector3<T>{T(0.25) * kScale, T(0.25) * kScale, -kScale},
+      Eigen::Vector3<T>{T(0), T(0), T(2) * kScale},
+      Eigen::Vector3<T>{T(0), T(0), T(0)},
+      Eigen::Vector3<T>{kScale, T(0), T(0)},
+      Eigen::Vector3<T>{T(0), kScale, T(0)},
+      intersectionPoint,
+      t,
+      u,
+      v));
+  EXPECT_NEAR(t, T(0.5), eps<T>());
+  EXPECT_NEAR(u, T(0.25), eps<T>());
+  EXPECT_NEAR(v, T(0.25), eps<T>());
+  EXPECT_TRUE(
+      (intersectionPoint / kScale).isApprox(Eigen::Vector3<T>{T(0.25), T(0.25), T(0)}, eps<T>()));
 }
 
 } // namespace
