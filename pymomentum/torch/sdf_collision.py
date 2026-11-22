@@ -8,7 +8,7 @@
 """Pure PyTorch SDF collision geometry for torch_character.
 
 Provides differentiable SDF evaluation matching the behavior of
-:class:`momentum.SDFColliderT`. All operations use pure PyTorch ops,
+:class:`pymomentum.geometry.SDFCollider`. All operations use pure PyTorch ops,
 enabling gradient computation through autograd including higher-order
 gradients (gradient-of-gradient).
 
@@ -142,7 +142,7 @@ def evaluate_sdf(
 class SDFCollider(torch.nn.Module):
     """A signed distance field volume attached to a skeleton joint.
 
-    Mirrors :class:`momentum.SDFColliderT` with evaluation implemented
+    Mirrors :class:`pymomentum.geometry.SDFCollider` with evaluation implemented
     in pure PyTorch for full autograd differentiability.
 
     The SDF data is stored as a 3D tensor in ``(nz, ny, nx)`` (DHW) order:
@@ -280,7 +280,7 @@ class SDFCollider(torch.nn.Module):
 class SDFCollisionGeometry(torch.nn.Module):
     """Collection of SDF colliders for character collision detection.
 
-    Mirrors :class:`momentum.SDFCollisionGeometryT` — a list of
+    Mirrors momentum's C++ ``SDFCollisionGeometry`` — a list of
     :class:`SDFCollider` modules attached to skeleton joints.
 
     :param colliders: List of :class:`SDFCollider` modules.
