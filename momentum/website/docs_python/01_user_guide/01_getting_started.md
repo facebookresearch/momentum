@@ -70,17 +70,39 @@ For the most stable and well-tested installation experience, we recommend using 
 
 :::
 
+PyPI wheels are built for CPython 3.12 and 3.13 on Linux x86_64 (glibc 2.28
+or newer), macOS 14 or newer on Apple Silicon, and Windows x86_64.
+`pymomentum-gpu` is available for Linux and Windows only. For other Python
+versions or platforms (for example Linux aarch64 or Intel macOS), use the Pixi
+or Conda packages above.
+
 ```bash
 # Using uv (preferred over pip)
 uv add pymomentum-core  # NumPy/native modules, no PyTorch
 uv add pymomentum-cpu   # CPU version
-uv add pymomentum-gpu   # GPU version (requires CUDA)
 
 # Alternative: Using pip
 pip install pymomentum-core
 pip install pymomentum-cpu
+```
+
+`pymomentum-cpu` installs the PyTorch version it was built against
+(currently `torch>=2.8,<2.9`).
+
+`pymomentum-gpu` does not install PyTorch, because package metadata cannot
+point to PyTorch's CUDA package index. Install the matching CUDA build of
+PyTorch first, then the add-on:
+
+```bash
+pip install "torch>=2.8,<2.9" --index-url https://download.pytorch.org/whl/cu129
 pip install pymomentum-gpu
 ```
+
+With uv, run the same two commands with `uv pip install`. Without this
+PyTorch build, the Torch-backed modules fail to import: with no PyTorch
+installed, `pymomentum.diff_geometry` and `pymomentum.solver` cannot find
+`libtorch.so`; with a different PyTorch version already in the environment,
+`pymomentum.diff_geometry` fails with an undefined-symbol error.
 
 The CPU and GPU distributions are add-ons that install a compatible
 `pymomentum-core`; do not install both add-ons in the same environment.
