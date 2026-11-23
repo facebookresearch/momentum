@@ -197,8 +197,8 @@ Studio project.
 - GitHub Actions workflows live in `.github/workflows/`. Keep platform matrices
   intentional and use existing workflow patterns before adding new mechanisms.
 - Wheel builds have three layered variants:
-  - `core` - NumPy/native modules and pure-Python Torch helpers, without a
-    required PyTorch installation.
+  - `core` - NumPy/native modules and pure-Python Torch helpers; requires
+    `torch>=1.13` with no upper bound.
   - `cpu` - C++ extensions for CPU PyTorch; depends on core.
   - `gpu` - C++ extensions for CUDA PyTorch; depends on core.
 - Build and test wheel variants with:

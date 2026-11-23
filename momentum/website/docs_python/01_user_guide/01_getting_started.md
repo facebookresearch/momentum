@@ -29,7 +29,7 @@ Choose your preferred installation method based on your workflow. **We recommend
 pixi add pymomentum
 
 # Explicit backend selection
-pixi add pymomentum-core # NumPy/native modules and optional pure-Python Torch helpers
+pixi add pymomentum-core # NumPy/native modules and pure-Python Torch helpers
 pixi add pymomentum-cpu  # CPU-only
 pixi add pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -45,7 +45,7 @@ pixi add pymomentum-gpu  # GPU (CUDA) support
 conda install -c conda-forge pymomentum
 
 # Explicit backend selection
-conda install -c conda-forge pymomentum-core # NumPy/native modules and optional pure-Python Torch helpers
+conda install -c conda-forge pymomentum-core # NumPy/native modules and pure-Python Torch helpers
 conda install -c conda-forge pymomentum-cpu  # CPU-only
 conda install -c conda-forge pymomentum-gpu  # GPU (CUDA) support
 ```
@@ -78,20 +78,19 @@ or Conda packages above.
 
 ```bash
 # Using uv (preferred over pip)
-uv add pymomentum-core          # Core without installing PyTorch
-uv add "pymomentum-core[torch]" # Core with pure-Python Torch helpers enabled
+uv add pymomentum-core  # NumPy/native modules and pure-Python Torch helpers
 uv add pymomentum-cpu   # CPU version
 
 # Alternative: Using pip
 pip install pymomentum-core
-pip install "pymomentum-core[torch]" # Include PyTorch for the pure-Python helpers
 pip install pymomentum-cpu
 ```
 
 `pymomentum-cpu` installs the PyTorch version it was built against
 (currently `torch>=2.8,<2.9`).
 
-`pymomentum-gpu` does not install PyTorch, because package metadata cannot
+`pymomentum-gpu` does not install the matching CUDA build of PyTorch (its
+core dependency only requires `torch>=1.13`), because package metadata cannot
 point to PyTorch's CUDA package index. Install the matching CUDA build of
 PyTorch first, then the add-on:
 
@@ -101,13 +100,12 @@ pip install pymomentum-gpu
 ```
 
 With uv, run the same two commands with `uv pip install`. Without this
-PyTorch build, the Torch-backed modules fail to import: with no PyTorch
-installed, `pymomentum.diff_geometry` and `pymomentum.solver` cannot find
-`libtorch.so`; with a different PyTorch version already in the environment,
-`pymomentum.diff_geometry` fails with an undefined-symbol error.
+PyTorch build, the Torch-backed modules fail to import: for example, with a
+different PyTorch version in the environment, `pymomentum.diff_geometry` fails
+with an undefined-symbol error.
 
-Core includes the pure-Python Torch helpers but does not install PyTorch unless
-the `torch` extra is selected. The CPU and GPU distributions add the compiled
+Core includes the pure-Python Torch helpers and requires `torch>=1.13` with no
+upper bound. The CPU and GPU distributions add the compiled
 Torch extensions and install a compatible `pymomentum-core`; do not install
 both add-ons in the same environment.
 

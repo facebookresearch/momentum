@@ -49,11 +49,8 @@ conda install -c conda-forge momentum-cpp
 
 Install PyPI wheels -- these are experimental ⚠️
 ```bash
-# Install the NumPy/native core and pure-Python Torch helpers without installing PyTorch
+# Install the NumPy/native core and pure-Python Torch helpers (requires torch>=1.13)
 pip install pymomentum-core
-
-# Install the core and PyTorch for pure-Python Torch helpers
-pip install "pymomentum-core[torch]"
 
 # Install core package with optional visualization helpers
 pip install "pymomentum-core[viser,rerun]"
@@ -70,8 +67,8 @@ The same layered packages are available from conda-forge. `pymomentum` remains a
 compatibility package that installs the CPU or GPU stack selected by the solver.
 
 The `pymomentum-core` package owns the NumPy/native modules and pure-Python
-Torch helpers, including `pymomentum.torch.character`. PyTorch is optional and
-is installed by the `torch` extra. `pymomentum-cpu` and `pymomentum-gpu` are
+Torch helpers, including `pymomentum.torch.character`. It requires
+`torch>=1.13` with no upper bound. `pymomentum-cpu` and `pymomentum-gpu` are
 mutually exclusive add-ons: each installs the compiled `diff_geometry` and
 `solver` modules and depends on a compatible `pymomentum-core` release.
 

@@ -148,6 +148,8 @@ classifiers = [
 dependencies = [
 {% if tag == "core" %}
     "numpy>=1.20.0",
+    # The pure-Python Torch helpers work with any PyTorch version, so no upper pin.
+    "torch>=1.13",
 {% else %}
     # The add-on contributes only compiled Torch extensions to the core namespace.
     "pymomentum-core>={{ core_version_min }},<{{ core_version_max }}",
@@ -176,7 +178,6 @@ dependencies = [
 # Opt-in extras. Visualization stacks are large and have transitive deps
 # users may not want; keep them out of the default install.
 [project.optional-dependencies]
-torch = ["torch>=1.13"]
 rerun = ["rerun-sdk>=0.23.3,<0.34"]
 viser = ["viser>=1.0.24,<2"]
 {% endif %}
@@ -321,7 +322,9 @@ if [ "$VARIANT" != "core" ]; then
 fi
 """
 {% if tag == "core" %}
-test-command = "python -c \"import pymomentum.geometry, pymomentum.solver2\""
+# Clear LD_LIBRARY_PATH (set for the build and repair steps) so the test's
+# PyTorch loads its own libtorch_python.so, not the pixi env's 2.8 build.
+test-command = "LD_LIBRARY_PATH= python -c \"import pymomentum.geometry, pymomentum.solver2\""
 test-requires = ["numpy"]
 {% endif %}
 before-test = """
@@ -333,7 +336,11 @@ case "$VARIANT" in
   cpu) VARIANT="cpu" ;;
   gpu) VARIANT="gpu" ;;
 esac
-if [ "$VARIANT" != "core" ]; then
+if [ "$VARIANT" = "core" ]; then
+  # Core requires torch>=1.13; install the CPU build so the smoke test does not
+  # pull CUDA PyTorch and its NVIDIA packages from PyPI.
+  python -m pip install "torch>=1.13" --index-url https://download.pytorch.org/whl/cpu
+else
   if [ "$VARIANT" = "gpu" ]; then
     TORCH_INDEX="https://download.pytorch.org/whl/cu129"
   else
