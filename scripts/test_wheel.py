@@ -20,6 +20,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+from demote_gnu_unique_symbols import count_unique_symbols
+
 WHEEL_PREFIX_BY_TYPE = {
     "core": "pymomentum_core-",
     "cpu": "pymomentum_cpu-",
@@ -101,11 +103,22 @@ def check_wheel_contents(
     """Check that core and Torch add-on wheels own disjoint payloads."""
     with zipfile.ZipFile(wheel_file) as archive:
         names = {name for name in archive.namelist() if not name.endswith("/")}
+        private_libstdcxx = [
+            name
+            for name in names
+            if Path(name).name.startswith("libstdc++-pymomentum.so")
+            and count_unique_symbols(archive.read(name))
+        ]
     package_files = {name for name in names if name.startswith("pymomentum/")}
     if any(name.startswith(("include/", "lib/", "bin/", "share/")) for name in names):
         raise RuntimeError(f"{wheel_file.name} contains C++ SDK files")
     if any("geometry_test_utils" in name for name in names):
         raise RuntimeError(f"{wheel_file.name} contains test-only bindings")
+    if private_libstdcxx:
+        raise RuntimeError(
+            f"{private_libstdcxx} has STB_GNU_UNIQUE symbols, so it can bind to "
+            "another libstdc++ in the process"
+        )
 
     torch_paths = {
         "pymomentum/quaternion.py",
@@ -357,6 +370,46 @@ def get_torch_after_pymomentum_script() -> str:
     )
 
 
+def get_cxx_runtime_script(torch_first: bool) -> str:
+    """Return a regression test for PyMomentum's private C++ runtime.
+
+    Parsing the URDF numbers and naming the blend-shape parameters use iostream
+    number I/O, which crashed when the private libstdc++ bound its locale facet
+    ids to torch's libstdc++. On Linux, #1566's loader imports torch first in
+    both orders; the orders differ on macOS and Windows.
+    """
+    imports = ["import pymomentum.geometry as geometry", "import torch"]
+    if torch_first:
+        imports.reverse()
+    order = "torch before" if torch_first else "pymomentum.geometry before"
+    return "\n".join(
+        [
+            "import faulthandler",
+            "faulthandler.enable()",
+            "import numpy as np",
+            *imports,
+            f'print("Testing with_blend_shape, {order}...")',
+            "urdf = (",
+            '    b\'<robot name="r"><link name="base"/><link name="tip"/>\'',
+            '    b\'<joint name="j" type="revolute"><parent link="base"/><child link="tip"/>\'',
+            '    b\'<axis xyz="0 0 1"/><limit lower="-1" upper="1" effort="1" velocity="1"/>\'',
+            "    b'</joint></robot>'",
+            ")",
+            "character = geometry.Character.load_urdf_from_bytes(urdf).with_mesh_and_skin_weights(",
+            "    geometry.Mesh(np.eye(3, dtype=np.float32), np.array([[0, 1, 2]], dtype=np.int32)),",
+            "    geometry.SkinWeights(np.zeros((3, 1), dtype=np.int32), np.ones((3, 1), dtype=np.float32)),",
+            ")",
+            "blend_shape = geometry.BlendShape.from_tensors(",
+            "    np.zeros((3, 3), dtype=np.float32), np.ones((2, 3, 3), dtype=np.float32)",
+            ")",
+            "names = character.with_blend_shape(blend_shape).parameter_transform.names",
+            'assert names[-2:] == ["blend_0", "blend_1"], names',
+            f'print("[PASS] with_blend_shape, {order}")',
+            "",
+        ]
+    )
+
+
 def run_import_tests(
     python_exe: str,
     wheel_type: str,
@@ -377,19 +430,19 @@ def run_import_tests(
     # Keep the checkout's namespace-package directories out of wheel import checks.
     with tempfile.TemporaryDirectory() as tmpdir:
         if has_torch_extensions(wheel_type):
-            result = subprocess.run(
-                [
-                    python_exe,
-                    "-I",
-                    "-c",
-                    get_torch_after_pymomentum_script(),
-                ],
-                capture_output=False,
-                cwd=tmpdir,
-                env=env,
-            )
-            if result.returncode != 0:
-                return result.returncode
+            for script in (
+                get_torch_after_pymomentum_script(),
+                get_cxx_runtime_script(torch_first=True),
+                get_cxx_runtime_script(torch_first=False),
+            ):
+                result = subprocess.run(
+                    [python_exe, "-I", "-c", script],
+                    capture_output=False,
+                    cwd=tmpdir,
+                    env=env,
+                )
+                if result.returncode != 0:
+                    return result.returncode
 
         result = subprocess.run(
             [
@@ -505,6 +558,17 @@ def test_in_container(
                 "",
             ]
         )
+        for torch_first in (True, False):
+            script_path = f"/tmp/test_cxx_runtime_torch_first_{torch_first}.py"
+            container_lines.extend(
+                [
+                    f"cat >{script_path} <<'PYTEST'",
+                    *get_cxx_runtime_script(torch_first).rstrip().splitlines(),
+                    "PYTEST",
+                    f"/tmp/test_venv/bin/python -I {script_path}",
+                    "",
+                ]
+            )
     container_lines.extend(
         [
             'echo "Testing imports..."',

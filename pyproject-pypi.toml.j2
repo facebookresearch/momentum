@@ -561,6 +561,15 @@ fi
 chmod 755 "$LIBS_DIR/$RENAMED_LIBSTDCXX"
 patchelf --set-soname "$RENAMED_LIBSTDCXX" "$LIBS_DIR/$RENAMED_LIBSTDCXX"
 
+# The private SONAME does not cover libstdc++'s STB_GNU_UNIQUE symbols (locale
+# facet ids and other template statics): glibc binds each one to the first
+# definition loaded in the process, even under RTLD_LOCAL. With torch loaded
+# first, PyMomentum's copy would use torch's facet ids and crash on its first
+# numeric stream I/O, e.g. in Character.with_blend_shape. Demote them to
+# STB_GLOBAL so the private copy binds its own symbols.
+echo '=== Demoting private libstdc++ unique symbols ==='
+python3 /project/scripts/demote_gnu_unique_symbols.py "$LIBS_DIR/$RENAMED_LIBSTDCXX"
+
 echo '=== Patching DT_NEEDED and RPATH ==='
 find . -name '*.so*' -type f | while read so_file; do
     case "$so_file" in
