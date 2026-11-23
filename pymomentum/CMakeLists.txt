@@ -383,7 +383,6 @@ mt_python_library(
   NAME torch_renderer
   PYMOMENTUM_SOURCES_VARS torch_renderer_sources
   PRESERVE_DIRECTORY_STRUCTURE
-  COMPONENT pymomentum_torch
 )
 
 mt_python_library(

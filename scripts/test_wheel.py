@@ -125,6 +125,7 @@ def check_wheel_contents(
         "pymomentum/quaternion.py",
         "pymomentum/skel_state.py",
         "pymomentum/torch/character.py",
+        "pymomentum/torch/renderer.py",
         "pymomentum/trs.py",
     }
     if wheel_type == "core":
