@@ -36,6 +36,7 @@ using IdentityParameters = std::tuple<std::vector<std::string>, JointParameters>
 /// addMotion() and addSkeletonStates() to target that character; an empty `characterName` targets
 /// the character added from character.name that kept that name, or else the first one added from
 /// character.name.
+/// loadGltfCharacters() reads every character back under its exported name.
 class GltfBuilder final {
  public:
   GltfBuilder();
