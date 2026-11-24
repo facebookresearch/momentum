@@ -16,6 +16,7 @@
 #include "momentum/io/common/stream_utils.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/gltf_io_internal.h"
+#include "momentum/io/gltf/gltf_skeleton_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
 #include "momentum/math/constants.h"
@@ -27,15 +28,6 @@
 namespace momentum {
 
 namespace {
-
-nlohmann::json getMomentumExtension(const nlohmann::json& extensionsAndExtras) {
-  if (extensionsAndExtras.count("extensions") != 0 &&
-      extensionsAndExtras["extensions"].count("FB_momentum") != 0) {
-    return extensionsAndExtras["extensions"]["FB_momentum"];
-  } else {
-    return nlohmann::json::object();
-  }
-}
 
 fx::gltf::Document loadModel(
     const std::variant<filesystem::path, std::span<const std::byte>>& input) {
@@ -70,10 +62,9 @@ fx::gltf::Document loadModel(
 
 } // namespace
 
-std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Document& model) {
-  const auto& def = getMomentumExtension(model.extensionsAndExtras);
-  const auto motion = def.value("motion", nlohmann::json::object());
-
+std::tuple<MotionParameters, IdentityParameters> getMotionFromJson(
+    const fx::gltf::Document& model,
+    const nlohmann::json& motion) {
   const size_t nframes = motion.value("nframes", 0);
   const int32_t poseBuffer = motion.value("poses", int32_t(-1));
   const int32_t offsetBuffer = motion.value("offsets", int32_t(-1));
@@ -110,6 +101,11 @@ std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Do
   }
 
   return {{parameterNames, storedMotion}, {jointNames, storedIdentity}};
+}
+
+std::tuple<MotionParameters, IdentityParameters> getMotionFromModel(fx::gltf::Document& model) {
+  const auto& def = findMomentumExtension(model.extensionsAndExtras);
+  return getMotionFromJson(model, def.value("motion", nlohmann::json::object()));
 }
 
 float calculateFpsFromAnimationData(const fx::gltf::Document& model) {
@@ -164,26 +160,28 @@ float calculateFpsFromAnimationData(const fx::gltf::Document& model) {
   return medianFps;
 }
 
+float loadFpsFromModel(const fx::gltf::Document& model) {
+  float fps = findMomentumExtension(model.extensionsAndExtras).value("fps", 0.0f);
+
+  // If FPS is not found in momentum metadata, try to calculate from animation data
+  if (fps == 0.0f) {
+    fps = calculateFpsFromAnimationData(model);
+    if (fps > 0.0f) {
+      MT_LOGD("FPS not found in momentum metadata, calculated from animation data: {}", fps);
+    } else {
+      // Fall back to default if calculation fails
+      fps = 120.0f;
+      MT_LOGW("FPS not found in momentum metadata or animation data, using default: {}", fps);
+    }
+  }
+  return fps;
+}
+
 std::tuple<MotionParameters, IdentityParameters, float> loadMotionFromModel(
     fx::gltf::Document& model) {
   // parse motion data
   try {
-    // load motion
-    const auto& def = getMomentumExtension(model.extensionsAndExtras);
-    float fps = def.value("fps", 0.0f);
-
-    // If FPS is not found in momentum metadata, try to calculate from animation data
-    if (fps == 0.0f) {
-      fps = calculateFpsFromAnimationData(model);
-      if (fps > 0.0f) {
-        MT_LOGD("FPS not found in momentum metadata, calculated from animation data: {}", fps);
-      } else {
-        // Fall back to default if calculation fails
-        fps = 120.0f;
-        MT_LOGW("FPS not found in momentum metadata or animation data, using default: {}", fps);
-      }
-    }
-
+    const float fps = loadFpsFromModel(model);
     const auto& [motion, identity] = getMotionFromModel(model);
     return {motion, identity, fps};
   } catch (std::runtime_error& err) {
@@ -201,10 +199,14 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
     // Set maximum filesize to 4 gigabyte (glb hard limit due to uint32).
     // Need to fork gltf load to support dynamic loading at some point if files get too big
     fx::gltf::Document model = loadModel(input);
-    Character character = loadGltfCharacter(model);
+    auto characters = loadGltfCharactersInternal(model);
+    auto& loaded = selectGltfCharacter(characters);
+    Character& character = loaded.character;
 
-    // load motion
-    auto [motion, identity, fps] = loadMotionFromModel(model);
+    // load the motion of that character
+    const auto [motion, identity] = getMotionFromJson(
+        model, getCharacterMotionJson(model, loaded.rootNode, characters.size() == 1));
+    const float fps = loadFpsFromModel(model);
 
     // check that there is actual motion data within the glb / gltf
     MT_LOGW_IF(std::get<1>(motion).cols() == 0, "No motion data found in gltf file");
