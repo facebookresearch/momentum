@@ -8,11 +8,14 @@
 #pragma once
 
 #include <momentum/character/character.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/io/gltf/gltf_skeleton_io.h>
 
 #include <fx/gltf.h>
 
 #include <cstdint>
+#include <span>
+#include <tuple>
 #include <vector>
 
 namespace momentum {
@@ -56,6 +59,30 @@ std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Doc
 /// @param[in] characters The result of loadGltfCharactersInternal().
 /// @return A reference into @p characters.
 CharacterWithNodeMap& selectGltfCharacter(std::vector<CharacterWithNodeMap>& characters);
+
+/// The first animation of @p model with a translation, rotation or scale channel that targets a
+/// joint of @p character, or nullptr.
+///
+/// @param[in] model The glTF document.
+/// @param[in] character The character, as loaded from @p model.
+/// @param[in] nodeToObjectMap The character's node-to-object map.
+const fx::gltf::Animation* findAnimationForCharacter(
+    const fx::gltf::Document& model,
+    const Character& character,
+    std::span<const size_t> nodeToObjectMap);
+
+/// Read the channels of @p animation that target @p character's joints as skeleton states.
+///
+/// @param[in] model The glTF document.
+/// @param[in] animation An animation of @p model.
+/// @param[in] character The character, as loaded from @p model.
+/// @param[in] nodeToObjectMap The character's node-to-object map.
+/// @return One skeleton state per frame, and the frame times in seconds.
+std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesForCharacter(
+    const fx::gltf::Document& model,
+    const fx::gltf::Animation& animation,
+    const Character& character,
+    std::span<const size_t> nodeToObjectMap);
 
 /// The momentum "motion" object of the character whose root node is @p rootNode: the one stored on
 /// that node; else the document-level one if @p isOnlyCharacter and no node stores a motion (a file
