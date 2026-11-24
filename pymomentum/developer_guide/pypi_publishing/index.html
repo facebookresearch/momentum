@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQKPMTK7XB"></script>
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-NQKPMTK7XB",{})</script><link rel="stylesheet" href="/momentum/assets/css/styles.3ba2e559.css">
-<script src="/momentum/assets/js/runtime~main.c49fc8c6.js" defer="defer"></script>
-<script src="/momentum/assets/js/main.5daf1a4c.js" defer="defer"></script>
+<script src="/momentum/assets/js/runtime~main.ea181be4.js" defer="defer"></script>
+<script src="/momentum/assets/js/main.42c667a9.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -87,8 +87,9 @@ for the <code>pymomentum-core</code>, <code>pymomentum-cpu</code>, and <code>pym
 <p>Build test wheels:</p>
 <div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#393A34"><span class="token plain">pixi run -e py312 wheel_clean</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">pixi run -e py312 wheel_build</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_build</span><br></div><div class="token-line" style="color:#393A34"><span class="token plain">PYMOMENTUM_VARIANT=cpu pixi run -e py312 wheel_test</span><br></div></code></pre></div></div>
 <p>Core and add-on wheels use separate CMake install components. The core wheel
-owns all NumPy/native modules; CPU and GPU wheels own only Torch-backed modules
-and require the matching core release series.</p>
+owns all NumPy/native modules and pure-Python Torch helpers; CPU and GPU wheels
+own only the compiled Torch extensions and require the matching core release
+series.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="ci-workflow">CI Workflow<a href="#ci-workflow" class="hash-link" aria-label="Direct link to CI Workflow" title="Direct link to CI Workflow" translate="no">​</a></h2>
 <p>The CI automatically:</p>
 <ol>
