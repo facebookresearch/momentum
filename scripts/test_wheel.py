@@ -404,8 +404,7 @@ def get_cxx_runtime_script(torch_first: bool) -> str:
 
     Parsing the URDF numbers and naming the blend-shape parameters use iostream
     number I/O, which crashed when the private libstdc++ bound its locale facet
-    ids to torch's libstdc++. On Linux, #1566's loader imports torch first in
-    both orders; the orders differ on macOS and Windows.
+    ids to torch's libstdc++.
     """
     imports = ["import pymomentum.geometry as geometry", "import torch"]
     if torch_first:

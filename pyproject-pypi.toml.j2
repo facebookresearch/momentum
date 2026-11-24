@@ -378,8 +378,8 @@ repair-wheel-command = """
 #
 # We manually bundle dependencies, including libstdc++, because conda-forge
 # dependencies require newer GLIBCXX symbols than manylinux_2_28's system
-# libstdc++ provides. libstdc++ is renamed to a private SONAME so torch-first
-# imports cannot pin the older system libstdc++.so.6 for PyMomentum's DSOs.
+# libstdc++ provides. libstdc++ is renamed to a private SONAME so a system
+# libstdc++.so.6 loaded earlier (e.g. by torch) cannot stand in for it.
 
 set -e
 
@@ -406,19 +406,10 @@ import importlib.machinery
 import sys
 
 
-_NATIVE_MODULES = {
-    f"{__name__}.{module}"
-    for module in (
-        "axel",
-        "camera",
-        "diff_geometry",
-        "geometry",
-        "marker_tracking",
-        "renderer",
-        "solver",
-        "solver2",
-    )
-}
+# Only the extension modules that link libtorch. Importing torch first lets
+# torch's libraries load and bind to the system libstdc++ before these modules
+# load PyMomentum's private copy. The other modules load without torch.
+_NATIVE_MODULES = {f"{__name__}.{module}" for module in ("diff_geometry", "solver")}
 
 
 class _TorchFirstExtensionLoader(importlib.abc.Loader):
@@ -551,10 +542,11 @@ done
 echo "Bundled libraries:"
 ls -la "$LIBS_DIR/"
 
-# Keep PyMomentum's C++ runtime dependency private. Python package init imports
-# torch, when available, before loading PyMomentum extension modules so torch
-# owns its process-global C++ runtime state without exposing PyMomentum's private
-# libstdc++ symbols to later native extensions such as Triton.
+# Keep PyMomentum's C++ runtime dependency private. PyMomentum's extension
+# modules load it under a private SONAME with Python's default RTLD_LOCAL, so its
+# symbols are not exposed to later native extensions such as Triton. Python
+# package init imports torch before diff_geometry and solver, the modules that
+# link libtorch, so torch's libraries bind to the system libstdc++.
 echo '=== Renaming libstdc++ ==='
 RENAMED_LIBSTDCXX="libstdc++-pymomentum.so.6"
 if [ -f "$LIBS_DIR/libstdc++.so.6" ]; then
