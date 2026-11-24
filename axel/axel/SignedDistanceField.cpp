@@ -166,21 +166,8 @@ SignedDistanceField<ScalarType>::sampleWithGradient(
 
   InputScalar value = c0 * (InputScalar{1} - fz) + c1 * fz;
 
-  // Calculate offset from original query point to clamped point
-  const Eigen::Vector3<InputScalar> originalGridPos = worldToGrid(position);
-  if (clampedGridPos != originalGridPos) {
-    const Eigen::Vector3<InputScalar> clampedWorldPos = gridToWorld(clampedGridPos);
-    const Eigen::Vector3<InputScalar> offsetVector = position - clampedWorldPos;
-    const InputScalar offsetDistance = offsetVector.norm();
-
-    // If point was outside bounds, add offset distance and use offset gradient
-    if (offsetDistance > InputScalar{0}) {
-      return {value + offsetDistance, offsetVector / offsetDistance};
-    }
-  }
-
-  // Standard analytical gradient computation for points inside the grid bounds using InputScalar
-  // precision
+  // Analytical gradient of the trilinear interpolation at the clamped grid position using
+  // InputScalar precision
   const InputScalar dfdx_term = (c100 - c000) * (InputScalar{1} - fy) * (InputScalar{1} - fz) +
       (c101 - c001) * (InputScalar{1} - fy) * fz + (c110 - c010) * fy * (InputScalar{1} - fz) +
       (c111 - c011) * fy * fz;
@@ -194,10 +181,29 @@ SignedDistanceField<ScalarType>::sampleWithGradient(
       (c111 - c110) * fx * fy;
 
   // Transform grid space gradients to world space using InputScalar precision
-  const Eigen::Vector3<InputScalar> gradient(
+  Eigen::Vector3<InputScalar> gradient(
       dfdx_term / static_cast<InputScalar>(voxelSize_.x()),
       dfdy_term / static_cast<InputScalar>(voxelSize_.y()),
       dfdz_term / static_cast<InputScalar>(voxelSize_.z()));
+
+  // Calculate offset from original query point to clamped point
+  const Eigen::Vector3<InputScalar> originalGridPos = worldToGrid(position);
+  if (clampedGridPos != originalGridPos) {
+    const Eigen::Vector3<InputScalar> clampedWorldPos = gridToWorld(clampedGridPos);
+    const Eigen::Vector3<InputScalar> offsetVector = position - clampedWorldPos;
+    const InputScalar offsetDistance = offsetVector.norm();
+
+    // If point was outside bounds, add offset distance. The interpolated value still varies along
+    // the axes that were not clamped; along the clamped axes only the offset distance does.
+    if (offsetDistance > InputScalar{0}) {
+      for (int axis = 0; axis < 3; ++axis) {
+        if (clampedGridPos[axis] != originalGridPos[axis]) {
+          gradient[axis] = InputScalar{0};
+        }
+      }
+      return {value + offsetDistance, gradient + offsetVector / offsetDistance};
+    }
+  }
 
   return std::make_pair(value, gradient);
 }
