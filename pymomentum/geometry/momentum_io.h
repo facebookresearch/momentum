@@ -128,6 +128,17 @@ loadGLTFCharacterWithSkelStates(const std::string& gltfFilename);
 std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>
 loadGLTFCharacterWithSkelStatesFromBytes(const pybind11::bytes& gltfBytes);
 
+// Per-character skeleton states exposed to Python: (character, skel_states, timestamps), where
+// skel_states is [nFrames x nJoints x 8] as in the singular loader.
+using CharacterWithSkelStates =
+    std::tuple<momentum::Character, pybind11::array_t<float>, std::vector<float>>;
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStates(
+    const std::string& gltfFilename);
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
+    const pybind11::bytes& gltfBytes);
+
 std::string toGLTF(const momentum::Character& character);
 
 std::tuple<RowMatrixf, std::vector<std::string>, Eigen::VectorXf, std::vector<std::string>>
