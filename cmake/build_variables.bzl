@@ -525,6 +525,7 @@ diff_ik_test_sources = [
 
 io_common_public_headers = [
     "io/common/gsl_utils.h",
+    "io/common/name_utils.h",
     "io/common/stream_utils.h",
 ]
 
@@ -542,6 +543,7 @@ io_json_utils_sources = [
 
 io_common_test_sources = [
     "test/io/common/json_utils_test.cpp",
+    "test/io/common/name_utils_test.cpp",
     "test/io/common/stream_utils_test.cpp",
 ]
 
