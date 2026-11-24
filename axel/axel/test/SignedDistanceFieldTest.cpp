@@ -225,11 +225,10 @@ TEST_F(SignedDistanceFieldTest, BoundaryGradientPointsAwayFromTheGrid) {
   // penetration, which is always inside.
   //
   // A uniform field on purpose. For a query outside on one axis the true
-  // derivative also picks up the field's variation *along* the boundary face,
-  // which this implementation discards in favour of the pure offset direction.
-  // Making the field constant removes that term, so the finite difference is
-  // exactly the outward unit vector and the comparison tests the sign rather
-  // than the approximation.
+  // derivative also picks up the field's variation *along* the boundary face
+  // (OutsideGradientKeepsTheDerivativeAlongTheBoundary covers that term).
+  // Making the field constant removes it, so the finite difference is exactly
+  // the outward unit vector and the comparison isolates the sign.
   constexpr float kUniform = 2.0f;
   sdf_->fill(kUniform);
 
@@ -286,6 +285,58 @@ TEST_F(SignedDistanceFieldTest, BoundaryGradientPointsAwayFromTheGrid) {
   const Eigen::Vector3f inside(1.0f, 1.0f, 1.0f);
   EXPECT_LT(sdf_->sampleWithGradient(inside).second.norm(), 1e-4f);
   EXPECT_NEAR(sdf_->sample(inside), kUniform, 1e-5f);
+}
+
+TEST_F(SignedDistanceFieldTest, OutsideGradientKeepsTheDerivativeAlongTheBoundary) {
+  // Outside the grid `sample()` returns f(c) + |p - c|, where c clamps p onto the grid and f is
+  // the trilinear interpolation. Along an axis that was not clamped, c moves with p, so the
+  // derivative there is the interior derivative of f at c; along a clamped axis c stays put and
+  // only |p - c| changes. A query outside on one or two axes (a face or edge region) needs both
+  // terms; only a query outside on all three (a corner region) is the offset direction alone.
+  //
+  // A sphere queried away from its symmetry axes, so f varies along every boundary face. Double
+  // precision keeps the central difference well inside the tolerance.
+  const auto sphere =
+      SignedDistanceFieldd::createSphere(1.0, Eigen::Vector3<Index>(16, 16, 16), 1.0);
+
+  constexpr double kStep = 1e-4;
+  const auto centralDifference = [&](const Eigen::Vector3d& p) {
+    Eigen::Vector3d out;
+    for (int axis = 0; axis < 3; ++axis) {
+      Eigen::Vector3d step = Eigen::Vector3d::Zero();
+      step[axis] = kStep;
+      const Eigen::Vector3d ahead = p + step;
+      const Eigen::Vector3d behind = p - step;
+      out[axis] = (sphere.sample(ahead) - sphere.sample(behind)) / (2.0 * kStep);
+    }
+    return out;
+  };
+
+  // Grid nodes sit at -2 + 0.25 * i for i = 0..15, so the grid covers [-2, 1.75] on each axis.
+  // Unclamped coordinates stay between nodes so that each difference stays inside one cell.
+  const std::array<Eigen::Vector3d, 6> outsidePositions = {
+      // One axis clamped.
+      Eigen::Vector3d(0.6, 0.85, 2.5),
+      Eigen::Vector3d(0.4, 3.1, -1.1),
+      // Clamped at the lower bound, where the interpolation's derivative along the clamped axis
+      // is nonzero and must not leak into the gradient.
+      Eigen::Vector3d(-2.7, 0.3, -0.65),
+      // Two axes clamped.
+      Eigen::Vector3d(2.4, -2.6, 0.7),
+      Eigen::Vector3d(-0.35, 2.3, -3.0),
+      // All three clamped.
+      Eigen::Vector3d(2.5, 2.2, -2.9)};
+
+  for (const auto& position : outsidePositions) {
+    const auto [distance, gradient] = sphere.sampleWithGradient(position);
+    const Eigen::Vector3d numerical = centralDifference(position);
+
+    EXPECT_NEAR(distance, sphere.sample(position), 1e-12)
+        << "sampleWithGradient and sample disagree at " << position.transpose();
+    EXPECT_LT((gradient - numerical).norm(), 1e-6)
+        << "at " << position.transpose() << ": analytical " << gradient.transpose()
+        << " vs finite difference of sample() " << numerical.transpose();
+  }
 }
 
 TEST_F(SignedDistanceFieldTest, DoubleTypeSDF) {
