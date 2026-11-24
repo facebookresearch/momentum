@@ -403,6 +403,32 @@ TEST(FbxBuilderTest, LoadCharactersWithObjects) {
   expectRigidlyBound(characters[1], 0, object.mesh->vertices);
 }
 
+TEST(FbxBuilderTest, AnimatedMeshNamesAreUniqueAmongCharacters) {
+  Character body = createTestCharacter(3);
+  body.name = "body";
+  Character later = createTestCharacter(3);
+  later.name = "body_1";
+  const Character object = createTestCharacter(3);
+
+  const auto outFile = temporaryFile("builder_mesh_names", "fbx");
+  {
+    FbxBuilder builder;
+    EXPECT_EQ(builder.addCharacter(body), "body");
+    EXPECT_EQ(builder.addAnimatedMesh(*object.mesh, "body", 30.0f, objectMotion()), "body_1");
+    // The mesh keeps its name from a character added after it.
+    EXPECT_EQ(builder.addCharacter(later), "body_1_1");
+    builder.save(outFile.path());
+  }
+
+  std::vector<std::string> names;
+  for (const Character& loaded :
+       loadFbxCharacters(outFile.path(), KeepLocators::No, Permissive::Yes)) {
+    names.push_back(loaded.name);
+  }
+  std::ranges::sort(names);
+  EXPECT_EQ(names, (std::vector<std::string>{"body", "body_1", "body_1_1"}));
+}
+
 namespace {
 
 // Expect `motion` on `loaded` to pose every joint as `expectedMotion` poses it on `expected`.
