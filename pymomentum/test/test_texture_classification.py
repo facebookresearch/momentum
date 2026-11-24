@@ -124,6 +124,21 @@ class TestTextureClassification(unittest.TestCase):
         self.assertEqual(result_high[0], [])
         self.assertEqual(result_high[1], [])
 
+    def test_nan_threshold_is_rejected(self) -> None:
+        mesh = _make_quad_mesh()
+        texture = np.full((10, 10, 3), [255, 0, 0], dtype=np.uint8)
+        region_colors = np.array([[255, 0, 0]], dtype=np.uint8)
+
+        with self.assertRaisesRegex(
+            RuntimeError, r"threshold must be in range \[0, 1\]"
+        ):
+            pym.classify_triangles_by_texture(
+                mesh=mesh,
+                texture=texture,
+                region_colors=region_colors,
+                threshold=float("nan"),
+            )
+
 
 class TestReduceMeshByFaces(unittest.TestCase):
     """Tests for Mesh-level reduce_mesh_by_faces and reduce_mesh_by_vertices."""

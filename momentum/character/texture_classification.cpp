@@ -102,7 +102,7 @@ std::vector<std::vector<int32_t>> classifyTrianglesByTexture(
     int32_t numSamples) {
   MT_THROW_IF(mesh.texcoords.empty(), "Mesh must have texture coordinates");
   MT_THROW_IF(mesh.texcoord_faces.empty(), "Mesh must have texture coordinate faces");
-  MT_THROW_IF(threshold < 0.0f || threshold > 1.0f, "threshold must be in range [0, 1]");
+  MT_THROW_IF(!(threshold >= 0.0f && threshold <= 1.0f), "threshold must be in range [0, 1]");
 
   const auto samplePoints = getSamplePoints(numSamples);
   const auto nSamples = static_cast<int32_t>(samplePoints.size());
