@@ -613,6 +613,8 @@ python -m wheel pack "$WORK" -d /tmp/final_wheel
 
 FINAL_WHEEL=$(ls /tmp/final_wheel/*.whl | head -1)
 echo "Final wheel: $(basename $FINAL_WHEEL)"
+# Fail loudly when an older full-package add-on shares the install.
+python3 /project/scripts/finalize_pypi_wheel.py "$FINAL_WHEEL"
 cp "$FINAL_WHEEL" {dest_dir}/
 echo "Done"
 """

@@ -21,6 +21,7 @@ import zipfile
 from pathlib import Path
 
 from demote_gnu_unique_symbols import count_unique_symbols
+from finalize_pypi_wheel import GUARD_MARKER, INIT, INIT_PYC, INIT_PYW
 
 WHEEL_PREFIX_BY_TYPE = {
     "core": "pymomentum_core-",
@@ -93,6 +94,11 @@ def normalize_wheel_type(wheel_type: str) -> str:
     return wheel_type
 
 
+# The last release whose CPU and GPU wheels installed every module themselves.
+PREVIOUS_FULL_PACKAGE_VERSION = "0.1.114.post0"
+REPAIR_MESSAGE = "Repair with:"
+
+
 def has_torch_extensions(wheel_type: str) -> bool:
     return wheel_type in {"cpu", "gpu"}
 
@@ -110,6 +116,7 @@ def check_wheel_contents(
     """Check that core and Torch add-on wheels own disjoint payloads."""
     with zipfile.ZipFile(wheel_file) as archive:
         names = {name for name in archive.namelist() if not name.endswith("/")}
+        init = archive.read(INIT).decode("utf-8") if INIT in names else ""
         private_libstdcxx = [
             name
             for name in names
@@ -136,6 +143,10 @@ def check_wheel_contents(
         "pymomentum/trs.py",
     }
     if wheel_type == "core":
+        if GUARD_MARKER not in init:
+            raise RuntimeError(f"core wheel {INIT} lacks the install check")
+        if "-win" in wheel_file.name and INIT_PYW not in package_files:
+            raise RuntimeError(f"Windows core wheel lacks {INIT_PYW}")
         missing = sorted(pure_torch_paths - package_files)
         if missing:
             raise RuntimeError(f"core wheel is missing Torch helpers: {missing}")
@@ -153,6 +164,8 @@ def check_wheel_contents(
 
     if core_wheel is None:
         raise RuntimeError("CPU/GPU wheel tests require the matching core wheel")
+    if INIT_PYC not in package_files:
+        raise RuntimeError(f"{wheel_type} wheel lacks the {INIT_PYC} install check")
     unexpected = sorted(
         name
         for name in package_files
@@ -480,6 +493,55 @@ def find_container_runtime() -> str | None:
     return None
 
 
+def get_previous_release_container_lines(
+    wheel_file: Path, wheel_type: str, core_wheel: Path
+) -> list[str]:
+    """Shell steps for installs that start from the last full-package add-on."""
+    old = f"{DIST_NAME_BY_TYPE[wheel_type]}=={PREVIOUS_FULL_PACKAGE_VERSION}"
+    new_wheels = f"/wheel/{core_wheel.name} /wheel/{wheel_file.name}"
+    torch = f'"{get_torch_requirement(wheel_type)}" --index-url ' + get_torch_index(
+        wheel_type
+    )
+    repair = [
+        f"$VENV -m pip uninstall -y pymomentum-core {DIST_NAME_BY_TYPE[wheel_type]}",
+        f"$VENV -m pip install {new_wheels}",
+        "$VENV -I /tmp/test_wheel_imports.py",
+    ]
+    lines = [
+        "",
+        f'echo "Testing a plain pip upgrade from {old}..."',
+        "VENV=/tmp/upgrade_venv/bin/python",
+        "$PYTHON -m venv /tmp/upgrade_venv",
+        f"$VENV -m pip install --quiet {torch}",
+        f'$VENV -m pip install --quiet --only-binary :all: "{old}"',
+        f"$VENV -m pip install --upgrade {new_wheels}",
+        "if ! $VENV -I /tmp/test_wheel_imports.py; then",
+        f'  $VENV -I -c "import pymomentum" 2>&1 | grep "{REPAIR_MESSAGE}" || '
+        '{ echo "[FAIL] broken install without the repair message"; exit 1; }',
+        '  echo "Upgrade failed with the repair message; running the repair..."',
+        *(f"  {line}" for line in repair),
+        "fi",
+    ]
+    if wheel_type != "cpu":
+        return lines
+    return lines + [
+        "",
+        f'echo "Testing {old} next to the new core..."',
+        "VENV=/tmp/coexist_venv/bin/python",
+        "$PYTHON -m venv /tmp/coexist_venv",
+        f"$VENV -m pip install --quiet {torch}",
+        f'$VENV -m pip install --quiet --only-binary :all: "{old}"',
+        f"$VENV -m pip install /wheel/{core_wheel.name}",
+        'if $VENV -I -c "import pymomentum.geometry" >/tmp/coexist.log 2>&1; then',
+        '  echo "[FAIL] the old add-on next to the new core imported silently"',
+        "  exit 1",
+        "fi",
+        f'grep "{REPAIR_MESSAGE}" /tmp/coexist.log || '
+        '{ cat /tmp/coexist.log; echo "[FAIL] no repair message"; exit 1; }',
+        *repair,
+    ]
+
+
 def test_in_container(
     wheel_file: Path,
     wheel_type: str,
@@ -600,6 +662,10 @@ def test_in_container(
                 "PYTEST",
                 "/tmp/test_venv/bin/python -I /tmp/test_core_imports.py",
             ]
+        )
+    if core_wheel is not None:
+        container_lines.extend(
+            get_previous_release_container_lines(wheel_file, wheel_type, core_wheel)
         )
     container_script = "\n".join(container_lines) + "\n"
 
@@ -750,7 +816,101 @@ def test_locally_with_uv(
                 f"[FAIL] Failed to uninstall add-on: {result.stderr}", file=sys.stderr
             )
             return result.returncode
-        return run_import_tests(python_exe, "core")
+        returncode = run_import_tests(python_exe, "core")
+        if returncode != 0:
+            return returncode
+        scenarios = ["upgrade", "coexist"] if wheel_type == "cpu" else ["upgrade"]
+        for scenario in scenarios:
+            returncode = test_previous_release_install(
+                uv_path,
+                py_version,
+                Path(tmpdir) / f"{scenario}_venv",
+                scenario,
+                wheel_file,
+                wheel_type,
+                core_wheel,
+                require_cuda,
+                require_triton,
+            )
+            if returncode != 0:
+                return returncode
+        return 0
+
+
+def test_previous_release_install(
+    uv_path: str,
+    py_version: str,
+    venv_path: Path,
+    scenario: str,
+    wheel_file: Path,
+    wheel_type: str,
+    core_wheel: Path,
+    require_cuda: bool,
+    require_triton: bool,
+) -> int:
+    """Start from the last full-package add-on, then add the new wheels with pip.
+
+    "upgrade" runs a plain `pip install --upgrade` of core and the add-on; it
+    must work or fail with the repair message. "coexist" adds only the new core
+    next to the old add-on; importing must fail with the repair message. Either
+    way the printed repair must give a working install.
+    """
+    old = f"{DIST_NAME_BY_TYPE[wheel_type]}=={PREVIOUS_FULL_PACKAGE_VERSION}"
+    print(f"Testing {scenario} from {old}...", flush=True)
+    result = subprocess.run(
+        [uv_path, "venv", "--seed", "--python", py_version, str(venv_path)]
+    )
+    if result.returncode != 0:
+        return result.returncode
+    if sys.platform == "win32":
+        python_exe = str(venv_path / "Scripts" / "python.exe")
+    else:
+        python_exe = str(venv_path / "bin" / "python")
+    pip = [python_exe, "-m", "pip"]
+    torch = [
+        get_torch_requirement(wheel_type),
+        "--index-url",
+        get_torch_index(wheel_type),
+    ]
+    new_wheels = (
+        [str(core_wheel), str(wheel_file)]
+        if scenario == "upgrade"
+        else [str(core_wheel)]
+    )
+    for command in (
+        [*pip, "install", "--quiet", *torch],
+        [*pip, "install", "--quiet", "--only-binary", ":all:", old],
+        [*pip, "install", "--upgrade", *new_wheels],
+    ):
+        if subprocess.run(command).returncode != 0:
+            print(f"[FAIL] {' '.join(command)}", file=sys.stderr)
+            return 1
+
+    probe = subprocess.run(
+        [python_exe, "-I", "-c", "import pymomentum.geometry"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if probe.returncode == 0 and scenario == "upgrade":
+        return run_import_tests(python_exe, wheel_type, require_cuda, require_triton)
+    if probe.returncode == 0:
+        print("[FAIL] the old add-on next to the new core imported silently")
+        return 1
+    if REPAIR_MESSAGE not in probe.stderr:
+        print(f"[FAIL] broken install without the repair message:\n{probe.stderr}")
+        return 1
+    print(probe.stderr.strip().splitlines()[-3:], flush=True)
+    print("Running the repair from the message...", flush=True)
+    for command in (
+        [*pip, "uninstall", "-y", "pymomentum-core", DIST_NAME_BY_TYPE[wheel_type]],
+        [*pip, "install", str(core_wheel), str(wheel_file)],
+    ):
+        if subprocess.run(command).returncode != 0:
+            print(f"[FAIL] {' '.join(command)}", file=sys.stderr)
+            return 1
+    return run_import_tests(python_exe, wheel_type, require_cuda, require_triton)
 
 
 def main():
