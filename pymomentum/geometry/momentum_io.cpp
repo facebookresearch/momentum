@@ -394,6 +394,44 @@ loadGLTFCharacterWithSkelStates(const std::string& gltfFilename) {
   return std::make_tuple(character, skelStatesToTensor(states, character), timestamps);
 }
 
+namespace {
+
+// Converts loaded characters to Python tuples; needs the GIL, since skelStatesToTensor allocates
+// numpy arrays.
+std::vector<CharacterWithSkelStates> toCharacterSkelStateTuples(
+    std::vector<momentum::CharacterSkeletonStates>&& loaded) {
+  std::vector<CharacterWithSkelStates> result;
+  result.reserve(loaded.size());
+  for (auto& entry : loaded) {
+    auto tensor = skelStatesToTensor(entry.skeletonStates, entry.character);
+    result.emplace_back(std::move(entry.character), std::move(tensor), std::move(entry.timestamps));
+  }
+  return result;
+}
+
+} // namespace
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStates(
+    const std::string& gltfFilename) {
+  std::vector<momentum::CharacterSkeletonStates> loaded;
+  {
+    pybind11::gil_scoped_release release;
+    loaded = momentum::loadGltfCharactersWithSkeletonStates(gltfFilename);
+  }
+  return toCharacterSkelStateTuples(std::move(loaded));
+}
+
+std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
+    const pybind11::bytes& gltfBytes) {
+  const auto span = toSpan<std::byte>(gltfBytes);
+  std::vector<momentum::CharacterSkeletonStates> loaded;
+  {
+    pybind11::gil_scoped_release release;
+    loaded = momentum::loadGltfCharactersWithSkeletonStates(span);
+  }
+  return toCharacterSkelStateTuples(std::move(loaded));
+}
+
 std::string toGLTF(const momentum::Character& character) {
   nlohmann::json j = momentum::makeCharacterDocument(character);
   return j.dump();
