@@ -176,6 +176,11 @@ solver_test_sources = [
     "test/solver/subset_gauss_newton_solver_test.cpp",
 ]
 
+# Built as its own CMake test; see the solver_test TODO in CMakeLists.txt.
+gauss_newton_solver_test_sources = [
+    "test/solver/gauss_newton_solver_test.cpp",
+]
+
 skeleton_public_headers = [
     "character/fwd.h",
     "character/joint_state.h",
