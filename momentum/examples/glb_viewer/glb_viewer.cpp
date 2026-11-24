@@ -7,6 +7,8 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/character_state.h>
+#include <momentum/character/skeleton_state.h>
+#include <momentum/common/exception.h>
 #include <momentum/common/filesystem.h>
 #include <momentum/common/log.h>
 #include <momentum/gui/rerun/logger.h>
@@ -19,6 +21,7 @@
 
 #include <algorithm>
 #include <map>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -192,9 +195,43 @@ struct CharacterPlayback {
   CharacterParameters params;
   // One state per character: CharacterState caches the posed mesh of the character it last posed.
   CharacterState state;
+  // Joint parameters per frame for a character played from its glTF animation channels.
+  Eigen::MatrixXf jointMotion;
+  // Frames of momentum motion or channel motion; the character holds its last pose after them.
+  size_t numFrames = 0;
   Eigen::MatrixXf jointParams;
   size_t numJointParamFrames = 0;
 };
+
+/// The joint motion of each character without momentum motion, read from the glTF animation
+/// channels. Channel keys are played one per frame, as GltfBuilder samples them.
+std::vector<Eigen::MatrixXf> loadChannelJointMotion(
+    const std::string& glbFile,
+    std::span<const CharacterMotion> characters) {
+  const auto animated = loadGltfCharactersWithSkeletonStates(glbFile);
+  // Both loaders find the characters of a file in the same order.
+  MT_THROW_IF(
+      animated.size() != characters.size(),
+      "Loaded {} characters with animation channels but {} with motion from {}",
+      animated.size(),
+      characters.size(),
+      glbFile);
+  std::vector<Eigen::MatrixXf> jointMotion(characters.size());
+  size_t nextIndex = 0;
+  for (const CharacterMotion& cm : characters) {
+    const size_t i = nextIndex++;
+    const auto& states = animated.at(i).skeletonStates;
+    if (cm.motion.cols() > 0 || states.empty()) {
+      continue;
+    }
+    auto& joints = jointMotion.at(i);
+    joints.resize(cm.character.parameterTransform.numJointParameters(), states.size());
+    for (size_t iFrame = 0; iFrame < states.size(); ++iFrame) {
+      joints.col(iFrame) = skeletonStateToJointParameters(states[iFrame], cm.character.skeleton).v;
+    }
+  }
+  return jointMotion;
+}
 
 int run(const Options& options) {
   // Validate file extension
@@ -220,16 +257,38 @@ int run(const Options& options) {
   }
   auto fps = cFps;
 
+  // A file not written by momentum keeps its animation in glTF animation channels rather than in
+  // momentum motion. Play those channels, as joint parameters, for the characters without momentum
+  // motion.
+  std::vector<CharacterPlayback> playback(characters.size());
+  if (std::ranges::any_of(
+          characters, [](const CharacterMotion& cm) { return cm.motion.cols() == 0; })) {
+    try {
+      auto jointMotion = loadChannelJointMotion(options.glbFile, characters);
+      for (size_t i = 0; i < playback.size(); ++i) {
+        playback.at(i).jointMotion = std::move(jointMotion.at(i));
+      }
+    } catch (const std::exception& e) {
+      MT_LOGW(
+          "Unable to play the glTF animation channels of {}: {}. Characters without momentum "
+          "motion show their identity pose.",
+          fileName,
+          e.what());
+    }
+  }
+
   // The frame range spans the longest motion.
   size_t nFrames = 0;
-  for (const auto& cm : characters) {
-    nFrames = std::max(nFrames, static_cast<size_t>(cm.motion.cols()));
+  for (size_t i = 0; i < characters.size(); ++i) {
+    auto& pc = playback.at(i);
+    pc.numFrames =
+        static_cast<size_t>(std::max(characters[i].motion.cols(), pc.jointMotion.cols()));
+    nFrames = std::max(nFrames, pc.numFrames);
   }
   const bool hasMotion = nFrames > 0;
 
   // Start every character at its rest pose. That is all a character without motion shows, and it
   // gives the marker correspondence a locator state before a character's motion starts.
-  std::vector<CharacterPlayback> playback(characters.size());
   for (size_t i = 0; i < characters.size(); ++i) {
     const auto& cm = characters[i];
     auto& pc = playback.at(i);
@@ -244,7 +303,7 @@ int run(const Options& options) {
         true /*updateMesh*/,
         true /*updateCollision*/,
         false /*applyLimits*/);
-    if (cm.motion.cols() == 0) {
+    if (pc.numFrames == 0) {
       logCharacter(rec, pc.entityPath, cm.character, pc.state);
     }
   }
@@ -271,13 +330,12 @@ int run(const Options& options) {
     auto& pc = playback.at(i);
     pc.jointNames = cm.character.skeleton.getJointNames();
     pc.locatorLookup = buildLocatorLookup(cm.character);
-    pc.sel = selectMotionFrames(
-        firstFrame, lastFrame, options.stride, static_cast<size_t>(cm.motion.cols()), fps);
-    if (cm.motion.cols() == 0) {
+    pc.sel = selectMotionFrames(firstFrame, lastFrame, options.stride, pc.numFrames, fps);
+    if (pc.numFrames == 0) {
       continue;
     }
     const auto& modelParamNames = cm.character.parameterTransform.name;
-    if (options.logParams) {
+    if (options.logParams && cm.motion.cols() > 0) {
       logModelParamNames(rec, pc.paramsPrefix, "model_params", modelParamNames);
       batchLogModelParams(rec, pc.paramsPrefix, modelParamNames, cm.motion, pc.sel);
     }
@@ -301,11 +359,15 @@ int run(const Options& options) {
 
       // A character keeps its last pose after its motion ends. A character whose motion ends
       // before the first frame shows its last pose from the first frame on.
-      const auto motionFrames = static_cast<size_t>(cm.motion.cols());
-      const bool inMotion = iFrame < motionFrames;
-      if (inMotion || (iFrame == firstFrame && motionFrames > 0)) {
-        pc.params.pose =
-            cm.motion.col(static_cast<Eigen::Index>(std::min(iFrame, motionFrames - 1)));
+      const bool inMotion = iFrame < pc.numFrames;
+      if (inMotion || (iFrame == firstFrame && pc.numFrames > 0)) {
+        const auto frame = static_cast<Eigen::Index>(std::min(iFrame, pc.numFrames - 1));
+        // Joint motion goes through the offsets, on top of the zero pose set up above.
+        if (cm.motion.cols() > 0) {
+          pc.params.pose = cm.motion.col(frame);
+        } else {
+          pc.params.offsets = pc.jointMotion.col(frame);
+        }
         pc.state.set(
             pc.params,
             cm.character,
