@@ -14,6 +14,7 @@
 #include "momentum/io/gltf/utils/coordinate_utils.h"
 
 #include <algorithm>
+#include <numeric>
 
 namespace momentum {
 
@@ -70,6 +71,13 @@ std::vector<Vector3i> makeTriangleFaces(const std::vector<uint32_t>& indices) {
 std::vector<Vector3i> loadTriangleFaces(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive) {
+  if (primitive.indices < 0) {
+    // Non-indexed geometry: every three consecutive vertices form a triangle (glTF 2.0, 3.7.2.1).
+    const auto& positions = model.accessors.at(primitive.attributes.at("POSITION"));
+    std::vector<uint32_t> indices(positions.count);
+    std::iota(indices.begin(), indices.end(), 0u);
+    return makeTriangleFaces(indices);
+  }
   return makeTriangleFaces(loadIndexBuffer(model, primitive));
 }
 

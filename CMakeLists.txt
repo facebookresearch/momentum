@@ -1017,6 +1017,12 @@ if(MOMENTUM_BUILD_TESTING)
   # TODO: Add io_gltf_test
 
   mt_test(
+    NAME io_gltf_mesh_test
+    SOURCES_VARS io_gltf_mesh_test_sources
+    LINK_LIBRARIES io_gltf
+  )
+
+  mt_test(
     NAME io_marker_test
     SOURCES_VARS io_marker_test_sources
     LINK_LIBRARIES
