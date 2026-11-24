@@ -41,18 +41,6 @@ namespace py = pybind11;
 
 namespace pymomentum {
 
-template <typename T>
-std::span<const T> toSpan(const pybind11::bytes& bytes) {
-  pybind11::gil_scoped_acquire acquire;
-  py::buffer_info info(py::buffer(bytes).request());
-  const T* data = reinterpret_cast<const T*>(info.ptr);
-  const auto length = static_cast<size_t>(info.size);
-
-  MT_THROW_IF(data == nullptr, "Unable to extract contents from bytes.");
-
-  return std::span<const T>(data, length);
-}
-
 constexpr momentum::KeepLocators keepLocators = momentum::KeepLocators::Yes;
 
 momentum::Character loadFBXCharacterFromFile(
