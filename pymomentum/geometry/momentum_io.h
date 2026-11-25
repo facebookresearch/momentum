@@ -109,6 +109,29 @@ void saveCharacterToFileWithSkelStates(
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFCharacterWithMotion(
     const std::string& gltfFilename);
 
+/// A BVH character, its motion [nFrames x nParams] (model parameters of its identity parameter
+/// transform, transposed from momentum's layout) and the frame rate.
+std::tuple<momentum::Character, RowMatrixf, float> loadBVHCharacterWithMotion(
+    const std::string& bvhFilename);
+
+/// Saves the character with its motion [nFrames x nParams] (model parameters) and identity offsets
+/// [nJoints * 7] to a BVH file, as momentum::saveBvhCharacterWithMotion() does. Without a motion,
+/// the file holds a single frame of zero model parameters.
+void saveBVHCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    float fps,
+    const std::optional<const Eigen::MatrixXf>& motion,
+    const std::optional<const Eigen::VectorXf>& offsets);
+
+/// Saves the character with its motion [nFrames x nJointParams] (joint parameters) to a BVH file.
+/// Without a motion, the file holds a single frame of zero joint parameters.
+void saveBVHCharacterToFileWithJointParams(
+    const std::string& path,
+    const momentum::Character& character,
+    float fps,
+    const std::optional<const Eigen::MatrixXf>& jointParams);
+
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
 loadGLTFCharacterWithMotionFromBytes(const pybind11::bytes& gltfBytes);
 
