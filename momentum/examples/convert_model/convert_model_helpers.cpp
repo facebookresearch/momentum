@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <fstream>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -510,6 +511,39 @@ int findLongestTake(
 
 namespace {
 
+// Saves the locators of the character to options.output_locator_local (local space) and
+// options.output_locator_global (global space), for each of them that is not empty.
+void saveLocatorFiles(const Options& options, const Character& character) {
+  if (!options.output_locator_local.empty()) {
+    saveLocators(
+        options.output_locator_local, character.locators, character.skeleton, LocatorSpace::Local);
+  }
+  if (!options.output_locator_global.empty()) {
+    saveLocators(
+        options.output_locator_global,
+        character.locators,
+        character.skeleton,
+        LocatorSpace::Global);
+  }
+}
+
+// Saves the parameter transform and parameter limits of the character to a .model file at
+// options.output_params_file, when it is not empty.
+void saveParameterFile(const Options& options, const Character& character) {
+  if (options.output_params_file.empty()) {
+    return;
+  }
+
+  MT_LOGI("Saving model parameter file...");
+  std::ofstream ofs(options.output_params_file);
+  MT_THROW_IF(
+      !ofs.is_open(),
+      "Cannot open output parameter file for writing: {}",
+      options.output_params_file);
+  ofs << writeModelDefinition(
+      character.skeleton, character.parameterTransform, character.parameterLimits);
+}
+
 // The motion of a BVH file for one character. Without a model file, the character is the BVH
 // character, which keeps the motion as it is, unless a parameter file changes its parameters;
 // otherwise the motion is mapped onto the character by joint name, as loadFbxMotion() maps it.
@@ -685,6 +719,24 @@ void initializeCharacterFromMotionFile(
     character.parameterTransform = ParameterTransform::identity(character.skeleton.getJointNames());
   }
   applyOptionalInputs(character, options);
+}
+
+bool hasRigOutputs(const Options& options) {
+  return !options.output_locator_local.empty() || !options.output_locator_global.empty() ||
+      !options.output_params_file.empty();
+}
+
+void saveRigOutputs(const Options& options, const Scene& scene) {
+  if (!hasRigOutputs(options)) {
+    return;
+  }
+  MT_THROW_IF(
+      scene.characters.size() != 1,
+      "The locator and parameter outputs apply to one character, but the input has {}",
+      scene.characters.size());
+  const Character& character = scene.characters.front().character;
+  saveLocatorFiles(options, character);
+  saveParameterFile(options, character);
 }
 
 bool isBvhFile(const filesystem::path& path) {
