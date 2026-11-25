@@ -18,13 +18,16 @@
 #include "momentum/character/skin_weights.h"
 #include "momentum/character/skinned_locator.h"
 #include "momentum/common/checks.h"
+#include "momentum/common/exception.h"
 #include "momentum/math/mesh.h"
 #include "momentum/math/mppca.h"
 #include "momentum/math/random.h"
 
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace momentum {
 
@@ -323,5 +326,68 @@ std::shared_ptr<const MppcaT<T>> createDefaultPosePrior() {
 
 template std::shared_ptr<const MppcaT<float>> createDefaultPosePrior();
 template std::shared_ptr<const MppcaT<double>> createDefaultPosePrior();
+
+MatrixXf jointMotionOf(
+    const ParameterTransform& parameterTransform,
+    const MatrixXf& motion,
+    const VectorXf& offsets) {
+  MatrixXf result = parameterTransform.transform * motion;
+  if (offsets.size() > 0) {
+    MT_THROW_IF(
+        offsets.size() != result.rows(),
+        "The offsets have {} values, but the parameter transform has {} joint parameters",
+        offsets.size(),
+        result.rows());
+    result.colwise() += offsets;
+  }
+  return result;
+}
+
+void removeScaleMotion(const ParameterTransform& parameterTransform, MatrixXf& motion) {
+  const auto& transform = parameterTransform.transform;
+  for (Eigen::Index jointParameter = SC; jointParameter < transform.rows();
+       jointParameter += kParametersPerJoint) {
+    for (SparseRowMatrixf::InnerIterator it(transform, jointParameter); it; ++it) {
+      motion.row(it.col()).setZero();
+    }
+  }
+}
+
+JointTransformDifference maxGlobalJointTransformDifference(
+    const Skeleton& expected,
+    const MatrixXf& expectedJointMotion,
+    const Skeleton& actual,
+    const MatrixXf& actualJointMotion) {
+  MT_THROW_IF(
+      expectedJointMotion.cols() != actualJointMotion.cols(),
+      "The motions have {} and {} frames",
+      expectedJointMotion.cols(),
+      actualJointMotion.cols());
+  std::vector<size_t> actualJoints;
+  actualJoints.reserve(expected.joints.size());
+  for (const auto& joint : expected.joints) {
+    const size_t actualJoint = actual.getJointIdByName(joint.name);
+    MT_THROW_IF(actualJoint == kInvalidIndex, "No joint named '{}'", joint.name);
+    actualJoints.push_back(actualJoint);
+  }
+
+  JointTransformDifference result;
+  for (Eigen::Index frame = 0; frame < expectedJointMotion.cols(); ++frame) {
+    const SkeletonState expectedState(
+        JointParameters(expectedJointMotion.col(frame)), expected, /*computeDeriv=*/false);
+    const SkeletonState actualState(
+        JointParameters(actualJointMotion.col(frame)), actual, /*computeDeriv=*/false);
+    for (size_t joint = 0; joint < expected.joints.size(); ++joint) {
+      const auto& expectedTransform = expectedState.jointState.at(joint).transform;
+      const auto& actualTransform = actualState.jointState.at(actualJoints[joint]).transform;
+      result.translation = std::max(
+          result.translation, (actualTransform.translation - expectedTransform.translation).norm());
+      result.rotation = std::max(
+          result.rotation,
+          (actualTransform.toRotationMatrix() - expectedTransform.toRotationMatrix()).norm());
+    }
+  }
+  return result;
+}
 
 } // namespace momentum
