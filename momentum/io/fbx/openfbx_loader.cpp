@@ -31,6 +31,7 @@
 #include <ofbx.h>
 #include <gsl/span_ext>
 
+#include <array>
 #include <cmath>
 #include <exception>
 #include <fstream>
@@ -1173,6 +1174,7 @@ MatrixXf parseAnimation(
   if (skeletonAnimCurves.empty()) {
     return {};
   }
+  MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX animation: unknown scene frame rate {}", fps);
 
   const double totalSeconds = getMaxSeconds(skeletonAnimCurves);
   const size_t numFrames = ceil(totalSeconds * fps) + 1;
@@ -1387,6 +1389,8 @@ parseMarkerSequence(const ofbx::IScene* scene, const ofbx::Object* root, const f
     return result;
   }
 
+  MT_THROW_IF(!(fps > 0.0f), "Unable to read the FBX markers: unknown scene frame rate {}", fps);
+
   // Determine the total number of frames based on marker animation only
   const double totalSeconds = getMaxSeconds(markerAnimCurves);
   const size_t numFrames = std::ceil(totalSeconds * fps) + 1;
@@ -1516,6 +1520,25 @@ OfbxScenePtr loadOfbxScene(
   }
 
   return scene;
+}
+
+// The frame rate of the scene. Versions of OpenFBX that know the FBX time modes only up to the
+// custom frame rate, such as 0.9, report -1 for the later ones (96, 72, 59.94 and 119.88 frames per
+// second, time modes 15 to 18), which the FBX SDK writes, for example for motion at 72 or 96 frames
+// per second. Any other unknown time mode gives -1.
+float sceneFrameRate(const ofbx::IScene& scene) {
+  constexpr int kFirstLaterTimeMode = 15;
+  constexpr std::array<float, 4> kLaterFrameRates = {
+      96.0f, 72.0f, 60000.0f / 1001.0f, 120000.0f / 1001.0f};
+  const float frameRate = scene.getSceneFrameRate();
+  const ofbx::GlobalSettings* settings = scene.getGlobalSettings();
+  if (frameRate > 0.0f || settings == nullptr) {
+    return frameRate;
+  }
+  const int timeMode = static_cast<int>(settings->TimeMode) - kFirstLaterTimeMode;
+  return timeMode >= 0 && timeMode < static_cast<int>(kLaterFrameRates.size())
+      ? kLaterFrameRates[timeMode]
+      : frameRate;
 }
 
 // Parse state for one loaded character: the skeleton and the meshes/skin/collision belonging to it.
@@ -1675,7 +1698,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   std::vector<MatrixXf> jointParamMotions;
   if (loadAnim) {
     const auto stacks = collectReadableAnimationStacks(scene);
-    jointParamMotions = parseAnimationStacks(stacks, cp, scene.getSceneFrameRate(), permissive);
+    jointParamMotions = parseAnimationStacks(stacks, cp, sceneFrameRate(scene), permissive);
   }
 
   const auto parameterTransform =
@@ -1683,7 +1706,7 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   return {
       buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),
       jointParamMotions,
-      scene.getSceneFrameRate()};
+      sceneFrameRate(scene)};
 }
 
 // The character, and the joint within it, of each parsed character's joint nodes.
@@ -1883,7 +1906,7 @@ std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float> load
       parseFbxCharacters(*scene, permissive, loadBlendShapes);
   const auto stacks = loadAnim ? collectReadableAnimationStacks(*scene)
                                : std::vector<const ofbx::AnimationStack*>();
-  const float frameRate = scene->getSceneFrameRate();
+  const float frameRate = sceneFrameRate(*scene);
 
   std::vector<std::pair<Character, std::vector<MatrixXf>>> result;
   result.reserve(characters.size());
@@ -2012,7 +2035,7 @@ MarkerSequence loadOpenFbxMarkerSequence(
   // Markers need the animation curves, so load with animations enabled; blend shapes are unused.
   const OfbxScenePtr scene =
       loadOfbxScene(inputData, /*loadAnim=*/true, LoadBlendShapes::No, stripNamespaces);
-  return parseMarkerSequence(scene.get(), scene->getRoot(), scene->getSceneFrameRate());
+  return parseMarkerSequence(scene.get(), scene->getRoot(), sceneFrameRate(*scene));
 }
 
 MarkerSequence loadOpenFbxMarkerSequence(const filesystem::path& filename, bool stripNamespaces) {
