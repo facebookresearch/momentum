@@ -1037,11 +1037,8 @@ std::string GltfBuilder::addCharacter(
     }
   }
   if (options.extensions) {
-    nlohmann::json rig = nlohmann::json::object();
-    parameterTransformToJson(character, rig["transform"]);
-    parameterLimitsToJson(character, rig["parameterLimits"]);
-    parameterSetsToJson(character, rig["parameterSet"]);
-    poseConstraintsToJson(character, rig["poseConstraints"]);
+    nlohmann::json rig;
+    rigToJson(character, rig);
     if (!isEmptyMetadata(character.metadata)) {
       rig["metadata"] = character.metadata;
     }
