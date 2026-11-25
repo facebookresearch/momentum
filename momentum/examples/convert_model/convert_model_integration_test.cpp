@@ -12,6 +12,7 @@
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/urdf/urdf_io.h>
@@ -66,8 +67,8 @@ std::string fileContents(const std::string& path) {
   return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
 }
 
-/// Integration test fixture that runs the convert_model, export_rig, apply_motion and
-/// split_characters binaries with various arguments and checks their output files.
+/// Integration test fixture that runs the convert_model, export_rig, apply_motion, split_characters
+/// and combine_characters binaries with various arguments and checks their output files.
 class ConvertModelIntegrationTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -88,6 +89,11 @@ class ConvertModelIntegrationTest : public ::testing::Test {
     ASSERT_NE(splitCharactersPath, nullptr)
         << "SPLIT_CHARACTERS_BINARY environment variable not set";
     splitCharactersPath_ = filesystem::absolute(splitCharactersPath).string();
+
+    const char* combineCharactersPath = getenv("COMBINE_CHARACTERS_BINARY");
+    ASSERT_NE(combineCharactersPath, nullptr)
+        << "COMBINE_CHARACTERS_BINARY environment variable not set";
+    combineCharactersPath_ = filesystem::absolute(combineCharactersPath).string();
 
     const char* testDataPath = getenv("TEST_MOMENTUM_MODELS_PATH");
     ASSERT_NE(testDataPath, nullptr) << "TEST_MOMENTUM_MODELS_PATH environment variable not set";
@@ -119,6 +125,12 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   /// Returns the process exit code (0 = success).
   int runSplitCharacters(const std::vector<std::string>& args) {
     return runBinary(splitCharactersPath_, args);
+  }
+
+  /// Run the combine_characters binary with the given arguments.
+  /// Returns the process exit code (0 = success).
+  int runCombineCharacters(const std::vector<std::string>& args) {
+    return runBinary(combineCharactersPath_, args);
   }
 
   /// Run a binary with the given arguments.
@@ -187,6 +199,7 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   std::string exportRigPath_;
   std::string applyMotionPath_;
   std::string splitCharactersPath_;
+  std::string combineCharactersPath_;
   std::string testDataPath_;
   momentum::TemporaryDirectory tempDir_;
 };
@@ -1310,4 +1323,159 @@ TEST_F(ConvertModelIntegrationTest, SplitCharacters_UnknownFormat_Fails) {
            "obj"}),
       0);
   EXPECT_FALSE(std::filesystem::exists(directory));
+}
+
+// ============================================================================
+// COMBINE_CHARACTERS TESTS
+// ============================================================================
+
+// Test: combine_characters writes the file that convert_model writes for one file with the
+// characters of all inputs
+TEST_F(ConvertModelIntegrationTest, CombineCharacters_WritesTheFileOfConvertModelForAllCharacters) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto both = outputFile("both.glb");
+  momentum::saveTestSceneAsGltf(both, saved, 30.0f);
+  const auto a = outputFile("only_a.glb");
+  momentum::saveTestSceneAsGltf(a, {saved[0]}, 30.0f);
+  const auto b = outputFile("only_b.glb");
+  momentum::saveTestSceneAsGltf(b, {saved[1]}, 30.0f);
+
+  const auto combined = outputFile("combined.glb");
+  ASSERT_EQ(runCombineCharacters({"--input", a, "--input", b, "--out", combined}), 0);
+  const auto expected = outputFile("expected_both.glb");
+  ASSERT_EQ(runConvertModel({"--motion", both, "--out", expected}), 0);
+  ASSERT_FALSE(fileContents(expected).empty());
+  EXPECT_TRUE(fileContents(combined) == fileContents(expected));
+
+  // An FBX input gives the characters that convert_model reads from it.
+  const auto bFbx = outputFile("only_b.fbx");
+  momentum::saveTestSceneAsFbx(bFbx, {saved[1]}, 30.0f);
+  const auto bothFromFbx = outputFile("both_from_fbx.glb");
+  ASSERT_EQ(runCombineCharacters({"--input", a, "--input", bFbx, "--out", bothFromFbx}), 0);
+  const auto [entries, fps] = momentum::loadGltfCharactersWithMotion(bothFromFbx);
+  ASSERT_EQ(entries.size(), 2);
+  EXPECT_EQ(entries[1].character.name, "b");
+  EXPECT_EQ(entries[1].motion.cols(), saved[1].motion.cols());
+}
+
+// Test: inputs with different frame rates are an error without --resample; with it, the motion is
+// resampled to the frame rate of the first input, or to --fps
+TEST_F(ConvertModelIntegrationTest, CombineCharacters_DifferentFrameRates_NeedResample) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto a = outputFile("a_30.glb");
+  momentum::saveTestSceneAsGltf(a, {saved[0]}, 30.0f);
+  const auto b = outputFile("b_60.glb");
+  momentum::saveTestSceneAsGltf(b, {saved[1]}, 60.0f);
+
+  const auto out = outputFile("resampled.glb");
+  EXPECT_NE(runCombineCharacters({"--input", a, "--input", b, "--out", out}), 0);
+  EXPECT_FALSE(std::filesystem::exists(out));
+  EXPECT_NE(runCombineCharacters({"--input", a, "--input", b, "--fps", "60", "--out", out}), 0);
+
+  // At half the frame rate, the frames are every other input frame; at twice the frame rate, the
+  // input frames with the mean of each two neighbors between them.
+  const auto everyOtherFrame = [](const Eigen::MatrixXf& motion) {
+    Eigen::MatrixXf result(motion.rows(), (motion.cols() + 1) / 2);
+    for (Eigen::Index frame = 0; frame < result.cols(); ++frame) {
+      result.col(frame) = motion.col(2 * frame);
+    }
+    return result;
+  };
+  const auto withMidpoints = [](const Eigen::MatrixXf& motion) {
+    Eigen::MatrixXf result(motion.rows(), 2 * motion.cols() - 1);
+    for (Eigen::Index frame = 0; frame < motion.cols(); ++frame) {
+      result.col(2 * frame) = motion.col(frame);
+      if (frame + 1 < motion.cols()) {
+        result.col(2 * frame + 1) = 0.5f * (motion.col(frame) + motion.col(frame + 1));
+      }
+    }
+    return result;
+  };
+  struct Case {
+    std::vector<std::string> fpsArgs;
+    float fps;
+    Eigen::MatrixXf motionA;
+    Eigen::MatrixXf motionB;
+  };
+  for (const auto& [fpsArgs, fps, motionA, motionB] :
+       {Case{
+            .fpsArgs = {},
+            .fps = 30.0f,
+            .motionA = saved[0].motion,
+            .motionB = everyOtherFrame(saved[1].motion)},
+        Case{
+            .fpsArgs = {"--fps", "60"},
+            .fps = 60.0f,
+            .motionA = withMidpoints(saved[0].motion),
+            .motionB = saved[1].motion}}) {
+    SCOPED_TRACE(fps);
+    std::vector<std::string> args = {"--input", a, "--input", b, "--resample", "--out", out};
+    args.insert(args.end(), fpsArgs.begin(), fpsArgs.end());
+    ASSERT_EQ(runCombineCharacters(args), 0);
+    const auto [entries, loadedFps] = momentum::loadGltfCharactersWithMotion(out);
+    EXPECT_EQ(loadedFps, fps);
+    ASSERT_EQ(entries.size(), 2);
+    EXPECT_TRUE(entries[0].motion.isApprox(motionA, 1e-5f)) << entries[0].motion;
+    EXPECT_TRUE(entries[1].motion.isApprox(motionB, 1e-5f)) << entries[1].motion;
+  }
+}
+
+// Test: a character with the name of an earlier character is renamed with a numeric suffix
+TEST_F(ConvertModelIntegrationTest, CombineCharacters_SameNames_AreMadeUnique) {
+  const auto saved = momentum::createTwoCharacterScene();
+  auto renamed = saved[1];
+  renamed.character.name = "a";
+  const auto first = outputFile("first_a.glb");
+  momentum::saveTestSceneAsGltf(first, {saved[0]}, 30.0f);
+  const auto second = outputFile("second_a.glb");
+  momentum::saveTestSceneAsGltf(second, {renamed}, 30.0f);
+
+  const auto out = outputFile("unique_names.glb");
+  ASSERT_EQ(runCombineCharacters({"--input", first, "--input", second, "--out", out}), 0);
+  const auto characters = momentum::loadGltfCharacters(out);
+  ASSERT_EQ(characters.size(), 2);
+  EXPECT_EQ(characters[0].name, "a");
+  EXPECT_EQ(characters[1].name, "a_1");
+  EXPECT_EQ(characters[1].skeleton.joints.size(), renamed.character.skeleton.joints.size());
+}
+
+// Test: the markers of a marker file are saved when their frame rate is the frame rate of the
+// output
+TEST_F(ConvertModelIntegrationTest, CombineCharacters_Markers_NeedTheFrameRateOfTheOutput) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto a = outputFile("a_markers.glb");
+  momentum::saveTestSceneAsGltf(a, {saved[0]}, 30.0f);
+  const std::vector<std::vector<momentum::Marker>> frames(
+      5, {momentum::Marker{.name = "marker", .pos = {1.0, 2.0, 3.0}, .occluded = false}});
+  const auto markersAt = [&](float fps) {
+    const auto path = outputFile("markers_" + std::to_string(static_cast<int>(fps)) + ".glb");
+    momentum::GltfBuilder builder;
+    builder.addMarkerSequence(fps, frames);
+    builder.save(path);
+    return path;
+  };
+
+  const auto out = outputFile("with_markers.glb");
+  ASSERT_EQ(runCombineCharacters({"--input", a, "--markers", markersAt(30.0f), "--out", out}), 0);
+  const auto markers = momentum::loadMarkers(out);
+  ASSERT_EQ(markers.size(), 1);
+  EXPECT_EQ(markers[0].frames.size(), frames.size());
+
+  EXPECT_NE(
+      runCombineCharacters(
+          {"--input", a, "--markers", markersAt(100.0f), "--out", outputFile("bad.glb")}),
+      0);
+  EXPECT_FALSE(std::filesystem::exists(outputFile("bad.glb")));
+  ASSERT_EQ(
+      runCombineCharacters(
+          {"--input",
+           a,
+           "--markers",
+           markersAt(100.0f),
+           "--resample",
+           "--fps",
+           "100",
+           "--out",
+           outputFile("resampled_markers.glb")}),
+      0);
 }
