@@ -156,7 +156,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
 ///
 /// @param filename Path to the output FBX file
 /// @param character The character to save
-/// @param poses Model parameters for each frame (empty for bind pose only)
+/// @param poses Model parameters with shape (numAllModelParameters x numFrames), one column per
+/// frame; empty for the bind pose only. With columns, a different row count throws.
 /// @param identity Identity pose parameters (empty to use bind pose)
 /// @param framerate Animation framerate in frames per second
 /// @param markerSequence Optional marker sequence data to save with the character
