@@ -23,6 +23,12 @@ namespace momentum {
 
 namespace {
 
+// Whether `node` is a joint that GltfBuilder marked with the momentum extension.
+[[nodiscard]] bool isMarkedJoint(const fx::gltf::Node& node) {
+  return findMomentumExtension(node.extensionsAndExtras).value("type", std::string()) ==
+      "skeleton_joint";
+}
+
 [[nodiscard]] std::vector<uint32_t> getAncestorsIncludingSelf(
     uint32_t nodeId,
     std::span<const uint32_t> parents) {
@@ -59,9 +65,9 @@ namespace {
 // nodeToObjectMap for query. nodeToObjectMap stores mapping from node index to joint index,
 // if the node is a joint. If it's a collision capsule or locator,
 // stores the index in the collision volume array or locator array.
-// If no extension is present in the glb file, right now we will load every not-skinned node as a
-// joint. #TODO: correctly load hierarchy from the skinning information if no momentum extension is
-// in the file.
+// If no node of the document is a marked joint, every node without a mesh is loaded as a joint.
+// #TODO: correctly load hierarchy from the skinning information if no momentum extension is in the
+// file.
 void loadHierarchyRecursive(
     const fx::gltf::Document& model,
     const int nodeId,
@@ -323,8 +329,7 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
   if (hasMomentumExtension(model.extensionsAndExtras)) {
     std::vector<bool> hasMarkedJoint(model.nodes.size(), false);
     for (size_t nodeId = 0; nodeId < model.nodes.size(); ++nodeId) {
-      if (findMomentumExtension(model.nodes[nodeId].extensionsAndExtras)
-              .value("type", std::string()) == "skeleton_joint") {
+      if (isMarkedJoint(model.nodes[nodeId])) {
         const uint32_t root = getTopLevelAncestor(static_cast<uint32_t>(nodeId), sceneParentMap);
         hasMarkedJoint.at(root) = true;
       }
@@ -443,7 +448,9 @@ loadHierarchyForRoots(
   LocatorList locators;
   PhysicalProperties physicalProperties;
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
-  const bool useExtension = hasMomentumExtension(model.extensionsAndExtras);
+  // GltfBuilder marks every joint when it writes the momentum extension, and writes a
+  // document-level extension (the frame rate of a motion) even without it, so the marks decide.
+  const bool useExtension = std::ranges::any_of(model.nodes, isMarkedJoint);
   std::vector<bool> visited(model.nodes.size(), false);
 
   for (const auto& rootNode : skeletonRoots) {
