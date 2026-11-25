@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
             charState.skeletonState.jointParameters.v);
       }
     }
-    jointParams.send(rec, "world_params", jointNames);
+    jointParams.send(rec, "world_params", "joint_params", jointNames);
   } catch (const std::exception& e) {
     std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;

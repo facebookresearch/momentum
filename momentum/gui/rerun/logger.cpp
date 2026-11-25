@@ -646,12 +646,13 @@ Eigen::Map<const Eigen::MatrixXf> JointParamsRecorder::jointParams() const {
 void JointParamsRecorder::send(
     const rerun::RecordingStream& rec,
     const std::string& worldPrefix,
+    const std::string& posePrefix,
     std::span<const std::string> jointNames) const {
   if (frameIndices_.empty()) {
     return;
   }
   logJointParamsColumns(
-      rec, worldPrefix, "joint_params", jointNames, jointParams(), frameIndices_, times_);
+      rec, worldPrefix, posePrefix, jointNames, jointParams(), frameIndices_, times_);
 }
 
 } // namespace momentum
