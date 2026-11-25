@@ -28,6 +28,8 @@ enum class LoadBlendShapes { No, Yes };
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
 // Permissive mode allows loading  mesh-only characters (without skin weights).
+// The character has the rig that the file stores (see FbxBuilder), or else an empty parameter
+// transform; the scene of several skeletons, which this merges into one character, gets no rig.
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
@@ -52,7 +54,8 @@ Character loadFbxCharacter(
 /// mesh outside a skeleton, such as an object written by FbxBuilder::addAnimatedMesh, which becomes
 /// a one-joint character. A skinned mesh goes to the character its skin links to. An unskinned mesh
 /// in a skeleton, such as one written by FbxBuilder::addRigidBody, is bound rigidly to the nearest
-/// joint above it. Each character has an identity parameter transform. No animation is loaded.
+/// joint above it. Each character has the rig that the file stores for it (see FbxBuilder), or else
+/// an identity parameter transform. No animation is loaded.
 ///
 /// @note The name comes from the root joint's `name` property when present, otherwise from the root
 /// node name. The singular loader leaves the name empty when that property is absent.

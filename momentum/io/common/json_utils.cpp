@@ -201,6 +201,49 @@ void parameterTransformToJson(const Character& character, nlohmann::json& j) {
   j["faceExpressionParameters"] = fe;
 }
 
+void rigToJson(const Character& character, nlohmann::json& j) {
+  j = nlohmann::json::object();
+  parameterTransformToJson(character, j["transform"]);
+  parameterLimitsToJson(character, j["parameterLimits"]);
+  parameterSetsToJson(character, j["parameterSet"]);
+  poseConstraintsToJson(character, j["poseConstraints"]);
+}
+
+void rigFromJson(const nlohmann::json& j, Character& character) {
+  if (j.contains("transform")) {
+    character.parameterTransform = parameterTransformFromJson(character, j.at("transform"));
+  } else {
+    character.parameterTransform =
+        ParameterTransform::empty(character.skeleton.joints.size() * kParametersPerJoint);
+  }
+  if (j.contains("parameterSet")) {
+    character.parameterTransform.parameterSets =
+        parameterSetsFromJson(character, j.at("parameterSet"));
+  }
+  if (j.contains("poseConstraints")) {
+    character.parameterTransform.poseConstraints =
+        poseConstraintsFromJson(character, j.at("poseConstraints"));
+  }
+  if (j.contains("parameterLimits")) {
+    character.parameterLimits = parameterLimitsFromJson(character, j.at("parameterLimits"));
+  }
+}
+
+std::string rigToJsonString(const Character& character) {
+  nlohmann::json j;
+  rigToJson(character, j);
+  return j.dump();
+}
+
+void rigFromJsonString(const std::string& text, Character& character) {
+  const nlohmann::json j = nlohmann::json::parse(text);
+  // rigToJsonString() writes an object with the parameter transform; other JSON is not a rig.
+  MT_THROW_IF(
+      !j.is_object() || !j.contains("transform"),
+      "The JSON text is not a rig, which is an object with a 'transform' field");
+  rigFromJson(j, character);
+}
+
 ParameterTransform parameterTransformFromJson(const Character& character, const nlohmann::json& j) {
   ParameterTransform pt;
   try {
