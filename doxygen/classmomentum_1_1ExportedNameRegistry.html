@@ -104,6 +104,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a2f9aaa85b7029323ad3be887714a5459"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name <code class="param">requestedName</code> is exported under: itself if unused, otherwise with a numeric suffix (see makeUniqueName).  <br /></td></tr>
 <tr class="memitem:afed7a375c3d3eb22a83700ae5a378ef1" id="r_afed7a375c3d3eb22a83700ae5a378ef1"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afed7a375c3d3eb22a83700ae5a378ef1">insert</a> (const std::string &amp;exportedName, const std::string &amp;sourceName, T entry)</td></tr>
 <tr class="memdesc:afed7a375c3d3eb22a83700ae5a378ef1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Store <code class="param">entry</code> under <code class="param">exportedName</code>, as returned by <a class="el" href="#a2f9aaa85b7029323ad3be887714a5459" title="The name requestedName is exported under: itself if unused, otherwise with a numeric suffix (see make...">makeExportedName()</a>, for a character whose source name is <code class="param">sourceName</code>.  <br /></td></tr>
+<tr class="memitem:af8aeacf2828926bb9f09d25c0356ba70" id="r_af8aeacf2828926bb9f09d25c0356ba70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8aeacf2828926bb9f09d25c0356ba70">reserve</a> (const std::string &amp;exportedName)</td></tr>
+<tr class="memdesc:af8aeacf2828926bb9f09d25c0356ba70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserve <code class="param">exportedName</code>, as returned by <a class="el" href="#a2f9aaa85b7029323ad3be887714a5459" title="The name requestedName is exported under: itself if unused, otherwise with a numeric suffix (see make...">makeExportedName()</a>, for an exported object that is not a character.  <br /></td></tr>
 <tr class="memitem:ab0458ad3fc9c5c3beb9c41809d734be0" id="r_ab0458ad3fc9c5c3beb9c41809d734be0"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0458ad3fc9c5c3beb9c41809d734be0">resolve</a> (const std::string &amp;exportedName, const std::string &amp;sourceName)</td></tr>
 <tr class="memdesc:ab0458ad3fc9c5c3beb9c41809d734be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The entry a request selects: the entry exported as <code class="param">exportedName</code> when it is not empty (throws if there is none), otherwise the default entry for <code class="param">sourceName</code> (see <a class="el" href="#afed7a375c3d3eb22a83700ae5a378ef1" title="Store entry under exportedName, as returned by makeExportedName(), for a character whose source name ...">insert()</a>; nullptr if there is none).  <br /></td></tr>
 <tr class="memitem:abd42ae7bc24a928840cbe3dea3e596be" id="r_abd42ae7bc24a928840cbe3dea3e596be"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd42ae7bc24a928840cbe3dea3e596be">find</a> (const std::string &amp;exportedName)</td></tr>
@@ -114,7 +116,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
 class momentum::ExportedNameRegistry&lt; T &gt;</div><p>Entries of a scene builder keyed by their exported (unique) name. </p>
-<p><a class="el" href="classmomentum_1_1FbxBuilder.html" title="Builder class for creating FBX files with multiple characters and animations.">FbxBuilder</a> and <a class="el" href="classmomentum_1_1GltfBuilder.html" title="Helper class to build a glb scene.">GltfBuilder</a> export each character under a unique name and return it, so callers can target one exported character even when several share a source name (<span class="tt">character.name</span>). An empty requested name resolves to the entry added from the source name that kept that name, or else to the first entry added from the source name, which keeps calls that do not pass the returned name working. A character exported under the empty name is thus reachable with that name.</p>
+<p><a class="el" href="classmomentum_1_1FbxBuilder.html" title="Builder class for creating FBX files with multiple characters and animations.">FbxBuilder</a> and <a class="el" href="classmomentum_1_1GltfBuilder.html" title="Helper class to build a glb scene.">GltfBuilder</a> export each character under a unique name and return it, so callers can target one exported character even when several share a source name (<span class="tt">character.name</span>). An empty requested name resolves to the entry added from the source name that kept that name, or else to the first entry added from the source name, which keeps calls that do not pass the returned name working. A character exported under the empty name is thus reachable with that name. An exported object that is not a character, such as an FBX animated mesh, reserves its name so that no character is exported under it.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Per-entry payload. </td></tr>
@@ -122,7 +124,7 @@ class momentum::ExportedNameRegistry&lt; T &gt;</div><p>Entries of a scene build
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00054">54</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00056">56</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="abd42ae7bc24a928840cbe3dea3e596be" name="abd42ae7bc24a928840cbe3dea3e596be"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abd42ae7bc24a928840cbe3dea3e596be">&#9670;&#160;</a></span>find()</h2>
@@ -151,9 +153,9 @@ template&lt;typename T&gt; </div>
 
 <p>The entry exported as <code class="param">exportedName</code>, or nullptr. </p>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00094">94</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00104">104</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="name__utils_8h_source.html#l00082">resolve()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="name__utils_8h_source.html#l00092">resolve()</a>.</p>
 
 </div>
 </div>
@@ -194,7 +196,7 @@ template&lt;typename T&gt; </div>
 <p>Store <code class="param">entry</code> under <code class="param">exportedName</code>, as returned by <a class="el" href="#a2f9aaa85b7029323ad3be887714a5459" title="The name requestedName is exported under: itself if unused, otherwise with a numeric suffix (see make...">makeExportedName()</a>, for a character whose source name is <code class="param">sourceName</code>. </p>
 <p>An empty name resolves to the entry added from <code class="param">sourceName</code> that kept that name, else to the first entry added from <code class="param">sourceName</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00071">71</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00073">73</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
 </div>
 </div>
@@ -226,9 +228,41 @@ template&lt;typename T&gt; </div>
 <p>The name <code class="param">requestedName</code> is exported under: itself if unused, otherwise with a numeric suffix (see makeUniqueName). </p>
 <p>Does not change the registry, so a caller can finish building an entry before it calls <a class="el" href="#afed7a375c3d3eb22a83700ae5a378ef1" title="Store entry under exportedName, as returned by makeExportedName(), for a character whose source name ...">insert()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00059">59</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00061">61</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="name__utils_8h_source.html#l00027">momentum::makeUniqueName()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
+<p class="reference">References <a class="el" href="name__utils_8h_source.html#l00028">momentum::makeUniqueName()</a>, and <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
+
+</div>
+</div>
+<a id="af8aeacf2828926bb9f09d25c0356ba70" name="af8aeacf2828926bb9f09d25c0356ba70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8aeacf2828926bb9f09d25c0356ba70">&#9670;&#160;</a></span>reserve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classmomentum_1_1ExportedNameRegistry.html">momentum::ExportedNameRegistry</a>&lt; T &gt;::reserve </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>exportedName</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reserve <code class="param">exportedName</code>, as returned by <a class="el" href="#a2f9aaa85b7029323ad3be887714a5459" title="The name requestedName is exported under: itself if unused, otherwise with a numeric suffix (see make...">makeExportedName()</a>, for an exported object that is not a character. </p>
+<p><a class="el" href="#a2f9aaa85b7029323ad3be887714a5459" title="The name requestedName is exported under: itself if unused, otherwise with a numeric suffix (see make...">makeExportedName()</a> then does not return it, and <a class="el" href="#ab0458ad3fc9c5c3beb9c41809d734be0" title="The entry a request selects: the entry exported as exportedName when it is not empty (throws if there...">resolve()</a> and <a class="el" href="#abd42ae7bc24a928840cbe3dea3e596be" title="The entry exported as exportedName, or nullptr.">find()</a> do not return an entry for it. </p>
+
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00085">85</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
 </div>
 </div>
@@ -263,9 +297,9 @@ template&lt;typename T&gt; </div>
 
 <p>The entry a request selects: the entry exported as <code class="param">exportedName</code> when it is not empty (throws if there is none), otherwise the default entry for <code class="param">sourceName</code> (see <a class="el" href="#afed7a375c3d3eb22a83700ae5a378ef1" title="Store entry under exportedName, as returned by makeExportedName(), for a character whose source name ...">insert()</a>; nullptr if there is none). </p>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00082">82</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00092">92</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
-<p class="reference">References <a class="el" href="name__utils_8h_source.html#l00094">find()</a>, and <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
+<p class="reference">References <a class="el" href="name__utils_8h_source.html#l00104">find()</a>, and <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
 
 </div>
 </div>
@@ -296,7 +330,7 @@ template&lt;typename T&gt; </div>
 
 <p>The number of entries. </p>
 
-<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00100">100</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="name__utils_8h_source.html#l00110">110</a> of file <a class="el" href="name__utils_8h_source.html">name_utils.h</a>.</p>
 
 </div>
 </div>

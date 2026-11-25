@@ -1,5 +1,7 @@
 var NAVTREEINDEX8 =
 {
+"classmomentum_1_1SkinnedLocatorErrorFunctionT.html#aff78891e3296ecd596a24b20ba83deed":[2,0,0,132,7],
+"classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html":[1,0,2,134],
 "classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html":[2,0,0,133],
 "classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a002726ef1e2b9742d142b283ccc19e90":[1,0,2,134,13],
 "classmomentum_1_1SkinnedLocatorTriangleErrorFunctionT.html#a002726ef1e2b9742d142b283ccc19e90":[2,0,0,133,13],
@@ -247,7 +249,5 @@ var NAVTREEINDEX8 =
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#a6993596c31cf66127d68c7f9d7f3e05a":[2,0,0,26,5],
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#a8201e42591b1aae799455930ba0be779":[1,0,2,27,3],
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#a8201e42591b1aae799455930ba0be779":[2,0,0,26,3],
-"classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553":[1,0,2,27,2],
-"classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553":[2,0,0,26,2],
-"classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe":[1,0,2,27,4]
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553":[1,0,2,27,2]
 };

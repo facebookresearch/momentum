@@ -5,5 +5,7 @@ var dir_48d37d9357baadef9a0e1c1d75190b6d =
     [ "logger.h", "logger_8h.html", "logger_8h" ],
     [ "logging_redirect.cpp", "logging__redirect_8cpp.html", "logging__redirect_8cpp" ],
     [ "logging_redirect.h", "logging__redirect_8h.html", "logging__redirect_8h" ],
-    [ "rerun_compat.h", "rerun__compat_8h.html", "rerun__compat_8h" ]
+    [ "rerun_compat.h", "rerun__compat_8h.html", "rerun__compat_8h" ],
+    [ "rerun_sink.cpp", "rerun__sink_8cpp.html", "rerun__sink_8cpp" ],
+    [ "rerun_sink.h", "rerun__sink_8h.html", "rerun__sink_8h" ]
 ];

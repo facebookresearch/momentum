@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"classmomentum_1_1FloorErrorFunctionT.html#aff6d777df8030759a352f2a0b3cdac56":[2,0,0,97,10],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html":[1,0,2,186],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html":[2,0,0,185],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a2d42e9bb34ea47420105e48fb79130b7":[1,0,2,186,4],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a2d42e9bb34ea47420105e48fb79130b7":[2,0,0,185,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "classmomentum_1_1GeneralizedLossT.html#a44aae7467211c01b0f2c73a8b418f357":[2,0,0,12,8],
 "classmomentum_1_1GeneralizedLossT.html#a8bd3714b7eba70b0dc1dafe6affe5f0e":[1,0,2,13,6],
 "classmomentum_1_1GeneralizedLossT.html#a8bd3714b7eba70b0dc1dafe6affe5f0e":[2,0,0,12,6],
-"classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[1,0,2,13,1],
-"classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[2,0,0,12,1],
-"classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[1,0,2,13,7]
+"classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[1,0,2,13,1]
 };

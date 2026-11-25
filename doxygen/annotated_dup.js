@@ -221,6 +221,7 @@ var annotated_dup =
       [ "CharacterMotion", "structmomentum_1_1CharacterMotion.html", "structmomentum_1_1CharacterMotion" ],
       [ "CharacterSkeletonStates", "structmomentum_1_1CharacterSkeletonStates.html", "structmomentum_1_1CharacterSkeletonStates" ],
       [ "CharacterWithNodeMap", "structmomentum_1_1CharacterWithNodeMap.html", "structmomentum_1_1CharacterWithNodeMap" ],
+      [ "RerunSinkOptions", "structmomentum_1_1RerunSinkOptions.html", "structmomentum_1_1RerunSinkOptions" ],
       [ "IOOptions", "structmomentum_1_1IOOptions.html", "structmomentum_1_1IOOptions" ],
       [ "ModelOptions", "structmomentum_1_1ModelOptions.html", "structmomentum_1_1ModelOptions" ],
       [ "GloveSensorObservation", "structmomentum_1_1GloveSensorObservation.html", "structmomentum_1_1GloveSensorObservation" ],

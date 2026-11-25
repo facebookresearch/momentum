@@ -1,5 +1,7 @@
 var NAVTREEINDEX3 =
 {
+"classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[2,0,0,12,1],
+"classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[1,0,2,13,7],
 "classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[2,0,0,12,7],
 "classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766":[1,0,2,13,0],
 "classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766":[2,0,0,12,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX3 =
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html":[2,0,0,165],
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a0ba45508a92bb710fecd12708adff7e7":[1,0,2,166,6],
 "classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a0ba45508a92bb710fecd12708adff7e7":[2,0,0,165,6],
-"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a0edfe667d35f099bc42d5c8435069de8":[1,0,2,166,3],
-"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a0edfe667d35f099bc42d5c8435069de8":[2,0,0,165,3],
-"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a179c8c6e77ef39e591493904af25e15b":[1,0,2,166,13]
+"classmomentum_1_1JointToJointSequenceErrorFunctionT.html#a0edfe667d35f099bc42d5c8435069de8":[1,0,2,166,3]
 };

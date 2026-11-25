@@ -192,6 +192,7 @@ var hierarchy =
     [ "momentum::Random&lt; Generator_ &gt;", "classmomentum_1_1Random.html", null ],
     [ "momentum::AlignedAllocator&lt; T, Alignment &gt;::rebind&lt; U &gt;", "structmomentum_1_1AlignedAllocator_1_1rebind.html", null ],
     [ "momentum::RegionColorsView", "structmomentum_1_1RegionColorsView.html", null ],
+    [ "momentum::RerunSinkOptions", "structmomentum_1_1RerunSinkOptions.html", null ],
     [ "momentum::ResizeableMatrix&lt; T &gt;", "classmomentum_1_1ResizeableMatrix.html", null ],
     [ "momentum::PlaneCollisionQueryT&lt; T &gt;::Result", "structmomentum_1_1PlaneCollisionQueryT_1_1Result.html", null ],
     [ "momentum::RigidTransformNodeResult", "structmomentum_1_1RigidTransformNodeResult.html", null ],

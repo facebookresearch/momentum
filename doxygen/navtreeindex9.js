@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#ac3bd04e8b9c5a012b2764e7e286dd553":[2,0,0,26,2],
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe":[1,0,2,27,4],
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe":[2,0,0,26,4],
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30":[1,0,2,27,0],
 "classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30":[2,0,0,26,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#a9e1408aa0769bd2879a58835ea9636bb":[2,0,0,141,15],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aa40ec0dbc7af76153c59688b9f41bcf8":[1,0,2,142,6],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aa40ec0dbc7af76153c59688b9f41bcf8":[2,0,0,141,6],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[1,0,2,142,12],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[2,0,0,141,12],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[1,0,2,142,1]
+"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[1,0,2,142,12]
 };

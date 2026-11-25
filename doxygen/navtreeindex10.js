@@ -1,5 +1,7 @@
 var NAVTREEINDEX10 =
 {
+"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[2,0,0,141,12],
+"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[1,0,2,142,1],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[2,0,0,141,1],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ae9189c37a70303dbfd941b8b5cc6cd4b":[1,0,2,142,14],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ae9189c37a70303dbfd941b8b5cc6cd4b":[2,0,0,141,14],
@@ -247,7 +249,5 @@ var NAVTREEINDEX10 =
 "functions_vars_s.html":[2,3,2,19],
 "functions_vars_t.html":[2,3,2,20],
 "functions_vars_u.html":[2,3,2,21],
-"functions_vars_v.html":[2,3,2,22],
-"functions_vars_w.html":[2,3,2,23],
-"functions_w.html":[2,3,0,23]
+"functions_vars_v.html":[2,3,2,22]
 };
