@@ -161,7 +161,8 @@ class GltfBuilder final {
       const std::string& animName = "default");
 
   // Save the file with the provided filename. If the fileFormat is 'GltfFileFormat::Auto',
-  // will deduct the file format by filename.
+  // will deduct the file format by filename: text for a .gltf extension in any letter case, and
+  // binary otherwise.
   // When embedResources is true, it will set all the existing buffers to embed the data.
   void save(
       const filesystem::path& filename,
