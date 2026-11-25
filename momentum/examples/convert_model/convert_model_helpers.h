@@ -178,6 +178,18 @@ SaveSceneOptions saveSceneOptions(const Options& options);
 /// @param options The FBX namespace, the FBX meshes, and the markers to save.
 void saveScene(const filesystem::path& path, const Scene& scene, const SaveSceneOptions& options);
 
+/// A motion at another frame rate, over the same duration.
+///
+/// Frame k of the result is at the time k / targetFps, for each k with a time that is not after the
+/// last frame of `motion`. Each value is linearly interpolated between the two nearest frames of
+/// `motion`, so the motion must not wrap angles between frames.
+///
+/// @param motion The motion, one column per frame at `sourceFps`.
+/// @param sourceFps The frame rate of `motion`; must be positive.
+/// @param targetFps The frame rate of the result; must be positive.
+/// @return The motion at `targetFps`, with the rows of `motion`.
+MatrixXf resampleMotion(const MatrixXf& motion, float sourceFps, float targetFps);
+
 /// Whether `path` names a BVH file.
 ///
 /// @param path A file path.

@@ -141,6 +141,9 @@ apply_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/apply_motion", 
 split_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/split_characters", depends-on = [
     "build",
 ], description = "Save each character of a file to a file of its own" }
+combine_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/combine_characters", depends-on = [
+    "build",
+], description = "Save the characters of several files to one file" }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/c3d_viewer", depends-on = [
     "build",
 ], description = "Run C3D file viewer" }
@@ -529,6 +532,9 @@ apply_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/apply_motion.ex
     "build",
 ] }
 split_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/split_characters.exe", depends-on = [
+    "build",
+] }
+combine_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/combine_characters.exe", depends-on = [
     "build",
 ] }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/c3d_viewer.exe", depends-on = [
