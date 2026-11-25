@@ -524,7 +524,7 @@ std::vector<std::string> sceneNames(const Scene& scene) {
 
 } // namespace
 
-TEST_F(ConvertModelTest, LoadsSceneOnlyForSeveralCharactersOrASelectedOne) {
+TEST_F(ConvertModelTest, LoadsEveryCharacterOrTheOneCharacterOfTheInput) {
   auto tempDir = temporaryDirectory("convert_model_scene");
   const auto gltfPath = tempDir.path() / "two.glb";
   const auto fbxPath = tempDir.path() / "two.fbx";
@@ -534,17 +534,27 @@ TEST_F(ConvertModelTest, LoadsSceneOnlyForSeveralCharactersOrASelectedOne) {
   for (const auto& twoCharacters : {gltfPath, fbxPath}) {
     Options motionOnly;
     motionOnly.input_motion_file = twoCharacters.string();
-    EXPECT_TRUE(loadScene(motionOnly).has_value()) << twoCharacters;
+    EXPECT_EQ(loadScene(motionOnly).characters.size(), 2) << twoCharacters;
     Options modelOnly;
     modelOnly.input_model_file = twoCharacters.string();
-    EXPECT_TRUE(loadScene(modelOnly).has_value()) << twoCharacters;
+    EXPECT_EQ(loadScene(modelOnly).characters.size(), 2) << twoCharacters;
   }
 
+  // One character is read with the single-character loaders.
   Options oneCharacter;
   oneCharacter.input_model_file = (filesystem::path(testDataPath_) / "motion.fbx").string();
   oneCharacter.input_motion_file =
       (filesystem::path(testDataPath_) / "character_with_motion.glb").string();
-  EXPECT_FALSE(loadScene(oneCharacter).has_value());
+  const Scene scene = loadScene(oneCharacter);
+  ASSERT_EQ(scene.characters.size(), 1);
+  Character expected = loadModelCharacter(oneCharacter);
+  const MotionData motion =
+      loadGlbMotion(filesystem::path(oneCharacter.input_motion_file), expected, true, oneCharacter);
+  EXPECT_EQ(
+      scene.characters.front().character.skeleton.getJointNames(),
+      expected.skeleton.getJointNames());
+  EXPECT_TRUE(scene.characters.front().poses.isApprox(motion.poses));
+  EXPECT_EQ(scene.fps, motion.fps);
   // A selected character is looked up by name, also in a file with one character.
   oneCharacter.character_name = "missing";
   EXPECT_THROW(loadScene(oneCharacter), std::runtime_error);
@@ -560,7 +570,7 @@ TEST_F(ConvertModelTest, MotionFileKeepsEveryCharacterWithItsMotion) {
 
   Options gltfOptions;
   gltfOptions.input_motion_file = gltfPath.string();
-  const Scene gltfScene = loadScene(gltfOptions).value();
+  const Scene gltfScene = loadScene(gltfOptions);
   ASSERT_EQ(sceneNames(gltfScene), (std::vector<std::string>{"a", "b"}));
   EXPECT_FLOAT_EQ(gltfScene.fps, 30.0f);
   for (size_t i = 0; i < saved.size(); ++i) {
@@ -572,7 +582,7 @@ TEST_F(ConvertModelTest, MotionFileKeepsEveryCharacterWithItsMotion) {
   // FBX stores joint parameters, which the identity parameter transform keeps as they are.
   Options fbxOptions;
   fbxOptions.input_motion_file = fbxPath.string();
-  const Scene fbxScene = loadScene(fbxOptions).value();
+  const Scene fbxScene = loadScene(fbxOptions);
   ASSERT_EQ(sceneNames(fbxScene), (std::vector<std::string>{"a", "b"}));
   EXPECT_FLOAT_EQ(fbxScene.fps, 30.0f);
   for (size_t i = 0; i < saved.size(); ++i) {
@@ -590,9 +600,8 @@ TEST_F(ConvertModelTest, MotionFileIsReadWhateverItsGltfExtension) {
     saveTestSceneAsGltf(path, createTwoCharacterScene(), 30.0f);
     Options options;
     options.input_motion_file = path.string();
-    const auto scene = loadScene(options);
-    ASSERT_TRUE(scene.has_value()) << filename;
-    EXPECT_EQ(sceneNames(*scene), (std::vector<std::string>{"a", "b"})) << filename;
+    const Scene scene = loadScene(options);
+    EXPECT_EQ(sceneNames(scene), (std::vector<std::string>{"a", "b"})) << filename;
   }
 }
 
@@ -613,7 +622,7 @@ TEST_F(ConvertModelTest, ModelCharactersGetTheMotionOfTheSameNamedCharacter) {
   Options options;
   options.input_model_file = modelPath.string();
   options.input_motion_file = motionPath.string();
-  const Scene scene = loadScene(options).value();
+  const Scene scene = loadScene(options);
 
   ASSERT_EQ(sceneNames(scene), (std::vector<std::string>{"a", "b"}));
   EXPECT_EQ(scene.characters[0].poses.cols(), 0);
@@ -635,7 +644,7 @@ TEST_F(ConvertModelTest, SelectedCharacterIsTheOnlyOneConverted) {
   Options options;
   options.input_motion_file = path.string();
   options.character_name = "b";
-  const Scene scene = loadScene(options).value();
+  const Scene scene = loadScene(options);
   ASSERT_EQ(sceneNames(scene), std::vector<std::string>{"b"});
   ASSERT_EQ(scene.characters[0].poses.cols(), saved[1].motion.cols());
   ASSERT_EQ(scene.characters[0].poses.rows(), saved[1].motion.rows());
@@ -656,7 +665,7 @@ TEST_F(ConvertModelTest, OneCharacterOptionsNeedASelectedCharacter) {
   EXPECT_THROW(loadScene(options), std::runtime_error);
 
   options.character_name = "a";
-  EXPECT_EQ(loadScene(options).value().characters.size(), 1);
+  EXPECT_EQ(loadScene(options).characters.size(), 1);
 }
 
 TEST_F(ConvertModelTest, FileThatTheMultiCharacterLoaderRejectsConvertsAsOneCharacter) {
@@ -675,7 +684,10 @@ TEST_F(ConvertModelTest, FileThatTheMultiCharacterLoaderRejectsConvertsAsOneChar
 
   Options options;
   options.input_model_file = path.string();
-  EXPECT_FALSE(loadScene(options).has_value());
+  const Scene scene = loadScene(options);
+  ASSERT_EQ(scene.characters.size(), 1);
+  EXPECT_EQ(
+      scene.characters.front().character.skeleton.joints.size(), character.skeleton.joints.size());
   // A selected character needs the multi-character loader.
   options.character_name = "a";
   EXPECT_THROW(loadScene(options), std::runtime_error);
