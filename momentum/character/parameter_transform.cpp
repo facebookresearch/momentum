@@ -537,15 +537,12 @@ ParameterSet ParameterTransformT<T>::getFaceExpressionParameters() const {
 
 template <typename T>
 bool ParameterTransformT<T>::isApprox(const ParameterTransformT<T>& parameterTransform) const {
-  bool isTransformEqual = false;
-  if (transform.cols() > 0 && transform.rows() > 0 && parameterTransform.transform.cols() > 0 &&
-      parameterTransform.transform.rows() > 0) {
-    isTransformEqual = transform.isApprox(parameterTransform.transform);
-  } else {
-    isTransformEqual = (transform.cols() == parameterTransform.transform.cols()) &&
-        (transform.rows() == parameterTransform.transform.rows());
+  // Eigen compares matrices of the same size only.
+  if (transform.rows() != parameterTransform.transform.rows() ||
+      transform.cols() != parameterTransform.transform.cols()) {
+    return false;
   }
-  if (!isTransformEqual) {
+  if (transform.size() > 0 && !transform.isApprox(parameterTransform.transform)) {
     return false;
   }
 
