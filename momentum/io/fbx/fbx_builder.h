@@ -49,6 +49,10 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// character.name. An animated mesh is not a motion target. loadFbxCharacters() reads every
 /// character and animated mesh back under its exported name.
 ///
+/// A non-empty FileSaveOptions::fbxNamespace given to addCharacter() or addRigidBody() prefixes the
+/// name of every node in the saved file with "<namespace>:", as saveFbx() does. A file has one
+/// namespace, so a different non-empty namespace in a later call throws.
+///
 /// Example usage:
 /// @code
 ///   FbxBuilder builder;
@@ -78,7 +82,8 @@ class FbxBuilder final {
   /// collision geometry, and metadata.
   ///
   /// @param character The character to add.
-  /// @param options File save options controlling mesh, locators, collisions.
+  /// @param options File save options: mesh, locators, collisions, coordinate system, and the FBX
+  /// namespace (see the class notes).
   /// @return The unique name the character is exported under (see the class notes).
   std::string addCharacter(
       const Character& character,
@@ -93,7 +98,7 @@ class FbxBuilder final {
   /// @param character The character to add as a rigid body.
   /// @param name Optional requested base name. Uses character.name if empty.
   /// @param parentJoint Index of the joint to parent the mesh under.
-  /// @param options File save options (mesh option is respected).
+  /// @param options File save options: the mesh option and the FBX namespace (see the class notes).
   /// @return The unique name the rigid body is exported under (see the class notes).
   std::string addRigidBody(
       const Character& character,
@@ -118,7 +123,7 @@ class FbxBuilder final {
   /// first one added from character.name; throws if there is none.
   void addMotion(
       const Character& character,
-      float fps,
+      double fps,
       const MatrixXf& motion = {},
       const VectorXf& offsets = {},
       const std::string& characterName = "");
@@ -136,7 +141,7 @@ class FbxBuilder final {
   /// @param characterName Name of the character to animate; see addMotion().
   void addMotionWithJointParams(
       const Character& character,
-      float fps,
+      double fps,
       const MatrixXf& jointParams,
       const std::string& characterName = "");
 
@@ -158,7 +163,7 @@ class FbxBuilder final {
   std::string addAnimatedMesh(
       const Character& character,
       const std::string& name,
-      float fps,
+      double fps,
       const MatrixXf& jointParams,
       const FbxUserProperties& userProperties = {});
 
@@ -183,7 +188,7 @@ class FbxBuilder final {
   std::string addAnimatedMesh(
       const Mesh& mesh,
       const std::string& name,
-      float fps,
+      double fps,
       const MatrixXf& jointParams,
       const Vector3f& translationOffset = Vector3f::Zero(),
       const FbxUserProperties& userProperties = {});
@@ -192,7 +197,7 @@ class FbxBuilder final {
   ///
   /// @param fps Frame rate for the marker animation.
   /// @param markerSequence Marker data per frame: markerSequence[frame][marker].
-  void addMarkerSequence(float fps, std::span<const std::vector<Marker>> markerSequence);
+  void addMarkerSequence(double fps, std::span<const std::vector<Marker>> markerSequence);
 
   /// Save the FBX scene to a file.
   ///
