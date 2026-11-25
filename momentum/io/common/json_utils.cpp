@@ -168,11 +168,16 @@ PoseConstraints poseConstraintsFromJson(const Character& character, const nlohma
 
 void parameterTransformToJson(const Character& character, nlohmann::json& j) {
   j["parameters"] = character.parameterTransform.name;
+  // parameterTransformFromJson() needs "joints", also when no parameter drives a joint.
+  j["joints"] = nlohmann::json::object();
 
+  // A transform with fewer rows than the joint parameters, such as a default-constructed one, has
+  // no entry for the other joints.
+  const auto numRows = static_cast<size_t>(character.parameterTransform.transform.outerSize());
   for (size_t jt = 0; jt < character.skeleton.joints.size(); jt++) {
     const auto& jointName = character.skeleton.joints[jt].name;
     const size_t paramIndex = jt * kParametersPerJoint;
-    for (size_t d = 0; d < kParametersPerJoint; d++) {
+    for (size_t d = 0; d < kParametersPerJoint && paramIndex + d < numRows; d++) {
       for (auto index = character.parameterTransform.transform.outerIndexPtr()[paramIndex + d];
            index < character.parameterTransform.transform.outerIndexPtr()[paramIndex + d + 1];
            ++index) {
