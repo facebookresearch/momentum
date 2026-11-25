@@ -1214,6 +1214,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
     NAME convert_model
     SOURCES_VARS convert_model_sources
     LINK_LIBRARIES
+      io_bvh
       io_character
       io_marker
       io_urdf
