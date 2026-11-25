@@ -103,8 +103,9 @@ jobs:
           cache: true
 
       - name: Build Momentum Debug
+        # Debug compiles peak at ~4-6 GB; the default 6 jobs exhaust the 16 GB runner.
         run: |
-          pixi run build_dev
+          pixi run build_dev -j3
 
       - name: Print ccache stats
         if: always()
