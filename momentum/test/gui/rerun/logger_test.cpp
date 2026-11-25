@@ -355,7 +355,7 @@ TEST_F(RerunLoggerTest, JointParamsRecorderKeepsFramesInOrder) {
   EXPECT_EQ(
       std::vector<double>(recorder.times().begin(), recorder.times().end()),
       (std::vector<double>{0.25, 0.5}));
-  EXPECT_NO_THROW(recorder.send(*rec_, "test/world", jointNames));
+  EXPECT_NO_THROW(recorder.send(*rec_, "test/world", "test/pose", jointNames));
 }
 
 TEST_F(RerunLoggerTest, JointParamsRecorderRejectsAFrameOfAnotherSize) {
