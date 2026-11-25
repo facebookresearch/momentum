@@ -1221,6 +1221,16 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
+  mt_executable(
+    NAME export_rig
+    SOURCES_VARS export_rig_sources
+    LINK_LIBRARIES
+      io_bvh
+      io_character
+      io_urdf
+      CLI11::CLI11
+  )
+
   if(MOMENTUM_BUILD_RERUN)
     mt_executable(
       NAME glb_viewer
