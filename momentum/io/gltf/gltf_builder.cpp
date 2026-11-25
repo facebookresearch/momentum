@@ -33,6 +33,9 @@
 
 #include <fx/gltf.h>
 
+#include <algorithm>
+#include <cctype>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
@@ -860,7 +863,11 @@ void saveDocument(
     const GltfFileFormat fileFormat) {
   // save model
   auto deducedFileFormat = fileFormat;
-  if (fileFormat == GltfFileFormat::Auto && filename.extension() == filesystem::path(".gltf")) {
+  std::string extension = filename.extension().string();
+  std::ranges::transform(extension, extension.begin(), [](unsigned char c) {
+    return static_cast<char>(std::tolower(c));
+  });
+  if (fileFormat == GltfFileFormat::Auto && extension == ".gltf") {
     deducedFileFormat = GltfFileFormat::Ascii;
   }
 
