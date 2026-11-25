@@ -9,10 +9,12 @@
 
 #include "momentum/character/character.h"
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 #include "momentum/io/fbx/openfbx_loader.h"
 
 #ifdef MOMENTUM_WITH_FBX_SDK
-#include "momentum/character/character_state.h"
+#include "momentum/character/skeleton_state.h"
+#include "momentum/io/fbx/fbx_builder.h"
 #include "momentum/io/fbx/fbx_io_internal.h"
 #include "momentum/io/fbx/fbx_memory_stream.h"
 #include "momentum/io/skeleton/locator_io.h"
@@ -20,160 +22,10 @@
 #include "momentum/io/skeleton/parameter_transform_io.h"
 #include "momentum/io/skeleton/parameters_io.h"
 
-#include <gsl/gsl>
-
 #include <variant>
 #endif // MOMENTUM_WITH_FBX_SDK
 
 namespace momentum {
-
-#ifdef MOMENTUM_WITH_FBX_SDK
-
-namespace {
-
-using namespace fbx_internal; // NOLINT(google-build-using-namespace)
-
-void saveFbxCommon(
-    const filesystem::path& filename,
-    const Character& character,
-    const MatrixXf& jointValues,
-    const double framerate,
-    const bool saveMesh,
-    const bool skipActiveJointParamCheck,
-    const FbxCoordSystemInfo& coordSystemInfo,
-    Permissive permissive,
-    std::span<const std::vector<Marker>> markerSequence,
-    std::string_view fbxNamespace,
-    const MatrixXf& poses) {
-  // ---------------------------------------------
-  // initialize FBX SDK and prepare for export
-  // ---------------------------------------------
-  auto* manager = ::fbxsdk::FbxManager::Create();
-  // FBX SDK uses manual memory management. Use a scope guard so the manager — and the exporter,
-  // scene, and nodes it owns — are always destroyed, including when an exception is thrown mid-
-  // export (e.g. by addPhysicalProperties). Without it, a throw leaks the manager (flagged by
-  // ASAN).
-  const auto managerGuard = gsl::finally([manager]() { manager->Destroy(); });
-  auto* ios = ::fbxsdk::FbxIOSettings::Create(manager, IOSROOT);
-  manager->SetIOSettings(ios);
-
-  // Create an exporter.
-  ::fbxsdk::FbxExporter* lExporter = ::fbxsdk::FbxExporter::Create(manager, "");
-
-  // Declare the path and filename of the file containing the scene.
-  // In this case, we are assuming the file is in the same directory as the executable.
-  // Going through string() because on windows, wchar_t (native filesystem path) are different from
-  // char https://en.cppreference.com/w/cpp/language/types This avoids a build error on windows
-  // only.
-  std::string sFilename = filename.string();
-  const char* lFilename = sFilename.c_str();
-
-  // Initialize the exporter.
-  bool lExportStatus = lExporter->Initialize(lFilename, -1, manager->GetIOSettings());
-
-  MT_THROW_IF(
-      !lExportStatus,
-      "Unable to initialize fbx exporter {}",
-      lExporter->GetStatus().GetErrorString());
-
-  // Normalize namespace: ensure it ends with ':' if not empty
-  std::string namespacePrefix(fbxNamespace);
-  if (!namespacePrefix.empty() && namespacePrefix.back() != ':') {
-    namespacePrefix += ":";
-  }
-
-  // ---------------------------------------------
-  // create the scene
-  // ---------------------------------------------
-  ::fbxsdk::FbxScene* scene = ::fbxsdk::FbxScene::Create(manager, "momentum_scene");
-  ::fbxsdk::FbxNode* root = scene->GetRootNode();
-  MT_THROW_IF(root == nullptr, "Unable to get root node from FBX scene");
-
-  // set the coordinate system
-  ::fbxsdk::FbxAxisSystem axis = toFbx(coordSystemInfo);
-  axis.ConvertScene(scene);
-
-  // Create skeleton hierarchy
-  auto skeletonResult = createSkeletonNodes(character, scene);
-  addMetaData(skeletonResult.rootNode, character);
-  addPhysicalProperties(character, skeletonResult.jointToNodeMap);
-  createLocatorNodes(character, scene, skeletonResult.nodes);
-  createCollisionGeometryNodes(character, scene, skeletonResult.nodes);
-
-  // Create mesh with blend shapes
-  MeshBlendShapeResult meshResult;
-  if (saveMesh && character.mesh != nullptr) {
-    meshResult = createMeshNode(character, scene, root, skeletonResult.jointToNodeMap, permissive);
-  }
-
-  // Add skeleton to scene root
-  if (!skeletonResult.nodes.empty()) {
-    root->AddChild(skeletonResult.rootNode);
-  }
-
-  // ---------------------------------------------
-  // create animation curves if we have motion
-  // ---------------------------------------------
-  if (jointValues.cols() != 0) {
-    if (jointValues.rows() == character.parameterTransform.numJointParameters()) {
-      createAnimationCurves(
-          character,
-          scene,
-          skeletonResult.nodes,
-          jointValues,
-          framerate,
-          skipActiveJointParamCheck);
-    } else {
-      MT_LOGE(
-          "Rows of joint values {} do not match joint parameter dimension {} so not saving any motion.",
-          jointValues.rows(),
-          character.parameterTransform.numJointParameters());
-    }
-  }
-
-  // ---------------------------------------------
-  // create marker nodes and animation
-  // ---------------------------------------------
-  if (!markerSequence.empty()) {
-    createMarkerNodes(scene, markerSequence, framerate);
-  }
-
-  // ---------------------------------------------
-  // create blend shape animation curves
-  // Auto-detect blend shapes from model parameters
-  // ---------------------------------------------
-  if (saveMesh) {
-    const MatrixXf blendShapeWeights = extractBlendShapeWeights(character, poses);
-    if (blendShapeWeights.cols() > 0 && !meshResult.blendShapeChannels.empty()) {
-      createBlendShapeAnimationCurves(
-          scene, meshResult.blendShapeChannels, blendShapeWeights, framerate);
-    }
-    const MatrixXf faceExpressionWeights = extractFaceExpressionWeights(character, poses);
-    if (faceExpressionWeights.cols() > 0 && !meshResult.faceExprChannels.empty()) {
-      createBlendShapeAnimationCurves(
-          scene, meshResult.faceExprChannels, faceExpressionWeights, framerate);
-    }
-  }
-
-  // ---------------------------------------------
-  // apply namespace prefix to all nodes
-  // ---------------------------------------------
-  if (!namespacePrefix.empty()) {
-    prependNamespaceToAllNodes(scene->GetRootNode(), namespacePrefix);
-  }
-
-  // ---------------------------------------------
-  // close the fbx exporter
-  // ---------------------------------------------
-
-  // finally export the scene; managerGuard destroys the exporter, scene, and manager (and
-  // everything they own) when this function returns or throws.
-  lExporter->Export(scene);
-}
-
-} // namespace
-
-#endif // MOMENTUM_WITH_FBX_SDK
 
 Character loadFbxCharacter(
     const filesystem::path& inputPath,
@@ -275,42 +127,11 @@ void saveFbx(
     const double framerate,
     std::span<const std::vector<Marker>> markerSequence,
     const FileSaveOptions& options) {
-  CharacterParameters params;
-  if (identity.size() == character.parameterTransform.numJointParameters()) {
-    params.offsets = identity;
-  } else {
-    params.offsets = character.parameterTransform.bindPose();
-  }
-
-  CharacterState state;
-  MatrixXf jointValues;
-  if (poses.cols() > 0) {
-    params.pose = poses.col(0);
-    state.set(params, character, false, false, false);
-
-    jointValues.resize(state.skeletonState.jointParameters.v.size(), poses.cols());
-
-    jointValues.col(0) = state.skeletonState.jointParameters.v;
-
-    for (Eigen::Index f = 1; f < poses.cols(); f++) {
-      params.pose = poses.col(f);
-      state.set(params, character, false, false, false);
-      jointValues.col(f) = state.skeletonState.jointParameters.v;
-    }
-  }
-
-  saveFbxCommon(
-      filename,
-      character,
-      jointValues,
-      framerate,
-      options.mesh,
-      false,
-      options.coordSystemInfo,
-      options.permissive,
-      markerSequence,
-      options.fbxNamespace,
-      poses);
+  FbxBuilder builder;
+  builder.addCharacter(character, options);
+  builder.addMotion(character, framerate, poses, identity);
+  builder.addMarkerSequence(framerate, markerSequence);
+  builder.save(filename);
 }
 
 void saveFbxWithJointParams(
@@ -320,18 +141,19 @@ void saveFbxWithJointParams(
     const double framerate,
     std::span<const std::vector<Marker>> markerSequence,
     const FileSaveOptions& options) {
-  saveFbxCommon(
-      filename,
-      character,
-      jointParams,
-      framerate,
-      options.mesh,
-      true,
-      options.coordSystemInfo,
-      options.permissive,
-      markerSequence,
-      options.fbxNamespace,
-      MatrixXf());
+  FbxBuilder builder;
+  builder.addCharacter(character, options);
+  if (jointParams.cols() != 0 &&
+      jointParams.rows() != character.parameterTransform.numJointParameters()) {
+    MT_LOGE(
+        "Rows of joint values {} do not match joint parameter dimension {} so not saving any motion.",
+        jointParams.rows(),
+        character.parameterTransform.numJointParameters());
+  } else {
+    builder.addMotionWithJointParams(character, framerate, jointParams);
+  }
+  builder.addMarkerSequence(framerate, markerSequence);
+  builder.save(filename);
 }
 
 void saveFbxWithSkeletonStates(
@@ -348,18 +170,11 @@ void saveFbxWithSkeletonStates(
         skeletonStateToJointParameters(skeletonStates[iFrame], character.skeleton).v;
   }
 
-  saveFbxCommon(
-      filename,
-      character,
-      jointParams,
-      framerate,
-      options.mesh,
-      true,
-      options.coordSystemInfo,
-      options.permissive,
-      markerSequence,
-      options.fbxNamespace,
-      MatrixXf());
+  FbxBuilder builder;
+  builder.addCharacter(character, options);
+  builder.addMotionWithJointParams(character, framerate, jointParams);
+  builder.addMarkerSequence(framerate, markerSequence);
+  builder.save(filename);
 }
 
 void saveFbxModel(
