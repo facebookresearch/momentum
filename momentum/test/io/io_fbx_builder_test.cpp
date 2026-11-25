@@ -304,6 +304,26 @@ TEST(FbxBuilderTest, AddMotionUnknownCharacterThrows) {
       std::exception);
 }
 
+TEST(FbxBuilderTest, MotionWithWrongRowCountThrows) {
+  const Character character = createTestCharacter(3);
+  FbxBuilder builder;
+  builder.addCharacter(character);
+  const auto numModelParams = character.parameterTransform.numAllModelParameters();
+  const auto numJointParams = character.parameterTransform.numJointParameters();
+  EXPECT_THROW(
+      builder.addMotion(character, 30.0f, MatrixXf::Zero(numModelParams - 1, 2)), std::exception);
+  EXPECT_THROW(
+      builder.addMotionWithJointParams(character, 30.0f, MatrixXf::Zero(numJointParams - 1, 2)),
+      std::exception);
+}
+
+TEST(FbxBuilderTest, AnimatedMeshWithFewerThanSixRowsThrows) {
+  const Character object = createTestCharacter(3);
+  FbxBuilder builder;
+  EXPECT_THROW(
+      builder.addAnimatedMesh(*object.mesh, "object", 30.0f, MatrixXf::Zero(5, 2)), std::exception);
+}
+
 TEST(FbxBuilderTest, DedupeSkipsNamesTakenByExplicitNames) {
   FbxBuilder builder;
   EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup_1"), "dup_1");
@@ -450,6 +470,30 @@ void expectSameJointTransforms(
 }
 
 } // namespace
+
+TEST(FbxBuilderTest, AnimatedMeshWithoutScaleRowHasUnitScale) {
+  const Character object = createTestCharacter(3);
+  // Translation and rotation only, with a constant nonzero rotation about z.
+  MatrixXf motion = objectMotion().topRows(6);
+  motion.row(5).setConstant(0.4f);
+
+  const auto outFile = temporaryFile("builder_mesh_no_scale", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addAnimatedMesh(*object.mesh, "object", 30.0f, motion);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, loadedFps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 1);
+  const auto& [loaded, takes] = characters[0];
+  ASSERT_EQ(takes.size(), 1);
+  MatrixXf expectedMotion = MatrixXf::Zero(kParametersPerJoint, motion.cols());
+  expectedMotion.topRows(6) = motion;
+  Skeleton objectSkeleton;
+  objectSkeleton.joints.emplace_back();
+  expectSameJointTransforms(loaded, takes[0], objectSkeleton, expectedMotion);
+}
 
 TEST(FbxBuilderTest, LoadMultipleCharactersWithMotion) {
   const Character prop = createTestCharacter(3);
