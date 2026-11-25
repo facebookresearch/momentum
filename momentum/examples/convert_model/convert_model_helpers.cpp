@@ -14,6 +14,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/common/exception.h>
 #include <momentum/common/log.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
@@ -23,6 +24,7 @@
 #include <momentum/io/urdf/urdf_io.h>
 
 #include <algorithm>
+#include <cctype>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -52,6 +54,30 @@ void warnIgnoredInputs(const momentum::Options& options) {
   if (!options.input_locator_file.empty()) {
     MT_LOGW("Ignoring input locators {}.", options.input_locator_file);
   }
+}
+
+// The extension of `path` in lower case, such as ".bvh".
+std::string lowerCaseExtension(const filesystem::path& path) {
+  std::string extension = path.extension().string();
+  std::ranges::transform(extension, extension.begin(), [](unsigned char c) {
+    return static_cast<char>(std::tolower(c));
+  });
+  return extension;
+}
+
+// The joint-parameter motion of a character with the skeleton `source`, mapped by joint name onto
+// `target` (see convertMotionWithJointMapping()). The mapping subtracts the offsets of the
+// parameter transform from the joint parameters, and the identity offsets add them back.
+momentum::MotionData mappedMotion(
+    const momentum::MatrixXf& jointMotion,
+    const momentum::Skeleton& source,
+    const momentum::Character& target,
+    float fps) {
+  momentum::MotionData result;
+  result.poses = momentum::convertMotionWithJointMapping(jointMotion, source, target);
+  result.offsets = target.parameterTransform.zero();
+  result.fps = fps;
+  return result;
 }
 
 // The index of the longest of `lengths` (frame counts), as findLongestMotion() and
@@ -310,6 +336,24 @@ void assignFbxTake(
 // Gives each character of the model file the motion of the motion-file character with the same
 // name. Warns about motion-file characters that no character uses if `warnUnused`.
 void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath, bool warnUnused) {
+  if (momentum::isBvhFile(motionPath)) {
+    // A BVH file holds one character without a name.
+    MT_THROW_IF(
+        scene.characters.size() != 1,
+        "{} holds one character: select the model character that gets its motion with --character",
+        motionPath.string());
+    auto& target = scene.characters.front();
+    const auto [bvhCharacter, bvhMotion, fps] = momentum::loadBvhCharacterWithMotion(motionPath);
+    const auto& jointMotion = std::get<1>(bvhMotion);
+    if (jointMotion.cols() == 0) {
+      return;
+    }
+    auto motion = mappedMotion(jointMotion, bvhCharacter.skeleton, target.character, fps);
+    target.poses = std::move(motion.poses);
+    target.offsets = std::move(motion.offsets);
+    scene.fps = motion.fps;
+    return;
+  }
   switch (momentum::parseCharacterFormat(motionPath)) {
     case momentum::CharacterFormat::Gltf: {
       auto [sources, fps] = momentum::loadGltfCharactersWithMotion(motionPath);
@@ -424,7 +468,7 @@ std::optional<momentum::Scene> loadFbxMotionScene(
   }
   for (const auto& [fbxCharacter, takes] : selected) {
     momentum::SceneCharacter entry;
-    momentum::initializeCharacterFromFbx(entry.character, fbxCharacter, options);
+    momentum::initializeCharacterFromMotionFile(entry.character, fbxCharacter, options);
     if (take >= 0) {
       assignFbxTake(entry, fbxCharacter.skeleton, takes, static_cast<size_t>(take));
     }
@@ -466,6 +510,33 @@ int findLongestTake(
 
 namespace {
 
+// The motion of a BVH file for one character. Without a model file, the character is the BVH
+// character, which keeps the motion as it is, unless a parameter file changes its parameters;
+// otherwise the motion is mapped onto the character by joint name, as loadFbxMotion() maps it.
+MotionData loadBvhMotion(
+    const filesystem::path& motionPath,
+    Character& character,
+    bool hasModel,
+    const Options& options) {
+  MT_LOGI("Loading motion from bvh...");
+  // The BVH character has an identity parameter transform, so its motion holds joint parameters.
+  auto [bvhCharacter, bvhMotion, fps] = loadBvhCharacterWithMotion(motionPath);
+  if (!hasModel) {
+    initializeCharacterFromMotionFile(character, bvhCharacter, options);
+  }
+  MatrixXf& jointMotion = std::get<1>(bvhMotion);
+  if (jointMotion.cols() == 0) {
+    return {};
+  }
+  if (!hasModel && options.input_params_file.empty()) {
+    return {
+        .poses = std::move(jointMotion),
+        .offsets = character.parameterTransform.zero(),
+        .fps = fps};
+  }
+  return mappedMotion(jointMotion, bvhCharacter.skeleton, character, fps);
+}
+
 // The motion of the motion file for one character, read with the loader of its format. Without a
 // model file, the character is read from the motion file too.
 MotionData loadMotion(const Options& options, Character& character, bool hasModel) {
@@ -474,6 +545,9 @@ MotionData loadMotion(const Options& options, Character& character, bool hasMode
   }
 
   const auto motionPath = filesystem::path(options.input_motion_file);
+  if (isBvhFile(motionPath)) {
+    return loadBvhMotion(motionPath, character, hasModel, options);
+  }
   switch (parseCharacterFormat(motionPath)) {
     case CharacterFormat::Gltf:
       return loadGlbMotion(motionPath, character, hasModel, options);
@@ -524,6 +598,10 @@ std::optional<Scene> loadMultiCharacterScene(const Options& options) {
       case CharacterFormat::Unknown:
         break;
     }
+    MT_THROW_IF(
+        selectsCharacter && isBvhFile(motionPath),
+        "--character needs a model file with a BVH motion file: {} holds one character",
+        motionPath.string());
     MT_THROW_IF(
         selectsCharacter,
         "Cannot read characters from {}: unknown motion file format",
@@ -598,26 +676,32 @@ MotionData loadGlbMotion(
   return result;
 }
 
-void initializeCharacterFromFbx(
+void initializeCharacterFromMotionFile(
     Character& character,
-    const Character& fbxCharacter,
+    const Character& motionCharacter,
     const Options& options) {
-  character = fbxCharacter;
+  character = motionCharacter;
   if (options.input_params_file.empty()) {
     character.parameterTransform = ParameterTransform::identity(character.skeleton.getJointNames());
   }
   applyOptionalInputs(character, options);
 }
 
+bool isBvhFile(const filesystem::path& path) {
+  return lowerCaseExtension(path) == ".bvh";
+}
+
 Character loadModelCharacter(const Options& options) {
   const filesystem::path modelPath(options.input_model_file);
-  if (modelPath.extension() != ".urdf") {
+  const std::string extension = lowerCaseExtension(modelPath);
+  if (extension != ".bvh" && extension != ".urdf") {
     return loadFullCharacter(
         options.input_model_file, options.input_params_file, options.input_locator_file);
   }
 
-  MT_LOGI("Loading URDF model...");
-  Character character = loadUrdfCharacter(modelPath);
+  const bool bvh = extension == ".bvh";
+  MT_LOGI("Loading {} model...", bvh ? "BVH" : "URDF");
+  Character character = bvh ? loadBvhCharacter(modelPath) : loadUrdfCharacter(modelPath);
   applyOptionalInputs(character, options);
   return character;
 }
@@ -684,28 +768,23 @@ MotionData loadFbxMotion(
     bool hasModel,
     const Options& options) {
   MT_LOGI("Loading motion from fbx...");
-  MotionData result;
-
   auto [c, motions, framerate] =
       loadFbxCharacterWithMotion(motionPath, KeepLocators::Yes, Permissive::No);
 
   const int motionIndex = findLongestMotion(motions);
 
   if (!hasModel) {
-    initializeCharacterFromFbx(character, c, options);
+    initializeCharacterFromMotionFile(character, c, options);
   }
 
   if (motionIndex < 0) {
-    return result;
+    return {};
   }
 
   // To account for differences in joint order and rest pose between the source
   // and target skeletons, map global joint transforms by name then convert back
   // to joint parameters based on the target skeleton's bind pose.
-  result.poses = convertMotionWithJointMapping(motions.at(motionIndex), c.skeleton, character);
-  result.fps = framerate;
-  result.offsets = character.parameterTransform.zero();
-  return result;
+  return mappedMotion(motions.at(motionIndex), c.skeleton, character, framerate);
 }
 
 } // namespace momentum
