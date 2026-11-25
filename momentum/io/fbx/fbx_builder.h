@@ -37,16 +37,17 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// skinned characters, rigid bodies, motions, and marker data. This is useful
 /// for creating scenes with multiple characters/objects in a single FBX file.
 ///
-/// @note addCharacter() and addRigidBody() export each character under a unique name: the requested
-/// name (character.name, or addRigidBody's `name`), with a numeric suffix when that name is already
-/// in use. The exported name is the character's name in the file. A renamed character's joint and
-/// attribute nodes get the FBX namespace "<exportedName>:" (loaders remove it when stripping
-/// namespaces), and its skinned mesh is "<exportedName>_mesh" instead of "body_mesh". A rigid body
-/// with an explicit `name` also gets the namespace. Pass the returned name as `characterName` to
-/// addMotion() and addMotionWithJointParams() to target that character; an empty `characterName`
-/// targets the character added from character.name that kept that name, or else the first one
-/// added from character.name. loadFbxCharacters() reads
-/// every character back under its exported name.
+/// @note addCharacter(), addRigidBody() and addAnimatedMesh() export each object under a unique
+/// name: the requested name (character.name, or the `name` argument of addRigidBody() and
+/// addAnimatedMesh()), with a numeric suffix when that name is already in use. The exported name is
+/// the object's name in the file. A renamed character's joint and attribute nodes get the FBX
+/// namespace "<exportedName>:" (loaders remove it when stripping namespaces), and its skinned mesh
+/// is "<exportedName>_mesh" instead of "body_mesh". A rigid body with an explicit `name` also gets
+/// the namespace. Pass the returned name as `characterName` to addMotion() and
+/// addMotionWithJointParams() to target that character; an empty `characterName` targets the
+/// character added from character.name that kept that name, or else the first one added from
+/// character.name. An animated mesh is not a motion target. loadFbxCharacters() reads every
+/// character and animated mesh back under its exported name.
 ///
 /// Example usage:
 /// @code
@@ -142,12 +143,13 @@ class FbxBuilder final {
   /// as a simple animated mesh without any skeleton hierarchy.
   ///
   /// @param character The character providing the mesh geometry.
-  /// @param name Name for the mesh node.
+  /// @param name Requested name for the mesh node.
   /// @param fps Animation frame rate in frames per second.
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
   /// @param userProperties User-defined properties to write onto the mesh node,
   ///   surfaced by DCC tools as the object's custom attributes.
-  void addAnimatedMesh(
+  /// @return The unique name the mesh node is exported under (see the class notes).
+  std::string addAnimatedMesh(
       const Character& character,
       const std::string& name,
       float fps,
@@ -162,14 +164,15 @@ class FbxBuilder final {
   /// are used (root transform).
   ///
   /// @param mesh The mesh geometry.
-  /// @param name Name for the mesh node.
+  /// @param name Requested name for the mesh node.
   /// @param fps Animation frame rate in frames per second.
   /// @param jointParams Joint parameters matrix with shape (nFrames x nJointParams).
   /// @param translationOffset Rest-pose translation offset added to the
   ///   translation channels (defaults to zero).
   /// @param userProperties User-defined properties to write onto the mesh node,
   ///   surfaced by DCC tools as the object's custom attributes.
-  void addAnimatedMesh(
+  /// @return The unique name the mesh node is exported under (see the class notes).
+  std::string addAnimatedMesh(
       const Mesh& mesh,
       const std::string& name,
       float fps,
