@@ -127,7 +127,10 @@ inline void setFrameRate(::fbxsdk::FbxScene* scene, const double framerate) {
 struct SkeletonNodeResult {
   std::vector<::fbxsdk::FbxNode*> nodes;
   std::unordered_map<size_t, fbxsdk::FbxNode*> jointToNodeMap;
+  /// The node of joint 0, which holds the character's name and metadata.
   ::fbxsdk::FbxNode* rootNode = nullptr;
+  /// The nodes of every joint without a parent, joint 0 first.
+  std::vector<::fbxsdk::FbxNode*> rootNodes;
 };
 
 inline SkeletonNodeResult createSkeletonNodes(
@@ -143,7 +146,10 @@ inline SkeletonNodeResult createSkeletonNodes(
         ::fbxsdk::FbxSkeleton::Create(scene, joint.name.c_str());
 
     if (joint.parent == kInvalidIndex) {
-      result.rootNode = skeletonNode;
+      if (result.rootNode == nullptr) {
+        result.rootNode = skeletonNode;
+      }
+      result.rootNodes.push_back(skeletonNode);
       skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eRoot);
     } else {
       skeletonAttribute->SetSkeletonType(::fbxsdk::FbxSkeleton::eLimbNode);
