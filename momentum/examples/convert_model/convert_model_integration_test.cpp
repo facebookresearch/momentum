@@ -8,10 +8,13 @@
 #include "convert_model_test_helpers.h"
 
 #include <momentum/common/filesystem.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/urdf/urdf_io.h>
+#include <momentum/math/random.h>
 #include <momentum/test/character/character_helpers_gtest.h>
 #include <momentum/test/io/io_helpers.h>
 
@@ -96,6 +99,10 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   [[nodiscard]] std::string testFile(const std::string& filename) const {
     return (std::filesystem::path(testDataPath_) / filename).string();
   }
+
+  /// Converts `input` (glTF with motion) to BVH and back, and checks that every joint has the same
+  /// global transform in every frame. Also converts the BVH file as a model.
+  void expectBvhRoundTripKeepsTheJointTransforms(const std::string& input);
 
   /// Helper to construct a path to a temporary output file.
   [[nodiscard]] std::string outputFile(const std::string& filename) const {
@@ -714,6 +721,136 @@ TEST_F(ConvertModelIntegrationTest, Result_UrdfModel_KeepsItsPhysicalProperties)
     ASSERT_EQ(loaded.size(), 1);
     momentum::comparePhysicalProperties(expected.physicalProperties, loaded[0].physicalProperties);
   }
+
+  // The extension can have any letter case. The file has another name, because inertial.urdf and
+  // INERTIAL.URDF are the same file on file systems that ignore the letter case.
+  const auto upperCaseUrdf = outputFile("UPPER_CASE.URDF");
+  std::filesystem::copy_file(urdf, upperCaseUrdf);
+  const auto out = outputFile("inertial_upper_case.glb");
+  ASSERT_EQ(runConvertModel({"--model", upperCaseUrdf, "--out", out}), 0);
+  momentum::comparePhysicalProperties(
+      expected.physicalProperties, loadEveryCharacter(out).at(0).physicalProperties);
+}
+
+// Test: a character with its motion goes from glTF to BVH and back with the same joint transforms,
+// and the BVH file converts as a model
+TEST_F(ConvertModelIntegrationTest, Result_GlbToBvhToGlb_KeepsTheJointTransforms) {
+  // A test file, and a file whose motion has identity offsets, which BVH cannot store separately.
+  const auto withIdentity = outputFile("with_identity.glb");
+  {
+    auto [character, motion] = momentum::createTestSceneCharacter("a", 3, 4, 0.0f);
+    momentum::removeScaleMotion(character.parameterTransform, motion);
+    momentum::VectorXf identity =
+        momentum::VectorXf::Zero(character.parameterTransform.numJointParameters());
+    identity(momentum::kParametersPerJoint + momentum::TY) = 2.0f;
+    momentum::saveGltfCharacter(
+        withIdentity,
+        character,
+        30.0f,
+        {character.parameterTransform.name, motion},
+        {character.skeleton.getJointNames(), identity});
+  }
+  for (const auto& input : {testFile("character_with_motion.glb"), withIdentity}) {
+    SCOPED_TRACE(input);
+    expectBvhRoundTripKeepsTheJointTransforms(input);
+  }
+}
+
+void ConvertModelIntegrationTest::expectBvhRoundTripKeepsTheJointTransforms(
+    const std::string& input) {
+  const auto stem = filesystem::path(input).stem().string();
+  const auto bvh = outputFile(stem + ".bvh");
+  const auto back = outputFile(stem + "_from_bvh.glb");
+  const auto model = outputFile(stem + "_bvh_model.glb");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", bvh}), 0);
+  ASSERT_EQ(runConvertModel({"--motion", bvh, "--out", back}), 0);
+  ASSERT_EQ(runConvertModel({"--model", bvh, "--out", model}), 0);
+
+  const auto [character, motion, identity, fps] = momentum::loadCharacterWithMotion(input);
+  const auto [backCharacter, backMotion, backIdentity, backFps] =
+      momentum::loadCharacterWithMotion(back);
+  ASSERT_EQ(backMotion.cols(), motion.cols());
+  EXPECT_NEAR(backFps, fps, 1e-3f);
+  const auto difference = momentum::maxGlobalJointTransformDifference(
+      character.skeleton,
+      momentum::jointMotionOf(character.parameterTransform, motion, identity.v),
+      backCharacter.skeleton,
+      momentum::jointMotionOf(backCharacter.parameterTransform, backMotion, backIdentity.v));
+  EXPECT_LT(difference.translation, 1e-2f);
+  EXPECT_LT(difference.rotation, 1e-3f);
+  EXPECT_EQ(
+      momentum::loadGltfCharacter(model).skeleton.getJointNames(),
+      character.skeleton.getJointNames());
+}
+
+// Test: with a parameter file whose transform has constant offsets, BVH motion on a model gives
+// the same joint transforms in BVH and glTF outputs
+TEST_F(ConvertModelIntegrationTest, Result_ParameterTransformOffsets_SameJointsInBvhAndGlb) {
+  momentum::Character character = momentum::createTestCharacter(3);
+  auto& parameterTransform = character.parameterTransform;
+  // Offsets of joint parameters that model parameters drive, which .model files store.
+  parameterTransform.offsets(momentum::TY) = 1.5f;
+  parameterTransform.offsets(2 * momentum::kParametersPerJoint + momentum::RX) = 0.25f;
+  const auto parameters = outputFile("offsets.model");
+  {
+    std::ofstream file(parameters);
+    file << momentum::writeModelDefinition(
+        character.skeleton, parameterTransform, character.parameterLimits);
+  }
+  const auto model = outputFile("offsets_model.glb");
+  momentum::saveGltfCharacter(model, character);
+  // A motion that the parameter transform can express exactly.
+  momentum::Random<> rng(12345);
+  auto motion =
+      rng.uniform<momentum::MatrixXf>(parameterTransform.numAllModelParameters(), 3, -0.3f, 0.3f);
+  momentum::removeScaleMotion(parameterTransform, motion);
+  const momentum::MatrixXf jointMotion =
+      momentum::jointMotionOf(parameterTransform, motion, parameterTransform.offsets);
+  const auto bvh = outputFile("offsets_motion.bvh");
+  momentum::saveBvhCharacterWithJointParams(bvh, character, jointMotion, 30.0f);
+
+  const auto bvhOut = outputFile("offsets_out.bvh");
+  const auto glbOut = outputFile("offsets_out.glb");
+  for (const auto& out : {bvhOut, glbOut}) {
+    ASSERT_EQ(
+        runConvertModel(
+            {"--model", model, "--parameters", parameters, "--motion", bvh, "--out", out}),
+        0);
+  }
+
+  const auto fromBvh = momentum::loadBvhCharacterWithMotion(bvhOut);
+  const auto bvhDifference = momentum::maxGlobalJointTransformDifference(
+      character.skeleton,
+      jointMotion,
+      std::get<0>(fromBvh).skeleton,
+      std::get<1>(std::get<1>(fromBvh)));
+  EXPECT_LT(bvhDifference.translation, 1e-3f);
+  EXPECT_LT(bvhDifference.rotation, 1e-3f);
+
+  const auto [glbCharacter, glbMotion, glbIdentity, glbFps] =
+      momentum::loadCharacterWithMotion(glbOut);
+  const auto glbDifference = momentum::maxGlobalJointTransformDifference(
+      character.skeleton,
+      jointMotion,
+      glbCharacter.skeleton,
+      momentum::jointMotionOf(glbCharacter.parameterTransform, glbMotion, glbIdentity.v));
+  EXPECT_LT(glbDifference.translation, 1e-3f);
+  EXPECT_LT(glbDifference.rotation, 1e-3f);
+}
+
+// Test: a BVH file holds one character, so the input needs one or --character
+TEST_F(ConvertModelIntegrationTest, Error_SeveralCharactersToBvh) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two_for_bvh.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+
+  EXPECT_NE(runConvertModel({"--motion", input, "--out", outputFile("two.bvh")}), 0);
+  const auto out = outputFile("b.bvh");
+  ASSERT_EQ(runConvertModel({"--motion", input, "--character", "b", "--out", out}), 0);
+  EXPECT_EQ(
+      momentum::loadBvhCharacter(out).skeleton.getJointNames(),
+      saved[1].character.skeleton.getJointNames());
 }
 
 // Test: a model character that no motion-file character matches gets no motion
