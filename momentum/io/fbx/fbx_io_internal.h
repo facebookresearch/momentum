@@ -217,9 +217,8 @@ inline void addPhysicalProperties(
 inline void addMetaData(
     ::fbxsdk::FbxNode* skeletonRootNode,
     const Character& character,
-    const std::string& characterName = "") {
+    const std::string& exportedName) {
   if (skeletonRootNode != nullptr) {
-    const std::string& exportedName = characterName.empty() ? character.name : characterName;
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
         .Set(FbxString(character.metadata.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
