@@ -18,6 +18,7 @@
 #include <momentum/character/collision_geometry.h>
 #include <momentum/character/skeleton.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/legacy_json/legacy_json_io.h>
@@ -1171,6 +1172,74 @@ If the file has more than one character, this returns the one with the most join
 :param path: A .gltf file; e.g. character_s0.glb.
       )",
           py::arg("path"))
+      .def_static(
+          "load_bvh",
+          [](const std::string& path) { return mm::loadBvhCharacter(path); },
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character from a BVH (BioVision Hierarchy) file.
+
+The character has the skeleton of the file and an identity parameter transform (7 parameters per
+joint), and no mesh.
+
+:param path: A .bvh file; e.g. motion.bvh.
+:return: The character.
+      )",
+          py::arg("path"))
+      .def_static(
+          "load_bvh_with_motion",
+          &loadBVHCharacterWithMotion,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load a character and its motion from a BVH (BioVision Hierarchy) file.
+
+:param path: A .bvh file; e.g. motion.bvh.
+:return: A tuple (character, motion, fps): the character as :meth:`load_bvh` returns it, its motion
+  in [n_frames x n_parameters] (model parameters of its identity parameter transform), and the
+  frame rate.
+      )",
+          py::arg("path"))
+      .def_static(
+          "save_bvh",
+          &saveBVHCharacterToFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character and its motion to a BVH (BioVision Hierarchy) file.
+
+A BVH file stores a skeleton and its motion only: the mesh, locators, collision geometry, physical
+properties, metadata and joint scales of the character are not saved, with a warning. Joint
+pre-rotations are folded into the rotation channels.
+
+:param path: A .bvh export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second.
+:param motion: [Optional] Model parameters in [n_frames x n_parameters]. Without a motion, the file
+  holds a single frame of zero model parameters.
+:param offsets: [Optional] Identity offsets in [(n_joints x n_parameters_per_joint)]. As in
+  :meth:`save_fbx`, the joint parameters are the parameter transform applied to the motion plus
+  these offsets, which take the place of the parameter transform's own offsets.
+      )",
+          py::arg("path"),
+          py::arg("character"),
+          py::arg("fps") = 120.f,
+          py::arg("motion") = std::optional<const Eigen::MatrixXf>{},
+          py::arg("offsets") = std::optional<const Eigen::VectorXf>{})
+      .def_static(
+          "save_bvh_with_joint_params",
+          &saveBVHCharacterToFileWithJointParams,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Save a character and its motion, given as joint parameters, to a BVH (BioVision Hierarchy) file.
+
+Like :meth:`save_bvh`, for joint-parameter motion such as the takes of
+:meth:`load_fbx_with_motion`, whatever the character's parameter transform is.
+
+:param path: A .bvh export filename.
+:param character: A Character to be saved to the output file.
+:param fps: Frequency in frames per second.
+:param joint_params: [Optional] Joint parameters in [n_frames x (n_joints x
+  n_parameters_per_joint)]. Without them, the file holds a single frame of zero joint parameters.
+      )",
+          py::arg("path"),
+          py::arg("character"),
+          py::arg("fps") = 120.f,
+          py::arg("joint_params") = std::optional<const Eigen::MatrixXf>{})
       // loadURDFCharacterFromFile(urdfPath)
       .def_static(
           "load_urdf",
