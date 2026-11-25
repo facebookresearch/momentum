@@ -118,9 +118,10 @@ int findLongestTake(
 /// parameter transform by parameter name, as with the same file as the model file and the motion
 /// file.
 ///
-/// An FBX file stores no parameter transform: without a parameter file, the characters of an FBX
-/// model file get the identity transform, as the characters of an FBX motion file do, and the
-/// motion of every motion file, glTF included, is mapped onto them through the joint transforms.
+/// Without a parameter file, the characters of an FBX file get the rig that the file stores (see
+/// FbxBuilder::addCharacter()); the characters of an FBX file that stores no rig get the identity
+/// transform, and the motion of every motion file, glTF included, is mapped onto those of an FBX
+/// model file through the joint transforms.
 ///
 /// The parameter and locator files, and the locator and parameter outputs, apply to one character,
 /// so this throws when they are given for several characters. It also throws when no character has
@@ -197,8 +198,8 @@ MatrixXf resampleMotion(const MatrixXf& motion, float sourceFps, float targetFps
 bool isBvhFile(const filesystem::path& path);
 
 /// Loads the input model character, applying optional parameter and locator files. An FBX model
-/// without a parameter file gets the identity parameter transform (see
-/// initializeCharacterFromMotionFile()).
+/// without a parameter file gets the rig that the file stores, or else the identity parameter
+/// transform (see initializeCharacterFromMotionFile()).
 Character loadModelCharacter(const Options& options);
 
 /// Whether the options give a rig output: a locator file (options.output_locator_local,
@@ -220,6 +221,8 @@ void saveRigOutputs(const Options& options, const Scene& scene);
 
 /// Initializes the character from the character of an FBX or BVH motion file when no separate
 /// model was provided. Applies parameter transform and locators if specified in the options.
+/// Without a parameter file, a character without model parameters, as from an FBX file that stores
+/// no rig, gets the identity parameter transform; a stored rig stays.
 ///
 /// @param character The character to initialize.
 /// @param motionCharacter The character of the motion file.
