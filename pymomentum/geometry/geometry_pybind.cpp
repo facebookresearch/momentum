@@ -1036,7 +1036,7 @@ stores one normal per vertex while OBJ indexes them per face corner.
       &loadMarkersFromFile,
       R"(Load 3d mocap marker data from file.
 
-:param path: A marker data file: .c3d, .gltf, or .trc.
+:param path: A marker data file: .c3d, .trc, .glb, .gltf or .fbx (the extension in any letter case).
 :param main_subject_only: True to load only one subject's data.
 :param up: The up vector to use for the coordinate system, default to Y.
 :return: an array of MarkerSequence, one per subject in the file.
