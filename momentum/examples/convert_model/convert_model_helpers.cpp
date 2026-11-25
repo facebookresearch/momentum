@@ -81,6 +81,27 @@ momentum::MotionData mappedMotion(
   return result;
 }
 
+// Whether the model characters come from an FBX file without a parameter file. An FBX file stores
+// no parameter transform, so these characters get the identity transform, and the motion of every
+// motion file is mapped onto them through the joint transforms.
+bool isFbxModelWithoutParameters(const momentum::Options& options) {
+  return !options.input_model_file.empty() && options.input_params_file.empty() &&
+      momentum::parseCharacterFormat(options.input_model_file) == momentum::CharacterFormat::Fbx;
+}
+
+// The joint parameters (numJointParameters x frames) of glTF motion: the model parameters `motion`
+// of `character` with the identity offsets, as the glTF writer computes the joints.
+momentum::MatrixXf gltfJointMotion(
+    const momentum::Character& character,
+    const momentum::MatrixXf& motion,
+    const momentum::JointParameters& identity) {
+  momentum::MatrixXf result = character.parameterTransform.transform * motion;
+  if (identity.size() > 0) {
+    result.colwise() += identity.v;
+  }
+  return result;
+}
+
 // The index of the longest of `lengths` (frame counts), as findLongestMotion() and
 // findLongestTake() choose. Returns -1 when no length is positive, and warns when there is no
 // length or a single zero length. Warns when it chooses one of several lengths.
@@ -299,9 +320,21 @@ void assignMotionByName(
       motionPath.string());
 }
 
-// Model parameters and identity of a glTF motion-file character, mapped by name onto `target`, as
-// loadMotionOnCharacter() maps them.
-void assignGltfMotion(momentum::SceneCharacter& target, const momentum::CharacterMotion& source) {
+// The motion of a glTF motion-file character for `target`: mapped through the joint transforms
+// when `byJoints` and the source has frames, as FBX motion is; otherwise the model parameters and
+// the identity are mapped by name, as loadMotionOnCharacter() maps them.
+void assignGltfMotion(
+    momentum::SceneCharacter& target,
+    const momentum::CharacterMotion& source,
+    bool byJoints) {
+  if (byJoints && source.motion.cols() > 0) {
+    target.poses = momentum::convertMotionWithJointMapping(
+        gltfJointMotion(source.character, source.motion, source.identity),
+        source.character.skeleton,
+        target.character);
+    target.offsets = target.character.parameterTransform.zero();
+    return;
+  }
   target.poses = momentum::mapMotionToCharacter(
       {source.character.parameterTransform.name, source.motion}, target.character);
   if (source.identity.size() != 0) {
@@ -335,8 +368,13 @@ void assignFbxTake(
 }
 
 // Gives each character of the model file the motion of the motion-file character with the same
-// name. Warns about motion-file characters that no character uses if `warnUnused`.
-void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath, bool warnUnused) {
+// name. Warns about motion-file characters that no character uses if `warnUnused`. glTF motion is
+// mapped through the joint transforms if `gltfByJoints` (see assignGltfMotion()).
+void addMotionByName(
+    momentum::Scene& scene,
+    const filesystem::path& motionPath,
+    bool warnUnused,
+    bool gltfByJoints) {
   if (momentum::isBvhFile(motionPath)) {
     // A BVH file holds one character without a name.
     MT_THROW_IF(
@@ -365,7 +403,10 @@ void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath,
           motionPath,
           warnUnused,
           gltfSourceName,
-          assignGltfMotion);
+          [gltfByJoints](
+              momentum::SceneCharacter& target, const momentum::CharacterMotion& source) {
+            assignGltfMotion(target, source, gltfByJoints);
+          });
       return;
     }
     case momentum::CharacterFormat::Fbx: {
@@ -668,7 +709,11 @@ std::optional<Scene> loadMultiCharacterScene(const Options& options) {
   }
   if (hasMotion) {
     // With a selected character, the other motion-file characters are left out on purpose.
-    addMotionByName(scene, filesystem::path(options.input_motion_file), !selectsCharacter);
+    addMotionByName(
+        scene,
+        filesystem::path(options.input_motion_file),
+        !selectsCharacter,
+        isFbxModelWithoutParameters(options));
   }
   return scene;
 }
@@ -698,6 +743,13 @@ MotionData loadGlbMotion(
     const Options& options) {
   MT_LOGI("Loading motion from glb...");
   MotionData result;
+  if (hasModel && isFbxModelWithoutParameters(options)) {
+    auto [source, motion, identity, fps] = loadCharacterWithMotion(motionPath);
+    if (motion.cols() > 0) {
+      return mappedMotion(
+          gltfJointMotion(source, motion, identity), source.skeleton, character, fps);
+    }
+  }
   if (hasModel) {
     std::tie(result.poses, result.offsets, result.fps) =
         loadMotionOnCharacter(motionPath, character);
@@ -746,6 +798,12 @@ bool isBvhFile(const filesystem::path& path) {
 Character loadModelCharacter(const Options& options) {
   const filesystem::path modelPath(options.input_model_file);
   const std::string extension = lowerCaseExtension(modelPath);
+  if (isFbxModelWithoutParameters(options)) {
+    Character character;
+    initializeCharacterFromMotionFile(
+        character, loadFullCharacter(options.input_model_file), options);
+    return character;
+  }
   if (extension != ".bvh" && extension != ".urdf") {
     return loadFullCharacter(
         options.input_model_file, options.input_params_file, options.input_locator_file);
