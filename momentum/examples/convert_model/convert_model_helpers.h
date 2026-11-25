@@ -10,7 +10,10 @@
 #include <momentum/character/character.h>
 #include <momentum/common/filesystem.h>
 
+#include <optional>
+#include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace momentum {
@@ -26,6 +29,8 @@ struct Options {
   std::string output_locator_global;
   std::string output_params_file;
   std::string fbx_namespace;
+  /// Name of the one character to convert; empty converts every character of the input.
+  std::string character_name;
   bool save_markers = false;
   bool character_mesh_save = false;
 };
@@ -37,9 +42,67 @@ struct MotionData {
   float fps = 120.0f;
 };
 
+/// A character to convert, with its motion.
+struct SceneCharacter {
+  Character character;
+  /// Model parameters (numAllModelParameters x numFrames); no columns without motion.
+  MatrixXf poses;
+  /// Identity joint parameters; empty or zero when the file has none.
+  JointParameters offsets;
+};
+
+/// The characters to convert from files that can hold several characters, and the frame rate of
+/// their motion.
+struct Scene {
+  std::vector<SceneCharacter> characters;
+  float fps = 120.0f;
+};
+
 /// Finds the index of the longest motion in a list of motions.
 /// Returns -1 if no valid motion is found.
 int findLongestMotion(const std::vector<MatrixXf>& motions);
+
+/// Finds the FBX take (animation stack) to convert for every character: the take in which some
+/// character has the longest motion.
+///
+/// @param characters The characters with their takes, index-aligned across characters, as
+/// loadFbxCharactersWithMotion() returns them.
+/// @return The take index, or -1 if no take has frames.
+int findLongestTake(std::span<const std::pair<Character, std::vector<MatrixXf>>> characters);
+
+/// Finds the FBX take to convert for the characters named in `names`, which get the motion of the
+/// file's characters with their names: the take in which one of these characters has the longest
+/// motion, as findLongestTake() finds it. When no character is named in `names`, every character
+/// counts.
+///
+/// @param characters The characters with their takes, as findLongestTake() takes them.
+/// @param names The names of the characters that get motion.
+/// @return The take index, or -1 if no take has frames.
+int findLongestTake(
+    std::span<const std::pair<Character, std::vector<MatrixXf>>> characters,
+    std::span<const std::string> names);
+
+/// Loads the characters to convert and their motion, when the input has several characters or
+/// options.character_name selects one.
+///
+/// The characters are those of the model file, or of the motion file when there is no model file,
+/// as loadGltfCharacters(), loadGltfCharactersWithMotion(), loadFbxCharacters() and
+/// loadFbxCharactersWithMotion() read them; only the one named options.character_name when it is
+/// not empty. Without a model file, each character keeps the motion stored with it in the motion
+/// file. With a model file, each character gets the motion of the motion-file character with the
+/// same name.
+///
+/// The parameter and locator files, and the locator and parameter outputs, apply to one character,
+/// so this throws when they are given for several characters. It also throws when no character has
+/// the selected name, when a name matches several characters, and when no character of the model
+/// file has a motion-file character with the same name.
+///
+/// @param options The command-line options.
+/// @return The characters with their motion, and its frame rate. nullopt when no character is
+/// selected and the file has one character, is of another format, or cannot be read by the
+/// multi-character loaders (after a warning); loadModelCharacter(), loadGlbMotion() and
+/// loadFbxMotion() then convert the input as one character.
+std::optional<Scene> loadScene(const Options& options);
 
 /// Loads motion data from a GLB file. If no separate model was provided,
 /// the character is also loaded from the GLB file.

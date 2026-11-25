@@ -925,6 +925,10 @@ convert_model_headers = [
     "examples/convert_model/convert_model_helpers.h",
 ]
 
+convert_model_test_headers = [
+    "examples/convert_model/convert_model_test_helpers.h",
+]
+
 convert_model_test_sources = [
     "examples/convert_model/convert_model_test.cpp",
     "examples/convert_model/convert_model_helpers.cpp",
