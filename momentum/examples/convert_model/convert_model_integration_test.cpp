@@ -65,8 +65,8 @@ std::string fileContents(const std::string& path) {
   return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
 }
 
-/// Integration test fixture that runs the convert_model and export_rig binaries with various
-/// arguments and checks their output files.
+/// Integration test fixture that runs the convert_model, export_rig and apply_motion binaries with
+/// various arguments and checks their output files.
 class ConvertModelIntegrationTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -78,6 +78,10 @@ class ConvertModelIntegrationTest : public ::testing::Test {
     const char* exportRigPath = getenv("EXPORT_RIG_BINARY");
     ASSERT_NE(exportRigPath, nullptr) << "EXPORT_RIG_BINARY environment variable not set";
     exportRigPath_ = filesystem::absolute(exportRigPath).string();
+
+    const char* applyMotionPath = getenv("APPLY_MOTION_BINARY");
+    ASSERT_NE(applyMotionPath, nullptr) << "APPLY_MOTION_BINARY environment variable not set";
+    applyMotionPath_ = filesystem::absolute(applyMotionPath).string();
 
     const char* testDataPath = getenv("TEST_MOMENTUM_MODELS_PATH");
     ASSERT_NE(testDataPath, nullptr) << "TEST_MOMENTUM_MODELS_PATH environment variable not set";
@@ -97,6 +101,12 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   /// Returns the process exit code (0 = success).
   int runExportRig(const std::vector<std::string>& args) {
     return runBinary(exportRigPath_, args);
+  }
+
+  /// Run the apply_motion binary with the given arguments.
+  /// Returns the process exit code (0 = success).
+  int runApplyMotion(const std::vector<std::string>& args) {
+    return runBinary(applyMotionPath_, args);
   }
 
   /// Run a binary with the given arguments.
@@ -163,6 +173,7 @@ class ConvertModelIntegrationTest : public ::testing::Test {
 
   std::string convertModelPath_;
   std::string exportRigPath_;
+  std::string applyMotionPath_;
   std::string testDataPath_;
   momentum::TemporaryDirectory tempDir_;
 };
@@ -1042,3 +1053,99 @@ TEST_F(ConvertModelIntegrationTest, ExportRig_NoOutput_Fails) {
 }
 
 } // namespace
+
+// ============================================================================
+// APPLY_MOTION TESTS
+// ============================================================================
+
+// Test: apply_motion writes the file that the deprecated convert_model --model with --motion
+// writes with the same options
+TEST_F(ConvertModelIntegrationTest, ApplyMotion_WritesTheFileOfConvertModelWithModelAndMotion) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto models = outputFile("apply_models.glb");
+  momentum::saveTestSceneAsGltf(models, saved, 30.0f);
+  // The motion file has other motions than the model file, and markers.
+  const auto motions = outputFile("apply_motions.glb");
+  momentum::GltfBuilder builder;
+  builder.setFps(30.0f);
+  for (const auto& [character, motion] : saved) {
+    const std::string name = builder.addCharacter(character);
+    builder.addMotion(
+        character,
+        30.0f,
+        {character.parameterTransform.name, 0.5f * motion},
+        {},
+        true,
+        "default",
+        {},
+        name);
+  }
+  const std::vector<std::vector<momentum::Marker>> markers(
+      4, {momentum::Marker{.name = "marker", .pos = {1.0, 2.0, 3.0}, .occluded = false}});
+  builder.addMarkerSequence(30.0f, markers);
+  builder.save(motions);
+
+  const std::vector<std::vector<std::string>> inputs = {
+      {"--model",
+       testFile("character_no_motion.fbx"),
+       "--parameters",
+       testFile("character.model"),
+       "--locator",
+       testFile("character.locators"),
+       "--motion",
+       testFile("character_with_motion.glb")},
+      {"--model", models, "--motion", motions, "--save-markers"},
+      {"--model", models, "--motion", motions, "--character", "b"},
+  };
+  for (size_t i = 0; i < inputs.size(); ++i) {
+    SCOPED_TRACE(i);
+    const auto applied = outputFile("applied_" + std::to_string(i) + ".glb");
+    const auto converted = outputFile("converted_" + std::to_string(i) + ".glb");
+    auto args = inputs[i];
+    args.insert(args.end(), {"--out", applied});
+    ASSERT_EQ(runApplyMotion(args), 0);
+    args.back() = converted;
+    ASSERT_EQ(runConvertModel(args), 0);
+    ASSERT_FALSE(fileContents(applied).empty());
+    EXPECT_EQ(fileContents(applied), fileContents(converted));
+  }
+
+  // FBX files store the save time, so they are compared through their glTF conversions.
+  std::vector<std::string> fbxArgs = {
+      "--model",
+      models,
+      "--motion",
+      motions,
+      "--character-mesh",
+      "--fbx-namespace",
+      "ns42",
+      "--out",
+      outputFile("applied.fbx")};
+  ASSERT_EQ(runApplyMotion(fbxArgs), 0);
+  fbxArgs.back() = outputFile("converted.fbx");
+  ASSERT_EQ(runConvertModel(fbxArgs), 0);
+  EXPECT_NE(fileContents(outputFile("applied.fbx")).find("ns42:"), std::string::npos);
+  for (const std::string name : {"applied", "converted"}) {
+    ASSERT_EQ(
+        runConvertModel(
+            {"--motion", outputFile(name + ".fbx"), "--out", outputFile(name + "_fbx.glb")}),
+        0);
+  }
+  EXPECT_EQ(
+      fileContents(outputFile("applied_fbx.glb")), fileContents(outputFile("converted_fbx.glb")));
+}
+
+// Test: apply_motion fails for a motion file of an unknown format
+TEST_F(ConvertModelIntegrationTest, ApplyMotion_UnknownMotionFormat_Fails) {
+  const auto out = outputFile("unknown_motion.glb");
+  EXPECT_NE(
+      runApplyMotion(
+          {"--model",
+           testFile("character_with_motion.glb"),
+           "--motion",
+           testFile("character.locators"),
+           "--out",
+           out}),
+      0);
+  EXPECT_FALSE(std::filesystem::exists(out));
+}
