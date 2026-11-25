@@ -27,8 +27,8 @@ using namespace momentum;
 
 namespace {
 
-// `character` without model parameters, so that an FBX file stores no rig for it.
-Character withoutRig(Character character) {
+// `character` without model parameters and without parameter limits.
+Character withoutParameters(Character character) {
   character.parameterTransform =
       ParameterTransform::empty(character.skeleton.joints.size() * kParametersPerJoint);
   character.parameterLimits.clear();
@@ -796,13 +796,13 @@ TEST_F(ConvertModelTest, BvhMotionNeedsOneModelCharacter) {
   EXPECT_EQ(scene.characters.front().poses.cols(), motion.cols());
 }
 
-TEST_F(ConvertModelTest, FbxModelWithoutRigGetsTheMotionOfEveryMotionFormat) {
+TEST_F(ConvertModelTest, FbxModelWithoutParametersGetsTheMotionOfEveryMotionFormat) {
   auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
   // BVH cannot store joint scales.
   removeScaleMotion(character.parameterTransform, motion);
   auto tempDir = temporaryDirectory("convert_model_fbx_model");
   const auto modelPath = tempDir.path() / "model.fbx";
-  saveFbx(modelPath, withoutRig(character));
+  saveFbx(modelPath, withoutParameters(character));
   const auto gltfPath = tempDir.path() / "motion.glb";
   saveGltfCharacter(gltfPath, character, 30.0f, {character.parameterTransform.name, motion});
   const auto fbxPath = tempDir.path() / "motion.fbx";
@@ -831,13 +831,15 @@ TEST_F(ConvertModelTest, FbxModelWithoutRigGetsTheMotionOfEveryMotionFormat) {
   }
 }
 
-TEST_F(ConvertModelTest, FbxModelCharactersWithoutRigGetTheGltfMotionOfTheSameNamedCharacter) {
+TEST_F(
+    ConvertModelTest,
+    FbxModelCharactersWithoutParametersGetTheGltfMotionOfTheSameNamedCharacter) {
   const auto saved = createTwoCharacterScene();
   auto tempDir = temporaryDirectory("convert_model_fbx_models");
   const auto modelPath = tempDir.path() / "models.fbx";
   std::vector<TestSceneCharacter> models = saved;
   for (auto& model : models) {
-    model.character = withoutRig(model.character);
+    model.character = withoutParameters(model.character);
     model.motion.resize(0, model.motion.cols());
   }
   saveTestSceneAsFbx(modelPath, models, 30.0f);

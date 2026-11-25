@@ -85,9 +85,9 @@ class FbxBuilder final {
   /// Add a skinned character (skeleton + mesh with skin weights) to the scene.
   ///
   /// Creates the skeleton hierarchy, mesh with skin deformer, locators,
-  /// collision geometry, and metadata. A character with model parameters or parameter limits also
-  /// gets its rig (the parameter transform, parameter limits, parameter sets and pose constraints),
-  /// stored as glTF files store it (see rigToJson()), which the FBX loaders read back.
+  /// collision geometry, and metadata. The character also gets its rig (the parameter transform,
+  /// parameter limits, parameter sets and pose constraints), stored as glTF files store it (see
+  /// rigToJson()), which the FBX loaders read back, also when it has no model parameters.
   ///
   /// @param character The character to add.
   /// @param options File save options: mesh, locators, collisions, coordinate system, and the FBX
