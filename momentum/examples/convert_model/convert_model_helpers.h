@@ -133,6 +133,23 @@ bool isBvhFile(const filesystem::path& path);
 /// Loads the input model character, applying optional parameter and locator files.
 Character loadModelCharacter(const Options& options);
 
+/// Whether the options give a rig output: a locator file (options.output_locator_local,
+/// options.output_locator_global) or a parameter file (options.output_params_file).
+///
+/// @param options The command-line options.
+/// @return Whether one of the three paths is not empty.
+bool hasRigOutputs(const Options& options);
+
+/// Saves the rig outputs of the one character of `scene`: its locators to
+/// options.output_locator_local (local space) and options.output_locator_global (global space),
+/// and its parameter transform and parameter limits to options.output_params_file, for each path
+/// that is not empty. loadScene() gives one character when the options have rig outputs; this
+/// throws otherwise.
+///
+/// @param options The command-line options.
+/// @param scene The characters, from loadScene().
+void saveRigOutputs(const Options& options, const Scene& scene);
+
 /// Initializes the character from the character of an FBX or BVH motion file when no separate
 /// model was provided. Applies parameter transform and locators if specified in the options.
 ///
