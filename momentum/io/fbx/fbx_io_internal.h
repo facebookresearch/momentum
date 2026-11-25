@@ -216,8 +216,10 @@ inline void addMetaData(
     const Character& character,
     const std::string& exportedName) {
   if (skeletonRootNode != nullptr) {
-    ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
-        .Set(FbxString(character.metadata.c_str()));
+    if (!isEmptyMetadata(character.metadata)) {
+      ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
+          .Set(FbxString(character.metadata.c_str()));
+    }
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
         .Set(FbxString(exportedName.c_str()));
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "RigName")
