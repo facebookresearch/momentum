@@ -598,6 +598,7 @@ io_fbx_public_headers = [
 io_fbx_private_headers = [
     "io/fbx/fbx_io_internal.h",
     "io/fbx/fbx_memory_stream.h",
+    "io/fbx/marker_property_names.h",
     "io/fbx/openfbx_loader.h",
     "io/fbx/polygon_data.h",
 ]
