@@ -1044,6 +1044,7 @@ if(MOMENTUM_BUILD_TESTING)
     NAME io_marker_test
     SOURCES_VARS io_marker_test_sources
     LINK_LIBRARIES
+      io_gltf
       io_marker
       io_test_helper
     ENV
