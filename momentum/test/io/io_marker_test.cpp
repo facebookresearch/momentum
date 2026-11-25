@@ -6,11 +6,13 @@
  */
 
 #include "momentum/common/filesystem.h"
+#include "momentum/io/gltf/gltf_builder.h"
 #include "momentum/io/marker/marker_io.h"
 #include "momentum/test/io/io_helpers.h"
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <fstream>
@@ -158,6 +160,42 @@ TEST(MarkerIOTest, testLoadMarkersFromBytesEmpty) {
   // empty buffer for any format -> graceful empty return, no crash
   EXPECT_EQ(loadMarkers(bytes, ".c3d").size(), 0);
   EXPECT_EQ(loadMarkers(bytes, ".trc").size(), 1); // trc returns one empty sequence
+}
+
+TEST(MarkerIOTest, testLoadMarkersFromGltfWithAnyExtensionCase) {
+  const std::vector<MarkerSequence> expected = loadMarkers(getMarkerFile());
+  ASSERT_EQ(expected.size(), 1);
+  const auto& expectedFrames = expected[0].frames;
+  const auto tempDir = temporaryDirectory("marker_io_gltf");
+  // The names differ by more than the letter case, for file systems that ignore it.
+  for (const std::string name :
+       {"binary.glb", "text.gltf", "BINARY_UPPER.GLB", "TEXT_UPPER.GLTF"}) {
+    SCOPED_TRACE(name);
+    const auto path = (tempDir.path() / name).string();
+    GltfBuilder builder;
+    builder.addMarkerSequence(expected[0].fps, expectedFrames);
+    builder.save(path);
+
+    const std::vector<MarkerSequence> loaded = loadMarkers(path);
+    ASSERT_EQ(loaded.size(), 1);
+    const auto& frames = loaded[0].frames;
+    ASSERT_EQ(frames.size(), expectedFrames.size());
+    for (size_t frame = 0; frame < frames.size(); ++frame) {
+      for (const Marker& marker : expectedFrames[frame]) {
+        if (marker.occluded) {
+          continue;
+        }
+        const auto found = std::ranges::find(frames[frame], marker.name, &Marker::name);
+        ASSERT_NE(found, frames[frame].end()) << marker.name;
+        EXPECT_FALSE(found->occluded) << marker.name;
+        EXPECT_LT((found->pos - marker.pos).norm(), 1e-3) << marker.name;
+      }
+    }
+  }
+
+  // The format of a byte buffer, in any letter case too.
+  const auto bytes = readFileBytes((tempDir.path() / "binary.glb").string());
+  EXPECT_EQ(loadMarkers(bytes, ".GLB").size(), 1);
 }
 
 } // namespace
