@@ -11,6 +11,9 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <limits>
+
 namespace {
 
 using namespace momentum;
@@ -173,6 +176,66 @@ class InactiveRowsSolverFunction : public SolverFunctionT<float> {
       }
     }
   }
+};
+
+// One-parameter least-squares problem whose error is larger than the float range (about 3.4e38)
+// while its Jacobian, JtJ and JtR still fit in float. The error is computed in double, as
+// SolverFunctionT<float>::getError returns double.
+//   residual = kScale * x, Jacobian = kScale, error = 0.5 * (kScale * x)^2
+// For x = 1e5 the error is 5e41; the Gauss-Newton step lands on x = 0.
+class LargeErrorSolverFunction : public SolverFunctionT<float> {
+ public:
+  static constexpr float kScale = 1e16f;
+
+  LargeErrorSolverFunction() {
+    this->numParameters_ = 1;
+    this->actualParameters_ = 1;
+  }
+
+  double getError(const VectorX<float>& parameters) override {
+    const double residual = static_cast<double>(kScale) * static_cast<double>(parameters(0));
+    return 0.5 * residual * residual;
+  }
+
+  double getGradient(const VectorX<float>& parameters, VectorX<float>& gradient) override {
+    gradient.resize(1);
+    gradient(0) = kScale * (kScale * parameters(0));
+    return getError(parameters);
+  }
+
+  void initializeJacobianComputation(const VectorX<float>& /* parameters */) override {}
+
+  [[nodiscard]] size_t getJacobianBlockCount() const override {
+    return 1;
+  }
+
+  [[nodiscard]] size_t getJacobianBlockSize(size_t blockIndex) const override {
+    return blockIndex == 0 ? 1 : 0;
+  }
+
+  double computeJacobianBlock(
+      const VectorX<float>& parameters,
+      size_t blockIndex,
+      Eigen::Ref<MatrixX<float>> jacobianBlock,
+      Eigen::Ref<VectorX<float>> residualBlock,
+      size_t& actualRows) override {
+    if (blockIndex != 0) {
+      actualRows = 0;
+      return 0.0;
+    }
+    jacobianBlock(0, 0) = kScale;
+    residualBlock(0) = kScale * parameters(0);
+    actualRows = 1;
+    return getError(parameters);
+  }
+
+  void finalizeJacobianComputation() override {}
+
+  void updateParameters(VectorX<float>& parameters, const VectorX<float>& delta) override {
+    parameters -= delta;
+  }
+
+  void setEnabledParameters(const ParameterSet& /* parameterSet */) override {}
 };
 
 // Simple test to verify that the Gauss-Newton solver exists
@@ -891,6 +954,39 @@ TEST(GaussNewtonSolverTest, UseBlockJtJWithNonContiguousSubset) {
   EXPECT_EQ(paramsWithJtJ(4), 1.0f);
   EXPECT_EQ(paramsWithJtJ(5), 1.0f);
   EXPECT_EQ(paramsWithJtJ(6), 1.0f);
+}
+
+// The line search must accept a step that removes almost all of the error, even when the error
+// is too large to be represented as a float. Before the fix, the sufficient-decrease threshold
+// was rounded to float, became infinity, and every step was rejected, leaving x near its start.
+// The dense and sparse solvers share this line search, so both are checked.
+TEST(GaussNewtonSolverTest, LineSearchAcceptsStepWhenErrorExceedsFloatRange) {
+  LargeErrorSolverFunction function;
+  const VectorX<float> initialParameters = VectorX<float>::Constant(1, 1e5f);
+  const double initialError = function.getError(initialParameters);
+  ASSERT_GT(initialError, static_cast<double>(std::numeric_limits<float>::max()));
+
+  GaussNewtonSolverOptions denseOptions;
+  denseOptions.maxIterations = 1;
+  denseOptions.minIterations = 1;
+  denseOptions.verbose = false;
+  denseOptions.doLineSearch = true;
+  GaussNewtonSolverT<float> denseSolver(denseOptions, &function);
+  VectorX<float> denseParameters = initialParameters;
+  denseSolver.solve(denseParameters);
+  EXPECT_LT(std::abs(denseParameters(0)), 1.0f) << "dense solver";
+  EXPECT_LT(function.getError(denseParameters), 1e-6 * initialError) << "dense solver";
+
+  SparseGaussNewtonSolverOptions sparseOptions;
+  sparseOptions.maxIterations = 1;
+  sparseOptions.minIterations = 1;
+  sparseOptions.verbose = false;
+  sparseOptions.doLineSearch = true;
+  SparseGaussNewtonSolverT<float> sparseSolver(sparseOptions, &function);
+  VectorX<float> sparseParameters = initialParameters;
+  sparseSolver.solve(sparseParameters);
+  EXPECT_LT(std::abs(sparseParameters(0)), 1.0f) << "sparse solver";
+  EXPECT_LT(function.getError(sparseParameters), 1e-6 * initialError) << "sparse solver";
 }
 
 } // namespace

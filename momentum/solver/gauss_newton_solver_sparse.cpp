@@ -142,11 +142,13 @@ void SparseGaussNewtonSolverT<T>::updateParameters(Eigen::VectorX<T>& delta) {
 
   MT_PROFILE_EVENT("Line search");
 
-  static constexpr T kC1 = 1e-3;
+  // The errors are double even when T is float, so the sufficient-decrease test is done in double.
+  // A float threshold loses precision and becomes infinity once the error exceeds the float range.
+  static constexpr double kC1 = 1e-3;
   static constexpr T kTau = 0.5;
   static constexpr size_t kMaxLineSearchSteps = 10;
 
-  const T scaledError = kC1 * this->error_;
+  const double scaledError = kC1 * this->error_;
   const Eigen::VectorX<T> parametersOrig = this->parameters_;
   T lineSearchScale = 1.0;
 
@@ -156,7 +158,7 @@ void SparseGaussNewtonSolverT<T>::updateParameters(Eigen::VectorX<T>& delta) {
     this->solverFunction_->updateParameters(this->parameters_, lineSearchScale * delta);
 
     const double errorNew = this->solverFunction_->getError(this->parameters_);
-    if ((this->error_ - errorNew) >= lineSearchScale * scaledError) {
+    if ((this->error_ - errorNew) >= static_cast<double>(lineSearchScale) * scaledError) {
       break;
     }
 

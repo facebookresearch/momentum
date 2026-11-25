@@ -964,7 +964,12 @@ if(MOMENTUM_BUILD_TESTING)
     LINK_LIBRARIES simd_generalized_loss
   )
 
-  # TODO: Add solver_test
+  # TODO: Add the rest of solver_test_sources; gauss_newton_solver_test covers part of it.
+  mt_test(
+    NAME gauss_newton_solver_test
+    SOURCES_VARS gauss_newton_solver_test_sources
+    LINK_LIBRARIES solver
+  )
 
   mt_test(
     NAME character_test
