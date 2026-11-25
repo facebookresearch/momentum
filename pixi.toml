@@ -138,6 +138,9 @@ export_rig = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/export_rig", depe
 apply_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/apply_motion", depends-on = [
     "build",
 ], description = "Apply the motion of a file to the characters of another file" }
+split_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/split_characters", depends-on = [
+    "build",
+], description = "Save each character of a file to a file of its own" }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/c3d_viewer", depends-on = [
     "build",
 ], description = "Run C3D file viewer" }
@@ -523,6 +526,9 @@ export_rig = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/export_rig.exe", 
     "build",
 ] }
 apply_motion = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/apply_motion.exe", depends-on = [
+    "build",
+] }
+split_characters = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/split_characters.exe", depends-on = [
     "build",
 ] }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/c3d_viewer.exe", depends-on = [
