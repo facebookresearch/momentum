@@ -583,6 +583,19 @@ TEST_F(ConvertModelTest, MotionFileKeepsEveryCharacterWithItsMotion) {
   }
 }
 
+TEST_F(ConvertModelTest, MotionFileIsReadWhateverItsGltfExtension) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  for (const auto* filename : {"two.gltf", "TWO.GLB"}) {
+    const auto path = tempDir.path() / filename;
+    saveTestSceneAsGltf(path, createTwoCharacterScene(), 30.0f);
+    Options options;
+    options.input_motion_file = path.string();
+    const auto scene = loadScene(options);
+    ASSERT_TRUE(scene.has_value()) << filename;
+    EXPECT_EQ(sceneNames(*scene), (std::vector<std::string>{"a", "b"})) << filename;
+  }
+}
+
 TEST_F(ConvertModelTest, ModelCharactersGetTheMotionOfTheSameNamedCharacter) {
   auto tempDir = temporaryDirectory("convert_model_scene");
   const auto modelPath = tempDir.path() / "model.glb";
