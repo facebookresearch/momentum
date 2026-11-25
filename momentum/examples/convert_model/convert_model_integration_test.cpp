@@ -12,6 +12,7 @@
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/urdf/urdf_io.h>
 #include <momentum/math/random.h>
@@ -35,16 +36,48 @@
 
 namespace {
 
-/// Integration test fixture that invokes the convert_model CLI binary
-/// with various argument combinations to verify the refactoring
-/// preserves all behavior.
+#ifdef _WIN32
+// `arg` quoted for the Windows command-line parser: in quotes, with the backslashes before a quote
+// doubled and the quotes escaped.
+std::string quoteArgument(const std::string& arg) {
+  if (!arg.empty() && arg.find_first_of(" \t\"") == std::string::npos) {
+    return arg;
+  }
+  std::string result = "\"";
+  size_t backslashes = 0;
+  for (const char c : arg) {
+    if (c == '\\') {
+      ++backslashes;
+      continue;
+    }
+    result.append(c == '"' ? 2 * backslashes + 1 : backslashes, '\\');
+    backslashes = 0;
+    result += c;
+  }
+  result.append(2 * backslashes, '\\');
+  result += '"';
+  return result;
+}
+#endif
+
+std::string fileContents(const std::string& path) {
+  std::ifstream file(path, std::ios::binary);
+  return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+}
+
+/// Integration test fixture that runs the convert_model and export_rig binaries with various
+/// arguments and checks their output files.
 class ConvertModelIntegrationTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    const char* binaryPath = getenv("CONVERT_MODEL_BINARY");
-    ASSERT_NE(binaryPath, nullptr) << "CONVERT_MODEL_BINARY environment variable not set";
+    const char* convertModelPath = getenv("CONVERT_MODEL_BINARY");
+    ASSERT_NE(convertModelPath, nullptr) << "CONVERT_MODEL_BINARY environment variable not set";
     // Make binary path absolute so it works from any CWD
-    binaryPath_ = filesystem::absolute(binaryPath).string();
+    convertModelPath_ = filesystem::absolute(convertModelPath).string();
+
+    const char* exportRigPath = getenv("EXPORT_RIG_BINARY");
+    ASSERT_NE(exportRigPath, nullptr) << "EXPORT_RIG_BINARY environment variable not set";
+    exportRigPath_ = filesystem::absolute(exportRigPath).string();
 
     const char* testDataPath = getenv("TEST_MOMENTUM_MODELS_PATH");
     ASSERT_NE(testDataPath, nullptr) << "TEST_MOMENTUM_MODELS_PATH environment variable not set";
@@ -57,20 +90,39 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   /// Run the convert_model binary with the given arguments.
   /// Returns the process exit code (0 = success).
   int runConvertModel(const std::vector<std::string>& args) {
+    return runBinary(convertModelPath_, args);
+  }
+
+  /// Run the export_rig binary with the given arguments.
+  /// Returns the process exit code (0 = success).
+  int runExportRig(const std::vector<std::string>& args) {
+    return runBinary(exportRigPath_, args);
+  }
+
+  /// Run a binary with the given arguments.
+  /// Returns the process exit code (0 = success).
+  static int runBinary(const std::string& binary, const std::vector<std::string>& args) {
 #ifdef _WIN32
-    // On Windows, use _spawnv which doesn't spawn a shell
-    std::vector<const char*> argv;
-    argv.push_back(binaryPath_.c_str());
+    // On Windows, use _spawnv which doesn't spawn a shell. It joins the arguments with spaces, so
+    // each argument is quoted as the Windows command-line parser expects.
+    std::vector<std::string> quoted;
+    quoted.reserve(args.size() + 1);
+    quoted.push_back(quoteArgument(binary));
     for (const auto& arg : args) {
+      quoted.push_back(quoteArgument(arg));
+    }
+    std::vector<const char*> argv;
+    argv.reserve(quoted.size() + 1);
+    for (const auto& arg : quoted) {
       argv.push_back(arg.c_str());
     }
     argv.push_back(nullptr);
-    const int status = _spawnv(_P_WAIT, binaryPath_.c_str(), argv.data());
+    const int status = _spawnv(_P_WAIT, binary.c_str(), argv.data());
     return status;
 #else
     // Build argv for execvp (no shell spawned)
     std::vector<const char*> argv;
-    argv.push_back(binaryPath_.c_str());
+    argv.push_back(binary.c_str());
     for (const auto& arg : args) {
       argv.push_back(arg.c_str());
     }
@@ -82,7 +134,7 @@ class ConvertModelIntegrationTest : public ::testing::Test {
     }
     if (pid == 0) {
       // Child process
-      execvp(binaryPath_.c_str(), const_cast<char* const*>(argv.data()));
+      execvp(binary.c_str(), const_cast<char* const*>(argv.data()));
       _exit(127); // execvp failed
     }
     // Parent process
@@ -109,7 +161,8 @@ class ConvertModelIntegrationTest : public ::testing::Test {
     return (tempDir_.path() / filename).string();
   }
 
-  std::string binaryPath_;
+  std::string convertModelPath_;
+  std::string exportRigPath_;
   std::string testDataPath_;
   momentum::TemporaryDirectory tempDir_;
 };
@@ -457,10 +510,7 @@ TEST_F(ConvertModelIntegrationTest, ParameterOutput_WritesModelFile) {
   ASSERT_TRUE(std::filesystem::exists(outParams));
   EXPECT_GT(std::filesystem::file_size(outParams), 0u);
 
-  std::ifstream paramsFile(outParams);
-  ASSERT_TRUE(paramsFile.is_open());
-  const std::string paramsData{
-      std::istreambuf_iterator<char>{paramsFile}, std::istreambuf_iterator<char>{}};
+  const std::string paramsData = fileContents(outParams);
   EXPECT_NE(paramsData.find("[ParameterTransform]"), std::string::npos);
   EXPECT_NE(paramsData.find("root.tx = 1*root_tx"), std::string::npos);
   EXPECT_NE(paramsData.find("joint2.rz = 0.5*shared_rz"), std::string::npos);
@@ -608,8 +658,6 @@ TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterModel_KeepsEveryCharact
   }
 }
 
-namespace {
-
 // Every character of a glTF or FBX file, as the multi-character loader of its format reads it.
 std::vector<momentum::Character> loadEveryCharacter(const std::string& path) {
   if (momentum::parseCharacterFormat(path) == momentum::CharacterFormat::Fbx) {
@@ -631,8 +679,6 @@ void expectSamePhysicalPropertiesAndMetadata(
         expected[i].physicalProperties, loaded[i].physicalProperties);
   }
 }
-
-} // namespace
 
 // Test: the physical properties and metadata of every character are kept, for one and for two
 // characters, read from the model file or from the motion file, between glTF and FBX
@@ -917,6 +963,82 @@ TEST_F(ConvertModelIntegrationTest, Error_OneCharacterOptionForSeveralCharacters
           {"--motion", input, "--out", out, "--out-locators-local", outputFile("x.locators")}),
       0);
   EXPECT_FALSE(std::filesystem::exists(out));
+}
+
+// ============================================================================
+// EXPORT_RIG TESTS
+// ============================================================================
+
+// Test: export_rig writes the parameter transform, limits and locators of its input, in the files
+// that the deprecated convert_model options write
+TEST_F(ConvertModelIntegrationTest, ExportRig_WritesTheRigOfTheInput) {
+  const auto model = testFile("character_with_motion.glb");
+  const auto parameters = testFile("character.model");
+  const auto locators = testFile("character.locators");
+  const auto argsWithOutputs = [&](const std::string& prefix) {
+    return std::vector<std::string>{
+        "--model",
+        model,
+        "--parameters",
+        parameters,
+        "--locator",
+        locators,
+        "--out-parameters",
+        outputFile(prefix + ".model"),
+        "--out-locators-local",
+        outputFile(prefix + "_local.locators"),
+        "--out-locators-global",
+        outputFile(prefix + "_global.locators")};
+  };
+
+  ASSERT_EQ(runExportRig(argsWithOutputs("rig")), 0);
+  auto convertArgs = argsWithOutputs("deprecated");
+  convertArgs.emplace_back("--out");
+  convertArgs.emplace_back(outputFile("deprecated.glb"));
+  ASSERT_EQ(runConvertModel(convertArgs), 0);
+
+  for (const std::string suffix : {".model", "_local.locators", "_global.locators"}) {
+    SCOPED_TRACE(suffix);
+    ASSERT_FALSE(fileContents(outputFile("rig" + suffix)).empty());
+    EXPECT_EQ(
+        fileContents(outputFile("rig" + suffix)), fileContents(outputFile("deprecated" + suffix)));
+  }
+
+  const momentum::Skeleton skeleton = momentum::loadGltfCharacter(model).skeleton;
+  const auto [expectedTransform, expectedLimits] =
+      momentum::loadModelDefinition(parameters, skeleton);
+  const auto [transform, limits] = momentum::loadModelDefinition(outputFile("rig.model"), skeleton);
+  EXPECT_EQ(transform.name, expectedTransform.name);
+  EXPECT_TRUE(transform.transform.isApprox(expectedTransform.transform));
+  EXPECT_EQ(limits, expectedLimits);
+  const auto expectedLocators = momentum::loadLocators(locators, skeleton, expectedTransform);
+  ASSERT_FALSE(expectedLocators.empty());
+  EXPECT_EQ(
+      momentum::loadLocators(outputFile("rig_local.locators"), skeleton, expectedTransform),
+      expectedLocators);
+  EXPECT_EQ(
+      momentum::loadLocators(outputFile("rig_global.locators"), skeleton, expectedTransform),
+      expectedLocators);
+}
+
+// Test: export_rig exports one character of an input with several characters, selected by name
+TEST_F(ConvertModelIntegrationTest, ExportRig_SeveralCharacters_NeedCharacter) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two_for_rig.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("b.model");
+
+  EXPECT_NE(runExportRig({"--model", input, "--out-parameters", out}), 0);
+  ASSERT_EQ(runExportRig({"--model", input, "--character", "b", "--out-parameters", out}), 0);
+  ASSERT_TRUE(std::filesystem::exists(out));
+  const auto& b = saved[1].character;
+  EXPECT_EQ(
+      std::get<0>(momentum::loadModelDefinition(out, b.skeleton)).name, b.parameterTransform.name);
+}
+
+// Test: export_rig without an output fails
+TEST_F(ConvertModelIntegrationTest, ExportRig_NoOutput_Fails) {
+  EXPECT_NE(runExportRig({"--model", testFile("character_with_motion.glb")}), 0);
 }
 
 } // namespace
