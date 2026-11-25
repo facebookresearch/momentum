@@ -13,6 +13,7 @@
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/types.h>
 #include <momentum/common/checks.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
@@ -294,6 +295,40 @@ std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float> loadGLTFChar
     const std::string& gltfFilename) {
   const auto [character, motion, identity, fps] = momentum::loadCharacterWithMotion(gltfFilename);
   return std::make_tuple(character, motion.transpose(), identity.v, fps);
+}
+
+std::tuple<momentum::Character, RowMatrixf, float> loadBVHCharacterWithMotion(
+    const std::string& bvhFilename) {
+  auto [character, motion, fps] = momentum::loadBvhCharacterWithMotion(bvhFilename);
+  return std::make_tuple(std::move(character), std::get<1>(motion).transpose(), fps);
+}
+
+void saveBVHCharacterToFile(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const std::optional<const Eigen::MatrixXf>& motion,
+    const std::optional<const Eigen::VectorXf>& offsets) {
+  const Eigen::MatrixXf poses = motion.has_value()
+      ? Eigen::MatrixXf(motion->transpose())
+      : Eigen::MatrixXf::Zero(character.parameterTransform.numAllModelParameters(), 1);
+  momentum::saveBvhCharacterWithMotion(
+      path,
+      character,
+      {character.parameterTransform.name, poses},
+      fps,
+      offsets.value_or(Eigen::VectorXf()));
+}
+
+void saveBVHCharacterToFileWithJointParams(
+    const std::string& path,
+    const momentum::Character& character,
+    const float fps,
+    const std::optional<const Eigen::MatrixXf>& jointParams) {
+  const Eigen::MatrixXf jointMotion = jointParams.has_value()
+      ? Eigen::MatrixXf(jointParams->transpose())
+      : Eigen::MatrixXf::Zero(character.parameterTransform.numJointParameters(), 1);
+  momentum::saveBvhCharacterWithJointParams(path, character, jointMotion, fps);
 }
 
 std::tuple<momentum::Character, RowMatrixf, Eigen::VectorXf, float>
