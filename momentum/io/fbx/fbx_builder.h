@@ -110,14 +110,18 @@ class FbxBuilder final {
   ///
   /// Converts model parameters to joint parameters via CharacterState, then
   /// creates animation curves. Also extracts and animates blend shape weights
-  /// when the character has blend shapes.
+  /// when the character has blend shapes. A joint parameter that no model parameter drives gets a
+  /// curve when its value is not zero, such as an offset from @p offsets. A later call for the same
+  /// character replaces its motion.
   ///
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
   /// @param motion Model parameters with shape (nModelParams x nFrames), one column per frame. The
   /// number of rows must be character.parameterTransform.numAllModelParameters(); otherwise the
   /// function throws.
-  /// @param offsets Identity/offset parameters for the bind pose.
+  /// @param offsets Identity/offset joint parameters, added to the joint parameters of every frame.
+  /// When its size is not numJointParameters(), the offsets of the character's earlier motion are
+  /// used, as GltfBuilder does, or the bind pose (zero) if there is none.
   /// @param characterName Name returned by addCharacter() or addRigidBody() of the character to
   /// animate. When empty, the character added from character.name that kept that name, or else the
   /// first one added from character.name; throws if there is none.
@@ -131,7 +135,8 @@ class FbxBuilder final {
   /// Add joint-parameter animation for a previously added character.
   ///
   /// Uses joint parameters directly, bypassing the activeJointParams check.
-  /// This is useful for rigid bodies or characters with simple parameterization.
+  /// This is useful for rigid bodies or characters with simple parameterization. A later call for
+  /// the same character replaces its motion.
   ///
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
