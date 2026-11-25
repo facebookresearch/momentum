@@ -25,6 +25,18 @@
 
 using namespace momentum;
 
+namespace {
+
+// `character` without model parameters, so that an FBX file stores no rig for it.
+Character withoutRig(Character character) {
+  character.parameterTransform =
+      ParameterTransform::empty(character.skeleton.joints.size() * kParametersPerJoint);
+  character.parameterLimits.clear();
+  return character;
+}
+
+} // namespace
+
 /// Test fixture providing shared test data and utilities for convert_model tests.
 class ConvertModelTest : public ::testing::Test {
  protected:
@@ -581,17 +593,20 @@ TEST_F(ConvertModelTest, MotionFileKeepsEveryCharacterWithItsMotion) {
     EXPECT_TRUE(gltfScene.characters[i].poses.isApprox(saved[i].motion, 1e-5f)) << i;
   }
 
-  // FBX stores joint parameters, which the identity parameter transform keeps as they are.
+  // FBX stores joint parameters and the rig of each character, which fits them back to its model
+  // parameters.
   Options fbxOptions;
   fbxOptions.input_motion_file = fbxPath.string();
   const Scene fbxScene = loadScene(fbxOptions);
   ASSERT_EQ(sceneNames(fbxScene), (std::vector<std::string>{"a", "b"}));
   EXPECT_FLOAT_EQ(fbxScene.fps, 30.0f);
   for (size_t i = 0; i < saved.size(); ++i) {
-    const MatrixXf expected = toJointParameters(saved[i].character, saved[i].motion);
-    ASSERT_EQ(fbxScene.characters[i].poses.rows(), expected.rows()) << i;
-    ASSERT_EQ(fbxScene.characters[i].poses.cols(), expected.cols()) << i;
-    EXPECT_LT((fbxScene.characters[i].poses - expected).cwiseAbs().maxCoeff(), 1e-4f) << i;
+    const auto& converted = fbxScene.characters[i];
+    EXPECT_EQ(
+        converted.character.parameterTransform.name, saved[i].character.parameterTransform.name);
+    ASSERT_EQ(converted.poses.rows(), saved[i].motion.rows()) << i;
+    ASSERT_EQ(converted.poses.cols(), saved[i].motion.cols()) << i;
+    EXPECT_LT((converted.poses - saved[i].motion).cwiseAbs().maxCoeff(), 1e-4f) << i;
   }
 }
 
@@ -781,13 +796,13 @@ TEST_F(ConvertModelTest, BvhMotionNeedsOneModelCharacter) {
   EXPECT_EQ(scene.characters.front().poses.cols(), motion.cols());
 }
 
-TEST_F(ConvertModelTest, FbxModelWithoutParameterFileGetsTheMotionOfEveryMotionFormat) {
+TEST_F(ConvertModelTest, FbxModelWithoutRigGetsTheMotionOfEveryMotionFormat) {
   auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
   // BVH cannot store joint scales.
   removeScaleMotion(character.parameterTransform, motion);
   auto tempDir = temporaryDirectory("convert_model_fbx_model");
   const auto modelPath = tempDir.path() / "model.fbx";
-  saveFbx(modelPath, character);
+  saveFbx(modelPath, withoutRig(character));
   const auto gltfPath = tempDir.path() / "motion.glb";
   saveGltfCharacter(gltfPath, character, 30.0f, {character.parameterTransform.name, motion});
   const auto fbxPath = tempDir.path() / "motion.fbx";
@@ -816,11 +831,16 @@ TEST_F(ConvertModelTest, FbxModelWithoutParameterFileGetsTheMotionOfEveryMotionF
   }
 }
 
-TEST_F(ConvertModelTest, FbxModelCharactersGetTheGltfMotionOfTheSameNamedCharacter) {
+TEST_F(ConvertModelTest, FbxModelCharactersWithoutRigGetTheGltfMotionOfTheSameNamedCharacter) {
   const auto saved = createTwoCharacterScene();
   auto tempDir = temporaryDirectory("convert_model_fbx_models");
   const auto modelPath = tempDir.path() / "models.fbx";
-  saveTestSceneAsFbx(modelPath, saved, 30.0f);
+  std::vector<TestSceneCharacter> models = saved;
+  for (auto& model : models) {
+    model.character = withoutRig(model.character);
+    model.motion.resize(0, model.motion.cols());
+  }
+  saveTestSceneAsFbx(modelPath, models, 30.0f);
   const auto motionPath = tempDir.path() / "motions.glb";
   saveTestSceneAsGltf(motionPath, saved, 30.0f);
 
@@ -873,4 +893,91 @@ TEST_F(ConvertModelTest, ResampleMotion_InterpolatesLinearlyOverTheSameDuration)
     EXPECT_TRUE(resampled.isApprox(linearMotion(targetFps, targetFrames), 1e-5f))
         << resampled << "\n";
   }
+}
+
+TEST_F(ConvertModelTest, AnFbxFileComesBackWithTheRigThatItWasSavedWith) {
+  const auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
+  auto tempDir = temporaryDirectory("convert_model_fbx_rig");
+  const auto modelPath = tempDir.path() / "model.fbx";
+  saveFbx(modelPath, character);
+  const auto gltfPath = tempDir.path() / "motion.glb";
+  saveGltfCharacter(gltfPath, character, 30.0f, {character.parameterTransform.name, motion});
+  const auto fbxPath = tempDir.path() / "motion.fbx";
+  saveFbx(fbxPath, character, motion, VectorXf(), 30.0);
+
+  // glTF motion maps by parameter name onto the rig of the FBX model; FBX motion is fitted to it.
+  struct Case {
+    std::string model;
+    std::string motionFile;
+  };
+  for (const auto& [model, motionFile] :
+       {Case{.model = modelPath.string(), .motionFile = gltfPath.string()},
+        Case{.model = "", .motionFile = fbxPath.string()}}) {
+    SCOPED_TRACE(motionFile);
+    Options options;
+    options.input_model_file = model;
+    options.input_motion_file = motionFile;
+    const Scene scene = loadScene(options);
+    ASSERT_EQ(scene.characters.size(), 1);
+    const SceneCharacter& converted = scene.characters.front();
+    EXPECT_EQ(converted.character.parameterTransform.name, character.parameterTransform.name);
+    EXPECT_EQ(converted.character.parameterLimits, character.parameterLimits);
+    ASSERT_EQ(converted.poses.rows(), motion.rows());
+    ASSERT_EQ(converted.poses.cols(), motion.cols());
+    EXPECT_LT((converted.poses - motion).cwiseAbs().maxCoeff(), 1e-4f);
+  }
+
+  // The characters of an FBX model with several characters get their rigs too.
+  const auto saved = createTwoCharacterScene();
+  const auto modelsPath = tempDir.path() / "models.fbx";
+  saveTestSceneAsFbx(modelsPath, saved, 30.0f);
+  const auto motionsPath = tempDir.path() / "motions.glb";
+  saveTestSceneAsGltf(motionsPath, saved, 30.0f);
+  Options options;
+  options.input_model_file = modelsPath.string();
+  options.input_motion_file = motionsPath.string();
+  const Scene scene = loadScene(options);
+  ASSERT_EQ(scene.characters.size(), saved.size());
+  for (size_t i = 0; i < saved.size(); ++i) {
+    SCOPED_TRACE(saved[i].character.name);
+    const SceneCharacter& converted = scene.characters[i];
+    EXPECT_EQ(
+        converted.character.parameterTransform.name, saved[i].character.parameterTransform.name);
+    ASSERT_EQ(converted.poses.rows(), saved[i].motion.rows());
+    EXPECT_TRUE(converted.poses.isApprox(saved[i].motion));
+  }
+}
+
+TEST_F(ConvertModelTest, GltfMotionKeepsItsIdentityOnTheRigOfAnFbxModel) {
+  const auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
+  // An identity offset on a joint channel that no model parameter drives, which only the identity
+  // of the motion can hold.
+  JointParameters identity =
+      JointParameters::Zero(character.parameterTransform.numJointParameters());
+  identity.v[1 * kParametersPerJoint + 1] = 0.5f;
+  auto tempDir = temporaryDirectory("convert_model_fbx_rig_identity");
+  const auto modelPath = tempDir.path() / "model.fbx";
+  saveFbx(modelPath, character);
+  const auto gltfPath = tempDir.path() / "motion.glb";
+  saveGltfCharacter(
+      gltfPath,
+      character,
+      30.0f,
+      {character.parameterTransform.name, motion},
+      {character.skeleton.getJointNames(), identity});
+
+  Options options;
+  options.input_model_file = modelPath.string();
+  options.input_motion_file = gltfPath.string();
+  const Scene scene = loadScene(options);
+  ASSERT_EQ(scene.characters.size(), 1);
+  const SceneCharacter& converted = scene.characters.front();
+  ASSERT_EQ(converted.poses.cols(), motion.cols());
+  const auto difference = maxGlobalJointTransformDifference(
+      character.skeleton,
+      jointMotionOf(character.parameterTransform, motion, identity.v),
+      converted.character.skeleton,
+      jointMotionOf(converted.character.parameterTransform, converted.poses, converted.offsets.v));
+  EXPECT_LT(difference.translation, 1e-4f);
+  EXPECT_LT(difference.rotation, 1e-4f);
 }
