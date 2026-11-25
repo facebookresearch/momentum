@@ -1249,6 +1249,15 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
+  mt_executable(
+    NAME split_characters
+    SOURCES_VARS split_characters_sources
+    LINK_LIBRARIES
+      convert_model_helpers
+      io_common
+      CLI11::CLI11
+  )
+
   if(MOMENTUM_BUILD_RERUN)
     mt_executable(
       NAME glb_viewer
