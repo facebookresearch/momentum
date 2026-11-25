@@ -1564,11 +1564,10 @@ struct FbxCharacterParse {
   BlendShape_p blendShape;
   TransformationList inverseBindPose;
   std::string name;
-  std::string metadata = "{}"; // empty json string
+  std::string metadata;
 };
 
-// Recover the character's name and metadata from its root joint node. Metadata that is not valid
-// JSON is warned about but kept verbatim (see warnIfMetadataIsNotJson()).
+// Recover the character's name and metadata from its root joint node (see metadataFromFile()).
 void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
   MT_CHECK(
       cp.jointFbxNodes.empty() || cp.jointFbxNodes.front() != nullptr,
@@ -1580,10 +1579,10 @@ void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
       cp.name = cp.jointFbxNodes.front()->name;
     }
     if (resolveProperty(*cp.jointFbxNodes.front(), "metadata") != nullptr) {
-      cp.metadata = resolveStringProperty(*cp.jointFbxNodes.front(), "metadata");
+      cp.metadata =
+          metadataFromFile(resolveStringProperty(*cp.jointFbxNodes.front(), "metadata"), "FBX");
     }
   }
-  warnIfMetadataIsNotJson(cp.metadata, "FBX");
 }
 
 // The multi-character loaders bind each joint at its rest pose, so that a reader that rebuilds the

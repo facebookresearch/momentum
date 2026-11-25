@@ -673,12 +673,20 @@ ParameterLimits parameterLimitsFromJson(const Character& character, const nlohma
   return result;
 }
 
-void warnIfMetadataIsNotJson(const std::string& metadata, std::string_view format) {
+bool isEmptyMetadata(std::string_view metadata) {
+  return metadata.empty() || metadata == "{}";
+}
+
+std::string metadataFromFile(std::string metadata, std::string_view format) {
+  if (isEmptyMetadata(metadata)) {
+    return {};
+  }
   try {
     (void)nlohmann::json::parse(metadata);
   } catch (const nlohmann::json::parse_error& e) {
     MT_LOGW("{} character metadata is not valid JSON: {}", format, e.what());
   }
+  return metadata;
 }
 
 } // namespace momentum
