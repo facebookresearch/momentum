@@ -21,7 +21,8 @@ curl -L \
 ```
 
 The `.model` file populates `character.parameter_transform`; loading only the
-FBX would produce a character without usable model parameters.
+FBX would produce a character without usable model parameters. See
+[Character Files](https://facebookresearch.github.io/momentum/docs/user_guide/character_files) for the role of each file.
 
 The same pose operations apply to characters loaded from glTF or URDF.
 

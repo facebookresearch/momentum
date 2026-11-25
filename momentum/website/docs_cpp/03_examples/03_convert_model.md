@@ -4,13 +4,22 @@ sidebar_position: 3
 
 # Convert Model
 
-The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX, glTF/GLB and BVH formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). If no input model is provided, the tool will automatically read the animation from an existing glTF/GLB, FBX or BVH file given with `-d` or `--motion`; one of the two options is required. The `-p` and `-l` options apply a model parameter file and a locator file to the characters of the input file: glTF motion moves to the new parameter transform by parameter name, and FBX and BVH motion is fitted to it. An FBX file that momentum writes saves the rig (parameter transform, parameter limits, parameter sets and pose constraints) of each character along with its animation, as a glTF file does, so the file reads back with the rig that it was saved with. The stored rig is a copy for reading the file back, not a replacement for the `.model` file: to change a rig, change its `.model` file and give it with `-p`, which replaces the stored rig.
+The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX, glTF/GLB and BVH formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). If no input model is provided, the tool will automatically read the animation from an existing glTF/GLB, FBX or BVH file given with `-d` or `--motion`; one of the two options is required. The input files are read as described in [Files and options shared by the tools](#files-and-options-shared-by-the-tools).
 
 A BVH file holds the skeleton and the motion of one character. When the output is a BVH file, the tool warns about the data that BVH cannot store, such as the mesh, the physical properties and the metadata.
 
 The `--out-locators-local`, `--out-locators-global` and `--out-parameters` options are deprecated: use the `export_rig` example to save the parameter transform, the parameter limits and the locators of a character. The `-m` option with `-d` is also deprecated: use the `apply_motion` example to apply the motion of one file to the characters of another file.
 
-Files with several characters, such as a body and the objects it holds, are converted with every character and its motion. Use `--character` to convert only one of them; the parameter and locator inputs and outputs (`-p`, `-l`, `--out-locators-local`, `--out-locators-global` and `--out-parameters`) apply to one character, so they need `--character` when the input has several characters. When the model file has several characters, or with `--character`, each character gets the motion of the motion-file character with the same name.
+Files with several characters, such as a body and the objects it holds, are converted with every character and its motion. Use `--character` to convert only one of them. The `--out-locators-local`, `--out-locators-global` and `--out-parameters` outputs apply to one character, so they need `--character` when the input has several characters.
+
+## Files and options shared by the tools
+
+The `convert_model`, `export_rig`, `apply_motion`, `split_characters` and `combine_characters` examples share their code and read files in the same way. See [Character Files](../02_user_guide/04_character_files.md) for the role of each file.
+
+- `-p` applies a `.model` file and `-l` a `.locators` file to a character, in `convert_model`, `export_rig` and `apply_motion`. They replace the rig and the locators that the input file stores. They apply to one character, so they need `--character` when the input has several characters.
+- Without `-p`, a character gets the rig that its file stores, such as the rig that momentum saves in glTF and FBX files. The stored rig is a copy: to change a rig, change its `.model` file and give it with `-p`. A character of an FBX file without model parameters, such as a file from another tool, gets the identity parameter transform, so that its joint motion is also its model-parameter motion.
+- glTF motion maps onto the rig by parameter name, and onto the identity parameter transform of an FBX model through the joint transforms. FBX and BVH motion is fitted to the rig.
+- When the model file has several characters, or with `--character`, each character gets the motion of the motion-file character with the same name.
 
 <FbInternalOnly>
 

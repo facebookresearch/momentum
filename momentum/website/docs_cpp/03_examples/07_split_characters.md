@@ -6,7 +6,7 @@ sidebar_position: 7
 
 The `split_characters` example saves each character of a file, such as a hand and the object it holds, with its motion to a file of its own. Use the `-i` or `--input` option to specify the input file (`.glb`, `.gltf`, `.fbx`, or `.bvh`), and `--out-dir` for the output directory. Each file has the name of its character: `_` replaces the characters other than letters, digits, `-`, `_` and `.`, a character without a name is saved as `character_<index>`, and a numeric suffix keeps the file names unique in any letter case. The output files have the format of the input file, unless `--format` selects another one (`fbx`, `glb`, `gltf`, or `bvh`). The markers of the input file are not saved.
 
-Each output file has the content that `convert_model -d <input> --character <name>` writes.
+Each output file has the content that `convert_model -d <input> --character <name>` writes. The input file is read as described in [Files and options shared by the tools](./03_convert_model.md#files-and-options-shared-by-the-tools).
 
 <FbInternalOnly>
 

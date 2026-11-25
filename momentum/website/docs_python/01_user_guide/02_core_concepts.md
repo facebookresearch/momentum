@@ -20,6 +20,10 @@ A `pymomentum.geometry.Character` can contain:
 Not every character has every component. For example, a character loaded from
 URDF may have a skeleton but no mesh.
 
+A character often comes from several files, such as an FBX file with the
+skeleton and the mesh, a `.model` file with the rig, and a `.locators` file. See
+[Character Files](https://facebookresearch.github.io/momentum/docs/user_guide/character_files) for the role of each file.
+
 ## Pose representations
 
 | Representation | Shape | Contents |
