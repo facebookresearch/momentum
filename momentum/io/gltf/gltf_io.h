@@ -62,6 +62,11 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// are read from the character's root node, where GltfBuilder stores each character's own copy.
 /// Files without that copy have a single document-level rig, which every character then uses.
 ///
+/// @note The joints come in the depth-first order of the file's hierarchy, so a character whose
+/// joints were in another order when it was written comes back reordered, each joint with its name
+/// and parent. The locators and collision shapes come ordered by parent joint, in file order within
+/// a joint.
+///
 /// @param[in] model The glTF document to load from.
 /// @return One Character per character in the scene, in scene order.
 std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model);
