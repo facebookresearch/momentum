@@ -12,6 +12,7 @@
 #include <momentum/character/character.h>
 #include <momentum/common/exception.h>
 #include <momentum/common/log.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_builder.h>
 #include <momentum/io/fbx/fbx_io.h>
@@ -36,7 +37,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
          "-m,--model",
          opt->input_model_file,
-         "Input model (.fbx/.glb/.gltf/.urdf); not required if reading animation from glb/gltf or fbx. "
+         "Input model (.fbx/.glb/.gltf/.urdf/.bvh); not required if reading animation from glb/gltf, fbx or bvh. "
          "Every character of the file is converted, unless --character selects one. With several "
          "characters or with --character, each character gets the motion of the motion-file "
          "character with the same name")
@@ -49,7 +50,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
          "-d,--motion",
          opt->input_motion_file,
-         "Input motion data file (.glb/.gltf/.fbx); without --model, every character of the file "
+         "Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file "
          "is converted with its motion")
       ->check(CLI::ExistingFile);
   app.add_option(
@@ -59,7 +60,11 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
       "required for --parameters, --locator, --out-locators-local, --out-locators-global and "
       "--out-parameters when the input has several characters");
 
-  app.add_option("-o,--out", opt->output_model_file, "Output file (.fbx/.glb/.gltf)")->required();
+  app.add_option(
+         "-o,--out",
+         opt->output_model_file,
+         "Output file (.fbx/.glb/.gltf/.bvh); a .bvh file holds one character's skeleton and motion")
+      ->required();
 
   app.add_option(
       "--out-locators-local",
@@ -169,6 +174,32 @@ void saveGltfScene(
   builder.save(outputFile);
 }
 
+// Saves the one character of the scene with its motion to a BVH output file, which stores only a
+// skeleton and its motion: saveBvhCharacterWithMotion() warns about the other data of the
+// character.
+void saveBvhScene(const std::string& outputFile, const Scene& scene, bool saveMarkers) {
+  MT_LOGI("Saving bvh file...");
+  MT_THROW_IF(
+      scene.characters.size() != 1,
+      "A BVH file holds one character, but the input has {}: select one with --character",
+      scene.characters.size());
+  if (saveMarkers) {
+    MT_LOGW("A BVH file cannot store markers: --save-markers is ignored");
+  }
+  const auto& entry = scene.characters.front();
+  const Character& character = entry.character;
+  if (entry.poses.cols() == 0) {
+    saveBvhCharacter(outputFile, character);
+    return;
+  }
+  saveBvhCharacterWithMotion(
+      outputFile,
+      character,
+      {character.parameterTransform.name, entry.poses},
+      scene.fps,
+      entry.offsets.v);
+}
+
 // The marker sequence of the motion file when --save-markers is given.
 MarkerSequence loadRequestedMarkers(const Options& options) {
   if (!options.save_markers) {
@@ -220,18 +251,24 @@ int main(int argc, char** argv) {
 
     // Validate output file extension
     const CharacterFormat outputFormat = parseCharacterFormat(options->output_model_file);
-    if (outputFormat != CharacterFormat::Fbx && outputFormat != CharacterFormat::Gltf) {
+    const bool bvhOutput = isBvhFile(options->output_model_file);
+    if (!bvhOutput && outputFormat != CharacterFormat::Fbx &&
+        outputFormat != CharacterFormat::Gltf) {
       MT_LOGE("Unknown output file format: {}", options->output_model_file);
       return EXIT_FAILURE;
     }
 
     const Scene scene = loadScene(*options);
-    const MarkerSequence markerSequence = loadRequestedMarkers(*options);
-    if (outputFormat == CharacterFormat::Fbx) {
-      saveFbxScene(options->output_model_file, scene, markerSequence, *options);
+    if (bvhOutput) {
+      saveBvhScene(options->output_model_file, scene, options->save_markers);
+    } else if (outputFormat == CharacterFormat::Fbx) {
+      saveFbxScene(options->output_model_file, scene, loadRequestedMarkers(*options), *options);
     } else {
       saveGltfScene(
-          options->output_model_file, scene, markerSequence, !options->input_motion_file.empty());
+          options->output_model_file,
+          scene,
+          loadRequestedMarkers(*options),
+          !options->input_motion_file.empty());
     }
     // loadScene() rejects these outputs for several characters.
     if (scene.characters.size() == 1) {
