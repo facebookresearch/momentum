@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <fstream>
 #include <iterator>
 #include <optional>
@@ -918,6 +919,31 @@ bool isBvhFile(const filesystem::path& path) {
 bool isSceneOutputFile(const filesystem::path& path) {
   const CharacterFormat format = parseCharacterFormat(path);
   return isBvhFile(path) || format == CharacterFormat::Fbx || format == CharacterFormat::Gltf;
+}
+
+MatrixXf resampleMotion(const MatrixXf& motion, float sourceFps, float targetFps) {
+  MT_THROW_IF(
+      sourceFps <= 0.0f || targetFps <= 0.0f,
+      "Cannot resample a motion from {} fps to {} fps: the frame rates must be positive",
+      sourceFps,
+      targetFps);
+  if (motion.cols() <= 1) {
+    return motion;
+  }
+  const Eigen::Index lastFrame = motion.cols() - 1;
+  // The small term keeps the last frame when the duration is a whole number of target frames.
+  const auto numFrames = static_cast<Eigen::Index>(std::floor(
+                             static_cast<double>(lastFrame) * targetFps / sourceFps + 1e-6)) +
+      1;
+  MatrixXf result(motion.rows(), numFrames);
+  for (Eigen::Index frame = 0; frame < numFrames; ++frame) {
+    const double position = static_cast<double>(frame) * sourceFps / targetFps;
+    const auto before = std::min(static_cast<Eigen::Index>(std::floor(position)), lastFrame);
+    const Eigen::Index after = std::min(before + 1, lastFrame);
+    const auto weight = static_cast<float>(std::min(position - static_cast<double>(before), 1.0));
+    result.col(frame) = (1.0f - weight) * motion.col(before) + weight * motion.col(after);
+  }
+  return result;
 }
 
 bool isMotionInputFile(const filesystem::path& path) {
