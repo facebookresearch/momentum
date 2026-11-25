@@ -215,6 +215,7 @@ mt_python_binding(
     array_utility
     character
     character_solver
+    io_bvh
     io_character
     io_fbx
     io_file_save_options
