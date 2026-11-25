@@ -1211,14 +1211,25 @@ if(MOMENTUM_BUILD_EXAMPLES)
       math
   )
 
-  mt_executable(
-    NAME convert_model
-    SOURCES_VARS convert_model_sources
-    LINK_LIBRARIES
+  mt_library(
+    NAME convert_model_helpers
+    HEADERS_VARS convert_model_headers
+    SOURCES_VARS convert_model_helpers_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+    PRIVATE_LINK_LIBRARIES
       io_bvh
       io_character
       io_marker
       io_urdf
+    NO_INSTALL
+  )
+
+  mt_executable(
+    NAME convert_model
+    SOURCES_VARS convert_model_sources
+    LINK_LIBRARIES
+      convert_model_helpers
       CLI11::CLI11
   )
 
@@ -1226,9 +1237,7 @@ if(MOMENTUM_BUILD_EXAMPLES)
     NAME export_rig
     SOURCES_VARS export_rig_sources
     LINK_LIBRARIES
-      io_bvh
-      io_character
-      io_urdf
+      convert_model_helpers
       CLI11::CLI11
   )
 

@@ -16,8 +16,11 @@
 #include <momentum/common/log.h>
 #include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
+#include <momentum/io/fbx/fbx_builder.h>
 #include <momentum/io/fbx/fbx_io.h>
+#include <momentum/io/gltf/gltf_builder.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/io/marker/marker_io.h>
 #include <momentum/io/skeleton/locator_io.h>
 #include <momentum/io/skeleton/parameter_transform_io.h>
 #include <momentum/io/skeleton/parameters_io.h>
@@ -718,13 +721,126 @@ std::optional<Scene> loadMultiCharacterScene(const Options& options) {
   return scene;
 }
 
+// The first marker sequence of `markerFile`; no frames if it has none.
+MarkerSequence loadMarkerData(const std::string& markerFile) {
+  auto markerData = loadMarkers(markerFile);
+  if (!markerData.empty()) {
+    return std::move(markerData[0]);
+  }
+  return {};
+}
+
+// The marker sequence that the options ask for; no frames without options.saveMarkers.
+MarkerSequence loadRequestedMarkers(const SaveSceneOptions& options) {
+  if (!options.saveMarkers) {
+    return {};
+  }
+  return loadMarkerData(options.markerFile);
+}
+
+// The identity offsets of `character` for the glTF writer.
+IdentityParameters toIdentityParameters(
+    const Character& character,
+    const JointParameters& offsets) {
+  // Empty offsets mean "the loaded motion has no per-joint identity vector"; passing the
+  // skeleton's joint names paired with an empty identity vector would violate
+  // mapIdentityToCharacter's size precondition. Use a fully empty IdentityParameters so the
+  // glTF writer sees "no identity data" rather than a mismatched tuple.
+  return offsets.size() == 0 ? IdentityParameters{}
+                             : IdentityParameters{character.skeleton.getJointNames(), offsets};
+}
+
+// Saves the characters with their motion and the marker sequence to an FBX file.
+void saveFbxScene(
+    const filesystem::path& path,
+    const Scene& scene,
+    const MarkerSequence& markerSequence,
+    const SaveSceneOptions& options) {
+  MT_LOGI("Saving fbx file...");
+  FileSaveOptions fbxOptions;
+  fbxOptions.mesh = options.saveMeshes;
+  fbxOptions.fbxNamespace = options.fbxNamespace;
+  FbxBuilder builder;
+  for (const auto& entry : scene.characters) {
+    const std::string name = builder.addCharacter(entry.character, fbxOptions);
+    builder.addMotion(entry.character, scene.fps, entry.poses, entry.offsets.v, name);
+  }
+  builder.addMarkerSequence(scene.fps, markerSequence.frames);
+  builder.save(path);
+}
+
+// Saves the characters with their motion and the marker sequence to a glTF/GLB file.
+void saveGltfScene(
+    const filesystem::path& path,
+    const Scene& scene,
+    const MarkerSequence& markerSequence) {
+  MT_LOGI("Saving gltf/glb file...");
+  GltfBuilder builder;
+  for (const auto& entry : scene.characters) {
+    // As saveGltfCharacter(), an empty character (from no input file) adds nothing.
+    if (entry.character.skeleton.joints.empty() && entry.character.mesh == nullptr) {
+      continue;
+    }
+    const std::string name = builder.addCharacter(entry.character);
+    // In a scene with several characters, a character without motion, such as a model character
+    // that no motion-file character matches, gets no animation. One character gets the motion of
+    // the motion file even without frames, as saveGltfCharacter() adds it.
+    const bool hasOwnMotion = entry.poses.cols() > 0 || entry.offsets.size() > 0;
+    if (!scene.hasMotionFile || (scene.characters.size() > 1 && !hasOwnMotion)) {
+      continue;
+    }
+    const auto& character = entry.character;
+    builder.addMotion(
+        character,
+        scene.fps,
+        {character.parameterTransform.name, entry.poses},
+        toIdentityParameters(character, entry.offsets),
+        /*addExtensions=*/true,
+        /*customName=*/"default",
+        /*timestamps=*/{},
+        name);
+  }
+  if (!markerSequence.frames.empty()) {
+    builder.addMarkerSequence(scene.fps, markerSequence.frames);
+  }
+  builder.save(path);
+}
+
+// Saves the one character of the scene with its motion to a BVH file, which stores only a
+// skeleton and its motion: saveBvhCharacterWithMotion() warns about the other data of the
+// character.
+void saveBvhScene(const filesystem::path& path, const Scene& scene, bool saveMarkers) {
+  MT_LOGI("Saving bvh file...");
+  MT_THROW_IF(
+      scene.characters.size() != 1,
+      "A BVH file holds one character, but the input has {}: select one with --character",
+      scene.characters.size());
+  if (saveMarkers) {
+    MT_LOGW("A BVH file cannot store markers: --save-markers is ignored");
+  }
+  const auto& entry = scene.characters.front();
+  const Character& character = entry.character;
+  if (entry.poses.cols() == 0) {
+    saveBvhCharacter(path, character);
+    return;
+  }
+  saveBvhCharacterWithMotion(
+      path,
+      character,
+      {character.parameterTransform.name, entry.poses},
+      scene.fps,
+      entry.offsets.v);
+}
+
 } // namespace
 
 Scene loadScene(const Options& options) {
-  if (auto scene = loadMultiCharacterScene(options)) {
-    return std::move(*scene);
+  std::optional<Scene> scene = loadMultiCharacterScene(options);
+  if (!scene) {
+    scene = loadOneCharacterScene(options);
   }
-  return loadOneCharacterScene(options);
+  scene->hasMotionFile = !options.input_motion_file.empty();
+  return std::move(*scene);
 }
 
 int findLongestMotion(const std::vector<MatrixXf>& motions) {
@@ -793,6 +909,37 @@ void saveRigOutputs(const Options& options, const Scene& scene) {
 
 bool isBvhFile(const filesystem::path& path) {
   return lowerCaseExtension(path) == ".bvh";
+}
+
+bool isSceneOutputFile(const filesystem::path& path) {
+  const CharacterFormat format = parseCharacterFormat(path);
+  return isBvhFile(path) || format == CharacterFormat::Fbx || format == CharacterFormat::Gltf;
+}
+
+SaveSceneOptions saveSceneOptions(const Options& options) {
+  SaveSceneOptions result;
+  result.fbxNamespace = options.fbx_namespace;
+  result.saveMeshes = options.character_mesh_save;
+  result.saveMarkers = options.save_markers;
+  result.markerFile = options.input_motion_file;
+  return result;
+}
+
+void saveScene(const filesystem::path& path, const Scene& scene, const SaveSceneOptions& options) {
+  if (isBvhFile(path)) {
+    saveBvhScene(path, scene, options.saveMarkers);
+    return;
+  }
+  const CharacterFormat format = parseCharacterFormat(path);
+  MT_THROW_IF(
+      format != CharacterFormat::Fbx && format != CharacterFormat::Gltf,
+      "Unknown output file format: {}",
+      path.string());
+  if (format == CharacterFormat::Fbx) {
+    saveFbxScene(path, scene, loadRequestedMarkers(options), options);
+  } else {
+    saveGltfScene(path, scene, loadRequestedMarkers(options));
+  }
 }
 
 Character loadModelCharacter(const Options& options) {
