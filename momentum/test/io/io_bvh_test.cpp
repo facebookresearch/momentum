@@ -5,13 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <momentum/character/parameter_transform.h>
+#include <momentum/character/skeleton_state.h>
 #include <momentum/io/bvh/bvh_io.h>
+#include <momentum/math/random.h>
+#include <momentum/test/character/character_helpers.h>
 #include <momentum/test/io/io_helpers.h>
 
 #include <gtest/gtest.h>
 
 #include <cmath>
 #include <fstream>
+#include <iterator>
+#include <string>
+#include <vector>
 
 using namespace momentum;
 
@@ -286,6 +293,150 @@ TEST(IoBvhTest, SaveAndReloadFromBuffer) {
   for (size_t i = 0; i < origCharacter.skeleton.joints.size(); ++i) {
     EXPECT_EQ(reCharacter.skeleton.joints[i].name, origCharacter.skeleton.joints[i].name);
   }
+}
+
+// The joint parameters of the motion of a loaded BVH file, whose character has an identity
+// parameter transform.
+const MatrixXf& loadedJointMotion(const std::tuple<Character, MotionParameters, float>& loaded) {
+  return std::get<1>(std::get<1>(loaded));
+}
+
+TEST(IoBvhTest, SavedMotionKeepsTheJointTransformsOfAnyCharacter) {
+  // Joints with pre-rotations, listed in an order that is not the hierarchy order: joint 2 is a
+  // child of the root and joint 3 a child of joint 1, so the hierarchy order is 0, 1, 3, 2.
+  Character character = createTestCharacter(4);
+  character.skeleton.joints.at(2).parent = 0;
+  character.skeleton.joints.at(3).parent = 1;
+  character.skeleton.joints.at(1).preRotation =
+      Quaternionf(Eigen::AngleAxisf(0.4f, Vector3f(1.0f, 2.0f, 3.0f).normalized()));
+  character.skeleton.joints.at(3).preRotation =
+      Quaternionf(Eigen::AngleAxisf(-0.7f, Vector3f::UnitY()));
+
+  // The test parameter transform, and an identity transform, whose model parameters also
+  // translate the joints below the root.
+  for (const bool identityTransform : {false, true}) {
+    SCOPED_TRACE(identityTransform ? "identity transform" : "test transform");
+    if (identityTransform) {
+      character.parameterTransform =
+          ParameterTransform::identity(character.skeleton.getJointNames());
+    }
+    Random<> rng(12345);
+    auto motion =
+        rng.uniform<MatrixXf>(character.parameterTransform.numAllModelParameters(), 3, -0.5f, 0.5f);
+    // BVH cannot store joint scales.
+    removeScaleMotion(character.parameterTransform, motion);
+
+    const auto tmpFile = temporaryFile("any_character", "bvh");
+    saveBvhCharacterWithMotion(
+        tmpFile.path(), character, {character.parameterTransform.name, motion}, 30.0f);
+    const auto loaded = loadBvhCharacterWithMotion(tmpFile.path());
+
+    const auto difference = maxGlobalJointTransformDifference(
+        character.skeleton,
+        jointMotionOf(character.parameterTransform, motion),
+        std::get<0>(loaded).skeleton,
+        loadedJointMotion(loaded));
+    EXPECT_LT(difference.translation, 1e-3f);
+    EXPECT_LT(difference.rotation, 1e-3f);
+  }
+}
+
+TEST(IoBvhTest, IdentityOffsetsTakeThePlaceOfTheParameterTransformOffsets) {
+  Character character = createTestCharacter(4);
+  Random<> rng(12345);
+  // Offsets of the parameter transform, which FbxBuilder::addMotion() does not use either.
+  const auto numJointParameters = character.parameterTransform.numJointParameters();
+  character.parameterTransform.offsets = rng.uniform<VectorXf>(numJointParameters, -0.5f, 0.5f);
+  auto identity = rng.uniform<VectorXf>(numJointParameters, -0.5f, 0.5f);
+  for (Eigen::Index scale = SC; scale < numJointParameters; scale += kParametersPerJoint) {
+    character.parameterTransform.offsets[scale] = 0.0f;
+    identity[scale] = 0.0f;
+  }
+  auto motion =
+      rng.uniform<MatrixXf>(character.parameterTransform.numAllModelParameters(), 2, -0.5f, 0.5f);
+  removeScaleMotion(character.parameterTransform, motion);
+
+  for (const VectorXf& offsets : {identity, VectorXf()}) {
+    SCOPED_TRACE(offsets.size() > 0 ? "identity offsets" : "no offsets");
+    const auto bytes = saveBvhCharacterWithMotion(
+        character, {character.parameterTransform.name, motion}, 30.0f, offsets);
+    const auto loaded = loadBvhCharacterWithMotion(bytes);
+
+    const auto difference = maxGlobalJointTransformDifference(
+        character.skeleton,
+        jointMotionOf(character.parameterTransform, motion, offsets),
+        std::get<0>(loaded).skeleton,
+        loadedJointMotion(loaded));
+    EXPECT_LT(difference.translation, 1e-3f);
+    EXPECT_LT(difference.rotation, 1e-3f);
+  }
+}
+
+TEST(IoBvhTest, SavedJointParametersKeepTheirJointTransforms) {
+  const Character character = createTestCharacter(4);
+  Random<> rng(12345);
+  auto jointMotion =
+      rng.uniform<MatrixXf>(character.parameterTransform.numJointParameters(), 3, -0.5f, 0.5f);
+  for (Eigen::Index scale = SC; scale < jointMotion.rows(); scale += kParametersPerJoint) {
+    jointMotion.row(scale).setZero();
+  }
+
+  const auto tmpFile = temporaryFile("joint_parameters", "bvh");
+  saveBvhCharacterWithJointParams(tmpFile.path(), character, jointMotion, 30.0f);
+  const auto loaded = loadBvhCharacterWithMotion(tmpFile.path());
+
+  const auto difference = maxGlobalJointTransformDifference(
+      character.skeleton, jointMotion, std::get<0>(loaded).skeleton, loadedJointMotion(loaded));
+  EXPECT_LT(difference.translation, 1e-3f);
+  EXPECT_LT(difference.rotation, 1e-3f);
+}
+
+TEST(IoBvhTest, OnlyRootsAndTranslatedJointsGetPositionChannels) {
+  const Character character = createTestCharacter(4);
+  // Joint 1 moves by less than the written precision, joint 2 by 0.5.
+  MatrixXf jointMotion = MatrixXf::Zero(character.parameterTransform.numJointParameters(), 2);
+  jointMotion(kParametersPerJoint + TX, 1) = 1e-6f;
+  jointMotion(2 * kParametersPerJoint + TY, 1) = 0.5f;
+
+  const auto tmpFile = temporaryFile("position_channels", "bvh");
+  saveBvhCharacterWithJointParams(tmpFile.path(), character, jointMotion, 30.0f);
+
+  std::ifstream file(tmpFile.path());
+  std::vector<std::string> channelLines;
+  for (std::string line; std::getline(file, line);) {
+    if (line.find("CHANNELS") != std::string::npos) {
+      channelLines.push_back(line.substr(line.find("CHANNELS")));
+    }
+  }
+  const std::string rotations = "Zrotation Xrotation Yrotation";
+  const std::vector<std::string> expected = {
+      "CHANNELS 6 Xposition Yposition Zposition " + rotations,
+      "CHANNELS 3 " + rotations,
+      "CHANNELS 6 Xposition Yposition Zposition " + rotations,
+      "CHANNELS 3 " + rotations};
+  EXPECT_EQ(channelLines, expected);
+}
+
+TEST(IoBvhTest, FailedSaveLeavesTheFileUnchanged) {
+  const Character character = createTestCharacter(3);
+  const auto tmpFile = temporaryFile("failed_save", "bvh");
+  {
+    std::ofstream file(tmpFile.path());
+    file << "kept";
+  }
+  const auto fileContent = [&]() {
+    std::ifstream file(tmpFile.path());
+    return std::string(std::istreambuf_iterator<char>(file), {});
+  };
+
+  const MatrixXf wrongRows =
+      MatrixXf::Zero(character.parameterTransform.numAllModelParameters() + 1, 2);
+  EXPECT_THROW(
+      saveBvhCharacterWithMotion(
+          tmpFile.path(), character, {character.parameterTransform.name, wrongRows}, 30.0f),
+      std::runtime_error);
+  EXPECT_THROW(saveBvhCharacter(tmpFile.path(), Character()), std::runtime_error);
+  EXPECT_EQ(fileContent(), "kept");
 }
 
 } // namespace
