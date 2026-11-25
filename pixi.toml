@@ -132,6 +132,9 @@ hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/hello_world", de
 convert_model = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/convert_model", depends-on = [
     "build",
 ], description = "Run model conversion tool" }
+export_rig = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/export_rig", depends-on = [
+    "build",
+], description = "Export the parameter transform and locators of a character" }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/release/c3d_viewer", depends-on = [
     "build",
 ], description = "Run C3D file viewer" }
@@ -511,6 +514,9 @@ hello_world = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/hello_world.exe"
     "build",
 ] }
 convert_model = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/convert_model.exe", depends-on = [
+    "build",
+] }
+export_rig = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/export_rig.exe", depends-on = [
     "build",
 ] }
 c3d_viewer = { cmd = "build/$PIXI_ENVIRONMENT_NAME/cpp/Release/c3d_viewer.exe", depends-on = [
