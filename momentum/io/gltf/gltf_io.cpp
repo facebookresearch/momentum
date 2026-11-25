@@ -79,12 +79,7 @@ void loadCharacterExtensions(
     }
     if (def.count("metadata") > 0) {
       character.metadata = def.value<std::string>("metadata", {});
-      // ensure metadata is valid JSON
-      try {
-        auto json = nlohmann::json::parse(character.metadata);
-      } catch (const nlohmann::json::parse_error& e) {
-        MT_LOGW("Failed to parse metadata: {}", e.what());
-      }
+      warnIfMetadataIsNotJson(character.metadata, "glTF");
     }
   } catch (std::runtime_error& err) {
     MT_THROW("{}", gltfLoadErrorMessage(err.what()));
