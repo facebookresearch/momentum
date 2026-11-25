@@ -105,7 +105,8 @@ struct CharacterMotion {
 /// motion, which is all that files written before per-character motion carry.
 ///
 /// @param[in] model The glTF document to load from.
-/// @return The characters with their motion, and the frame rate of the document.
+/// @return The characters with their motion, and the frame rate of the document, which applies to
+/// the motion of every character.
 std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
     const fx::gltf::Document& model);
 
@@ -115,7 +116,8 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
 /// @ref fx::gltf::Document overload.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
-/// @return The characters with their motion, and the frame rate of the document.
+/// @return The characters with their motion, and the frame rate of the document, which applies to
+/// the motion of every character.
 std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
     const filesystem::path& gltfFilename);
 
@@ -124,7 +126,8 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
 /// See the @ref fx::gltf::Document overload.
 ///
 /// @param[in] byteSpan The buffer containing the glTF data.
-/// @return The characters with their motion, and the frame rate of the document.
+/// @return The characters with their motion, and the frame rate of the document, which applies to
+/// the motion of every character.
 std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
     std::span<const std::byte> byteSpan);
 
