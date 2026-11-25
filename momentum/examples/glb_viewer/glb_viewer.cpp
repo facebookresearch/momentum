@@ -165,28 +165,6 @@ void batchLogModelParams(
       rec, worldPrefix, "model_params", paramNames, selectedParams, sel.indices, sel.logTimes);
 }
 
-/// Batch log joint parameters collected during the frame loop, under the per-character stream
-/// prefix `worldPrefix` (e.g. "world_params/character_0").
-void batchLogJointParams(
-    const RecordingStream& rec,
-    const std::string& worldPrefix,
-    std::span<const std::string> jointNames,
-    const Eigen::MatrixXf& allJointParams,
-    size_t nCollected,
-    const FrameSelection& sel) {
-  if (nCollected == 0) {
-    return;
-  }
-  logJointParamsColumns(
-      rec,
-      worldPrefix,
-      "joint_params",
-      jointNames,
-      allJointParams.leftCols(nCollected),
-      std::span<const int64_t>(sel.indices.data(), nCollected),
-      std::span<const double>(sel.logTimes.data(), nCollected));
-}
-
 /// Everything the frame loop needs for one character.
 struct CharacterPlayback {
   std::string entityPath;
@@ -194,7 +172,6 @@ struct CharacterPlayback {
   std::string correspondencePath;
   std::vector<std::string> jointNames;
   std::map<std::string, size_t> locatorLookup;
-  FrameSelection sel;
   CharacterParameters params;
   // One state per character: CharacterState caches the posed mesh of the character it last posed.
   CharacterState state;
@@ -202,8 +179,7 @@ struct CharacterPlayback {
   Eigen::MatrixXf jointMotion;
   // Frames of momentum motion or channel motion; the character holds its last pose after them.
   size_t numFrames = 0;
-  Eigen::MatrixXf jointParams;
-  size_t numJointParamFrames = 0;
+  JointParamsRecorder jointParams;
 };
 
 int run(const Options& options) {
@@ -310,17 +286,19 @@ int run(const Options& options) {
     auto& pc = playback.at(i);
     pc.jointNames = cm.character.skeleton.getJointNames();
     pc.locatorLookup = buildLocatorLookup(cm.character);
-    pc.sel = selectMotionFrames(firstFrame, lastFrame, options.stride, pc.numFrames, fps);
     if (pc.numFrames == 0) {
       continue;
     }
+    const FrameSelection sel =
+        selectMotionFrames(firstFrame, lastFrame, options.stride, pc.numFrames, fps);
     const auto& modelParamNames = cm.character.parameterTransform.name;
     if (options.logParams && cm.motion.cols() > 0) {
       logModelParamNames(rec, pc.paramsPrefix, "model_params", modelParamNames);
-      batchLogModelParams(rec, pc.paramsPrefix, modelParamNames, cm.motion, pc.sel);
+      batchLogModelParams(rec, pc.paramsPrefix, modelParamNames, cm.motion, sel);
     }
     if (options.logJoints) {
       logJointParamNames(rec, pc.paramsPrefix, "joint_params", pc.jointNames);
+      pc.jointParams.reserve(cm.character.parameterTransform.numJointParameters(), sel.cols.size());
     }
   }
 
@@ -357,11 +335,10 @@ int run(const Options& options) {
         logCharacter(rec, pc.entityPath, cm.character, pc.state);
 
         if (options.logJoints && inMotion) {
-          const auto& jp = pc.state.skeletonState.jointParameters.v;
-          if (pc.jointParams.cols() == 0) {
-            pc.jointParams.resize(jp.size(), pc.sel.cols.size());
-          }
-          pc.jointParams.col(pc.numJointParamFrames++) = jp;
+          pc.jointParams.add(
+              static_cast<int64_t>(iFrame),
+              static_cast<double>(iFrame) / fps,
+              pc.state.skeletonState.jointParameters.v);
         }
       }
 
@@ -377,11 +354,8 @@ int run(const Options& options) {
     }
   }
 
-  if (options.logJoints) {
-    for (const auto& pc : playback) {
-      batchLogJointParams(
-          rec, pc.paramsPrefix, pc.jointNames, pc.jointParams, pc.numJointParamFrames, pc.sel);
-    }
+  for (const auto& pc : playback) {
+    pc.jointParams.send(rec, pc.paramsPrefix, pc.jointNames);
   }
 
   return EXIT_SUCCESS;
