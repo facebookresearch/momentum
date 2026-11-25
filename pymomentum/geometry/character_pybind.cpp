@@ -669,6 +669,7 @@ Note: In practice, most limits are enforced on the model parameters, but momentu
       .def_static(
           "load_gltf_from_bytes",
           &loadGLTFCharacterFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from a gltf byte array.
 
 If the file has more than one character, this returns the one with the most joints; use
@@ -745,6 +746,7 @@ This is the byte-array version of :meth:`load_gltf_characters_with_motion`.
       .def_static(
           "load_gltf_with_motion_from_bytes",
           &loadGLTFCharacterWithMotionFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
           R"(Load a character and motion from a gltf byte array.
 
 For a multi-character file, this returns the character with the most joints and that character's
@@ -783,6 +785,7 @@ own motion; use :meth:`load_gltf_characters_with_motion` to load every character
       .def_static(
           "load_gltf_with_motion_model_parameter_scales_from_bytes",
           &loadGLTFCharacterWithMotionModelParameterScalesFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
           R"(Load BOTH character (skeleton/mesh) and motion data from a gltf byte array,
 with model parameter scales instead of joint parameters.
 
