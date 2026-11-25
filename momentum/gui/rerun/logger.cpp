@@ -14,6 +14,7 @@
 #include "momentum/character/locator.h"
 #include "momentum/character/locator_state.h"
 #include "momentum/character/marker.h"
+#include "momentum/common/exception.h"
 #include "momentum/gui/rerun/eigen_adapters.h"
 #include "momentum/gui/rerun/rerun_compat.h"
 #include "momentum/math/mesh.h"
@@ -406,7 +407,7 @@ void logJointParamsColumns(
     const std::string& worldPrefix,
     const std::string& posePrefix,
     std::span<const std::string> names,
-    const Eigen::MatrixXf& allJointParams,
+    const Eigen::Ref<const Eigen::MatrixXf>& allJointParams,
     std::span<const int64_t> frameIndices,
     std::span<const double> times) {
   const auto nFrames = static_cast<size_t>(allJointParams.cols());
@@ -616,6 +617,41 @@ void logCharacter(
     logCollisionGeometry(
         rec, charStreamName + "/collision_geometry", *collision, characterState.skeletonState);
   }
+}
+
+void JointParamsRecorder::add(int64_t frameIndex, double time, const Eigen::VectorXf& jointParams) {
+  if (frameIndices_.empty()) {
+    numJointParameters_ = jointParams.size();
+  }
+  MT_THROW_IF(
+      jointParams.size() != numJointParameters_,
+      "Joint parameters of a frame have {} values; earlier frames have {}.",
+      jointParams.size(),
+      numJointParameters_);
+  values_.insert(values_.end(), jointParams.data(), jointParams.data() + jointParams.size());
+  frameIndices_.push_back(frameIndex);
+  times_.push_back(time);
+}
+
+void JointParamsRecorder::reserve(Eigen::Index numJointParameters, size_t numFrames) {
+  values_.reserve(static_cast<size_t>(numJointParameters) * numFrames);
+  frameIndices_.reserve(numFrames);
+  times_.reserve(numFrames);
+}
+
+Eigen::Map<const Eigen::MatrixXf> JointParamsRecorder::jointParams() const {
+  return {values_.data(), numJointParameters_, static_cast<Eigen::Index>(frameIndices_.size())};
+}
+
+void JointParamsRecorder::send(
+    const rerun::RecordingStream& rec,
+    const std::string& worldPrefix,
+    std::span<const std::string> jointNames) const {
+  if (frameIndices_.empty()) {
+    return;
+  }
+  logJointParamsColumns(
+      rec, worldPrefix, "joint_params", jointNames, jointParams(), frameIndices_, times_);
 }
 
 } // namespace momentum
