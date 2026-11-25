@@ -641,6 +641,10 @@ io_gltf_test_sources = [
     "test/io/io_gltf_test.cpp",
 ]
 
+io_gltf_mesh_test_sources = [
+    "test/io/io_gltf_mesh_test.cpp",
+]
+
 io_usd_public_headers = [
     "io/usd/usd_io.h",
 ]
