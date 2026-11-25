@@ -74,10 +74,11 @@ momentum::MotionData mappedMotion(
   return result;
 }
 
-// Whether the model characters come from an FBX file without a parameter file. Unless the file
-// stores their rig, these characters get the identity transform (see
-// initializeCharacterFromMotionFile()), and the motion of every motion file is mapped onto them
-// through the joint transforms (see hasIdentityParameterTransform()).
+// Whether the model characters come from an FBX file without a parameter file. These characters
+// get the rig that the file stores, or the identity transform when they have no model parameters
+// (see useIdentityTransformWithoutParameters()); the motion of every motion file is mapped onto
+// those with the identity transform through the joint transforms (see
+// hasIdentityParameterTransform()).
 bool isFbxModelWithoutParameters(const momentum::Options& options) {
   return !options.input_model_file.empty() && options.input_params_file.empty() &&
       momentum::parseCharacterFormat(options.input_model_file) == momentum::CharacterFormat::Fbx;
@@ -88,6 +89,16 @@ bool isFbxModelWithoutParameters(const momentum::Options& options) {
 bool hasIdentityParameterTransform(const momentum::Character& character) {
   return character.parameterTransform.isApprox(
       momentum::ParameterTransform::identity(character.skeleton.getJointNames()));
+}
+
+// Gives `character` the identity parameter transform when it has no model parameters, as the
+// character of an FBX file that stores no rig, or a rig without model parameters. Its joint motion
+// is then also model-parameter motion.
+void useIdentityTransformWithoutParameters(momentum::Character& character) {
+  if (character.parameterTransform.numAllModelParameters() == 0) {
+    character.parameterTransform =
+        momentum::ParameterTransform::identity(character.skeleton.getJointNames());
+  }
 }
 
 // The joint parameters (numJointParameters x frames) of glTF motion: the model parameters `motion`
@@ -250,12 +261,18 @@ std::vector<momentum::Character> loadModelCharacters(const filesystem::path& mod
       }
       return characters;
     }
-    case momentum::CharacterFormat::Fbx:
-      return momentum::loadFbxCharacters(
+    case momentum::CharacterFormat::Fbx: {
+      auto characters = momentum::loadFbxCharacters(
           modelPath,
           momentum::KeepLocators::Yes,
           momentum::Permissive::No,
           momentum::LoadBlendShapes::No);
+      // As initializeCharacterFromMotionFile(); a parameter file replaces the transform later.
+      for (auto& character : characters) {
+        useIdentityTransformWithoutParameters(character);
+      }
+      return characters;
+    }
     case momentum::CharacterFormat::Usd:
     case momentum::CharacterFormat::Unknown:
       break;
@@ -898,9 +915,8 @@ void initializeCharacterFromMotionFile(
     const Character& motionCharacter,
     const Options& options) {
   character = motionCharacter;
-  if (options.input_params_file.empty() &&
-      character.parameterTransform.numAllModelParameters() == 0) {
-    character.parameterTransform = ParameterTransform::identity(character.skeleton.getJointNames());
+  if (options.input_params_file.empty()) {
+    useIdentityTransformWithoutParameters(character);
   }
   applyOptionalInputs(character, options);
 }
