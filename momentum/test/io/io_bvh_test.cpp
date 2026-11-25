@@ -17,6 +17,7 @@
 #include <cmath>
 #include <fstream>
 #include <iterator>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -437,6 +438,48 @@ TEST(IoBvhTest, FailedSaveLeavesTheFileUnchanged) {
       std::runtime_error);
   EXPECT_THROW(saveBvhCharacter(tmpFile.path(), Character()), std::runtime_error);
   EXPECT_EQ(fileContent(), "kept");
+}
+
+TEST(IoBvhTest, JointNamesWithSpacesAreKept) {
+  Character character = createTestCharacter(3);
+  character.skeleton.joints.at(0).name = "Bip01 Pelvis";
+  character.skeleton.joints.at(1).name = "Bip01 L Thigh";
+  character.skeleton.joints.at(2).name = "Bip01 L Calf";
+  const MatrixXf motion = MatrixXf::Zero(character.parameterTransform.numAllModelParameters(), 1);
+
+  const auto bytes =
+      saveBvhCharacterWithMotion(character, {character.parameterTransform.name, motion}, 30.0f);
+
+  EXPECT_EQ(loadBvhCharacter(bytes).skeleton.getJointNames(), character.skeleton.getJointNames());
+}
+
+TEST(IoBvhTest, ReadsBracesOnTheJointLineAndTheFramesThatTheFileHas) {
+  // The braces are on the joint lines, and the frame count of the header is far too large.
+  const std::string text =
+      "HIERARCHY\n"
+      "ROOT Hips {\n"
+      "  OFFSET 0 0 0\n"
+      "  CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation\n"
+      "  JOINT Left Leg {\n"
+      "    OFFSET 0 -1 0\n"
+      "    CHANNELS 3 Zrotation Xrotation Yrotation\n"
+      "    End Site\n"
+      "    {\n"
+      "      OFFSET 0 -1 0\n"
+      "    }\n"
+      "  }\n"
+      "}\n"
+      "MOTION\n"
+      "Frames: 99999999999999\n"
+      "Frame Time: 0.033333\n"
+      "0 0 0 0 0 0 0 0 0\n"
+      "1 2 3 0 0 0 0 0 0\n";
+
+  const auto [character, motion, fps] =
+      loadBvhCharacterWithMotion(std::as_bytes(std::span(text.data(), text.size())));
+
+  EXPECT_EQ(character.skeleton.getJointNames(), (std::vector<std::string>{"Hips", "Left Leg"}));
+  EXPECT_EQ(std::get<1>(motion).cols(), 2);
 }
 
 } // namespace
