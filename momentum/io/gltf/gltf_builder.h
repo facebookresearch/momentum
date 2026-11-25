@@ -68,6 +68,15 @@ class GltfBuilder final {
   /// Add a static mesh, such as an environment or a target scan
   void addMesh(const Mesh& mesh, const std::string& name, bool addColor = false);
 
+  /// Set the frame rate of the file.
+  ///
+  /// A glTF file stores one frame rate for all of its content. The first call that sets it (this
+  /// function, addMotion(), addSkeletonStates() or addMarkerSequence()) wins; a later call with a
+  /// different frame rate only logs a warning. The momentum motion (model parameters) of every
+  /// character is read back at this frame rate, so give all motions of one file the same frame
+  /// rate.
+  ///
+  /// @param[in] fps Frame rate in frames per second.
   void setFps(float fps);
 
   /// Set how the joint and blend shape animation samplers added afterwards interpolate
@@ -87,7 +96,8 @@ class GltfBuilder final {
   /// is not empty. A motion without frames stores nothing, not even the identity.
   ///
   /// @param[in] character The character to add motion for.
-  /// @param[in] fps Frame rate of the motion in frames per second.
+  /// @param[in] fps Frame rate of the motion in frames per second. It must match the frame rate of
+  /// the file (see setFps()); otherwise the motion is read back at the file's frame rate.
   /// @param[in] motion Motion parameters (parameter names and poses matrix).
   /// @param[in] offsets Identity/offset parameters (joint names and offsets vector).
   /// @param[in] addExtensions Whether to add momentum extensions to the document.
@@ -112,6 +122,9 @@ class GltfBuilder final {
   /// Add a skeleton states to the provided character. If addCharacter is not called before adding
   /// the skeleton states, the character will be automatically added with the default settings.
   ///
+  /// @param[in] fps Frame rate of the skeleton states in frames per second; see setFps(). The
+  /// animation keys are stored in seconds, so the skeleton states keep their timing even if the
+  /// file has another frame rate.
   /// @param[in] customName Name of the glTF animation that receives the skeleton states; see
   /// addMotion().
   /// @param[in] characterName Name of the character to animate; see addMotion().
@@ -124,7 +137,7 @@ class GltfBuilder final {
 
   /// Add marker data to the file
   ///
-  /// @param[in] fps The frame rate of the motion capture data in frames per second.
+  /// @param[in] fps The frame rate of the motion capture data in frames per second; see setFps().
   /// @param[in] markerSequence A 2D vector specifying the Marker data (name/position/occlusion) for
   /// all markers across all captured frames. Size: [numFrames][numMarkers]
   /// @param[in] markerMesh Optional parameter specifying the MarkerMesh type (default is
@@ -167,6 +180,7 @@ class GltfBuilder final {
 
   size_t getNumMotions();
 
+  /// The frame rate of the file (see setFps()), or 0 if none is set.
   float getFps();
 
   std::vector<size_t> getCharacterMotions(const std::string& characterName);
