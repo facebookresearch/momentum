@@ -9,6 +9,7 @@
 
 #include "pymomentum/array_utility/array_utility.h"
 #include "pymomentum/array_utility/geometry_accessors.h"
+#include "pymomentum/renderer/rasterizer_primitives.h"
 #include "pymomentum/renderer/rasterizer_utility.h"
 
 #include <momentum/character/character.h>
@@ -28,11 +29,13 @@
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <limits>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -45,6 +48,7 @@ namespace pymomentum {
 using rasterizer_detail::bufferToEigenMap;
 using rasterizer_detail::convertLightsToEyeSpace;
 using rasterizer_detail::make_mdspan;
+using rasterizer_detail::validateBuffer;
 using rasterizer_detail::validateRasterizerBuffers;
 
 namespace {
@@ -1247,6 +1251,141 @@ void rasterizeCharacter(
         backfaceCulling,
         depthOffset - 0.001,
         imageOffset.value_or(Eigen::Vector2f::Zero()));
+  }
+}
+
+namespace {
+
+// Writes `characterIndex` to the character index buffer, and the triangle index to the triangle
+// index buffer, at the pixels where `coveredTriangles` holds a triangle of that character. A
+// character writes a pixel only where it is nearer than everything rasterized before it, so these
+// are the pixels that the character covers so far.
+void copyCoveredPixels(
+    int32_t characterIndex,
+    const momentum::rasterizer::Camera& camera,
+    const py::array_t<int32_t>& coveredTriangles,
+    const py::buffer& characterIndexBuffer,
+    const std::optional<py::buffer>& triangleIndexBuffer) {
+  const auto triangles = make_mdspan<int32_t, 2>(coveredTriangles);
+  const auto characterOut = make_mdspan<int32_t, 2>(characterIndexBuffer);
+  const auto triangleOut = make_mdspan<int32_t, 2>(triangleIndexBuffer);
+  for (rasterizer_detail::index_t y = 0; y < camera.imageHeight(); ++y) {
+    for (rasterizer_detail::index_t x = 0; x < camera.imageWidth(); ++x) {
+      const int32_t triangle = triangles(y, x);
+      if (triangle < 0) {
+        continue;
+      }
+      characterOut(y, x) = characterIndex;
+      if (triangleOut.data_handle() != nullptr) {
+        triangleOut(y, x) = triangle;
+      }
+    }
+  }
+}
+
+// Fills a buffer from createIndexBuffer(), padding included, with -1.
+void clearIndexBuffer(py::array_t<int32_t>& buffer) {
+  const py::buffer_info info = buffer.request(/*writable=*/true);
+  const auto numElements = info.shape.at(0) * (info.strides.at(0) / info.itemsize);
+  std::fill_n(static_cast<int32_t*>(info.ptr), numElements, -1);
+}
+
+} // namespace
+
+void rasterizeCharacters(
+    const std::vector<const momentum::Character*>& characters,
+    const std::vector<pybind11::buffer>& skeletonStates,
+    const momentum::rasterizer::Camera& camera,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
+    const std::optional<pybind11::buffer>& characterIndexBuffer,
+    const std::optional<pybind11::buffer>& vertexIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
+    const std::optional<std::vector<momentum::rasterizer::PhongMaterial>>& materials,
+    const std::optional<std::vector<momentum::rasterizer::Light>>& lights,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    bool backfaceCulling,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset) {
+  MT_THROW_IF(
+      skeletonStates.size() != characters.size(),
+      "rasterize_characters: got {} skeleton states for {} characters",
+      skeletonStates.size(),
+      characters.size());
+  MT_THROW_IF(
+      materials.has_value() && materials->size() != characters.size(),
+      "rasterize_characters: got {} materials for {} characters",
+      materials.has_value() ? materials->size() : 0,
+      characters.size());
+  validateRasterizerBuffers(
+      camera, zBuffer, rgbBuffer, surfaceNormalsBuffer, vertexIndexBuffer, triangleIndexBuffer);
+  if (characterIndexBuffer.has_value()) {
+    validateBuffer(
+        *characterIndexBuffer,
+        "characterIndexBuffer",
+        2,
+        py::format_descriptor<int32_t>::format(),
+        {camera.imageHeight(), camera.imageWidth()});
+  }
+  // Check every character before rendering, so that an error leaves the buffers unchanged.
+  for (size_t iCharacter = 0; iCharacter < characters.size(); ++iCharacter) {
+    const momentum::Character* character = characters.at(iCharacter);
+    MT_THROW_IF(character == nullptr, "rasterize_characters: character {} is None", iCharacter);
+    MT_THROW_IF(
+        !character->mesh || !character->skinWeights,
+        "rasterize_characters: character {} ('{}') has no mesh or no skin weights",
+        iCharacter,
+        character->name);
+    const std::string skeletonStateName = fmt::format("skeleton_states[{}]", iCharacter);
+    ArrayChecker checker("rasterize_characters");
+    checker.validateBuffer(
+        skeletonStates.at(iCharacter),
+        skeletonStateName.c_str(),
+        {static_cast<int>(character->skeleton.joints.size()), 8},
+        {"nJoints", "pos+rot+scale"});
+  }
+
+  // The vertex and triangle indices of a character go straight to the output buffers: a character
+  // writes a pixel only where it is nearer than everything rasterized before it. The character
+  // index needs the pixels that each character covers, so then each character writes its triangle
+  // indices to a buffer of its own first.
+  std::optional<py::array_t<int32_t>> coveredTriangles;
+  if (characterIndexBuffer.has_value()) {
+    coveredTriangles = createIndexBuffer(camera);
+  }
+  for (size_t iCharacter = 0; iCharacter < characters.size(); ++iCharacter) {
+    if (coveredTriangles.has_value() && iCharacter > 0) {
+      clearIndexBuffer(*coveredTriangles);
+    }
+    rasterizeCharacter(
+        *characters.at(iCharacter),
+        skeletonStates.at(iCharacter),
+        camera,
+        zBuffer,
+        rgbBuffer,
+        surfaceNormalsBuffer,
+        vertexIndexBuffer,
+        coveredTriangles.has_value() ? std::optional<py::buffer>(*coveredTriangles)
+                                     : triangleIndexBuffer,
+        materials.has_value() ? std::optional(materials->at(iCharacter)) : std::nullopt,
+        /*perVertexDiffuseColor=*/std::nullopt,
+        lights,
+        modelMatrix,
+        backfaceCulling,
+        nearClip,
+        depthOffset,
+        imageOffset,
+        /*wireframeColor=*/std::nullopt);
+    if (coveredTriangles.has_value() && characterIndexBuffer.has_value()) {
+      copyCoveredPixels(
+          static_cast<int32_t>(iCharacter),
+          camera,
+          *coveredTriangles,
+          *characterIndexBuffer,
+          triangleIndexBuffer);
+    }
   }
 }
 

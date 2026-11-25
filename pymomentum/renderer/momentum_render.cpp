@@ -13,13 +13,20 @@
 #include <momentum/character/parameter_transform.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/character/skin_weights.h>
+#include <momentum/common/exception.h>
 #include <momentum/math/mesh.h>
 
 #include <dispenso/parallel_for.h> // @manual
 #include <pybind11/numpy.h>
 #include <Eigen/Core>
 
+#include <array>
 #include <cstring>
+#include <optional>
+#include <span>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 namespace py = pybind11;
 
@@ -78,62 +85,132 @@ momentum::Camera makeOutsideInCamera(
   return momentum::Camera(intrinsicsModel, worldToEyeXF);
 }
 
-momentum::Camera frameMesh(
-    const momentum::Camera& cam_in,
+namespace {
+
+// The joints that a camera for a body faces: the mid-spine, to get a good view of the upper body
+// rather than the root (which is down in the pelvis), or the wrist for hand models.
+constexpr std::array<const char*, 7> kBodyCameraJoints =
+    {"b_spine3", "c_spine3", "spineUpper_joint", "b_l_wrist", "b_r_wrist", "l_wrist", "r_wrist"};
+
+std::optional<size_t> findBodyCameraJoint(const momentum::Character& character) {
+  for (const auto* name : kBodyCameraJoints) {
+    const auto id = character.skeleton.getJointIdByName(name);
+    if (id != momentum::kInvalidIndex) {
+      return id;
+    }
+  }
+  return std::nullopt;
+}
+
+// Reads skeleton states with shape (nJoints, 8) or (nFrames, nJoints, 8); `context` starts the
+// error messages.
+std::vector<momentum::SkeletonState> toSkeletonStates(
     const momentum::Character& character,
-    std::span<const momentum::SkeletonState> skelStates) {
-  const float min_z = 5;
-  std::vector<Eigen::Vector3f> positions;
+    const py::array_t<float>& skeletonStates,
+    std::string_view context) {
+  const size_t nJoints = character.skeleton.joints.size();
+
+  MT_THROW_IF(
+      skeletonStates.ndim() < 2 || skeletonStates.ndim() > 3,
+      "{}: skeleton_states must be 2D (nJoints x 8), 3D (nFrames x nJoints x 8). Got {} dimensions.",
+      context,
+      skeletonStates.ndim());
+
+  // Verify the last dimension is 8 (tx, ty, tz, rx, ry, rz, rw, s)
+  const size_t lastDim = skeletonStates.shape(skeletonStates.ndim() - 1);
+  MT_THROW_IF(
+      lastDim != 8,
+      "{}: Expected last dimension to be 8 (tx, ty, tz, rx, ry, rz, rw, s), but got {}.",
+      context,
+      lastDim);
+
+  // Verify the second-to-last dimension matches the number of joints
+  const size_t jointsDim = skeletonStates.shape(skeletonStates.ndim() - 2);
+  MT_THROW_IF(
+      jointsDim != nJoints,
+      "{}: Expected {} joints (second-to-last dimension), but got {}.",
+      context,
+      nJoints,
+      jointsDim);
+
+  // `value(iJoint, i)` reads value i of joint iJoint in one frame.
+  const auto readFrame = [nJoints](const auto& value) {
+    momentum::SkeletonState skelState;
+    skelState.jointState.resize(nJoints);
+    for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
+      auto& transform = skelState.jointState[iJoint].transform;
+      transform.translation = Eigen::Vector3f(value(iJoint, 0), value(iJoint, 1), value(iJoint, 2));
+      transform.rotation = Eigen::Quaternionf(
+          value(iJoint, 6), // rw
+          value(iJoint, 3), // rx
+          value(iJoint, 4), // ry
+          value(iJoint, 5)); // rz
+      transform.scale = value(iJoint, 7);
+    }
+    return skelState;
+  };
+
+  std::vector<momentum::SkeletonState> result;
+  if (skeletonStates.ndim() == 2) {
+    const auto accessor = skeletonStates.unchecked<2>();
+    result.push_back(
+        readFrame([&accessor](size_t iJoint, size_t i) { return accessor(iJoint, i); }));
+    return result;
+  }
+
+  const auto accessor = skeletonStates.unchecked<3>();
+  result.reserve(accessor.shape(0));
+  for (py::ssize_t iFrame = 0; iFrame < accessor.shape(0); ++iFrame) {
+    result.push_back(readFrame(
+        [&accessor, iFrame](size_t iJoint, size_t i) { return accessor(iFrame, iJoint, i); }));
+  }
+  return result;
+}
+
+// Appends the points that keep a character in view: its skinned mesh vertices if it has a mesh and
+// skin weights, otherwise its joint positions.
+void appendFramedPoints(
+    const momentum::Character& character,
+    std::span<const momentum::SkeletonState> skelStates,
+    std::vector<Eigen::Vector3f>& points) {
   for (const auto& s : skelStates) {
     if (character.mesh && character.skinWeights) {
       for (const auto& p : momentum::applySSD(
                character.inverseBindPose, *character.skinWeights, character.mesh->vertices, s)) {
-        positions.push_back(p);
+        points.push_back(p);
       }
     } else {
       for (const auto& js : s.jointState) {
-        positions.push_back(js.translation());
+        points.push_back(js.translation());
       }
     }
   }
-
-  return cam_in.framePoints(positions, min_z, 0.05f);
 }
 
-momentum::Camera makeOutsideInCameraForBody(
-    const momentum::Character& character,
+// Moves the camera, keeping its orientation, so that every point is in view.
+momentum::Camera framePoints(
+    const momentum::Camera& camera,
+    const std::vector<Eigen::Vector3f>& points) {
+  const float min_z = 5;
+  return camera.framePoints(points, min_z, 0.05f);
+}
+
+// Where a camera looks from, before framePoints() moves it.
+struct CameraAim {
+  Eigen::Vector3f up;
+  Eigen::Vector3f lookAt;
+  Eigen::Vector3f center;
+};
+
+// Faces the front of the body at `joint`, averaged over the frames.
+CameraAim aimAtBody(
     std::span<const momentum::SkeletonState> skelStates,
-    const int imageHeight_pixels,
-    const int imageWidth_pixels,
-    const float focalLength_mm,
+    size_t joint,
     bool horizontal,
     float cameraAngle) {
-  // Center on the mid-spine (to get a good view of the upper body) rather than
-  // the root (which is down in the pelvis).
-  // For hand models, center on the wrist.
-  std::vector<const char*> possibleRoots = {
-      "b_spine3", "c_spine3", "spineUpper_joint", "b_l_wrist", "b_r_wrist", "l_wrist", "r_wrist"};
-
-  const auto spineJoint = [&]() -> size_t {
-    for (const auto& r : possibleRoots) {
-      auto id = character.skeleton.getJointIdByName(r);
-      if (id != momentum::kInvalidIndex) {
-        return id;
-      }
-    }
-
-    std::ostringstream oss;
-    oss << "Unable to locate appropriate root joint.  Options are {";
-    for (const auto& r : possibleRoots) {
-      oss << r << ", ";
-    }
-    oss << "}";
-    throw std::runtime_error(oss.str());
-  }();
-
   std::vector<momentum::TransformT<double>> spineLocalToWorldTransforms;
   for (const auto& skelState : skelStates) {
-    const auto& jointState = skelState.jointState.at(spineJoint);
+    const auto& jointState = skelState.jointState.at(joint);
     spineLocalToWorldTransforms.emplace_back(
         jointState.translation().cast<double>(), jointState.rotation().cast<double>());
   }
@@ -144,7 +221,6 @@ momentum::Camera makeOutsideInCameraForBody(
   const Eigen::Affine3f spineLocalToWorldXF = blendedTransform.toAffine3().cast<float>();
 
   const Eigen::Vector3f body_center_world_cm = spineLocalToWorldXF.translation();
-  const float cameraDistanceToBody_cm = 2.5f * 100; // 2.5 meters away.
 
   // in spine-local coords,
   //   x points up
@@ -181,17 +257,41 @@ momentum::Camera makeOutsideInCameraForBody(
     camera_forward_world = Eigen::AngleAxisf(cameraAngle, camera_up_world) * camera_forward_world;
   }
 
-  auto result = makeOutsideInCamera(
-      camera_up_world,
-      camera_forward_world,
-      body_center_world_cm,
-      cameraDistanceToBody_cm,
+  return {.up = camera_up_world, .lookAt = camera_forward_world, .center = body_center_world_cm};
+}
+
+// Looks along the world -Z axis with the world Y axis up, which faces the front of a character
+// that faces +Z, rotated by `cameraAngle` about the up axis.
+CameraAim aimAlongWorldAxes(std::span<const Eigen::Vector3f> points, float cameraAngle) {
+  Eigen::Vector3f center = Eigen::Vector3f::Zero();
+  for (const auto& p : points) {
+    center += p;
+  }
+  center /= static_cast<float>(points.size());
+  const Eigen::Vector3f up = Eigen::Vector3f::UnitY();
+  return {
+      .up = up,
+      .lookAt = Eigen::AngleAxisf(cameraAngle, up) * -Eigen::Vector3f::UnitZ(),
+      .center = center};
+}
+
+momentum::Camera makeOutsideInCameraForAim(
+    const CameraAim& aim,
+    const int imageHeight_pixels,
+    const int imageWidth_pixels,
+    const float focalLength_mm) {
+  const float cameraDistance_cm = 2.5f * 100; // 2.5 meters away.
+  return makeOutsideInCamera(
+      aim.up,
+      aim.lookAt,
+      aim.center,
+      cameraDistance_cm,
       imageHeight_pixels,
       imageWidth_pixels,
       focalLength_mm);
-
-  return frameMesh(result, character, skelStates);
 }
+
+} // namespace
 
 momentum::Camera createCameraForBody(
     const momentum::Character& character,
@@ -201,97 +301,87 @@ momentum::Camera createCameraForBody(
     float focalLength_mm,
     bool horizontal,
     float cameraAngle) {
-  const size_t nJoints = character.skeleton.joints.size();
+  const auto skelStates = toSkeletonStates(character, skeletonStates, "create_camera_for_body");
 
-  if (skeletonStates.ndim() < 2 || skeletonStates.ndim() > 3) {
-    throw std::runtime_error(
-        fmt::format(
-            "create_camera_for_body: skeleton_states must be 2D (nJoints x 8), 3D (nFrames x nJoints x 8). Got {} dimensions.",
-            skeletonStates.ndim()));
-  }
-
-  // Verify the last dimension is 8 (tx, ty, tz, rx, ry, rz, rw, s)
-  const size_t lastDim = skeletonStates.shape(skeletonStates.ndim() - 1);
-  if (lastDim != 8) {
-    throw std::runtime_error(
-        fmt::format(
-            "create_camera_for_body: Expected last dimension to be 8 (tx, ty, tz, rx, ry, rz, rw, s), but got {}.",
-            lastDim));
-  }
-
-  // Verify the second-to-last dimension matches the number of joints
-  const size_t jointsDim = skeletonStates.shape(skeletonStates.ndim() - 2);
-  if (jointsDim != nJoints) {
-    throw std::runtime_error(
-        fmt::format(
-            "create_camera_for_body: Expected {} joints (second-to-last dimension), but got {}.",
-            nJoints,
-            jointsDim));
-  }
-
-  // Handle different dimensionalities with appropriate accessors
-  if (skeletonStates.ndim() == 2) {
-    // Unbatched: (nJoints, 8)
-    auto accessor = skeletonStates.unchecked<2>();
-
-    std::vector<momentum::SkeletonState> skelStates;
-    skelStates.reserve(1);
-
-    momentum::SkeletonState skelState;
-    skelState.jointState.resize(nJoints);
-
-    for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
-      Eigen::Vector3f translation(accessor(iJoint, 0), accessor(iJoint, 1), accessor(iJoint, 2));
-
-      Eigen::Quaternionf rotation(
-          accessor(iJoint, 6), // rw
-          accessor(iJoint, 3), // rx
-          accessor(iJoint, 4), // ry
-          accessor(iJoint, 5)); // rz
-
-      float scale = accessor(iJoint, 7);
-
-      skelState.jointState[iJoint].transform.translation = translation;
-      skelState.jointState[iJoint].transform.rotation = rotation;
-      skelState.jointState[iJoint].transform.scale = scale;
+  const auto joint = findBodyCameraJoint(character);
+  if (!joint.has_value()) {
+    std::ostringstream oss;
+    oss << "Unable to locate appropriate root joint.  Options are {";
+    for (const auto& r : kBodyCameraJoints) {
+      oss << r << ", ";
     }
-
-    skelStates.push_back(skelState);
-    return makeOutsideInCameraForBody(
-        character, skelStates, imageHeight, imageWidth, focalLength_mm, horizontal, cameraAngle);
-
-  } else { // skeletonStates.ndim() == 3
-    // Batched: (nBatch, nJoints, 8)
-    auto accessor = skeletonStates.unchecked<3>();
-
-    std::vector<momentum::SkeletonState> skelStates;
-    skelStates.reserve(accessor.shape(0));
-    for (size_t iPose = 0; iPose < accessor.shape(0); ++iPose) {
-      momentum::SkeletonState skelState;
-      skelState.jointState.resize(nJoints);
-
-      for (size_t iJoint = 0; iJoint < nJoints; ++iJoint) {
-        Eigen::Vector3f translation(
-            accessor(iPose, iJoint, 0), accessor(iPose, iJoint, 1), accessor(iPose, iJoint, 2));
-
-        Eigen::Quaternionf rotation(
-            accessor(iPose, iJoint, 6), // rw
-            accessor(iPose, iJoint, 3), // rx
-            accessor(iPose, iJoint, 4), // ry
-            accessor(iPose, iJoint, 5)); // rz
-
-        float scale = accessor(iPose, iJoint, 7);
-
-        skelState.jointState[iJoint].transform.translation = translation;
-        skelState.jointState[iJoint].transform.rotation = rotation;
-        skelState.jointState[iJoint].transform.scale = scale;
-      }
-
-      skelStates.push_back(skelState);
-    }
-    return makeOutsideInCameraForBody(
-        character, skelStates, imageHeight, imageWidth, focalLength_mm, horizontal, cameraAngle);
+    oss << "}";
+    throw std::runtime_error(oss.str());
   }
+
+  std::vector<Eigen::Vector3f> points;
+  appendFramedPoints(character, skelStates, points);
+  return framePoints(
+      makeOutsideInCameraForAim(
+          aimAtBody(skelStates, *joint, horizontal, cameraAngle),
+          imageHeight,
+          imageWidth,
+          focalLength_mm),
+      points);
+}
+
+momentum::Camera createCameraForCharacters(
+    const std::vector<const momentum::Character*>& characters,
+    const std::vector<py::array_t<float>>& skeletonStates,
+    int imageHeight,
+    int imageWidth,
+    float focalLength_mm,
+    bool horizontal,
+    float cameraAngle) {
+  MT_THROW_IF(characters.empty(), "create_camera_for_characters: characters is empty");
+  MT_THROW_IF(
+      skeletonStates.size() != characters.size(),
+      "create_camera_for_characters: got {} skeleton states for {} characters",
+      skeletonStates.size(),
+      characters.size());
+
+  // The camera faces the first character with frames that a camera for a body can face: the
+  // index of that character, and of the joint it faces.
+  std::optional<std::pair<size_t, size_t>> aimTarget;
+  for (size_t iCharacter = 0; iCharacter < characters.size(); ++iCharacter) {
+    const momentum::Character* character = characters.at(iCharacter);
+    MT_THROW_IF(
+        character == nullptr, "create_camera_for_characters: character {} is None", iCharacter);
+    const auto& states = skeletonStates.at(iCharacter);
+    const bool hasFrames = states.ndim() == 2 || (states.ndim() == 3 && states.shape(0) > 0);
+    const auto joint = findBodyCameraJoint(*character);
+    if (!aimTarget.has_value() && joint.has_value() && hasFrames) {
+      aimTarget = std::pair(iCharacter, *joint);
+    }
+  }
+
+  std::vector<Eigen::Vector3f> points;
+  std::optional<CameraAim> aim;
+  for (size_t iCharacter = 0; iCharacter < characters.size(); ++iCharacter) {
+    const momentum::Character& character = *characters.at(iCharacter);
+    const auto states = toSkeletonStates(
+        character,
+        skeletonStates.at(iCharacter),
+        fmt::format("create_camera_for_characters: character {}", iCharacter));
+    const size_t pointsPerFrame = character.mesh && character.skinWeights
+        ? character.mesh->vertices.size()
+        : character.skeleton.joints.size();
+    points.reserve(points.size() + states.size() * pointsPerFrame);
+
+    // Skinning reads no Python objects.
+    py::gil_scoped_release release;
+    appendFramedPoints(character, states, points);
+    if (aimTarget.has_value() && aimTarget->first == iCharacter) {
+      aim = aimAtBody(states, aimTarget->second, horizontal, cameraAngle);
+    }
+  }
+  MT_THROW_IF(points.empty(), "create_camera_for_characters: skeleton_states have no frames");
+  if (!aim.has_value()) {
+    aim = aimAlongWorldAxes(points, cameraAngle);
+  }
+
+  return framePoints(
+      makeOutsideInCameraForAim(*aim, imageHeight, imageWidth, focalLength_mm), points);
 }
 
 Eigen::Matrix<int, Eigen::Dynamic, 3, Eigen::RowMajor> triangulate(
