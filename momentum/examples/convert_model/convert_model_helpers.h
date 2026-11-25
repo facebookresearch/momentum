@@ -97,6 +97,10 @@ int findLongestTake(
 /// at all (an empty character). A BVH file holds one character; its motion is mapped onto the
 /// model character by joint name.
 ///
+/// An FBX file stores no parameter transform: without a parameter file, the characters of an FBX
+/// model file get the identity transform, as the characters of an FBX motion file do, and the
+/// motion of every motion file, glTF included, is mapped onto them through the joint transforms.
+///
 /// The parameter and locator files, and the locator and parameter outputs, apply to one character,
 /// so this throws when they are given for several characters. It also throws when no character has
 /// the selected name, when a name matches several characters, when no character of the model file
@@ -130,7 +134,9 @@ MotionData loadFbxMotion(
 /// @return Whether the extension of `path` is .bvh, in any letter case.
 bool isBvhFile(const filesystem::path& path);
 
-/// Loads the input model character, applying optional parameter and locator files.
+/// Loads the input model character, applying optional parameter and locator files. An FBX model
+/// without a parameter file gets the identity parameter transform (see
+/// initializeCharacterFromMotionFile()).
 Character loadModelCharacter(const Options& options);
 
 /// Whether the options give a rig output: a locator file (options.output_locator_local,
