@@ -150,6 +150,12 @@ MotionData loadFbxMotion(
 /// @return Whether the extension of `path` is .fbx, .glb, .gltf or .bvh, in any letter case.
 bool isSceneOutputFile(const filesystem::path& path);
 
+/// Whether loadScene() reads the motion of files with the extension of `path`.
+///
+/// @param path A file path.
+/// @return Whether the extension of `path` is .glb, .gltf, .fbx or .bvh, in any letter case.
+bool isMotionInputFile(const filesystem::path& path);
+
 /// The options of saveScene() that the command-line options select: options.fbx_namespace,
 /// options.character_mesh_save, and the markers of options.input_motion_file with
 /// options.save_markers.
