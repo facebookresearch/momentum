@@ -916,6 +916,11 @@ bool isSceneOutputFile(const filesystem::path& path) {
   return isBvhFile(path) || format == CharacterFormat::Fbx || format == CharacterFormat::Gltf;
 }
 
+bool isMotionInputFile(const filesystem::path& path) {
+  const CharacterFormat format = parseCharacterFormat(path);
+  return isBvhFile(path) || format == CharacterFormat::Gltf || format == CharacterFormat::Fbx;
+}
+
 SaveSceneOptions saveSceneOptions(const Options& options) {
   SaveSceneOptions result;
   result.fbxNamespace = options.fbx_namespace;
