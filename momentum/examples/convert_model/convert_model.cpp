@@ -19,12 +19,8 @@
 #include <momentum/io/gltf/gltf_builder.h>
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/io/marker/marker_io.h>
-#include <momentum/io/skeleton/locator_io.h>
-#include <momentum/io/skeleton/parameter_transform_io.h>
 
 #include <CLI/CLI.hpp>
-
-#include <fstream>
 
 using namespace momentum;
 
@@ -69,15 +65,18 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
       "--out-locators-local",
       opt->output_locator_local,
-      "Output a locator file (.locators) in local space for transferring between identities");
+      "(Deprecated: use export_rig) Output a locator file (.locators) in local space for "
+      "transferring between identities");
   app.add_option(
       "--out-locators-global",
       opt->output_locator_global,
-      "Output a locator file (.locators) in global space for authoring a template");
+      "(Deprecated: use export_rig) Output a locator file (.locators) in global space for "
+      "authoring a template");
   app.add_option(
       "--out-parameters",
       opt->output_params_file,
-      "Output a model parameter file (.model) containing the parameter transform and limits");
+      "(Deprecated: use export_rig) Output a model parameter file (.model) containing the "
+      "parameter transform and limits");
   app.add_option("--fbx-namespace", opt->fbx_namespace, "Namespace in output fbx file");
 
   app.add_flag(
@@ -208,36 +207,14 @@ MarkerSequence loadRequestedMarkers(const Options& options) {
   return loadMarkerData(options.input_motion_file);
 }
 
-// Saves locator files in local and/or global space if output paths are specified.
-void saveLocatorFiles(const Options& options, const Character& character) {
-  if (!options.output_locator_local.empty()) {
-    saveLocators(
-        options.output_locator_local, character.locators, character.skeleton, LocatorSpace::Local);
-  }
-  if (!options.output_locator_global.empty()) {
-    saveLocators(
-        options.output_locator_global,
-        character.locators,
-        character.skeleton,
-        LocatorSpace::Global);
-  }
-}
-
-// Saves the character's parameter transform and limits to a .model file if an
-// output path is specified.
-void saveParameterFile(const Options& options, const Character& character) {
-  if (options.output_params_file.empty()) {
+// Warns that the rig outputs of convert_model moved to export_rig.
+void warnAboutDeprecatedRigOutputs(const Options& options) {
+  if (!hasRigOutputs(options)) {
     return;
   }
-
-  MT_LOGI("Saving model parameter file...");
-  std::ofstream ofs(options.output_params_file);
-  MT_THROW_IF(
-      !ofs.is_open(),
-      "Cannot open output parameter file for writing: {}",
-      options.output_params_file);
-  ofs << writeModelDefinition(
-      character.skeleton, character.parameterTransform, character.parameterLimits);
+  MT_LOGW(
+      "--out-locators-local, --out-locators-global and --out-parameters of convert_model are "
+      "deprecated: use export_rig");
 }
 
 } // namespace
@@ -248,6 +225,7 @@ int main(int argc, char** argv) {
     CLI::App app(appName);
     auto options = setupOptions(app);
     CLI11_PARSE(app, argc, argv);
+    warnAboutDeprecatedRigOutputs(*options);
 
     // Validate output file extension
     const CharacterFormat outputFormat = parseCharacterFormat(options->output_model_file);
@@ -270,11 +248,7 @@ int main(int argc, char** argv) {
           loadRequestedMarkers(*options),
           !options->input_motion_file.empty());
     }
-    // loadScene() rejects these outputs for several characters.
-    if (scene.characters.size() == 1) {
-      saveLocatorFiles(*options, scene.characters.front().character);
-      saveParameterFile(*options, scene.characters.front().character);
-    }
+    saveRigOutputs(*options, scene);
   } catch (std::exception& e) {
     MT_LOGE("Failed to convert model. Error: {}", e.what());
     return EXIT_FAILURE;
