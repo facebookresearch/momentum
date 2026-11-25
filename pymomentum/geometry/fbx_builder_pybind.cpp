@@ -48,7 +48,9 @@ Creates the skeleton hierarchy, mesh with skin deformer, locators,
 collision geometry, and metadata.
 
 :param character: The character to add.
-:param options: File save options controlling mesh, locators, collisions.
+:param options: File save options: mesh, locators, collisions, coordinate system and FBX
+    namespace. A non-empty ``fbx_namespace`` prefixes the name of every node in the saved file; a
+    file has one namespace, so a different non-empty namespace in a later call raises an error.
 :return: The exported character name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("options") = mm::FileSaveOptions())
@@ -66,7 +68,8 @@ root, so it inherits the skeleton's animation without needing skin weights.
     suffix is appended if the resulting name is already in use.
 :param parent_joint: Index of the joint to parent the mesh under. Defaults to 0
     (the root joint).
-:param options: File save options (mesh option is respected).
+:param options: File save options: the mesh option and the FBX namespace (see
+    :meth:`add_character`).
 :return: The exported rigid-body name. A numeric suffix is added when the requested name is already in use.)",
           py::arg("character"),
           py::arg("name") = "",
@@ -76,7 +79,7 @@ root, so it inherits the skeleton's animation without needing skin weights.
           "add_motion",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& motion,
              const std::optional<Eigen::VectorXf>& offsets,
              const std::string& characterName) {
@@ -110,7 +113,7 @@ curves. Also extracts and animates blend shape weights when applicable.
           "add_motion_with_joint_params",
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const std::string& characterName) {
             // pymomentum convention: (nFrames x nParams), C++ convention: (nParams x nFrames)
@@ -138,7 +141,7 @@ This is useful for rigid bodies or characters with simple parameterization.
           [](mm::FbxBuilder& builder,
              const mm::Character& character,
              const std::string& name,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const mm::FbxUserProperties& userProperties) {
             mm::MatrixXf transposedJointParams;
@@ -175,7 +178,7 @@ as a simple animated mesh without any skeleton hierarchy.
           [](mm::FbxBuilder& builder,
              const mm::Mesh& mesh,
              const std::string& name,
-             float fps,
+             double fps,
              const std::optional<Eigen::MatrixXf>& jointParams,
              const std::optional<Eigen::Vector3f>& translationOffset,
              const mm::FbxUserProperties& userProperties) {
@@ -218,7 +221,7 @@ parameters.
       .def(
           "add_marker_sequence",
           [](mm::FbxBuilder& builder,
-             float fps,
+             double fps,
              const std::vector<std::vector<mm::Marker>>& markerSequence) {
             builder.addMarkerSequence(fps, std::span(markerSequence));
           },
