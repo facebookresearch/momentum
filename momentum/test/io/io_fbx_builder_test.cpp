@@ -745,3 +745,27 @@ TEST(FbxBuilderTest, MotionAt72And96FramesPerSecondIsReadBack) {
     EXPECT_EQ(characters[0].second[0].cols(), motion.cols()) << fps << " fps";
   }
 }
+
+TEST(FbxBuilderTest, SkeletonWithTwoRootsKeepsBothTrees) {
+  // Joints root, joint1, joint2 and joint3 with parents -, 0, - and 2: two root joints.
+  Character character = createTestCharacter(4);
+  character.skeleton.joints[2].parent = kInvalidIndex;
+  character.initInverseBindPose();
+
+  const auto outFile = temporaryFile("builder_two_roots", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addCharacter(character);
+    builder.save(outFile.path());
+  }
+
+  // The singular loader reads every skeleton of the scene as one character; the plural loaders
+  // read one character per root joint.
+  const Character loaded = loadFbxCharacter(outFile.path());
+  EXPECT_EQ(loaded.skeleton.getJointNames(), character.skeleton.getJointNames());
+  std::vector<size_t> parents(loaded.skeleton.joints.size());
+  std::ranges::transform(loaded.skeleton.joints, parents.begin(), &Joint::parent);
+  const std::vector<size_t> expectedParents = {kInvalidIndex, 0, kInvalidIndex, 2};
+  EXPECT_EQ(parents, expectedParents);
+  EXPECT_EQ(loaded.name, character.name);
+}
