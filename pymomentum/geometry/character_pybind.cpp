@@ -1116,6 +1116,35 @@ This is the byte-array version of :meth:`load_gltf_characters_with_skel_states`.
           )",
           py::arg("gltf_bytes"))
       .def_static(
+          "load_gltf_characters_channel_motion",
+          &loadGLTFCharactersChannelMotion,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load the motion that the gltf animation channels give every character in a gltf file, as
+joint parameters.
+
+These are the skeleton states of :meth:`load_gltf_characters_with_skel_states` converted to joint
+parameters; each channel key is one frame. Files written by other tools keep their animation in
+these channels rather than in momentum's motion data.
+
+:param gltf_filename: A .gltf/.glb file; e.g. scene.glb.
+:return: One motion per character, in the order of :meth:`load_gltf_characters`: a numpy array of
+         shape ``(n_frames, n_joint_parameters)``, or ``None`` for a character that no channel
+         animates.
+          )",
+          py::arg("gltf_filename"))
+      .def_static(
+          "load_gltf_characters_channel_motion_from_bytes",
+          &loadGLTFCharactersChannelMotionFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load the motion of the gltf animation channels of every character in a gltf byte array.
+
+This is the byte-array version of :meth:`load_gltf_characters_channel_motion`.
+
+:param gltf_bytes: A :class:`bytes` containing the GLTF JSON/messagepack data.
+:return: One motion per character, as in :meth:`load_gltf_characters_channel_motion`.
+          )",
+          py::arg("gltf_bytes"))
+      .def_static(
           "load_motion_timestamps",
           &loadMotionTimestamps,
           R"(Load per-frame timestamps from a gltf file.

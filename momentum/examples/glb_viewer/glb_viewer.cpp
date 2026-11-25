@@ -206,36 +206,6 @@ struct CharacterPlayback {
   size_t numJointParamFrames = 0;
 };
 
-/// The joint motion of each character without momentum motion, read from the glTF animation
-/// channels. Channel keys are played one per frame, as GltfBuilder samples them.
-std::vector<Eigen::MatrixXf> loadChannelJointMotion(
-    const std::string& glbFile,
-    std::span<const CharacterMotion> characters) {
-  const auto animated = loadGltfCharactersWithSkeletonStates(glbFile);
-  // Both loaders find the characters of a file in the same order.
-  MT_THROW_IF(
-      animated.size() != characters.size(),
-      "Loaded {} characters with animation channels but {} with motion from {}",
-      animated.size(),
-      characters.size(),
-      glbFile);
-  std::vector<Eigen::MatrixXf> jointMotion(characters.size());
-  size_t nextIndex = 0;
-  for (const CharacterMotion& cm : characters) {
-    const size_t i = nextIndex++;
-    const auto& states = animated.at(i).skeletonStates;
-    if (cm.motion.cols() > 0 || states.empty()) {
-      continue;
-    }
-    auto& joints = jointMotion.at(i);
-    joints.resize(cm.character.parameterTransform.numJointParameters(), states.size());
-    for (size_t iFrame = 0; iFrame < states.size(); ++iFrame) {
-      joints.col(iFrame) = skeletonStateToJointParameters(states[iFrame], cm.character.skeleton).v;
-    }
-  }
-  return jointMotion;
-}
-
 int run(const Options& options) {
   // Validate file extension
   const filesystem::path filePath(options.glbFile);
@@ -266,9 +236,17 @@ int run(const Options& options) {
   if (std::ranges::any_of(
           characters, [](const CharacterMotion& cm) { return cm.motion.cols() == 0; })) {
     try {
-      auto jointMotion = loadChannelJointMotion(options.glbFile, characters);
+      auto jointMotion = loadGltfCharactersChannelMotion(filesystem::path(options.glbFile));
+      // Both loaders find the characters of a file in the same order.
+      MT_THROW_IF(
+          jointMotion.size() != characters.size(),
+          "Loaded {} characters with animation channels but {} with motion",
+          jointMotion.size(),
+          characters.size());
       for (size_t i = 0; i < playback.size(); ++i) {
-        playback.at(i).jointMotion = std::move(jointMotion.at(i));
+        if (characters[i].motion.cols() == 0) {
+          playback.at(i).jointMotion = std::move(jointMotion.at(i));
+        }
       }
     } catch (const std::exception& e) {
       MT_LOGW(
