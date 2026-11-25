@@ -822,6 +822,9 @@ motion's scale parameters.
           py::call_guard<py::gil_scoped_release>(),
           R"(Load a character from an FBX file.  Optionally pass in a separate model definition and locators file.
 
+Without a model definition, the character has the rig that the file stores (see :class:`FbxBuilder`),
+or else an empty parameter transform.
+
 :param fbx_filename: .fbx file that contains the skeleton and skinned mesh; e.g. character_s0.fbx.
 :param model_filename: Configuration file that defines the parameter mappings and joint limits; e.g. character.cfg.
 :param locators_filename: File containing the locators, e.g. character.locators.
@@ -896,7 +899,8 @@ Unlike :meth:`load_fbx`, which merges the whole scene into one character, this r
 character per skeleton and one per unskinned mesh outside a skeleton, such as an object written by
 :meth:`FbxBuilder.add_animated_mesh`, which becomes a one-joint character. An unskinned mesh in a
 skeleton, such as one written by :meth:`FbxBuilder.add_rigid_body`, moves rigidly with the nearest
-joint above it. Each character has an identity parameter transform. No animation is loaded.
+joint above it. Each character has the rig that the file stores for it (see :class:`FbxBuilder`),
+or else an identity parameter transform. No animation is loaded.
 
 :param fbx_filename: .fbx file; e.g. scene.fbx.
 :param permissive: If true, load joints with unsupported rotation settings and skip a mesh that
