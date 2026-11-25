@@ -779,3 +779,68 @@ TEST_F(ConvertModelTest, BvhMotionNeedsOneModelCharacter) {
   ASSERT_EQ(scene.characters.size(), 1);
   EXPECT_EQ(scene.characters.front().poses.cols(), motion.cols());
 }
+
+TEST_F(ConvertModelTest, FbxModelWithoutParameterFileGetsTheMotionOfEveryMotionFormat) {
+  auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
+  // BVH cannot store joint scales.
+  removeScaleMotion(character.parameterTransform, motion);
+  auto tempDir = temporaryDirectory("convert_model_fbx_model");
+  const auto modelPath = tempDir.path() / "model.fbx";
+  saveFbx(modelPath, character);
+  const auto gltfPath = tempDir.path() / "motion.glb";
+  saveGltfCharacter(gltfPath, character, 30.0f, {character.parameterTransform.name, motion});
+  const auto fbxPath = tempDir.path() / "motion.fbx";
+  saveFbx(fbxPath, character, motion, VectorXf(), 30.0);
+  const auto bvhPath = tempDir.path() / "motion.bvh";
+  saveBvhCharacterWithMotion(
+      bvhPath, character, {character.parameterTransform.name, motion}, 30.0f);
+
+  for (const auto& motionPath : {gltfPath, fbxPath, bvhPath}) {
+    SCOPED_TRACE(motionPath.filename().string());
+    Options options;
+    options.input_model_file = modelPath.string();
+    options.input_motion_file = motionPath.string();
+    const Scene scene = loadScene(options);
+    ASSERT_EQ(scene.characters.size(), 1);
+    const SceneCharacter& converted = scene.characters.front();
+    ASSERT_EQ(converted.poses.cols(), motion.cols());
+    const auto difference = maxGlobalJointTransformDifference(
+        character.skeleton,
+        jointMotionOf(character.parameterTransform, motion),
+        converted.character.skeleton,
+        jointMotionOf(
+            converted.character.parameterTransform, converted.poses, converted.offsets.v));
+    EXPECT_LT(difference.translation, 1e-3f);
+    EXPECT_LT(difference.rotation, 1e-3f);
+  }
+}
+
+TEST_F(ConvertModelTest, FbxModelCharactersGetTheGltfMotionOfTheSameNamedCharacter) {
+  const auto saved = createTwoCharacterScene();
+  auto tempDir = temporaryDirectory("convert_model_fbx_models");
+  const auto modelPath = tempDir.path() / "models.fbx";
+  saveTestSceneAsFbx(modelPath, saved, 30.0f);
+  const auto motionPath = tempDir.path() / "motions.glb";
+  saveTestSceneAsGltf(motionPath, saved, 30.0f);
+
+  Options options;
+  options.input_model_file = modelPath.string();
+  options.input_motion_file = motionPath.string();
+  const Scene scene = loadScene(options);
+  ASSERT_EQ(scene.characters.size(), saved.size());
+  for (size_t i = 0; i < saved.size(); ++i) {
+    const auto& [character, motion] = saved[i];
+    SCOPED_TRACE(character.name);
+    const SceneCharacter& converted = scene.characters[i];
+    EXPECT_EQ(converted.character.name, character.name);
+    ASSERT_EQ(converted.poses.cols(), motion.cols());
+    const auto difference = maxGlobalJointTransformDifference(
+        character.skeleton,
+        jointMotionOf(character.parameterTransform, motion),
+        converted.character.skeleton,
+        jointMotionOf(
+            converted.character.parameterTransform, converted.poses, converted.offsets.v));
+    EXPECT_LT(difference.translation, 1e-3f);
+    EXPECT_LT(difference.rotation, 1e-3f);
+  }
+}
