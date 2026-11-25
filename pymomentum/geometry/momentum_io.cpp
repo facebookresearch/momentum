@@ -43,6 +43,25 @@ momentum::MotionParameters transpose(const momentum::MotionParameters& motionPar
   return {parameters, poses.transpose()};
 }
 
+void checkMotionShape(const momentum::MotionParameters& motion) {
+  const auto& [parameters, poses] = motion;
+  MT_THROW_IF(
+      poses.cols() != static_cast<Eigen::Index>(parameters.size()),
+      "Expected motion parameters to be n_frames x {}, but got {} x {}",
+      parameters.size(),
+      poses.rows(),
+      poses.cols());
+}
+
+momentum::IdentityParameters toIdentityParameters(
+    const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets) {
+  if (!offsets.has_value()) {
+    return {};
+  }
+  const auto& [names, params] = offsets.value();
+  return {names, params};
+}
+
 std::vector<momentum::SkeletonState> arrayToSkeletonStates(
     const pybind11::array_t<float>& skelStates,
     const momentum::Character& character) {
@@ -120,13 +139,8 @@ void saveGLTFCharacterToFile(
   }
 
   if (motion.has_value()) {
-    const auto& [parameters, poses] = motion.value();
-    MT_THROW_IF(
-        poses.cols() != parameters.size(),
-        "Expected motion parameters to be n_frames x {}, but got {} x {}",
-        parameters.size(),
-        poses.rows(),
-        poses.cols());
+    checkMotionShape(motion.value());
+    const auto& poses = std::get<1>(motion.value());
 
     // Validate timestamps size matches number of frames
     if (timestamps.has_value() && !timestamps->empty()) {
@@ -138,11 +152,7 @@ void saveGLTFCharacterToFile(
     }
   }
 
-  momentum::IdentityParameters identityParams;
-  if (offsets.has_value()) {
-    const auto& [names, params] = offsets.value();
-    identityParams = {names, params};
-  }
+  const momentum::IdentityParameters identityParams = toIdentityParameters(offsets);
 
   momentum::saveGltfCharacter(
       path,
@@ -431,26 +441,6 @@ std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
   }
   return toCharacterSkelStateTuples(std::move(loaded));
 }
-
-namespace {
-
-// Transposes each motion to (numFrames x numJointParameters); a motion without frames becomes
-// std::nullopt.
-std::vector<std::optional<RowMatrixf>> toFrameMajorMotions(
-    const std::vector<Eigen::MatrixXf>& motions) {
-  std::vector<std::optional<RowMatrixf>> result;
-  result.reserve(motions.size());
-  for (const auto& motion : motions) {
-    if (motion.cols() == 0) {
-      result.emplace_back(std::nullopt);
-    } else {
-      result.emplace_back(RowMatrixf(motion.transpose()));
-    }
-  }
-  return result;
-}
-
-} // namespace
 
 std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotion(
     const std::string& gltfFilename) {

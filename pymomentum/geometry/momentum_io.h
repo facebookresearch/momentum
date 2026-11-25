@@ -39,6 +39,15 @@ std::vector<momentum::Character> loadGLTFCharactersFromBytes(const pybind11::byt
 /// Utility function to transpose motion parameters for C++ internal format
 momentum::MotionParameters transpose(const momentum::MotionParameters& motionParameters);
 
+/// Throws unless @p motion is in the Python layout: one row per frame and one column per parameter
+/// name.
+void checkMotionShape(const momentum::MotionParameters& motion);
+
+/// The identity parameters of an optional (joint names, offsets) tuple, as the Python functions
+/// take them; empty when the tuple is not given.
+momentum::IdentityParameters toIdentityParameters(
+    const std::optional<std::tuple<std::vector<std::string>, Eigen::VectorXf>>& offsets);
+
 void saveGLTFCharacterToFile(
     const std::string& path,
     const momentum::Character& character,
