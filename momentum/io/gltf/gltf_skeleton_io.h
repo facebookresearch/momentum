@@ -161,6 +161,21 @@ struct JointFileTransform {
     const fx::gltf::Document& model,
     std::span<const uint32_t> sceneParentMap);
 
+/// Gather the objects of a document without joint marks: the parts of the scene with a mesh without
+/// a skin that are outside the skeletons.
+///
+/// Each object is the hierarchy below the highest node that is neither in a skeleton nor above
+/// one, if that hierarchy has a mesh without a skin. GltfBuilder writes no such objects.
+///
+/// @param[in] model The glTF document.
+/// @param[in] sceneParentMap The parent map from @ref buildSceneParentMap.
+/// @param[in] skeletonRoots The skeleton roots from @ref gatherSkeletonRoots.
+/// @return The root node of each object, in the order of the scene.
+[[nodiscard]] std::vector<uint32_t> gatherObjectRoots(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> sceneParentMap,
+    std::span<const std::vector<uint32_t>> skeletonRoots);
+
 /// Load the hierarchy of one skeleton returned by @ref gatherSkeletonRoots.
 ///
 /// This includes the joints, collision geometry and locators below @p skeletonRoots, and a mapping
@@ -173,6 +188,8 @@ struct JointFileTransform {
 /// @param[in] characterRootNode The node whose name is the character's name, usually
 ///            getTopLevelAncestor(skeletonRoots.front(), ...). An out-of-range index gives an empty
 ///            name.
+/// @param[in] meshNodesAreJoints In a document without joint marks, whether the nodes with a mesh
+///            are joints too, as in an object (see @ref gatherObjectRoots).
 /// @return A tuple containing the name, joints, collision geometry, locators, physical properties,
 /// and node-to-object map.
 std::tuple<
@@ -185,7 +202,8 @@ std::tuple<
 loadHierarchyForRoots(
     const fx::gltf::Document& model,
     std::span<const uint32_t> skeletonRoots,
-    uint32_t characterRootNode);
+    uint32_t characterRootNode,
+    bool meshNodesAreJoints = false);
 
 /// Create a skeleton with only a root joint.
 ///

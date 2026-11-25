@@ -84,6 +84,7 @@ void loadHierarchyRecursive(
     PhysicalProperties& physicalProperties,
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension,
+    bool meshNodesAreJoints,
     std::vector<bool>& visited) {
   MT_THROW_IF(
       (nodeId < 0) || (nodeId >= model.nodes.size()),
@@ -150,7 +151,7 @@ void loadHierarchyRecursive(
     locators.push_back(loc);
     locatorNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = locators.size() - 1;
-  } else if ((!useExtension && (node.mesh < 0)) || type == "skeleton_joint") {
+  } else if ((!useExtension && (node.mesh < 0 || meshNodesAreJoints)) || type == "skeleton_joint") {
     Joint joint = createJoint(node);
     joint.parent = parentJointId;
     joints.push_back(joint);
@@ -182,6 +183,7 @@ void loadHierarchyRecursive(
         physicalProperties,
         nodeToObjectMap,
         useExtension,
+        meshNodesAreJoints,
         visited);
   }
 }
@@ -324,9 +326,10 @@ Transform nodeLocalTransform(const fx::gltf::Node& node) {
 
 namespace {
 
-// Whether loadHierarchyRecursive loads `node` as a joint of a document without joint marks.
+// Whether loadHierarchyRecursive can load `node` as a joint of a document without joint marks: a
+// node of a skeleton without a mesh, or any node of an object (see gatherObjectRoots()).
 [[nodiscard]] bool isUnmarkedJointNode(const fx::gltf::Node& node) {
-  if (!isHierarchyNode(node) || node.mesh >= 0) {
+  if (!isHierarchyNode(node)) {
     return false;
   }
   const std::string type = findMomentumExtension(node.extensionsAndExtras).value("type", "");
@@ -577,6 +580,86 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
   return result;
 }
 
+std::vector<uint32_t> gatherObjectRoots(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> sceneParentMap,
+    std::span<const std::vector<uint32_t>> skeletonRoots) {
+  const size_t numNodes = model.nodes.size();
+  // The nodes of the skeletons, and the nodes above them.
+  std::vector<bool> inSkeleton(numNodes, false);
+  std::vector<bool> aboveSkeleton(numNodes, false);
+  for (const auto& roots : skeletonRoots) {
+    for (const uint32_t root : roots) {
+      if (root >= numNodes) {
+        continue;
+      }
+      for (uint32_t node = sceneParentMap[root]; node != kInvalidNodeId;
+           node = sceneParentMap[node]) {
+        aboveSkeleton[node] = true;
+      }
+      std::vector<uint32_t> stack = {root};
+      while (!stack.empty()) {
+        const uint32_t node = stack.back();
+        stack.pop_back();
+        if (node >= numNodes || inSkeleton[node]) {
+          continue;
+        }
+        inSkeleton[node] = true;
+        for (const int32_t child : model.nodes[node].children) {
+          stack.push_back(static_cast<uint32_t>(child));
+        }
+      }
+    }
+  }
+
+  // Whether the hierarchy below `node` (the node included) has a mesh without a skin.
+  const auto hasUnskinnedMesh = [&](uint32_t start) {
+    std::vector<bool> visited(numNodes, false);
+    std::vector<uint32_t> stack = {start};
+    while (!stack.empty()) {
+      const uint32_t node = stack.back();
+      stack.pop_back();
+      if (node >= numNodes || visited[node] || !isHierarchyNode(model.nodes[node])) {
+        continue;
+      }
+      visited[node] = true;
+      if (model.nodes[node].mesh >= 0) {
+        return true;
+      }
+      for (const int32_t child : model.nodes[node].children) {
+        stack.push_back(static_cast<uint32_t>(child));
+      }
+    }
+    return false;
+  };
+
+  // Each highest node that is neither in nor above a skeleton, in the order of the scene.
+  std::vector<uint32_t> result;
+  if (model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size()) {
+    return result;
+  }
+  std::vector<bool> visited(numNodes, false);
+  const auto& sceneNodes = model.scenes.at(model.scene).nodes;
+  std::vector<uint32_t> stack(sceneNodes.rbegin(), sceneNodes.rend());
+  while (!stack.empty()) {
+    const uint32_t node = stack.back();
+    stack.pop_back();
+    if (node >= numNodes || visited[node] || inSkeleton[node] ||
+        !isHierarchyNode(model.nodes[node])) {
+      continue;
+    }
+    visited[node] = true;
+    if (aboveSkeleton[node]) {
+      for (const int32_t child : std::views::reverse(model.nodes[node].children)) {
+        stack.push_back(static_cast<uint32_t>(child));
+      }
+    } else if (hasUnskinnedMesh(node)) {
+      result.push_back(node);
+    }
+  }
+  return result;
+}
+
 std::tuple<
     std::string,
     JointList,
@@ -587,7 +670,8 @@ std::tuple<
 loadHierarchyForRoots(
     const fx::gltf::Document& model,
     std::span<const uint32_t> skeletonRoots,
-    uint32_t characterRootNode) {
+    uint32_t characterRootNode,
+    bool meshNodesAreJoints) {
   JointList joints;
   auto collision = std::make_unique<CollisionGeometry>();
   std::vector<size_t> collisionNodes;
@@ -613,6 +697,7 @@ loadHierarchyForRoots(
         physicalProperties,
         nodeToObjectMap,
         useExtension,
+        meshNodesAreJoints,
         visited);
     if (!joints.empty()) {
       break;

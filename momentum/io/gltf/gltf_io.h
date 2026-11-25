@@ -58,6 +58,13 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// its top-level node, so names need not be unique. A character gets the skinned meshes whose skin
 /// starts at one of its joints; unskinned meshes are added only when the scene has one character.
 ///
+/// @note A file without momentum's joint marks that has skins, such as a file from another tool,
+/// also yields one character per object: a part of the scene outside the skeletons with meshes
+/// without a skin (see gatherObjectRoots()). An object character, named after the object's root
+/// node, has a joint for each node of the object and the meshes of its nodes, each bound rigidly to
+/// the joint of its node, so the animation of the nodes moves them. Meshes without a skin inside a
+/// skeleton, and objects that cannot be read, are not loaded, with a warning.
+///
 /// @note The parameter transform, parameter limits, parameter sets, pose constraints and metadata
 /// are read from the character's root node, where GltfBuilder stores each character's own copy.
 /// Files without that copy have a single document-level rig, which every character then uses.

@@ -537,6 +537,36 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
   return {std::move(resultMesh), std::move(skinWeights), std::move(blendShape)};
 }
 
+std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadRigidMeshes(
+    const fx::gltf::Document& model,
+    std::span<const size_t> meshNodes,
+    std::span<const size_t> nodeToObjectMap) {
+  auto mesh = std::make_unique<Mesh>();
+  auto skinWeights = std::make_unique<SkinWeights>();
+  BlendShape_u blendShape;
+  for (const size_t nodeId : meshNodes) {
+    const auto& node = model.nodes.at(nodeId);
+    MT_THROW_IF(
+        nodeId >= nodeToObjectMap.size(),
+        "glTF node {} is not in the node map of {} nodes",
+        nodeId,
+        nodeToObjectMap.size());
+    const auto jointId = static_cast<uint32_t>(nodeToObjectMap[nodeId]);
+    for (const auto& primitive : model.meshes.at(node.mesh).primitives) {
+      const auto numVertices = static_cast<Eigen::Index>(addMesh(model, primitive, mesh));
+      const Eigen::Index start = skinWeights->index.rows();
+      skinWeights->index.conservativeResize(start + numVertices, Eigen::NoChange);
+      skinWeights->weight.conservativeResize(start + numVertices, Eigen::NoChange);
+      skinWeights->index.bottomRows(numVertices).setZero();
+      skinWeights->weight.bottomRows(numVertices).setZero();
+      skinWeights->index.bottomRows(numVertices).col(0).setConstant(jointId);
+      skinWeights->weight.bottomRows(numVertices).col(0).setOnes();
+      addBlendShapes(model, primitive, blendShape);
+    }
+  }
+  return {std::move(mesh), std::move(skinWeights), std::move(blendShape)};
+}
+
 SkinWeights_u bindMeshToJoint(const Mesh_u& mesh, size_t jointId) {
   auto skinWeights = std::make_unique<SkinWeights>();
   const auto kNumVertices = mesh->vertices.size();
