@@ -18,6 +18,7 @@
 #include <momentum/io/gltf/gltf_io.h>
 #include <momentum/test/io/io_helpers.h>
 
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <fstream>
@@ -842,5 +843,34 @@ TEST_F(ConvertModelTest, FbxModelCharactersGetTheGltfMotionOfTheSameNamedCharact
             converted.character.parameterTransform, converted.poses, converted.offsets.v));
     EXPECT_LT(difference.translation, 1e-3f);
     EXPECT_LT(difference.rotation, 1e-3f);
+  }
+}
+
+TEST_F(ConvertModelTest, ResampleMotion_InterpolatesLinearlyOverTheSameDuration) {
+  // Two parameters that are linear in time, so linear interpolation gives their exact values.
+  const auto linearMotion = [](float fps, Eigen::Index numFrames) {
+    MatrixXf motion(2, numFrames);
+    for (Eigen::Index frame = 0; frame < numFrames; ++frame) {
+      const float time = static_cast<float>(frame) / fps;
+      motion.col(frame) << 1.0f + 2.0f * time, -time;
+    }
+    return motion;
+  };
+  struct Case {
+    float sourceFps;
+    Eigen::Index sourceFrames;
+    float targetFps;
+    Eigen::Index targetFrames;
+  };
+  // 0.2 s at 30 fps: 11 frames at 50 fps, 5 frames at 24 fps; 0.1 s at 120 fps: 4 frames at 30 fps.
+  for (const auto& [sourceFps, sourceFrames, targetFps, targetFrames] :
+       {Case{.sourceFps = 30.0f, .sourceFrames = 7, .targetFps = 50.0f, .targetFrames = 11},
+        Case{.sourceFps = 30.0f, .sourceFrames = 7, .targetFps = 24.0f, .targetFrames = 5},
+        Case{.sourceFps = 120.0f, .sourceFrames = 13, .targetFps = 30.0f, .targetFrames = 4}}) {
+    SCOPED_TRACE(fmt::format("{} fps to {} fps", sourceFps, targetFps));
+    const MatrixXf resampled =
+        resampleMotion(linearMotion(sourceFps, sourceFrames), sourceFps, targetFps);
+    EXPECT_TRUE(resampled.isApprox(linearMotion(targetFps, targetFrames), 1e-5f))
+        << resampled << "\n";
   }
 }
