@@ -238,6 +238,39 @@ pym_renderer.rasterize_circles(
 
 Note that aliasing can be particularly bad for lines so see the notes about antialiasing below.
 
+### Several characters
+
+A file can hold several characters, such as a body and the objects it holds. `create_camera_for_characters` frames all of them, and `rasterize_characters` renders them into the same buffers. Each pixel shows the nearest character, and the optional character index buffer tells which character covers each pixel:
+
+```python
+import pymomentum.geometry as pym_geometry
+
+entries, fps = pym_geometry.Character.load_gltf_characters_with_motion("body_and_objects.glb")
+characters = [character for character, _, _, _ in entries]
+frame = 0
+skel_states = [
+    pym_geometry.model_parameters_to_skeleton_state(character, motion[frame])
+    for character, motion, _, _ in entries
+]
+
+camera = pym_renderer.create_camera_for_characters(
+    characters, skel_states, image_height=480, image_width=640, horizontal=True
+)
+z_buffer = pym_renderer.create_z_buffer(camera)
+rgb_buffer = pym_renderer.create_rgb_buffer(camera)
+character_index = pym_renderer.create_index_buffer(camera)
+pym_renderer.rasterize_characters(
+    characters,
+    skel_states,
+    camera,
+    z_buffer,
+    rgb_buffer,
+    character_index_buffer=character_index,
+)
+```
+
+`create_camera_for_characters` faces the first character that `create_camera_for_body` can face, and looks along the world -Z axis when no character has a spine or wrist joint. The vertex and triangle index buffers refer to the mesh of the character in the character index buffer.
+
 ### Rendering on top of existing images
 
 If you want to render on top of an existing image, you can use the `alpha_matte` function. This will automatically downsample the image if necessary (if it was upsampled for anti-aliasing reasons) and handle conversions between float- and uint8-valued buffers.
