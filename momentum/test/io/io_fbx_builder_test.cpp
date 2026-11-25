@@ -406,9 +406,8 @@ TEST(FbxBuilderTest, LoadMultipleCharacters) {
     const Character& loaded = characters[i];
     EXPECT_EQ(loaded.name, source.name);
     EXPECT_EQ(loaded.skeleton.joints.size(), source.skeleton.joints.size());
-    EXPECT_EQ(
-        loaded.parameterTransform.numAllModelParameters(),
-        loaded.skeleton.joints.size() * kParametersPerJoint);
+    // Each character gets its rig, which the file stores.
+    EXPECT_EQ(loaded.parameterTransform.name, source.parameterTransform.name);
     ASSERT_NE(loaded.mesh, nullptr);
     EXPECT_EQ(loaded.mesh->vertices.size(), source.mesh->vertices.size());
   }

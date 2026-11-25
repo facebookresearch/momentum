@@ -1565,9 +1565,11 @@ struct FbxCharacterParse {
   TransformationList inverseBindPose;
   std::string name;
   std::string metadata;
+  /// The rig as FbxBuilder stores it (see rigToJson()); empty when the file stores none.
+  std::string rig;
 };
 
-// Recover the character's name and metadata from its root joint node (see metadataFromFile()).
+// Recover the character's name, metadata and rig from its root joint node (see metadataFromFile()).
 void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
   MT_CHECK(
       cp.jointFbxNodes.empty() || cp.jointFbxNodes.front() != nullptr,
@@ -1581,6 +1583,9 @@ void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
     if (resolveProperty(*cp.jointFbxNodes.front(), "metadata") != nullptr) {
       cp.metadata =
           metadataFromFile(resolveStringProperty(*cp.jointFbxNodes.front(), "metadata"), "FBX");
+    }
+    if (resolveProperty(*cp.jointFbxNodes.front(), "rig") != nullptr) {
+      cp.rig = resolveStringProperty(*cp.jointFbxNodes.front(), "rig");
     }
   }
 }
@@ -1643,7 +1648,8 @@ std::vector<MatrixXf> parseAnimationStacks(
 }
 
 // Build a Character from a parsed character: updates the parse's mesh normals and moves its inverse
-// bind pose out; the rest is copied. Shared by the singular and multi-character loaders.
+// bind pose out; the rest is copied. Shared by the singular and multi-character loaders. The
+// character gets the rig stored in the file, or else `parameterTransform` without limits.
 Character buildCharacterFromParse(
     FbxCharacterParse&& cp,
     KeepLocators keepLocators,
@@ -1678,6 +1684,23 @@ Character buildCharacterFromParse(
       {}, // inverseBindPose
       {}, // skinnedLocators
       cp.metadata);
+  if (!cp.rig.empty()) {
+    // Files from other tools can have a property of this name for something else, so a rig that
+    // momentum cannot read is not used, and the character keeps its parameter transform and limits.
+    ParameterTransform parameterTransformBeforeRig = character.parameterTransform;
+    ParameterLimits parameterLimitsBeforeRig = character.parameterLimits;
+    try {
+      rigFromJsonString(cp.rig, character);
+    } catch (const std::exception& e) {
+      MT_LOGW(
+          "FBX character '{}' has a 'rig' property that momentum cannot read as a rig, so it is "
+          "not used: {}",
+          character.name,
+          e.what());
+      character.parameterTransform = std::move(parameterTransformBeforeRig);
+      character.parameterLimits = std::move(parameterLimitsBeforeRig);
+    }
+  }
   character.resetJointMap();
   character.inverseBindPose = std::move(cp.inverseBindPose);
   character.physicalProperties =
@@ -1702,6 +1725,11 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
   std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =
       parseSkeleton(scene.getRoot(), {}, permissive);
   fillNameAndMetadata(cp, /*fallbackToNodeName=*/false);
+  // A stored rig belongs to the skeleton of one character, so a scene with several skeletons, which
+  // this loader merges, gets none.
+  if (std::ranges::count(cp.skeleton.joints, kInvalidIndex, &Joint::parent) != 1) {
+    cp.rig.clear();
+  }
   computeInverseBindPose(cp);
 
   // Likewise, every mesh in the scene belongs to that one character.
@@ -1906,8 +1934,8 @@ parseFbxCharacters(ofbx::IScene& scene, Permissive permissive, LoadBlendShapes l
   return characters;
 }
 
-// The multi-character loaders give each character an identity parameter transform, so that its
-// joint-parameter motion is also valid model-parameter motion.
+// The multi-character loaders give each character without a stored rig an identity parameter
+// transform, so that its joint-parameter motion is also valid model-parameter motion.
 Character buildMultiCharacterFromParse(FbxCharacterParse&& cp, KeepLocators keepLocators) {
   const auto parameterTransform = ParameterTransform::identity(cp.skeleton.getJointNames());
   return buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform);

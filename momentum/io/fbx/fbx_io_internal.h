@@ -208,7 +208,7 @@ inline void addPhysicalProperties(
 }
 
 // ============================================================================
-// Metadata, locators, collision geometry
+// Metadata, rig, locators, collision geometry
 // ============================================================================
 
 inline void addMetaData(
@@ -219,6 +219,13 @@ inline void addMetaData(
     if (!isEmptyMetadata(character.metadata)) {
       ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "metadata")
           .Set(FbxString(character.metadata.c_str()));
+    }
+    // An FBX file has no parameter transform of its own, so the rig is stored as glTF stores it.
+    // Joint limits need no model parameters, so a character with limits gets its rig too.
+    if (character.parameterTransform.numAllModelParameters() > 0 ||
+        !character.parameterLimits.empty()) {
+      ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "rig")
+          .Set(FbxString(rigToJsonString(character).c_str()));
     }
     ::fbxsdk::FbxProperty::Create(skeletonRootNode, ::fbxsdk::FbxStringDT, "name")
         .Set(FbxString(exportedName.c_str()));
