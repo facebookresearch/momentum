@@ -464,7 +464,49 @@ int findLongestTake(
   return findLongestLength(takeLengths);
 }
 
-std::optional<Scene> loadScene(const Options& options) {
+namespace {
+
+// The motion of the motion file for one character, read with the loader of its format. Without a
+// model file, the character is read from the motion file too.
+MotionData loadMotion(const Options& options, Character& character, bool hasModel) {
+  if (options.input_motion_file.empty()) {
+    return {};
+  }
+
+  const auto motionPath = filesystem::path(options.input_motion_file);
+  switch (parseCharacterFormat(motionPath)) {
+    case CharacterFormat::Gltf:
+      return loadGlbMotion(motionPath, character, hasModel, options);
+    case CharacterFormat::Fbx:
+      return loadFbxMotion(motionPath, character, hasModel, options);
+    case CharacterFormat::Usd:
+    case CharacterFormat::Unknown:
+      break;
+  }
+
+  MT_LOGW("Unknown motion file format: {}. Exporting without motion.", options.input_motion_file);
+  return {};
+}
+
+// The input converted as one character (see loadScene()).
+Scene loadOneCharacterScene(const Options& options) {
+  const bool hasModel = !options.input_model_file.empty();
+  SceneCharacter entry;
+  if (hasModel) {
+    entry.character = loadModelCharacter(options);
+  }
+  MotionData motion = loadMotion(options, entry.character, hasModel);
+  entry.poses = std::move(motion.poses);
+  entry.offsets = std::move(motion.offsets);
+  Scene scene;
+  scene.fps = motion.fps;
+  scene.characters.push_back(std::move(entry));
+  return scene;
+}
+
+// The characters when the input has several or one is selected by name (see loadScene()); nullopt
+// when the input converts as one character.
+std::optional<Scene> loadMultiCharacterScene(const Options& options) {
   const bool selectsCharacter = !options.character_name.empty();
   const bool hasMotion = !options.input_motion_file.empty();
   if (options.input_model_file.empty()) {
@@ -517,6 +559,15 @@ std::optional<Scene> loadScene(const Options& options) {
     addMotionByName(scene, filesystem::path(options.input_motion_file), !selectsCharacter);
   }
   return scene;
+}
+
+} // namespace
+
+Scene loadScene(const Options& options) {
+  if (auto scene = loadMultiCharacterScene(options)) {
+    return std::move(*scene);
+  }
+  return loadOneCharacterScene(options);
 }
 
 int findLongestMotion(const std::vector<MatrixXf>& motions) {
