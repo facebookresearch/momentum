@@ -28,7 +28,6 @@
 #include "momentum/math/mesh.h"
 #include "momentum/math/utility.h"
 
-#include <nlohmann/json.hpp>
 #include <ofbx.h>
 #include <gsl/span_ext>
 
@@ -1537,7 +1536,7 @@ struct FbxCharacterParse {
 };
 
 // Recover the character's name and metadata from its root joint node. Metadata that is not valid
-// JSON is warned about but kept verbatim, as in the glTF loader.
+// JSON is warned about but kept verbatim (see warnIfMetadataIsNotJson()).
 void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
   MT_CHECK(
       cp.jointFbxNodes.empty() || cp.jointFbxNodes.front() != nullptr,
@@ -1552,14 +1551,7 @@ void fillNameAndMetadata(FbxCharacterParse& cp, bool fallbackToNodeName) {
       cp.metadata = resolveStringProperty(*cp.jointFbxNodes.front(), "metadata");
     }
   }
-  try {
-    // Validate that the metadata is well-formed JSON; the parsed value is not otherwise needed.
-    (void)nlohmann::json::parse(cp.metadata);
-  } catch (const nlohmann::json::parse_error& e) {
-    // Warn but keep the string, matching the glTF loader: the caller sees exactly what the file
-    // held and can decide what to do with it.
-    MT_LOGW("FBX character metadata is not valid JSON: {}", e.what());
-  }
+  warnIfMetadataIsNotJson(cp.metadata, "FBX");
 }
 
 // The multi-character loaders bind each joint at its rest pose, so that a reader that rebuilds the
