@@ -1074,6 +1074,7 @@ if(MOMENTUM_BUILD_TESTING)
     NAME io_bvh_test
     SOURCES_VARS io_bvh_test_sources
     LINK_LIBRARIES
+      character_test_helpers
       io_bvh
       io_test_helper
     ENV
