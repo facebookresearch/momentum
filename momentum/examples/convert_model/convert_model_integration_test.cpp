@@ -516,6 +516,24 @@ TEST_F(ConvertModelIntegrationTest, Result_UpperCaseMotionExtension_KeepsTheMoti
   EXPECT_EQ(takes[0].cols(), motion.cols());
 }
 
+// Test: the output format is read from the output extension in any letter case
+TEST_F(ConvertModelIntegrationTest, Result_UpperCaseOutputExtension_KeepsTheMotion) {
+  const auto input = testFile("character_with_motion.glb");
+  const auto glb = outputFile("upper_case.GLB");
+  const auto fbx = outputFile("upper_case.FBX");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", glb}), 0);
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", fbx}), 0);
+
+  const auto [character, motion, identity, fps] = momentum::loadCharacterWithMotion(input);
+  const auto [glbCharacter, glbMotion, glbIdentity, glbFps] =
+      momentum::loadCharacterWithMotion(glb);
+  EXPECT_EQ(glbMotion.cols(), motion.cols());
+  const auto [fbxCharacter, takes, fbxFps] = momentum::loadFbxCharacterWithMotion(fbx);
+  ASSERT_EQ(takes.size(), 1);
+  EXPECT_EQ(takes[0].cols(), motion.cols());
+}
+
 // Test: every character of a GLB file comes back from the FBX output with its motion
 TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterGlbToFbx_KeepsEveryCharacterAndMotion) {
   const auto saved = momentum::createTwoCharacterScene();
