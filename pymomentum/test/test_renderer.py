@@ -9,8 +9,48 @@ import unittest
 
 import numpy as np
 import pymomentum.camera as pym_camera  # @manual=:camera
+import pymomentum.geometry as pym_geometry  # @manual=:geometry
+import pymomentum.geometry_test_utils as pym_test_utils  # @manual=:geometry_test_utils
 import pymomentum.renderer as pym_renderer  # @manual=:renderer
 from numpy.typing import NDArray
+
+
+def _rest_skeleton_state(
+    character: pym_geometry.Character, offset: tuple[float, float, float]
+) -> NDArray[np.float32]:
+    """The rest pose of a character, moved by `offset` (cm)."""
+    skel_state = pym_geometry.model_parameters_to_skeleton_state(
+        character, np.zeros(character.parameter_transform.size, dtype=np.float32)
+    )
+    skel_state[:, :3] += np.asarray(offset, dtype=np.float32)
+    return skel_state
+
+
+class _SoloRender:
+    """Buffers of one character rasterized alone with :func:`rasterize_character`."""
+
+    def __init__(
+        self,
+        character: pym_geometry.Character,
+        skel_state: NDArray[np.float32],
+        camera: pym_camera.Camera,
+        material: pym_renderer.PhongMaterial,
+    ) -> None:
+        self.z: NDArray[np.float32] = pym_renderer.create_z_buffer(camera)
+        self.rgb: NDArray[np.float32] = pym_renderer.create_rgb_buffer(camera)
+        self.triangles: NDArray[np.int32] = pym_renderer.create_index_buffer(camera)
+        self.vertices: NDArray[np.int32] = pym_renderer.create_index_buffer(camera)
+        pym_renderer.rasterize_character(
+            character,
+            skel_state,
+            camera,
+            self.z,
+            self.rgb,
+            triangle_index_buffer=self.triangles,
+            vertex_index_buffer=self.vertices,
+            material=material,
+            back_face_culling=False,
+        )
 
 
 class TestRendering(unittest.TestCase):
@@ -634,3 +674,144 @@ class TestRendering(unittest.TestCase):
             np.any(rendered_rgb_a > 0).item(),
             "No visible pixels in rgb_buffer after rendering",
         )
+
+    def test_create_camera_for_characters_keeps_every_character_in_view(
+        self,
+    ) -> None:
+        # The test character has no spine or wrist joint, which a camera for a body needs.
+        character = pym_test_utils.create_test_character()
+        states = [
+            _rest_skeleton_state(character, (0.0, 0.0, 0.0)),
+            _rest_skeleton_state(character, (100.0, 0.0, 0.0)),
+        ]
+        with self.assertRaises(RuntimeError):
+            pym_renderer.create_camera_for_body(character, states[0], 120, 160)
+
+        camera = pym_renderer.create_camera_for_characters(
+            [character, character], states, 120, 160
+        )
+
+        np.testing.assert_allclose(
+            camera.world_space_principle_axis, [0.0, 0.0, -1.0], atol=1e-6
+        )
+        for state in states:
+            projected = camera.project(character.skin_points(state))
+            self.assertTrue(np.all(projected[:, 2] > 0.0))
+            self.assertTrue(np.all((projected[:, 0] >= 0) & (projected[:, 0] < 160)))
+            self.assertTrue(np.all((projected[:, 1] >= 0) & (projected[:, 1] < 120)))
+
+    def test_create_camera_for_characters_faces_the_first_body(self) -> None:
+        skeleton = pym_geometry.Skeleton(
+            [
+                pym_geometry.Joint("root", -1, [0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0]),
+                pym_geometry.Joint(
+                    "b_spine3", 0, [0.0, 0.0, 0.0, 1.0], [0.0, 10.0, 0.0]
+                ),
+            ]
+        )
+        body = pym_geometry.Character(
+            "body",
+            skeleton,
+            pym_geometry.ParameterTransform(
+                ["unused"], skeleton, np.zeros((14, 1), dtype=np.float32)
+            ),
+        )
+        body_state = _rest_skeleton_state(body, (0.0, 0.0, 0.0))
+        strip = pym_test_utils.create_test_character()
+        strip_state = _rest_skeleton_state(strip, (20.0, 0.0, 0.0))
+
+        camera = pym_renderer.create_camera_for_characters(
+            [strip, body], [strip_state, body_state], 120, 160
+        )
+
+        np.testing.assert_allclose(
+            camera.world_space_principle_axis,
+            pym_renderer.create_camera_for_body(
+                body, body_state, 120, 160
+            ).world_space_principle_axis,
+            atol=1e-6,
+        )
+
+    def test_rasterize_characters_shows_the_nearest_character(self) -> None:
+        character = pym_test_utils.create_test_character()
+        # The second character overlaps the first one and is 2 cm nearer to the camera.
+        states = [
+            _rest_skeleton_state(character, (0.0, 0.0, 0.0)),
+            _rest_skeleton_state(character, (0.3, 0.5, 2.0)),
+        ]
+        # The strip faces away from the camera, so only the emissive colors light it.
+        materials = [
+            pym_renderer.PhongMaterial(emissive_color=np.array([1.0, 0.0, 0.0])),
+            pym_renderer.PhongMaterial(emissive_color=np.array([0.0, 1.0, 0.0])),
+        ]
+        camera = pym_renderer.create_camera_for_characters(
+            [character, character], states, 120, 160
+        )
+        solo = [
+            _SoloRender(character, state, camera, material)
+            for state, material in zip(states, materials)
+        ]
+        solo_z = np.stack([render.z for render in solo])
+        covered = self._get_rendered_mask(solo_z)
+        self.assertTrue(np.any(covered[0] & ~covered[1]))
+        self.assertTrue(np.any(covered[0] & covered[1]))
+        self.assertTrue(np.all(solo[0].rgb[covered[0]][:, 0] > 0))
+        self.assertTrue(np.all(solo[1].rgb[covered[1]][:, 1] > 0))
+        nearest = np.argmin(solo_z, axis=0)
+        expected_character = np.where(covered.any(axis=0), nearest, -1)
+
+        for order in ([0, 1], [1, 0]):
+            z = pym_renderer.create_z_buffer(camera)
+            rgb = pym_renderer.create_rgb_buffer(camera)
+            character_index = pym_renderer.create_index_buffer(camera)
+            triangles = pym_renderer.create_index_buffer(camera)
+            vertices = pym_renderer.create_index_buffer(camera)
+            pym_renderer.rasterize_characters(
+                [character for _ in order],
+                [states[i] for i in order],
+                camera,
+                z,
+                rgb,
+                character_index_buffer=character_index,
+                triangle_index_buffer=triangles,
+                vertex_index_buffer=vertices,
+                materials=[materials[i] for i in order],
+                back_face_culling=False,
+            )
+
+            # Map the index in `order` back to the character.
+            shown = np.where(
+                character_index >= 0, np.asarray(order)[character_index], -1
+            )
+            np.testing.assert_array_equal(shown, expected_character)
+            np.testing.assert_array_equal(z, solo_z.min(axis=0))
+            for i, render in enumerate(solo):
+                mask = expected_character == i
+                np.testing.assert_array_equal(rgb[mask], render.rgb[mask])
+                np.testing.assert_array_equal(triangles[mask], render.triangles[mask])
+                np.testing.assert_array_equal(vertices[mask], render.vertices[mask])
+
+    def _assert_nothing_rendered(self, z_buffer: NDArray[np.float32]) -> None:
+        self.assertFalse(np.any(self._get_rendered_mask(z_buffer)))
+
+    def test_rasterize_characters_errors_name_the_character(self) -> None:
+        character = pym_test_utils.create_test_character()
+        other = pym_test_utils.create_test_character(5)
+        state = _rest_skeleton_state(character, (0.0, 0.0, 0.0))
+        camera = pym_renderer.create_camera_for_characters(
+            [character], [state], 120, 160
+        )
+        z = pym_renderer.create_z_buffer(camera)
+
+        with self.assertRaisesRegex(RuntimeError, "2 skeleton states for 1 characters"):
+            pym_renderer.rasterize_characters([character], [state, state], camera, z)
+        # The check fails before the first character is rendered.
+        with self.assertRaisesRegex(RuntimeError, r"skeleton_states\[1\]"):
+            pym_renderer.rasterize_characters(
+                [character, other], [state, state], camera, z
+            )
+        self._assert_nothing_rendered(z)
+        with self.assertRaisesRegex(RuntimeError, "character 1"):
+            pym_renderer.create_camera_for_characters(
+                [character, other], [state, state], 120, 160
+            )
