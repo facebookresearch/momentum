@@ -313,3 +313,92 @@ TEST(FbxBuilderTest, DedupeSkipsNamesTakenByExplicitNames) {
   // An explicit name colliding with an existing one is itself suffixed.
   EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup_1"), "dup_1_1");
 }
+
+TEST(FbxBuilderTest, LoadMultipleCharacters) {
+  Character charA = createTestCharacter(4);
+  charA.name = "alpha";
+  Character charB = createTestCharacter(6);
+  charB.name = "beta";
+
+  const auto outFile = temporaryFile("builder_multi_load", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addCharacter(charA);
+    builder.addCharacter(charB);
+    builder.save(outFile.path());
+  }
+
+  // Permissive since the round trip may produce nonzero rest rotations.
+  const std::vector<Character> characters =
+      loadFbxCharacters(outFile.path(), KeepLocators::No, Permissive::Yes);
+  ASSERT_EQ(characters.size(), 2);
+  for (size_t i = 0; i < characters.size(); ++i) {
+    const Character& source = i == 0 ? charA : charB;
+    const Character& loaded = characters[i];
+    EXPECT_EQ(loaded.name, source.name);
+    EXPECT_EQ(loaded.skeleton.joints.size(), source.skeleton.joints.size());
+    EXPECT_EQ(
+        loaded.parameterTransform.numAllModelParameters(),
+        loaded.skeleton.joints.size() * kParametersPerJoint);
+    ASSERT_NE(loaded.mesh, nullptr);
+    EXPECT_EQ(loaded.mesh->vertices.size(), source.mesh->vertices.size());
+  }
+}
+
+namespace {
+
+// Expect every vertex of `loaded` to be fully weighted on `joint`, and to map back to
+// `localVertices` through that joint's inverse bind pose.
+void expectRigidlyBound(
+    const Character& loaded,
+    size_t joint,
+    const std::vector<Vector3f>& localVertices) {
+  ASSERT_NE(loaded.mesh, nullptr);
+  ASSERT_NE(loaded.skinWeights, nullptr);
+  ASSERT_EQ(loaded.mesh->vertices.size(), localVertices.size());
+  for (size_t v = 0; v < localVertices.size(); ++v) {
+    EXPECT_EQ(loaded.skinWeights->index(v, 0), joint);
+    EXPECT_FLOAT_EQ(loaded.skinWeights->weight(v, 0), 1.0f);
+    EXPECT_TRUE((loaded.inverseBindPose[joint] * loaded.mesh->vertices[v])
+                    .isApprox(localVertices[v], 1e-3f));
+  }
+}
+
+// Three frames of joint parameters for a one-joint object.
+MatrixXf objectMotion() {
+  MatrixXf jointParams = MatrixXf::Zero(kParametersPerJoint, 3);
+  for (Eigen::Index f = 0; f < jointParams.cols(); ++f) {
+    jointParams.col(f) << 1.0f + f, 2.0f, -0.5f * f, 0.1f * f, 0.2f, -0.3f * f, 0.0f;
+  }
+  return jointParams;
+}
+
+} // namespace
+
+TEST(FbxBuilderTest, LoadCharactersWithObjects) {
+  const Character prop = createTestCharacter(3);
+  const Character object = createTestCharacter(3);
+  const Vector3f objectOffset(0.5f, 1.0f, -2.0f);
+  constexpr size_t kPropMeshJoint = 1;
+
+  const auto outFile = temporaryFile("builder_objects", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addRigidBody(prop, "prop", kPropMeshJoint);
+    builder.addAnimatedMesh(*object.mesh, "object", 30.0f, objectMotion(), objectOffset);
+    builder.save(outFile.path());
+  }
+
+  const std::vector<Character> characters = loadFbxCharacters(outFile.path());
+  ASSERT_EQ(characters.size(), 2);
+
+  // A mesh under a joint moves rigidly with that joint.
+  EXPECT_EQ(characters[0].name, "prop");
+  EXPECT_EQ(characters[0].skeleton.joints.size(), prop.skeleton.joints.size());
+  expectRigidlyBound(characters[0], kPropMeshJoint, prop.mesh->vertices);
+
+  // An animated mesh is a one-joint character.
+  EXPECT_EQ(characters[1].name, "object");
+  ASSERT_EQ(characters[1].skeleton.joints.size(), 1);
+  expectRigidlyBound(characters[1], 0, object.mesh->vertices);
+}
