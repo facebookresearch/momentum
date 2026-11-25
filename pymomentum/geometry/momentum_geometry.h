@@ -75,6 +75,41 @@ momentum::Character loadFBXCharacterFromBytes(
     bool permissive = false,
     bool loadBlendShapes = false,
     bool stripNamespaces = true);
+
+/// Load every character of an FBX file; see momentum::loadFbxCharacters().
+std::vector<momentum::Character> loadFBXCharactersFromFile(
+    const std::string& fbxPath,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an in-memory FBX file; see momentum::loadFbxCharacters().
+std::vector<momentum::Character> loadFBXCharactersFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an FBX file with its motion; see
+/// momentum::loadFbxCharactersWithMotion(). Each motion is transposed to (numFrames x
+/// numJointParameters).
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromFile(
+    const std::string& fbxPath,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
+/// Load every character of an in-memory FBX file with its motion; see
+/// momentum::loadFbxCharactersWithMotion(). Each motion is transposed to
+/// (numFrames x numJointParameters).
+std::tuple<std::vector<std::pair<momentum::Character, std::vector<Eigen::MatrixXf>>>, float>
+loadFBXCharactersWithMotionFromBytes(
+    const pybind11::bytes& bytes,
+    bool permissive = false,
+    bool loadBlendShapes = false,
+    bool stripNamespaces = true);
+
 momentum::Character loadLocatorsFromBytes(
     const momentum::Character& character,
     const pybind11::bytes& bytes);
