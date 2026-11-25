@@ -224,7 +224,7 @@ PYBIND11_MODULE(renderer, m) {
       R"(Create a camera that roughly faces the body (default: face the front of the body).  If you pass in multiple frames of animation, the camera will ensure all frames are visible.
 
 :param character: Character to use.
-:param skeleton_states: numpy.ndarray of skeleton states with shape (nJoints, 8), (nBatch, nJoints, 8), or (nBatch, nFrames, nJoints, 8). Each joint has 8 values: (tx, ty, tz, rx, ry, rz, rw, s) representing translation, quaternion rotation (x, y, z, w), and uniform scale.
+:param skeleton_states: numpy.ndarray of skeleton states with shape (nJoints, 8) or (nFrames, nJoints, 8). Each joint has 8 values: (tx, ty, tz, rx, ry, rz, rw, s) representing translation, quaternion rotation (x, y, z, w), and uniform scale.
 :param image_height: Height of the target image.
 :param image_width: Width of the target image.
 :param focal_length_mm: 35mm-equivalent focal length; e.g. focal_length_mm=50 corresponds to a "normal" lens.  Specified in millimeters because this is what photographers use.
@@ -232,6 +232,29 @@ PYBIND11_MODULE(renderer, m) {
 :param camera_angle: what direction the camera looks at the body. default: 0, looking at front of body. pi/2: at left side of body.
 :return: a :class:`Camera`.)",
       py::arg("character"),
+      py::arg("skeleton_states"),
+      py::arg("image_height"),
+      py::arg("image_width"),
+      py::arg("focal_length_mm") = 50.0f,
+      py::arg("horizontal") = false,
+      py::arg("camera_angle") = 0.0f);
+
+  m.def(
+      "create_camera_for_characters",
+      &createCameraForCharacters,
+      R"(Create a camera that keeps several characters in view, e.g. every character of a multi-character file.
+
+The camera faces the first character that :meth:`create_camera_for_body` can face (a character with one of its spine or wrist joints), as :meth:`create_camera_for_body` does.  If no character has one of these joints, for example an object or a hand model with other joint names, the camera looks along the world -Z axis with the world Y axis up.  The camera then moves so that every frame of every character is in view: the skinned mesh of a character with a mesh and skin weights, otherwise its joints.
+
+:param characters: List of :class:`pymomentum.geometry.Character` to keep in view.
+:param skeleton_states: List with one numpy.ndarray of skeleton states per character, with shape (nJoints, 8) or (nFrames, nJoints, 8); the number of frames can differ between characters.  Each joint has 8 values: (tx, ty, tz, rx, ry, rz, rw, s) representing translation, quaternion rotation (x, y, z, w), and uniform scale.
+:param image_height: Height of the target image.
+:param image_width: Width of the target image.
+:param focal_length_mm: 35mm-equivalent focal length; e.g. focal_length_mm=50 corresponds to a "normal" lens.  Specified in millimeters because this is what photographers use.
+:param horizontal: When the camera faces a body, whether to place it horizontally, assuming the Y axis is the world up direction.
+:param camera_angle: Rotation of the view direction about the camera up axis, in radians.  When the camera faces a body, 0 looks at the front of the body and pi/2 at its left side.
+:return: a :class:`Camera`.)",
+      py::arg("characters"),
       py::arg("skeleton_states"),
       py::arg("image_height"),
       py::arg("image_width"),
@@ -781,6 +804,48 @@ See detailed notes under :meth:`rasterize_mesh`, above.
       py::arg("depth_offset") = 0.0f,
       py::arg("image_offset") = std::optional<Eigen::Vector2f>{},
       py::arg("wireframe_color") = std::optional<Eigen::Vector3f>{});
+
+  m.def(
+      "rasterize_characters",
+      &rasterizeCharacters,
+      R"(Rasterize several posed characters, e.g. every character of a multi-character file, onto the same RGB+depth buffer.
+
+Each character is rasterized as :meth:`rasterize_character` rasterizes one, so each pixel shows the nearest character.  The index buffers tell which character covers each pixel, and which vertex and triangle of that character's mesh.
+
+:param characters: List of :class:`pymomentum.geometry.Character` to rasterize; each needs a mesh and skin weights.
+:param skeleton_states: List with one skeleton state (nJoints, 8) per character.
+:param camera: Camera to render from.
+:param z_buffer: Z-buffer to render geometry onto; can be reused for multiple renders.
+:param rgb_buffer: RGB-buffer to render geometry onto; can be reused for multiple renders.
+:param surface_normals_buffer: Optional buffer to rasterize the surface normals to.
+:param character_index_buffer: Optional buffer (see :meth:`create_index_buffer`) to rasterize the index in ``characters`` of the character that covers each pixel to.  Pixels that no character covers keep their value.
+:param vertex_index_buffer: Optional buffer to rasterize the vertex indices to; each index is in the mesh of the character in ``character_index_buffer``.
+:param triangle_index_buffer: Optional buffer to rasterize the triangle indices to; each index is in the mesh of the character in ``character_index_buffer``.
+:param materials: Optional list with one material per character; the default material is used when not given.
+:param lights: Lights to use in renderering, in world-space.  If none are given, a default light setup is used.
+:param model_matrix: Additional matrix to apply to every character.  Unlike the camera transforms, it is allowed to have scaling and/or shearing.
+:param back_face_culling: Enable back-face culling (speeds up the render).
+:param near_clip: Clip any triangles closer than this depth.  Defaults to 0.1.
+:param depth_offset: Offset the depth values.  Nonzero values can be used to render something slightly in front of something else and avoid depth fighting.  Defaults to 0.
+:param image_offset: Offset by (x, y) pixels in image space.
+)",
+      py::arg("characters"),
+      py::arg("skeleton_states"),
+      py::arg("camera"),
+      py::arg("z_buffer"),
+      py::arg("rgb_buffer") = std::optional<pybind11::buffer>{},
+      py::kw_only(),
+      py::arg("surface_normals_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("character_index_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("vertex_index_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("triangle_index_buffer") = std::optional<pybind11::buffer>{},
+      py::arg("materials") = std::optional<std::vector<momentum::rasterizer::PhongMaterial>>{},
+      py::arg("lights") = std::optional<std::vector<momentum::rasterizer::Light>>{},
+      py::arg("model_matrix") = std::optional<Eigen::Matrix4f>{},
+      py::arg("back_face_culling") = true,
+      py::arg("near_clip") = 0.1f,
+      py::arg("depth_offset") = 0.0f,
+      py::arg("image_offset") = std::optional<Eigen::Vector2f>{});
 
   m.def(
       "rasterize_checkerboard",
