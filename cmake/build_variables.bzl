@@ -945,6 +945,10 @@ apply_motion_sources = [
     "examples/convert_model/apply_motion.cpp",
 ]
 
+split_characters_sources = [
+    "examples/convert_model/split_characters.cpp",
+]
+
 convert_model_test_headers = [
     "examples/convert_model/convert_model_test_helpers.h",
 ]
