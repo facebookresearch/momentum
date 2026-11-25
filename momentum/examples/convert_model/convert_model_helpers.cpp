@@ -23,7 +23,6 @@
 #include <momentum/io/urdf/urdf_io.h>
 
 #include <algorithm>
-#include <cctype>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -77,36 +76,6 @@ int findLongestLength(std::span<const Eigen::Index> lengths) {
     MT_LOGW("More than one motion found; only taking the longest one");
   }
   return longest;
-}
-
-enum class InputFormat { Gltf, Fbx, Other };
-
-// The format of the model file, as loadFullCharacter() recognizes it.
-InputFormat modelFormat(const filesystem::path& path) {
-  std::string extension = path.extension().string();
-  std::ranges::transform(extension, extension.begin(), [](unsigned char c) {
-    return static_cast<char>(std::tolower(c));
-  });
-  if (extension == ".glb" || extension == ".gltf") {
-    return InputFormat::Gltf;
-  }
-  if (extension == ".fbx") {
-    return InputFormat::Fbx;
-  }
-  return InputFormat::Other;
-}
-
-// The format of the motion file, as the single-character conversion recognizes it (loadMotion() in
-// convert_model.cpp).
-InputFormat motionFormat(const filesystem::path& path) {
-  const auto extension = path.extension();
-  if (extension == ".glb") {
-    return InputFormat::Gltf;
-  }
-  if (extension == ".fbx") {
-    return InputFormat::Fbx;
-  }
-  return InputFormat::Other;
 }
 
 // Whether characters read from a file convert as a scene: when there are several, or when one is
@@ -222,8 +191,8 @@ const std::string& characterName(const momentum::Character& character) {
 // The characters of the model file, each read as loadModelCharacter() reads a single character,
 // before the parameter and locator files.
 std::vector<momentum::Character> loadModelCharacters(const filesystem::path& modelPath) {
-  switch (modelFormat(modelPath)) {
-    case InputFormat::Gltf: {
+  switch (momentum::parseCharacterFormat(modelPath)) {
+    case momentum::CharacterFormat::Gltf: {
       auto characters = momentum::loadGltfCharacters(modelPath);
       // loadFullCharacter() reads glTF characters without their blend shapes.
       for (auto& character : characters) {
@@ -232,13 +201,14 @@ std::vector<momentum::Character> loadModelCharacters(const filesystem::path& mod
       }
       return characters;
     }
-    case InputFormat::Fbx:
+    case momentum::CharacterFormat::Fbx:
       return momentum::loadFbxCharacters(
           modelPath,
           momentum::KeepLocators::Yes,
           momentum::Permissive::No,
           momentum::LoadBlendShapes::No);
-    case InputFormat::Other:
+    case momentum::CharacterFormat::Usd:
+    case momentum::CharacterFormat::Unknown:
       break;
   }
   momentum::Options modelOnly;
@@ -340,8 +310,8 @@ void assignFbxTake(
 // Gives each character of the model file the motion of the motion-file character with the same
 // name. Warns about motion-file characters that no character uses if `warnUnused`.
 void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath, bool warnUnused) {
-  switch (motionFormat(motionPath)) {
-    case InputFormat::Gltf: {
+  switch (momentum::parseCharacterFormat(motionPath)) {
+    case momentum::CharacterFormat::Gltf: {
       auto [sources, fps] = momentum::loadGltfCharactersWithMotion(motionPath);
       scene.fps = fps;
       assignMotionByName(
@@ -353,7 +323,7 @@ void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath,
           assignGltfMotion);
       return;
     }
-    case InputFormat::Fbx: {
+    case momentum::CharacterFormat::Fbx: {
       auto [sources, fps] = momentum::loadFbxCharactersWithMotion(
           motionPath, momentum::KeepLocators::Yes, momentum::Permissive::No);
       // The take is chosen among the characters that get motion, as loadFbxMotionScene() chooses
@@ -379,7 +349,8 @@ void addMotionByName(momentum::Scene& scene, const filesystem::path& motionPath,
           });
       return;
     }
-    case InputFormat::Other:
+    case momentum::CharacterFormat::Usd:
+    case momentum::CharacterFormat::Unknown:
       break;
   }
   MT_LOGW("Unknown motion file format: {}. Exporting without motion.", motionPath.string());
@@ -502,12 +473,13 @@ std::optional<Scene> loadScene(const Options& options) {
       return std::nullopt;
     }
     const filesystem::path motionPath(options.input_motion_file);
-    switch (motionFormat(motionPath)) {
-      case InputFormat::Gltf:
+    switch (parseCharacterFormat(motionPath)) {
+      case CharacterFormat::Gltf:
         return loadGltfMotionScene(motionPath, options);
-      case InputFormat::Fbx:
+      case CharacterFormat::Fbx:
         return loadFbxMotionScene(motionPath, options);
-      case InputFormat::Other:
+      case CharacterFormat::Usd:
+      case CharacterFormat::Unknown:
         break;
     }
     MT_THROW_IF(
@@ -518,7 +490,9 @@ std::optional<Scene> loadScene(const Options& options) {
   }
 
   const filesystem::path modelPath(options.input_model_file);
-  if (modelFormat(modelPath) == InputFormat::Other && !selectsCharacter) {
+  const CharacterFormat modelFormat = parseCharacterFormat(modelPath);
+  if (modelFormat != CharacterFormat::Gltf && modelFormat != CharacterFormat::Fbx &&
+      !selectsCharacter) {
     // A file of another format has one character.
     return std::nullopt;
   }
