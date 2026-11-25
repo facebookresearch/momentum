@@ -50,9 +50,9 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   return opt;
 }
 
-// Log one animation take of a character; a take without frames shows the character's rest pose.
-// FBX motion is joint parameters, which are passed as offsets on a zero pose.
-void logTake(
+// Log the motion of a character; a motion without frames shows the character's rest pose. FBX
+// motion is joint parameters, which are passed as offsets on a zero pose.
+void logMotion(
     const RecordingStream& rec,
     const Character& character,
     const MatrixXf& motion,
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
 
     rec.log_static("world", ViewCoordinates(::components::ViewCoordinates::RUB)); // Set an up-axis
 
-    const auto [characters, fps] = loadFbxCharactersWithMotion(
+    auto [characters, fps] = loadFbxCharactersWithMotion(
         options->fbxFile,
         KeepLocators::Yes,
         options->permissive ? Permissive::Yes : Permissive::No);
@@ -139,32 +139,26 @@ int main(int argc, char* argv[]) {
       MT_LOGW("No characters loaded from file");
     }
 
-    // Each take of each character is logged under its own entity, starting at frame 0. A take that
-    // does not animate the character is skipped; a character that no take animates shows its rest
-    // pose once.
+    // Every character is logged once, with its takes one after another on a shared timeline; a
+    // character that no take animates shows its rest pose once.
+    // The takes are freed once joined, so all motion data is not held twice while logging.
+    const std::vector<MatrixXf> motions = [&characters] {
+      std::vector<std::vector<MatrixXf>> takes;
+      takes.reserve(characters.size());
+      for (auto& [character, characterTakes] : characters) {
+        takes.push_back(std::move(characterTakes));
+      }
+      return joinTakesOnSharedTimeline(takes);
+    }();
     for (size_t iChar = 0; iChar < characters.size(); ++iChar) {
-      const auto& [character, takes] = characters[iChar];
-      const auto logCharacterTake = [&rec, &character, fps, iChar, &options](
-                                        size_t iTake, const MatrixXf& motion) {
-        const std::string take = "take_" + std::to_string(iTake);
-        logTake(
-            rec,
-            character,
-            motion,
-            fps,
-            "world/character/" + std::to_string(iChar) + "/" + take,
-            "world_params/character_" + std::to_string(iChar) + "/" + take,
-            options->logJoints);
-      };
-      if (std::ranges::none_of(takes, [](const MatrixXf& take) { return take.cols() > 0; })) {
-        logCharacterTake(0, MatrixXf());
-        continue;
-      }
-      for (size_t iTake = 0; iTake < takes.size(); ++iTake) {
-        if (takes[iTake].cols() > 0) {
-          logCharacterTake(iTake, takes[iTake]);
-        }
-      }
+      logMotion(
+          rec,
+          characters[iChar].first,
+          motions[iChar],
+          fps,
+          "world/character/" + std::to_string(iChar),
+          "world_params/character_" + std::to_string(iChar),
+          options->logJoints);
     }
   } catch (const std::exception& e) {
     std::cerr << "Exception thrown. Error: " << e.what() << '\n';
