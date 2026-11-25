@@ -33,4 +33,47 @@ template <typename T>
 /// @pre `character.skeleton.joints.size() >= 2`.
 [[nodiscard]] Character withTestPhysicalProperties(const Character& character);
 
+/// The joint parameters of every frame of `motion`, with the identity `offsets` added as
+/// ParameterTransform::apply(CharacterParameters) adds them: `transform * motion.col(i) + offsets`.
+///
+/// @param parameterTransform The parameter transform of the motion's character.
+/// @param motion Model parameters (numAllModelParameters x frames).
+/// @param offsets Identity joint parameters (numJointParameters values), or empty for none.
+/// @return Joint parameters (numJointParameters x frames).
+[[nodiscard]] MatrixXf jointMotionOf(
+    const ParameterTransform& parameterTransform,
+    const MatrixXf& motion,
+    const VectorXf& offsets = VectorXf());
+
+/// Zeroes the model parameters that drive a joint scale in every frame of `motion`, for formats
+/// that cannot store joint scales.
+///
+/// @param parameterTransform The parameter transform of the motion's character.
+/// @param motion Model parameters (numAllModelParameters x frames).
+void removeScaleMotion(const ParameterTransform& parameterTransform, MatrixXf& motion);
+
+/// The largest differences between the global joint transforms of two skeletons in any frame.
+struct JointTransformDifference {
+  /// The largest distance between the positions of two joints with the same name.
+  float translation = 0.0f;
+  /// The largest Frobenius norm of the difference between the rotations of two joints with the
+  /// same name.
+  float rotation = 0.0f;
+};
+
+/// Compares the global transforms of the joints of `expected` with those of the joints of
+/// `actual` that have the same names, in every frame. Throws when a joint of `expected` has no
+/// joint with its name in `actual`, or when the frame counts differ.
+///
+/// @param expected The expected skeleton.
+/// @param expectedJointMotion Joint parameters of `expected` (numJointParameters x frames).
+/// @param actual The skeleton to compare, which can list its joints in another order.
+/// @param actualJointMotion Joint parameters of `actual` (numJointParameters x frames).
+/// @return The largest differences.
+[[nodiscard]] JointTransformDifference maxGlobalJointTransformDifference(
+    const Skeleton& expected,
+    const MatrixXf& expectedJointMotion,
+    const Skeleton& actual,
+    const MatrixXf& actualJointMotion);
+
 } // namespace momentum
