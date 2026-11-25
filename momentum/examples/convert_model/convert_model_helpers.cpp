@@ -74,12 +74,20 @@ momentum::MotionData mappedMotion(
   return result;
 }
 
-// Whether the model characters come from an FBX file without a parameter file. An FBX file stores
-// no parameter transform, so these characters get the identity transform, and the motion of every
-// motion file is mapped onto them through the joint transforms.
+// Whether the model characters come from an FBX file without a parameter file. Unless the file
+// stores their rig, these characters get the identity transform (see
+// initializeCharacterFromMotionFile()), and the motion of every motion file is mapped onto them
+// through the joint transforms (see hasIdentityParameterTransform()).
 bool isFbxModelWithoutParameters(const momentum::Options& options) {
   return !options.input_model_file.empty() && options.input_params_file.empty() &&
       momentum::parseCharacterFormat(options.input_model_file) == momentum::CharacterFormat::Fbx;
+}
+
+// Whether `character` has the identity parameter transform, which the characters of an FBX file
+// that stores no rig get.
+bool hasIdentityParameterTransform(const momentum::Character& character) {
+  return character.parameterTransform.isApprox(
+      momentum::ParameterTransform::identity(character.skeleton.getJointNames()));
 }
 
 // The joint parameters (numJointParameters x frames) of glTF motion: the model parameters `motion`
@@ -314,13 +322,14 @@ void assignMotionByName(
 }
 
 // The motion of a glTF motion-file character for `target`: mapped through the joint transforms
-// when `byJoints` and the source has frames, as FBX motion is; otherwise the model parameters and
-// the identity are mapped by name, as loadMotionOnCharacter() maps them.
+// when `byJoints`, the target has the identity parameter transform, and the source has frames, as
+// FBX motion is; otherwise the model parameters and the identity are mapped by name, as
+// loadMotionOnCharacter() maps them.
 void assignGltfMotion(
     momentum::SceneCharacter& target,
     const momentum::CharacterMotion& source,
     bool byJoints) {
-  if (byJoints && source.motion.cols() > 0) {
+  if (byJoints && hasIdentityParameterTransform(target.character) && source.motion.cols() > 0) {
     target.poses = momentum::convertMotionWithJointMapping(
         gltfJointMotion(source.character, source.motion, source.identity),
         source.character.skeleton,
@@ -865,7 +874,8 @@ MotionData loadGlbMotion(
     const Options& options) {
   MT_LOGI("Loading motion from glb...");
   MotionData result;
-  if (hasModel && isFbxModelWithoutParameters(options)) {
+  if (hasModel && isFbxModelWithoutParameters(options) &&
+      hasIdentityParameterTransform(character)) {
     auto [source, motion, identity, fps] = loadCharacterWithMotion(motionPath);
     if (motion.cols() > 0) {
       return mappedMotion(
@@ -888,7 +898,8 @@ void initializeCharacterFromMotionFile(
     const Character& motionCharacter,
     const Options& options) {
   character = motionCharacter;
-  if (options.input_params_file.empty()) {
+  if (options.input_params_file.empty() &&
+      character.parameterTransform.numAllModelParameters() == 0) {
     character.parameterTransform = ParameterTransform::identity(character.skeleton.getJointNames());
   }
   applyOptionalInputs(character, options);
