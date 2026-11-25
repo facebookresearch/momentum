@@ -104,7 +104,7 @@ int findLongestTake(
 /// loadFbxMotion() then convert the input as one character.
 std::optional<Scene> loadScene(const Options& options);
 
-/// Loads motion data from a GLB file. If no separate model was provided,
+/// Loads motion data from a glTF/GLB file. If no separate model was provided,
 /// the character is also loaded from the GLB file.
 MotionData loadGlbMotion(
     const filesystem::path& motionPath,
