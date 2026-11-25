@@ -17,6 +17,7 @@ var searchData=
   ['buildhierarchicalpaths_14',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
   ['buildjetmat_15',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
   ['buildjetvec_16',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['buildsequencecolumnindices_17',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
-  ['buildtriangleadjacency_18',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
+  ['buildsceneparentmap_17',['buildSceneParentMap',['../namespacemomentum.html#a729b70c7d51e1a58385968adb237cb8c',1,'momentum']]],
+  ['buildsequencecolumnindices_18',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
+  ['buildtriangleadjacency_19',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]]
 ];

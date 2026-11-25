@@ -1,5 +1,17 @@
 var NAVTREEINDEX5 =
 {
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a495b5aa9f6d8e2f18e3db6f0f38e0baf":[2,0,0,16,15],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a4a87289aa8d6684b905b070c4d9db36d":[1,0,2,17,2],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a4a87289aa8d6684b905b070c4d9db36d":[2,0,0,16,2],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a69ca4cf401bc6450743d069544c586f0":[1,0,2,17,11],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a69ca4cf401bc6450743d069544c586f0":[2,0,0,16,11],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a6e97d33ae79cf56100305c12e1d00afe":[1,0,2,17,13],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a6e97d33ae79cf56100305c12e1d00afe":[2,0,0,16,13],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a6f00f1d305f77b87de89543fbbc77566":[1,0,2,17,7],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a6f00f1d305f77b87de89543fbbc77566":[2,0,0,16,7],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a7434362e1b8e21566e882ced663269e2":[1,0,2,17,16],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a7434362e1b8e21566e882ced663269e2":[2,0,0,16,16],
+"classmomentum_1_1OnlineBlockHouseholderQR.html#a78c4d0e1102c52550abff2b126b36925":[1,0,2,17,5],
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a78c4d0e1102c52550abff2b126b36925":[2,0,0,16,5],
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a8868807cc1ed3a88da7fc97a4b4f247a":[1,0,2,17,4],
 "classmomentum_1_1OnlineBlockHouseholderQR.html#a8868807cc1ed3a88da7fc97a4b4f247a":[2,0,0,16,4],
@@ -237,17 +249,5 @@ var NAVTREEINDEX5 =
 "classmomentum_1_1ProgressBar.html#a963bb090a7fdb9571e4f92f9e4057d3b":[2,0,0,5,2],
 "classmomentum_1_1ProgressBar.html#a98088b45ab749d9fc294ea9d82e6a122":[1,0,2,6,1],
 "classmomentum_1_1ProgressBar.html#a98088b45ab749d9fc294ea9d82e6a122":[2,0,0,5,1],
-"classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035":[1,0,2,6,0],
-"classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035":[2,0,0,5,0],
-"classmomentum_1_1ProjectionErrorFunctionT.html":[1,0,2,129],
-"classmomentum_1_1ProjectionErrorFunctionT.html":[2,0,0,128],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a03a8d8f2dd68a82db71f2f71ccd721b0":[1,0,2,129,11],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a03a8d8f2dd68a82db71f2f71ccd721b0":[2,0,0,128,11],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a03e48f4fd404cc033c51134f74eadb05":[1,0,2,129,10],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a03e48f4fd404cc033c51134f74eadb05":[2,0,0,128,10],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a23a8eb3303f57daee9b71ca1b4d28e4f":[1,0,2,129,9],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a23a8eb3303f57daee9b71ca1b4d28e4f":[2,0,0,128,9],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a3993c04fa49feae867745389cf71dc92":[1,0,2,129,2],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a3993c04fa49feae867745389cf71dc92":[2,0,0,128,2],
-"classmomentum_1_1ProjectionErrorFunctionT.html#a719f0ff76ede7b1b39f39cbd4a6ceba4":[1,0,2,129,0]
+"classmomentum_1_1ProgressBar.html#aa34174b4d3ee19b04ac846441bcc8035":[1,0,2,6,0]
 };

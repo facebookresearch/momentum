@@ -1,5 +1,17 @@
 var NAVTREEINDEX9 =
 {
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#ad050799a84c53803a22ee762a69b1efe":[2,0,0,26,4],
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30":[1,0,2,27,0],
+"classmomentum_1_1SubsetGaussNewtonSolverT.html#af91ee407e9e2cc664120b2eb2a414c30":[2,0,0,26,0],
+"classmomentum_1_1TrustRegionQRT.html":[1,0,2,136],
+"classmomentum_1_1TrustRegionQRT.html":[2,0,0,135],
+"classmomentum_1_1TrustRegionQRT.html#a07dd4361339362a615416a700928e229":[1,0,2,136,7],
+"classmomentum_1_1TrustRegionQRT.html#a07dd4361339362a615416a700928e229":[2,0,0,135,7],
+"classmomentum_1_1TrustRegionQRT.html#a4993add84028d79013e04d60990a2481":[1,0,2,136,2],
+"classmomentum_1_1TrustRegionQRT.html#a4993add84028d79013e04d60990a2481":[2,0,0,135,2],
+"classmomentum_1_1TrustRegionQRT.html#a6c69bd78e3a6c2fd6af55d66815dde61":[1,0,2,136,6],
+"classmomentum_1_1TrustRegionQRT.html#a6c69bd78e3a6c2fd6af55d66815dde61":[2,0,0,135,6],
+"classmomentum_1_1TrustRegionQRT.html#a809adc33eae1dc252328cb1f73086ba9":[1,0,2,136,3],
 "classmomentum_1_1TrustRegionQRT.html#a809adc33eae1dc252328cb1f73086ba9":[2,0,0,135,3],
 "classmomentum_1_1TrustRegionQRT.html#a93dc36614f0f893c7f97667c9e7e951a":[1,0,2,136,4],
 "classmomentum_1_1TrustRegionQRT.html#a93dc36614f0f893c7f97667c9e7e951a":[2,0,0,135,4],
@@ -237,17 +249,5 @@ var NAVTREEINDEX9 =
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aa40ec0dbc7af76153c59688b9f41bcf8":[2,0,0,141,6],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[1,0,2,142,12],
 "classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ab1a99a459dcb9b9a11c8881f01601b97":[2,0,0,141,12],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[1,0,2,142,1],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[2,0,0,141,1],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ae9189c37a70303dbfd941b8b5cc6cd4b":[1,0,2,142,14],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ae9189c37a70303dbfd941b8b5cc6cd4b":[2,0,0,141,14],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aee1d7cc06e53029601bf3d6fab95a623":[1,0,2,142,11],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#aee1d7cc06e53029601bf3d6fab95a623":[2,0,0,141,11],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#af5cd15f7c74b1b7468d6658eed420490":[1,0,2,142,9],
-"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#af5cd15f7c74b1b7468d6658eed420490":[2,0,0,141,9],
-"classmomentum_1_1io__detail_1_1SectionContent.html":[1,0,2,3,1],
-"classmomentum_1_1io__detail_1_1SectionContent.html":[2,0,0,2,1],
-"classmomentum_1_1io__detail_1_1SectionContent.html#a070c9d7cba44b32b205e3d21ec554900":[1,0,2,3,1,4],
-"classmomentum_1_1io__detail_1_1SectionContent.html#a070c9d7cba44b32b205e3d21ec554900":[2,0,0,2,1,4],
-"classmomentum_1_1io__detail_1_1SectionContent.html#a2b53c000f742a61b1d6d8f1ec1081bfc":[1,0,2,3,1,1]
+"classmomentum_1_1VertexVertexDistanceErrorFunctionT.html#ac09af0b626565b85cf792fdec31be3d0":[1,0,2,142,1]
 };

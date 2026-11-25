@@ -108,7 +108,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a5c7f9b1e2f65d70f2ad1e0b79bec421e" id="r_a5c7f9b1e2f65d70f2ad1e0b79bec421e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c7f9b1e2f65d70f2ad1e0b79bec421e">setFrameRate</a> (::fbxsdk::FbxScene *scene, const double framerate)</td></tr>
 <tr class="memitem:ae15b9d4da6b048a9ae8e70b721af9bb2" id="r_ae15b9d4da6b048a9ae8e70b721af9bb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html">SkeletonNodeResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae15b9d4da6b048a9ae8e70b721af9bb2">createSkeletonNodes</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, ::fbxsdk::FbxScene *scene)</td></tr>
 <tr class="memitem:a2c3cb644f6bbfd9b5f2279e34f9cf39c" id="r_a2c3cb644f6bbfd9b5f2279e34f9cf39c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c3cb644f6bbfd9b5f2279e34f9cf39c">addPhysicalProperties</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::unordered_map&lt; size_t, fbxsdk::FbxNode * &gt; &amp;jointToNodeMap)</td></tr>
-<tr class="memitem:af7c3168cb203e33baf92cb83775b55cd" id="r_af7c3168cb203e33baf92cb83775b55cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7c3168cb203e33baf92cb83775b55cd">addMetaData</a> (::fbxsdk::FbxNode *skeletonRootNode, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character)</td></tr>
+<tr class="memitem:a47ce2c18b255767e35d3224cbc26fdf9" id="r_a47ce2c18b255767e35d3224cbc26fdf9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47ce2c18b255767e35d3224cbc26fdf9">addMetaData</a> (::fbxsdk::FbxNode *skeletonRootNode, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;characterName=&quot;&quot;)</td></tr>
 <tr class="memitem:abbf0e3ef2bab6df1f7433c17e321f048" id="r_abbf0e3ef2bab6df1f7433c17e321f048"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abbf0e3ef2bab6df1f7433c17e321f048">createLocatorNodes</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, ::fbxsdk::FbxScene *scene, const std::vector&lt;::fbxsdk::FbxNode * &gt; &amp;skeletonNodes)</td></tr>
 <tr class="memitem:ad3d40af0f52e4e498c3a2f8ce95c5ee1" id="r_ad3d40af0f52e4e498c3a2f8ce95c5ee1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3d40af0f52e4e498c3a2f8ce95c5ee1">createCollisionGeometryNodes</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, ::fbxsdk::FbxScene *scene, const std::vector&lt;::fbxsdk::FbxNode * &gt; &amp;skeletonNodes)</td></tr>
 <tr class="memitem:a2f5522199c98ffbe1fe355cbb3f12236" id="r_a2f5522199c98ffbe1fe355cbb3f12236"><td class="memItemLeft" align="right" valign="top">std::pair&lt;::fbxsdk::FbxAnimStack *, ::fbxsdk::FbxAnimLayer * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f5522199c98ffbe1fe355cbb3f12236">getOrCreateAnimStackAndLayer</a> (::fbxsdk::FbxScene *scene, const char *stackName)</td></tr>
@@ -133,8 +133,8 @@ Variables</h2></td></tr>
 <tr class="memitem:a37dabd44dce447a0466151ece56a1f09" id="r_a37dabd44dce447a0466151ece56a1f09"><td class="memItemLeft" align="right" valign="top">constexpr const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37dabd44dce447a0466151ece56a1f09">kMomentumMarkerProperty</a> = &quot;Momentum_Marker&quot;</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="af7c3168cb203e33baf92cb83775b55cd" name="af7c3168cb203e33baf92cb83775b55cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7c3168cb203e33baf92cb83775b55cd">&#9670;&#160;</a></span>addMetaData()</h2>
+<a id="a47ce2c18b255767e35d3224cbc26fdf9" name="a47ce2c18b255767e35d3224cbc26fdf9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47ce2c18b255767e35d3224cbc26fdf9">&#9670;&#160;</a></span>addMetaData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -150,7 +150,12 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;&quot;</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -246,9 +251,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00443">443</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00447">447</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00073">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00330">getOrCreateAnimStackAndLayer()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00362">jointParamToFbx()</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00378">setupJointAnimCurves()</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00073">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00334">getOrCreateAnimStackAndLayer()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00366">jointParamToFbx()</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00382">setupJointAnimCurves()</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
 
 </div>
 </div>
@@ -289,9 +294,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00634">634</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00638">638</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00330">getOrCreateAnimStackAndLayer()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00334">getOrCreateAnimStackAndLayer()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>.</p>
 
 </div>
 </div>
@@ -327,7 +332,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00251">251</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00255">255</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="collision__geometry_8h_source.html#l00025">momentum::Box</a>, <a class="el" href="character_8h_source.html#l00064">momentum::Character::collision</a>, <a class="el" href="collision__geometry_8h_source.html#l00024">momentum::Ellipsoid</a>, <a class="el" href="math_2utility_8h_source.html#l00178">momentum::Extrinsic</a>, <a class="el" href="character_2types_8h_source.html#l00182">momentum::kInvalidIndex</a>, <a class="el" href="log_8h_source.html#l00178">MT_LOGD</a>, <a class="el" href="log_8h_source.html#l00181">MT_LOGE</a>, <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="math_2utility_8cpp_source.html#l00201">momentum::rotationMatrixToEulerXYZ()</a>, <a class="el" href="collision__geometry_8h_source.html#l00023">momentum::TaperedCapsule</a>, and <a class="el" href="constants_8h_source.html#l00078">momentum::toDeg()</a>.</p>
 
@@ -365,7 +370,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00228">228</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00232">232</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00182">momentum::kInvalidIndex</a>, <a class="el" href="character_8h_source.html#l00049">momentum::Character::locators</a>, and <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>.</p>
 
@@ -403,9 +408,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00797">797</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00801">801</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00330">getOrCreateAnimStackAndLayer()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00795">kMomentumMarkerProperty</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00794">kMomentumMarkersRootProperty</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00334">getOrCreateAnimStackAndLayer()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00799">kMomentumMarkerProperty</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00798">kMomentumMarkersRootProperty</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00095">setFrameRate()</a>.</p>
 
 </div>
 </div>
@@ -456,9 +461,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00671">671</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00675">675</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="character_8h_source.html#l00070">momentum::Character::blendShape</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00586">momentum::fbx_internal::MeshBlendShapeResult::blendShapeChannels</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00587">momentum::fbx_internal::MeshBlendShapeResult::faceExprChannels</a>, <a class="el" href="character_8h_source.html#l00073">momentum::Character::faceExpressionBlendShape</a>, <a class="el" href="character_8h_source.html#l00055">momentum::Character::mesh</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, <a class="el" href="file__save__options_8h_source.html#l00021">momentum::No</a>, <a class="el" href="random-inl_8h_source.html#l00382">momentum::normal()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00590">saveBlendShapeGeometryToFbx()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00487">saveSkinWeightsToFbx()</a>, <a class="el" href="character_8h_source.html#l00058">momentum::Character::skinWeights</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00533">writePolygonsToFbxMesh()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00555">writeTextureUVIndicesToFbxMesh()</a>.</p>
+<p class="reference">References <a class="el" href="character_8h_source.html#l00070">momentum::Character::blendShape</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00590">momentum::fbx_internal::MeshBlendShapeResult::blendShapeChannels</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00591">momentum::fbx_internal::MeshBlendShapeResult::faceExprChannels</a>, <a class="el" href="character_8h_source.html#l00073">momentum::Character::faceExpressionBlendShape</a>, <a class="el" href="character_8h_source.html#l00055">momentum::Character::mesh</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, <a class="el" href="file__save__options_8h_source.html#l00021">momentum::No</a>, <a class="el" href="random-inl_8h_source.html#l00382">momentum::normal()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00594">saveBlendShapeGeometryToFbx()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00491">saveSkinWeightsToFbx()</a>, <a class="el" href="character_8h_source.html#l00058">momentum::Character::skinWeights</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00537">writePolygonsToFbxMesh()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00559">writeTextureUVIndicesToFbxMesh()</a>.</p>
 
 </div>
 </div>
@@ -522,7 +527,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00749">749</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00753">753</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="character_8h_source.html#l00070">momentum::Character::blendShape</a>, <a class="el" href="parameter__transform_8h_source.html#l00083">momentum::ParameterTransformT&lt; T &gt;::blendShapeParameters</a>, and <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>.</p>
 
@@ -555,7 +560,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00769">769</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00773">773</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="character_8h_source.html#l00073">momentum::Character::faceExpressionBlendShape</a>, <a class="el" href="parameter__transform_8h_source.html#l00087">momentum::ParameterTransformT&lt; T &gt;::faceExpressionParameters</a>, and <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>.</p>
 
@@ -588,9 +593,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00330">330</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00334">334</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00443">createAnimationCurves()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00634">createBlendShapeAnimationCurves()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00797">createMarkerNodes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00447">createAnimationCurves()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00638">createBlendShapeAnimationCurves()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00801">createMarkerNodes()</a>.</p>
 
 </div>
 </div>
@@ -641,11 +646,11 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00362">362</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00366">366</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="constants_8h_source.html#l00078">momentum::toDeg()</a>, and <a class="el" href="joint_8h_source.html#l00036">momentum::JointT&lt; T &gt;::translationOffset</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00443">createAnimationCurves()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00447">createAnimationCurves()</a>.</p>
 
 </div>
 </div>
@@ -676,11 +681,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00918">918</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00922">922</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00918">prependNamespaceToAllNodes()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__io__internal_8h_source.html#l00922">prependNamespaceToAllNodes()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00918">prependNamespaceToAllNodes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00922">prependNamespaceToAllNodes()</a>.</p>
 
 </div>
 </div>
@@ -726,11 +731,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00590">590</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00594">594</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="blend__shape__base_8h_source.html#l00079">momentum::BlendShapeBase::getShapeNames()</a>, <a class="el" href="blend__shape__base_8h_source.html#l00043">momentum::BlendShapeBase::getShapeVectors()</a>, and <a class="el" href="blend__shape__base_8h_source.html#l00071">momentum::BlendShapeBase::shapeSize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00671">createMeshNode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00675">createMeshNode()</a>.</p>
 
 </div>
 </div>
@@ -771,11 +776,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00487">487</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00491">491</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="character_8h_source.html#l00058">momentum::Character::skinWeights</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00671">createMeshNode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00675">createMeshNode()</a>.</p>
 
 </div>
 </div>
@@ -808,7 +813,7 @@ Variables</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00095">95</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00443">createAnimationCurves()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00634">createBlendShapeAnimationCurves()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00797">createMarkerNodes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00447">createAnimationCurves()</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00638">createBlendShapeAnimationCurves()</a>, and <a class="el" href="fbx__io__internal_8h_source.html#l00801">createMarkerNodes()</a>.</p>
 
 </div>
 </div>
@@ -849,11 +854,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00378">378</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00382">382</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00073">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00373">momentum::fbx_internal::JointCurveSetup::animCurves</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00374">momentum::fbx_internal::JointCurveSetup::animCurvesIndex</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="parameter__transform_8h_source.html#l00073">momentum::ParameterTransformT&lt; T &gt;::activeJointParams</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00377">momentum::fbx_internal::JointCurveSetup::animCurves</a>, <a class="el" href="fbx__io__internal_8h_source.html#l00378">momentum::fbx_internal::JointCurveSetup::animCurvesIndex</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_2types_8h_source.html#l00021">momentum::kParametersPerJoint</a>, <a class="el" href="character_8h_source.html#l00039">momentum::Character::parameterTransform</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00443">createAnimationCurves()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00447">createAnimationCurves()</a>.</p>
 
 </div>
 </div>
@@ -1002,11 +1007,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00533">533</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00537">537</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="mesh_8h_source.html#l00028">momentum::MeshT&lt; T &gt;::faces</a>, <a class="el" href="mesh_8h_source.html#l00067">momentum::MeshT&lt; T &gt;::polyFaces</a>, and <a class="el" href="mesh_8h_source.html#l00073">momentum::MeshT&lt; T &gt;::polyFaceSizes</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00671">createMeshNode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00675">createMeshNode()</a>.</p>
 
 </div>
 </div>
@@ -1042,11 +1047,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00555">555</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00559">559</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
 <p class="reference">References <a class="el" href="mesh_8h_source.html#l00067">momentum::MeshT&lt; T &gt;::polyFaces</a>, <a class="el" href="mesh_8h_source.html#l00073">momentum::MeshT&lt; T &gt;::polyFaceSizes</a>, <a class="el" href="mesh_8h_source.html#l00079">momentum::MeshT&lt; T &gt;::polyTexcoordFaces</a>, and <a class="el" href="mesh_8h_source.html#l00055">momentum::MeshT&lt; T &gt;::texcoord_faces</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00671">createMeshNode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00675">createMeshNode()</a>.</p>
 
 </div>
 </div>
@@ -1071,9 +1076,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00795">795</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00799">799</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00797">createMarkerNodes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00801">createMarkerNodes()</a>.</p>
 
 </div>
 </div>
@@ -1097,9 +1102,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00794">794</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__io__internal_8h_source.html#l00798">798</a> of file <a class="el" href="fbx__io__internal_8h_source.html">fbx_io_internal.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00797">createMarkerNodes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__io__internal_8h_source.html#l00801">createMarkerNodes()</a>.</p>
 
 </div>
 </div>

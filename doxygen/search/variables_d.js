@@ -24,8 +24,9 @@ var searchData=
   ['mmu_5f_21',['mmu_',['../classmomentum_1_1FullyDifferentiablePosePriorErrorFunctionT.html#a5f25e1ca7c6998b0fce3baa37815add5',1,'momentum::FullyDifferentiablePosePriorErrorFunctionT']]],
   ['model_22',['model',['../structmomentum_1_1ModelOptions.html#a182f8055a3f06e61d4ef0efbe7a6d377',1,'momentum::ModelOptions']]],
   ['modelparamindices_23',['modelParamIndices',['../structmomentum_1_1CameraIntrinsicsMapping.html#a4cf4a3ab3e25610c87d331ce2450927c',1,'momentum::CameraIntrinsicsMapping']]],
-  ['mu_24',['mu',['../structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1',1,'momentum::MppcaT']]],
-  ['multithreaded_25',['multithreaded',['../structmomentum_1_1SequenceSolverOptionsBase.html#ad03ecadfacdfb8a7e36d97ca21353427',1,'momentum::SequenceSolverOptionsBase']]],
-  ['multithreaded_5f_26',['multithreaded_',['../classmomentum_1_1SequenceSolverBaseT.html#af42aedb601917720fe955b1693706227',1,'momentum::SequenceSolverBaseT']]],
-  ['mutableintrinsics_27',['mutableIntrinsics',['../structmomentum_1_1CameraIntrinsicsMapping.html#a98a49f2bf3098e69a6d857aa461cd206',1,'momentum::CameraIntrinsicsMapping']]]
+  ['motion_24',['motion',['../structmomentum_1_1CharacterMotion.html#a005ce2d9f73d7fc4d9bf27d0277b3820',1,'momentum::CharacterMotion']]],
+  ['mu_25',['mu',['../structmomentum_1_1MppcaT.html#a9d6ed4e3f8262d2b5ffb33faab07bcb1',1,'momentum::MppcaT']]],
+  ['multithreaded_26',['multithreaded',['../structmomentum_1_1SequenceSolverOptionsBase.html#ad03ecadfacdfb8a7e36d97ca21353427',1,'momentum::SequenceSolverOptionsBase']]],
+  ['multithreaded_5f_27',['multithreaded_',['../classmomentum_1_1SequenceSolverBaseT.html#af42aedb601917720fe955b1693706227',1,'momentum::SequenceSolverBaseT']]],
+  ['mutableintrinsics_28',['mutableIntrinsics',['../structmomentum_1_1CameraIntrinsicsMapping.html#a98a49f2bf3098e69a6d857aa461cd206',1,'momentum::CameraIntrinsicsMapping']]]
 ];

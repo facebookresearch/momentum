@@ -7,8 +7,9 @@ var searchData=
   ['newparameterpattern_5f_4',['newParameterPattern_',['../classmomentum_1_1SolverT.html#a0349c34a3eaa9c23b3de51c9db6a76f0',1,'momentum::SolverT']]],
   ['nodemap_5',['nodeMap',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a31edce79cab820dc771f862f6315e23f',1,'momentum::GltfBuilder::Impl::CharacterData']]],
   ['nodes_6',['nodes',['../structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html#ac85fedce3d85f2a0386b5f0199f99439',1,'momentum::fbx_internal::SkeletonNodeResult']]],
-  ['normal_7',['normal',['../structmomentum_1_1SupportPlaneT.html#af701a626952c9257c9dc080e19328dd3',1,'momentum::SupportPlaneT::normal'],['../structmomentum_1_1LimitHalfPlane.html#a45e83cf964f30c7b9b230367c7e4a977',1,'momentum::LimitHalfPlane::normal'],['../structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6',1,'momentum::PlaneDataT::normal'],['../structmomentum_1_1VertexPlaneDataT.html#a4281d158b70158e0ef806aff64c0763d',1,'momentum::VertexPlaneDataT::normal']]],
-  ['normals_8',['normals',['../structmomentum_1_1MeshT.html#a9370e7b956ccb6eb93ff5c7cb285fb52',1,'momentum::MeshT']]],
-  ['nregions_9',['nRegions',['../structmomentum_1_1RegionColorsView.html#a9a23ee172242291dae4a4f6f03da8a22',1,'momentum::RegionColorsView']]],
-  ['numparameters_5f_10',['numParameters_',['../classmomentum_1_1SolverT.html#ae83db1a172c236fe48bfaf8f8855bade',1,'momentum::SolverT::numParameters_'],['../classmomentum_1_1SolverFunctionT.html#a94714d7b39cd57846cfe7f9cc19c7625',1,'momentum::SolverFunctionT::numParameters_']]]
+  ['nodetoobjectmap_7',['nodeToObjectMap',['../structmomentum_1_1CharacterWithNodeMap.html#a6e7324c8b29fbfec1080990a381cc1df',1,'momentum::CharacterWithNodeMap']]],
+  ['normal_8',['normal',['../structmomentum_1_1SupportPlaneT.html#af701a626952c9257c9dc080e19328dd3',1,'momentum::SupportPlaneT::normal'],['../structmomentum_1_1LimitHalfPlane.html#a45e83cf964f30c7b9b230367c7e4a977',1,'momentum::LimitHalfPlane::normal'],['../structmomentum_1_1PlaneDataT.html#aadc2f648b8bad0a46a64ccf6b8b091b6',1,'momentum::PlaneDataT::normal'],['../structmomentum_1_1VertexPlaneDataT.html#a4281d158b70158e0ef806aff64c0763d',1,'momentum::VertexPlaneDataT::normal']]],
+  ['normals_9',['normals',['../structmomentum_1_1MeshT.html#a9370e7b956ccb6eb93ff5c7cb285fb52',1,'momentum::MeshT']]],
+  ['nregions_10',['nRegions',['../structmomentum_1_1RegionColorsView.html#a9a23ee172242291dae4a4f6f03da8a22',1,'momentum::RegionColorsView']]],
+  ['numparameters_5f_11',['numParameters_',['../classmomentum_1_1SolverT.html#ae83db1a172c236fe48bfaf8f8855bade',1,'momentum::SolverT::numParameters_'],['../classmomentum_1_1SolverFunctionT.html#a94714d7b39cd57846cfe7f9cc19c7625',1,'momentum::SolverFunctionT::numParameters_']]]
 ];

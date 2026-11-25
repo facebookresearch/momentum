@@ -93,11 +93,21 @@ $(function(){initNavTree('gltf__io__internal_8h.html','',''); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="character_8h_source.html">momentum/character/character.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="skeleton__state_8h_source.html">momentum/character/skeleton_state.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="gltf__skeleton__io_8h_source.html">momentum/io/gltf/gltf_skeleton_io.h</a>&gt;</code><br />
 <code>#include &lt;fx/gltf.h&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
+<code>#include &lt;tuple&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="gltf__io__internal_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:momentum_3A_3ACharacterWithNodeMap" id="r_momentum_3A_3ACharacterWithNodeMap"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1CharacterWithNodeMap.html">momentum::CharacterWithNodeMap</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A character loaded from a glTF document with the data needed to resolve the document's nodes to it.  <a href="structmomentum_1_1CharacterWithNodeMap.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:momentum" id="r_momentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
@@ -106,6 +116,16 @@ Namespaces</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a5e8e64436b9d787f532d1b75d87e8332" id="r_a5e8e64436b9d787f532d1b75d87e8332"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1Character.html">Character</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a5e8e64436b9d787f532d1b75d87e8332">momentum::loadGltfCharacterInternal</a> (const fx::gltf::Document &amp;model, std::vector&lt; size_t &gt; &amp;nodeToObjectMap)</td></tr>
 <tr class="memdesc:a5e8e64436b9d787f532d1b75d87e8332"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal function to load a character from a glTF model with node-to-object mapping.  <br /></td></tr>
+<tr class="memitem:a1893857f7bf72fcc0fd7da4b0c640a4a" id="r_a1893857f7bf72fcc0fd7da4b0c640a4a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmomentum_1_1CharacterWithNodeMap.html">CharacterWithNodeMap</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a1893857f7bf72fcc0fd7da4b0c640a4a">momentum::loadGltfCharactersInternal</a> (const fx::gltf::Document &amp;model)</td></tr>
+<tr class="memdesc:a1893857f7bf72fcc0fd7da4b0c640a4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load every character of a glTF document, in the order of <a class="el" href="namespacemomentum.html#a6da16e2b5054b596836e0a55225f6a1c" title="Load every character of a glTF document.">loadGltfCharacters()</a>.  <br /></td></tr>
+<tr class="memitem:a2e0959a90c4baccfb67b641fbf793ca6" id="r_a2e0959a90c4baccfb67b641fbf793ca6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1CharacterWithNodeMap.html">CharacterWithNodeMap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a2e0959a90c4baccfb67b641fbf793ca6">momentum::selectGltfCharacter</a> (std::vector&lt; <a class="el" href="structmomentum_1_1CharacterWithNodeMap.html">CharacterWithNodeMap</a> &gt; &amp;characters)</td></tr>
+<tr class="memdesc:a2e0959a90c4baccfb67b641fbf793ca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The character the single-character loaders return: the one with the most joints, the first of those on a tie.  <br /></td></tr>
+<tr class="memitem:a131c5e57ecd576ac956bd5d6e793fa84" id="r_a131c5e57ecd576ac956bd5d6e793fa84"><td class="memItemLeft" align="right" valign="top">const fx::gltf::Animation *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a131c5e57ecd576ac956bd5d6e793fa84">momentum::findAnimationForCharacter</a> (const fx::gltf::Document &amp;model, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, std::span&lt; const size_t &gt; nodeToObjectMap)</td></tr>
+<tr class="memdesc:a131c5e57ecd576ac956bd5d6e793fa84"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first animation of <code class="param">model</code> with a translation, rotation or scale channel that targets a joint of <code class="param">character</code>, or nullptr.  <br /></td></tr>
+<tr class="memitem:a360b0ff1bec0514cd34bc5f8ca064b1a" id="r_a360b0ff1bec0514cd34bc5f8ca064b1a"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; std::vector&lt; <a class="el" href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">SkeletonState</a> &gt;, std::vector&lt; float &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a360b0ff1bec0514cd34bc5f8ca064b1a">momentum::loadSkeletonStatesForCharacter</a> (const fx::gltf::Document &amp;model, const fx::gltf::Animation &amp;animation, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, std::span&lt; const size_t &gt; nodeToObjectMap)</td></tr>
+<tr class="memdesc:a360b0ff1bec0514cd34bc5f8ca064b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the channels of <code class="param">animation</code> that target <code class="param">character's</code> joints as skeleton states.  <br /></td></tr>
+<tr class="memitem:a114e920e9b45901af7c3efc65ac7ce85" id="r_a114e920e9b45901af7c3efc65ac7ce85"><td class="memItemLeft" align="right" valign="top">const nlohmann::json &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a114e920e9b45901af7c3efc65ac7ce85">momentum::getCharacterMotionJson</a> (const fx::gltf::Document &amp;model, uint32_t rootNode, bool isOnlyCharacter)</td></tr>
+<tr class="memdesc:a114e920e9b45901af7c3efc65ac7ce85"><td class="mdescLeft">&#160;</td><td class="mdescRight">The momentum "motion" object of the character whose root node is <code class="param">rootNode:</code> the one stored on that node; else the document-level one if <code class="param">isOnlyCharacter</code> and no node stores a motion (a file written before motion was stored per character); else an empty object.  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -3,7 +3,7 @@ var fbx__io__internal_8h =
     [ "momentum::fbx_internal::SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult" ],
     [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", "structmomentum_1_1fbx__internal_1_1JointCurveSetup" ],
     [ "momentum::fbx_internal::MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult" ],
-    [ "momentum::fbx_internal::addMetaData", "namespacemomentum_1_1fbx__internal.html#af7c3168cb203e33baf92cb83775b55cd", null ],
+    [ "momentum::fbx_internal::addMetaData", "namespacemomentum_1_1fbx__internal.html#a47ce2c18b255767e35d3224cbc26fdf9", null ],
     [ "momentum::fbx_internal::addPhysicalProperties", "namespacemomentum_1_1fbx__internal.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c", null ],
     [ "momentum::fbx_internal::createAnimationCurves", "namespacemomentum_1_1fbx__internal.html#a389c8f8eef8f63ff35f3f5e864523809", null ],
     [ "momentum::fbx_internal::createBlendShapeAnimationCurves", "namespacemomentum_1_1fbx__internal.html#aa499b5116efef2bf9a691d6e9ad1f2bf", null ],

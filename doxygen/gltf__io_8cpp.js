@@ -1,5 +1,6 @@
 var gltf__io_8cpp =
 [
+    [ "momentum::getCharacterMotionJson", "namespacemomentum.html#a114e920e9b45901af7c3efc65ac7ce85", null ],
     [ "momentum::loadCharacterWithMotion", "namespacemomentum.html#aef601ac879928cd839662071b92c6680", null ],
     [ "momentum::loadCharacterWithMotion", "namespacemomentum.html#ad20017d04a78b32f29f1179afe65eabc", null ],
     [ "momentum::loadCharacterWithMotionModelParameterScales", "namespacemomentum.html#a86ee17e3d1befb6b79c6afe6e901c32d", null ],
@@ -10,6 +11,16 @@ var gltf__io_8cpp =
     [ "momentum::loadGltfCharacter", "namespacemomentum.html#acc049309dfd76de97f325de527d60692", null ],
     [ "momentum::loadGltfCharacter", "namespacemomentum.html#ac00d6d69b68187eaeae5a937d3189e8f", null ],
     [ "momentum::loadGltfCharacterInternal", "namespacemomentum.html#a5e8e64436b9d787f532d1b75d87e8332", null ],
+    [ "momentum::loadGltfCharacters", "namespacemomentum.html#af30440e90cae433c902c21b9f5b3aa99", null ],
+    [ "momentum::loadGltfCharacters", "namespacemomentum.html#a6da16e2b5054b596836e0a55225f6a1c", null ],
+    [ "momentum::loadGltfCharacters", "namespacemomentum.html#a92c0983b3405dcc9c2b8925bffe217c5", null ],
+    [ "momentum::loadGltfCharactersInternal", "namespacemomentum.html#a1893857f7bf72fcc0fd7da4b0c640a4a", null ],
+    [ "momentum::loadGltfCharactersWithMotion", "namespacemomentum.html#a3f03091d370a065e4899372a0beb1a93", null ],
+    [ "momentum::loadGltfCharactersWithMotion", "namespacemomentum.html#a1fcfb3fb92c0fdc6d52a9bd73627cb64", null ],
+    [ "momentum::loadGltfCharactersWithMotion", "namespacemomentum.html#aef5792bd6ba2409f5666f6889ff1f787", null ],
+    [ "momentum::loadGltfCharactersWithSkeletonStates", "namespacemomentum.html#ac9c0e506c20854e8773d0725f4d6ccea", null ],
+    [ "momentum::loadGltfCharactersWithSkeletonStates", "namespacemomentum.html#a73cc3c946e04118618b104cb456e17db", null ],
+    [ "momentum::loadGltfCharactersWithSkeletonStates", "namespacemomentum.html#ae01800e83120f0403be2cd5cc3cbc635", null ],
     [ "momentum::loadMarkerSequence", "namespacemomentum.html#aaf255ac6caa4128f5a31c7cfb089774d", null ],
     [ "momentum::loadMarkerSequence", "namespacemomentum.html#afaa540f73cdfe98c5b6d8096862ac962", null ],
     [ "momentum::loadMotion", "namespacemomentum.html#a06ff22b041f41c37ec0793777c9ce93e", null ],
@@ -19,5 +30,6 @@ var gltf__io_8cpp =
     [ "momentum::makeCharacterDocument", "namespacemomentum.html#a82bd36ed1d0b08f197f9434567626a16", null ],
     [ "momentum::saveCharacterToBytes", "namespacemomentum.html#a4dacb6246ce79f2602459ca4f599b676", null ],
     [ "momentum::saveGltfCharacter", "namespacemomentum.html#a5b67b4aed4cbd9e47a62aeca79db7395", null ],
-    [ "momentum::saveGltfCharacter", "namespacemomentum.html#a39a7ab91b9ab395325e1ee5cfb61da4c", null ]
+    [ "momentum::saveGltfCharacter", "namespacemomentum.html#a39a7ab91b9ab395325e1ee5cfb61da4c", null ],
+    [ "momentum::selectGltfCharacter", "namespacemomentum.html#a2e0959a90c4baccfb67b641fbf793ca6", null ]
 ];

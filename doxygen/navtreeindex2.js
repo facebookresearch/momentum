@@ -1,5 +1,17 @@
 var NAVTREEINDEX2 =
 {
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html":[2,0,0,185],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a2d42e9bb34ea47420105e48fb79130b7":[1,0,2,186,4],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a2d42e9bb34ea47420105e48fb79130b7":[2,0,0,185,4],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a39ef22aa6b2b501f7375ff99afb498db":[1,0,2,186,6],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a39ef22aa6b2b501f7375ff99afb498db":[2,0,0,185,6],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a4bfb4ade0b6111b59a0507426a3f7813":[1,0,2,186,3],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a4bfb4ade0b6111b59a0507426a3f7813":[2,0,0,185,3],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a51ca5282df458c812da4bfac4f973e1c":[1,0,2,186,5],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#a51ca5282df458c812da4bfac4f973e1c":[2,0,0,185,5],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#aa814d3fb9239f7654027330e0f8205f4":[1,0,2,186,0],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#aa814d3fb9239f7654027330e0f8205f4":[2,0,0,185,0],
+"classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#aaba479098a9eca961c8722aee60e9da3":[1,0,2,186,1],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#aaba479098a9eca961c8722aee60e9da3":[2,0,0,185,1],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#af1972f3fc036a8a945918867d5f4d896":[1,0,2,186,2],
 "classmomentum_1_1FullyDifferentiableDistanceErrorFunctionT.html#af1972f3fc036a8a945918867d5f4d896":[2,0,0,185,2],
@@ -237,17 +249,5 @@ var NAVTREEINDEX2 =
 "classmomentum_1_1GeneralizedLossT.html#a8bd3714b7eba70b0dc1dafe6affe5f0e":[2,0,0,12,6],
 "classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[1,0,2,13,1],
 "classmomentum_1_1GeneralizedLossT.html#ad8c370ad0bb520957d6204999a65984e":[2,0,0,12,1],
-"classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[1,0,2,13,7],
-"classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[2,0,0,12,7],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766":[1,0,2,13,0],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766":[2,0,0,12,0],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f":[1,0,2,13,0,4],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a0db377921f4ce762c62526131097968f":[2,0,0,12,0,4],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a2ee21c55474972b3e65b31a6b0b57dc8":[1,0,2,13,0,2],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a2ee21c55474972b3e65b31a6b0b57dc8":[2,0,0,12,0,2],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a72f82728658c822b13155628339d3df9":[1,0,2,13,0,3],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a72f82728658c822b13155628339d3df9":[2,0,0,12,0,3],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a7e6aa2d53f6ee2b1a34b017fa403cb76":[1,0,2,13,0,1],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a7e6aa2d53f6ee2b1a34b017fa403cb76":[2,0,0,12,0,1],
-"classmomentum_1_1GeneralizedLossT.html#aee954f3672efa90cdb52fc0523dd6766a9ec4c0afd450ceac7adb81c3bcfc9732":[1,0,2,13,0,0]
+"classmomentum_1_1GeneralizedLossT.html#ae488b78a540c68849b0c591694a9c002":[1,0,2,13,7]
 };

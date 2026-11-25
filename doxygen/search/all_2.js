@@ -71,9 +71,10 @@ var searchData=
   ['buildhierarchicalpaths_68',['buildHierarchicalPaths',['../namespacemomentum.html#ad96b4e878b9cdb81598acfaa62ab466b',1,'momentum']]],
   ['buildjetmat_69',['buildJetMat',['../namespacemomentum.html#a87dd0c7cabfcef9a22353b9acbc8c976',1,'momentum']]],
   ['buildjetvec_70',['buildJetVec',['../namespacemomentum.html#a7375baa5eb34abac1d8c4c9f5ee8eef8',1,'momentum']]],
-  ['buildsequencecolumnindices_71',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
-  ['buildtriangleadjacency_72',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]],
-  ['bvh_5fio_2ecpp_73',['bvh_io.cpp',['../bvh__io_8cpp.html',1,'']]],
-  ['bvh_5fio_2eh_74',['bvh_io.h',['../bvh__io_8h.html',1,'']]],
-  ['bytep_75',['ByteP',['../namespacemomentum.html#a8c48f8891e50bed2530186c0cd23b27c',1,'momentum']]]
+  ['buildsceneparentmap_71',['buildSceneParentMap',['../namespacemomentum.html#a729b70c7d51e1a58385968adb237cb8c',1,'momentum']]],
+  ['buildsequencecolumnindices_72',['buildSequenceColumnIndices',['../namespacemomentum_1_1detail.html#ae7650c2c01f359691644123a093519eb',1,'momentum::detail']]],
+  ['buildtriangleadjacency_73',['buildTriangleAdjacency',['../namespacemomentum.html#a710cca2a3e8ff5130375f03d9f8b9887',1,'momentum']]],
+  ['bvh_5fio_2ecpp_74',['bvh_io.cpp',['../bvh__io_8cpp.html',1,'']]],
+  ['bvh_5fio_2eh_75',['bvh_io.h',['../bvh__io_8h.html',1,'']]],
+  ['bytep_76',['ByteP',['../namespacemomentum.html#a8c48f8891e50bed2530186c0cd23b27c',1,'momentum']]]
 ];

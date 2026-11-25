@@ -110,14 +110,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5b3a23713fbee4c90020ce53e7aac112" id="r_a5b3a23713fbee4c90020ce53e7aac112"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5b3a23713fbee4c90020ce53e7aac112">operator=</a> (<a class="el" href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">FbxBuilder</a> const &amp;)=delete</td></tr>
 <tr class="memitem:a2367b365646b73a4802cba1be58f52b0" id="r_a2367b365646b73a4802cba1be58f52b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2367b365646b73a4802cba1be58f52b0">FbxBuilder</a> (FbxBuilder &amp;&amp;) noexcept</td></tr>
 <tr class="memitem:a4a792d7c9c9c579be1bf7f5f9e754008" id="r_a4a792d7c9c9c579be1bf7f5f9e754008"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">FbxBuilder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a792d7c9c9c579be1bf7f5f9e754008">operator=</a> (<a class="el" href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">FbxBuilder</a> &amp;&amp;) noexcept</td></tr>
-<tr class="memitem:ad1f887eb9927f779c207f912d2552c37" id="r_ad1f887eb9927f779c207f912d2552c37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad1f887eb9927f779c207f912d2552c37">addCharacter</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
-<tr class="memdesc:ad1f887eb9927f779c207f912d2552c37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a skinned character (skeleton + mesh with skin weights) to the scene.  <br /></td></tr>
-<tr class="memitem:a5cc1dd8d3aa1bcc47ed272e10f3cd583" id="r_a5cc1dd8d3aa1bcc47ed272e10f3cd583"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5cc1dd8d3aa1bcc47ed272e10f3cd583">addRigidBody</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;name=&quot;&quot;, size_t parentJoint=0, const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
-<tr class="memdesc:a5cc1dd8d3aa1bcc47ed272e10f3cd583"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rigid body (skeleton + mesh parented to a joint, no skinning).  <br /></td></tr>
-<tr class="memitem:aa3eb23a3940e93f558b0ea04990ea91c" id="r_aa3eb23a3940e93f558b0ea04990ea91c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa3eb23a3940e93f558b0ea04990ea91c">addMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;motion={}, const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;offsets={})</td></tr>
-<tr class="memdesc:aa3eb23a3940e93f558b0ea04990ea91c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add model-parameter animation for a previously added character.  <br /></td></tr>
-<tr class="memitem:a05d24558e341f9b446d3add084b729ff" id="r_a05d24558e341f9b446d3add084b729ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05d24558e341f9b446d3add084b729ff">addMotionWithJointParams</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;jointParams)</td></tr>
-<tr class="memdesc:a05d24558e341f9b446d3add084b729ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add joint-parameter animation for a previously added character.  <br /></td></tr>
+<tr class="memitem:a562e2c912f9c052f5bbfc223b9555d7b" id="r_a562e2c912f9c052f5bbfc223b9555d7b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a562e2c912f9c052f5bbfc223b9555d7b">addCharacter</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
+<tr class="memdesc:a562e2c912f9c052f5bbfc223b9555d7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a skinned character (skeleton + mesh with skin weights) to the scene.  <br /></td></tr>
+<tr class="memitem:a272a542ec1f25ce78191c507bfbf12a0" id="r_a272a542ec1f25ce78191c507bfbf12a0"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a272a542ec1f25ce78191c507bfbf12a0">addRigidBody</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;name=&quot;&quot;, size_t parentJoint=0, const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
+<tr class="memdesc:a272a542ec1f25ce78191c507bfbf12a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rigid body (skeleton + mesh parented to a joint, no skinning).  <br /></td></tr>
+<tr class="memitem:aac579f2f21add9428b0d6f9ae8627a3f" id="r_aac579f2f21add9428b0d6f9ae8627a3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac579f2f21add9428b0d6f9ae8627a3f">addMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;motion={}, const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;offsets={}, const std::string &amp;characterName=&quot;&quot;)</td></tr>
+<tr class="memdesc:aac579f2f21add9428b0d6f9ae8627a3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add model-parameter animation for a previously added character.  <br /></td></tr>
+<tr class="memitem:a200356cd4c78b87a6a8962e31a0a74c4" id="r_a200356cd4c78b87a6a8962e31a0a74c4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a200356cd4c78b87a6a8962e31a0a74c4">addMotionWithJointParams</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;jointParams, const std::string &amp;characterName=&quot;&quot;)</td></tr>
+<tr class="memdesc:a200356cd4c78b87a6a8962e31a0a74c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add joint-parameter animation for a previously added character.  <br /></td></tr>
 <tr class="memitem:af77a18952dd7373a3a4bfea112665147" id="r_af77a18952dd7373a3a4bfea112665147"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af77a18952dd7373a3a4bfea112665147">addAnimatedMesh</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;name, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;jointParams, const <a class="el" href="namespacemomentum.html#a9426f1fa91f8da23ff8089c7df508409">FbxUserProperties</a> &amp;userProperties={})</td></tr>
 <tr class="memdesc:af77a18952dd7373a3a4bfea112665147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an animated mesh (mesh node with per-frame transform, no skeleton).  <br /></td></tr>
 <tr class="memitem:a436c667f342473d30b144baffa028256" id="r_a436c667f342473d30b144baffa028256"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a436c667f342473d30b144baffa028256">addAnimatedMesh</a> (const <a class="el" href="namespacemomentum.html#a662507d90801d201dd6192f5fa99f42a">Mesh</a> &amp;mesh, const std::string &amp;name, float fps, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;jointParams, const <a class="el" href="namespacemomentum.html#ad584410b943fec2eea3e87f385b610b8">Vector3f</a> &amp;translationOffset=Vector3f::Zero(), const <a class="el" href="namespacemomentum.html#a9426f1fa91f8da23ff8089c7df508409">FbxUserProperties</a> &amp;userProperties={})</td></tr>
@@ -130,20 +130,21 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Builder class for creating FBX files with multiple characters and animations. </p>
 <p><a class="el" href="classmomentum_1_1FbxBuilder.html" title="Builder class for creating FBX files with multiple characters and animations.">FbxBuilder</a> allows you to incrementally construct an FBX scene by adding skinned characters, rigid bodies, motions, and marker data. This is useful for creating scenes with multiple characters/objects in a single FBX file.</p>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="#a562e2c912f9c052f5bbfc223b9555d7b" title="Add a skinned character (skeleton + mesh with skin weights) to the scene.">addCharacter()</a> and <a class="el" href="#a272a542ec1f25ce78191c507bfbf12a0" title="Add a rigid body (skeleton + mesh parented to a joint, no skinning).">addRigidBody()</a> export each character under a unique name: the requested name (character.name, or addRigidBody's <span class="tt">name</span>), with a numeric suffix when that name is already in use. The exported name is the character's name in the file. A renamed character's joint and attribute nodes get the FBX namespace "&lt;exportedName&gt;:" (loaders remove it when stripping namespaces), and its skinned mesh is "&lt;exportedName&gt;_mesh" instead of "body_mesh". A rigid body with an explicit <span class="tt">name</span> also gets the namespace. Pass the returned name as <span class="tt">characterName</span> to <a class="el" href="#aac579f2f21add9428b0d6f9ae8627a3f" title="Add model-parameter animation for a previously added character.">addMotion()</a> and <a class="el" href="#a200356cd4c78b87a6a8962e31a0a74c4" title="Add joint-parameter animation for a previously added character.">addMotionWithJointParams()</a> to target that character; an empty <span class="tt">characterName</span> targets the character added from character.name that kept that name, or else the first one added from character.name.</dd></dl>
 <p>Example usage: </p><div class="fragment"><div class="line"><a class="code hl_function" href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">FbxBuilder</a> builder;</div>
-<div class="line">builder.<a class="code hl_function" href="#ad1f887eb9927f779c207f912d2552c37">addCharacter</a>(bodyCharacter);</div>
-<div class="line">builder.<a class="code hl_function" href="#aa3eb23a3940e93f558b0ea04990ea91c">addMotion</a>(bodyCharacter, fps, motion);</div>
-<div class="line">builder.<a class="code hl_function" href="#a5cc1dd8d3aa1bcc47ed272e10f3cd583">addRigidBody</a>(propCharacter, <span class="stringliteral">&quot;controller&quot;</span>, 0);</div>
-<div class="line">builder.<a class="code hl_function" href="#a05d24558e341f9b446d3add084b729ff">addMotionWithJointParams</a>(propCharacter, fps, jointParams);</div>
+<div class="line"><span class="keyword">const</span> std::string bodyName = builder.<a class="code hl_function" href="#a562e2c912f9c052f5bbfc223b9555d7b">addCharacter</a>(bodyCharacter);</div>
+<div class="line">builder.<a class="code hl_function" href="#aac579f2f21add9428b0d6f9ae8627a3f">addMotion</a>(bodyCharacter, fps, motion, {}, bodyName);</div>
+<div class="line"><span class="keyword">const</span> std::string propName = builder.<a class="code hl_function" href="#a272a542ec1f25ce78191c507bfbf12a0">addRigidBody</a>(propCharacter, <span class="stringliteral">&quot;controller&quot;</span>, 0);</div>
+<div class="line">builder.<a class="code hl_function" href="#a200356cd4c78b87a6a8962e31a0a74c4">addMotionWithJointParams</a>(propCharacter, fps, jointParams, propName);</div>
 <div class="line">builder.<a class="code hl_function" href="#a295c743f3c2aa67c9b6bf547bac016e8">save</a>(<span class="stringliteral">&quot;output.fbx&quot;</span>);</div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a05d24558e341f9b446d3add084b729ff"><div class="ttname"><a href="#a05d24558e341f9b446d3add084b729ff">momentum::FbxBuilder::addMotionWithJointParams</a></div><div class="ttdeci">void addMotionWithJointParams(const Character &amp;character, float fps, const MatrixXf &amp;jointParams)</div><div class="ttdoc">Add joint-parameter animation for a previously added character.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00516">fbx_builder.cpp:516</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a295c743f3c2aa67c9b6bf547bac016e8"><div class="ttname"><a href="#a295c743f3c2aa67c9b6bf547bac016e8">momentum::FbxBuilder::save</a></div><div class="ttdeci">void save(const filesystem::path &amp;filename)</div><div class="ttdoc">Save the FBX scene to a file.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00543">fbx_builder.cpp:543</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a2e5a39ce5bbdaeabed29a06f181cc3f9"><div class="ttname"><a href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">momentum::FbxBuilder::FbxBuilder</a></div><div class="ttdeci">FbxBuilder()</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00489">fbx_builder.cpp:489</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a5cc1dd8d3aa1bcc47ed272e10f3cd583"><div class="ttname"><a href="#a5cc1dd8d3aa1bcc47ed272e10f3cd583">momentum::FbxBuilder::addRigidBody</a></div><div class="ttdeci">void addRigidBody(const Character &amp;character, const std::string &amp;name=&quot;&quot;, size_t parentJoint=0, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a rigid body (skeleton + mesh parented to a joint, no skinning).</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00504">fbx_builder.cpp:504</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_aa3eb23a3940e93f558b0ea04990ea91c"><div class="ttname"><a href="#aa3eb23a3940e93f558b0ea04990ea91c">momentum::FbxBuilder::addMotion</a></div><div class="ttdeci">void addMotion(const Character &amp;character, float fps, const MatrixXf &amp;motion={}, const VectorXf &amp;offsets={})</div><div class="ttdoc">Add model-parameter animation for a previously added character.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00512">fbx_builder.cpp:512</a></div></div>
-<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_ad1f887eb9927f779c207f912d2552c37"><div class="ttname"><a href="#ad1f887eb9927f779c207f912d2552c37">momentum::FbxBuilder::addCharacter</a></div><div class="ttdeci">void addCharacter(const Character &amp;character, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a skinned character (skeleton + mesh with skin weights) to the scene.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00500">fbx_builder.cpp:500</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a200356cd4c78b87a6a8962e31a0a74c4"><div class="ttname"><a href="#a200356cd4c78b87a6a8962e31a0a74c4">momentum::FbxBuilder::addMotionWithJointParams</a></div><div class="ttdeci">void addMotionWithJointParams(const Character &amp;character, float fps, const MatrixXf &amp;jointParams, const std::string &amp;characterName=&quot;&quot;)</div><div class="ttdoc">Add joint-parameter animation for a previously added character.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00549">fbx_builder.cpp:549</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a272a542ec1f25ce78191c507bfbf12a0"><div class="ttname"><a href="#a272a542ec1f25ce78191c507bfbf12a0">momentum::FbxBuilder::addRigidBody</a></div><div class="ttdeci">std::string addRigidBody(const Character &amp;character, const std::string &amp;name=&quot;&quot;, size_t parentJoint=0, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a rigid body (skeleton + mesh parented to a joint, no skinning).</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00536">fbx_builder.cpp:536</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a295c743f3c2aa67c9b6bf547bac016e8"><div class="ttname"><a href="#a295c743f3c2aa67c9b6bf547bac016e8">momentum::FbxBuilder::save</a></div><div class="ttdeci">void save(const filesystem::path &amp;filename)</div><div class="ttdoc">Save the FBX scene to a file.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00580">fbx_builder.cpp:580</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a2e5a39ce5bbdaeabed29a06f181cc3f9"><div class="ttname"><a href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">momentum::FbxBuilder::FbxBuilder</a></div><div class="ttdeci">FbxBuilder()</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00520">fbx_builder.cpp:520</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_a562e2c912f9c052f5bbfc223b9555d7b"><div class="ttname"><a href="#a562e2c912f9c052f5bbfc223b9555d7b">momentum::FbxBuilder::addCharacter</a></div><div class="ttdeci">std::string addCharacter(const Character &amp;character, const FileSaveOptions &amp;options=FileSaveOptions())</div><div class="ttdoc">Add a skinned character (skeleton + mesh with skin weights) to the scene.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00531">fbx_builder.cpp:531</a></div></div>
+<div class="ttc" id="aclassmomentum_1_1FbxBuilder_html_aac579f2f21add9428b0d6f9ae8627a3f"><div class="ttname"><a href="#aac579f2f21add9428b0d6f9ae8627a3f">momentum::FbxBuilder::addMotion</a></div><div class="ttdeci">void addMotion(const Character &amp;character, float fps, const MatrixXf &amp;motion={}, const VectorXf &amp;offsets={}, const std::string &amp;characterName=&quot;&quot;)</div><div class="ttdoc">Add model-parameter animation for a previously added character.</div><div class="ttdef"><b>Definition</b> <a href="fbx__builder_8cpp_source.html#l00540">fbx_builder.cpp:540</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8h_source.html#l00049">49</a> of file <a class="el" href="fbx__builder_8h_source.html">fbx_builder.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8h_source.html#l00059">59</a> of file <a class="el" href="fbx__builder_8h_source.html">fbx_builder.h</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2e5a39ce5bbdaeabed29a06f181cc3f9" name="a2e5a39ce5bbdaeabed29a06f181cc3f9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2e5a39ce5bbdaeabed29a06f181cc3f9">&#9670;&#160;</a></span>FbxBuilder() <span class="overload">[1/3]</span></h2>
@@ -160,11 +161,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00489">489</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00520">520</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__builder_8cpp_source.html#l00500">addCharacter()</a>, <a class="el" href="#a2367b365646b73a4802cba1be58f52b0">FbxBuilder()</a>, <a class="el" href="#af072114352b2f9d2012d33c318b05e58">FbxBuilder()</a>, <a class="el" href="#a4a792d7c9c9c579be1bf7f5f9e754008">operator=()</a>, and <a class="el" href="#a5b3a23713fbee4c90020ce53e7aac112">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__builder_8cpp_source.html#l00531">addCharacter()</a>, <a class="el" href="#a2367b365646b73a4802cba1be58f52b0">FbxBuilder()</a>, <a class="el" href="#af072114352b2f9d2012d33c318b05e58">FbxBuilder()</a>, <a class="el" href="#a4a792d7c9c9c579be1bf7f5f9e754008">operator=()</a>, and <a class="el" href="#a5b3a23713fbee4c90020ce53e7aac112">operator=()</a>.</p>
 
 </div>
 </div>
@@ -216,7 +217,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00489">FbxBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00520">FbxBuilder()</a>.</p>
 
 </div>
 </div>
@@ -243,7 +244,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00489">FbxBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00520">FbxBuilder()</a>.</p>
 
 </div>
 </div>
@@ -295,7 +296,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00520">520</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00557">557</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -354,20 +355,20 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00529">529</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00566">566</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
 </div>
 </div>
-<a id="ad1f887eb9927f779c207f912d2552c37" name="ad1f887eb9927f779c207f912d2552c37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1f887eb9927f779c207f912d2552c37">&#9670;&#160;</a></span>addCharacter()</h2>
+<a id="a562e2c912f9c052f5bbfc223b9555d7b" name="a562e2c912f9c052f5bbfc223b9555d7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a562e2c912f9c052f5bbfc223b9555d7b">&#9670;&#160;</a></span>addCharacter()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void momentum::FbxBuilder::addCharacter </td>
+          <td class="memname">std::string momentum::FbxBuilder::addCharacter </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>, </td>
         </tr>
@@ -388,12 +389,13 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The unique name the character is exported under (see the class notes). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00500">500</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00531">531</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00500">addCharacter()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00489">FbxBuilder()</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
+<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00531">addCharacter()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00520">FbxBuilder()</a>, and <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="fbx__builder_8cpp_source.html#l00500">addCharacter()</a>, and <a class="el" href="#a4a792d7c9c9c579be1bf7f5f9e754008">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="fbx__builder_8cpp_source.html#l00531">addCharacter()</a>, and <a class="el" href="#a4a792d7c9c9c579be1bf7f5f9e754008">operator=()</a>.</p>
 
 </div>
 </div>
@@ -425,14 +427,14 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00539">539</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00576">576</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
 </div>
 </div>
-<a id="aa3eb23a3940e93f558b0ea04990ea91c" name="aa3eb23a3940e93f558b0ea04990ea91c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3eb23a3940e93f558b0ea04990ea91c">&#9670;&#160;</a></span>addMotion()</h2>
+<a id="aac579f2f21add9428b0d6f9ae8627a3f" name="aac579f2f21add9428b0d6f9ae8627a3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac579f2f21add9428b0d6f9ae8627a3f">&#9670;&#160;</a></span>addMotion()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -455,7 +457,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;&quot;</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -468,11 +475,12 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">fps</td><td>Animation frame rate in frames per second. </td></tr>
     <tr><td class="paramname">motion</td><td>Model parameters matrix with shape (nFrames x nModelParams). </td></tr>
     <tr><td class="paramname">offsets</td><td>Identity/offset parameters for the bind pose. </td></tr>
+    <tr><td class="paramname">characterName</td><td>Name returned by <a class="el" href="#a562e2c912f9c052f5bbfc223b9555d7b" title="Add a skinned character (skeleton + mesh with skin weights) to the scene.">addCharacter()</a> or <a class="el" href="#a272a542ec1f25ce78191c507bfbf12a0" title="Add a rigid body (skeleton + mesh parented to a joint, no skinning).">addRigidBody()</a> of the character to animate. When empty, the character added from character.name that kept that name, or else the first one added from character.name; throws if there is none. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00512">512</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00540">540</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -480,8 +488,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a05d24558e341f9b446d3add084b729ff" name="a05d24558e341f9b446d3add084b729ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05d24558e341f9b446d3add084b729ff">&#9670;&#160;</a></span>addMotionWithJointParams()</h2>
+<a id="a200356cd4c78b87a6a8962e31a0a74c4" name="a200356cd4c78b87a6a8962e31a0a74c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a200356cd4c78b87a6a8962e31a0a74c4">&#9670;&#160;</a></span>addMotionWithJointParams()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -499,7 +507,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>jointParams</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>jointParams</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;&quot;</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -511,24 +524,25 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">character</td><td>The character to animate (must match a previously added character). </td></tr>
     <tr><td class="paramname">fps</td><td>Animation frame rate in frames per second. </td></tr>
     <tr><td class="paramname">jointParams</td><td><a class="el" href="namespacemomentum.html#ab40a5cd02229cf96c31bd9b5ed134849">Joint</a> parameters matrix with shape (nFrames x nJointParams). </td></tr>
+    <tr><td class="paramname">characterName</td><td>Name of the character to animate; see <a class="el" href="#aac579f2f21add9428b0d6f9ae8627a3f" title="Add model-parameter animation for a previously added character.">addMotion()</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00516">516</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00549">549</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
 </div>
 </div>
-<a id="a5cc1dd8d3aa1bcc47ed272e10f3cd583" name="a5cc1dd8d3aa1bcc47ed272e10f3cd583"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5cc1dd8d3aa1bcc47ed272e10f3cd583">&#9670;&#160;</a></span>addRigidBody()</h2>
+<a id="a272a542ec1f25ce78191c507bfbf12a0" name="a272a542ec1f25ce78191c507bfbf12a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a272a542ec1f25ce78191c507bfbf12a0">&#9670;&#160;</a></span>addRigidBody()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void momentum::FbxBuilder::addRigidBody </td>
+          <td class="memname">std::string momentum::FbxBuilder::addRigidBody </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>, </td>
         </tr>
@@ -555,14 +569,15 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">character</td><td>The character to add as a rigid body. </td></tr>
-    <tr><td class="paramname">name</td><td>Optional name override. Uses character.name if empty. </td></tr>
+    <tr><td class="paramname">name</td><td>Optional requested base name. Uses character.name if empty. </td></tr>
     <tr><td class="paramname">parentJoint</td><td>Index of the joint to parent the mesh under. </td></tr>
     <tr><td class="paramname">options</td><td>File save options (mesh option is respected). </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The unique name the rigid body is exported under (see the class notes). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00504">504</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00536">536</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 
@@ -593,7 +608,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00500">addCharacter()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00512">addMotion()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00504">addRigidBody()</a>, and <a class="el" href="fbx__builder_8cpp_source.html#l00489">FbxBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00531">addCharacter()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00540">addMotion()</a>, <a class="el" href="fbx__builder_8cpp_source.html#l00536">addRigidBody()</a>, and <a class="el" href="fbx__builder_8cpp_source.html#l00520">FbxBuilder()</a>.</p>
 
 </div>
 </div>
@@ -620,7 +635,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00489">FbxBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="fbx__builder_8cpp_source.html#l00520">FbxBuilder()</a>.</p>
 
 </div>
 </div>
@@ -648,7 +663,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00543">543</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fbx__builder_8cpp_source.html#l00580">580</a> of file <a class="el" href="fbx__builder_8cpp_source.html">fbx_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="exception_8h_source.html#l00031">MT_THROW</a>.</p>
 

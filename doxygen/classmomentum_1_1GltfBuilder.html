@@ -117,18 +117,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a496cb8ec4670226b3bae420ba4f27941" id="r_a496cb8ec4670226b3bae420ba4f27941"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a496cb8ec4670226b3bae420ba4f27941">operator=</a> (<a class="el" href="#a58d255c191d5fe57ab24f7ee3a3660ba">GltfBuilder</a> const &amp;)=delete</td></tr>
 <tr class="memitem:a3adf89dc03662784873640bb96f37fd7" id="r_a3adf89dc03662784873640bb96f37fd7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3adf89dc03662784873640bb96f37fd7">GltfBuilder</a> (GltfBuilder &amp;&amp;) noexcept</td></tr>
 <tr class="memitem:abf58358483e824cd7651e039238e954e" id="r_abf58358483e824cd7651e039238e954e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a58d255c191d5fe57ab24f7ee3a3660ba">GltfBuilder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf58358483e824cd7651e039238e954e">operator=</a> (<a class="el" href="#a58d255c191d5fe57ab24f7ee3a3660ba">GltfBuilder</a> &amp;&amp;) noexcept</td></tr>
-<tr class="memitem:a98ddd6c2f36cecca4acd076e57a82c01" id="r_a98ddd6c2f36cecca4acd076e57a82c01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a98ddd6c2f36cecca4acd076e57a82c01">addCharacter</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#ad584410b943fec2eea3e87f385b610b8">Vector3f</a> &amp;positionOffset=Vector3f::Zero(), const <a class="el" href="namespacemomentum.html#a1e7fdb17c780b2e8a7f3097a5a5b5db1">Quaternionf</a> &amp;rotationOffset=Quaternionf::Identity(), const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
-<tr class="memdesc:a98ddd6c2f36cecca4acd076e57a82c01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a character to the scene.  <br /></td></tr>
+<tr class="memitem:a64ba33056bbe21025a83533caa9b2055" id="r_a64ba33056bbe21025a83533caa9b2055"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64ba33056bbe21025a83533caa9b2055">addCharacter</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#ad584410b943fec2eea3e87f385b610b8">Vector3f</a> &amp;positionOffset=Vector3f::Zero(), const <a class="el" href="namespacemomentum.html#a1e7fdb17c780b2e8a7f3097a5a5b5db1">Quaternionf</a> &amp;rotationOffset=Quaternionf::Identity(), const <a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a> &amp;options=<a class="el" href="structmomentum_1_1FileSaveOptions.html">FileSaveOptions</a>())</td></tr>
+<tr class="memdesc:a64ba33056bbe21025a83533caa9b2055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a character to the scene.  <br /></td></tr>
 <tr class="memitem:a9cc5d8454d3344d9246d782e0144d4f1" id="r_a9cc5d8454d3344d9246d782e0144d4f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9cc5d8454d3344d9246d782e0144d4f1">addMesh</a> (const <a class="el" href="namespacemomentum.html#a662507d90801d201dd6192f5fa99f42a">Mesh</a> &amp;mesh, const std::string &amp;name, bool addColor=false)</td></tr>
 <tr class="memdesc:a9cc5d8454d3344d9246d782e0144d4f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a static mesh, such as an environment or a target scan.  <br /></td></tr>
 <tr class="memitem:aff999cc3c299174f14ecb6eb3c11b0c5" id="r_aff999cc3c299174f14ecb6eb3c11b0c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff999cc3c299174f14ecb6eb3c11b0c5">setFps</a> (float fps)</td></tr>
 <tr class="memitem:a357359589eac12356eb4ebca785aee1e" id="r_a357359589eac12356eb4ebca785aee1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a357359589eac12356eb4ebca785aee1e">setAnimationInterpolation</a> (<a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a> interpolation)</td></tr>
 <tr class="memdesc:a357359589eac12356eb4ebca785aee1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set how the joint and blend shape animation samplers added afterwards interpolate between their keys (default: Step).  <br /></td></tr>
 <tr class="memitem:ad55e1cbfa7f9cc2fc6dd24efa1b89a4c" id="r_ad55e1cbfa7f9cc2fc6dd24efa1b89a4c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacemomentum.html#a7c00483ac5ecf488b4f02041c3d22cbf">GltfAnimationInterpolation</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad55e1cbfa7f9cc2fc6dd24efa1b89a4c">getAnimationInterpolation</a> () const</td></tr>
-<tr class="memitem:a5e553a3fbfbfd9afe9e9129488425138" id="r_a5e553a3fbfbfd9afe9e9129488425138"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e553a3fbfbfd9afe9e9129488425138">addMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps=120.0f, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motion={}, const <a class="el" href="namespacemomentum.html#a184a6f0d1967a08db8519e9ed2e65acb">IdentityParameters</a> &amp;offsets={}, bool addExtensions=true, const std::string &amp;customName=&quot;default&quot;, std::span&lt; const int64_t &gt; timestamps={})</td></tr>
-<tr class="memdesc:a5e553a3fbfbfd9afe9e9129488425138"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a motion to the provided character.  <br /></td></tr>
-<tr class="memitem:ad50ea074e34f1d4abecd94476ab10e41" id="r_ad50ea074e34f1d4abecd94476ab10e41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad50ea074e34f1d4abecd94476ab10e41">addSkeletonStates</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, std::span&lt; const <a class="el" href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">SkeletonState</a> &gt; skeletonStates, const std::string &amp;customName=&quot;default&quot;)</td></tr>
-<tr class="memdesc:ad50ea074e34f1d4abecd94476ab10e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a skeleton states to the provided character.  <br /></td></tr>
+<tr class="memitem:a58d479787c90f962aa0afd235eba3f6d" id="r_a58d479787c90f962aa0afd235eba3f6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58d479787c90f962aa0afd235eba3f6d">addMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps=120.0f, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motion={}, const <a class="el" href="namespacemomentum.html#a184a6f0d1967a08db8519e9ed2e65acb">IdentityParameters</a> &amp;offsets={}, bool addExtensions=true, const std::string &amp;customName=&quot;default&quot;, std::span&lt; const int64_t &gt; timestamps={}, const std::string &amp;characterName=&quot;&quot;)</td></tr>
+<tr class="memdesc:a58d479787c90f962aa0afd235eba3f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a motion to the provided character.  <br /></td></tr>
+<tr class="memitem:aabe5899236c26a108ebc0c91886a4fd4" id="r_aabe5899236c26a108ebc0c91886a4fd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aabe5899236c26a108ebc0c91886a4fd4">addSkeletonStates</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, float fps, std::span&lt; const <a class="el" href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">SkeletonState</a> &gt; skeletonStates, const std::string &amp;customName=&quot;default&quot;, const std::string &amp;characterName=&quot;&quot;)</td></tr>
+<tr class="memdesc:aabe5899236c26a108ebc0c91886a4fd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a skeleton states to the provided character.  <br /></td></tr>
 <tr class="memitem:a620a154d7f8d24c5ea434ea52b49d853" id="r_a620a154d7f8d24c5ea434ea52b49d853"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a620a154d7f8d24c5ea434ea52b49d853">addMarkerSequence</a> (float fps, std::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">momentum::Marker</a> &gt; &gt; markerSequence, <a class="el" href="#aa56c094d7cb75845f8c7460f525a31b4">MarkerMesh</a> markerMesh=<a class="el" href="#aa56c094d7cb75845f8c7460f525a31b4a9d91aa74b959d8473008602fc9322311">MarkerMesh::UnitCube</a>, const std::string &amp;animName=&quot;default&quot;)</td></tr>
 <tr class="memdesc:a620a154d7f8d24c5ea434ea52b49d853"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add marker data to the file.  <br /></td></tr>
 <tr class="memitem:aa5082bfd08cf270262f97a89293269cc" id="r_aa5082bfd08cf270262f97a89293269cc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5082bfd08cf270262f97a89293269cc">save</a> (const filesystem::path &amp;filename, <a class="el" href="namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8">GltfFileFormat</a> fileFormat=<a class="el" href="namespacemomentum.html#ab4c06c8408d6bc9e0f322065a9ec93e8a06b9281e396db002010bde1de57262eb">GltfFileFormat::Auto</a>, bool embedResources=false)</td></tr>
@@ -150,9 +150,10 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Helper class to build a glb scene. </p>
-<p>It supports adding multiple characters and motions for each character. By default, momentum extension is added to the glb nodes. This is required if you want to correctly load the exported character back. </p>
+<p>It supports adding multiple characters and motions for each character. By default, momentum extension is added to the glb nodes. This is required if you want to correctly load the exported character back.</p>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="#a64ba33056bbe21025a83533caa9b2055" title="Add a character to the scene.">addCharacter()</a> exports each character under a unique name: character.name, with a numeric suffix when that name is already in use. Pass the returned name as <span class="tt">characterName</span> to <a class="el" href="#a58d479787c90f962aa0afd235eba3f6d" title="Add a motion to the provided character.">addMotion()</a> and <a class="el" href="#aabe5899236c26a108ebc0c91886a4fd4" title="Add a skeleton states to the provided character.">addSkeletonStates()</a> to target that character; an empty <span class="tt">characterName</span> targets the character added from character.name that kept that name, or else the first one added from character.name. <a class="el" href="namespacemomentum.html#a6da16e2b5054b596836e0a55225f6a1c" title="Load every character of a glTF document.">loadGltfCharacters()</a> reads every character back under its exported name. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8h_source.html#l00033">33</a> of file <a class="el" href="gltf__builder_8h_source.html">gltf_builder.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8h_source.html#l00040">40</a> of file <a class="el" href="gltf__builder_8h_source.html">gltf_builder.h</a>.</p>
 </div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Member Enumeration Documentation</h2>
 <a id="aa56c094d7cb75845f8c7460f525a31b4" name="aa56c094d7cb75845f8c7460f525a31b4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa56c094d7cb75845f8c7460f525a31b4">&#9670;&#160;</a></span>MarkerMesh</h2>
@@ -180,7 +181,7 @@ Static Public Member Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="aa56c094d7cb75845f8c7460f525a31b4a9d91aa74b959d8473008602fc9322311" name="aa56c094d7cb75845f8c7460f525a31b4a9d91aa74b959d8473008602fc9322311"></a>UnitCube&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8h_source.html#l00048">48</a> of file <a class="el" href="gltf__builder_8h_source.html">gltf_builder.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8h_source.html#l00055">55</a> of file <a class="el" href="gltf__builder_8h_source.html">gltf_builder.h</a>.</p>
 
 </div>
 </div>
@@ -200,9 +201,9 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00959">959</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00975">975</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">addCharacter()</a>, <a class="el" href="#a3adf89dc03662784873640bb96f37fd7">GltfBuilder()</a>, <a class="el" href="#a3fc0cb937315b207977e24e69fb22584">GltfBuilder()</a>, <a class="el" href="#abf58358483e824cd7651e039238e954e">operator=()</a>, and <a class="el" href="#a496cb8ec4670226b3bae420ba4f27941">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00986">addCharacter()</a>, <a class="el" href="#a3adf89dc03662784873640bb96f37fd7">GltfBuilder()</a>, <a class="el" href="#a3fc0cb937315b207977e24e69fb22584">GltfBuilder()</a>, <a class="el" href="#abf58358483e824cd7651e039238e954e">operator=()</a>, and <a class="el" href="#a496cb8ec4670226b3bae420ba4f27941">operator=()</a>.</p>
 
 </div>
 </div>
@@ -254,7 +255,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00959">GltfBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00975">GltfBuilder()</a>.</p>
 
 </div>
 </div>
@@ -281,19 +282,19 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00959">GltfBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00975">GltfBuilder()</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a98ddd6c2f36cecca4acd076e57a82c01" name="a98ddd6c2f36cecca4acd076e57a82c01"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a98ddd6c2f36cecca4acd076e57a82c01">&#9670;&#160;</a></span>addCharacter()</h2>
+<a id="a64ba33056bbe21025a83533caa9b2055" name="a64ba33056bbe21025a83533caa9b2055"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64ba33056bbe21025a83533caa9b2055">&#9670;&#160;</a></span>addCharacter()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void momentum::GltfBuilder::addCharacter </td>
+          <td class="memname">std::string momentum::GltfBuilder::addCharacter </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>, </td>
         </tr>
@@ -316,13 +317,14 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Add a character to the scene. </p>
-<p>Each character will have a root node with the character's name as the parent of the skeleton root and the character mesh. positionOffset and rotationOffset can be provided as an initial offset to the character. </p>
+<p>Each character will have a root node with the character's name as the parent of the skeleton root and the character mesh. positionOffset and rotationOffset can be provided as an initial offset to the character.</p>
+<dl class="section return"><dt>Returns</dt><dd>The unique name the character is exported under (see the class notes). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00970">970</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00986">986</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00970">addCharacter()</a>, <a class="el" href="coordinate__utils_8h_source.html#l00062">momentum::fromMomentumQuaternionf()</a>, <a class="el" href="coordinate__utils_8h_source.html#l00026">momentum::fromMomentumVec3f()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00959">GltfBuilder()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="json__utils_8cpp_source.html#l00600">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00108">momentum::parameterSetsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00169">momentum::parameterTransformToJson()</a>, and <a class="el" href="json__utils_8cpp_source.html#l00138">momentum::poseConstraintsToJson()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00986">addCharacter()</a>, <a class="el" href="coordinate__utils_8h_source.html#l00062">momentum::fromMomentumQuaternionf()</a>, <a class="el" href="coordinate__utils_8h_source.html#l00026">momentum::fromMomentumVec3f()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00975">GltfBuilder()</a>, <a class="el" href="checks_8h_source.html#l00036">MT_CHECK</a>, <a class="el" href="json__utils_8cpp_source.html#l00600">momentum::parameterLimitsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00108">momentum::parameterSetsToJson()</a>, <a class="el" href="json__utils_8cpp_source.html#l00169">momentum::parameterTransformToJson()</a>, and <a class="el" href="json__utils_8cpp_source.html#l00138">momentum::poseConstraintsToJson()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00970">addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01091">addMotion()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01205">addSkeletonStates()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00986">addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01109">addMotion()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01237">addSkeletonStates()</a>, and <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -366,11 +368,11 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01164">1164</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01196">1196</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01077">setFps()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01095">setFps()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -400,14 +402,14 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Add a static mesh, such as an environment or a target scan. </p>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01032">1032</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01054">1054</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
 
 </div>
 </div>
-<a id="a5e553a3fbfbfd9afe9e9129488425138" name="a5e553a3fbfbfd9afe9e9129488425138"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5e553a3fbfbfd9afe9e9129488425138">&#9670;&#160;</a></span>addMotion()</h2>
+<a id="a58d479787c90f962aa0afd235eba3f6d" name="a58d479787c90f962aa0afd235eba3f6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58d479787c90f962aa0afd235eba3f6d">&#9670;&#160;</a></span>addMotion()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -445,13 +447,19 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::span&lt; const int64_t &gt;</td>          <td class="paramname"><span class="paramname"><em>timestamps</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+          <td class="paramtype">std::span&lt; const int64_t &gt;</td>          <td class="paramname"><span class="paramname"><em>timestamps</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;&quot;</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Add a motion to the provided character. </p>
 <p>If addCharacter is not called before adding the motion, the character will be automatically added with the default settings.</p>
+<p>The momentum extension keeps one motion per character, so adding another motion to the same character replaces the stored model parameters and timestamps, and the identity if <code class="param">offsets</code> is not empty. A motion without frames stores nothing, not even the identity.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">character</td><td>The character to add motion for. </td></tr>
@@ -459,22 +467,23 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">motion</td><td>Motion parameters (parameter names and poses matrix). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">offsets</td><td>Identity/offset parameters (joint names and offsets vector). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">addExtensions</td><td>Whether to add momentum extensions to the document. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">customName</td><td>Custom name for the animation (default is "default"). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">timestamps</td><td>Per-frame timestamps. Size should match motion columns. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">customName</td><td>Name of the glTF animation that receives the motion (default is "default"). Motions added with the same name share one animation, which glTF viewers play as one clip, so give the characters of one recording the same name. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamps</td><td>Per-frame timestamps: empty, or one per motion column; otherwise the function throws before it changes the document. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">characterName</td><td>Name returned by <a class="el" href="#a64ba33056bbe21025a83533caa9b2055" title="Add a character to the scene.">addCharacter()</a> of the character to animate. When empty, the character added from character.name that kept that name, or else the first one added from character.name, which is added with default settings if there is none. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01091">1091</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01109">1109</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00970">addCharacter()</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01077">setFps()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00986">addCharacter()</a>, <a class="el" href="exception_8h_source.html#l00055">MT_THROW_IF</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00943">momentum::GltfBuilder::Impl::CharacterData::nodeMap</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01095">setFps()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
 
 </div>
 </div>
-<a id="ad50ea074e34f1d4abecd94476ab10e41" name="ad50ea074e34f1d4abecd94476ab10e41"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad50ea074e34f1d4abecd94476ab10e41">&#9670;&#160;</a></span>addSkeletonStates()</h2>
+<a id="aabe5899236c26a108ebc0c91886a4fd4" name="aabe5899236c26a108ebc0c91886a4fd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabe5899236c26a108ebc0c91886a4fd4">&#9670;&#160;</a></span>addSkeletonStates()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -497,17 +506,29 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>customName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;default&quot;</span>&#160;)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>customName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;default&quot;</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;&quot;</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Add a skeleton states to the provided character. </p>
-<p>If addCharacter is not called before adding the skeleton states, the character will be automatically added with the default settings. </p>
+<p>If addCharacter is not called before adding the skeleton states, the character will be automatically added with the default settings.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">customName</td><td>Name of the glTF animation that receives the skeleton states; see <a class="el" href="#a58d479787c90f962aa0afd235eba3f6d" title="Add a motion to the provided character.">addMotion()</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">characterName</td><td>Name of the character to animate; see <a class="el" href="#a58d479787c90f962aa0afd235eba3f6d" title="Add a motion to the provided character.">addMotion()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01205">1205</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01237">1237</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00970">addCharacter()</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01077">setFps()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00986">addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00943">momentum::GltfBuilder::Impl::CharacterData::nodeMap</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01095">setFps()</a>.</p>
 
 </div>
 </div>
@@ -528,11 +549,11 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Set all existing buffers to embed resources. </p>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01190">1190</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01222">1222</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01190">forceEmbedResources()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01222">forceEmbedResources()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01190">forceEmbedResources()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01194">save()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01222">forceEmbedResources()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01226">save()</a>.</p>
 
 </div>
 </div>
@@ -559,7 +580,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01180">1180</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01212">1212</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -587,7 +608,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>The sampler interpolation used by addMotion and addSkeletonStates. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01073">1073</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01091">1091</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -606,7 +627,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01157">1157</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01188">1188</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -625,7 +646,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01055">1055</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01077">1077</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00182">momentum::kInvalidIndex</a>.</p>
 
@@ -648,9 +669,9 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Allow copy the document, but do not allow modify the file outside of the builder to keep metadata consistent. </p>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01186">1186</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01218">1218</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -669,7 +690,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01148">1148</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01179">1179</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -688,7 +709,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01051">1051</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01073">1073</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -707,7 +728,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01062">1062</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01082">1082</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="character_2types_8h_source.html#l00182">momentum::kInvalidIndex</a>.</p>
 
@@ -728,7 +749,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01144">1144</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01175">1175</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -755,7 +776,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00959">GltfBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00975">GltfBuilder()</a>.</p>
 
 </div>
 </div>
@@ -782,7 +803,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00959">GltfBuilder()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00975">GltfBuilder()</a>.</p>
 
 </div>
 </div>
@@ -810,11 +831,11 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01173">1173</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01205">1205</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01173">save()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01205">save()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01173">save()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00509">momentum::saveGltfCharacter()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00493">momentum::saveGltfCharacter()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01205">save()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00693">momentum::saveGltfCharacter()</a>, <a class="el" href="gltf__io_8cpp_source.html#l00677">momentum::saveGltfCharacter()</a>, and <a class="el" href="app__utils_8cpp_source.html#l00195">momentum::saveMotion()</a>.</p>
 
 </div>
 </div>
@@ -855,9 +876,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01194">1194</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01226">1226</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01190">forceEmbedResources()</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l01222">forceEmbedResources()</a>.</p>
 
 </div>
 </div>
@@ -885,9 +906,9 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01069">1069</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01087">1087</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00373">momentum::makeCharacterDocument()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__io_8cpp_source.html#l00557">momentum::makeCharacterDocument()</a>.</p>
 
 </div>
 </div>
@@ -906,11 +927,11 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01077">1077</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l01095">1095</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="log_8h_source.html#l00180">MT_LOGW</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01164">addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01091">addMotion()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01205">addSkeletonStates()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l01196">addMarkerSequence()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l01109">addMotion()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l01237">addSkeletonStates()</a>.</p>
 
 </div>
 </div>
