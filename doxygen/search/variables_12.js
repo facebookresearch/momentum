@@ -18,9 +18,10 @@ var searchData=
   ['restmesh_5f_15',['restMesh_',['../structmomentum_1_1MeshStateT.html#ad281c3ff04d74875034b434cc34112b0',1,'momentum::MeshStateT']]],
   ['rootindex_16',['rootIndex',['../structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html#a9742dddffa46dec648fcbe579087855b',1,'momentum::GltfBuilder::Impl::CharacterData']]],
   ['rootnode_17',['rootNode',['../structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html#adc49a66360e462c9173f560cf6d04965',1,'momentum::fbx_internal::SkeletonNodeResult::rootNode'],['../structmomentum_1_1CharacterWithNodeMap.html#aa5d10ea3ff5c6b372106930d7b798c0e',1,'momentum::CharacterWithNodeMap::rootNode']]],
-  ['rotation_18',['rotation',['../structmomentum_1_1TransformT.html#ab95039e987a72c96d1ff1b94cb1d8732',1,'momentum::TransformT']]],
-  ['rotationaxis_19',['RotationAxis',['../namespacemomentum.html#ad7a4eb26abfc152149b61fb2dd13e66f',1,'momentum']]],
-  ['rotationaxis_20',['rotationAxis',['../structmomentum_1_1JointStateT.html#a4b62cc0d1c0ad0a377abea09b5f04ed1',1,'momentum::JointStateT']]],
-  ['rotationeulerxyz_21',['rotationEulerXYZ',['../structmomentum_1_1GloveOffset.html#a100ab0a62047ed5c4977dcceaa12069d',1,'momentum::GloveOffset']]],
-  ['rpre_22',['Rpre',['../structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6',1,'momentum::MppcaT']]]
+  ['rootnodes_18',['rootNodes',['../structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html#a6fda8e8674f20c830b8d047e316e6432',1,'momentum::fbx_internal::SkeletonNodeResult']]],
+  ['rotation_19',['rotation',['../structmomentum_1_1TransformT.html#ab95039e987a72c96d1ff1b94cb1d8732',1,'momentum::TransformT']]],
+  ['rotationaxis_20',['RotationAxis',['../namespacemomentum.html#ad7a4eb26abfc152149b61fb2dd13e66f',1,'momentum']]],
+  ['rotationaxis_21',['rotationAxis',['../structmomentum_1_1JointStateT.html#a4b62cc0d1c0ad0a377abea09b5f04ed1',1,'momentum::JointStateT']]],
+  ['rotationeulerxyz_22',['rotationEulerXYZ',['../structmomentum_1_1GloveOffset.html#a100ab0a62047ed5c4977dcceaa12069d',1,'momentum::GloveOffset']]],
+  ['rpre_23',['Rpre',['../structmomentum_1_1MppcaT.html#a8ee1332c8b619072dfeac359e872b7a6',1,'momentum::MppcaT']]]
 ];
