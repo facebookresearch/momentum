@@ -808,41 +808,12 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
   ::fbxsdk::FbxProperty::Create(markersRootNode, ::fbxsdk::FbxBoolDT, kMomentumMarkersRootProperty)
       .Set(true);
 
-  std::map<std::string, size_t> markerNameToIndex;
-  std::vector<std::string> markerNames;
-  std::vector<std::vector<float>> timestamps;
-  std::vector<std::vector<Vector3d>> markerPositions;
-
-  for (size_t frameIndex = 0; frameIndex < markerSequence.size(); ++frameIndex) {
-    const float timestamp = static_cast<float>(frameIndex) / static_cast<float>(framerate);
-    for (const auto& marker : markerSequence[frameIndex]) {
-      if (marker.occluded) {
-        continue;
-      }
-
-      if (markerNameToIndex.count(marker.name) == 0) {
-        const auto index = timestamps.size();
-        timestamps.emplace_back();
-        markerPositions.emplace_back();
-        markerNameToIndex[marker.name] = index;
-        markerNames.emplace_back(marker.name);
-      }
-
-      const auto& index = markerNameToIndex.at(marker.name);
-      MT_THROW_IF(
-          index >= timestamps.size() || index >= markerPositions.size(),
-          "Marker index {} exceeds container size",
-          index);
-      timestamps[index].push_back(timestamp);
-      markerPositions[index].push_back(marker.pos);
-    }
-  }
-
-  for (const auto& markerName : markerNames) {
-    ::fbxsdk::FbxMarker* markerAttribute = ::fbxsdk::FbxMarker::Create(scene, markerName.c_str());
+  const std::vector<MarkerTrack> tracks = groupMarkerTracks(markerSequence);
+  for (const MarkerTrack& track : tracks) {
+    ::fbxsdk::FbxMarker* markerAttribute = ::fbxsdk::FbxMarker::Create(scene, track.name.c_str());
     markerAttribute->Look.Set(::fbxsdk::FbxMarker::ELook::eHardCross);
 
-    ::fbxsdk::FbxNode* markerNode = ::fbxsdk::FbxNode::Create(scene, markerName.c_str());
+    ::fbxsdk::FbxNode* markerNode = ::fbxsdk::FbxNode::Create(scene, track.name.c_str());
     markerNode->SetNodeAttribute(markerAttribute);
 
     ::fbxsdk::FbxProperty::Create(markerNode, ::fbxsdk::FbxBoolDT, kMomentumMarkerProperty)
@@ -855,14 +826,11 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
 
   scene->GetRootNode()->AddChild(markersRootNode);
 
-  if (!timestamps.empty() && !timestamps[0].empty()) {
+  if (!tracks.empty()) {
     auto [animStack, animBaseLayer] = getOrCreateAnimStackAndLayer(scene, "Marker Animation Stack");
 
-    for (size_t j = 0; j < markerNames.size(); ++j) {
-      if (timestamps[j].empty()) {
-        continue;
-      }
-
+    for (size_t j = 0; j < tracks.size(); ++j) {
+      const MarkerTrack& track = tracks[j];
       auto* markerNode = markerNodes.at(j);
 
       markerNode->LclTranslation.GetCurveNode(animBaseLayer, true);
@@ -877,16 +845,11 @@ inline std::vector<::fbxsdk::FbxNode*> createMarkerNodes(
       curveY->KeyModifyBegin();
       curveZ->KeyModifyBegin();
 
-      for (size_t k = 0; k < timestamps[j].size(); ++k) {
-        MT_THROW_IF(
-            j >= markerPositions.size() || k >= markerPositions[j].size(),
-            "Marker position index out of bounds: j={}, k={}",
-            j,
-            k);
+      for (size_t k = 0; k < track.frames.size(); ++k) {
         ::fbxsdk::FbxTime time;
-        time.SetSecondDouble(timestamps[j][k]);
+        time.SetSecondDouble(static_cast<float>(track.frames[k]) / static_cast<float>(framerate));
 
-        const auto& pos = markerPositions[j][k];
+        const auto& pos = track.positions[k];
 
         const auto keyIndexX = curveX->KeyAdd(time);
         curveX->KeySet(keyIndexX, time, static_cast<float>(pos.x()));
