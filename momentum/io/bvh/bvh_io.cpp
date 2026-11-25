@@ -18,6 +18,7 @@
 
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <fstream>
@@ -150,8 +151,14 @@ void parseJointDefinition(
     std::istringstream& iss,
     std::stack<size_t>& jointStack,
     BvhParseResult& result) {
+  // The name is the rest of the line, which can contain spaces (such as "Bip01 L Thigh"), without
+  // a "{" that some files put on the same line.
   std::string jointName;
-  iss >> jointName;
+  std::getline(iss, jointName);
+  jointName = trim(jointName);
+  if (!jointName.empty() && jointName.back() == '{') {
+    jointName = trim(jointName.substr(0, jointName.size() - 1));
+  }
   MT_THROW_IF(jointName.empty(), "BVH joint name is empty");
 
   BvhJointData joint;
@@ -256,9 +263,11 @@ void parseBvhMotion(std::istream& stream, BvhParseResult& result) {
     iss >> keyword;
 
     if (keyword == "Frames:") {
+      // The frame count comes from the file, so a wrong count must not allocate memory.
+      constexpr size_t kMaxReservedFrames = 100000;
       size_t numFrames = 0;
       iss >> numFrames;
-      result.frames.reserve(numFrames);
+      result.frames.reserve(std::min(numFrames, kMaxReservedFrames));
     } else if (keyword == "Frame") {
       // "Frame Time: X.XXXX"
       std::string timeKeyword;
