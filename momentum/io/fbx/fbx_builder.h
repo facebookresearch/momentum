@@ -53,6 +53,12 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// name of every node in the saved file with "<namespace>:", as saveFbx() does. A file has one
 /// namespace, so a different non-empty namespace in a later call throws.
 ///
+/// A file also has one frame rate. Each call that writes animation (addMotion(),
+/// addMotionWithJointParams(), addAnimatedMesh() and addMarkerSequence()) sets it, so the last such
+/// call wins, and the loaders read every motion at that frame rate: a motion written at another
+/// frame rate comes back resampled, with another frame count. Give every motion of a file the same
+/// frame rate.
+///
 /// Example usage:
 /// @code
 ///   FbxBuilder builder;
@@ -112,7 +118,8 @@ class FbxBuilder final {
   /// creates animation curves. Also extracts and animates blend shape weights
   /// when the character has blend shapes. A joint parameter that no model parameter drives gets a
   /// curve when its value is not zero, such as an offset from @p offsets. A later call for the same
-  /// character replaces its motion.
+  /// character replaces its motion; a motion without columns writes nothing and keeps the earlier
+  /// one.
   ///
   /// @param character The character to animate (must match a previously added character).
   /// @param fps Animation frame rate in frames per second.
@@ -199,6 +206,10 @@ class FbxBuilder final {
       const FbxUserProperties& userProperties = {});
 
   /// Add a marker sequence to the scene.
+  ///
+  /// FBX stores no confidence: every visible observation is written, and the loaders read each one
+  /// with confidence 1. (The glTF writer leaves out observations with a confidence below 0.001 and
+  /// stores the confidence of the others.)
   ///
   /// @param fps Frame rate for the marker animation.
   /// @param markerSequence Marker data per frame: markerSequence[frame][marker].
