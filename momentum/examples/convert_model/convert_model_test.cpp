@@ -12,6 +12,7 @@
 #include <momentum/character/inverse_parameter_transform.h>
 #include <momentum/character/skeleton_state.h>
 #include <momentum/common/filesystem.h>
+#include <momentum/io/bvh/bvh_io.h>
 #include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
@@ -74,10 +75,10 @@ TEST_F(ConvertModelTest, FindLongestMotion_MultipleMotions_LastLongest) {
 }
 
 // ============================================================================
-// initializeCharacterFromFbx tests
+// initializeCharacterFromMotionFile tests
 // ============================================================================
 
-TEST_F(ConvertModelTest, InitializeCharacterFromFbx_NoParams_CreatesIdentityTransform) {
+TEST_F(ConvertModelTest, InitializeCharacterFromMotionFile_NoParams_CreatesIdentityTransform) {
   const auto fbxPath = filesystem::path(testDataPath_) / "character.fbx";
   if (!filesystem::exists(fbxPath)) {
     GTEST_SKIP() << "Test data not available: " << fbxPath;
@@ -87,7 +88,7 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_NoParams_CreatesIdentityTran
   Character character;
   Options options;
 
-  initializeCharacterFromFbx(character, fbxCharacter, options);
+  initializeCharacterFromMotionFile(character, fbxCharacter, options);
 
   EXPECT_EQ(character.skeleton.joints.size(), fbxCharacter.skeleton.joints.size());
   EXPECT_EQ(
@@ -95,7 +96,7 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_NoParams_CreatesIdentityTran
       character.skeleton.joints.size() * kParametersPerJoint);
 }
 
-TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithParams_LoadsTransform) {
+TEST_F(ConvertModelTest, InitializeCharacterFromMotionFile_WithParams_LoadsTransform) {
   const auto fbxPath = filesystem::path(testDataPath_) / "character.fbx";
   const auto modelPath = filesystem::path(testDataPath_) / "character.model";
   if (!filesystem::exists(fbxPath) || !filesystem::exists(modelPath)) {
@@ -107,13 +108,13 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithParams_LoadsTransform) {
   Options options;
   options.input_params_file = modelPath.string();
 
-  initializeCharacterFromFbx(character, fbxCharacter, options);
+  initializeCharacterFromMotionFile(character, fbxCharacter, options);
 
   EXPECT_EQ(character.skeleton.joints.size(), fbxCharacter.skeleton.joints.size());
   EXPECT_GT(character.parameterTransform.numAllModelParameters(), 0);
 }
 
-TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithLocators_LoadsLocators) {
+TEST_F(ConvertModelTest, InitializeCharacterFromMotionFile_WithLocators_LoadsLocators) {
   const auto fbxPath = filesystem::path(testDataPath_) / "character.fbx";
   const auto locatorPath = filesystem::path(testDataPath_) / "character.locators";
   if (!filesystem::exists(fbxPath) || !filesystem::exists(locatorPath)) {
@@ -125,12 +126,12 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithLocators_LoadsLocators) 
   Options options;
   options.input_locator_file = locatorPath.string();
 
-  initializeCharacterFromFbx(character, fbxCharacter, options);
+  initializeCharacterFromMotionFile(character, fbxCharacter, options);
 
   EXPECT_GT(character.locators.size(), 0);
 }
 
-TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithParamsAndLocators_LoadsBoth) {
+TEST_F(ConvertModelTest, InitializeCharacterFromMotionFile_WithParamsAndLocators_LoadsBoth) {
   const auto fbxPath = filesystem::path(testDataPath_) / "character.fbx";
   const auto modelPath = filesystem::path(testDataPath_) / "character.model";
   const auto locatorPath = filesystem::path(testDataPath_) / "character.locators";
@@ -145,7 +146,7 @@ TEST_F(ConvertModelTest, InitializeCharacterFromFbx_WithParamsAndLocators_LoadsB
   options.input_params_file = modelPath.string();
   options.input_locator_file = locatorPath.string();
 
-  initializeCharacterFromFbx(character, fbxCharacter, options);
+  initializeCharacterFromMotionFile(character, fbxCharacter, options);
 
   EXPECT_GT(character.parameterTransform.numAllModelParameters(), 0);
   EXPECT_GT(character.locators.size(), 0);
@@ -718,4 +719,63 @@ TEST_F(ConvertModelTest, FindLongestTakeCountsOnlyTheNamedCharacters) {
   EXPECT_EQ(findLongestTake(characters, std::vector<std::string>{"object"}), 1);
   // When no character is named, every character counts.
   EXPECT_EQ(findLongestTake(characters, std::vector<std::string>{"other"}), 1);
+}
+
+TEST_F(ConvertModelTest, BvhMotionGivesTheSameJointTransforms) {
+  auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
+  removeScaleMotion(character.parameterTransform, motion);
+  auto tempDir = temporaryDirectory("convert_model_bvh");
+  const auto bvhPath = tempDir.path() / "motion.bvh";
+  saveBvhCharacterWithMotion(
+      bvhPath, character, {character.parameterTransform.name, motion}, 30.0f);
+  const auto modelPath = tempDir.path() / "model.glb";
+  saveGltfCharacter(modelPath, character);
+
+  // The BVH motion on the model, and the BVH character with its own motion.
+  Options onModel;
+  onModel.input_model_file = modelPath.string();
+  onModel.input_motion_file = bvhPath.string();
+  Options motionOnly;
+  motionOnly.input_motion_file = bvhPath.string();
+  for (const Options& options : {onModel, motionOnly}) {
+    SCOPED_TRACE(options.input_model_file.empty() ? "motion only" : "on the model");
+    const Scene scene = loadScene(options);
+    ASSERT_EQ(scene.characters.size(), 1);
+    const SceneCharacter& converted = scene.characters.front();
+    ASSERT_EQ(converted.poses.cols(), motion.cols());
+    // BVH stores the frame time with six decimals.
+    EXPECT_NEAR(scene.fps, 30.0f, 1e-2f);
+    const auto difference = maxGlobalJointTransformDifference(
+        character.skeleton,
+        jointMotionOf(character.parameterTransform, motion),
+        converted.character.skeleton,
+        jointMotionOf(
+            converted.character.parameterTransform, converted.poses, converted.offsets.v));
+    EXPECT_LT(difference.translation, 1e-3f);
+    EXPECT_LT(difference.rotation, 1e-3f);
+  }
+
+  // Without a model file, the BVH character keeps the motion of the file as it is.
+  const Scene scene = loadScene(motionOnly);
+  const auto loaded = loadBvhCharacterWithMotion(bvhPath);
+  EXPECT_EQ(scene.characters.front().poses, std::get<1>(std::get<1>(loaded)));
+}
+
+TEST_F(ConvertModelTest, BvhMotionNeedsOneModelCharacter) {
+  auto tempDir = temporaryDirectory("convert_model_bvh");
+  const auto [character, motion] = createTestSceneCharacter("a", 3, 4, 0.0f);
+  const auto bvhPath = tempDir.path() / "motion.bvh";
+  saveBvhCharacterWithMotion(
+      bvhPath, character, {character.parameterTransform.name, motion}, 30.0f);
+  const auto modelPath = tempDir.path() / "two.glb";
+  saveTestSceneAsGltf(modelPath, createTwoCharacterScene(), 30.0f);
+
+  Options options;
+  options.input_model_file = modelPath.string();
+  options.input_motion_file = bvhPath.string();
+  EXPECT_THROW(loadScene(options), std::runtime_error);
+  options.character_name = "a";
+  const Scene scene = loadScene(options);
+  ASSERT_EQ(scene.characters.size(), 1);
+  EXPECT_EQ(scene.characters.front().poses.cols(), motion.cols());
 }
