@@ -521,6 +521,19 @@ class TestFBX(unittest.TestCase):
         with open(path, "rb") as f:
             return f.read()
 
+    def test_animated_mesh_returns_unique_name(self) -> None:
+        if not pym_geometry.is_fbxsdk_available():
+            return
+
+        builder = pym_geometry.FbxBuilder()
+        name = builder.add_character(self.character)
+        self.assertEqual(
+            builder.add_animated_mesh(
+                self.character, name=name, fps=60, joint_params=self.joint_params
+            ),
+            f"{name}_1",
+        )
+
     def test_animated_mesh_user_properties(self) -> None:
         if not pym_geometry.is_fbxsdk_available():
             return
