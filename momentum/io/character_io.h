@@ -28,6 +28,13 @@ enum class CharacterFormat : uint8_t {
   Unknown ///< Unknown or unsupported file format.
 };
 
+/// The character format of a file, from its extension in any letter case: glTF for `.glb` and
+/// `.gltf`, FBX for `.fbx`, and USD for `.usd`, `.usda` and `.usdc`.
+///
+/// @param[in] filepath The path to the character file.
+/// @return The format, or CharacterFormat::Unknown for any other extension.
+[[nodiscard]] CharacterFormat parseCharacterFormat(const filesystem::path& filepath) noexcept;
+
 /// High level function to load a character of any type, with a local path.
 ///
 /// @param[in] characterPath The path to the character file.
