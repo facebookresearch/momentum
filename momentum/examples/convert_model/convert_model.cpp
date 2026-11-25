@@ -36,7 +36,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
          "-m,--model",
          opt->input_model_file,
-         "Input model (.fbx/.glb/.gltf/.urdf); not required if reading animation from glb or fbx. "
+         "Input model (.fbx/.glb/.gltf/.urdf); not required if reading animation from glb/gltf or fbx. "
          "Every character of the file is converted, unless --character selects one. With several "
          "characters or with --character, each character gets the motion of the motion-file "
          "character with the same name")
@@ -49,8 +49,8 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   app.add_option(
          "-d,--motion",
          opt->input_motion_file,
-         "Input motion data file (.glb/.fbx); without --model, every character of the file is "
-         "converted with its motion")
+         "Input motion data file (.glb/.gltf/.fbx); without --model, every character of the file "
+         "is converted with its motion")
       ->check(CLI::ExistingFile);
   app.add_option(
       "--character",
@@ -93,13 +93,14 @@ MotionData loadMotion(const Options& options, Character& character, bool hasMode
   }
 
   const auto motionPath = filesystem::path(options.input_motion_file);
-  const auto motionExt = motionPath.extension();
-
-  if (motionExt == ".glb") {
-    return loadGlbMotion(motionPath, character, hasModel, options);
-  }
-  if (motionExt == ".fbx") {
-    return loadFbxMotion(motionPath, character, hasModel, options);
+  switch (parseCharacterFormat(motionPath)) {
+    case CharacterFormat::Gltf:
+      return loadGlbMotion(motionPath, character, hasModel, options);
+    case CharacterFormat::Fbx:
+      return loadFbxMotion(motionPath, character, hasModel, options);
+    case CharacterFormat::Usd:
+    case CharacterFormat::Unknown:
+      break;
   }
 
   MT_LOGW("Unknown motion file format: {}. Exporting without motion.", options.input_motion_file);
