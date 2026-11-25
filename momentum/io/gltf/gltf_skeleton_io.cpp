@@ -17,7 +17,10 @@
 #include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
+#include <optional>
+#include <ranges>
 #include <span>
 
 namespace momentum {
@@ -303,6 +306,110 @@ Joint createJoint(const fx::gltf::Node& node) {
 
 bool isHierarchyNode(const fx::gltf::Node& node) {
   return (node.skin < 0) && (node.camera < 0);
+}
+
+bool hasMarkedJoints(const fx::gltf::Document& model) {
+  return std::ranges::any_of(model.nodes, isMarkedJoint);
+}
+
+Transform nodeLocalTransform(const fx::gltf::Node& node) {
+  if (node.matrix != fx::gltf::defaults::IdentityMatrix) {
+    Matrix4f matrix = Map<const Matrix4f>(node.matrix.data());
+    matrix.topRightCorner<3, 1>() *= toCm();
+    return Transform::fromMatrix(matrix);
+  }
+  return Transform(
+      toMomentumVec3f(node.translation), toMomentumQuaternionf(node.rotation), node.scale[0]);
+}
+
+namespace {
+
+// Whether loadHierarchyRecursive loads `node` as a joint of a document without joint marks.
+[[nodiscard]] bool isUnmarkedJointNode(const fx::gltf::Node& node) {
+  if (!isHierarchyNode(node) || node.mesh >= 0) {
+    return false;
+  }
+  const std::string type = findMomentumExtension(node.extensionsAndExtras).value("type", "");
+  return type != "collision_capsule" && type != "collision_ellipsoid" && type != "collision_box" &&
+      type != "locator";
+}
+
+// Whether the scale of `node` differs between its axes.
+[[nodiscard]] bool hasNonUniformScale(const fx::gltf::Node& node) {
+  Vector3f scale = Map<const Vector3f>(node.scale.data());
+  if (node.matrix != fx::gltf::defaults::IdentityMatrix) {
+    scale = Map<const Matrix4f>(node.matrix.data()).topLeftCorner<3, 3>().colwise().norm();
+  }
+  constexpr float kTolerance = 1e-4f;
+  return (scale.array() - scale.x()).abs().maxCoeff() > kTolerance * std::abs(scale.x());
+}
+
+} // namespace
+
+std::vector<JointFileTransform> jointFileTransforms(
+    const fx::gltf::Document& model,
+    const Skeleton& skeleton,
+    std::span<const size_t> nodeToObjectMap) {
+  const size_t numJoints = skeleton.joints.size();
+  std::vector<JointFileTransform> result(numJoints);
+  for (size_t nodeId = 0; nodeId < model.nodes.size() && nodeId < nodeToObjectMap.size();
+       ++nodeId) {
+    const size_t jointId = nodeToObjectMap[nodeId];
+    const auto& node = model.nodes.at(nodeId);
+    // The node map shares its indices between joints, locators and collision shapes.
+    if (jointId < numJoints && isUnmarkedJointNode(node) &&
+        node.name == skeleton.joints[jointId].name) {
+      result[jointId].node = static_cast<uint32_t>(nodeId);
+    }
+  }
+
+  const auto parentMap = buildSceneParentMap(model);
+  std::vector<std::optional<Transform>> worlds(model.nodes.size());
+  const auto world = [&](uint32_t nodeId) {
+    std::vector<uint32_t> chain;
+    for (uint32_t id = nodeId; id != kInvalidNodeId && !worlds[id].has_value();
+         id = parentMap[id]) {
+      chain.push_back(id);
+    }
+    for (const uint32_t id : std::views::reverse(chain)) {
+      const auto& node = model.nodes.at(id);
+      // Called outside MT_LOGW_IF: builds without logging do not evaluate its condition.
+      if (hasNonUniformScale(node)) {
+        MT_LOGW(
+            "glTF node '{}' has a non-uniform scale; momentum uses the scale of its x axis.",
+            node.name);
+      }
+      const uint32_t parent = parentMap[id];
+      worlds[id] = parent == kInvalidNodeId ? nodeLocalTransform(node)
+                                            : *worlds[parent] * nodeLocalTransform(node);
+    }
+    return *worlds[nodeId];
+  };
+
+  for (size_t jointId = 0; jointId < numJoints; ++jointId) {
+    auto& entry = result[jointId];
+    if (entry.node == kInvalidNodeId) {
+      continue;
+    }
+    const uint32_t parentNode = parentMap[entry.node];
+    const Transform parentWorld = parentNode == kInvalidNodeId ? Transform() : world(parentNode);
+    Transform parentJointFrame;
+    const size_t parentJoint = skeleton.joints[jointId].parent;
+    if (parentJoint < numJoints && result[parentJoint].node != kInvalidNodeId) {
+      const Transform parentJointWorld = world(result[parentJoint].node);
+      parentJointFrame = Transform(parentJointWorld.translation, parentJointWorld.rotation);
+    }
+    entry.pre = parentJointFrame.inverse() * parentWorld;
+    const float scale = world(entry.node).scale;
+    if (std::abs(scale) > std::numeric_limits<float>::epsilon()) {
+      entry.post = Transform::makeScale(1.0f / scale);
+    } else {
+      MT_LOGW(
+          "glTF joint '{}' has a rest scale of zero; its scale is not removed from its rest pose.",
+          model.nodes.at(entry.node).name);
+    }
+  }
+  return result;
 }
 
 std::vector<uint32_t> buildSceneParentMap(const fx::gltf::Document& model) {
