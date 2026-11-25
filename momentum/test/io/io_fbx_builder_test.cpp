@@ -725,3 +725,23 @@ TEST(FbxBuilderTest, MotionWithoutOffsetsKeepsTheEarlierOffsets) {
   ASSERT_EQ(loaded.cols(), expected.cols());
   EXPECT_LT((loaded - expected).cwiseAbs().maxCoeff(), 1e-4f);
 }
+
+TEST(FbxBuilderTest, MotionAt72And96FramesPerSecondIsReadBack) {
+  const Character character = createTestCharacter(3);
+  const MatrixXf motion =
+      MatrixXf::Constant(character.parameterTransform.numAllModelParameters(), 10, 0.2f);
+  for (const double fps : {72.0, 96.0}) {
+    const auto outFile = temporaryFile("builder_fps", "fbx");
+    {
+      FbxBuilder builder;
+      const std::string name = builder.addCharacter(character);
+      builder.addMotion(character, fps, motion, {}, name);
+      builder.save(outFile.path());
+    }
+    const auto [characters, loadedFps] = loadFbxCharactersWithMotion(outFile.path());
+    EXPECT_FLOAT_EQ(loadedFps, static_cast<float>(fps));
+    ASSERT_EQ(characters.size(), 1);
+    ASSERT_EQ(characters[0].second.size(), 1);
+    EXPECT_EQ(characters[0].second[0].cols(), motion.cols()) << fps << " fps";
+  }
+}
