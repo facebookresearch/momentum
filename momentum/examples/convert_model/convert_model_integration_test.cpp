@@ -5,7 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "convert_model_test_helpers.h"
+
 #include <momentum/common/filesystem.h>
+#include <momentum/io/fbx/fbx_io.h>
+#include <momentum/io/gltf/gltf_io.h>
 #include <momentum/test/io/io_helpers.h>
 
 #include <gtest/gtest.h>
@@ -474,6 +478,158 @@ TEST_F(ConvertModelIntegrationTest, LocatorOutput_LocalAndGlobal) {
   EXPECT_TRUE(std::filesystem::exists(out));
   EXPECT_TRUE(std::filesystem::exists(outLocLocal));
   EXPECT_TRUE(std::filesystem::exists(outLocGlobal));
+}
+
+// ============================================================================
+// CONVERSION RESULT TESTS
+// Load the output back and compare it with the input
+// ============================================================================
+
+// Test: a single-character GLB motion comes back from the FBX output
+TEST_F(ConvertModelIntegrationTest, Result_SingleCharacterGlbToFbx_KeepsTheMotion) {
+  const auto input = testFile("character_with_motion.glb");
+  const auto out = outputFile("single.fbx");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", out}), 0);
+
+  const auto [character, motion, identity, fps] = momentum::loadCharacterWithMotion(input);
+  const auto [loaded, takes, loadedFps] = momentum::loadFbxCharacterWithMotion(out);
+  ASSERT_EQ(takes.size(), 1);
+  const momentum::MatrixXf expected = momentum::toJointParameters(character, motion);
+  ASSERT_EQ(takes[0].rows(), expected.rows());
+  ASSERT_EQ(takes[0].cols(), expected.cols());
+  EXPECT_LT((takes[0] - expected).cwiseAbs().maxCoeff(), 1e-4f);
+  EXPECT_FLOAT_EQ(loadedFps, fps);
+}
+
+// Test: every character of a GLB file comes back from the FBX output with its motion
+TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterGlbToFbx_KeepsEveryCharacterAndMotion) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("two.fbx");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", out}), 0);
+
+  const auto [loaded, fps] = momentum::loadFbxCharactersWithMotion(out);
+  ASSERT_EQ(loaded.size(), saved.size());
+  EXPECT_FLOAT_EQ(fps, 30.0f);
+  for (size_t i = 0; i < saved.size(); ++i) {
+    const auto& [character, takes] = loaded[i];
+    EXPECT_EQ(character.name, saved[i].character.name);
+    ASSERT_EQ(takes.size(), 1);
+    const momentum::MatrixXf expected =
+        momentum::toJointParameters(saved[i].character, saved[i].motion);
+    ASSERT_EQ(takes[0].rows(), expected.rows()) << i;
+    ASSERT_EQ(takes[0].cols(), expected.cols()) << i;
+    EXPECT_LT((takes[0] - expected).cwiseAbs().maxCoeff(), 1e-4f) << i;
+  }
+}
+
+// Test: every character of an FBX file comes back from the GLB output with its motion
+TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterFbxToGlb_KeepsEveryCharacterAndMotion) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two.fbx");
+  momentum::saveTestSceneAsFbx(input, saved, 30.0f);
+  const auto out = outputFile("two.glb");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--out", out}), 0);
+
+  // The FBX characters have an identity parameter transform, so the motion is joint parameters.
+  const auto [loaded, fps] = momentum::loadGltfCharactersWithMotion(out);
+  ASSERT_EQ(loaded.size(), saved.size());
+  EXPECT_FLOAT_EQ(fps, 30.0f);
+  for (size_t i = 0; i < saved.size(); ++i) {
+    EXPECT_EQ(loaded[i].character.name, saved[i].character.name);
+    const momentum::MatrixXf expected =
+        momentum::toJointParameters(saved[i].character, saved[i].motion);
+    ASSERT_EQ(loaded[i].motion.rows(), expected.rows()) << i;
+    ASSERT_EQ(loaded[i].motion.cols(), expected.cols()) << i;
+    EXPECT_LT((loaded[i].motion - expected).cwiseAbs().maxCoeff(), 1e-4f) << i;
+  }
+}
+
+// Test: a model file with several characters keeps all of them
+TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterModel_KeepsEveryCharacter) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two_model.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("two_model.fbx");
+
+  ASSERT_EQ(runConvertModel({"--model", input, "--out", out}), 0);
+
+  const auto loaded = momentum::loadFbxCharacters(out);
+  ASSERT_EQ(loaded.size(), saved.size());
+  for (size_t i = 0; i < saved.size(); ++i) {
+    EXPECT_EQ(loaded[i].name, saved[i].character.name);
+    EXPECT_EQ(loaded[i].skeleton.getJointNames(), saved[i].character.skeleton.getJointNames());
+  }
+}
+
+// Test: a model character that no motion-file character matches gets no motion
+TEST_F(ConvertModelIntegrationTest, Result_ModelCharacterWithoutMatchingMotion_HasNoMotion) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto model = outputFile("model_ab.glb");
+  momentum::GltfBuilder modelBuilder;
+  for (const auto& entry : saved) {
+    modelBuilder.addCharacter(entry.character);
+  }
+  modelBuilder.save(model);
+  const auto motion = outputFile("motion_b.glb");
+  momentum::saveTestSceneAsGltf(motion, {saved[1]}, 30.0f);
+  const auto out = outputFile("model_ab_out.glb");
+
+  ASSERT_EQ(runConvertModel({"--model", model, "--motion", motion, "--out", out}), 0);
+
+  const auto [loaded, fps] = momentum::loadGltfCharactersWithMotion(out);
+  ASSERT_EQ(loaded.size(), 2);
+  EXPECT_EQ(loaded[0].motion.cols(), 0);
+  ASSERT_EQ(loaded[1].motion.cols(), saved[1].motion.cols());
+  ASSERT_EQ(loaded[1].motion.rows(), saved[1].motion.rows());
+  EXPECT_TRUE(loaded[1].motion.isApprox(saved[1].motion, 1e-5f));
+}
+
+// Test: --character converts one character of a multi-character file, with the locator output
+TEST_F(ConvertModelIntegrationTest, Result_SelectedCharacter_IsTheOnlyOneConverted) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two_select.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("b.glb");
+  const auto outLocators = outputFile("b.locators");
+
+  ASSERT_EQ(
+      runConvertModel(
+          {"--motion",
+           input,
+           "--character",
+           "b",
+           "--out",
+           out,
+           "--out-locators-local",
+           outLocators}),
+      0);
+
+  const auto [loaded, fps] = momentum::loadGltfCharactersWithMotion(out);
+  ASSERT_EQ(loaded.size(), 1);
+  EXPECT_EQ(loaded[0].character.name, "b");
+  ASSERT_EQ(loaded[0].motion.cols(), saved[1].motion.cols());
+  ASSERT_EQ(loaded[0].motion.rows(), saved[1].motion.rows());
+  EXPECT_TRUE(loaded[0].motion.isApprox(saved[1].motion, 1e-5f));
+  EXPECT_TRUE(std::filesystem::exists(outLocators));
+}
+
+// Test: an option for one character fails for a multi-character file without --character
+TEST_F(ConvertModelIntegrationTest, Error_OneCharacterOptionForSeveralCharacters) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("two_error.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("two_error_out.glb");
+
+  EXPECT_NE(
+      runConvertModel(
+          {"--motion", input, "--out", out, "--out-locators-local", outputFile("x.locators")}),
+      0);
+  EXPECT_FALSE(std::filesystem::exists(out));
 }
 
 } // namespace

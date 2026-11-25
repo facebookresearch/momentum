@@ -6,6 +6,7 @@
  */
 
 #include "convert_model_helpers.h"
+#include "convert_model_test_helpers.h"
 
 #include <momentum/character/character.h>
 #include <momentum/character/inverse_parameter_transform.h>
@@ -504,4 +505,192 @@ TEST_F(ConvertModelTest, ConvertMotionWithJointMapping_NonZeroMotion) {
     }
   }
   EXPECT_TRUE(hasNonZeroDiff) << "Non-zero source motion should produce different output frames";
+}
+
+// ============================================================================
+// Multi-character conversion tests
+// ============================================================================
+
+namespace {
+
+std::vector<std::string> sceneNames(const Scene& scene) {
+  std::vector<std::string> names;
+  names.reserve(scene.characters.size());
+  for (const auto& entry : scene.characters) {
+    names.push_back(entry.character.name);
+  }
+  return names;
+}
+
+} // namespace
+
+TEST_F(ConvertModelTest, LoadsSceneOnlyForSeveralCharactersOrASelectedOne) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto gltfPath = tempDir.path() / "two.glb";
+  const auto fbxPath = tempDir.path() / "two.fbx";
+  saveTestSceneAsGltf(gltfPath, createTwoCharacterScene(), 30.0f);
+  saveTestSceneAsFbx(fbxPath, createTwoCharacterScene(), 30.0f);
+
+  for (const auto& twoCharacters : {gltfPath, fbxPath}) {
+    Options motionOnly;
+    motionOnly.input_motion_file = twoCharacters.string();
+    EXPECT_TRUE(loadScene(motionOnly).has_value()) << twoCharacters;
+    Options modelOnly;
+    modelOnly.input_model_file = twoCharacters.string();
+    EXPECT_TRUE(loadScene(modelOnly).has_value()) << twoCharacters;
+  }
+
+  Options oneCharacter;
+  oneCharacter.input_model_file = (filesystem::path(testDataPath_) / "motion.fbx").string();
+  oneCharacter.input_motion_file =
+      (filesystem::path(testDataPath_) / "character_with_motion.glb").string();
+  EXPECT_FALSE(loadScene(oneCharacter).has_value());
+  // A selected character is looked up by name, also in a file with one character.
+  oneCharacter.character_name = "missing";
+  EXPECT_THROW(loadScene(oneCharacter), std::runtime_error);
+}
+
+TEST_F(ConvertModelTest, MotionFileKeepsEveryCharacterWithItsMotion) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto saved = createTwoCharacterScene();
+  const auto gltfPath = tempDir.path() / "two.glb";
+  const auto fbxPath = tempDir.path() / "two.fbx";
+  saveTestSceneAsGltf(gltfPath, saved, 30.0f);
+  saveTestSceneAsFbx(fbxPath, saved, 30.0f);
+
+  Options gltfOptions;
+  gltfOptions.input_motion_file = gltfPath.string();
+  const Scene gltfScene = loadScene(gltfOptions).value();
+  ASSERT_EQ(sceneNames(gltfScene), (std::vector<std::string>{"a", "b"}));
+  EXPECT_FLOAT_EQ(gltfScene.fps, 30.0f);
+  for (size_t i = 0; i < saved.size(); ++i) {
+    ASSERT_EQ(gltfScene.characters[i].poses.cols(), saved[i].motion.cols()) << i;
+    ASSERT_EQ(gltfScene.characters[i].poses.rows(), saved[i].motion.rows()) << i;
+    EXPECT_TRUE(gltfScene.characters[i].poses.isApprox(saved[i].motion, 1e-5f)) << i;
+  }
+
+  // FBX stores joint parameters, which the identity parameter transform keeps as they are.
+  Options fbxOptions;
+  fbxOptions.input_motion_file = fbxPath.string();
+  const Scene fbxScene = loadScene(fbxOptions).value();
+  ASSERT_EQ(sceneNames(fbxScene), (std::vector<std::string>{"a", "b"}));
+  EXPECT_FLOAT_EQ(fbxScene.fps, 30.0f);
+  for (size_t i = 0; i < saved.size(); ++i) {
+    const MatrixXf expected = toJointParameters(saved[i].character, saved[i].motion);
+    ASSERT_EQ(fbxScene.characters[i].poses.rows(), expected.rows()) << i;
+    ASSERT_EQ(fbxScene.characters[i].poses.cols(), expected.cols()) << i;
+    EXPECT_LT((fbxScene.characters[i].poses - expected).cwiseAbs().maxCoeff(), 1e-4f) << i;
+  }
+}
+
+TEST_F(ConvertModelTest, ModelCharactersGetTheMotionOfTheSameNamedCharacter) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto modelPath = tempDir.path() / "model.glb";
+  const auto motionPath = tempDir.path() / "motion.glb";
+  const auto saved = createTwoCharacterScene();
+  GltfBuilder modelBuilder;
+  for (const auto& entry : saved) {
+    modelBuilder.addCharacter(entry.character);
+  }
+  modelBuilder.save(modelPath);
+  // The motion file has "b" and a character that the model does not have.
+  const auto other = createTestSceneCharacter("c", 3, 4, 2.0f);
+  saveTestSceneAsGltf(motionPath, {other, saved[1]}, 30.0f);
+
+  Options options;
+  options.input_model_file = modelPath.string();
+  options.input_motion_file = motionPath.string();
+  const Scene scene = loadScene(options).value();
+
+  ASSERT_EQ(sceneNames(scene), (std::vector<std::string>{"a", "b"}));
+  EXPECT_EQ(scene.characters[0].poses.cols(), 0);
+  ASSERT_EQ(scene.characters[1].poses.cols(), saved[1].motion.cols());
+  ASSERT_EQ(scene.characters[1].poses.rows(), saved[1].motion.rows());
+  EXPECT_TRUE(scene.characters[1].poses.isApprox(saved[1].motion, 1e-5f));
+
+  // No character of the motion file has the name of a model character.
+  saveTestSceneAsGltf(motionPath, {other}, 30.0f);
+  EXPECT_THROW(loadScene(options), std::runtime_error);
+}
+
+TEST_F(ConvertModelTest, SelectedCharacterIsTheOnlyOneConverted) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto path = tempDir.path() / "two.glb";
+  const auto saved = createTwoCharacterScene();
+  saveTestSceneAsGltf(path, saved, 30.0f);
+
+  Options options;
+  options.input_motion_file = path.string();
+  options.character_name = "b";
+  const Scene scene = loadScene(options).value();
+  ASSERT_EQ(sceneNames(scene), std::vector<std::string>{"b"});
+  ASSERT_EQ(scene.characters[0].poses.cols(), saved[1].motion.cols());
+  ASSERT_EQ(scene.characters[0].poses.rows(), saved[1].motion.rows());
+  EXPECT_TRUE(scene.characters[0].poses.isApprox(saved[1].motion, 1e-5f));
+
+  options.character_name = "missing";
+  EXPECT_THROW(loadScene(options), std::runtime_error);
+}
+
+TEST_F(ConvertModelTest, OneCharacterOptionsNeedASelectedCharacter) {
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto path = tempDir.path() / "two.glb";
+  saveTestSceneAsGltf(path, createTwoCharacterScene(), 30.0f);
+
+  Options options;
+  options.input_motion_file = path.string();
+  options.output_locator_local = (tempDir.path() / "local.locators").string();
+  EXPECT_THROW(loadScene(options), std::runtime_error);
+
+  options.character_name = "a";
+  EXPECT_EQ(loadScene(options).value().characters.size(), 1);
+}
+
+TEST_F(ConvertModelTest, FileThatTheMultiCharacterLoaderRejectsConvertsAsOneCharacter) {
+  // A mesh skinned to the joints of two skeletons: the multi-character FBX loader rejects it, and
+  // the single-character loader reads both skeletons as one character.
+  Character character = createTestCharacter(3);
+  character.skeleton.joints.at(1).parent = kInvalidIndex;
+  character.initInverseBindPose();
+  auto tempDir = temporaryDirectory("convert_model_scene");
+  const auto path = tempDir.path() / "two_skeletons.fbx";
+  saveFbx(path, character);
+  ASSERT_THROW(
+      loadFbxCharacters(path, KeepLocators::Yes, Permissive::No, LoadBlendShapes::No),
+      std::runtime_error);
+  ASSERT_EQ(loadFbxCharacter(path).skeleton.joints.size(), character.skeleton.joints.size());
+
+  Options options;
+  options.input_model_file = path.string();
+  EXPECT_FALSE(loadScene(options).has_value());
+  // A selected character needs the multi-character loader.
+  options.character_name = "a";
+  EXPECT_THROW(loadScene(options), std::runtime_error);
+}
+
+TEST_F(ConvertModelTest, FindLongestTakePicksTheTakeWithTheLongestMotionOfAnyCharacter) {
+  // The first character is longest in take 0 (5 frames), the second in take 1 (9 frames).
+  const std::vector<std::pair<Character, std::vector<MatrixXf>>> characters = {
+      {Character(), {MatrixXf::Zero(7, 5), MatrixXf::Zero(7, 2)}},
+      {Character(), {MatrixXf::Zero(7, 0), MatrixXf::Zero(7, 9)}},
+  };
+  EXPECT_EQ(findLongestTake(characters), 1);
+
+  const std::vector<std::pair<Character, std::vector<MatrixXf>>> withoutFrames = {
+      {Character(), {MatrixXf::Zero(7, 0), MatrixXf::Zero(7, 0)}},
+  };
+  EXPECT_EQ(findLongestTake(withoutFrames), -1);
+}
+
+TEST_F(ConvertModelTest, FindLongestTakeCountsOnlyTheNamedCharacters) {
+  // "hand" moves in take 0 (5 frames), "object" in take 1 (9 frames).
+  std::vector<std::pair<Character, std::vector<MatrixXf>>> characters(2);
+  characters[0].first.name = "hand";
+  characters[0].second = {MatrixXf::Zero(7, 5), MatrixXf::Zero(7, 0)};
+  characters[1].first.name = "object";
+  characters[1].second = {MatrixXf::Zero(7, 0), MatrixXf::Zero(7, 9)};
+  EXPECT_EQ(findLongestTake(characters, std::vector<std::string>{"hand"}), 0);
+  EXPECT_EQ(findLongestTake(characters, std::vector<std::string>{"object"}), 1);
+  // When no character is named, every character counts.
+  EXPECT_EQ(findLongestTake(characters, std::vector<std::string>{"other"}), 1);
 }
