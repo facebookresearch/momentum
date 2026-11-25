@@ -10,6 +10,7 @@ import glob
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -75,6 +76,11 @@ def main() -> None:
     for repaired in out_dir.glob("*.whl"):
         shutil.move(str(repaired), Path("dist") / repaired.name)
     shutil.rmtree(out_dir)
+
+    finalize = Path(__file__).with_name("finalize_pypi_wheel.py")
+    subprocess.check_call(
+        [sys.executable, str(finalize), *sorted(glob.glob(WHEEL_PATTERNS[variant]))]
+    )
 
 
 if __name__ == "__main__":
