@@ -87,7 +87,9 @@ class FbxBuilder final {
   /// Creates the skeleton hierarchy, mesh with skin deformer, locators,
   /// collision geometry, and metadata. The character also gets its rig (the parameter transform,
   /// parameter limits, parameter sets and pose constraints), stored as glTF files store it (see
-  /// rigToJson()), which the FBX loaders read back, also when it has no model parameters.
+  /// rigToJson()), which the FBX loaders read back, also when it has no model parameters. The skin
+  /// clusters bind each joint at the character's bind pose (see Character::inverseBindPose), which
+  /// is its rest pose unless the character was bound in another pose.
   ///
   /// @param character The character to add.
   /// @param options File save options: mesh, locators, collisions, coordinate system, and the FBX
