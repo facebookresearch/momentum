@@ -17,9 +17,9 @@
 
 namespace momentum {
 
-/// Loads all actor sequences from a marker file (c3d, trc, glb) and converts the positions
-/// to the target coordinate system. Default target coordinate system is: (Y-up, right-handed,
-/// centimeter units).
+/// Loads all actor sequences from a marker file (c3d, trc, glb, gltf, fbx; the extension in any
+/// letter case) and converts the positions to the target coordinate system. Default target
+/// coordinate system is: (Y-up, right-handed, centimeter units).
 ///
 /// @param[in] filename The marker file to load data from.
 /// @param[in] up (Optional) The up-vector convention of the input marker file (default:
@@ -31,8 +31,8 @@ namespace momentum {
     UpVector up = UpVector::Y,
     std::span<const std::string> validMarkerNames = {});
 
-/// Loads the main subject's marker data from a marker file (c3d, trc, glb) and converts the
-/// positions to the target coordinate system. Default target coordinate system is: (Y-up,
+/// Loads the main subject's marker data from a marker file (as loadMarkers() reads it) and converts
+/// the positions to the target coordinate system. Default target coordinate system is: (Y-up,
 /// right-handed, centimeter units). The main subject is determined as the one with the most number
 /// of visible markers in the first frame.
 ///
@@ -63,7 +63,8 @@ namespace momentum {
 /// glb via fx::gltf's byte-span loader, and fbx via OpenFBX's native buffer API.
 ///
 /// @param[in] bytes Marker file contents.
-/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx").
+/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx"), in
+/// any letter case.
 /// @param[in] up (Optional) Up-vector convention of the input data.
 /// @param[in] validMarkerNames (Optional) Marker-name allowlist (c3d only).
 /// @return Vector of MarkerSequences. Empty on unknown format or read error.
@@ -78,7 +79,8 @@ namespace momentum {
 /// Convenience wrapper around the buffer-based loadMarkers + findMainSubjectIndex.
 ///
 /// @param[in] bytes Marker file contents.
-/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx").
+/// @param[in] format File extension including the leading dot (".c3d", ".trc", ".glb", ".fbx"), in
+/// any letter case.
 /// @param[in] up (Optional) Up-vector convention of the input data.
 /// @param[in] validMarkerNames (Optional) Marker-name allowlist (c3d only).
 /// @return The main subject's sequence, or empty optional if no main subject is found.
