@@ -85,28 +85,6 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
   return opt;
 }
 
-// Loads motion data from the specified file. Dispatches to format-specific
-// loading functions based on the file extension.
-MotionData loadMotion(const Options& options, Character& character, bool hasModel) {
-  if (options.input_motion_file.empty()) {
-    return {};
-  }
-
-  const auto motionPath = filesystem::path(options.input_motion_file);
-  switch (parseCharacterFormat(motionPath)) {
-    case CharacterFormat::Gltf:
-      return loadGlbMotion(motionPath, character, hasModel, options);
-    case CharacterFormat::Fbx:
-      return loadFbxMotion(motionPath, character, hasModel, options);
-    case CharacterFormat::Usd:
-    case CharacterFormat::Unknown:
-      break;
-  }
-
-  MT_LOGW("Unknown motion file format: {}. Exporting without motion.", options.input_motion_file);
-  return {};
-}
-
 // Loads marker sequence data from a motion file.
 MarkerSequence loadMarkerData(const std::string& motionFile) {
   auto markerData = loadMarkers(motionFile);
@@ -124,24 +102,6 @@ FileSaveOptions fbxSaveOptions(const Options& options) {
   return fbxOptions;
 }
 
-// Saves the character and motion data to an FBX output file.
-void saveFbxOutput(
-    const std::string& outputFile,
-    const Character& character,
-    const MotionData& motionData,
-    const MarkerSequence& markerSequence,
-    const Options& options) {
-  MT_LOGI("Saving fbx file...");
-  saveFbx(
-      outputFile,
-      character,
-      motionData.poses,
-      motionData.offsets.v,
-      motionData.fps,
-      markerSequence.frames,
-      fbxSaveOptions(options));
-}
-
 // The identity offsets of `character` for the glTF writer.
 IdentityParameters toIdentityParameters(
     const Character& character,
@@ -154,29 +114,7 @@ IdentityParameters toIdentityParameters(
                              : IdentityParameters{character.skeleton.getJointNames(), offsets};
 }
 
-// Saves the character and motion data to a glTF/GLB output file.
-void saveGltfOutput(
-    const std::string& outputFile,
-    const Character& character,
-    const MotionData& motionData,
-    const MarkerSequence& markerSequence,
-    bool hasMotion) {
-  MT_LOGI("Saving gltf/glb file...");
-  if (hasMotion) {
-    saveGltfCharacter(
-        outputFile,
-        character,
-        motionData.fps,
-        {character.parameterTransform.name, motionData.poses},
-        toIdentityParameters(character, motionData.offsets),
-        markerSequence.frames);
-  } else {
-    saveGltfCharacter(outputFile, character);
-  }
-}
-
-// Saves the characters with their motion and the marker sequence to an FBX output file, as
-// saveFbxOutput() saves a single character.
+// Saves the characters with their motion and the marker sequence to an FBX output file.
 void saveFbxScene(
     const std::string& outputFile,
     const Scene& scene,
@@ -193,8 +131,7 @@ void saveFbxScene(
   builder.save(outputFile);
 }
 
-// Saves the characters with their motion and the marker sequence to a glTF/GLB output file, as
-// saveGltfOutput() saves a single character.
+// Saves the characters with their motion and the marker sequence to a glTF/GLB output file.
 void saveGltfScene(
     const std::string& outputFile,
     const Scene& scene,
@@ -203,10 +140,16 @@ void saveGltfScene(
   MT_LOGI("Saving gltf/glb file...");
   GltfBuilder builder;
   for (const auto& entry : scene.characters) {
+    // As saveGltfCharacter(), an empty character (from no input file) adds nothing.
+    if (entry.character.skeleton.joints.empty() && entry.character.mesh == nullptr) {
+      continue;
+    }
     const std::string name = builder.addCharacter(entry.character);
-    // A character without motion, such as a model character that no motion-file character
-    // matches, gets no animation.
-    if (!hasMotion || (entry.poses.cols() == 0 && entry.offsets.size() == 0)) {
+    // In a scene with several characters, a character without motion, such as a model character
+    // that no motion-file character matches, gets no animation. One character gets the motion of
+    // the motion file even without frames, as saveGltfCharacter() adds it.
+    const bool hasOwnMotion = entry.poses.cols() > 0 || entry.offsets.size() > 0;
+    if (!hasMotion || (scene.characters.size() > 1 && !hasOwnMotion)) {
       continue;
     }
     const auto& character = entry.character;
@@ -282,51 +225,19 @@ int main(int argc, char** argv) {
       return EXIT_FAILURE;
     }
 
-    if (const auto scene = loadScene(*options)) {
-      const MarkerSequence markerSequence = loadRequestedMarkers(*options);
-      if (outputFormat == CharacterFormat::Fbx) {
-        saveFbxScene(options->output_model_file, *scene, markerSequence, *options);
-      } else {
-        saveGltfScene(
-            options->output_model_file,
-            *scene,
-            markerSequence,
-            !options->input_motion_file.empty());
-      }
-      // loadScene() rejects these outputs for several characters.
-      if (scene->characters.size() == 1) {
-        saveLocatorFiles(*options, scene->characters.front().character);
-        saveParameterFile(*options, scene->characters.front().character);
-      }
-      return EXIT_SUCCESS;
-    }
-
-    // Load character model
-    const bool hasModel = !options->input_model_file.empty();
-    Character character;
-    if (hasModel) {
-      character = loadModelCharacter(*options);
-    }
-
-    // Load motion data
-    const bool hasMotion = !options->input_motion_file.empty();
-    const auto motionData = loadMotion(*options, character, hasModel);
-
-    // Load markers if requested
+    const Scene scene = loadScene(*options);
     const MarkerSequence markerSequence = loadRequestedMarkers(*options);
-
-    // Save output file
     if (outputFormat == CharacterFormat::Fbx) {
-      saveFbxOutput(options->output_model_file, character, motionData, markerSequence, *options);
+      saveFbxScene(options->output_model_file, scene, markerSequence, *options);
     } else {
-      saveGltfOutput(options->output_model_file, character, motionData, markerSequence, hasMotion);
+      saveGltfScene(
+          options->output_model_file, scene, markerSequence, !options->input_motion_file.empty());
     }
-
-    // Save locator files
-    saveLocatorFiles(*options, character);
-
-    // Save model parameter file
-    saveParameterFile(*options, character);
+    // loadScene() rejects these outputs for several characters.
+    if (scene.characters.size() == 1) {
+      saveLocatorFiles(*options, scene.characters.front().character);
+      saveParameterFile(*options, scene.characters.front().character);
+    }
   } catch (std::exception& e) {
     MT_LOGE("Failed to convert model. Error: {}", e.what());
     return EXIT_FAILURE;
