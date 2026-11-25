@@ -8,6 +8,8 @@ The `convert_model` example demonstrates how to convert a character model and it
 
 A BVH file holds the skeleton and the motion of one character. When the output is a BVH file, the tool warns about the data that BVH cannot store, such as the mesh, the physical properties and the metadata.
 
+The `--out-locators-local`, `--out-locators-global` and `--out-parameters` options are deprecated: use the `export_rig` example to save the parameter transform, the parameter limits and the locators of a character.
+
 Files with several characters, such as a body and the objects it holds, are converted with every character and its motion. Use `--character` to convert only one of them; the parameter and locator inputs and outputs (`-p`, `-l`, `--out-locators-local`, `--out-locators-global` and `--out-parameters`) apply to one character, so they need `--character` when the input has several characters. When the model file has several characters, or with `--character`, each character gets the motion of the motion-file character with the same name.
 
 <FbInternalOnly>
@@ -29,9 +31,9 @@ Options:
   -d,--motion TEXT:FILE       Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file is converted with its motion
   --character TEXT            Convert only the character with this name, from the model file and the motion file; required for --parameters, --locator, --out-locators-local, --out-locators-global and --out-parameters when the input has several characters
   -o,--out TEXT REQUIRED      Output file (.fbx/.glb/.gltf/.bvh); a .bvh file holds one character's skeleton and motion
-  --out-locators-local TEXT   Output a locator file (.locators) in local space for transferring between identities
-  --out-locators-global TEXT  Output a locator file (.locators) in global space for authoring a template
-  --out-parameters TEXT       Output a model parameter file (.model) containing the parameter transform and limits
+  --out-locators-local TEXT   (Deprecated: use export_rig) Output a locator file (.locators) in local space for transferring between identities
+  --out-locators-global TEXT  (Deprecated: use export_rig) Output a locator file (.locators) in global space for authoring a template
+  --out-parameters TEXT       (Deprecated: use export_rig) Output a model parameter file (.model) containing the parameter transform and limits
   --fbx-namespace TEXT        Namespace in output fbx file
   --save-markers              Save marker data from input motion file in the output
   -c,--character-mesh         (FBX Output file only) Saves the Character Mesh to the output file.
@@ -107,17 +109,17 @@ buck run @arvr/mode/win/opt convert_model -- -d hand_and_object.glb -o hand_and_
 ```
 </FbInternalOnly>
 
-* Example 6: Convert only the character named `hand` from that file, and write its locators.
+* Example 6: Convert only the character named `hand` from that file.
 
 <OssOnly>
 ```
-pixi run convert_model -d hand_and_object.glb --character hand -o hand.glb --out-locators-local hand.locators
+pixi run convert_model -d hand_and_object.glb --character hand -o hand.glb
 ```
 </OssOnly>
 
 <FbInternalOnly>
 ```
-buck run @arvr/mode/win/opt convert_model -- -d hand_and_object.glb --character hand -o hand.glb --out-locators-local hand.locators
+buck run @arvr/mode/win/opt convert_model -- -d hand_and_object.glb --character hand -o hand.glb
 ```
 </FbInternalOnly>
 
