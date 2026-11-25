@@ -15,9 +15,20 @@
 #include "momentum/io/marker/c3d_io.h"
 #include "momentum/io/marker/trc_io.h"
 
+#include <algorithm>
+#include <cctype>
+#include <string>
+
 namespace momentum {
 
 namespace {
+
+std::string toLowerCase(std::string text) {
+  std::ranges::transform(
+      text, text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  return text;
+}
+
 size_t markerCount(const std::vector<std::vector<Marker>>& frames) {
   size_t maxCountMarkers = 0;
   for (const auto& fr : frames) {
@@ -33,13 +44,13 @@ std::vector<MarkerSequence> loadMarkers(
     const std::string& filename,
     UpVector up,
     std::span<const std::string> validMarkerNames) {
-  const std::string ext = filesystem::path(filename).extension().string();
+  const std::string ext = toLowerCase(filesystem::path(filename).extension().string());
   try {
     if (ext == ".c3d") {
       return loadC3d(filename, up, validMarkerNames);
     } else if (ext == ".trc") {
       return {loadTrc(filename, up)};
-    } else if (ext == ".glb") {
+    } else if (ext == ".glb" || ext == ".gltf") {
       return {loadMarkerSequence(filename)};
     } else if (ext == ".fbx") {
       return {loadFbxMarkerSequence(filename)};
@@ -71,14 +82,15 @@ std::vector<MarkerSequence> loadMarkers(
     const std::string& format,
     UpVector up,
     std::span<const std::string> validMarkerNames) {
+  const std::string lowerCaseFormat = toLowerCase(format);
   try {
-    if (format == ".trc") {
+    if (lowerCaseFormat == ".trc") {
       return {loadTrc(bytes, up)};
-    } else if (format == ".glb") {
+    } else if (lowerCaseFormat == ".glb") {
       return {loadMarkerSequence(bytes)};
-    } else if (format == ".fbx") {
+    } else if (lowerCaseFormat == ".fbx") {
       return {loadFbxMarkerSequence(bytes)};
-    } else if (format == ".c3d") {
+    } else if (lowerCaseFormat == ".c3d") {
 #ifdef MOMENTUM_WITH_EZC3D_ISTREAM
       return loadC3d(bytes, up, validMarkerNames);
 #else
