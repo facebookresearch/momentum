@@ -158,8 +158,8 @@ std::string FbxBuilder::addCharacter(const Character& character, const FileSaveO
   }
 
   // Add skeleton to scene root
-  if (!skeletonResult.nodes.empty()) {
-    root->AddChild(skeletonResult.rootNode);
+  for (auto* rootNode : skeletonResult.rootNodes) {
+    root->AddChild(rootNode);
   }
 
   // Store character data for later animation
@@ -222,8 +222,8 @@ std::string FbxBuilder::addRigidBody(
   }
 
   // Add skeleton to scene root
-  if (!skeletonResult.nodes.empty()) {
-    root->AddChild(skeletonResult.rootNode);
+  for (auto* rootNode : skeletonResult.rootNodes) {
+    root->AddChild(rootNode);
   }
 
   impl_->characters.insert(
