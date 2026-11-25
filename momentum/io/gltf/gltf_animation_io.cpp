@@ -18,6 +18,7 @@
 #include "momentum/io/gltf/gltf_skeleton_io.h"
 #include "momentum/io/gltf/utils/accessor_utils.h"
 #include "momentum/io/gltf/utils/coordinate_utils.h"
+#include "momentum/io/gltf/utils/momentum_extension.h"
 #include "momentum/math/constants.h"
 
 #include <algorithm>
