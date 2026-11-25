@@ -142,6 +142,10 @@ void registerCharacterBindings(py::class_<mm::Character>& characterClass) {
   // - load_fbx_from_bytes(fbx_bytes, permissive)
   // - load_fbx_with_motion(fbxFilename, permissive, strip_namespaces)
   // - load_fbx_with_motion_from_bytes(fbx_bytes, permissive, strip_namespaces)
+  // - load_fbx_characters(fbxFilename, permissive, strip_namespaces)
+  // - load_fbx_characters_from_bytes(fbx_bytes, permissive, strip_namespaces)
+  // - load_fbx_characters_with_motion(fbxFilename, permissive, strip_namespaces)
+  // - load_fbx_characters_with_motion_from_bytes(fbx_bytes, permissive, strip_namespaces)
   // - load_gltf(path)
   // - load_gltf_characters(path)
   // - load_gltf_characters_from_bytes(gltf_bytes)
@@ -873,6 +877,93 @@ motion's scale parameters.
 :param load_blendshapes: If true, load blendshapes from the file.
 :param strip_namespaces: If true, strip namespaces from nodes
 :return: A valid :class:`Character`.)",
+          py::arg("fbx_bytes"),
+          py::arg("permissive") = false,
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
+      // loadFBXCharactersFromFile(fbxFilename)
+      .def_static(
+          "load_fbx_characters",
+          &loadFBXCharactersFromFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character of an FBX file.
+
+Unlike :meth:`load_fbx`, which merges the whole scene into one character, this returns one
+character per skeleton and one per unskinned mesh outside a skeleton, such as an object written by
+:meth:`FbxBuilder.add_animated_mesh`, which becomes a one-joint character. An unskinned mesh in a
+skeleton, such as one written by :meth:`FbxBuilder.add_rigid_body`, moves rigidly with the nearest
+joint above it. Each character has an identity parameter transform. No animation is loaded.
+
+:param fbx_filename: .fbx file; e.g. scene.fbx.
+:param permissive: If true, load joints with unsupported rotation settings and skip a mesh that
+    belongs to no character, with a warning. If false, such a mesh makes the load fail.
+:param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes.
+:return: A ``list`` of :class:`Character`, in scene order.)",
+          py::arg("fbx_filename"),
+          py::arg("permissive") = false,
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
+      // loadFBXCharactersFromBytes(fbxBytes)
+      .def_static(
+          "load_fbx_characters_from_bytes",
+          &loadFBXCharactersFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character of an FBX byte array.
+
+Byte-array version of :meth:`load_fbx_characters`.
+
+:param fbx_bytes: An array of bytes in FBX format.
+:param permissive: If true, load joints with unsupported rotation settings and skip a mesh that
+    belongs to no character, with a warning. If false, such a mesh makes the load fail.
+:param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes.
+:return: A ``list`` of :class:`Character`, in scene order.)",
+          py::arg("fbx_bytes"),
+          py::arg("permissive") = false,
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
+      // loadFBXCharactersWithMotionFromFile(fbxFilename)
+      .def_static(
+          "load_fbx_characters_with_motion",
+          &loadFBXCharactersWithMotionFromFile,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character of an FBX file with its motion.
+
+Characters are those of :meth:`load_fbx_characters`. Each character's motion is read only from the
+curves on its own joints, with one motion per animation stack; the lists are index-aligned across
+characters, and a motion has no frames when its stack does not animate the character. Frame i of
+every motion is the pose at i / fps seconds, so the motions of one stack share their frame times;
+each motion ends at the last key on its character's own joints, so the motions of one stack can have
+different frame counts.
+
+:param fbx_filename: .fbx file; e.g. scene.fbx.
+:param permissive: If true, load joints with unsupported rotation settings and skip a mesh that
+    belongs to no character, with a warning. If false, such a mesh makes the load fail.
+:param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes.
+:return: A tuple ``(characters, fps)``. ``characters`` is a ``list`` of tuples
+         ``(character, motions)``, in scene order, where ``motions`` holds one numpy array of shape
+         ``(n_frames, n_joint_parameters)`` per animation stack. ``fps`` is the scene frame rate.)",
+          py::arg("fbx_filename"),
+          py::arg("permissive") = false,
+          py::arg("load_blendshapes") = false,
+          py::arg("strip_namespaces") = true)
+      // loadFBXCharactersWithMotionFromBytes(fbxBytes)
+      .def_static(
+          "load_fbx_characters_with_motion_from_bytes",
+          &loadFBXCharactersWithMotionFromBytes,
+          py::call_guard<py::gil_scoped_release>(),
+          R"(Load every character of an FBX byte array with its motion.
+
+Byte-array version of :meth:`load_fbx_characters_with_motion`.
+
+:param fbx_bytes: An array of bytes in FBX format.
+:param permissive: If true, load joints with unsupported rotation settings and skip a mesh that
+    belongs to no character, with a warning. If false, such a mesh makes the load fail.
+:param load_blendshapes: If true, load blendshapes from the file.
+:param strip_namespaces: If true, strip namespaces from nodes.
+:return: A tuple ``(characters, fps)``, as in :meth:`load_fbx_characters_with_motion`.)",
           py::arg("fbx_bytes"),
           py::arg("permissive") = false,
           py::arg("load_blendshapes") = false,
