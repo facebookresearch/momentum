@@ -8,7 +8,7 @@ The `convert_model` example demonstrates how to convert a character model and it
 
 A BVH file holds the skeleton and the motion of one character. When the output is a BVH file, the tool warns about the data that BVH cannot store, such as the mesh, the physical properties and the metadata.
 
-The `--out-locators-local`, `--out-locators-global` and `--out-parameters` options are deprecated: use the `export_rig` example to save the parameter transform, the parameter limits and the locators of a character.
+The `--out-locators-local`, `--out-locators-global` and `--out-parameters` options are deprecated: use the `export_rig` example to save the parameter transform, the parameter limits and the locators of a character. The `-m` option with `-d` is also deprecated: use the `apply_motion` example to apply the motion of one file to the characters of another file.
 
 Files with several characters, such as a body and the objects it holds, are converted with every character and its motion. Use `--character` to convert only one of them; the parameter and locator inputs and outputs (`-p`, `-l`, `--out-locators-local`, `--out-locators-global` and `--out-parameters`) apply to one character, so they need `--character` when the input has several characters. When the model file has several characters, or with `--character`, each character gets the motion of the motion-file character with the same name.
 
@@ -25,7 +25,7 @@ convert_model [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
-  -m,--model TEXT:FILE        Input model (.fbx/.glb/.gltf/.urdf/.bvh); not required if reading animation from glb/gltf, fbx or bvh. Every character of the file is converted, unless --character selects one. With several characters or with --character, each character gets the motion of the motion-file character with the same name
+  -m,--model TEXT:FILE        Input model (.fbx/.glb/.gltf/.urdf/.bvh); not required if reading animation from glb/gltf, fbx or bvh. Every character of the file is converted, unless --character selects one. (Deprecated with --motion: use apply_motion) With several characters or with --character, each character gets the motion of the motion-file character with the same name
   -p,--parameters TEXT:FILE   Input model parameter file (.model)
   -l,--locator TEXT:FILE      Input locator file (.locators)
   -d,--motion TEXT:FILE       Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file is converted with its motion
@@ -81,21 +81,7 @@ buck run @arvr/mode/win/opt convert_model -- -d animation.fbx -p character.model
 ```
 </FbInternalOnly>
 
-* Example 4: Apply animation from an s0 model to a s4 model for high-res rendering (ie. with mesh). The `.model` file is needed if the target model is in `.fbx` format so we know how to map the input motion.
-
-<OssOnly>
-```
-pixi run convert_model -m character.fbx -p character.model -d animation_s0.glb -o animation_s4.fbx -c
-```
-</OssOnly>
-
-<FbInternalOnly>
-```
-buck run @arvr/mode/win/opt convert_model -- -m character.fbx -p character.model -d animation_s0.glb -o animation_s4.fbx -c
-```
-</FbInternalOnly>
-
-* Example 5: Convert a glb file with several characters (for example a hand and an object) to an fbx file with every character and its motion.
+* Example 4: Convert a glb file with several characters (for example a hand and an object) to an fbx file with every character and its motion.
 
 <OssOnly>
 ```
@@ -109,7 +95,7 @@ buck run @arvr/mode/win/opt convert_model -- -d hand_and_object.glb -o hand_and_
 ```
 </FbInternalOnly>
 
-* Example 6: Convert only the character named `hand` from that file.
+* Example 5: Convert only the character named `hand` from that file.
 
 <OssOnly>
 ```
@@ -123,18 +109,16 @@ buck run @arvr/mode/win/opt convert_model -- -d hand_and_object.glb --character 
 ```
 </FbInternalOnly>
 
-* Example 7: Convert the motion of a glb file to a BVH file, and the BVH motion onto an fbx model.
+* Example 6: Convert the motion of a glb file to a BVH file.
 
 <OssOnly>
 ```
 pixi run convert_model -d animation.glb -o animation.bvh
-pixi run convert_model -m character.fbx -p character.model -d animation.bvh -o animation.fbx
 ```
 </OssOnly>
 
 <FbInternalOnly>
 ```
 buck run @arvr/mode/win/opt convert_model -- -d animation.glb -o animation.bvh
-buck run @arvr/mode/win/opt convert_model -- -m character.fbx -p character.model -d animation.bvh -o animation.fbx
 ```
 </FbInternalOnly>
