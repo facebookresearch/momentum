@@ -487,6 +487,13 @@ TEST_F(ConvertModelIntegrationTest, Error_InvalidOutputFormat) {
   EXPECT_NE(rc, 0) << "Invalid output format should fail";
 }
 
+// Test: no input file fails and writes no output
+TEST_F(ConvertModelIntegrationTest, Error_NoInputFile) {
+  const auto out = outputFile("no_input.glb");
+  EXPECT_NE(runConvertModel({"--out", out}), 0);
+  EXPECT_FALSE(std::filesystem::exists(out));
+}
+
 // Test: Unknown motion format
 TEST_F(ConvertModelIntegrationTest, Error_UnknownMotionFormat) {
   int rc = runConvertModel(
@@ -1148,4 +1155,48 @@ TEST_F(ConvertModelIntegrationTest, ApplyMotion_UnknownMotionFormat_Fails) {
            out}),
       0);
   EXPECT_FALSE(std::filesystem::exists(out));
+}
+
+// Test: the parameter and locator files apply to the character of a glTF motion file, as with the
+// same file as the model file and the motion file
+TEST_F(ConvertModelIntegrationTest, ParametersAndLocators_ApplyToTheCharacterOfAGltfMotionFile) {
+  const auto saved = momentum::createTestSceneCharacter("a", 3, 4, 0.0f);
+  const auto& skeleton = saved.character.skeleton;
+  const auto input = outputFile("rig_input.glb");
+  momentum::saveTestSceneAsGltf(input, {saved}, 30.0f);
+  // A new rig, with other parameter names than the rig in the input file.
+  const auto identity = momentum::ParameterTransform::identity(skeleton.getJointNames());
+  const auto parameters = outputFile("identity.model");
+  {
+    std::ofstream file(parameters);
+    file << momentum::writeModelDefinition(skeleton, identity, {});
+  }
+  const auto locators = testFile("character.locators");
+  const auto expectedLocators = momentum::loadLocators(locators, skeleton, identity);
+  ASSERT_NE(expectedLocators, saved.character.locators);
+
+  const auto out = outputFile("new_rig.glb");
+  ASSERT_EQ(
+      runConvertModel(
+          {"--motion", input, "--parameters", parameters, "--locator", locators, "--out", out}),
+      0);
+  const auto converted = momentum::loadGltfCharacter(out);
+  EXPECT_EQ(converted.parameterTransform.name, identity.name);
+  EXPECT_EQ(converted.locators, expectedLocators);
+
+  const auto sameFile = outputFile("new_rig_same_file.glb");
+  ASSERT_EQ(
+      runConvertModel(
+          {"--model",
+           input,
+           "--motion",
+           input,
+           "--parameters",
+           parameters,
+           "--locator",
+           locators,
+           "--out",
+           sameFile}),
+      0);
+  EXPECT_EQ(fileContents(out), fileContents(sameFile));
 }

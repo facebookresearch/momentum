@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Convert Model
 
-The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX, glTF/GLB and BVH formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). If no input model is provided, the tool will automatically read the animation from an existing glTF/GLB, FBX or BVH file.
+The `convert_model` example demonstrates how to convert a character model and its associated animation file between FBX, glTF/GLB and BVH formats. Use the `-m` or `--model` option to specify the input model, followed by the path to the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). If no input model is provided, the tool will automatically read the animation from an existing glTF/GLB, FBX or BVH file given with `-d` or `--motion`; one of the two options is required. The `-p` and `-l` options apply a model parameter file and a locator file to the characters of the input file: glTF motion moves to the new parameter transform by parameter name, and FBX and BVH motion is fitted to it.
 
 A BVH file holds the skeleton and the motion of one character. When the output is a BVH file, the tool warns about the data that BVH cannot store, such as the mesh, the physical properties and the metadata.
 
@@ -28,7 +28,7 @@ Options:
   -m,--model TEXT:FILE        Input model (.fbx/.glb/.gltf/.urdf/.bvh); not required if reading animation from glb/gltf, fbx or bvh. Every character of the file is converted, unless --character selects one. (Deprecated with --motion: use apply_motion) With several characters or with --character, each character gets the motion of the motion-file character with the same name
   -p,--parameters TEXT:FILE   Input model parameter file (.model)
   -l,--locator TEXT:FILE      Input locator file (.locators)
-  -d,--motion TEXT:FILE       Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file is converted with its motion
+  -d,--motion TEXT:FILE       Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file is converted with its motion, and --parameters and --locator apply to it
   --character TEXT            Convert only the character with this name, from the model file and the motion file; required for --parameters, --locator, --out-locators-local, --out-locators-global and --out-parameters when the input has several characters
   -o,--out TEXT REQUIRED      Output file (.fbx/.glb/.gltf/.bvh); a .bvh file holds one character's skeleton and motion
   --out-locators-local TEXT   (Deprecated: use export_rig) Output a locator file (.locators) in local space for transferring between identities
