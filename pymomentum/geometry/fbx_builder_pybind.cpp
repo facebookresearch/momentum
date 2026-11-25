@@ -157,7 +157,9 @@ as a simple animated mesh without any skeleton hierarchy.
 :param character: The character providing the mesh geometry.
 :param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
     object's custom attributes.
@@ -191,13 +193,15 @@ as a simple animated mesh without any skeleton hierarchy.
           },
           R"(Add an animated mesh from a Mesh object (no Character needed).
 
-Creates a standalone mesh node and animates its transform from joint
-parameters. Only the root transform (first 7 joint params) is used.
+Creates a standalone mesh node and animates its transform from the root joint
+parameters.
 
 :param mesh: The mesh geometry.
 :param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param translation_offset: Rest-pose translation offset added to the translation
     channels (defaults to zero).
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
