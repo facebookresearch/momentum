@@ -324,6 +324,55 @@ TEST(FbxBuilderTest, AnimatedMeshWithFewerThanSixRowsThrows) {
       builder.addAnimatedMesh(*object.mesh, "object", 30.0f, MatrixXf::Zero(5, 2)), std::exception);
 }
 
+TEST(FbxBuilderTest, NamespaceFromOptionsPrefixesEveryNode) {
+  const Character character = createTestCharacter(3);
+  FileSaveOptions options;
+  options.fbxNamespace = "ns";
+
+  const auto outFile = temporaryFile("builder_namespace", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addCharacter(character, options);
+    builder.save(outFile.path());
+  }
+
+  const Character prefixed = loadFbxCharacter(
+      outFile.path(), KeepLocators::No, Permissive::Yes, LoadBlendShapes::No, false);
+  ASSERT_EQ(prefixed.skeleton.joints.size(), character.skeleton.joints.size());
+  for (size_t i = 0; i < character.skeleton.joints.size(); ++i) {
+    EXPECT_EQ(prefixed.skeleton.joints[i].name, "ns:" + character.skeleton.joints[i].name);
+  }
+}
+
+TEST(FbxBuilderTest, FileHasOneNamespace) {
+  Character second = createTestCharacter(3);
+  second.name = "second";
+  FileSaveOptions first;
+  first.fbxNamespace = "a";
+  FileSaveOptions same;
+  same.fbxNamespace = "a:";
+  FileSaveOptions other;
+  other.fbxNamespace = "b";
+
+  FbxBuilder builder;
+  builder.addCharacter(createTestCharacter(3), first);
+  EXPECT_THROW(builder.addCharacter(second, other), std::exception);
+  EXPECT_THROW(builder.addRigidBody(second, "prop", 0, other), std::exception);
+  EXPECT_NO_THROW(builder.addCharacter(second, same));
+}
+
+TEST(FbxBuilderTest, FailedAddDoesNotSetTheNamespace) {
+  FileSaveOptions first;
+  first.fbxNamespace = "a";
+  FileSaveOptions other;
+  other.fbxNamespace = "b";
+
+  FbxBuilder builder;
+  // The parent joint is out of range, so the call fails after it checked the namespace.
+  EXPECT_THROW(builder.addRigidBody(createTestCharacter(3), "prop", 99, first), std::exception);
+  EXPECT_NO_THROW(builder.addCharacter(createTestCharacter(3), other));
+}
+
 TEST(FbxBuilderTest, DedupeSkipsNamesTakenByExplicitNames) {
   FbxBuilder builder;
   EXPECT_EQ(builder.addRigidBody(createTestCharacter(3), "dup_1"), "dup_1");
