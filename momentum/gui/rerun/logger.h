@@ -202,15 +202,17 @@ class JointParamsRecorder {
     return times_;
   }
 
-  /// Log the recorded frames with logJointParamsColumns(), under @p worldPrefix and the
-  /// "joint_params" pose prefix. Nothing is logged when no frame was recorded.
+  /// Log the recorded frames with logJointParamsColumns(), under @p worldPrefix (world and root
+  /// joints) and @p posePrefix (the other joints). Nothing is logged when no frame was recorded.
   ///
   /// @param rec The recording stream.
-  /// @param worldPrefix The stream prefix for world (root) parameters.
+  /// @param worldPrefix The stream prefix for world (root) joint parameters.
+  /// @param posePrefix The stream prefix for the other joint parameters.
   /// @param jointNames The joint names of the character.
   void send(
       const rerun::RecordingStream& rec,
       const std::string& worldPrefix,
+      const std::string& posePrefix,
       std::span<const std::string> jointNames) const;
 
  private:
