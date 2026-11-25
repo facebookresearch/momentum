@@ -607,3 +607,121 @@ TEST(FbxBuilderTest, CharacterNoStackAnimatesGetsEmptyTakes) {
   ASSERT_EQ(propTakes.size(), 1);
   EXPECT_EQ(propTakes[0].cols(), 0);
 }
+
+namespace {
+
+// The joint parameters that addMotion() writes for `motion` and `offsets`: PT * pose + offsets.
+MatrixXf expectedJointParameters(
+    const Character& character,
+    const MatrixXf& motion,
+    const VectorXf& offsets) {
+  MatrixXf result(character.parameterTransform.numJointParameters(), motion.cols());
+  for (Eigen::Index f = 0; f < motion.cols(); ++f) {
+    result.col(f) =
+        character.parameterTransform.apply(ModelParameters(VectorXf(motion.col(f)))).v + offsets;
+  }
+  return result;
+}
+
+// The first joint parameter that no model parameter drives, or -1.
+Eigen::Index undrivenJointParameter(const Character& character) {
+  const auto& active = character.parameterTransform.activeJointParams;
+  for (Eigen::Index p = 0; p < active.size(); ++p) {
+    if (!active[p]) {
+      return p;
+    }
+  }
+  return -1;
+}
+
+} // namespace
+
+TEST(FbxBuilderTest, MotionKeepsTheOffsetOfAnUndrivenJointParameter) {
+  const Character character = createTestCharacter(3);
+  const Eigen::Index undriven = undrivenJointParameter(character);
+  ASSERT_GE(undriven, 0);
+  MatrixXf motion = MatrixXf::Zero(character.parameterTransform.numAllModelParameters(), 3);
+  for (Eigen::Index f = 0; f < motion.cols(); ++f) {
+    motion(0, f) = 0.5f * static_cast<float>(f);
+  }
+  VectorXf offsets = VectorXf::Zero(character.parameterTransform.numJointParameters());
+  offsets[undriven] = 0.25f;
+
+  const auto outFile = temporaryFile("builder_undriven_offset", "fbx");
+  {
+    FbxBuilder builder;
+    const std::string name = builder.addCharacter(character);
+    builder.addMotion(character, 30.0, motion, offsets, name);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, fps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 1);
+  ASSERT_EQ(characters[0].second.size(), 1);
+  const MatrixXf& loaded = characters[0].second[0];
+  const MatrixXf expected = expectedJointParameters(character, motion, offsets);
+  ASSERT_EQ(loaded.rows(), expected.rows());
+  ASSERT_EQ(loaded.cols(), expected.cols());
+  EXPECT_LT((loaded - expected).cwiseAbs().maxCoeff(), 1e-4f);
+}
+
+TEST(FbxBuilderTest, LaterMotionReplacesTheEarlierOne) {
+  const Character character = createTestCharacter(3);
+  const Eigen::Index undriven = undrivenJointParameter(character);
+  ASSERT_GE(undriven, 0);
+  const auto numModelParameters = character.parameterTransform.numAllModelParameters();
+  const auto numJointParameters = character.parameterTransform.numJointParameters();
+  const MatrixXf first = MatrixXf::Constant(numModelParameters, 5, 0.3f);
+  VectorXf firstOffsets = VectorXf::Zero(numJointParameters);
+  firstOffsets[undriven] = 0.25f;
+  const MatrixXf second = MatrixXf::Constant(numModelParameters, 2, -0.2f);
+
+  const auto outFile = temporaryFile("builder_replaced_motion", "fbx");
+  {
+    FbxBuilder builder;
+    const std::string name = builder.addCharacter(character);
+    builder.addMotion(character, 30.0, first, firstOffsets, name);
+    // Zero offsets: the undriven parameter's curve is rewritten only because it exists.
+    builder.addMotion(character, 30.0, second, VectorXf::Zero(numJointParameters), name);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, fps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 1);
+  ASSERT_EQ(characters[0].second.size(), 1);
+  const MatrixXf& loaded = characters[0].second[0];
+  const MatrixXf expected =
+      expectedJointParameters(character, second, VectorXf::Zero(numJointParameters));
+  ASSERT_EQ(loaded.rows(), expected.rows());
+  ASSERT_EQ(loaded.cols(), expected.cols());
+  EXPECT_LT((loaded - expected).cwiseAbs().maxCoeff(), 1e-4f);
+}
+
+TEST(FbxBuilderTest, MotionWithoutOffsetsKeepsTheEarlierOffsets) {
+  const Character character = createTestCharacter(3);
+  const Eigen::Index undriven = undrivenJointParameter(character);
+  ASSERT_GE(undriven, 0);
+  const auto numModelParameters = character.parameterTransform.numAllModelParameters();
+  VectorXf offsets = VectorXf::Zero(character.parameterTransform.numJointParameters());
+  offsets[undriven] = 0.25f;
+  const MatrixXf second = MatrixXf::Constant(numModelParameters, 2, -0.2f);
+
+  const auto outFile = temporaryFile("builder_kept_offsets", "fbx");
+  {
+    FbxBuilder builder;
+    const std::string name = builder.addCharacter(character);
+    builder.addMotion(
+        character, 30.0, MatrixXf::Constant(numModelParameters, 3, 0.3f), offsets, name);
+    builder.addMotion(character, 30.0, second, {}, name);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, fps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 1);
+  ASSERT_EQ(characters[0].second.size(), 1);
+  const MatrixXf& loaded = characters[0].second[0];
+  const MatrixXf expected = expectedJointParameters(character, second, offsets);
+  ASSERT_EQ(loaded.rows(), expected.rows());
+  ASSERT_EQ(loaded.cols(), expected.cols());
+  EXPECT_LT((loaded - expected).cwiseAbs().maxCoeff(), 1e-4f);
+}
