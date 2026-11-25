@@ -34,7 +34,7 @@ Options:
   -c,--character-mesh         (FBX Output file only) Saves the Character Mesh to the output file.
 ```
 
-* Example 1: Apply animation from an s0 model to a s4 model for high-res rendering (ie. with mesh). With the `.model` file, the fbx model gets the parameter transform, and the glb motion maps onto it by parameter name.
+* Example 1: Apply animation from an s0 model to a s4 model for high-res rendering (ie. with mesh). With the `.model` file, the fbx model gets the parameter transform, and the glb motion maps onto it by parameter name. Without `-p`, an fbx model that momentum wrote uses the rig that it was saved with.
 
 <OssOnly>
 ```
