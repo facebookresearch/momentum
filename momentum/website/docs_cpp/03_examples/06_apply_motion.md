@@ -4,7 +4,7 @@ sidebar_position: 6
 
 # Apply Motion
 
-The `apply_motion` example applies the motion of a motion file to the characters of a model file, and saves them in FBX, glTF/GLB or BVH format. Use the `-m` or `--model` option to specify the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`), and the `-d` or `--motion` option to specify the motion file (`.glb`, `.gltf`, `.fbx`, or `.bvh`); a motion file of another format is an error. When the model file has several characters, or with `--character`, each character gets the motion of the motion-file character with the same name. The `-p` and `-l` options apply a model parameter file and a locator file to the character of the model file, as in `convert_model`.
+The `apply_motion` example applies the motion of a motion file to the characters of a model file, and saves them in FBX, glTF/GLB or BVH format. Use the `-m` or `--model` option to specify the model file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`), and the `-d` or `--motion` option to specify the motion file (`.glb`, `.gltf`, `.fbx`, or `.bvh`); a motion file of another format is an error. The files are read, and `-p`, `-l` and `--character` work, as described in [Files and options shared by the tools](./03_convert_model.md#files-and-options-shared-by-the-tools); `-p` and `-l` apply to the character of the model file.
 
 This example replaces the `-m` option with `-d` of `convert_model`, which is deprecated; both tools write the same files.
 
