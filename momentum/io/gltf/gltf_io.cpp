@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <ranges>
 #include <set>
 #include <variant>
 
@@ -251,6 +252,57 @@ void warnAboutUnloadedMeshes(
   }
   MT_LOGW_IF(
       count > 0, "glTF file has {} meshes without a skin that are not loaded: {}", count, names);
+}
+
+// The name of the skeleton that starts at `skeletonRoots`: the name of a skin that has its root as
+// a joint, or else the name of its root node.
+std::string skeletonName(const fx::gltf::Document& model, std::span<const uint32_t> skeletonRoots) {
+  if (skeletonRoots.empty()) {
+    return {};
+  }
+  const uint32_t root = skeletonRoots.front();
+  for (const auto& skin : model.skins) {
+    if (!skin.name.empty() && std::ranges::find(skin.joints, root) != skin.joints.end()) {
+      return skin.name;
+    }
+  }
+  return root < model.nodes.size() ? model.nodes[root].name : std::string();
+}
+
+// In a document from another tool, a top-level node can hold several characters, such as two hands
+// and an object below one world node. A skinned character there is named after its skeleton (see
+// skeletonName()) instead of after the top-level node.
+void nameCharactersThatShareATopLevelNode(
+    const fx::gltf::Document& model,
+    std::span<const uint32_t> sceneParentMap,
+    std::span<const std::vector<uint32_t>> skeletonRoots,
+    std::vector<CharacterWithNodeMap>& characters) {
+  // The skinned characters come first, one per skeleton, then the objects that loaded, each named
+  // after its own root node.
+  std::vector<uint32_t> topLevelNodes;
+  topLevelNodes.reserve(characters.size());
+  std::ranges::transform(
+      characters | std::views::take(skeletonRoots.size()),
+      std::back_inserter(topLevelNodes),
+      &CharacterWithNodeMap::rootNode);
+  std::ranges::transform(
+      characters | std::views::drop(skeletonRoots.size()),
+      std::back_inserter(topLevelNodes),
+      [&](const CharacterWithNodeMap& object) {
+        return getTopLevelAncestor(object.rootNode, sceneParentMap);
+      });
+  size_t index = 0;
+  for (const auto& roots : skeletonRoots) {
+    const uint32_t topLevelNode = topLevelNodes.at(index);
+    if (topLevelNode != kInvalidNodeId && std::ranges::count(topLevelNodes, topLevelNode) > 1) {
+      // A skeleton without a name keeps the name of the top-level node.
+      std::string name = skeletonName(model, roots);
+      if (!name.empty()) {
+        characters.at(index).character.name = std::move(name);
+      }
+    }
+    ++index;
+  }
 }
 
 // Build the character whose skeleton starts at `skeletonRoots`, named after `rootNode`.
@@ -481,6 +533,7 @@ std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Doc
       }
     }
     if (fromAnotherTool) {
+      nameCharactersThatShareATopLevelNode(model, sceneParentMap, skeletonRoots, characters);
       warnAboutUnloadedMeshes(model, characters);
     }
     return characters;

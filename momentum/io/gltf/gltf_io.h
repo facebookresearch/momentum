@@ -55,8 +55,11 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 ///
 /// A file written by GltfBuilder yields one character per addCharacter() call, with the name it was
 /// exported under. Other files yield one character per independent skinned skeleton, named after
-/// its top-level node, so names need not be unique. A character gets the skinned meshes whose skin
-/// starts at one of its joints; unskinned meshes are added only when the scene has one character.
+/// its top-level node, so names need not be unique. In a file without momentum's joint marks, a
+/// skinned character whose top-level node also holds another character is named after its skin, or
+/// else after the root node of its skeleton, if that has a name. A character gets the skinned
+/// meshes whose skin starts at one of its joints; unskinned meshes are added only when the scene
+/// has one character.
 ///
 /// @note A file without momentum's joint marks that has skins, such as a file from another tool,
 /// also yields one character per object: a part of the scene outside the skeletons with meshes
