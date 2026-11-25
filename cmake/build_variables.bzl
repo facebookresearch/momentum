@@ -883,10 +883,22 @@ rerun_sources = [
     "gui/rerun/logging_redirect.cpp",
 ]
 
+rerun_sink_public_headers = [
+    "gui/rerun/rerun_sink.h",
+]
+
+rerun_sink_sources = [
+    "gui/rerun/rerun_sink.cpp",
+]
+
 rerun_test_sources = [
     "test/gui/rerun/eigen_adapters_test.cpp",
     "test/gui/rerun/logger_test.cpp",
     "test/gui/rerun/rerun_compat_test.cpp",
+]
+
+rerun_sink_test_sources = [
+    "test/gui/rerun/rerun_sink_test.cpp",
 ]
 
 #==========
