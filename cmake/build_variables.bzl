@@ -941,6 +941,10 @@ export_rig_sources = [
     "examples/convert_model/export_rig.cpp",
 ]
 
+apply_motion_sources = [
+    "examples/convert_model/apply_motion.cpp",
+]
+
 convert_model_test_headers = [
     "examples/convert_model/convert_model_test_helpers.h",
 ]
