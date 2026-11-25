@@ -13,7 +13,6 @@
 #include "momentum/common/checks.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
-#include "momentum/io/common/stream_utils.h"
 #include "momentum/io/gltf/gltf_io.h"
 #include "momentum/io/gltf/gltf_io_internal.h"
 #include "momentum/io/gltf/gltf_skeleton_io.h"
@@ -22,46 +21,9 @@
 #include "momentum/math/constants.h"
 
 #include <algorithm>
-#include <fstream>
-#include <limits>
 #include <span>
 
 namespace momentum {
-
-namespace {
-
-fx::gltf::Document loadModel(
-    const std::variant<filesystem::path, std::span<const std::byte>>& input) {
-  fx::gltf::Document model;
-  constexpr uint32_t kMax = std::numeric_limits<uint32_t>::max();
-  constexpr fx::gltf::ReadQuotas kQuotas = {8, kMax, kMax};
-
-  std::visit(
-      [&](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, filesystem::path>) {
-          // Read first 4 chars for file sensing (https://docs.fileformat.com/3d/glb/)
-          // It is ASCII string "glTF", and can be used to identify data as Binary glTF
-          std::string magic;
-          std::ifstream infile(arg);
-          MT_THROW_IF(!infile.is_open(), "Unable to open: {}", arg.string());
-          std::copy_n(std::istreambuf_iterator<char>(infile.rdbuf()), 4, std::back_inserter(magic));
-          if (magic == "glTF") {
-            model = fx::gltf::LoadFromBinary(arg.string(), kQuotas);
-          } else {
-            model = fx::gltf::LoadFromText(arg.string(), kQuotas);
-          }
-        } else if constexpr (std::is_same_v<T, std::span<const std::byte>>) {
-          ispanstream inputStream(arg);
-          model = fx::gltf::LoadFromBinary(inputStream, "", kQuotas);
-        }
-      },
-      input);
-
-  return model;
-}
-
-} // namespace
 
 std::tuple<MotionParameters, IdentityParameters> getMotionFromJson(
     const fx::gltf::Document& model,
@@ -197,9 +159,7 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
   // load Skeleton and Mesh
   // ---------------------------------------------
   try {
-    // Set maximum filesize to 4 gigabyte (glb hard limit due to uint32).
-    // Need to fork gltf load to support dynamic loading at some point if files get too big
-    fx::gltf::Document model = loadModel(input);
+    fx::gltf::Document model = loadGltfDocument(input);
     auto characters = loadGltfCharactersInternal(model);
     auto& loaded = selectGltfCharacter(characters);
     Character& character = loaded.character;
@@ -217,7 +177,7 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
         mapParameters ? mapIdentityToCharacter(identity, character) : std::get<1>(identity),
         fps};
   } catch (std::runtime_error& err) {
-    MT_THROW("Unable to load gltf : {}", err.what());
+    MT_THROW("{}", gltfLoadErrorMessage(err.what()));
   }
 }
 
@@ -426,29 +386,34 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesFor
 std::tuple<Character, std::vector<SkeletonState>, std::vector<float>>
 loadCharacterWithSkeletonStatesCommon(
     const std::variant<filesystem::path, std::span<const std::byte>>& input) {
-  const fx::gltf::Document model = loadModel(input);
-  std::vector<size_t> nodeToObjectMap;
-  Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
+  return loadFromInput(
+      input,
+      [](const fx::gltf::Document& model)
+          -> std::tuple<Character, std::vector<SkeletonState>, std::vector<float>> {
+        std::vector<size_t> nodeToObjectMap;
+        Character character = loadGltfCharacterInternal(model, nodeToObjectMap);
 
-  const auto* animation = findAnimationForCharacter(model, character, nodeToObjectMap);
-  if (animation == nullptr) {
-    MT_LOGW("No animation of the character found in gltf file");
-    return {std::move(character), std::vector<SkeletonState>(), std::vector<float>()};
-  }
-  // Only the animations after the selected one can also animate the character.
-  const auto later = std::span(model.animations)
-                         .subspan(static_cast<size_t>(animation - model.animations.data()) + 1);
-  if (std::ranges::any_of(later, [&](const fx::gltf::Animation& candidate) {
-        return animatesCharacter(model, candidate, character, nodeToObjectMap);
-      })) {
-    MT_LOGW(
-        "More than one animation in the gltf file animates the character. Only the first one will "
-        "be used.");
-  }
+        const auto* animation = findAnimationForCharacter(model, character, nodeToObjectMap);
+        if (animation == nullptr) {
+          MT_LOGW("No animation of the character found in gltf file");
+          return {std::move(character), std::vector<SkeletonState>(), std::vector<float>()};
+        }
+        // Only the animations after the selected one can also animate the character.
+        const auto later =
+            std::span(model.animations)
+                .subspan(static_cast<size_t>(animation - model.animations.data()) + 1);
+        if (std::ranges::any_of(later, [&](const fx::gltf::Animation& candidate) {
+              return animatesCharacter(model, candidate, character, nodeToObjectMap);
+            })) {
+          MT_LOGW(
+              "More than one animation in the gltf file animates the character. Only the first one will "
+              "be used.");
+        }
 
-  auto [states, timestamps] =
-      loadSkeletonStatesForCharacter(model, *animation, character, nodeToObjectMap);
-  return {std::move(character), std::move(states), std::move(timestamps)};
+        auto [states, timestamps] =
+            loadSkeletonStatesForCharacter(model, *animation, character, nodeToObjectMap);
+        return {std::move(character), std::move(states), std::move(timestamps)};
+      });
 }
 
 } // namespace momentum
