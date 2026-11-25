@@ -11,18 +11,21 @@
 #include "momentum/character/parameter_transform.h"
 #include "momentum/character/skeleton.h"
 #include "momentum/common/exception.h"
+#include "momentum/common/log.h"
 #include "momentum/io/common/stream_utils.h"
 #include "momentum/math/constants.h"
 #include "momentum/math/utility.h"
 
 #include <Eigen/Geometry>
 
+#include <array>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <stack>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace momentum {
@@ -410,44 +413,6 @@ std::tuple<Character, MotionParameters, float> loadBvhFromStream(std::istream& s
 // Save helpers (Momentum -> BVH)
 // ---------------------------------------------------------------------------
 
-// Build BvhJointData from a Character's skeleton, using the standard BVH channel layout:
-// Root joint gets 6 channels (Xposition, Yposition, Zposition, Zrotation, Xrotation, Yrotation),
-// non-root joints get 3 rotation channels (Zrotation, Xrotation, Yrotation).
-std::vector<BvhJointData> buildBvhJointsFromCharacter(const Character& character) {
-  const auto& skeleton = character.skeleton;
-  std::vector<BvhJointData> bvhJoints;
-  bvhJoints.reserve(skeleton.joints.size());
-
-  size_t channelOffset = 0;
-  for (const auto& joint : skeleton.joints) {
-    BvhJointData bvhJoint;
-    bvhJoint.name = joint.name;
-    bvhJoint.parentIndex = joint.parent;
-    bvhJoint.offset = joint.translationOffset;
-    bvhJoint.channelOffset = channelOffset;
-
-    if (joint.parent == kInvalidIndex) {
-      // Root joint: position + rotation channels
-      bvhJoint.channels = {
-          BvhChannel::Xposition,
-          BvhChannel::Yposition,
-          BvhChannel::Zposition,
-          BvhChannel::Zrotation,
-          BvhChannel::Xrotation,
-          BvhChannel::Yrotation};
-      channelOffset += 6;
-    } else {
-      // Non-root joint: rotation channels only
-      bvhJoint.channels = {BvhChannel::Zrotation, BvhChannel::Xrotation, BvhChannel::Yrotation};
-      channelOffset += 3;
-    }
-
-    bvhJoints.push_back(std::move(bvhJoint));
-  }
-
-  return bvhJoints;
-}
-
 // Collect children for each joint in the skeleton
 std::vector<std::vector<size_t>> buildChildMap(const Skeleton& skeleton) {
   const auto numJoints = skeleton.joints.size();
@@ -461,41 +426,122 @@ std::vector<std::vector<size_t>> buildChildMap(const Skeleton& skeleton) {
   return children;
 }
 
-// Write a single joint and its subtree recursively
+// Channel values are written with 4 decimals, so a smaller joint value is written as zero.
+constexpr float kWrittenAsZero = 5e-5f;
+
+constexpr std::array<BvhChannel, 3> kPositionChannels = {
+    BvhChannel::Xposition,
+    BvhChannel::Yposition,
+    BvhChannel::Zposition};
+constexpr std::array<BvhChannel, 3> kRotationChannels = {
+    BvhChannel::Zrotation,
+    BvhChannel::Xrotation,
+    BvhChannel::Yrotation};
+
+// Whether each joint gets position channels: root joints, and joints that `jointMotion` (joint
+// parameters x frames) translates in some frame.
+std::vector<bool> jointsWithPositionChannels(
+    const Skeleton& skeleton,
+    const MatrixXf& jointMotion) {
+  std::vector<bool> result(skeleton.joints.size());
+  for (size_t joint = 0; joint < skeleton.joints.size(); ++joint) {
+    const auto base = static_cast<Eigen::Index>(joint * kParametersPerJoint);
+    result.at(joint) = skeleton.joints.at(joint).parent == kInvalidIndex ||
+        !jointMotion.middleRows(base + TX, 3).isZero(kWrittenAsZero);
+  }
+  return result;
+}
+
+// Appends `name` to the comma-separated `list`.
+void appendName(std::string& list, std::string_view name) {
+  if (!list.empty()) {
+    list += ", ";
+  }
+  list += name;
+}
+
+// Warns about the data of `character` and the joint scales of `jointMotion` (joint parameters x
+// frames), which a BVH file cannot store.
+void warnAboutDataThatIsNotSaved(const Character& character, const MatrixXf& jointMotion) {
+  std::string notSaved;
+  if (character.mesh != nullptr) {
+    appendName(notSaved, "mesh");
+  }
+  if (!character.locators.empty()) {
+    appendName(notSaved, "locators");
+  }
+  if (character.collision != nullptr && !character.collision->empty()) {
+    appendName(notSaved, "collision geometry");
+  }
+  if (!character.physicalProperties.empty()) {
+    appendName(notSaved, "physical properties");
+  }
+  // "{}" is empty metadata, as isEmptyMetadata() in io_json_utils says, which io_bvh does not link.
+  if (!character.metadata.empty() && character.metadata != "{}") {
+    appendName(notSaved, "metadata");
+  }
+  if (!notSaved.empty()) {
+    MT_LOGW(
+        "BVH export: a BVH file stores only a skeleton and its motion; not saved: {}", notSaved);
+  }
+
+  std::string scaledJoints;
+  for (size_t joint = 0; joint < character.skeleton.joints.size(); ++joint) {
+    const auto row = static_cast<Eigen::Index>(joint * kParametersPerJoint + SC);
+    if (!jointMotion.row(row).isZero(kWrittenAsZero)) {
+      appendName(scaledJoints, character.skeleton.joints[joint].name);
+    }
+  }
+  if (!scaledJoints.empty()) {
+    MT_LOGW(
+        "BVH export: BVH cannot store joint scales; the scales of these joints are not saved: {}",
+        scaledJoints);
+  }
+}
+
+// Writes `joint` and the joints below it to the HIERARCHY section, and appends them to `order` in
+// the order in which the section lists them, which is the order of their channels in a frame.
 void writeBvhJoint(
     std::ostream& stream,
     const Skeleton& skeleton,
-    const std::vector<BvhJointData>& bvhJoints,
     const std::vector<std::vector<size_t>>& children,
-    size_t jointIdx,
-    int depth) {
-  MT_THROW_IF(jointIdx >= skeleton.joints.size(), "Joint index out of range");
+    const std::vector<bool>& hasPositionChannels,
+    size_t joint,
+    int depth,
+    std::vector<size_t>& order) {
+  order.push_back(joint);
   const auto depthSz = static_cast<std::string::size_type>(depth);
   const auto indent = std::string(depthSz * 2, ' ');
   const auto innerIndent = std::string((depthSz + 1) * 2, ' ');
 
   // Write joint header
-  if (skeleton.joints[jointIdx].parent == kInvalidIndex) {
-    stream << "ROOT " << skeleton.joints[jointIdx].name << "\n";
+  const auto& skeletonJoint = skeleton.joints.at(joint);
+  if (skeletonJoint.parent == kInvalidIndex) {
+    stream << "ROOT " << skeletonJoint.name << "\n";
   } else {
-    stream << indent << "JOINT " << skeleton.joints[jointIdx].name << "\n";
+    stream << indent << "JOINT " << skeletonJoint.name << "\n";
   }
   stream << indent << "{\n";
 
   // Write offset
-  const auto& offset = bvhJoints[jointIdx].offset;
+  const auto& offset = skeletonJoint.translationOffset;
   stream << innerIndent << "OFFSET " << std::fixed << std::setprecision(4) << offset[0] << " "
          << offset[1] << " " << offset[2] << "\n";
 
   // Write channels
-  const auto& channels = bvhJoints[jointIdx].channels;
-  stream << innerIndent << "CHANNELS " << channels.size();
-  for (const auto& ch : channels) {
-    stream << " " << channelTypeName(ch);
+  const bool positions = hasPositionChannels.at(joint);
+  stream << innerIndent << "CHANNELS " << (positions ? 6 : 3);
+  if (positions) {
+    for (const auto channel : kPositionChannels) {
+      stream << " " << channelTypeName(channel);
+    }
+  }
+  for (const auto channel : kRotationChannels) {
+    stream << " " << channelTypeName(channel);
   }
   stream << "\n";
 
-  if (children[jointIdx].empty()) {
+  if (children.at(joint).empty()) {
     // Leaf joint: write an End Site with zero offset
     stream << innerIndent << "End Site\n";
     stream << innerIndent << "{\n";
@@ -503,125 +549,133 @@ void writeBvhJoint(
     stream << innerIndent << "}\n";
   } else {
     // Recurse into children
-    for (const auto childIdx : children[jointIdx]) {
-      writeBvhJoint(stream, skeleton, bvhJoints, children, childIdx, depth + 1);
+    for (const auto child : children.at(joint)) {
+      writeBvhJoint(stream, skeleton, children, hasPositionChannels, child, depth + 1, order);
     }
   }
 
   stream << indent << "}\n";
 }
 
-// Write the HIERARCHY section of a BVH file to a stream
-void writeBvhHierarchy(
+// Writes the HIERARCHY section, one ROOT per root joint, and returns the joints in the order in
+// which it lists them.
+std::vector<size_t> writeBvhHierarchy(
     std::ostream& stream,
-    const Character& character,
-    const std::vector<BvhJointData>& bvhJoints) {
-  const auto& skeleton = character.skeleton;
+    const Skeleton& skeleton,
+    const std::vector<bool>& hasPositionChannels) {
   stream << "HIERARCHY\n";
-
   const auto children = buildChildMap(skeleton);
-
-  // Find and write root joints
-  for (size_t i = 0; i < skeleton.joints.size(); ++i) {
-    if (skeleton.joints[i].parent == kInvalidIndex) {
-      writeBvhJoint(stream, skeleton, bvhJoints, children, i, 0);
+  std::vector<size_t> order;
+  order.reserve(skeleton.joints.size());
+  for (size_t joint = 0; joint < skeleton.joints.size(); ++joint) {
+    if (skeleton.joints[joint].parent == kInvalidIndex) {
+      writeBvhJoint(stream, skeleton, children, hasPositionChannels, joint, 0, order);
     }
   }
+  return order;
 }
 
-// Convert Momentum model parameters to BVH channel values for one frame
-VectorXf convertModelParamsToBvhFrame(
-    const std::vector<BvhJointData>& bvhJoints,
-    const MatrixXf& motion,
-    Eigen::Index frameIdx) {
-  // Count total channels
-  size_t totalChannels = 0;
-  for (const auto& joint : bvhJoints) {
-    totalChannels += joint.channels.size();
-  }
-
-  VectorXf frameData = VectorXf::Zero(totalChannels);
-
-  for (size_t jointIdx = 0; jointIdx < bvhJoints.size(); ++jointIdx) {
-    const auto& bvhJoint = bvhJoints[jointIdx];
-    const auto jointParamBase = static_cast<Eigen::Index>(jointIdx * kParametersPerJoint);
-
-    // Get Momentum rotation values (rx, ry, rz in radians)
-    const float rx = motion(jointParamBase + RX, frameIdx);
-    const float ry = motion(jointParamBase + RY, frameIdx);
-    const float rz = motion(jointParamBase + RZ, frameIdx);
-
-    // Convert Momentum ZYX rotation to quaternion: R = Rz(rz) * Ry(ry) * Rx(rx)
-    const Quaternionf q = Quaternionf(Eigen::AngleAxisf(rz, Vector3f::UnitZ())) *
-        Quaternionf(Eigen::AngleAxisf(ry, Vector3f::UnitY())) *
-        Quaternionf(Eigen::AngleAxisf(rx, Vector3f::UnitX()));
-
-    // Collect rotation and position channel indices
-    std::vector<int> rotAxes;
-    std::vector<size_t> rotChannelIndices;
-    for (size_t chIdx = 0; chIdx < bvhJoint.channels.size(); ++chIdx) {
-      const auto ch = bvhJoint.channels[chIdx];
-      if (isRotationChannel(ch)) {
-        rotAxes.push_back(rotationAxisIndex(ch));
-        rotChannelIndices.push_back(bvhJoint.channelOffset + chIdx);
-      } else if (isPositionChannel(ch)) {
-        const auto dataIdx = static_cast<Eigen::Index>(bvhJoint.channelOffset + chIdx);
-        frameData[dataIdx] = motion(jointParamBase + positionParameterIndex(ch), frameIdx);
-      }
-    }
-
-    if (rotAxes.size() == 3 && rotChannelIndices.size() == 3) {
-      // Decompose the quaternion into Euler angles matching the BVH channel order
-      const Vector3f angles = rotationMatrixToEuler(
-          q.toRotationMatrix(), rotAxes[0], rotAxes[1], rotAxes[2], EulerConvention::Intrinsic);
-
-      const float rad2deg = 180.0f / pi<float>();
-      for (size_t k = 0; k < 3; ++k) {
-        frameData[rotChannelIndices[k]] = angles[k] * rad2deg;
-      }
-    }
-  }
-
-  return frameData;
-}
-
-// Write the MOTION section of a BVH file to a stream
-void writeBvhMotion(
+// Writes the channel values of one frame of `jointMotion` (joint parameters x frames): for each
+// joint in `order`, its translation joint parameters when it has position channels, then its local
+// rotation as Euler angles in degrees in the order of the rotation channels. BVH joints have no
+// pre-rotation, so each joint's pre-rotation is folded into its rotation channels.
+void writeBvhFrame(
     std::ostream& stream,
-    const std::vector<BvhJointData>& bvhJoints,
-    const MatrixXf& motion,
-    float fps) {
-  MT_THROW_IF(fps <= 0.0f, "fps must be positive for BVH export");
+    const Skeleton& skeleton,
+    const MatrixXf& jointMotion,
+    Eigen::Index frame,
+    const std::vector<size_t>& order,
+    const std::vector<bool>& hasPositionChannels) {
+  constexpr float kRadiansToDegrees = 180.0f / pi<float>();
+  bool first = true;
+  const auto write = [&](float value) {
+    if (!first) {
+      stream << " ";
+    }
+    first = false;
+    stream << std::fixed << std::setprecision(4) << value;
+  };
+  for (const size_t joint : order) {
+    const auto base = static_cast<Eigen::Index>(joint * kParametersPerJoint);
+    if (hasPositionChannels.at(joint)) {
+      for (const auto channel : kPositionChannels) {
+        write(jointMotion(base + positionParameterIndex(channel), frame));
+      }
+    }
 
-  const auto numFrames = motion.cols();
+    // The local rotation of a Momentum joint (see JointState): R = Rpre * Rz(rz) * Ry(ry) * Rx(rx)
+    const Quaternionf q = skeleton.joints.at(joint).preRotation *
+        Quaternionf(Eigen::AngleAxisf(jointMotion(base + RZ, frame), Vector3f::UnitZ())) *
+        Quaternionf(Eigen::AngleAxisf(jointMotion(base + RY, frame), Vector3f::UnitY())) *
+        Quaternionf(Eigen::AngleAxisf(jointMotion(base + RX, frame), Vector3f::UnitX()));
+    const Vector3f angles = rotationMatrixToEuler(
+        q.toRotationMatrix(),
+        rotationAxisIndex(kRotationChannels[0]),
+        rotationAxisIndex(kRotationChannels[1]),
+        rotationAxisIndex(kRotationChannels[2]),
+        EulerConvention::Intrinsic);
+    for (Eigen::Index axis = 0; axis < 3; ++axis) {
+      write(angles[axis] * kRadiansToDegrees);
+    }
+  }
+  stream << "\n";
+}
 
+// The joint parameters (joint parameters x frames) of `motion`, the model parameters of
+// `character` (model parameters x frames), with the identity `offsets` added as
+// ParameterTransform::apply(CharacterParameters) adds them.
+MatrixXf
+toJointMotion(const Character& character, const MatrixXf& motion, const VectorXf& offsets) {
+  const auto& parameterTransform = character.parameterTransform;
+  MT_THROW_IF(
+      motion.rows() != parameterTransform.numAllModelParameters(),
+      "BVH export: the motion has {} rows, but the character has {} model parameters",
+      motion.rows(),
+      parameterTransform.numAllModelParameters());
+  MT_THROW_IF(
+      offsets.size() != 0 && offsets.size() != parameterTransform.numJointParameters(),
+      "BVH export: the offsets have {} values, but the character has {} joint parameters",
+      offsets.size(),
+      parameterTransform.numJointParameters());
+  MatrixXf jointMotion = parameterTransform.transform * motion;
+  if (offsets.size() != 0) {
+    jointMotion.colwise() += offsets;
+  }
+  return jointMotion;
+}
+
+// The text of a BVH file with `character` and its `jointMotion` (joint parameters x frames).
+std::string bvhText(const Character& character, const MatrixXf& jointMotion, float fps) {
+  const auto& skeleton = character.skeleton;
+  MT_THROW_IF(skeleton.joints.empty(), "BVH export: the character has no joints");
+  MT_THROW_IF(
+      jointMotion.rows() != static_cast<Eigen::Index>(skeleton.joints.size() * kParametersPerJoint),
+      "BVH export: the motion has {} joint parameters, but the skeleton has {}",
+      jointMotion.rows(),
+      skeleton.joints.size() * kParametersPerJoint);
+  MT_THROW_IF(fps <= 0.0f, "BVH export: fps must be positive, not {}", fps);
+  warnAboutDataThatIsNotSaved(character, jointMotion);
+
+  std::ostringstream stream;
+  const auto hasPositionChannels = jointsWithPositionChannels(skeleton, jointMotion);
+  const auto order = writeBvhHierarchy(stream, skeleton, hasPositionChannels);
   stream << "MOTION\n";
-  stream << "Frames: " << numFrames << "\n";
+  stream << "Frames: " << jointMotion.cols() << "\n";
   stream << "Frame Time: " << std::fixed << std::setprecision(6) << (1.0f / fps) << "\n";
-
-  for (Eigen::Index frameIdx = 0; frameIdx < numFrames; ++frameIdx) {
-    const VectorXf frameData = convertModelParamsToBvhFrame(bvhJoints, motion, frameIdx);
-
-    for (Eigen::Index i = 0; i < frameData.size(); ++i) {
-      if (i > 0) {
-        stream << " ";
-      }
-      stream << std::fixed << std::setprecision(4) << frameData[i];
-    }
-    stream << "\n";
+  for (Eigen::Index frame = 0; frame < jointMotion.cols(); ++frame) {
+    writeBvhFrame(stream, skeleton, jointMotion, frame, order, hasPositionChannels);
   }
+  return stream.str();
 }
 
-// Write a Character with motion to a BVH stream
-void saveBvhToStream(
-    std::ostream& stream,
-    const Character& character,
-    const MatrixXf& motion,
-    float fps) {
-  const auto bvhJoints = buildBvhJointsFromCharacter(character);
-
-  writeBvhHierarchy(stream, character, bvhJoints);
-  writeBvhMotion(stream, bvhJoints, motion, fps);
+// Writes the BVH `text` to `filepath`. Writing the text only when it is complete leaves the file
+// unchanged when the export throws.
+void writeBvhFile(const filesystem::path& filepath, const std::string& text) {
+  std::ofstream stream(filepath, std::ios::binary);
+  MT_THROW_IF(!stream.is_open(), "Failed to open BVH file for writing: {}", filepath.string());
+  stream << text;
+  stream.close();
+  MT_THROW_IF(stream.fail(), "Failed to write BVH file: {}", filepath.string());
 }
 
 } // namespace
@@ -653,40 +707,38 @@ std::tuple<Character, MotionParameters, float> loadBvhCharacterWithMotion(
 }
 
 void saveBvhCharacter(const filesystem::path& filepath, const Character& character) {
-  std::ofstream stream(filepath);
-  MT_THROW_IF(!stream.is_open(), "Failed to open BVH file for writing: {}", filepath.string());
-
-  // Write with zero motion (single frame, all zeros)
-  const auto numParams =
-      static_cast<Eigen::Index>(character.skeleton.joints.size() * kParametersPerJoint);
-  MatrixXf motion = MatrixXf::Zero(numParams, 1);
-  saveBvhToStream(stream, character, motion, 30.0f);
+  // The rest pose: a single frame of zero model parameters
+  const MatrixXf motion = MatrixXf::Zero(character.parameterTransform.numAllModelParameters(), 1);
+  writeBvhFile(filepath, bvhText(character, toJointMotion(character, motion, VectorXf()), 30.0f));
 }
 
 void saveBvhCharacterWithMotion(
     const filesystem::path& filepath,
     const Character& character,
     const MotionParameters& motionParams,
-    float fps) {
-  std::ofstream stream(filepath);
-  MT_THROW_IF(!stream.is_open(), "Failed to open BVH file for writing: {}", filepath.string());
+    float fps,
+    const VectorXf& offsets) {
+  const auto& motion = std::get<1>(motionParams);
+  writeBvhFile(filepath, bvhText(character, toJointMotion(character, motion, offsets), fps));
+}
 
-  const auto& [paramNames, motion] = motionParams;
-  saveBvhToStream(stream, character, motion, fps);
+void saveBvhCharacterWithJointParams(
+    const filesystem::path& filepath,
+    const Character& character,
+    const MatrixXf& jointParams,
+    float fps) {
+  writeBvhFile(filepath, bvhText(character, jointParams, fps));
 }
 
 std::vector<std::byte> saveBvhCharacterWithMotion(
     const Character& character,
     const MotionParameters& motionParams,
-    float fps) {
-  const auto& [paramNames, motion] = motionParams;
-
-  std::ostringstream oss;
-  saveBvhToStream(oss, character, motion, fps);
-
-  const std::string str = oss.str();
-  std::vector<std::byte> bytes(str.size());
-  std::memcpy(bytes.data(), str.data(), str.size());
+    float fps,
+    const VectorXf& offsets) {
+  const auto& motion = std::get<1>(motionParams);
+  const std::string text = bvhText(character, toJointMotion(character, motion, offsets), fps);
+  std::vector<std::byte> bytes(text.size());
+  std::memcpy(bytes.data(), text.data(), text.size());
   return bytes;
 }
 
