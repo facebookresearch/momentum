@@ -37,17 +37,7 @@ struct MeshBuffers {
 std::vector<uint32_t> loadIndexBuffer(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive) {
-  auto indices = copyAccessorBuffer<uint32_t>(model, primitive.indices);
-  if (!indices.empty()) {
-    return indices;
-  }
-
-  const auto shortIndices = copyAccessorBuffer<uint16_t>(model, primitive.indices);
-  indices.reserve(shortIndices.size());
-  for (const auto index : shortIndices) {
-    indices.push_back(index);
-  }
-  return indices;
+  return copyAccessorBuffer<uint32_t>(model, primitive.indices);
 }
 
 std::vector<Vector3i> makeTriangleFaces(const std::vector<uint32_t>& indices) {
@@ -83,6 +73,50 @@ std::vector<T> loadOptionalAttribute(
     return {};
   }
   return copyAccessorBuffer<T>(model, attribute->second);
+}
+
+// The colors of accessor `id`, which exists, without alpha: it has `Color4` elements when it has
+// alpha, and `Color3` elements otherwise.
+template <typename Color3, typename Color4>
+std::vector<Color3> loadColorsWithoutAlpha(const fx::gltf::Document& model, int32_t id) {
+  if (model.accessors.at(id).type != fx::gltf::Accessor::Type::Vec4) {
+    return copyAccessorBuffer<Color3>(model, id);
+  }
+  const std::vector<Color4> colors = copyAccessorBuffer<Color4>(model, id);
+  std::vector<Color3> result(colors.size());
+  std::ranges::transform(
+      colors, result.begin(), [](const Color4& color) { return color.template head<3>(); });
+  return result;
+}
+
+// The vertex colors of `primitive`, from colors with or without alpha of any component type that
+// the glTF format allows: normalized unsigned bytes and shorts, and floats. Unsigned bytes are
+// read as they are stored.
+std::vector<Vector3b> loadColors(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive) {
+  const auto attribute = primitive.attributes.find("COLOR_0");
+  if (attribute == primitive.attributes.end()) {
+    return {};
+  }
+  const auto id = static_cast<int32_t>(attribute->second);
+  MT_THROW_IF(
+      attribute->second >= model.accessors.size(),
+      "Accessor {} of the vertex colors does not exist; the file has {} accessors",
+      attribute->second,
+      model.accessors.size());
+  const auto componentType = model.accessors.at(id).componentType;
+  if (componentType == fx::gltf::Accessor::ComponentType::UnsignedByte) {
+    return loadColorsWithoutAlpha<Vector3b, Vector4b>(model, id);
+  }
+  // Normalized unsigned shorts come in [0, 1], as floats do.
+  const std::vector<Vector3f> colors = loadColorsWithoutAlpha<Vector3f, Vector4f>(model, id);
+  std::vector<Vector3b> result(colors.size());
+  std::ranges::transform(colors, result.begin(), [](const Vector3f& color) {
+    return Vector3b(
+        (255.0f * color.cwiseMax(0.0f).cwiseMin(1.0f)).array().round().cast<uint8_t>().matrix());
+  });
+  return result;
 }
 
 std::vector<Vector3f> loadPositions(
@@ -171,7 +205,7 @@ MeshBuffers loadMeshBuffers(
       buffers.positions.size());
   MT_LOGT_IF(buffers.normals.empty(), "no vertex normal found");
 
-  buffers.colors = loadOptionalAttribute<Vector3b>(model, primitive, "COLOR_0");
+  buffers.colors = loadColors(model, primitive);
   MT_CHECK(
       buffers.colors.empty() || buffers.colors.size() == buffers.positions.size(),
       "col: {}, pos: {}",
@@ -362,29 +396,24 @@ size_t addBlendShapes(
 std::vector<Vector4f> loadWeightsFromAccessor(
     const fx::gltf::Document& model,
     int32_t accessorIdx) {
-  std::vector<Vector4f> weightsData = copyAlignedAccessorBuffer<Vector4f>(model, accessorIdx);
-  if (weightsData.empty()) {
-    // Try fallback with normalized unsigned short weights (per glTF 2.0 spec, WEIGHTS_n can be
-    // FLOAT, UNSIGNED_BYTE normalized, or UNSIGNED_SHORT normalized).
-    auto weightsShort = copyAccessorBuffer<Vector4s>(model, accessorIdx);
-    if (!weightsShort.empty()) {
-      weightsData.reserve(weightsShort.size());
-      for (const auto& value : weightsShort) {
-        weightsData.emplace_back(value.cast<float>() / 65535.0f);
-      }
-    }
+  // The glTF format allows float, normalized unsigned byte and normalized unsigned short weights.
+  // Unsigned byte and short weights are read as normalized also when the file does not mark them
+  // so, as momentum always read them.
+  std::vector<Vector4f> weights = copyAlignedAccessorBuffer<Vector4f>(model, accessorIdx);
+  if (weights.empty()) {
+    return weights;
   }
-  if (weightsData.empty()) {
-    // Try fallback with normalized unsigned byte weights.
-    auto weightsByte = copyAccessorBuffer<Vector4b>(model, accessorIdx);
-    if (!weightsByte.empty()) {
-      weightsData.reserve(weightsByte.size());
-      for (const auto& value : weightsByte) {
-        weightsData.emplace_back(value.cast<float>() / 255.0f);
-      }
-    }
+  const auto& accessor = model.accessors.at(accessorIdx);
+  if (accessor.normalized ||
+      (accessor.componentType != fx::gltf::Accessor::ComponentType::UnsignedByte &&
+       accessor.componentType != fx::gltf::Accessor::ComponentType::UnsignedShort)) {
+    return weights;
   }
-  return weightsData;
+  for (auto& weight : weights) {
+    weight = weight.unaryExpr(
+        [&](float value) { return detail::normalizedComponent(value, accessor.componentType); });
+  }
+  return weights;
 }
 
 void addSkinWeights(
@@ -407,13 +436,6 @@ void addSkinWeights(
     std::vector<Vector4s> jointIndices;
     if (jointAttribute != primitive.attributes.end()) {
       jointIndices = copyAccessorBuffer<Vector4s>(model, jointAttribute->second);
-      if (jointIndices.empty()) {
-        // Try fallback with short indices.
-        auto jointIndicesShort = copyAccessorBuffer<Vector4b>(model, jointAttribute->second);
-        for (const auto& value : jointIndicesShort) {
-          jointIndices.emplace_back(value.cast<uint16_t>());
-        }
-      }
     }
 
     // load skinning weight buffer
