@@ -51,8 +51,7 @@ struct SceneCharacter {
   JointParameters offsets;
 };
 
-/// The characters to convert from files that can hold several characters, and the frame rate of
-/// their motion.
+/// The characters to convert, one or several, and the frame rate of their motion.
 struct Scene {
   std::vector<SceneCharacter> characters;
   float fps = 120.0f;
@@ -82,15 +81,20 @@ int findLongestTake(
     std::span<const std::pair<Character, std::vector<MatrixXf>>> characters,
     std::span<const std::string> names);
 
-/// Loads the characters to convert and their motion, when the input has several characters or
-/// options.character_name selects one.
+/// Loads the characters to convert and their motion.
 ///
-/// The characters are those of the model file, or of the motion file when there is no model file,
-/// as loadGltfCharacters(), loadGltfCharactersWithMotion(), loadFbxCharacters() and
+/// When the input has several characters or options.character_name selects one, the characters
+/// are those of the model file, or of the motion file when there is no model file, as
+/// loadGltfCharacters(), loadGltfCharactersWithMotion(), loadFbxCharacters() and
 /// loadFbxCharactersWithMotion() read them; only the one named options.character_name when it is
 /// not empty. Without a model file, each character keeps the motion stored with it in the motion
 /// file. With a model file, each character gets the motion of the motion-file character with the
 /// same name.
+///
+/// Otherwise the input converts as one character, as loadModelCharacter(), loadGlbMotion() and
+/// loadFbxMotion() read it: a file with one character, a file of another format, a file that the
+/// multi-character loaders cannot read (after a warning), or no input file at all (an empty
+/// character).
 ///
 /// The parameter and locator files, and the locator and parameter outputs, apply to one character,
 /// so this throws when they are given for several characters. It also throws when no character has
@@ -98,11 +102,8 @@ int findLongestTake(
 /// file has a motion-file character with the same name.
 ///
 /// @param options The command-line options.
-/// @return The characters with their motion, and its frame rate. nullopt when no character is
-/// selected and the file has one character, is of another format, or cannot be read by the
-/// multi-character loaders (after a warning); loadModelCharacter(), loadGlbMotion() and
-/// loadFbxMotion() then convert the input as one character.
-std::optional<Scene> loadScene(const Options& options);
+/// @return The characters with their motion, and its frame rate.
+Scene loadScene(const Options& options);
 
 /// Loads motion data from a glTF/GLB file. If no separate model was provided,
 /// the character is also loaded from the GLB file.
