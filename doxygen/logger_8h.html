@@ -101,6 +101,7 @@ $(function(){initNavTree('logger_8h.html','',''); });
 <code>#include &lt;rerun.hpp&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;map&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
@@ -112,6 +113,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">World-space ellipsoid collision primitive data prepared for Rerun ellipsoid logging.  <a href="structmomentum_1_1detail_1_1CollisionEllipsoidLogData.html#details">More...</a><br /></td></tr>
 <tr class="memitem:momentum_3A_3Adetail_3A_3ACollisionBoxLogData" id="r_momentum_3A_3Adetail_3A_3ACollisionBoxLogData"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1detail_1_1CollisionBoxLogData.html">momentum::detail::CollisionBoxLogData</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">World-space box collision primitive data prepared for Rerun box logging.  <a href="structmomentum_1_1detail_1_1CollisionBoxLogData.html#details">More...</a><br /></td></tr>
+<tr class="memitem:momentum_3A_3AJointParamsRecorder" id="r_momentum_3A_3AJointParamsRecorder"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmomentum_1_1JointParamsRecorder.html">momentum::JointParamsRecorder</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collects the joint parameters of a character frame by frame, to log them all at once with <a class="el" href="namespacemomentum.html#ad81d87c2ef871e6792b1f523f2b00681" title="Log joint parameters for all frames at once using send_columns.">logJointParamsColumns()</a>, which is much faster than logging each frame.  <a href="classmomentum_1_1JointParamsRecorder.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -138,8 +141,8 @@ Functions</h2></td></tr>
 <tr class="memitem:a58864f67ebc1f8ca33e4f53571660b56" id="r_a58864f67ebc1f8ca33e4f53571660b56"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a58864f67ebc1f8ca33e4f53571660b56">momentum::logJointParamNames</a> (const rerun::RecordingStream &amp;rec, const std::string &amp;worldPrefix, const std::string &amp;posePrefix, std::span&lt; const std::string &gt; names)</td></tr>
 <tr class="memitem:a78b5deb644ef6239223144e34937bd6b" id="r_a78b5deb644ef6239223144e34937bd6b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a78b5deb644ef6239223144e34937bd6b">momentum::logModelParamsColumns</a> (const rerun::RecordingStream &amp;rec, const std::string &amp;worldPrefix, const std::string &amp;posePrefix, std::span&lt; const std::string &gt; names, const Eigen::MatrixXf &amp;<a class="el" href="namespacemomentum.html#a3f6bc1d3f904741180da2507f2a3f480">allParams</a>, std::span&lt; const int64_t &gt; frameIndices, std::span&lt; const double &gt; times)</td></tr>
 <tr class="memdesc:a78b5deb644ef6239223144e34937bd6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log model parameters for all frames at once using send_columns.  <br /></td></tr>
-<tr class="memitem:abd67d48d58703aa556641e55636fbca6" id="r_abd67d48d58703aa556641e55636fbca6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#abd67d48d58703aa556641e55636fbca6">momentum::logJointParamsColumns</a> (const rerun::RecordingStream &amp;rec, const std::string &amp;worldPrefix, const std::string &amp;posePrefix, std::span&lt; const std::string &gt; names, const Eigen::MatrixXf &amp;allJointParams, std::span&lt; const int64_t &gt; frameIndices, std::span&lt; const double &gt; times)</td></tr>
-<tr class="memdesc:abd67d48d58703aa556641e55636fbca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log joint parameters for all frames at once using send_columns.  <br /></td></tr>
+<tr class="memitem:ad81d87c2ef871e6792b1f523f2b00681" id="r_ad81d87c2ef871e6792b1f523f2b00681"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ad81d87c2ef871e6792b1f523f2b00681">momentum::logJointParamsColumns</a> (const rerun::RecordingStream &amp;rec, const std::string &amp;worldPrefix, const std::string &amp;posePrefix, std::span&lt; const std::string &gt; names, const Eigen::Ref&lt; const Eigen::MatrixXf &gt; &amp;allJointParams, std::span&lt; const int64_t &gt; frameIndices, std::span&lt; const double &gt; times)</td></tr>
+<tr class="memdesc:ad81d87c2ef871e6792b1f523f2b00681"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log joint parameters for all frames at once using send_columns.  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

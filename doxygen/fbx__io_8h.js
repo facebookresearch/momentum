@@ -8,6 +8,7 @@ var fbx__io_8h =
       [ "momentum::LoadBlendShapes::No", "namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b", null ],
       [ "momentum::LoadBlendShapes::Yes", "namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bba93cba07454f06a4a960172bbd6e2a435", null ]
     ] ],
+    [ "momentum::joinTakesOnSharedTimeline", "namespacemomentum.html#a73a749e33c6eb0fd320d2e7d64524eb5", null ],
     [ "momentum::loadFbxBlendShapeWeights", "namespacemomentum.html#adf25016db200a7aeafddd3fbe47bd519", null ],
     [ "momentum::loadFbxCharacter", "namespacemomentum.html#a89d491703972937b6d9340c3b7761cc3", null ],
     [ "momentum::loadFbxCharacter", "namespacemomentum.html#abbe1ad912ce6566dfcf6e4457040b667", null ],

@@ -106,64 +106,64 @@ $(function(){initNavTree('gltf__mesh__io_8cpp_source.html','',''); });
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="json__utils_8h.html">momentum/io/common/json_utils.h</a>&quot;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="accessor__utils_8h.html">momentum/io/gltf/utils/accessor_utils.h</a>&quot;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="coordinate__utils_8h.html">momentum/io/gltf/utils/coordinate_utils.h</a>&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="momentum__extension_8h.html">momentum/io/gltf/utils/momentum_extension.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;numeric&gt;</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span>{</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacemomentum.html">momentum</a> {</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">struct </span>TextureBuffers {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  std::vector&lt;Vector2f&gt; coords;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  std::vector&lt;Vector3i&gt; faces;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>};</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">struct </span>MeshBuffers {</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  std::vector&lt;Vector3i&gt; faces;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  std::vector&lt;Vector3f&gt; positions;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  std::vector&lt;Vector3f&gt; normals;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  std::vector&lt;Vector3b&gt; colors;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  TextureBuffers texture;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>};</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>nlohmann::json getMomentumExtension(<span class="keyword">const</span> nlohmann::json&amp; extensionsAndExtras) {</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keywordflow">if</span> (extensionsAndExtras.count(<span class="stringliteral">&quot;extensions&quot;</span>) != 0 &amp;&amp;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>      extensionsAndExtras[<span class="stringliteral">&quot;extensions&quot;</span>].count(<span class="stringliteral">&quot;FB_momentum&quot;</span>) != 0) {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> extensionsAndExtras[<span class="stringliteral">&quot;extensions&quot;</span>][<span class="stringliteral">&quot;FB_momentum&quot;</span>];</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">return</span> nlohmann::json::object();</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  }</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>std::vector&lt;uint32_t&gt; loadIndexBuffer(</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keyword">const</span> fx::gltf::Document&amp; model,</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">const</span> fx::gltf::Primitive&amp; primitive) {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keyword">auto</span> indices = <a class="code hl_function" href="namespacemomentum.html#a8e9f76f18b80a76e1613f326b99d0d9c">copyAccessorBuffer&lt;uint32_t&gt;</a>(model, primitive.indices);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keywordflow">if</span> (!indices.empty()) {</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> indices;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  }</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keyword">const</span> <span class="keyword">auto</span> shortIndices = <a class="code hl_function" href="namespacemomentum.html#a8e9f76f18b80a76e1613f326b99d0d9c">copyAccessorBuffer&lt;uint16_t&gt;</a>(model, primitive.indices);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  indices.reserve(shortIndices.size());</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> index : shortIndices) {</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    indices.push_back(index);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  }</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordflow">return</span> indices;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>std::vector&lt;Vector3i&gt; makeTriangleFaces(<span class="keyword">const</span> std::vector&lt;uint32_t&gt;&amp; indices) {</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(indices.size() % 3 == 0, <span class="stringliteral">&quot;{} % 3 = {}&quot;</span>, indices.size(), indices.size() % 3);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">struct </span>TextureBuffers {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  std::vector&lt;Vector2f&gt; coords;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  std::vector&lt;Vector3i&gt; faces;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">struct </span>MeshBuffers {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  std::vector&lt;Vector3i&gt; faces;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  std::vector&lt;Vector3f&gt; positions;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  std::vector&lt;Vector3f&gt; normals;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  std::vector&lt;Vector3b&gt; colors;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  TextureBuffers texture;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>std::vector&lt;uint32_t&gt; loadIndexBuffer(</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">const</span> fx::gltf::Document&amp; model,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">const</span> fx::gltf::Primitive&amp; primitive) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">auto</span> indices = <a class="code hl_function" href="namespacemomentum.html#a8e9f76f18b80a76e1613f326b99d0d9c">copyAccessorBuffer&lt;uint32_t&gt;</a>(model, primitive.indices);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">if</span> (!indices.empty()) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> indices;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">const</span> <span class="keyword">auto</span> shortIndices = <a class="code hl_function" href="namespacemomentum.html#a8e9f76f18b80a76e1613f326b99d0d9c">copyAccessorBuffer&lt;uint16_t&gt;</a>(model, primitive.indices);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  indices.reserve(shortIndices.size());</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> index : shortIndices) {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    indices.push_back(index);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordflow">return</span> indices;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>}</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>std::vector&lt;Vector3i&gt; makeTriangleFaces(<span class="keyword">const</span> std::vector&lt;uint32_t&gt;&amp; indices) {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(indices.size() % 3 == 0, <span class="stringliteral">&quot;{} % 3 = {}&quot;</span>, indices.size(), indices.size() % 3);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  std::vector&lt;Vector3i&gt; faces(indices.size() / 3);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordflow">if</span> (!faces.empty()) {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    std::copy_n(indices.data(), indices.size(), &amp;faces[0][0]);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  }</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keywordflow">return</span> faces;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>}</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  std::vector&lt;Vector3i&gt; faces(indices.size() / 3);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keywordflow">if</span> (!faces.empty()) {</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    std::copy_n(indices.data(), indices.size(), &amp;faces[0][0]);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  }</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">return</span> faces;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>std::vector&lt;Vector3i&gt; loadTriangleFaces(</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">const</span> fx::gltf::Document&amp; model,</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keyword">const</span> fx::gltf::Primitive&amp; primitive) {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>std::vector&lt;Vector3i&gt; loadTriangleFaces(</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> fx::gltf::Document&amp; model,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">const</span> fx::gltf::Primitive&amp; primitive) {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordflow">if</span> (primitive.indices &lt; 0) {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="comment">// Non-indexed geometry: every three consecutive vertices form a triangle (glTF 2.0, 3.7.2.1).</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; positions = model.accessors.at(primitive.attributes.at(<span class="stringliteral">&quot;POSITION&quot;</span>));</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    std::vector&lt;uint32_t&gt; indices(positions.count);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    std::iota(indices.begin(), indices.end(), 0u);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">return</span> makeTriangleFaces(indices);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  }</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordflow">return</span> makeTriangleFaces(loadIndexBuffer(model, primitive));</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>}</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
@@ -237,7 +237,7 @@ $(function(){initNavTree('gltf__mesh__io_8cpp_source.html','',''); });
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> numPositions,</div>
 <div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keyword">const</span> <span class="keywordtype">size_t</span> vertexOffset,</div>
 <div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    std::vector&lt;Vector3i&gt;&amp; faces) {</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  <span class="keyword">const</span> <span class="keyword">auto</span> extension = getMomentumExtension(primitive);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; extension = <a class="code hl_function" href="namespacemomentum.html#ac3090a2d75cbd7f20f3cf46c04939178">findMomentumExtension</a>(primitive.extensionsAndExtras);</div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  <span class="keywordflow">if</span> (extension.count(<span class="stringliteral">&quot;texcoords&quot;</span>) &gt; 0 &amp;&amp; extension.count(<span class="stringliteral">&quot;texfaces&quot;</span>) &gt; 0) {</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">return</span> loadMomentumTextureBuffers(model, extension);</div>
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  }</div>
@@ -358,7 +358,7 @@ $(function(){initNavTree('gltf__mesh__io_8cpp_source.html','',''); });
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        std::make_unique&lt;BlendShape&gt;(std::span&lt;const Vector3f&gt;(baseVertices), numNewTargets);</div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
 <div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <span class="comment">// load blendshape names from extension</span></div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; extension = getMomentumExtension(primitive.extensionsAndExtras);</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; extension = <a class="code hl_function" href="namespacemomentum.html#ac3090a2d75cbd7f20f3cf46c04939178">findMomentumExtension</a>(primitive.extensionsAndExtras);</div>
 <div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    std::vector&lt;std::string&gt; blendShapeNames =</div>
 <div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        extension.value(<span class="stringliteral">&quot;shapeNames&quot;</span>, std::vector&lt;std::string&gt;());</div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
@@ -669,6 +669,7 @@ $(function(){initNavTree('gltf__mesh__io_8cpp_source.html','',''); });
 <div class="ttc" id="alog_8h_html_a2ed8e96bf3384a14bb4d4d577cba0c0c"><div class="ttname"><a href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a></div><div class="ttdeci">#define MT_LOGW(...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00180">log.h:180</a></div></div>
 <div class="ttc" id="alog_8h_html_abd90ff00ca31139752fadf7372f37fd0"><div class="ttname"><a href="log_8h.html#abd90ff00ca31139752fadf7372f37fd0">MT_LOGW_IF</a></div><div class="ttdeci">#define MT_LOGW_IF(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00186">log.h:186</a></div></div>
 <div class="ttc" id="alog_8h_html_adef8cede26b9d5b655aa5dfc56166445"><div class="ttname"><a href="log_8h.html#adef8cede26b9d5b655aa5dfc56166445">MT_LOGT_IF</a></div><div class="ttdeci">#define MT_LOGT_IF(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00183">log.h:183</a></div></div>
+<div class="ttc" id="amomentum__extension_8h_html"><div class="ttname"><a href="momentum__extension_8h.html">momentum_extension.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a1796636117d23c3bae6d5985503ce232"><div class="ttname"><a href="namespacemomentum.html#a1796636117d23c3bae6d5985503ce232">momentum::BlendShape_u</a></div><div class="ttdeci">::std::unique_ptr&lt; BlendShape &gt; BlendShape_u</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00021">fwd.h:21</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a41bac31ede4b2ec2415c6bbbdacdaf50"><div class="ttname"><a href="namespacemomentum.html#a41bac31ede4b2ec2415c6bbbdacdaf50">momentum::Mesh_u</a></div><div class="ttdeci">::std::unique_ptr&lt; Mesh &gt; Mesh_u</div><div class="ttdef"><b>Definition</b> <a href="math_2fwd_8h_source.html#l00024">fwd.h:24</a></div></div>
@@ -680,6 +681,7 @@ $(function(){initNavTree('gltf__mesh__io_8cpp_source.html','',''); });
 <div class="ttc" id="anamespacemomentum_html_a70f1c805ecb6005e0944ee9d03b57a4b"><div class="ttname"><a href="namespacemomentum.html#a70f1c805ecb6005e0944ee9d03b57a4b">momentum::toMomentumVec3f</a></div><div class="ttdeci">Vector3f toMomentumVec3f(const std::array&lt; float, 3 &gt; &amp;vec) noexcept</div><div class="ttdef"><b>Definition</b> <a href="coordinate__utils_8h_source.html#l00022">coordinate_utils.h:22</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a711de142bba8c91dc9b3d44c5f0dc859"><div class="ttname"><a href="namespacemomentum.html#a711de142bba8c91dc9b3d44c5f0dc859">momentum::SkinWeights_u</a></div><div class="ttdeci">::std::unique_ptr&lt; SkinWeights &gt; SkinWeights_u</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00075">fwd.h:75</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a8e9f76f18b80a76e1613f326b99d0d9c"><div class="ttname"><a href="namespacemomentum.html#a8e9f76f18b80a76e1613f326b99d0d9c">momentum::copyAccessorBuffer</a></div><div class="ttdeci">std::vector&lt; T &gt; copyAccessorBuffer(const fx::gltf::Document &amp;model, int32_t id)</div><div class="ttdef"><b>Definition</b> <a href="accessor__utils_8h_source.html#l00056">accessor_utils.h:56</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ac3090a2d75cbd7f20f3cf46c04939178"><div class="ttname"><a href="namespacemomentum.html#ac3090a2d75cbd7f20f3cf46c04939178">momentum::findMomentumExtension</a></div><div class="ttdeci">const nlohmann::json &amp; findMomentumExtension(const nlohmann::json &amp;extensionsAndExtras)</div><div class="ttdoc">The FB_momentum extension object in a glTF extensionsAndExtras object, or an empty object.</div><div class="ttdef"><b>Definition</b> <a href="momentum__extension_8h_source.html#l00031">momentum_extension.h:31</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ac966fa038c85b7384ba387e6a6334b40"><div class="ttname"><a href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">momentum::kInvalidIndex</a></div><div class="ttdeci">constexpr size_t kInvalidIndex</div><div class="ttdoc">Sentinel value indicating an invalid or unset size_t index.</div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00182">types.h:182</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_aceede6e4dfd7392f7d39b90accf60372"><div class="ttname"><a href="namespacemomentum.html#aceede6e4dfd7392f7d39b90accf60372">momentum::loadWeightsFromAccessor</a></div><div class="ttdeci">std::vector&lt; Vector4f &gt; loadWeightsFromAccessor(const fx::gltf::Document &amp;model, int32_t accessorIdx)</div><div class="ttdoc">Load skin weights from a glTF accessor.</div><div class="ttdef"><b>Definition</b> <a href="#l00362">gltf_mesh_io.cpp:362</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ad575709efc30c71c66a4db5dc9b3492b"><div class="ttname"><a href="namespacemomentum.html#ad575709efc30c71c66a4db5dc9b3492b">momentum::loadSkinnedMesh</a></div><div class="ttdeci">std::tuple&lt; Mesh_u, SkinWeights_u, BlendShape_u &gt; loadSkinnedMesh(const fx::gltf::Document &amp;model, const std::vector&lt; size_t &gt; &amp;meshNodes, const std::vector&lt; size_t &gt; &amp;nodeToObjectMap)</div><div class="ttdoc">Load skinned mesh, skin weights, and blend shapes from the model.</div><div class="ttdef"><b>Definition</b> <a href="#l00474">gltf_mesh_io.cpp:474</a></div></div>

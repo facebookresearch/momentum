@@ -19,6 +19,7 @@ var character__utility_8h =
     [ "momentum::removeJoints", "namespacemomentum.html#a2520884dcdc9ec8ceb533d9b4f87a560", null ],
     [ "momentum::replaceSkeletonHierarchy", "namespacemomentum.html#a1df42ce0cf53d225639ab19b226ed6fb", null ],
     [ "momentum::resolvePhysicalPropertiesJointIndex", "namespacemomentum.html#ac9de731c610cab0f2bf1c7c332845137", null ],
+    [ "momentum::resolvePhysicalPropertiesJointIndices", "namespacemomentum.html#afa4af4dc180207580413dbbc7ecdad6d", null ],
     [ "momentum::scaleCharacter", "namespacemomentum.html#afe3328021234fb4ff010f3b7183f29db", null ],
     [ "momentum::transformCharacter", "namespacemomentum.html#af9f3c6e1508dc52e560a036181b7e2ce", null ],
     [ "momentum::verticesToFaces", "namespacemomentum.html#ae56d4eaa233beeb938ead5e8bea55353", null ],

@@ -5,6 +5,7 @@ var accessor__utils_8h =
     [ "momentum::createAccessorBuffer", "namespacemomentum.html#a65e4f3bb836d92bd4474c9bb24be6531", null ],
     [ "momentum::createSampler", "namespacemomentum.html#aa69a3bb015abd026d4cb42c257dee22a", null ],
     [ "momentum::createSampler", "namespacemomentum.html#af8e329ad2d337a240a035e91d8ed6981", null ],
+    [ "momentum::ensureDocumentHasBuffer", "namespacemomentum.html#a3bea189bfef053f130355fd8c9c10239", null ],
     [ "momentum::getComponentSize", "namespacemomentum.html#a9d05b235978d035c6600f8f43488b95e", null ],
     [ "momentum::getTypeSize", "namespacemomentum.html#a4114a4aff807dfa5707e889f3747ea0e", null ],
     [ "momentum::setAccessorType", "namespacemomentum.html#aa04cc8199948c106e94c3dd9aa77a13d", null ],

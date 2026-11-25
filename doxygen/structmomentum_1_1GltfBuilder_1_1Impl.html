@@ -100,7 +100,9 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1621328506744cb1f84cb8e6e5ca235e" id="r_a1621328506744cb1f84cb8e6e5ca235e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1621328506744cb1f84cb8e6e5ca235e">Impl</a> ()</td></tr>
-<tr class="memitem:a3ada29b5273d5015bbc54d745a761110" id="r_a3ada29b5273d5015bbc54d745a761110"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ada29b5273d5015bbc54d745a761110">resolveCharacterForMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;characterName)</td></tr>
+<tr class="memitem:ac72dcb3196c6a8f164b34aec692f02ff" id="r_ac72dcb3196c6a8f164b34aec692f02ff"><td class="memTemplParams" colspan="2">template&lt;typename AddCharacter&gt; </td></tr>
+<tr class="memitem:ac72dcb3196c6a8f164b34aec692f02ff template"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac72dcb3196c6a8f164b34aec692f02ff">characterForMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const std::string &amp;characterName, AddCharacter &amp;&amp;<a class="el" href="classmomentum_1_1GltfBuilder.html#a64ba33056bbe21025a83533caa9b2055">addCharacter</a>)</td></tr>
+<tr class="memitem:a3a484c89cd1e543d9944a6cfc7e291d2" id="r_a3a484c89cd1e543d9944a6cfc7e291d2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a484c89cd1e543d9944a6cfc7e291d2">recordAnimation</a> (<a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> &amp;data, const std::string &amp;animationName)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -111,7 +113,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00941">941</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00891">891</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1621328506744cb1f84cb8e6e5ca235e" name="a1621328506744cb1f84cb8e6e5ca235e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1621328506744cb1f84cb8e6e5ca235e">&#9670;&#160;</a></span>Impl()</h2>
@@ -128,31 +130,38 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00971">971</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00935">935</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00951">document</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00901">document</a>, and <a class="el" href="momentum__extension_8h_source.html#l00016">momentum::kMomentumExtensionName</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a3ada29b5273d5015bbc54d745a761110" name="a3ada29b5273d5015bbc54d745a761110"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ada29b5273d5015bbc54d745a761110">&#9670;&#160;</a></span>resolveCharacterForMotion()</h2>
+<a id="ac72dcb3196c6a8f164b34aec692f02ff" name="ac72dcb3196c6a8f164b34aec692f02ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac72dcb3196c6a8f164b34aec692f02ff">&#9670;&#160;</a></span>characterForMotion()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename AddCharacter&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> * momentum::GltfBuilder::Impl::resolveCharacterForMotion </td>
+          <td class="memname"><a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> &amp; momentum::GltfBuilder::Impl::characterForMotion </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>character</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span>&#160;)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>characterName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">AddCharacter &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>addCharacter</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -162,9 +171,42 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00959">959</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00911">911</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00953">characterData</a>, <a class="el" href="name__utils_8h_source.html#l00123">momentum::checkMotionTargetJointCount()</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00943">momentum::GltfBuilder::Impl::CharacterData::nodeMap</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00950">momentum::GltfBuilder::addCharacter()</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00903">characterData</a>, <a class="el" href="name__utils_8h_source.html#l00123">momentum::checkMotionTargetJointCount()</a>, <a class="el" href="skeleton_8h_source.html#l00025">momentum::SkeletonT&lt; T &gt;::joints</a>, <a class="el" href="character_8h_source.html#l00082">momentum::Character::name</a>, <a class="el" href="gltf__builder_8cpp_source.html#l00893">momentum::GltfBuilder::Impl::CharacterData::nodeMap</a>, and <a class="el" href="character_8h_source.html#l00036">momentum::Character::skeleton</a>.</p>
+
+</div>
+</div>
+<a id="a3a484c89cd1e543d9944a6cfc7e291d2" name="a3a484c89cd1e543d9944a6cfc7e291d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a484c89cd1e543d9944a6cfc7e291d2">&#9670;&#160;</a></span>recordAnimation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void momentum::GltfBuilder::Impl::recordAnimation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmomentum_1_1GltfBuilder_1_1Impl_1_1CharacterData.html">CharacterData</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>animationName</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00926">926</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="gltf__builder_8cpp_source.html#l00897">momentum::GltfBuilder::Impl::CharacterData::animationIndices</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l00901">document</a>.</p>
 
 </div>
 </div>
@@ -181,7 +223,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00955">955</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00905">905</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>
@@ -197,9 +239,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00953">953</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00903">903</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00959">resolveCharacterForMotion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00911">characterForMotion()</a>.</p>
 
 </div>
 </div>
@@ -215,9 +257,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00951">951</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00901">901</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00971">Impl()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gltf__builder_8cpp_source.html#l00935">Impl()</a>, and <a class="el" href="gltf__builder_8cpp_source.html#l00926">recordAnimation()</a>.</p>
 
 </div>
 </div>
@@ -233,7 +275,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00954">954</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00904">904</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
 
 </div>
 </div>

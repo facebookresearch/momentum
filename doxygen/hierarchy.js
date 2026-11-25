@@ -141,6 +141,7 @@ var hierarchy =
       [ "momentum::ispanstream", "structmomentum_1_1ispanstream.html", null ]
     ] ],
     [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", null ],
+    [ "momentum::JointParamsRecorder", "classmomentum_1_1JointParamsRecorder.html", null ],
     [ "momentum::JointPhysicalProperties", "structmomentum_1_1JointPhysicalProperties.html", null ],
     [ "momentum::JointStateT&lt; T &gt;", "structmomentum_1_1JointStateT.html", null ],
     [ "momentum::JointT&lt; T &gt;", "structmomentum_1_1JointT.html", null ],
@@ -163,6 +164,7 @@ var hierarchy =
     [ "momentum::LowRankCovarianceMatrixT&lt; T &gt;", "classmomentum_1_1LowRankCovarianceMatrixT.html", null ],
     [ "momentum::Marker", "structmomentum_1_1Marker.html", null ],
     [ "momentum::MarkerSequence", "structmomentum_1_1MarkerSequence.html", null ],
+    [ "momentum::MarkerTrack", "structmomentum_1_1MarkerTrack.html", null ],
     [ "momentum::fbx_internal::MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", null ],
     [ "momentum::MeshStateT&lt; T &gt;", "structmomentum_1_1MeshStateT.html", null ],
     [ "momentum::MeshT&lt; T &gt;", "structmomentum_1_1MeshT.html", null ],

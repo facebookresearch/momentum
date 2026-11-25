@@ -13,5 +13,6 @@ var json__utils_8h =
     [ "momentum::parameterTransformToJson", "namespacemomentum.html#ab96431ab5c9c4024c15c77a84a7bb191", null ],
     [ "momentum::poseConstraintsFromJson", "namespacemomentum.html#ae6605834aeab3fb3f186aa02785979ce", null ],
     [ "momentum::poseConstraintsToJson", "namespacemomentum.html#a9bb264a8b00945007bcbd040e79a8500", null ],
-    [ "momentum::toJson", "namespacemomentum.html#a5fbedfbb21a5565b976acedaf9068ffb", null ]
+    [ "momentum::toJson", "namespacemomentum.html#a5fbedfbb21a5565b976acedaf9068ffb", null ],
+    [ "momentum::warnIfMetadataIsNotJson", "namespacemomentum.html#ab6f65bc16b6adb127321c29ba96280a8", null ]
 ];

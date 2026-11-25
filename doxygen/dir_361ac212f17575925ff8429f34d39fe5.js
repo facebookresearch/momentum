@@ -7,6 +7,7 @@ var dir_361ac212f17575925ff8429f34d39fe5 =
     [ "fbx_io_internal.h", "fbx__io__internal_8h.html", "fbx__io__internal_8h" ],
     [ "fbx_memory_stream.cpp", "fbx__memory__stream_8cpp.html", null ],
     [ "fbx_memory_stream.h", "fbx__memory__stream_8h.html", null ],
+    [ "marker_property_names.h", "marker__property__names_8h.html", "marker__property__names_8h" ],
     [ "openfbx_loader.cpp", "openfbx__loader_8cpp.html", "openfbx__loader_8cpp" ],
     [ "openfbx_loader.h", "openfbx__loader_8h.html", "openfbx__loader_8h" ],
     [ "polygon_data.cpp", "polygon__data_8cpp.html", "polygon__data_8cpp" ],

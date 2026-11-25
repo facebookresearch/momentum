@@ -3,7 +3,7 @@ var fbx__io__internal_8h =
     [ "momentum::fbx_internal::SkeletonNodeResult", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult.html", "structmomentum_1_1fbx__internal_1_1SkeletonNodeResult" ],
     [ "momentum::fbx_internal::JointCurveSetup", "structmomentum_1_1fbx__internal_1_1JointCurveSetup.html", "structmomentum_1_1fbx__internal_1_1JointCurveSetup" ],
     [ "momentum::fbx_internal::MeshBlendShapeResult", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult.html", "structmomentum_1_1fbx__internal_1_1MeshBlendShapeResult" ],
-    [ "momentum::fbx_internal::addMetaData", "namespacemomentum_1_1fbx__internal.html#a47ce2c18b255767e35d3224cbc26fdf9", null ],
+    [ "momentum::fbx_internal::addMetaData", "namespacemomentum_1_1fbx__internal.html#abf6e6b3f9a29291e1274aa983d9b2130", null ],
     [ "momentum::fbx_internal::addPhysicalProperties", "namespacemomentum_1_1fbx__internal.html#a2c3cb644f6bbfd9b5f2279e34f9cf39c", null ],
     [ "momentum::fbx_internal::createAnimationCurves", "namespacemomentum_1_1fbx__internal.html#a389c8f8eef8f63ff35f3f5e864523809", null ],
     [ "momentum::fbx_internal::createBlendShapeAnimationCurves", "namespacemomentum_1_1fbx__internal.html#aa499b5116efef2bf9a691d6e9ad1f2bf", null ],
@@ -20,13 +20,12 @@ var fbx__io__internal_8h =
     [ "momentum::fbx_internal::saveBlendShapeGeometryToFbx", "namespacemomentum_1_1fbx__internal.html#aa1fdca44b663ad4ae289a7ec3d621bf5", null ],
     [ "momentum::fbx_internal::saveSkinWeightsToFbx", "namespacemomentum_1_1fbx__internal.html#a78e1df973f85629b87a4ada9640e84e3", null ],
     [ "momentum::fbx_internal::setFrameRate", "namespacemomentum_1_1fbx__internal.html#a5c7f9b1e2f65d70f2ad1e0b79bec421e", null ],
-    [ "momentum::fbx_internal::setupJointAnimCurves", "namespacemomentum_1_1fbx__internal.html#a6afd421004cbc51044a9ff6973446688", null ],
+    [ "momentum::fbx_internal::setupJointAnimCurves", "namespacemomentum_1_1fbx__internal.html#a63a18d22def08adc5475e4799a95f15f", null ],
     [ "momentum::fbx_internal::toFbx", "namespacemomentum_1_1fbx__internal.html#ac7ed6f9fc0ab8a751d4973b7939a477f", null ],
     [ "momentum::fbx_internal::toFbx", "namespacemomentum_1_1fbx__internal.html#abe633f07b13aeeaf55012cf393a4c888", null ],
     [ "momentum::fbx_internal::toFbx", "namespacemomentum_1_1fbx__internal.html#a478924099579f042b6e35ef4eedaeab9", null ],
     [ "momentum::fbx_internal::toFbx", "namespacemomentum_1_1fbx__internal.html#a9efb71841fbc8096810aa3cdca5e4f39", null ],
+    [ "momentum::fbx_internal::writeMeshGeometry", "namespacemomentum_1_1fbx__internal.html#a574770be116e53d191a193c5eae37f4e", null ],
     [ "momentum::fbx_internal::writePolygonsToFbxMesh", "namespacemomentum_1_1fbx__internal.html#aeec408aab116c035ee8ddc7e773d2188", null ],
-    [ "momentum::fbx_internal::writeTextureUVIndicesToFbxMesh", "namespacemomentum_1_1fbx__internal.html#a8957e6ee6b3bf74940a7882c16a04135", null ],
-    [ "momentum::fbx_internal::kMomentumMarkerProperty", "namespacemomentum_1_1fbx__internal.html#a37dabd44dce447a0466151ece56a1f09", null ],
-    [ "momentum::fbx_internal::kMomentumMarkersRootProperty", "namespacemomentum_1_1fbx__internal.html#aa52c609ae2958e211c0a9e4caf6f4c23", null ]
+    [ "momentum::fbx_internal::writeTextureUVIndicesToFbxMesh", "namespacemomentum_1_1fbx__internal.html#a8957e6ee6b3bf74940a7882c16a04135", null ]
 ];

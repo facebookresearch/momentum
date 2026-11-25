@@ -112,16 +112,16 @@ $(function(){initNavTree('openfbx__loader_8cpp_source.html','',''); });
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="log_8h.html">momentum/common/log.h</a>&quot;</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;<a class="code" href="gsl__utils_8h.html">momentum/io/common/gsl_utils.h</a>&quot;</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;<a class="code" href="json__utils_8h.html">momentum/io/common/json_utils.h</a>&quot;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="polygon__data_8h.html">momentum/io/fbx/polygon_data.h</a>&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="locator__io_8h.html">momentum/io/skeleton/locator_io.h</a>&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="parameter__limits__io_8h.html">momentum/io/skeleton/parameter_limits_io.h</a>&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="parameter__transform__io_8h.html">momentum/io/skeleton/parameter_transform_io.h</a>&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="parameters__io_8h.html">momentum/io/skeleton/parameters_io.h</a>&quot;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="constants_8h.html">momentum/math/constants.h</a>&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="mesh_8h.html">momentum/math/mesh.h</a>&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="math_2utility_8h.html">momentum/math/utility.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;nlohmann/json.hpp&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="marker__property__names_8h.html">momentum/io/fbx/marker_property_names.h</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="polygon__data_8h.html">momentum/io/fbx/polygon_data.h</a>&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="locator__io_8h.html">momentum/io/skeleton/locator_io.h</a>&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="parameter__limits__io_8h.html">momentum/io/skeleton/parameter_limits_io.h</a>&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="parameter__transform__io_8h.html">momentum/io/skeleton/parameter_transform_io.h</a>&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="parameters__io_8h.html">momentum/io/skeleton/parameters_io.h</a>&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="constants_8h.html">momentum/math/constants.h</a>&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="mesh_8h.html">momentum/math/mesh.h</a>&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="math_2utility_8h.html">momentum/math/utility.h</a>&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;ofbx.h&gt;</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;gsl/span_ext&gt;</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
@@ -1630,7 +1630,7 @@ $(function(){initNavTree('openfbx__loader_8cpp_source.html','',''); });
 <div class="line"><a id="l01536" name="l01536"></a><span class="lineno"> 1536</span>};</div>
 <div class="line"><a id="l01537" name="l01537"></a><span class="lineno"> 1537</span> </div>
 <div class="line"><a id="l01538" name="l01538"></a><span class="lineno"> 1538</span><span class="comment">// Recover the character&#39;s name and metadata from its root joint node. Metadata that is not valid</span></div>
-<div class="line"><a id="l01539" name="l01539"></a><span class="lineno"> 1539</span><span class="comment">// JSON is warned about but kept verbatim, as in the glTF loader.</span></div>
+<div class="line"><a id="l01539" name="l01539"></a><span class="lineno"> 1539</span><span class="comment">// JSON is warned about but kept verbatim (see warnIfMetadataIsNotJson()).</span></div>
 <div class="line"><a id="l01540" name="l01540"></a><span class="lineno"> 1540</span><span class="keywordtype">void</span> fillNameAndMetadata(FbxCharacterParse&amp; cp, <span class="keywordtype">bool</span> fallbackToNodeName) {</div>
 <div class="line"><a id="l01541" name="l01541"></a><span class="lineno"> 1541</span>  <a class="code hl_define" href="checks_8h.html#ad864080ec7d619a1d96851a0de141aab">MT_CHECK</a>(</div>
 <div class="line"><a id="l01542" name="l01542"></a><span class="lineno"> 1542</span>      cp.jointFbxNodes.empty() || cp.jointFbxNodes.front() != <span class="keyword">nullptr</span>,</div>
@@ -1645,503 +1645,496 @@ $(function(){initNavTree('openfbx__loader_8cpp_source.html','',''); });
 <div class="line"><a id="l01551" name="l01551"></a><span class="lineno"> 1551</span>      cp.metadata = resolveStringProperty(*cp.jointFbxNodes.front(), <span class="stringliteral">&quot;metadata&quot;</span>);</div>
 <div class="line"><a id="l01552" name="l01552"></a><span class="lineno"> 1552</span>    }</div>
 <div class="line"><a id="l01553" name="l01553"></a><span class="lineno"> 1553</span>  }</div>
-<div class="line"><a id="l01554" name="l01554"></a><span class="lineno"> 1554</span>  <span class="keywordflow">try</span> {</div>
-<div class="line"><a id="l01555" name="l01555"></a><span class="lineno"> 1555</span>    <span class="comment">// Validate that the metadata is well-formed JSON; the parsed value is not otherwise needed.</span></div>
-<div class="line"><a id="l01556" name="l01556"></a><span class="lineno"> 1556</span>    (void)nlohmann::json::parse(cp.metadata);</div>
-<div class="line"><a id="l01557" name="l01557"></a><span class="lineno"> 1557</span>  } <span class="keywordflow">catch</span> (<span class="keyword">const</span> nlohmann::json::parse_error&amp; e) {</div>
-<div class="line"><a id="l01558" name="l01558"></a><span class="lineno"> 1558</span>    <span class="comment">// Warn but keep the string, matching the glTF loader: the caller sees exactly what the file</span></div>
-<div class="line"><a id="l01559" name="l01559"></a><span class="lineno"> 1559</span>    <span class="comment">// held and can decide what to do with it.</span></div>
-<div class="line"><a id="l01560" name="l01560"></a><span class="lineno"> 1560</span>    <a class="code hl_define" href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a>(<span class="stringliteral">&quot;FBX character metadata is not valid JSON: {}&quot;</span>, e.what());</div>
-<div class="line"><a id="l01561" name="l01561"></a><span class="lineno"> 1561</span>  }</div>
-<div class="line"><a id="l01562" name="l01562"></a><span class="lineno"> 1562</span>}</div>
-<div class="line"><a id="l01563" name="l01563"></a><span class="lineno"> 1563</span> </div>
-<div class="line"><a id="l01564" name="l01564"></a><span class="lineno"> 1564</span><span class="comment">// The multi-character loaders bind each joint at its rest pose, so that a reader that rebuilds the</span></div>
-<div class="line"><a id="l01565" name="l01565"></a><span class="lineno"> 1565</span><span class="comment">// bind pose from the skeleton, such as the glTF loader, skins the character the same way. Joints</span></div>
-<div class="line"><a id="l01566" name="l01566"></a><span class="lineno"> 1566</span><span class="comment">// that a skin cluster links to get the cluster&#39;s bind transform instead (see parseFbxCharacters).</span></div>
-<div class="line"><a id="l01567" name="l01567"></a><span class="lineno"> 1567</span><span class="keywordtype">void</span> computeRestInverseBindPose(FbxCharacterParse&amp; cp) {</div>
-<div class="line"><a id="l01568" name="l01568"></a><span class="lineno"> 1568</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">SkeletonState</a> restState(</div>
-<div class="line"><a id="l01569" name="l01569"></a><span class="lineno"> 1569</span>      <a class="code hl_function" href="structmomentum_1_1EigenStrongType.html#aad2cbbbf50d3d7c8201e6deb8a932f20">JointParameters::Zero</a>(cp.skeleton.joints.size() * <a class="code hl_variable" href="namespacemomentum.html#aa919dbc1dfafb5813e8cb4f4db695022">kParametersPerJoint</a>),</div>
-<div class="line"><a id="l01570" name="l01570"></a><span class="lineno"> 1570</span>      cp.skeleton,</div>
-<div class="line"><a id="l01571" name="l01571"></a><span class="lineno"> 1571</span>      <span class="comment">/*computeDeriv=*/</span><span class="keyword">false</span>);</div>
-<div class="line"><a id="l01572" name="l01572"></a><span class="lineno"> 1572</span>  cp.inverseBindPose.clear();</div>
-<div class="line"><a id="l01573" name="l01573"></a><span class="lineno"> 1573</span>  cp.inverseBindPose.reserve(restState.jointState.size());</div>
-<div class="line"><a id="l01574" name="l01574"></a><span class="lineno"> 1574</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; jointState : restState.jointState) {</div>
-<div class="line"><a id="l01575" name="l01575"></a><span class="lineno"> 1575</span>    cp.inverseBindPose.push_back(jointState.transform.toAffine3().inverse());</div>
-<div class="line"><a id="l01576" name="l01576"></a><span class="lineno"> 1576</span>  }</div>
-<div class="line"><a id="l01577" name="l01577"></a><span class="lineno"> 1577</span>}</div>
-<div class="line"><a id="l01578" name="l01578"></a><span class="lineno"> 1578</span> </div>
-<div class="line"><a id="l01579" name="l01579"></a><span class="lineno"> 1579</span><span class="keywordtype">void</span> computeInverseBindPose(FbxCharacterParse&amp; cp) {</div>
-<div class="line"><a id="l01580" name="l01580"></a><span class="lineno"> 1580</span>  cp.inverseBindPose.reserve(cp.jointFbxNodes.size());</div>
-<div class="line"><a id="l01581" name="l01581"></a><span class="lineno"> 1581</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>* jointNode : cp.jointFbxNodes) {</div>
-<div class="line"><a id="l01582" name="l01582"></a><span class="lineno"> 1582</span>    Eigen::Affine3d mat = Eigen::Affine3d::Identity();</div>
-<div class="line"><a id="l01583" name="l01583"></a><span class="lineno"> 1583</span>    <span class="keywordflow">if</span> (jointNode != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l01584" name="l01584"></a><span class="lineno"> 1584</span>      mat = toEigen(jointNode-&gt;getGlobalTransform());</div>
-<div class="line"><a id="l01585" name="l01585"></a><span class="lineno"> 1585</span>    }</div>
-<div class="line"><a id="l01586" name="l01586"></a><span class="lineno"> 1586</span>    cp.inverseBindPose.push_back(mat.inverse().cast&lt;<span class="keywordtype">float</span>&gt;());</div>
-<div class="line"><a id="l01587" name="l01587"></a><span class="lineno"> 1587</span>  }</div>
-<div class="line"><a id="l01588" name="l01588"></a><span class="lineno"> 1588</span>}</div>
-<div class="line"><a id="l01589" name="l01589"></a><span class="lineno"> 1589</span> </div>
-<div class="line"><a id="l01590" name="l01590"></a><span class="lineno"> 1590</span>std::vector&lt;const ofbx::AnimationStack*&gt; collectReadableAnimationStacks(<span class="keyword">const</span> ofbx::IScene&amp; scene) {</div>
-<div class="line"><a id="l01591" name="l01591"></a><span class="lineno"> 1591</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numAnimStacks = scene.getAnimationStackCount();</div>
-<div class="line"><a id="l01592" name="l01592"></a><span class="lineno"> 1592</span>  std::vector&lt;const ofbx::AnimationStack*&gt; stacks;</div>
-<div class="line"><a id="l01593" name="l01593"></a><span class="lineno"> 1593</span>  stacks.reserve(numAnimStacks);</div>
-<div class="line"><a id="l01594" name="l01594"></a><span class="lineno"> 1594</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iAnim = 0; iAnim &lt; numAnimStacks; ++iAnim) {</div>
-<div class="line"><a id="l01595" name="l01595"></a><span class="lineno"> 1595</span>    <span class="keyword">const</span> ofbx::AnimationStack* stack = scene.getAnimationStack(iAnim);</div>
-<div class="line"><a id="l01596" name="l01596"></a><span class="lineno"> 1596</span>    <span class="keywordflow">if</span> (stack == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l01597" name="l01597"></a><span class="lineno"> 1597</span>      <a class="code hl_define" href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a>(<span class="stringliteral">&quot;Skipping FBX animation stack {}: the scene reports it as null.&quot;</span>, iAnim);</div>
-<div class="line"><a id="l01598" name="l01598"></a><span class="lineno"> 1598</span>      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l01599" name="l01599"></a><span class="lineno"> 1599</span>    }</div>
-<div class="line"><a id="l01600" name="l01600"></a><span class="lineno"> 1600</span>    stacks.push_back(stack);</div>
-<div class="line"><a id="l01601" name="l01601"></a><span class="lineno"> 1601</span>  }</div>
-<div class="line"><a id="l01602" name="l01602"></a><span class="lineno"> 1602</span>  <span class="keywordflow">return</span> stacks;</div>
-<div class="line"><a id="l01603" name="l01603"></a><span class="lineno"> 1603</span>}</div>
-<div class="line"><a id="l01604" name="l01604"></a><span class="lineno"> 1604</span> </div>
-<div class="line"><a id="l01605" name="l01605"></a><span class="lineno"> 1605</span><span class="comment">// Extract this character&#39;s joint-parameter motion from every readable animation stack, scoped to</span></div>
-<div class="line"><a id="l01606" name="l01606"></a><span class="lineno"> 1606</span><span class="comment">// its own joints. An entry is empty when its stack animates none of this character&#39;s joints.</span></div>
-<div class="line"><a id="l01607" name="l01607"></a><span class="lineno"> 1607</span>std::vector&lt;MatrixXf&gt; parseAnimationStacks(</div>
-<div class="line"><a id="l01608" name="l01608"></a><span class="lineno"> 1608</span>    std::span&lt;const ofbx::AnimationStack* const&gt; stacks,</div>
-<div class="line"><a id="l01609" name="l01609"></a><span class="lineno"> 1609</span>    <span class="keyword">const</span> FbxCharacterParse&amp; cp,</div>
-<div class="line"><a id="l01610" name="l01610"></a><span class="lineno"> 1610</span>    <span class="keywordtype">float</span> frameRate,</div>
-<div class="line"><a id="l01611" name="l01611"></a><span class="lineno"> 1611</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive) {</div>
-<div class="line"><a id="l01612" name="l01612"></a><span class="lineno"> 1612</span>  std::vector&lt;MatrixXf&gt; motions;</div>
-<div class="line"><a id="l01613" name="l01613"></a><span class="lineno"> 1613</span>  motions.reserve(stacks.size());</div>
-<div class="line"><a id="l01614" name="l01614"></a><span class="lineno"> 1614</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::AnimationStack* stack : stacks) {</div>
-<div class="line"><a id="l01615" name="l01615"></a><span class="lineno"> 1615</span>    motions.emplace_back(</div>
-<div class="line"><a id="l01616" name="l01616"></a><span class="lineno"> 1616</span>        parseAnimation(stack, cp.jointFbxNodes, cp.skeleton, frameRate, permissive));</div>
-<div class="line"><a id="l01617" name="l01617"></a><span class="lineno"> 1617</span>  }</div>
-<div class="line"><a id="l01618" name="l01618"></a><span class="lineno"> 1618</span>  <span class="keywordflow">return</span> motions;</div>
-<div class="line"><a id="l01619" name="l01619"></a><span class="lineno"> 1619</span>}</div>
-<div class="line"><a id="l01620" name="l01620"></a><span class="lineno"> 1620</span> </div>
-<div class="line"><a id="l01621" name="l01621"></a><span class="lineno"> 1621</span><span class="comment">// Build a Character from a parsed character: updates the parse&#39;s mesh normals and moves its inverse</span></div>
-<div class="line"><a id="l01622" name="l01622"></a><span class="lineno"> 1622</span><span class="comment">// bind pose out; the rest is copied. Shared by the singular and multi-character loaders.</span></div>
-<div class="line"><a id="l01623" name="l01623"></a><span class="lineno"> 1623</span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> buildCharacterFromParse(</div>
-<div class="line"><a id="l01624" name="l01624"></a><span class="lineno"> 1624</span>    FbxCharacterParse&amp;&amp; cp,</div>
-<div class="line"><a id="l01625" name="l01625"></a><span class="lineno"> 1625</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01626" name="l01626"></a><span class="lineno"> 1626</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a81ff111adcbf15f8b216dc958c29a555">ParameterTransform</a>&amp; parameterTransform) {</div>
-<div class="line"><a id="l01627" name="l01627"></a><span class="lineno"> 1627</span>  cp.mesh.updateNormals();</div>
-<div class="line"><a id="l01628" name="l01628"></a><span class="lineno"> 1628</span>  <a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> character(</div>
-<div class="line"><a id="l01629" name="l01629"></a><span class="lineno"> 1629</span>      cp.skeleton,</div>
-<div class="line"><a id="l01630" name="l01630"></a><span class="lineno"> 1630</span>      parameterTransform,</div>
-<div class="line"><a id="l01631" name="l01631"></a><span class="lineno"> 1631</span>      <a class="code hl_typedef" href="namespacemomentum.html#a5e053889e659bbad2498c34c1e8bd636">ParameterLimits</a>(),</div>
-<div class="line"><a id="l01632" name="l01632"></a><span class="lineno"> 1632</span>      keepLocators == <a class="code hl_enumvalue" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90ca93cba07454f06a4a960172bbd6e2a435">KeepLocators::Yes</a> ? cp.locators : <a class="code hl_typedef" href="namespacemomentum.html#afcd9549d72f05446fd752979ef8529e8">LocatorList</a>(),</div>
-<div class="line"><a id="l01633" name="l01633"></a><span class="lineno"> 1633</span>      &amp;cp.mesh,</div>
-<div class="line"><a id="l01634" name="l01634"></a><span class="lineno"> 1634</span>      cp.skinWeights.get(),</div>
-<div class="line"><a id="l01635" name="l01635"></a><span class="lineno"> 1635</span>      cp.collision.empty() ? <span class="keyword">nullptr</span> : &amp;cp.collision,</div>
-<div class="line"><a id="l01636" name="l01636"></a><span class="lineno"> 1636</span>      <span class="keyword">nullptr</span>,</div>
-<div class="line"><a id="l01637" name="l01637"></a><span class="lineno"> 1637</span>      cp.blendShape,</div>
-<div class="line"><a id="l01638" name="l01638"></a><span class="lineno"> 1638</span>      {}, <span class="comment">// faceExpressionBlendShapes</span></div>
-<div class="line"><a id="l01639" name="l01639"></a><span class="lineno"> 1639</span>      cp.name, <span class="comment">// nameIn</span></div>
-<div class="line"><a id="l01640" name="l01640"></a><span class="lineno"> 1640</span>      {}, <span class="comment">// inverseBindPose</span></div>
-<div class="line"><a id="l01641" name="l01641"></a><span class="lineno"> 1641</span>      {}, <span class="comment">// skinnedLocators</span></div>
-<div class="line"><a id="l01642" name="l01642"></a><span class="lineno"> 1642</span>      cp.metadata);</div>
-<div class="line"><a id="l01643" name="l01643"></a><span class="lineno"> 1643</span>  character.resetJointMap();</div>
-<div class="line"><a id="l01644" name="l01644"></a><span class="lineno"> 1644</span>  character.inverseBindPose = std::move(cp.inverseBindPose);</div>
-<div class="line"><a id="l01645" name="l01645"></a><span class="lineno"> 1645</span>  character.physicalProperties =</div>
-<div class="line"><a id="l01646" name="l01646"></a><span class="lineno"> 1646</span>      loadPhysicalPropertiesFromNodes(character.skeleton, cp.jointFbxNodes);</div>
-<div class="line"><a id="l01647" name="l01647"></a><span class="lineno"> 1647</span>  <span class="keywordflow">return</span> character;</div>
-<div class="line"><a id="l01648" name="l01648"></a><span class="lineno"> 1648</span>}</div>
-<div class="line"><a id="l01649" name="l01649"></a><span class="lineno"> 1649</span> </div>
-<div class="line"><a id="l01650" name="l01650"></a><span class="lineno"> 1650</span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; loadOpenFbx(</div>
-<div class="line"><a id="l01651" name="l01651"></a><span class="lineno"> 1651</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01652" name="l01652"></a><span class="lineno"> 1652</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01653" name="l01653"></a><span class="lineno"> 1653</span>    <span class="keywordtype">bool</span> loadAnim,</div>
-<div class="line"><a id="l01654" name="l01654"></a><span class="lineno"> 1654</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01655" name="l01655"></a><span class="lineno"> 1655</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01656" name="l01656"></a><span class="lineno"> 1656</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01657" name="l01657"></a><span class="lineno"> 1657</span>  <span class="keyword">const</span> OfbxScenePtr scenePtr =</div>
-<div class="line"><a id="l01658" name="l01658"></a><span class="lineno"> 1658</span>      loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);</div>
-<div class="line"><a id="l01659" name="l01659"></a><span class="lineno"> 1659</span>  ofbx::IScene&amp; scene = *scenePtr;</div>
-<div class="line"><a id="l01660" name="l01660"></a><span class="lineno"> 1660</span> </div>
-<div class="line"><a id="l01661" name="l01661"></a><span class="lineno"> 1661</span>  <span class="comment">// Singular load: every skeleton in the scene is merged into one character (unlike</span></div>
-<div class="line"><a id="l01662" name="l01662"></a><span class="lineno"> 1662</span>  <span class="comment">// parseFbxCharacters, which keeps each top-level skeleton and rigid object separate).</span></div>
-<div class="line"><a id="l01663" name="l01663"></a><span class="lineno"> 1663</span>  FbxCharacterParse cp;</div>
-<div class="line"><a id="l01664" name="l01664"></a><span class="lineno"> 1664</span>  std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =</div>
-<div class="line"><a id="l01665" name="l01665"></a><span class="lineno"> 1665</span>      parseSkeleton(scene.getRoot(), {}, permissive);</div>
-<div class="line"><a id="l01666" name="l01666"></a><span class="lineno"> 1666</span>  fillNameAndMetadata(cp, <span class="comment">/*fallbackToNodeName=*/</span><span class="keyword">false</span>);</div>
-<div class="line"><a id="l01667" name="l01667"></a><span class="lineno"> 1667</span>  computeInverseBindPose(cp);</div>
-<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span> </div>
-<div class="line"><a id="l01669" name="l01669"></a><span class="lineno"> 1669</span>  <span class="comment">// Likewise, every mesh in the scene belongs to that one character.</span></div>
-<div class="line"><a id="l01670" name="l01670"></a><span class="lineno"> 1670</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
-<div class="line"><a id="l01671" name="l01671"></a><span class="lineno"> 1671</span>    parseSkinnedModel(</div>
-<div class="line"><a id="l01672" name="l01672"></a><span class="lineno"> 1672</span>        scene.getMesh(iMesh),</div>
-<div class="line"><a id="l01673" name="l01673"></a><span class="lineno"> 1673</span>        cp.jointFbxNodes,</div>
-<div class="line"><a id="l01674" name="l01674"></a><span class="lineno"> 1674</span>        cp.mesh,</div>
-<div class="line"><a id="l01675" name="l01675"></a><span class="lineno"> 1675</span>        cp.skinWeights,</div>
-<div class="line"><a id="l01676" name="l01676"></a><span class="lineno"> 1676</span>        cp.inverseBindPose,</div>
-<div class="line"><a id="l01677" name="l01677"></a><span class="lineno"> 1677</span>        cp.blendShape,</div>
-<div class="line"><a id="l01678" name="l01678"></a><span class="lineno"> 1678</span>        permissive,</div>
-<div class="line"><a id="l01679" name="l01679"></a><span class="lineno"> 1679</span>        loadBlendShapes);</div>
-<div class="line"><a id="l01680" name="l01680"></a><span class="lineno"> 1680</span>  }</div>
-<div class="line"><a id="l01681" name="l01681"></a><span class="lineno"> 1681</span> </div>
-<div class="line"><a id="l01682" name="l01682"></a><span class="lineno"> 1682</span>  std::vector&lt;MatrixXf&gt; jointParamMotions;</div>
-<div class="line"><a id="l01683" name="l01683"></a><span class="lineno"> 1683</span>  <span class="keywordflow">if</span> (loadAnim) {</div>
-<div class="line"><a id="l01684" name="l01684"></a><span class="lineno"> 1684</span>    <span class="keyword">const</span> <span class="keyword">auto</span> stacks = collectReadableAnimationStacks(scene);</div>
-<div class="line"><a id="l01685" name="l01685"></a><span class="lineno"> 1685</span>    jointParamMotions = parseAnimationStacks(stacks, cp, scene.getSceneFrameRate(), permissive);</div>
-<div class="line"><a id="l01686" name="l01686"></a><span class="lineno"> 1686</span>  }</div>
-<div class="line"><a id="l01687" name="l01687"></a><span class="lineno"> 1687</span> </div>
-<div class="line"><a id="l01688" name="l01688"></a><span class="lineno"> 1688</span>  <span class="keyword">const</span> <span class="keyword">auto</span> parameterTransform =</div>
-<div class="line"><a id="l01689" name="l01689"></a><span class="lineno"> 1689</span>      <a class="code hl_function" href="structmomentum_1_1ParameterTransformT.html#a1a6bbae3c994a1a2b011c58b5127f87d">ParameterTransform::empty</a>(cp.skeleton.joints.size() * <a class="code hl_variable" href="namespacemomentum.html#aa919dbc1dfafb5813e8cb4f4db695022">kParametersPerJoint</a>);</div>
-<div class="line"><a id="l01690" name="l01690"></a><span class="lineno"> 1690</span>  <span class="keywordflow">return</span> {</div>
-<div class="line"><a id="l01691" name="l01691"></a><span class="lineno"> 1691</span>      buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),</div>
-<div class="line"><a id="l01692" name="l01692"></a><span class="lineno"> 1692</span>      jointParamMotions,</div>
-<div class="line"><a id="l01693" name="l01693"></a><span class="lineno"> 1693</span>      scene.getSceneFrameRate()};</div>
-<div class="line"><a id="l01694" name="l01694"></a><span class="lineno"> 1694</span>}</div>
+<div class="line"><a id="l01554" name="l01554"></a><span class="lineno"> 1554</span>  <a class="code hl_function" href="namespacemomentum.html#ab6f65bc16b6adb127321c29ba96280a8">warnIfMetadataIsNotJson</a>(cp.metadata, <span class="stringliteral">&quot;FBX&quot;</span>);</div>
+<div class="line"><a id="l01555" name="l01555"></a><span class="lineno"> 1555</span>}</div>
+<div class="line"><a id="l01556" name="l01556"></a><span class="lineno"> 1556</span> </div>
+<div class="line"><a id="l01557" name="l01557"></a><span class="lineno"> 1557</span><span class="comment">// The multi-character loaders bind each joint at its rest pose, so that a reader that rebuilds the</span></div>
+<div class="line"><a id="l01558" name="l01558"></a><span class="lineno"> 1558</span><span class="comment">// bind pose from the skeleton, such as the glTF loader, skins the character the same way. Joints</span></div>
+<div class="line"><a id="l01559" name="l01559"></a><span class="lineno"> 1559</span><span class="comment">// that a skin cluster links to get the cluster&#39;s bind transform instead (see parseFbxCharacters).</span></div>
+<div class="line"><a id="l01560" name="l01560"></a><span class="lineno"> 1560</span><span class="keywordtype">void</span> computeRestInverseBindPose(FbxCharacterParse&amp; cp) {</div>
+<div class="line"><a id="l01561" name="l01561"></a><span class="lineno"> 1561</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">SkeletonState</a> restState(</div>
+<div class="line"><a id="l01562" name="l01562"></a><span class="lineno"> 1562</span>      <a class="code hl_function" href="structmomentum_1_1EigenStrongType.html#aad2cbbbf50d3d7c8201e6deb8a932f20">JointParameters::Zero</a>(cp.skeleton.joints.size() * <a class="code hl_variable" href="namespacemomentum.html#aa919dbc1dfafb5813e8cb4f4db695022">kParametersPerJoint</a>),</div>
+<div class="line"><a id="l01563" name="l01563"></a><span class="lineno"> 1563</span>      cp.skeleton,</div>
+<div class="line"><a id="l01564" name="l01564"></a><span class="lineno"> 1564</span>      <span class="comment">/*computeDeriv=*/</span><span class="keyword">false</span>);</div>
+<div class="line"><a id="l01565" name="l01565"></a><span class="lineno"> 1565</span>  cp.inverseBindPose.clear();</div>
+<div class="line"><a id="l01566" name="l01566"></a><span class="lineno"> 1566</span>  cp.inverseBindPose.reserve(restState.jointState.size());</div>
+<div class="line"><a id="l01567" name="l01567"></a><span class="lineno"> 1567</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; jointState : restState.jointState) {</div>
+<div class="line"><a id="l01568" name="l01568"></a><span class="lineno"> 1568</span>    cp.inverseBindPose.push_back(jointState.transform.toAffine3().inverse());</div>
+<div class="line"><a id="l01569" name="l01569"></a><span class="lineno"> 1569</span>  }</div>
+<div class="line"><a id="l01570" name="l01570"></a><span class="lineno"> 1570</span>}</div>
+<div class="line"><a id="l01571" name="l01571"></a><span class="lineno"> 1571</span> </div>
+<div class="line"><a id="l01572" name="l01572"></a><span class="lineno"> 1572</span><span class="keywordtype">void</span> computeInverseBindPose(FbxCharacterParse&amp; cp) {</div>
+<div class="line"><a id="l01573" name="l01573"></a><span class="lineno"> 1573</span>  cp.inverseBindPose.reserve(cp.jointFbxNodes.size());</div>
+<div class="line"><a id="l01574" name="l01574"></a><span class="lineno"> 1574</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>* jointNode : cp.jointFbxNodes) {</div>
+<div class="line"><a id="l01575" name="l01575"></a><span class="lineno"> 1575</span>    Eigen::Affine3d mat = Eigen::Affine3d::Identity();</div>
+<div class="line"><a id="l01576" name="l01576"></a><span class="lineno"> 1576</span>    <span class="keywordflow">if</span> (jointNode != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l01577" name="l01577"></a><span class="lineno"> 1577</span>      mat = toEigen(jointNode-&gt;getGlobalTransform());</div>
+<div class="line"><a id="l01578" name="l01578"></a><span class="lineno"> 1578</span>    }</div>
+<div class="line"><a id="l01579" name="l01579"></a><span class="lineno"> 1579</span>    cp.inverseBindPose.push_back(mat.inverse().cast&lt;<span class="keywordtype">float</span>&gt;());</div>
+<div class="line"><a id="l01580" name="l01580"></a><span class="lineno"> 1580</span>  }</div>
+<div class="line"><a id="l01581" name="l01581"></a><span class="lineno"> 1581</span>}</div>
+<div class="line"><a id="l01582" name="l01582"></a><span class="lineno"> 1582</span> </div>
+<div class="line"><a id="l01583" name="l01583"></a><span class="lineno"> 1583</span>std::vector&lt;const ofbx::AnimationStack*&gt; collectReadableAnimationStacks(<span class="keyword">const</span> ofbx::IScene&amp; scene) {</div>
+<div class="line"><a id="l01584" name="l01584"></a><span class="lineno"> 1584</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> numAnimStacks = scene.getAnimationStackCount();</div>
+<div class="line"><a id="l01585" name="l01585"></a><span class="lineno"> 1585</span>  std::vector&lt;const ofbx::AnimationStack*&gt; stacks;</div>
+<div class="line"><a id="l01586" name="l01586"></a><span class="lineno"> 1586</span>  stacks.reserve(numAnimStacks);</div>
+<div class="line"><a id="l01587" name="l01587"></a><span class="lineno"> 1587</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iAnim = 0; iAnim &lt; numAnimStacks; ++iAnim) {</div>
+<div class="line"><a id="l01588" name="l01588"></a><span class="lineno"> 1588</span>    <span class="keyword">const</span> ofbx::AnimationStack* stack = scene.getAnimationStack(iAnim);</div>
+<div class="line"><a id="l01589" name="l01589"></a><span class="lineno"> 1589</span>    <span class="keywordflow">if</span> (stack == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l01590" name="l01590"></a><span class="lineno"> 1590</span>      <a class="code hl_define" href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a>(<span class="stringliteral">&quot;Skipping FBX animation stack {}: the scene reports it as null.&quot;</span>, iAnim);</div>
+<div class="line"><a id="l01591" name="l01591"></a><span class="lineno"> 1591</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l01592" name="l01592"></a><span class="lineno"> 1592</span>    }</div>
+<div class="line"><a id="l01593" name="l01593"></a><span class="lineno"> 1593</span>    stacks.push_back(stack);</div>
+<div class="line"><a id="l01594" name="l01594"></a><span class="lineno"> 1594</span>  }</div>
+<div class="line"><a id="l01595" name="l01595"></a><span class="lineno"> 1595</span>  <span class="keywordflow">return</span> stacks;</div>
+<div class="line"><a id="l01596" name="l01596"></a><span class="lineno"> 1596</span>}</div>
+<div class="line"><a id="l01597" name="l01597"></a><span class="lineno"> 1597</span> </div>
+<div class="line"><a id="l01598" name="l01598"></a><span class="lineno"> 1598</span><span class="comment">// Extract this character&#39;s joint-parameter motion from every readable animation stack, scoped to</span></div>
+<div class="line"><a id="l01599" name="l01599"></a><span class="lineno"> 1599</span><span class="comment">// its own joints. An entry is empty when its stack animates none of this character&#39;s joints.</span></div>
+<div class="line"><a id="l01600" name="l01600"></a><span class="lineno"> 1600</span>std::vector&lt;MatrixXf&gt; parseAnimationStacks(</div>
+<div class="line"><a id="l01601" name="l01601"></a><span class="lineno"> 1601</span>    std::span&lt;const ofbx::AnimationStack* const&gt; stacks,</div>
+<div class="line"><a id="l01602" name="l01602"></a><span class="lineno"> 1602</span>    <span class="keyword">const</span> FbxCharacterParse&amp; cp,</div>
+<div class="line"><a id="l01603" name="l01603"></a><span class="lineno"> 1603</span>    <span class="keywordtype">float</span> frameRate,</div>
+<div class="line"><a id="l01604" name="l01604"></a><span class="lineno"> 1604</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive) {</div>
+<div class="line"><a id="l01605" name="l01605"></a><span class="lineno"> 1605</span>  std::vector&lt;MatrixXf&gt; motions;</div>
+<div class="line"><a id="l01606" name="l01606"></a><span class="lineno"> 1606</span>  motions.reserve(stacks.size());</div>
+<div class="line"><a id="l01607" name="l01607"></a><span class="lineno"> 1607</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::AnimationStack* stack : stacks) {</div>
+<div class="line"><a id="l01608" name="l01608"></a><span class="lineno"> 1608</span>    motions.emplace_back(</div>
+<div class="line"><a id="l01609" name="l01609"></a><span class="lineno"> 1609</span>        parseAnimation(stack, cp.jointFbxNodes, cp.skeleton, frameRate, permissive));</div>
+<div class="line"><a id="l01610" name="l01610"></a><span class="lineno"> 1610</span>  }</div>
+<div class="line"><a id="l01611" name="l01611"></a><span class="lineno"> 1611</span>  <span class="keywordflow">return</span> motions;</div>
+<div class="line"><a id="l01612" name="l01612"></a><span class="lineno"> 1612</span>}</div>
+<div class="line"><a id="l01613" name="l01613"></a><span class="lineno"> 1613</span> </div>
+<div class="line"><a id="l01614" name="l01614"></a><span class="lineno"> 1614</span><span class="comment">// Build a Character from a parsed character: updates the parse&#39;s mesh normals and moves its inverse</span></div>
+<div class="line"><a id="l01615" name="l01615"></a><span class="lineno"> 1615</span><span class="comment">// bind pose out; the rest is copied. Shared by the singular and multi-character loaders.</span></div>
+<div class="line"><a id="l01616" name="l01616"></a><span class="lineno"> 1616</span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> buildCharacterFromParse(</div>
+<div class="line"><a id="l01617" name="l01617"></a><span class="lineno"> 1617</span>    FbxCharacterParse&amp;&amp; cp,</div>
+<div class="line"><a id="l01618" name="l01618"></a><span class="lineno"> 1618</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01619" name="l01619"></a><span class="lineno"> 1619</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="namespacemomentum.html#a81ff111adcbf15f8b216dc958c29a555">ParameterTransform</a>&amp; parameterTransform) {</div>
+<div class="line"><a id="l01620" name="l01620"></a><span class="lineno"> 1620</span>  cp.mesh.updateNormals();</div>
+<div class="line"><a id="l01621" name="l01621"></a><span class="lineno"> 1621</span>  <a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> character(</div>
+<div class="line"><a id="l01622" name="l01622"></a><span class="lineno"> 1622</span>      cp.skeleton,</div>
+<div class="line"><a id="l01623" name="l01623"></a><span class="lineno"> 1623</span>      parameterTransform,</div>
+<div class="line"><a id="l01624" name="l01624"></a><span class="lineno"> 1624</span>      <a class="code hl_typedef" href="namespacemomentum.html#a5e053889e659bbad2498c34c1e8bd636">ParameterLimits</a>(),</div>
+<div class="line"><a id="l01625" name="l01625"></a><span class="lineno"> 1625</span>      keepLocators == <a class="code hl_enumvalue" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90ca93cba07454f06a4a960172bbd6e2a435">KeepLocators::Yes</a> ? cp.locators : <a class="code hl_typedef" href="namespacemomentum.html#afcd9549d72f05446fd752979ef8529e8">LocatorList</a>(),</div>
+<div class="line"><a id="l01626" name="l01626"></a><span class="lineno"> 1626</span>      &amp;cp.mesh,</div>
+<div class="line"><a id="l01627" name="l01627"></a><span class="lineno"> 1627</span>      cp.skinWeights.get(),</div>
+<div class="line"><a id="l01628" name="l01628"></a><span class="lineno"> 1628</span>      cp.collision.empty() ? <span class="keyword">nullptr</span> : &amp;cp.collision,</div>
+<div class="line"><a id="l01629" name="l01629"></a><span class="lineno"> 1629</span>      <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l01630" name="l01630"></a><span class="lineno"> 1630</span>      cp.blendShape,</div>
+<div class="line"><a id="l01631" name="l01631"></a><span class="lineno"> 1631</span>      {}, <span class="comment">// faceExpressionBlendShapes</span></div>
+<div class="line"><a id="l01632" name="l01632"></a><span class="lineno"> 1632</span>      cp.name, <span class="comment">// nameIn</span></div>
+<div class="line"><a id="l01633" name="l01633"></a><span class="lineno"> 1633</span>      {}, <span class="comment">// inverseBindPose</span></div>
+<div class="line"><a id="l01634" name="l01634"></a><span class="lineno"> 1634</span>      {}, <span class="comment">// skinnedLocators</span></div>
+<div class="line"><a id="l01635" name="l01635"></a><span class="lineno"> 1635</span>      cp.metadata);</div>
+<div class="line"><a id="l01636" name="l01636"></a><span class="lineno"> 1636</span>  character.resetJointMap();</div>
+<div class="line"><a id="l01637" name="l01637"></a><span class="lineno"> 1637</span>  character.inverseBindPose = std::move(cp.inverseBindPose);</div>
+<div class="line"><a id="l01638" name="l01638"></a><span class="lineno"> 1638</span>  character.physicalProperties =</div>
+<div class="line"><a id="l01639" name="l01639"></a><span class="lineno"> 1639</span>      loadPhysicalPropertiesFromNodes(character.skeleton, cp.jointFbxNodes);</div>
+<div class="line"><a id="l01640" name="l01640"></a><span class="lineno"> 1640</span>  <span class="keywordflow">return</span> character;</div>
+<div class="line"><a id="l01641" name="l01641"></a><span class="lineno"> 1641</span>}</div>
+<div class="line"><a id="l01642" name="l01642"></a><span class="lineno"> 1642</span> </div>
+<div class="line"><a id="l01643" name="l01643"></a><span class="lineno"> 1643</span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; loadOpenFbx(</div>
+<div class="line"><a id="l01644" name="l01644"></a><span class="lineno"> 1644</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01645" name="l01645"></a><span class="lineno"> 1645</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01646" name="l01646"></a><span class="lineno"> 1646</span>    <span class="keywordtype">bool</span> loadAnim,</div>
+<div class="line"><a id="l01647" name="l01647"></a><span class="lineno"> 1647</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01648" name="l01648"></a><span class="lineno"> 1648</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01649" name="l01649"></a><span class="lineno"> 1649</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01650" name="l01650"></a><span class="lineno"> 1650</span>  <span class="keyword">const</span> OfbxScenePtr scenePtr =</div>
+<div class="line"><a id="l01651" name="l01651"></a><span class="lineno"> 1651</span>      loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);</div>
+<div class="line"><a id="l01652" name="l01652"></a><span class="lineno"> 1652</span>  ofbx::IScene&amp; scene = *scenePtr;</div>
+<div class="line"><a id="l01653" name="l01653"></a><span class="lineno"> 1653</span> </div>
+<div class="line"><a id="l01654" name="l01654"></a><span class="lineno"> 1654</span>  <span class="comment">// Singular load: every skeleton in the scene is merged into one character (unlike</span></div>
+<div class="line"><a id="l01655" name="l01655"></a><span class="lineno"> 1655</span>  <span class="comment">// parseFbxCharacters, which keeps each top-level skeleton and rigid object separate).</span></div>
+<div class="line"><a id="l01656" name="l01656"></a><span class="lineno"> 1656</span>  FbxCharacterParse cp;</div>
+<div class="line"><a id="l01657" name="l01657"></a><span class="lineno"> 1657</span>  std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =</div>
+<div class="line"><a id="l01658" name="l01658"></a><span class="lineno"> 1658</span>      parseSkeleton(scene.getRoot(), {}, permissive);</div>
+<div class="line"><a id="l01659" name="l01659"></a><span class="lineno"> 1659</span>  fillNameAndMetadata(cp, <span class="comment">/*fallbackToNodeName=*/</span><span class="keyword">false</span>);</div>
+<div class="line"><a id="l01660" name="l01660"></a><span class="lineno"> 1660</span>  computeInverseBindPose(cp);</div>
+<div class="line"><a id="l01661" name="l01661"></a><span class="lineno"> 1661</span> </div>
+<div class="line"><a id="l01662" name="l01662"></a><span class="lineno"> 1662</span>  <span class="comment">// Likewise, every mesh in the scene belongs to that one character.</span></div>
+<div class="line"><a id="l01663" name="l01663"></a><span class="lineno"> 1663</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
+<div class="line"><a id="l01664" name="l01664"></a><span class="lineno"> 1664</span>    parseSkinnedModel(</div>
+<div class="line"><a id="l01665" name="l01665"></a><span class="lineno"> 1665</span>        scene.getMesh(iMesh),</div>
+<div class="line"><a id="l01666" name="l01666"></a><span class="lineno"> 1666</span>        cp.jointFbxNodes,</div>
+<div class="line"><a id="l01667" name="l01667"></a><span class="lineno"> 1667</span>        cp.mesh,</div>
+<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span>        cp.skinWeights,</div>
+<div class="line"><a id="l01669" name="l01669"></a><span class="lineno"> 1669</span>        cp.inverseBindPose,</div>
+<div class="line"><a id="l01670" name="l01670"></a><span class="lineno"> 1670</span>        cp.blendShape,</div>
+<div class="line"><a id="l01671" name="l01671"></a><span class="lineno"> 1671</span>        permissive,</div>
+<div class="line"><a id="l01672" name="l01672"></a><span class="lineno"> 1672</span>        loadBlendShapes);</div>
+<div class="line"><a id="l01673" name="l01673"></a><span class="lineno"> 1673</span>  }</div>
+<div class="line"><a id="l01674" name="l01674"></a><span class="lineno"> 1674</span> </div>
+<div class="line"><a id="l01675" name="l01675"></a><span class="lineno"> 1675</span>  std::vector&lt;MatrixXf&gt; jointParamMotions;</div>
+<div class="line"><a id="l01676" name="l01676"></a><span class="lineno"> 1676</span>  <span class="keywordflow">if</span> (loadAnim) {</div>
+<div class="line"><a id="l01677" name="l01677"></a><span class="lineno"> 1677</span>    <span class="keyword">const</span> <span class="keyword">auto</span> stacks = collectReadableAnimationStacks(scene);</div>
+<div class="line"><a id="l01678" name="l01678"></a><span class="lineno"> 1678</span>    jointParamMotions = parseAnimationStacks(stacks, cp, scene.getSceneFrameRate(), permissive);</div>
+<div class="line"><a id="l01679" name="l01679"></a><span class="lineno"> 1679</span>  }</div>
+<div class="line"><a id="l01680" name="l01680"></a><span class="lineno"> 1680</span> </div>
+<div class="line"><a id="l01681" name="l01681"></a><span class="lineno"> 1681</span>  <span class="keyword">const</span> <span class="keyword">auto</span> parameterTransform =</div>
+<div class="line"><a id="l01682" name="l01682"></a><span class="lineno"> 1682</span>      <a class="code hl_function" href="structmomentum_1_1ParameterTransformT.html#a1a6bbae3c994a1a2b011c58b5127f87d">ParameterTransform::empty</a>(cp.skeleton.joints.size() * <a class="code hl_variable" href="namespacemomentum.html#aa919dbc1dfafb5813e8cb4f4db695022">kParametersPerJoint</a>);</div>
+<div class="line"><a id="l01683" name="l01683"></a><span class="lineno"> 1683</span>  <span class="keywordflow">return</span> {</div>
+<div class="line"><a id="l01684" name="l01684"></a><span class="lineno"> 1684</span>      buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),</div>
+<div class="line"><a id="l01685" name="l01685"></a><span class="lineno"> 1685</span>      jointParamMotions,</div>
+<div class="line"><a id="l01686" name="l01686"></a><span class="lineno"> 1686</span>      scene.getSceneFrameRate()};</div>
+<div class="line"><a id="l01687" name="l01687"></a><span class="lineno"> 1687</span>}</div>
+<div class="line"><a id="l01688" name="l01688"></a><span class="lineno"> 1688</span> </div>
+<div class="line"><a id="l01689" name="l01689"></a><span class="lineno"> 1689</span><span class="comment">// The character, and the joint within it, of each parsed character&#39;s joint nodes.</span></div>
+<div class="line"><a id="l01690" name="l01690"></a><span class="lineno"> 1690</span><span class="keyword">struct </span>JointOwner {</div>
+<div class="line"><a id="l01691" name="l01691"></a><span class="lineno"> 1691</span>  <span class="keywordtype">size_t</span> character = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>;</div>
+<div class="line"><a id="l01692" name="l01692"></a><span class="lineno"> 1692</span>  <span class="keywordtype">size_t</span> joint = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>;</div>
+<div class="line"><a id="l01693" name="l01693"></a><span class="lineno"> 1693</span>};</div>
+<div class="line"><a id="l01694" name="l01694"></a><span class="lineno"> 1694</span><span class="keyword">using </span>JointOwnerMap = std::unordered_map&lt;const ofbx::Object*, JointOwner&gt;;</div>
 <div class="line"><a id="l01695" name="l01695"></a><span class="lineno"> 1695</span> </div>
-<div class="line"><a id="l01696" name="l01696"></a><span class="lineno"> 1696</span><span class="comment">// The character, and the joint within it, of each parsed character&#39;s joint nodes.</span></div>
-<div class="line"><a id="l01697" name="l01697"></a><span class="lineno"> 1697</span><span class="keyword">struct </span>JointOwner {</div>
-<div class="line"><a id="l01698" name="l01698"></a><span class="lineno"> 1698</span>  <span class="keywordtype">size_t</span> character = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>;</div>
-<div class="line"><a id="l01699" name="l01699"></a><span class="lineno"> 1699</span>  <span class="keywordtype">size_t</span> joint = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>;</div>
-<div class="line"><a id="l01700" name="l01700"></a><span class="lineno"> 1700</span>};</div>
-<div class="line"><a id="l01701" name="l01701"></a><span class="lineno"> 1701</span><span class="keyword">using </span>JointOwnerMap = std::unordered_map&lt;const ofbx::Object*, JointOwner&gt;;</div>
-<div class="line"><a id="l01702" name="l01702"></a><span class="lineno"> 1702</span> </div>
-<div class="line"><a id="l01703" name="l01703"></a><span class="lineno"> 1703</span>JointOwnerMap buildJointOwnerMap(std::span&lt;const FbxCharacterParse&gt; characters) {</div>
-<div class="line"><a id="l01704" name="l01704"></a><span class="lineno"> 1704</span>  JointOwnerMap jointOwner;</div>
-<div class="line"><a id="l01705" name="l01705"></a><span class="lineno"> 1705</span>  <span class="keywordtype">size_t</span> iChar = 0;</div>
-<div class="line"><a id="l01706" name="l01706"></a><span class="lineno"> 1706</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; character : characters) {</div>
-<div class="line"><a id="l01707" name="l01707"></a><span class="lineno"> 1707</span>    <span class="keywordtype">size_t</span> iJoint = 0;</div>
-<div class="line"><a id="l01708" name="l01708"></a><span class="lineno"> 1708</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>* jointNode : character.jointFbxNodes) {</div>
-<div class="line"><a id="l01709" name="l01709"></a><span class="lineno"> 1709</span>      jointOwner.emplace(jointNode, JointOwner{.character = iChar, .joint = iJoint++});</div>
-<div class="line"><a id="l01710" name="l01710"></a><span class="lineno"> 1710</span>    }</div>
-<div class="line"><a id="l01711" name="l01711"></a><span class="lineno"> 1711</span>    ++iChar;</div>
-<div class="line"><a id="l01712" name="l01712"></a><span class="lineno"> 1712</span>  }</div>
-<div class="line"><a id="l01713" name="l01713"></a><span class="lineno"> 1713</span>  <span class="keywordflow">return</span> jointOwner;</div>
-<div class="line"><a id="l01714" name="l01714"></a><span class="lineno"> 1714</span>}</div>
-<div class="line"><a id="l01715" name="l01715"></a><span class="lineno"> 1715</span> </div>
-<div class="line"><a id="l01716" name="l01716"></a><span class="lineno"> 1716</span><span class="comment">// The character a scene mesh belongs to. A skinned mesh belongs to the character that one of its</span></div>
-<div class="line"><a id="l01717" name="l01717"></a><span class="lineno"> 1717</span><span class="comment">// skin clusters links to (joint is then kInvalidIndex); an unskinned mesh moves rigidly with the</span></div>
-<div class="line"><a id="l01718" name="l01718"></a><span class="lineno"> 1718</span><span class="comment">// nearest joint at or above its node. Both fields are kInvalidIndex when there is no owner.</span></div>
-<div class="line"><a id="l01719" name="l01719"></a><span class="lineno"> 1719</span>JointOwner findMeshOwner(<span class="keyword">const</span> ofbx::Mesh&amp; mesh, <span class="keyword">const</span> JointOwnerMap&amp; jointOwner) {</div>
-<div class="line"><a id="l01720" name="l01720"></a><span class="lineno"> 1720</span>  <span class="keyword">const</span> <span class="keyword">auto</span>* skin = mesh.getGeometry()-&gt;getSkin();</div>
-<div class="line"><a id="l01721" name="l01721"></a><span class="lineno"> 1721</span>  <span class="keywordflow">if</span> (skin != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l01722" name="l01722"></a><span class="lineno"> 1722</span>    <span class="comment">// The first cluster&#39;s link can be null or outside every character while a later one resolves.</span></div>
-<div class="line"><a id="l01723" name="l01723"></a><span class="lineno"> 1723</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; c &lt; skin-&gt;getClusterCount(); ++c) {</div>
-<div class="line"><a id="l01724" name="l01724"></a><span class="lineno"> 1724</span>      <span class="keyword">const</span> <span class="keyword">auto</span>* cluster = skin-&gt;getCluster(c);</div>
-<div class="line"><a id="l01725" name="l01725"></a><span class="lineno"> 1725</span>      <span class="keyword">const</span> <span class="keyword">auto</span> it = cluster != <span class="keyword">nullptr</span> ? jointOwner.find(cluster-&gt;getLink()) : jointOwner.end();</div>
-<div class="line"><a id="l01726" name="l01726"></a><span class="lineno"> 1726</span>      <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
-<div class="line"><a id="l01727" name="l01727"></a><span class="lineno"> 1727</span>        <span class="keywordflow">return</span> {.character = it-&gt;second.character, .joint = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>};</div>
-<div class="line"><a id="l01728" name="l01728"></a><span class="lineno"> 1728</span>      }</div>
-<div class="line"><a id="l01729" name="l01729"></a><span class="lineno"> 1729</span>    }</div>
-<div class="line"><a id="l01730" name="l01730"></a><span class="lineno"> 1730</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l01696" name="l01696"></a><span class="lineno"> 1696</span>JointOwnerMap buildJointOwnerMap(std::span&lt;const FbxCharacterParse&gt; characters) {</div>
+<div class="line"><a id="l01697" name="l01697"></a><span class="lineno"> 1697</span>  JointOwnerMap jointOwner;</div>
+<div class="line"><a id="l01698" name="l01698"></a><span class="lineno"> 1698</span>  <span class="keywordtype">size_t</span> iChar = 0;</div>
+<div class="line"><a id="l01699" name="l01699"></a><span class="lineno"> 1699</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; character : characters) {</div>
+<div class="line"><a id="l01700" name="l01700"></a><span class="lineno"> 1700</span>    <span class="keywordtype">size_t</span> iJoint = 0;</div>
+<div class="line"><a id="l01701" name="l01701"></a><span class="lineno"> 1701</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>* jointNode : character.jointFbxNodes) {</div>
+<div class="line"><a id="l01702" name="l01702"></a><span class="lineno"> 1702</span>      jointOwner.emplace(jointNode, JointOwner{.character = iChar, .joint = iJoint++});</div>
+<div class="line"><a id="l01703" name="l01703"></a><span class="lineno"> 1703</span>    }</div>
+<div class="line"><a id="l01704" name="l01704"></a><span class="lineno"> 1704</span>    ++iChar;</div>
+<div class="line"><a id="l01705" name="l01705"></a><span class="lineno"> 1705</span>  }</div>
+<div class="line"><a id="l01706" name="l01706"></a><span class="lineno"> 1706</span>  <span class="keywordflow">return</span> jointOwner;</div>
+<div class="line"><a id="l01707" name="l01707"></a><span class="lineno"> 1707</span>}</div>
+<div class="line"><a id="l01708" name="l01708"></a><span class="lineno"> 1708</span> </div>
+<div class="line"><a id="l01709" name="l01709"></a><span class="lineno"> 1709</span><span class="comment">// The character a scene mesh belongs to. A skinned mesh belongs to the character that one of its</span></div>
+<div class="line"><a id="l01710" name="l01710"></a><span class="lineno"> 1710</span><span class="comment">// skin clusters links to (joint is then kInvalidIndex); an unskinned mesh moves rigidly with the</span></div>
+<div class="line"><a id="l01711" name="l01711"></a><span class="lineno"> 1711</span><span class="comment">// nearest joint at or above its node. Both fields are kInvalidIndex when there is no owner.</span></div>
+<div class="line"><a id="l01712" name="l01712"></a><span class="lineno"> 1712</span>JointOwner findMeshOwner(<span class="keyword">const</span> ofbx::Mesh&amp; mesh, <span class="keyword">const</span> JointOwnerMap&amp; jointOwner) {</div>
+<div class="line"><a id="l01713" name="l01713"></a><span class="lineno"> 1713</span>  <span class="keyword">const</span> <span class="keyword">auto</span>* skin = mesh.getGeometry()-&gt;getSkin();</div>
+<div class="line"><a id="l01714" name="l01714"></a><span class="lineno"> 1714</span>  <span class="keywordflow">if</span> (skin != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l01715" name="l01715"></a><span class="lineno"> 1715</span>    <span class="comment">// The first cluster&#39;s link can be null or outside every character while a later one resolves.</span></div>
+<div class="line"><a id="l01716" name="l01716"></a><span class="lineno"> 1716</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; c &lt; skin-&gt;getClusterCount(); ++c) {</div>
+<div class="line"><a id="l01717" name="l01717"></a><span class="lineno"> 1717</span>      <span class="keyword">const</span> <span class="keyword">auto</span>* cluster = skin-&gt;getCluster(c);</div>
+<div class="line"><a id="l01718" name="l01718"></a><span class="lineno"> 1718</span>      <span class="keyword">const</span> <span class="keyword">auto</span> it = cluster != <span class="keyword">nullptr</span> ? jointOwner.find(cluster-&gt;getLink()) : jointOwner.end();</div>
+<div class="line"><a id="l01719" name="l01719"></a><span class="lineno"> 1719</span>      <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
+<div class="line"><a id="l01720" name="l01720"></a><span class="lineno"> 1720</span>        <span class="keywordflow">return</span> {.character = it-&gt;second.character, .joint = <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>};</div>
+<div class="line"><a id="l01721" name="l01721"></a><span class="lineno"> 1721</span>      }</div>
+<div class="line"><a id="l01722" name="l01722"></a><span class="lineno"> 1722</span>    }</div>
+<div class="line"><a id="l01723" name="l01723"></a><span class="lineno"> 1723</span>    <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l01724" name="l01724"></a><span class="lineno"> 1724</span>  }</div>
+<div class="line"><a id="l01725" name="l01725"></a><span class="lineno"> 1725</span> </div>
+<div class="line"><a id="l01726" name="l01726"></a><span class="lineno"> 1726</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::Object* node = &amp;mesh; node != <span class="keyword">nullptr</span>; node = node-&gt;getParent()) {</div>
+<div class="line"><a id="l01727" name="l01727"></a><span class="lineno"> 1727</span>    <span class="keyword">const</span> <span class="keyword">auto</span> it = jointOwner.find(node);</div>
+<div class="line"><a id="l01728" name="l01728"></a><span class="lineno"> 1728</span>    <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
+<div class="line"><a id="l01729" name="l01729"></a><span class="lineno"> 1729</span>      <span class="keywordflow">return</span> it-&gt;second;</div>
+<div class="line"><a id="l01730" name="l01730"></a><span class="lineno"> 1730</span>    }</div>
 <div class="line"><a id="l01731" name="l01731"></a><span class="lineno"> 1731</span>  }</div>
-<div class="line"><a id="l01732" name="l01732"></a><span class="lineno"> 1732</span> </div>
-<div class="line"><a id="l01733" name="l01733"></a><span class="lineno"> 1733</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::Object* node = &amp;mesh; node != <span class="keyword">nullptr</span>; node = node-&gt;getParent()) {</div>
-<div class="line"><a id="l01734" name="l01734"></a><span class="lineno"> 1734</span>    <span class="keyword">const</span> <span class="keyword">auto</span> it = jointOwner.find(node);</div>
-<div class="line"><a id="l01735" name="l01735"></a><span class="lineno"> 1735</span>    <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
-<div class="line"><a id="l01736" name="l01736"></a><span class="lineno"> 1736</span>      <span class="keywordflow">return</span> it-&gt;second;</div>
-<div class="line"><a id="l01737" name="l01737"></a><span class="lineno"> 1737</span>    }</div>
-<div class="line"><a id="l01738" name="l01738"></a><span class="lineno"> 1738</span>  }</div>
-<div class="line"><a id="l01739" name="l01739"></a><span class="lineno"> 1739</span>  <span class="keywordflow">return</span> {};</div>
-<div class="line"><a id="l01740" name="l01740"></a><span class="lineno"> 1740</span>}</div>
-<div class="line"><a id="l01741" name="l01741"></a><span class="lineno"> 1741</span> </div>
-<div class="line"><a id="l01742" name="l01742"></a><span class="lineno"> 1742</span><span class="comment">// Whether `object` is a mesh node without a skin, which moves rigidly with its node.</span></div>
-<div class="line"><a id="l01743" name="l01743"></a><span class="lineno"> 1743</span><span class="keywordtype">bool</span> isRigidMesh(<span class="keyword">const</span> ofbx::Object&amp; <span class="keywordtype">object</span>) {</div>
-<div class="line"><a id="l01744" name="l01744"></a><span class="lineno"> 1744</span>  <span class="keywordflow">if</span> (<span class="keywordtype">object</span>.getType() != ofbx::Object::Type::MESH) {</div>
-<div class="line"><a id="l01745" name="l01745"></a><span class="lineno"> 1745</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l01746" name="l01746"></a><span class="lineno"> 1746</span>  }</div>
-<div class="line"><a id="l01747" name="l01747"></a><span class="lineno"> 1747</span>  <span class="keyword">const</span> <span class="keyword">auto</span>* geometry = <span class="keyword">static_cast&lt;</span><span class="keyword">const </span>ofbx::Mesh&amp;<span class="keyword">&gt;</span>(object).getGeometry();</div>
-<div class="line"><a id="l01748" name="l01748"></a><span class="lineno"> 1748</span>  <span class="keywordflow">return</span> geometry != <span class="keyword">nullptr</span> &amp;&amp; geometry-&gt;getSkin() == <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l01749" name="l01749"></a><span class="lineno"> 1749</span>}</div>
-<div class="line"><a id="l01750" name="l01750"></a><span class="lineno"> 1750</span> </div>
-<div class="line"><a id="l01751" name="l01751"></a><span class="lineno"> 1751</span><span class="comment">// Collect the nodes that each root a character, descending through grouping NULL_NODEs: every</span></div>
-<div class="line"><a id="l01752" name="l01752"></a><span class="lineno"> 1752</span><span class="comment">// LIMB_NODE that roots a skeleton, and every unskinned mesh outside a skeleton, which is a rigid</span></div>
-<div class="line"><a id="l01753" name="l01753"></a><span class="lineno"> 1753</span><span class="comment">// object such as one written by FbxBuilder::addAnimatedMesh.</span></div>
-<div class="line"><a id="l01754" name="l01754"></a><span class="lineno"> 1754</span><span class="keywordtype">void</span> collectCharacterRootObjects(</div>
-<div class="line"><a id="l01755" name="l01755"></a><span class="lineno"> 1755</span>    <span class="keyword">const</span> ofbx::Object&amp; node,</div>
-<div class="line"><a id="l01756" name="l01756"></a><span class="lineno"> 1756</span>    std::vector&lt;const ofbx::Object*&gt;&amp; roots) {</div>
-<div class="line"><a id="l01757" name="l01757"></a><span class="lineno"> 1757</span>  <span class="keywordtype">int</span> i = 0;</div>
-<div class="line"><a id="l01758" name="l01758"></a><span class="lineno"> 1758</span>  <span class="keywordflow">while</span> (<span class="keyword">const</span> ofbx::Object* child = node.resolveObjectLink(i++)) {</div>
-<div class="line"><a id="l01759" name="l01759"></a><span class="lineno"> 1759</span>    <span class="keyword">const</span> <span class="keyword">auto</span> type = child-&gt;getType();</div>
-<div class="line"><a id="l01760" name="l01760"></a><span class="lineno"> 1760</span>    <span class="keywordflow">if</span> (type == ofbx::Object::Type::LIMB_NODE || isRigidMesh(*child)) {</div>
-<div class="line"><a id="l01761" name="l01761"></a><span class="lineno"> 1761</span>      roots.push_back(child);</div>
-<div class="line"><a id="l01762" name="l01762"></a><span class="lineno"> 1762</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (type == ofbx::Object::Type::NULL_NODE) {</div>
-<div class="line"><a id="l01763" name="l01763"></a><span class="lineno"> 1763</span>      collectCharacterRootObjects(*child, roots);</div>
-<div class="line"><a id="l01764" name="l01764"></a><span class="lineno"> 1764</span>    }</div>
-<div class="line"><a id="l01765" name="l01765"></a><span class="lineno"> 1765</span>  }</div>
-<div class="line"><a id="l01766" name="l01766"></a><span class="lineno"> 1766</span>}</div>
-<div class="line"><a id="l01767" name="l01767"></a><span class="lineno"> 1767</span> </div>
-<div class="line"><a id="l01768" name="l01768"></a><span class="lineno"> 1768</span><span class="comment">// Parse every character of the scene into its own FbxCharacterParse: one per skeleton root and one</span></div>
-<div class="line"><a id="l01769" name="l01769"></a><span class="lineno"> 1769</span><span class="comment">// per rigid object (a one-joint skeleton on the mesh node). Each scene mesh goes to the character</span></div>
-<div class="line"><a id="l01770" name="l01770"></a><span class="lineno"> 1770</span><span class="comment">// that owns it. The scene must outlive the result, which points into it.</span></div>
-<div class="line"><a id="l01771" name="l01771"></a><span class="lineno"> 1771</span>std::vector&lt;FbxCharacterParse&gt;</div>
-<div class="line"><a id="l01772" name="l01772"></a><span class="lineno"> 1772</span>parseFbxCharacters(ofbx::IScene&amp; scene, <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive, <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes) {</div>
-<div class="line"><a id="l01773" name="l01773"></a><span class="lineno"> 1773</span>  <span class="comment">// Parsing each skeleton from its own root object, rather than by name, keeps two same-named roots</span></div>
-<div class="line"><a id="l01774" name="l01774"></a><span class="lineno"> 1774</span>  <span class="comment">// from merging into one skeleton.</span></div>
-<div class="line"><a id="l01775" name="l01775"></a><span class="lineno"> 1775</span>  std::vector&lt;const ofbx::Object*&gt; rootObjects;</div>
-<div class="line"><a id="l01776" name="l01776"></a><span class="lineno"> 1776</span>  collectCharacterRootObjects(*scene.getRoot(), rootObjects);</div>
-<div class="line"><a id="l01777" name="l01777"></a><span class="lineno"> 1777</span>  std::vector&lt;FbxCharacterParse&gt; characters;</div>
-<div class="line"><a id="l01778" name="l01778"></a><span class="lineno"> 1778</span>  characters.reserve(rootObjects.size());</div>
-<div class="line"><a id="l01779" name="l01779"></a><span class="lineno"> 1779</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::Object* root : rootObjects) {</div>
-<div class="line"><a id="l01780" name="l01780"></a><span class="lineno"> 1780</span>    FbxCharacterParse cp;</div>
-<div class="line"><a id="l01781" name="l01781"></a><span class="lineno"> 1781</span>    <span class="keywordflow">if</span> (isRigidMesh(*root)) {</div>
-<div class="line"><a id="l01782" name="l01782"></a><span class="lineno"> 1782</span>      cp.skeleton.joints.push_back(<a class="code hl_function" href="namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0">createJoint</a>(*root, <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>, permissive));</div>
-<div class="line"><a id="l01783" name="l01783"></a><span class="lineno"> 1783</span>      cp.jointFbxNodes.push_back(root);</div>
-<div class="line"><a id="l01784" name="l01784"></a><span class="lineno"> 1784</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01785" name="l01785"></a><span class="lineno"> 1785</span>      parseSkeleton(</div>
-<div class="line"><a id="l01786" name="l01786"></a><span class="lineno"> 1786</span>          root,</div>
-<div class="line"><a id="l01787" name="l01787"></a><span class="lineno"> 1787</span>          <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>,</div>
-<div class="line"><a id="l01788" name="l01788"></a><span class="lineno"> 1788</span>          cp.skeleton,</div>
-<div class="line"><a id="l01789" name="l01789"></a><span class="lineno"> 1789</span>          cp.jointFbxNodes,</div>
-<div class="line"><a id="l01790" name="l01790"></a><span class="lineno"> 1790</span>          cp.collision,</div>
-<div class="line"><a id="l01791" name="l01791"></a><span class="lineno"> 1791</span>          cp.locators,</div>
-<div class="line"><a id="l01792" name="l01792"></a><span class="lineno"> 1792</span>          permissive);</div>
-<div class="line"><a id="l01793" name="l01793"></a><span class="lineno"> 1793</span>    }</div>
-<div class="line"><a id="l01794" name="l01794"></a><span class="lineno"> 1794</span>    <span class="keywordflow">if</span> (cp.jointFbxNodes.empty()) {</div>
-<div class="line"><a id="l01795" name="l01795"></a><span class="lineno"> 1795</span>      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l01796" name="l01796"></a><span class="lineno"> 1796</span>    }</div>
-<div class="line"><a id="l01797" name="l01797"></a><span class="lineno"> 1797</span> </div>
-<div class="line"><a id="l01798" name="l01798"></a><span class="lineno"> 1798</span>    fillNameAndMetadata(cp, <span class="comment">/*fallbackToNodeName=*/</span><span class="keyword">true</span>);</div>
-<div class="line"><a id="l01799" name="l01799"></a><span class="lineno"> 1799</span>    computeRestInverseBindPose(cp);</div>
-<div class="line"><a id="l01800" name="l01800"></a><span class="lineno"> 1800</span>    characters.push_back(std::move(cp));</div>
-<div class="line"><a id="l01801" name="l01801"></a><span class="lineno"> 1801</span>  }</div>
-<div class="line"><a id="l01802" name="l01802"></a><span class="lineno"> 1802</span> </div>
-<div class="line"><a id="l01803" name="l01803"></a><span class="lineno"> 1803</span>  <span class="keyword">const</span> JointOwnerMap jointOwner = buildJointOwnerMap(characters);</div>
-<div class="line"><a id="l01804" name="l01804"></a><span class="lineno"> 1804</span>  <span class="comment">// Set the bind transforms that skin clusters give their joints before any mesh is parsed: a rigid</span></div>
-<div class="line"><a id="l01805" name="l01805"></a><span class="lineno"> 1805</span>  <span class="comment">// mesh is bound with its joint&#39;s final bind transform, whatever the mesh order.</span></div>
-<div class="line"><a id="l01806" name="l01806"></a><span class="lineno"> 1806</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
-<div class="line"><a id="l01807" name="l01807"></a><span class="lineno"> 1807</span>    <span class="keyword">const</span> ofbx::Mesh* mesh = scene.getMesh(iMesh);</div>
-<div class="line"><a id="l01808" name="l01808"></a><span class="lineno"> 1808</span>    <span class="keyword">const</span> ofbx::Skin* skin = mesh != <span class="keyword">nullptr</span> &amp;&amp; mesh-&gt;getGeometry() != <span class="keyword">nullptr</span></div>
-<div class="line"><a id="l01809" name="l01809"></a><span class="lineno"> 1809</span>        ? mesh-&gt;getGeometry()-&gt;getSkin()</div>
-<div class="line"><a id="l01810" name="l01810"></a><span class="lineno"> 1810</span>        : <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l01811" name="l01811"></a><span class="lineno"> 1811</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; skin != <span class="keyword">nullptr</span> &amp;&amp; c &lt; skin-&gt;getClusterCount(); ++c) {</div>
-<div class="line"><a id="l01812" name="l01812"></a><span class="lineno"> 1812</span>      <span class="keyword">const</span> ofbx::Cluster* cluster = skin-&gt;getCluster(c);</div>
-<div class="line"><a id="l01813" name="l01813"></a><span class="lineno"> 1813</span>      <span class="keyword">const</span> <span class="keyword">auto</span> it = cluster != <span class="keyword">nullptr</span> ? jointOwner.find(cluster-&gt;getLink()) : jointOwner.end();</div>
-<div class="line"><a id="l01814" name="l01814"></a><span class="lineno"> 1814</span>      <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
-<div class="line"><a id="l01815" name="l01815"></a><span class="lineno"> 1815</span>        characters.at(it-&gt;second.character).inverseBindPose.at(it-&gt;second.joint) =</div>
-<div class="line"><a id="l01816" name="l01816"></a><span class="lineno"> 1816</span>            clusterInverseBind(*cluster);</div>
-<div class="line"><a id="l01817" name="l01817"></a><span class="lineno"> 1817</span>      }</div>
-<div class="line"><a id="l01818" name="l01818"></a><span class="lineno"> 1818</span>    }</div>
-<div class="line"><a id="l01819" name="l01819"></a><span class="lineno"> 1819</span>  }</div>
-<div class="line"><a id="l01820" name="l01820"></a><span class="lineno"> 1820</span>  <span class="comment">// collectClusterWeights writes these transforms again, mesh by mesh, and ends with the same</span></div>
-<div class="line"><a id="l01821" name="l01821"></a><span class="lineno"> 1821</span>  <span class="comment">// values. When two clusters give one joint different transforms, the value at a rigid mesh&#39;s</span></div>
-<div class="line"><a id="l01822" name="l01822"></a><span class="lineno"> 1822</span>  <span class="comment">// place in the mesh order is not the final one, so rigid meshes are bound with these values.</span></div>
-<div class="line"><a id="l01823" name="l01823"></a><span class="lineno"> 1823</span>  std::vector&lt;TransformationList&gt; finalInverseBindPose;</div>
-<div class="line"><a id="l01824" name="l01824"></a><span class="lineno"> 1824</span>  finalInverseBindPose.reserve(characters.size());</div>
-<div class="line"><a id="l01825" name="l01825"></a><span class="lineno"> 1825</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; cp : characters) {</div>
-<div class="line"><a id="l01826" name="l01826"></a><span class="lineno"> 1826</span>    finalInverseBindPose.push_back(cp.inverseBindPose);</div>
-<div class="line"><a id="l01827" name="l01827"></a><span class="lineno"> 1827</span>  }</div>
-<div class="line"><a id="l01828" name="l01828"></a><span class="lineno"> 1828</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
-<div class="line"><a id="l01829" name="l01829"></a><span class="lineno"> 1829</span>    <span class="keyword">const</span> ofbx::Mesh* mesh = scene.getMesh(iMesh);</div>
-<div class="line"><a id="l01830" name="l01830"></a><span class="lineno"> 1830</span>    <span class="keywordflow">if</span> (mesh == <span class="keyword">nullptr</span> || mesh-&gt;getGeometry() == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l01831" name="l01831"></a><span class="lineno"> 1831</span>      <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l01832" name="l01832"></a><span class="lineno"> 1832</span>    }</div>
-<div class="line"><a id="l01833" name="l01833"></a><span class="lineno"> 1833</span>    <span class="keyword">const</span> JointOwner owner = findMeshOwner(*mesh, jointOwner);</div>
-<div class="line"><a id="l01834" name="l01834"></a><span class="lineno"> 1834</span>    <span class="keywordflow">if</span> (owner.character == <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>) {</div>
-<div class="line"><a id="l01835" name="l01835"></a><span class="lineno"> 1835</span>      <a class="code hl_define" href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a>(</div>
-<div class="line"><a id="l01836" name="l01836"></a><span class="lineno"> 1836</span>          permissive == <a class="code hl_enumvalue" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b">Permissive::No</a>,</div>
-<div class="line"><a id="l01837" name="l01837"></a><span class="lineno"> 1837</span>          <span class="stringliteral">&quot;FBX mesh &#39;{}&#39; belongs to no character: its skin links to no joint, or no joint is above &quot;</span></div>
-<div class="line"><a id="l01838" name="l01838"></a><span class="lineno"> 1838</span>          <span class="stringliteral">&quot;it. Load in permissive mode to skip it.&quot;</span>,</div>
-<div class="line"><a id="l01839" name="l01839"></a><span class="lineno"> 1839</span>          mesh-&gt;name);</div>
-<div class="line"><a id="l01840" name="l01840"></a><span class="lineno"> 1840</span>      <a class="code hl_define" href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a>(</div>
-<div class="line"><a id="l01841" name="l01841"></a><span class="lineno"> 1841</span>          <span class="stringliteral">&quot;Skipping FBX mesh &#39;{}&#39;: unable to determine which character it belongs to.&quot;</span>, mesh-&gt;name);</div>
-<div class="line"><a id="l01842" name="l01842"></a><span class="lineno"> 1842</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l01732" name="l01732"></a><span class="lineno"> 1732</span>  <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l01733" name="l01733"></a><span class="lineno"> 1733</span>}</div>
+<div class="line"><a id="l01734" name="l01734"></a><span class="lineno"> 1734</span> </div>
+<div class="line"><a id="l01735" name="l01735"></a><span class="lineno"> 1735</span><span class="comment">// Whether `object` is a mesh node without a skin, which moves rigidly with its node.</span></div>
+<div class="line"><a id="l01736" name="l01736"></a><span class="lineno"> 1736</span><span class="keywordtype">bool</span> isRigidMesh(<span class="keyword">const</span> ofbx::Object&amp; <span class="keywordtype">object</span>) {</div>
+<div class="line"><a id="l01737" name="l01737"></a><span class="lineno"> 1737</span>  <span class="keywordflow">if</span> (<span class="keywordtype">object</span>.getType() != ofbx::Object::Type::MESH) {</div>
+<div class="line"><a id="l01738" name="l01738"></a><span class="lineno"> 1738</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l01739" name="l01739"></a><span class="lineno"> 1739</span>  }</div>
+<div class="line"><a id="l01740" name="l01740"></a><span class="lineno"> 1740</span>  <span class="keyword">const</span> <span class="keyword">auto</span>* geometry = <span class="keyword">static_cast&lt;</span><span class="keyword">const </span>ofbx::Mesh&amp;<span class="keyword">&gt;</span>(object).getGeometry();</div>
+<div class="line"><a id="l01741" name="l01741"></a><span class="lineno"> 1741</span>  <span class="keywordflow">return</span> geometry != <span class="keyword">nullptr</span> &amp;&amp; geometry-&gt;getSkin() == <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l01742" name="l01742"></a><span class="lineno"> 1742</span>}</div>
+<div class="line"><a id="l01743" name="l01743"></a><span class="lineno"> 1743</span> </div>
+<div class="line"><a id="l01744" name="l01744"></a><span class="lineno"> 1744</span><span class="comment">// Collect the nodes that each root a character, descending through grouping NULL_NODEs: every</span></div>
+<div class="line"><a id="l01745" name="l01745"></a><span class="lineno"> 1745</span><span class="comment">// LIMB_NODE that roots a skeleton, and every unskinned mesh outside a skeleton, which is a rigid</span></div>
+<div class="line"><a id="l01746" name="l01746"></a><span class="lineno"> 1746</span><span class="comment">// object such as one written by FbxBuilder::addAnimatedMesh.</span></div>
+<div class="line"><a id="l01747" name="l01747"></a><span class="lineno"> 1747</span><span class="keywordtype">void</span> collectCharacterRootObjects(</div>
+<div class="line"><a id="l01748" name="l01748"></a><span class="lineno"> 1748</span>    <span class="keyword">const</span> ofbx::Object&amp; node,</div>
+<div class="line"><a id="l01749" name="l01749"></a><span class="lineno"> 1749</span>    std::vector&lt;const ofbx::Object*&gt;&amp; roots) {</div>
+<div class="line"><a id="l01750" name="l01750"></a><span class="lineno"> 1750</span>  <span class="keywordtype">int</span> i = 0;</div>
+<div class="line"><a id="l01751" name="l01751"></a><span class="lineno"> 1751</span>  <span class="keywordflow">while</span> (<span class="keyword">const</span> ofbx::Object* child = node.resolveObjectLink(i++)) {</div>
+<div class="line"><a id="l01752" name="l01752"></a><span class="lineno"> 1752</span>    <span class="keyword">const</span> <span class="keyword">auto</span> type = child-&gt;getType();</div>
+<div class="line"><a id="l01753" name="l01753"></a><span class="lineno"> 1753</span>    <span class="keywordflow">if</span> (type == ofbx::Object::Type::LIMB_NODE || isRigidMesh(*child)) {</div>
+<div class="line"><a id="l01754" name="l01754"></a><span class="lineno"> 1754</span>      roots.push_back(child);</div>
+<div class="line"><a id="l01755" name="l01755"></a><span class="lineno"> 1755</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (type == ofbx::Object::Type::NULL_NODE) {</div>
+<div class="line"><a id="l01756" name="l01756"></a><span class="lineno"> 1756</span>      collectCharacterRootObjects(*child, roots);</div>
+<div class="line"><a id="l01757" name="l01757"></a><span class="lineno"> 1757</span>    }</div>
+<div class="line"><a id="l01758" name="l01758"></a><span class="lineno"> 1758</span>  }</div>
+<div class="line"><a id="l01759" name="l01759"></a><span class="lineno"> 1759</span>}</div>
+<div class="line"><a id="l01760" name="l01760"></a><span class="lineno"> 1760</span> </div>
+<div class="line"><a id="l01761" name="l01761"></a><span class="lineno"> 1761</span><span class="comment">// Parse every character of the scene into its own FbxCharacterParse: one per skeleton root and one</span></div>
+<div class="line"><a id="l01762" name="l01762"></a><span class="lineno"> 1762</span><span class="comment">// per rigid object (a one-joint skeleton on the mesh node). Each scene mesh goes to the character</span></div>
+<div class="line"><a id="l01763" name="l01763"></a><span class="lineno"> 1763</span><span class="comment">// that owns it. The scene must outlive the result, which points into it.</span></div>
+<div class="line"><a id="l01764" name="l01764"></a><span class="lineno"> 1764</span>std::vector&lt;FbxCharacterParse&gt;</div>
+<div class="line"><a id="l01765" name="l01765"></a><span class="lineno"> 1765</span>parseFbxCharacters(ofbx::IScene&amp; scene, <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive, <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes) {</div>
+<div class="line"><a id="l01766" name="l01766"></a><span class="lineno"> 1766</span>  <span class="comment">// Parsing each skeleton from its own root object, rather than by name, keeps two same-named roots</span></div>
+<div class="line"><a id="l01767" name="l01767"></a><span class="lineno"> 1767</span>  <span class="comment">// from merging into one skeleton.</span></div>
+<div class="line"><a id="l01768" name="l01768"></a><span class="lineno"> 1768</span>  std::vector&lt;const ofbx::Object*&gt; rootObjects;</div>
+<div class="line"><a id="l01769" name="l01769"></a><span class="lineno"> 1769</span>  collectCharacterRootObjects(*scene.getRoot(), rootObjects);</div>
+<div class="line"><a id="l01770" name="l01770"></a><span class="lineno"> 1770</span>  std::vector&lt;FbxCharacterParse&gt; characters;</div>
+<div class="line"><a id="l01771" name="l01771"></a><span class="lineno"> 1771</span>  characters.reserve(rootObjects.size());</div>
+<div class="line"><a id="l01772" name="l01772"></a><span class="lineno"> 1772</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> ofbx::Object* root : rootObjects) {</div>
+<div class="line"><a id="l01773" name="l01773"></a><span class="lineno"> 1773</span>    FbxCharacterParse cp;</div>
+<div class="line"><a id="l01774" name="l01774"></a><span class="lineno"> 1774</span>    <span class="keywordflow">if</span> (isRigidMesh(*root)) {</div>
+<div class="line"><a id="l01775" name="l01775"></a><span class="lineno"> 1775</span>      cp.skeleton.joints.push_back(<a class="code hl_function" href="namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0">createJoint</a>(*root, <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>, permissive));</div>
+<div class="line"><a id="l01776" name="l01776"></a><span class="lineno"> 1776</span>      cp.jointFbxNodes.push_back(root);</div>
+<div class="line"><a id="l01777" name="l01777"></a><span class="lineno"> 1777</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01778" name="l01778"></a><span class="lineno"> 1778</span>      parseSkeleton(</div>
+<div class="line"><a id="l01779" name="l01779"></a><span class="lineno"> 1779</span>          root,</div>
+<div class="line"><a id="l01780" name="l01780"></a><span class="lineno"> 1780</span>          <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>,</div>
+<div class="line"><a id="l01781" name="l01781"></a><span class="lineno"> 1781</span>          cp.skeleton,</div>
+<div class="line"><a id="l01782" name="l01782"></a><span class="lineno"> 1782</span>          cp.jointFbxNodes,</div>
+<div class="line"><a id="l01783" name="l01783"></a><span class="lineno"> 1783</span>          cp.collision,</div>
+<div class="line"><a id="l01784" name="l01784"></a><span class="lineno"> 1784</span>          cp.locators,</div>
+<div class="line"><a id="l01785" name="l01785"></a><span class="lineno"> 1785</span>          permissive);</div>
+<div class="line"><a id="l01786" name="l01786"></a><span class="lineno"> 1786</span>    }</div>
+<div class="line"><a id="l01787" name="l01787"></a><span class="lineno"> 1787</span>    <span class="keywordflow">if</span> (cp.jointFbxNodes.empty()) {</div>
+<div class="line"><a id="l01788" name="l01788"></a><span class="lineno"> 1788</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l01789" name="l01789"></a><span class="lineno"> 1789</span>    }</div>
+<div class="line"><a id="l01790" name="l01790"></a><span class="lineno"> 1790</span> </div>
+<div class="line"><a id="l01791" name="l01791"></a><span class="lineno"> 1791</span>    fillNameAndMetadata(cp, <span class="comment">/*fallbackToNodeName=*/</span><span class="keyword">true</span>);</div>
+<div class="line"><a id="l01792" name="l01792"></a><span class="lineno"> 1792</span>    computeRestInverseBindPose(cp);</div>
+<div class="line"><a id="l01793" name="l01793"></a><span class="lineno"> 1793</span>    characters.push_back(std::move(cp));</div>
+<div class="line"><a id="l01794" name="l01794"></a><span class="lineno"> 1794</span>  }</div>
+<div class="line"><a id="l01795" name="l01795"></a><span class="lineno"> 1795</span> </div>
+<div class="line"><a id="l01796" name="l01796"></a><span class="lineno"> 1796</span>  <span class="keyword">const</span> JointOwnerMap jointOwner = buildJointOwnerMap(characters);</div>
+<div class="line"><a id="l01797" name="l01797"></a><span class="lineno"> 1797</span>  <span class="comment">// Set the bind transforms that skin clusters give their joints before any mesh is parsed: a rigid</span></div>
+<div class="line"><a id="l01798" name="l01798"></a><span class="lineno"> 1798</span>  <span class="comment">// mesh is bound with its joint&#39;s final bind transform, whatever the mesh order.</span></div>
+<div class="line"><a id="l01799" name="l01799"></a><span class="lineno"> 1799</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
+<div class="line"><a id="l01800" name="l01800"></a><span class="lineno"> 1800</span>    <span class="keyword">const</span> ofbx::Mesh* mesh = scene.getMesh(iMesh);</div>
+<div class="line"><a id="l01801" name="l01801"></a><span class="lineno"> 1801</span>    <span class="keyword">const</span> ofbx::Skin* skin = mesh != <span class="keyword">nullptr</span> &amp;&amp; mesh-&gt;getGeometry() != <span class="keyword">nullptr</span></div>
+<div class="line"><a id="l01802" name="l01802"></a><span class="lineno"> 1802</span>        ? mesh-&gt;getGeometry()-&gt;getSkin()</div>
+<div class="line"><a id="l01803" name="l01803"></a><span class="lineno"> 1803</span>        : <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l01804" name="l01804"></a><span class="lineno"> 1804</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; skin != <span class="keyword">nullptr</span> &amp;&amp; c &lt; skin-&gt;getClusterCount(); ++c) {</div>
+<div class="line"><a id="l01805" name="l01805"></a><span class="lineno"> 1805</span>      <span class="keyword">const</span> ofbx::Cluster* cluster = skin-&gt;getCluster(c);</div>
+<div class="line"><a id="l01806" name="l01806"></a><span class="lineno"> 1806</span>      <span class="keyword">const</span> <span class="keyword">auto</span> it = cluster != <span class="keyword">nullptr</span> ? jointOwner.find(cluster-&gt;getLink()) : jointOwner.end();</div>
+<div class="line"><a id="l01807" name="l01807"></a><span class="lineno"> 1807</span>      <span class="keywordflow">if</span> (it != jointOwner.end()) {</div>
+<div class="line"><a id="l01808" name="l01808"></a><span class="lineno"> 1808</span>        characters.at(it-&gt;second.character).inverseBindPose.at(it-&gt;second.joint) =</div>
+<div class="line"><a id="l01809" name="l01809"></a><span class="lineno"> 1809</span>            clusterInverseBind(*cluster);</div>
+<div class="line"><a id="l01810" name="l01810"></a><span class="lineno"> 1810</span>      }</div>
+<div class="line"><a id="l01811" name="l01811"></a><span class="lineno"> 1811</span>    }</div>
+<div class="line"><a id="l01812" name="l01812"></a><span class="lineno"> 1812</span>  }</div>
+<div class="line"><a id="l01813" name="l01813"></a><span class="lineno"> 1813</span>  <span class="comment">// collectClusterWeights writes these transforms again, mesh by mesh, and ends with the same</span></div>
+<div class="line"><a id="l01814" name="l01814"></a><span class="lineno"> 1814</span>  <span class="comment">// values. When two clusters give one joint different transforms, the value at a rigid mesh&#39;s</span></div>
+<div class="line"><a id="l01815" name="l01815"></a><span class="lineno"> 1815</span>  <span class="comment">// place in the mesh order is not the final one, so rigid meshes are bound with these values.</span></div>
+<div class="line"><a id="l01816" name="l01816"></a><span class="lineno"> 1816</span>  std::vector&lt;TransformationList&gt; finalInverseBindPose;</div>
+<div class="line"><a id="l01817" name="l01817"></a><span class="lineno"> 1817</span>  finalInverseBindPose.reserve(characters.size());</div>
+<div class="line"><a id="l01818" name="l01818"></a><span class="lineno"> 1818</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; cp : characters) {</div>
+<div class="line"><a id="l01819" name="l01819"></a><span class="lineno"> 1819</span>    finalInverseBindPose.push_back(cp.inverseBindPose);</div>
+<div class="line"><a id="l01820" name="l01820"></a><span class="lineno"> 1820</span>  }</div>
+<div class="line"><a id="l01821" name="l01821"></a><span class="lineno"> 1821</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iMesh = 0; iMesh &lt; scene.getMeshCount(); ++iMesh) {</div>
+<div class="line"><a id="l01822" name="l01822"></a><span class="lineno"> 1822</span>    <span class="keyword">const</span> ofbx::Mesh* mesh = scene.getMesh(iMesh);</div>
+<div class="line"><a id="l01823" name="l01823"></a><span class="lineno"> 1823</span>    <span class="keywordflow">if</span> (mesh == <span class="keyword">nullptr</span> || mesh-&gt;getGeometry() == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l01824" name="l01824"></a><span class="lineno"> 1824</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l01825" name="l01825"></a><span class="lineno"> 1825</span>    }</div>
+<div class="line"><a id="l01826" name="l01826"></a><span class="lineno"> 1826</span>    <span class="keyword">const</span> JointOwner owner = findMeshOwner(*mesh, jointOwner);</div>
+<div class="line"><a id="l01827" name="l01827"></a><span class="lineno"> 1827</span>    <span class="keywordflow">if</span> (owner.character == <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>) {</div>
+<div class="line"><a id="l01828" name="l01828"></a><span class="lineno"> 1828</span>      <a class="code hl_define" href="exception_8h.html#a9b406adb60f122613db3463c42c4d6ec">MT_THROW_IF</a>(</div>
+<div class="line"><a id="l01829" name="l01829"></a><span class="lineno"> 1829</span>          permissive == <a class="code hl_enumvalue" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b">Permissive::No</a>,</div>
+<div class="line"><a id="l01830" name="l01830"></a><span class="lineno"> 1830</span>          <span class="stringliteral">&quot;FBX mesh &#39;{}&#39; belongs to no character: its skin links to no joint, or no joint is above &quot;</span></div>
+<div class="line"><a id="l01831" name="l01831"></a><span class="lineno"> 1831</span>          <span class="stringliteral">&quot;it. Load in permissive mode to skip it.&quot;</span>,</div>
+<div class="line"><a id="l01832" name="l01832"></a><span class="lineno"> 1832</span>          mesh-&gt;name);</div>
+<div class="line"><a id="l01833" name="l01833"></a><span class="lineno"> 1833</span>      <a class="code hl_define" href="log_8h.html#a2ed8e96bf3384a14bb4d4d577cba0c0c">MT_LOGW</a>(</div>
+<div class="line"><a id="l01834" name="l01834"></a><span class="lineno"> 1834</span>          <span class="stringliteral">&quot;Skipping FBX mesh &#39;{}&#39;: unable to determine which character it belongs to.&quot;</span>, mesh-&gt;name);</div>
+<div class="line"><a id="l01835" name="l01835"></a><span class="lineno"> 1835</span>      <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l01836" name="l01836"></a><span class="lineno"> 1836</span>    }</div>
+<div class="line"><a id="l01837" name="l01837"></a><span class="lineno"> 1837</span>    <span class="keyword">auto</span>&amp; cp = characters.at(owner.character);</div>
+<div class="line"><a id="l01838" name="l01838"></a><span class="lineno"> 1838</span>    std::optional&lt;RigidBinding&gt; rigid;</div>
+<div class="line"><a id="l01839" name="l01839"></a><span class="lineno"> 1839</span>    <span class="keywordflow">if</span> (owner.joint != <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>) {</div>
+<div class="line"><a id="l01840" name="l01840"></a><span class="lineno"> 1840</span>      rigid = RigidBinding{</div>
+<div class="line"><a id="l01841" name="l01841"></a><span class="lineno"> 1841</span>          .joint = owner.joint,</div>
+<div class="line"><a id="l01842" name="l01842"></a><span class="lineno"> 1842</span>          .inverseBind = finalInverseBindPose.at(owner.character).at(owner.joint)};</div>
 <div class="line"><a id="l01843" name="l01843"></a><span class="lineno"> 1843</span>    }</div>
-<div class="line"><a id="l01844" name="l01844"></a><span class="lineno"> 1844</span>    <span class="keyword">auto</span>&amp; cp = characters.at(owner.character);</div>
-<div class="line"><a id="l01845" name="l01845"></a><span class="lineno"> 1845</span>    std::optional&lt;RigidBinding&gt; rigid;</div>
-<div class="line"><a id="l01846" name="l01846"></a><span class="lineno"> 1846</span>    <span class="keywordflow">if</span> (owner.joint != <a class="code hl_variable" href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">kInvalidIndex</a>) {</div>
-<div class="line"><a id="l01847" name="l01847"></a><span class="lineno"> 1847</span>      rigid = RigidBinding{</div>
-<div class="line"><a id="l01848" name="l01848"></a><span class="lineno"> 1848</span>          .joint = owner.joint,</div>
-<div class="line"><a id="l01849" name="l01849"></a><span class="lineno"> 1849</span>          .inverseBind = finalInverseBindPose.at(owner.character).at(owner.joint)};</div>
-<div class="line"><a id="l01850" name="l01850"></a><span class="lineno"> 1850</span>    }</div>
-<div class="line"><a id="l01851" name="l01851"></a><span class="lineno"> 1851</span>    <span class="keywordflow">try</span> {</div>
-<div class="line"><a id="l01852" name="l01852"></a><span class="lineno"> 1852</span>      parseSkinnedModel(</div>
-<div class="line"><a id="l01853" name="l01853"></a><span class="lineno"> 1853</span>          mesh,</div>
-<div class="line"><a id="l01854" name="l01854"></a><span class="lineno"> 1854</span>          cp.jointFbxNodes,</div>
-<div class="line"><a id="l01855" name="l01855"></a><span class="lineno"> 1855</span>          cp.mesh,</div>
-<div class="line"><a id="l01856" name="l01856"></a><span class="lineno"> 1856</span>          cp.skinWeights,</div>
-<div class="line"><a id="l01857" name="l01857"></a><span class="lineno"> 1857</span>          cp.inverseBindPose,</div>
-<div class="line"><a id="l01858" name="l01858"></a><span class="lineno"> 1858</span>          cp.blendShape,</div>
-<div class="line"><a id="l01859" name="l01859"></a><span class="lineno"> 1859</span>          permissive,</div>
-<div class="line"><a id="l01860" name="l01860"></a><span class="lineno"> 1860</span>          loadBlendShapes,</div>
-<div class="line"><a id="l01861" name="l01861"></a><span class="lineno"> 1861</span>          rigid);</div>
-<div class="line"><a id="l01862" name="l01862"></a><span class="lineno"> 1862</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
-<div class="line"><a id="l01863" name="l01863"></a><span class="lineno"> 1863</span>      <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(</div>
-<div class="line"><a id="l01864" name="l01864"></a><span class="lineno"> 1864</span>          <span class="stringliteral">&quot;Failed to parse FBX mesh &#39;{}&#39; for character &#39;{}&#39;: {}&quot;</span>, mesh-&gt;name, cp.name, e.what());</div>
-<div class="line"><a id="l01865" name="l01865"></a><span class="lineno"> 1865</span>    }</div>
-<div class="line"><a id="l01866" name="l01866"></a><span class="lineno"> 1866</span>  }</div>
-<div class="line"><a id="l01867" name="l01867"></a><span class="lineno"> 1867</span> </div>
-<div class="line"><a id="l01868" name="l01868"></a><span class="lineno"> 1868</span>  <span class="keywordflow">return</span> characters;</div>
+<div class="line"><a id="l01844" name="l01844"></a><span class="lineno"> 1844</span>    <span class="keywordflow">try</span> {</div>
+<div class="line"><a id="l01845" name="l01845"></a><span class="lineno"> 1845</span>      parseSkinnedModel(</div>
+<div class="line"><a id="l01846" name="l01846"></a><span class="lineno"> 1846</span>          mesh,</div>
+<div class="line"><a id="l01847" name="l01847"></a><span class="lineno"> 1847</span>          cp.jointFbxNodes,</div>
+<div class="line"><a id="l01848" name="l01848"></a><span class="lineno"> 1848</span>          cp.mesh,</div>
+<div class="line"><a id="l01849" name="l01849"></a><span class="lineno"> 1849</span>          cp.skinWeights,</div>
+<div class="line"><a id="l01850" name="l01850"></a><span class="lineno"> 1850</span>          cp.inverseBindPose,</div>
+<div class="line"><a id="l01851" name="l01851"></a><span class="lineno"> 1851</span>          cp.blendShape,</div>
+<div class="line"><a id="l01852" name="l01852"></a><span class="lineno"> 1852</span>          permissive,</div>
+<div class="line"><a id="l01853" name="l01853"></a><span class="lineno"> 1853</span>          loadBlendShapes,</div>
+<div class="line"><a id="l01854" name="l01854"></a><span class="lineno"> 1854</span>          rigid);</div>
+<div class="line"><a id="l01855" name="l01855"></a><span class="lineno"> 1855</span>    } <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; e) {</div>
+<div class="line"><a id="l01856" name="l01856"></a><span class="lineno"> 1856</span>      <a class="code hl_define" href="exception_8h.html#a4d17a9ca866d9cde9827cc39ab49a5e6">MT_THROW</a>(</div>
+<div class="line"><a id="l01857" name="l01857"></a><span class="lineno"> 1857</span>          <span class="stringliteral">&quot;Failed to parse FBX mesh &#39;{}&#39; for character &#39;{}&#39;: {}&quot;</span>, mesh-&gt;name, cp.name, e.what());</div>
+<div class="line"><a id="l01858" name="l01858"></a><span class="lineno"> 1858</span>    }</div>
+<div class="line"><a id="l01859" name="l01859"></a><span class="lineno"> 1859</span>  }</div>
+<div class="line"><a id="l01860" name="l01860"></a><span class="lineno"> 1860</span> </div>
+<div class="line"><a id="l01861" name="l01861"></a><span class="lineno"> 1861</span>  <span class="keywordflow">return</span> characters;</div>
+<div class="line"><a id="l01862" name="l01862"></a><span class="lineno"> 1862</span>}</div>
+<div class="line"><a id="l01863" name="l01863"></a><span class="lineno"> 1863</span> </div>
+<div class="line"><a id="l01864" name="l01864"></a><span class="lineno"> 1864</span><span class="comment">// The multi-character loaders give each character an identity parameter transform, so that its</span></div>
+<div class="line"><a id="l01865" name="l01865"></a><span class="lineno"> 1865</span><span class="comment">// joint-parameter motion is also valid model-parameter motion.</span></div>
+<div class="line"><a id="l01866" name="l01866"></a><span class="lineno"> 1866</span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> buildMultiCharacterFromParse(FbxCharacterParse&amp;&amp; cp, <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators) {</div>
+<div class="line"><a id="l01867" name="l01867"></a><span class="lineno"> 1867</span>  <span class="keyword">const</span> <span class="keyword">auto</span> parameterTransform = <a class="code hl_function" href="structmomentum_1_1ParameterTransformT.html#ae19be8881495d01510b328693f712e75">ParameterTransform::identity</a>(cp.skeleton.getJointNames());</div>
+<div class="line"><a id="l01868" name="l01868"></a><span class="lineno"> 1868</span>  <span class="keywordflow">return</span> buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform);</div>
 <div class="line"><a id="l01869" name="l01869"></a><span class="lineno"> 1869</span>}</div>
 <div class="line"><a id="l01870" name="l01870"></a><span class="lineno"> 1870</span> </div>
-<div class="line"><a id="l01871" name="l01871"></a><span class="lineno"> 1871</span><span class="comment">// The multi-character loaders give each character an identity parameter transform, so that its</span></div>
-<div class="line"><a id="l01872" name="l01872"></a><span class="lineno"> 1872</span><span class="comment">// joint-parameter motion is also valid model-parameter motion.</span></div>
-<div class="line"><a id="l01873" name="l01873"></a><span class="lineno"> 1873</span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> buildMultiCharacterFromParse(FbxCharacterParse&amp;&amp; cp, <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators) {</div>
-<div class="line"><a id="l01874" name="l01874"></a><span class="lineno"> 1874</span>  <span class="keyword">const</span> <span class="keyword">auto</span> parameterTransform = <a class="code hl_function" href="structmomentum_1_1ParameterTransformT.html#ae19be8881495d01510b328693f712e75">ParameterTransform::identity</a>(cp.skeleton.getJointNames());</div>
-<div class="line"><a id="l01875" name="l01875"></a><span class="lineno"> 1875</span>  <span class="keywordflow">return</span> buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform);</div>
-<div class="line"><a id="l01876" name="l01876"></a><span class="lineno"> 1876</span>}</div>
-<div class="line"><a id="l01877" name="l01877"></a><span class="lineno"> 1877</span> </div>
-<div class="line"><a id="l01878" name="l01878"></a><span class="lineno"> 1878</span><span class="comment">// Load every character of the scene. With loadAnim, each character also gets one joint-parameter</span></div>
-<div class="line"><a id="l01879" name="l01879"></a><span class="lineno"> 1879</span><span class="comment">// motion per readable animation stack; without it, the animation curves are not loaded and every</span></div>
-<div class="line"><a id="l01880" name="l01880"></a><span class="lineno"> 1880</span><span class="comment">// character gets no motion.</span></div>
-<div class="line"><a id="l01881" name="l01881"></a><span class="lineno"> 1881</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt; loadCharactersWithTakes(</div>
-<div class="line"><a id="l01882" name="l01882"></a><span class="lineno"> 1882</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01883" name="l01883"></a><span class="lineno"> 1883</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01884" name="l01884"></a><span class="lineno"> 1884</span>    <span class="keywordtype">bool</span> loadAnim,</div>
-<div class="line"><a id="l01885" name="l01885"></a><span class="lineno"> 1885</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01886" name="l01886"></a><span class="lineno"> 1886</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01887" name="l01887"></a><span class="lineno"> 1887</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01888" name="l01888"></a><span class="lineno"> 1888</span>  <span class="keyword">const</span> OfbxScenePtr scene = loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);</div>
-<div class="line"><a id="l01889" name="l01889"></a><span class="lineno"> 1889</span>  std::vector&lt;FbxCharacterParse&gt; characters =</div>
-<div class="line"><a id="l01890" name="l01890"></a><span class="lineno"> 1890</span>      parseFbxCharacters(*scene, permissive, loadBlendShapes);</div>
-<div class="line"><a id="l01891" name="l01891"></a><span class="lineno"> 1891</span>  <span class="keyword">const</span> <span class="keyword">auto</span> stacks = loadAnim ? collectReadableAnimationStacks(*scene)</div>
-<div class="line"><a id="l01892" name="l01892"></a><span class="lineno"> 1892</span>                               : std::vector&lt;const ofbx::AnimationStack*&gt;();</div>
-<div class="line"><a id="l01893" name="l01893"></a><span class="lineno"> 1893</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> frameRate = scene-&gt;getSceneFrameRate();</div>
-<div class="line"><a id="l01894" name="l01894"></a><span class="lineno"> 1894</span> </div>
-<div class="line"><a id="l01895" name="l01895"></a><span class="lineno"> 1895</span>  std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt; result;</div>
-<div class="line"><a id="l01896" name="l01896"></a><span class="lineno"> 1896</span>  result.reserve(characters.size());</div>
-<div class="line"><a id="l01897" name="l01897"></a><span class="lineno"> 1897</span>  for (<span class="keyword">auto</span>&amp; cp : characters) {</div>
-<div class="line"><a id="l01898" name="l01898"></a><span class="lineno"> 1898</span>    <span class="comment">// The scene&#39;s characters share the stacks; each character reads the curves on its own joints.</span></div>
-<div class="line"><a id="l01899" name="l01899"></a><span class="lineno"> 1899</span>    <span class="keyword">auto</span> takes = parseAnimationStacks(stacks, cp, frameRate, permissive);</div>
-<div class="line"><a id="l01900" name="l01900"></a><span class="lineno"> 1900</span>    result.emplace_back(</div>
-<div class="line"><a id="l01901" name="l01901"></a><span class="lineno"> 1901</span>        buildMultiCharacterFromParse(std::move(cp), keepLocators), std::move(takes));</div>
-<div class="line"><a id="l01902" name="l01902"></a><span class="lineno"> 1902</span>  }</div>
-<div class="line"><a id="l01903" name="l01903"></a><span class="lineno"> 1903</span>  <span class="keywordflow">return</span> {std::move(result), frameRate};</div>
-<div class="line"><a id="l01904" name="l01904"></a><span class="lineno"> 1904</span>}</div>
-<div class="line"><a id="l01905" name="l01905"></a><span class="lineno"> 1905</span> </div>
-<div class="line"><a id="l01906" name="l01906"></a><span class="lineno"> 1906</span>} <span class="comment">// namespace</span></div>
-<div class="line"><a id="l01907" name="l01907"></a><span class="lineno"> 1907</span> </div>
-<div class="foldopen" id="foldopen01908" data-start="{" data-end="}">
-<div class="line"><a id="l01908" name="l01908"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74"> 1908</a></span>std::vector&lt;Character&gt; <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
-<div class="line"><a id="l01909" name="l01909"></a><span class="lineno"> 1909</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01910" name="l01910"></a><span class="lineno"> 1910</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01911" name="l01911"></a><span class="lineno"> 1911</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01912" name="l01912"></a><span class="lineno"> 1912</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01913" name="l01913"></a><span class="lineno"> 1913</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01914" name="l01914"></a><span class="lineno"> 1914</span>  <span class="keyword">auto</span> characters = std::get&lt;0&gt;(loadCharactersWithTakes(</div>
-<div class="line"><a id="l01915" name="l01915"></a><span class="lineno"> 1915</span>      inputData, keepLocators, <span class="comment">/*loadAnim=*/</span><span class="keyword">false</span>, permissive, loadBlendShapes, stripNamespaces));</div>
-<div class="line"><a id="l01916" name="l01916"></a><span class="lineno"> 1916</span>  std::vector&lt;Character&gt; result;</div>
-<div class="line"><a id="l01917" name="l01917"></a><span class="lineno"> 1917</span>  result.reserve(characters.size());</div>
-<div class="line"><a id="l01918" name="l01918"></a><span class="lineno"> 1918</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; entry : characters) {</div>
-<div class="line"><a id="l01919" name="l01919"></a><span class="lineno"> 1919</span>    result.push_back(std::move(entry.first));</div>
-<div class="line"><a id="l01920" name="l01920"></a><span class="lineno"> 1920</span>  }</div>
-<div class="line"><a id="l01921" name="l01921"></a><span class="lineno"> 1921</span>  <span class="keywordflow">return</span> result;</div>
-<div class="line"><a id="l01922" name="l01922"></a><span class="lineno"> 1922</span>}</div>
+<div class="line"><a id="l01871" name="l01871"></a><span class="lineno"> 1871</span><span class="comment">// Load every character of the scene. With loadAnim, each character also gets one joint-parameter</span></div>
+<div class="line"><a id="l01872" name="l01872"></a><span class="lineno"> 1872</span><span class="comment">// motion per readable animation stack; without it, the animation curves are not loaded and every</span></div>
+<div class="line"><a id="l01873" name="l01873"></a><span class="lineno"> 1873</span><span class="comment">// character gets no motion.</span></div>
+<div class="line"><a id="l01874" name="l01874"></a><span class="lineno"> 1874</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt; loadCharactersWithTakes(</div>
+<div class="line"><a id="l01875" name="l01875"></a><span class="lineno"> 1875</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01876" name="l01876"></a><span class="lineno"> 1876</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01877" name="l01877"></a><span class="lineno"> 1877</span>    <span class="keywordtype">bool</span> loadAnim,</div>
+<div class="line"><a id="l01878" name="l01878"></a><span class="lineno"> 1878</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01879" name="l01879"></a><span class="lineno"> 1879</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01880" name="l01880"></a><span class="lineno"> 1880</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01881" name="l01881"></a><span class="lineno"> 1881</span>  <span class="keyword">const</span> OfbxScenePtr scene = loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);</div>
+<div class="line"><a id="l01882" name="l01882"></a><span class="lineno"> 1882</span>  std::vector&lt;FbxCharacterParse&gt; characters =</div>
+<div class="line"><a id="l01883" name="l01883"></a><span class="lineno"> 1883</span>      parseFbxCharacters(*scene, permissive, loadBlendShapes);</div>
+<div class="line"><a id="l01884" name="l01884"></a><span class="lineno"> 1884</span>  <span class="keyword">const</span> <span class="keyword">auto</span> stacks = loadAnim ? collectReadableAnimationStacks(*scene)</div>
+<div class="line"><a id="l01885" name="l01885"></a><span class="lineno"> 1885</span>                               : std::vector&lt;const ofbx::AnimationStack*&gt;();</div>
+<div class="line"><a id="l01886" name="l01886"></a><span class="lineno"> 1886</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> frameRate = scene-&gt;getSceneFrameRate();</div>
+<div class="line"><a id="l01887" name="l01887"></a><span class="lineno"> 1887</span> </div>
+<div class="line"><a id="l01888" name="l01888"></a><span class="lineno"> 1888</span>  std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt; result;</div>
+<div class="line"><a id="l01889" name="l01889"></a><span class="lineno"> 1889</span>  result.reserve(characters.size());</div>
+<div class="line"><a id="l01890" name="l01890"></a><span class="lineno"> 1890</span>  for (<span class="keyword">auto</span>&amp; cp : characters) {</div>
+<div class="line"><a id="l01891" name="l01891"></a><span class="lineno"> 1891</span>    <span class="comment">// The scene&#39;s characters share the stacks; each character reads the curves on its own joints.</span></div>
+<div class="line"><a id="l01892" name="l01892"></a><span class="lineno"> 1892</span>    <span class="keyword">auto</span> takes = parseAnimationStacks(stacks, cp, frameRate, permissive);</div>
+<div class="line"><a id="l01893" name="l01893"></a><span class="lineno"> 1893</span>    result.emplace_back(</div>
+<div class="line"><a id="l01894" name="l01894"></a><span class="lineno"> 1894</span>        buildMultiCharacterFromParse(std::move(cp), keepLocators), std::move(takes));</div>
+<div class="line"><a id="l01895" name="l01895"></a><span class="lineno"> 1895</span>  }</div>
+<div class="line"><a id="l01896" name="l01896"></a><span class="lineno"> 1896</span>  <span class="keywordflow">return</span> {std::move(result), frameRate};</div>
+<div class="line"><a id="l01897" name="l01897"></a><span class="lineno"> 1897</span>}</div>
+<div class="line"><a id="l01898" name="l01898"></a><span class="lineno"> 1898</span> </div>
+<div class="line"><a id="l01899" name="l01899"></a><span class="lineno"> 1899</span>} <span class="comment">// namespace</span></div>
+<div class="line"><a id="l01900" name="l01900"></a><span class="lineno"> 1900</span> </div>
+<div class="foldopen" id="foldopen01901" data-start="{" data-end="}">
+<div class="line"><a id="l01901" name="l01901"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74"> 1901</a></span>std::vector&lt;Character&gt; <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
+<div class="line"><a id="l01902" name="l01902"></a><span class="lineno"> 1902</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01903" name="l01903"></a><span class="lineno"> 1903</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01904" name="l01904"></a><span class="lineno"> 1904</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01905" name="l01905"></a><span class="lineno"> 1905</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01906" name="l01906"></a><span class="lineno"> 1906</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01907" name="l01907"></a><span class="lineno"> 1907</span>  <span class="keyword">auto</span> characters = std::get&lt;0&gt;(loadCharactersWithTakes(</div>
+<div class="line"><a id="l01908" name="l01908"></a><span class="lineno"> 1908</span>      inputData, keepLocators, <span class="comment">/*loadAnim=*/</span><span class="keyword">false</span>, permissive, loadBlendShapes, stripNamespaces));</div>
+<div class="line"><a id="l01909" name="l01909"></a><span class="lineno"> 1909</span>  std::vector&lt;Character&gt; result;</div>
+<div class="line"><a id="l01910" name="l01910"></a><span class="lineno"> 1910</span>  result.reserve(characters.size());</div>
+<div class="line"><a id="l01911" name="l01911"></a><span class="lineno"> 1911</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; entry : characters) {</div>
+<div class="line"><a id="l01912" name="l01912"></a><span class="lineno"> 1912</span>    result.push_back(std::move(entry.first));</div>
+<div class="line"><a id="l01913" name="l01913"></a><span class="lineno"> 1913</span>  }</div>
+<div class="line"><a id="l01914" name="l01914"></a><span class="lineno"> 1914</span>  <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l01915" name="l01915"></a><span class="lineno"> 1915</span>}</div>
 </div>
-<div class="line"><a id="l01923" name="l01923"></a><span class="lineno"> 1923</span> </div>
-<div class="foldopen" id="foldopen01924" data-start="{" data-end="}">
-<div class="line"><a id="l01924" name="l01924"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ab8a2f4b91420a9e68ead0e9a2f9cbb16"> 1924</a></span>std::vector&lt;Character&gt; <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
-<div class="line"><a id="l01925" name="l01925"></a><span class="lineno"> 1925</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
-<div class="line"><a id="l01926" name="l01926"></a><span class="lineno"> 1926</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01927" name="l01927"></a><span class="lineno"> 1927</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01928" name="l01928"></a><span class="lineno"> 1928</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01929" name="l01929"></a><span class="lineno"> 1929</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01930" name="l01930"></a><span class="lineno"> 1930</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
-<div class="line"><a id="l01931" name="l01931"></a><span class="lineno"> 1931</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
-<div class="line"><a id="l01932" name="l01932"></a><span class="lineno"> 1932</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
-<div class="line"><a id="l01933" name="l01933"></a><span class="lineno"> 1933</span>      keepLocators,</div>
-<div class="line"><a id="l01934" name="l01934"></a><span class="lineno"> 1934</span>      permissive,</div>
-<div class="line"><a id="l01935" name="l01935"></a><span class="lineno"> 1935</span>      loadBlendShapes,</div>
-<div class="line"><a id="l01936" name="l01936"></a><span class="lineno"> 1936</span>      stripNamespaces);</div>
-<div class="line"><a id="l01937" name="l01937"></a><span class="lineno"> 1937</span>}</div>
+<div class="line"><a id="l01916" name="l01916"></a><span class="lineno"> 1916</span> </div>
+<div class="foldopen" id="foldopen01917" data-start="{" data-end="}">
+<div class="line"><a id="l01917" name="l01917"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ab8a2f4b91420a9e68ead0e9a2f9cbb16"> 1917</a></span>std::vector&lt;Character&gt; <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
+<div class="line"><a id="l01918" name="l01918"></a><span class="lineno"> 1918</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
+<div class="line"><a id="l01919" name="l01919"></a><span class="lineno"> 1919</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01920" name="l01920"></a><span class="lineno"> 1920</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01921" name="l01921"></a><span class="lineno"> 1921</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01922" name="l01922"></a><span class="lineno"> 1922</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01923" name="l01923"></a><span class="lineno"> 1923</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
+<div class="line"><a id="l01924" name="l01924"></a><span class="lineno"> 1924</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">loadOpenFbxCharacters</a>(</div>
+<div class="line"><a id="l01925" name="l01925"></a><span class="lineno"> 1925</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
+<div class="line"><a id="l01926" name="l01926"></a><span class="lineno"> 1926</span>      keepLocators,</div>
+<div class="line"><a id="l01927" name="l01927"></a><span class="lineno"> 1927</span>      permissive,</div>
+<div class="line"><a id="l01928" name="l01928"></a><span class="lineno"> 1928</span>      loadBlendShapes,</div>
+<div class="line"><a id="l01929" name="l01929"></a><span class="lineno"> 1929</span>      stripNamespaces);</div>
+<div class="line"><a id="l01930" name="l01930"></a><span class="lineno"> 1930</span>}</div>
 </div>
-<div class="line"><a id="l01938" name="l01938"></a><span class="lineno"> 1938</span> </div>
-<div class="line"><a id="l01939" name="l01939"></a><span class="lineno"> 1939</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt;</div>
-<div class="foldopen" id="foldopen01940" data-start="{" data-end="}">
-<div class="line"><a id="l01940" name="l01940"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841"> 1940</a></span><a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
-<div class="line"><a id="l01941" name="l01941"></a><span class="lineno"> 1941</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01942" name="l01942"></a><span class="lineno"> 1942</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01943" name="l01943"></a><span class="lineno"> 1943</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01944" name="l01944"></a><span class="lineno"> 1944</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01945" name="l01945"></a><span class="lineno"> 1945</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01946" name="l01946"></a><span class="lineno"> 1946</span>  <span class="keywordflow">return</span> loadCharactersWithTakes(</div>
-<div class="line"><a id="l01947" name="l01947"></a><span class="lineno"> 1947</span>      inputData, keepLocators, <span class="comment">/*loadAnim=*/</span><span class="keyword">true</span>, permissive, loadBlendShapes, stripNamespaces);</div>
-<div class="line"><a id="l01948" name="l01948"></a><span class="lineno"> 1948</span>}</div>
+<div class="line"><a id="l01931" name="l01931"></a><span class="lineno"> 1931</span> </div>
+<div class="line"><a id="l01932" name="l01932"></a><span class="lineno"> 1932</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt;</div>
+<div class="foldopen" id="foldopen01933" data-start="{" data-end="}">
+<div class="line"><a id="l01933" name="l01933"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841"> 1933</a></span><a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
+<div class="line"><a id="l01934" name="l01934"></a><span class="lineno"> 1934</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01935" name="l01935"></a><span class="lineno"> 1935</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01936" name="l01936"></a><span class="lineno"> 1936</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01937" name="l01937"></a><span class="lineno"> 1937</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01938" name="l01938"></a><span class="lineno"> 1938</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01939" name="l01939"></a><span class="lineno"> 1939</span>  <span class="keywordflow">return</span> loadCharactersWithTakes(</div>
+<div class="line"><a id="l01940" name="l01940"></a><span class="lineno"> 1940</span>      inputData, keepLocators, <span class="comment">/*loadAnim=*/</span><span class="keyword">true</span>, permissive, loadBlendShapes, stripNamespaces);</div>
+<div class="line"><a id="l01941" name="l01941"></a><span class="lineno"> 1941</span>}</div>
 </div>
-<div class="line"><a id="l01949" name="l01949"></a><span class="lineno"> 1949</span> </div>
-<div class="line"><a id="l01950" name="l01950"></a><span class="lineno"> 1950</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt;</div>
-<div class="foldopen" id="foldopen01951" data-start="{" data-end="}">
-<div class="line"><a id="l01951" name="l01951"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a08640faa0f68ad91362eae805f977054"> 1951</a></span><a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
-<div class="line"><a id="l01952" name="l01952"></a><span class="lineno"> 1952</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
-<div class="line"><a id="l01953" name="l01953"></a><span class="lineno"> 1953</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01954" name="l01954"></a><span class="lineno"> 1954</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01955" name="l01955"></a><span class="lineno"> 1955</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01956" name="l01956"></a><span class="lineno"> 1956</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01957" name="l01957"></a><span class="lineno"> 1957</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
-<div class="line"><a id="l01958" name="l01958"></a><span class="lineno"> 1958</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
-<div class="line"><a id="l01959" name="l01959"></a><span class="lineno"> 1959</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
-<div class="line"><a id="l01960" name="l01960"></a><span class="lineno"> 1960</span>      keepLocators,</div>
-<div class="line"><a id="l01961" name="l01961"></a><span class="lineno"> 1961</span>      permissive,</div>
-<div class="line"><a id="l01962" name="l01962"></a><span class="lineno"> 1962</span>      loadBlendShapes,</div>
-<div class="line"><a id="l01963" name="l01963"></a><span class="lineno"> 1963</span>      stripNamespaces);</div>
-<div class="line"><a id="l01964" name="l01964"></a><span class="lineno"> 1964</span>}</div>
+<div class="line"><a id="l01942" name="l01942"></a><span class="lineno"> 1942</span> </div>
+<div class="line"><a id="l01943" name="l01943"></a><span class="lineno"> 1943</span>std::tuple&lt;std::vector&lt;std::pair&lt;Character, std::vector&lt;MatrixXf&gt;&gt;&gt;, <span class="keywordtype">float</span>&gt;</div>
+<div class="foldopen" id="foldopen01944" data-start="{" data-end="}">
+<div class="line"><a id="l01944" name="l01944"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a08640faa0f68ad91362eae805f977054"> 1944</a></span><a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
+<div class="line"><a id="l01945" name="l01945"></a><span class="lineno"> 1945</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
+<div class="line"><a id="l01946" name="l01946"></a><span class="lineno"> 1946</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01947" name="l01947"></a><span class="lineno"> 1947</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01948" name="l01948"></a><span class="lineno"> 1948</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01949" name="l01949"></a><span class="lineno"> 1949</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01950" name="l01950"></a><span class="lineno"> 1950</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
+<div class="line"><a id="l01951" name="l01951"></a><span class="lineno"> 1951</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">loadOpenFbxCharactersWithMotion</a>(</div>
+<div class="line"><a id="l01952" name="l01952"></a><span class="lineno"> 1952</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
+<div class="line"><a id="l01953" name="l01953"></a><span class="lineno"> 1953</span>      keepLocators,</div>
+<div class="line"><a id="l01954" name="l01954"></a><span class="lineno"> 1954</span>      permissive,</div>
+<div class="line"><a id="l01955" name="l01955"></a><span class="lineno"> 1955</span>      loadBlendShapes,</div>
+<div class="line"><a id="l01956" name="l01956"></a><span class="lineno"> 1956</span>      stripNamespaces);</div>
+<div class="line"><a id="l01957" name="l01957"></a><span class="lineno"> 1957</span>}</div>
 </div>
-<div class="line"><a id="l01965" name="l01965"></a><span class="lineno"> 1965</span> </div>
-<div class="foldopen" id="foldopen01966" data-start="{" data-end="}">
-<div class="line"><a id="l01966" name="l01966"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e"> 1966</a></span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
-<div class="line"><a id="l01967" name="l01967"></a><span class="lineno"> 1967</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01968" name="l01968"></a><span class="lineno"> 1968</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01969" name="l01969"></a><span class="lineno"> 1969</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01970" name="l01970"></a><span class="lineno"> 1970</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01971" name="l01971"></a><span class="lineno"> 1971</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01972" name="l01972"></a><span class="lineno"> 1972</span>  <span class="keyword">auto</span> [character, motion, fps] =</div>
-<div class="line"><a id="l01973" name="l01973"></a><span class="lineno"> 1973</span>      loadOpenFbx(inputData, keepLocators, <span class="keyword">false</span>, permissive, loadBlendShapes, stripNamespaces);</div>
-<div class="line"><a id="l01974" name="l01974"></a><span class="lineno"> 1974</span>  <span class="keywordflow">return</span> character;</div>
-<div class="line"><a id="l01975" name="l01975"></a><span class="lineno"> 1975</span>}</div>
+<div class="line"><a id="l01958" name="l01958"></a><span class="lineno"> 1958</span> </div>
+<div class="foldopen" id="foldopen01959" data-start="{" data-end="}">
+<div class="line"><a id="l01959" name="l01959"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e"> 1959</a></span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
+<div class="line"><a id="l01960" name="l01960"></a><span class="lineno"> 1960</span>    <span class="keyword">const</span> std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01961" name="l01961"></a><span class="lineno"> 1961</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01962" name="l01962"></a><span class="lineno"> 1962</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01963" name="l01963"></a><span class="lineno"> 1963</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01964" name="l01964"></a><span class="lineno"> 1964</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01965" name="l01965"></a><span class="lineno"> 1965</span>  <span class="keyword">auto</span> [character, motion, fps] =</div>
+<div class="line"><a id="l01966" name="l01966"></a><span class="lineno"> 1966</span>      loadOpenFbx(inputData, keepLocators, <span class="keyword">false</span>, permissive, loadBlendShapes, stripNamespaces);</div>
+<div class="line"><a id="l01967" name="l01967"></a><span class="lineno"> 1967</span>  <span class="keywordflow">return</span> character;</div>
+<div class="line"><a id="l01968" name="l01968"></a><span class="lineno"> 1968</span>}</div>
 </div>
-<div class="line"><a id="l01976" name="l01976"></a><span class="lineno"> 1976</span> </div>
-<div class="foldopen" id="foldopen01977" data-start="{" data-end="}">
-<div class="line"><a id="l01977" name="l01977"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ad19eae36b6e945ab913d12d9cb294273"> 1977</a></span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
-<div class="line"><a id="l01978" name="l01978"></a><span class="lineno"> 1978</span>    <span class="keyword">const</span> filesystem::path&amp; path,</div>
-<div class="line"><a id="l01979" name="l01979"></a><span class="lineno"> 1979</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01980" name="l01980"></a><span class="lineno"> 1980</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01981" name="l01981"></a><span class="lineno"> 1981</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01982" name="l01982"></a><span class="lineno"> 1982</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01983" name="l01983"></a><span class="lineno"> 1983</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(path);</div>
-<div class="line"><a id="l01984" name="l01984"></a><span class="lineno"> 1984</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
-<div class="line"><a id="l01985" name="l01985"></a><span class="lineno"> 1985</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
-<div class="line"><a id="l01986" name="l01986"></a><span class="lineno"> 1986</span>      keepLocators,</div>
-<div class="line"><a id="l01987" name="l01987"></a><span class="lineno"> 1987</span>      permissive,</div>
-<div class="line"><a id="l01988" name="l01988"></a><span class="lineno"> 1988</span>      loadBlendShapes,</div>
-<div class="line"><a id="l01989" name="l01989"></a><span class="lineno"> 1989</span>      stripNamespaces);</div>
-<div class="line"><a id="l01990" name="l01990"></a><span class="lineno"> 1990</span>}</div>
+<div class="line"><a id="l01969" name="l01969"></a><span class="lineno"> 1969</span> </div>
+<div class="foldopen" id="foldopen01970" data-start="{" data-end="}">
+<div class="line"><a id="l01970" name="l01970"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ad19eae36b6e945ab913d12d9cb294273"> 1970</a></span><a class="code hl_struct" href="structmomentum_1_1Character.html">Character</a> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
+<div class="line"><a id="l01971" name="l01971"></a><span class="lineno"> 1971</span>    <span class="keyword">const</span> filesystem::path&amp; path,</div>
+<div class="line"><a id="l01972" name="l01972"></a><span class="lineno"> 1972</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01973" name="l01973"></a><span class="lineno"> 1973</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01974" name="l01974"></a><span class="lineno"> 1974</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01975" name="l01975"></a><span class="lineno"> 1975</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01976" name="l01976"></a><span class="lineno"> 1976</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(path);</div>
+<div class="line"><a id="l01977" name="l01977"></a><span class="lineno"> 1977</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">loadOpenFbxCharacter</a>(</div>
+<div class="line"><a id="l01978" name="l01978"></a><span class="lineno"> 1978</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
+<div class="line"><a id="l01979" name="l01979"></a><span class="lineno"> 1979</span>      keepLocators,</div>
+<div class="line"><a id="l01980" name="l01980"></a><span class="lineno"> 1980</span>      permissive,</div>
+<div class="line"><a id="l01981" name="l01981"></a><span class="lineno"> 1981</span>      loadBlendShapes,</div>
+<div class="line"><a id="l01982" name="l01982"></a><span class="lineno"> 1982</span>      stripNamespaces);</div>
+<div class="line"><a id="l01983" name="l01983"></a><span class="lineno"> 1983</span>}</div>
 </div>
-<div class="line"><a id="l01991" name="l01991"></a><span class="lineno"> 1991</span> </div>
-<div class="foldopen" id="foldopen01992" data-start="{" data-end="}">
-<div class="line"><a id="l01992" name="l01992"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e"> 1992</a></span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
-<div class="line"><a id="l01993" name="l01993"></a><span class="lineno"> 1993</span>    std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l01994" name="l01994"></a><span class="lineno"> 1994</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l01995" name="l01995"></a><span class="lineno"> 1995</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l01996" name="l01996"></a><span class="lineno"> 1996</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l01997" name="l01997"></a><span class="lineno"> 1997</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l01998" name="l01998"></a><span class="lineno"> 1998</span>  <span class="keywordflow">return</span> loadOpenFbx(inputData, keepLocators, <span class="keyword">true</span>, permissive, loadBlendShapes, stripNamespaces);</div>
-<div class="line"><a id="l01999" name="l01999"></a><span class="lineno"> 1999</span>}</div>
+<div class="line"><a id="l01984" name="l01984"></a><span class="lineno"> 1984</span> </div>
+<div class="foldopen" id="foldopen01985" data-start="{" data-end="}">
+<div class="line"><a id="l01985" name="l01985"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e"> 1985</a></span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
+<div class="line"><a id="l01986" name="l01986"></a><span class="lineno"> 1986</span>    std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l01987" name="l01987"></a><span class="lineno"> 1987</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01988" name="l01988"></a><span class="lineno"> 1988</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01989" name="l01989"></a><span class="lineno"> 1989</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01990" name="l01990"></a><span class="lineno"> 1990</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l01991" name="l01991"></a><span class="lineno"> 1991</span>  <span class="keywordflow">return</span> loadOpenFbx(inputData, keepLocators, <span class="keyword">true</span>, permissive, loadBlendShapes, stripNamespaces);</div>
+<div class="line"><a id="l01992" name="l01992"></a><span class="lineno"> 1992</span>}</div>
 </div>
-<div class="line"><a id="l02000" name="l02000"></a><span class="lineno"> 2000</span> </div>
-<div class="foldopen" id="foldopen02001" data-start="{" data-end="}">
-<div class="line"><a id="l02001" name="l02001"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ad9db409949ee3cde649c107cf290934d"> 2001</a></span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
-<div class="line"><a id="l02002" name="l02002"></a><span class="lineno"> 2002</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
-<div class="line"><a id="l02003" name="l02003"></a><span class="lineno"> 2003</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
-<div class="line"><a id="l02004" name="l02004"></a><span class="lineno"> 2004</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
-<div class="line"><a id="l02005" name="l02005"></a><span class="lineno"> 2005</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
-<div class="line"><a id="l02006" name="l02006"></a><span class="lineno"> 2006</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l02007" name="l02007"></a><span class="lineno"> 2007</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
-<div class="line"><a id="l02008" name="l02008"></a><span class="lineno"> 2008</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
-<div class="line"><a id="l02009" name="l02009"></a><span class="lineno"> 2009</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
-<div class="line"><a id="l02010" name="l02010"></a><span class="lineno"> 2010</span>      keepLocators,</div>
-<div class="line"><a id="l02011" name="l02011"></a><span class="lineno"> 2011</span>      permissive,</div>
-<div class="line"><a id="l02012" name="l02012"></a><span class="lineno"> 2012</span>      loadBlendShapes,</div>
-<div class="line"><a id="l02013" name="l02013"></a><span class="lineno"> 2013</span>      stripNamespaces);</div>
-<div class="line"><a id="l02014" name="l02014"></a><span class="lineno"> 2014</span>}</div>
+<div class="line"><a id="l01993" name="l01993"></a><span class="lineno"> 1993</span> </div>
+<div class="foldopen" id="foldopen01994" data-start="{" data-end="}">
+<div class="line"><a id="l01994" name="l01994"></a><span class="lineno"><a class="line" href="namespacemomentum.html#ad9db409949ee3cde649c107cf290934d"> 1994</a></span>std::tuple&lt;Character, std::vector&lt;MatrixXf&gt;, <span class="keywordtype">float</span>&gt; <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
+<div class="line"><a id="l01995" name="l01995"></a><span class="lineno"> 1995</span>    <span class="keyword">const</span> filesystem::path&amp; inputPath,</div>
+<div class="line"><a id="l01996" name="l01996"></a><span class="lineno"> 1996</span>    <a class="code hl_enumeration" href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">KeepLocators</a> keepLocators,</div>
+<div class="line"><a id="l01997" name="l01997"></a><span class="lineno"> 1997</span>    <a class="code hl_enumeration" href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">Permissive</a> permissive,</div>
+<div class="line"><a id="l01998" name="l01998"></a><span class="lineno"> 1998</span>    <a class="code hl_enumeration" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">LoadBlendShapes</a> loadBlendShapes,</div>
+<div class="line"><a id="l01999" name="l01999"></a><span class="lineno"> 1999</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l02000" name="l02000"></a><span class="lineno"> 2000</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(inputPath);</div>
+<div class="line"><a id="l02001" name="l02001"></a><span class="lineno"> 2001</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">loadOpenFbxCharacterWithMotion</a>(</div>
+<div class="line"><a id="l02002" name="l02002"></a><span class="lineno"> 2002</span>      gsl::as_bytes(gsl::make_span(buffer)),</div>
+<div class="line"><a id="l02003" name="l02003"></a><span class="lineno"> 2003</span>      keepLocators,</div>
+<div class="line"><a id="l02004" name="l02004"></a><span class="lineno"> 2004</span>      permissive,</div>
+<div class="line"><a id="l02005" name="l02005"></a><span class="lineno"> 2005</span>      loadBlendShapes,</div>
+<div class="line"><a id="l02006" name="l02006"></a><span class="lineno"> 2006</span>      stripNamespaces);</div>
+<div class="line"><a id="l02007" name="l02007"></a><span class="lineno"> 2007</span>}</div>
 </div>
-<div class="line"><a id="l02015" name="l02015"></a><span class="lineno"> 2015</span> </div>
-<div class="foldopen" id="foldopen02016" data-start="{" data-end="}">
-<div class="line"><a id="l02016" name="l02016"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf"> 2016</a></span><a class="code hl_struct" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(</div>
-<div class="line"><a id="l02017" name="l02017"></a><span class="lineno"> 2017</span>    std::span&lt;const std::byte&gt; inputData,</div>
-<div class="line"><a id="l02018" name="l02018"></a><span class="lineno"> 2018</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l02019" name="l02019"></a><span class="lineno"> 2019</span>  <span class="comment">// Markers need the animation curves, so load with animations enabled; blend shapes are unused.</span></div>
-<div class="line"><a id="l02020" name="l02020"></a><span class="lineno"> 2020</span>  <span class="keyword">const</span> OfbxScenePtr scene =</div>
-<div class="line"><a id="l02021" name="l02021"></a><span class="lineno"> 2021</span>      loadOfbxScene(inputData, <span class="comment">/*loadAnim=*/</span><span class="keyword">true</span>, <a class="code hl_enumvalue" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b">LoadBlendShapes::No</a>, stripNamespaces);</div>
-<div class="line"><a id="l02022" name="l02022"></a><span class="lineno"> 2022</span>  <span class="keywordflow">return</span> parseMarkerSequence(scene.get(), scene-&gt;getRoot(), scene-&gt;getSceneFrameRate());</div>
-<div class="line"><a id="l02023" name="l02023"></a><span class="lineno"> 2023</span>}</div>
+<div class="line"><a id="l02008" name="l02008"></a><span class="lineno"> 2008</span> </div>
+<div class="foldopen" id="foldopen02009" data-start="{" data-end="}">
+<div class="line"><a id="l02009" name="l02009"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf"> 2009</a></span><a class="code hl_struct" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(</div>
+<div class="line"><a id="l02010" name="l02010"></a><span class="lineno"> 2010</span>    std::span&lt;const std::byte&gt; inputData,</div>
+<div class="line"><a id="l02011" name="l02011"></a><span class="lineno"> 2011</span>    <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l02012" name="l02012"></a><span class="lineno"> 2012</span>  <span class="comment">// Markers need the animation curves, so load with animations enabled; blend shapes are unused.</span></div>
+<div class="line"><a id="l02013" name="l02013"></a><span class="lineno"> 2013</span>  <span class="keyword">const</span> OfbxScenePtr scene =</div>
+<div class="line"><a id="l02014" name="l02014"></a><span class="lineno"> 2014</span>      loadOfbxScene(inputData, <span class="comment">/*loadAnim=*/</span><span class="keyword">true</span>, <a class="code hl_enumvalue" href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b">LoadBlendShapes::No</a>, stripNamespaces);</div>
+<div class="line"><a id="l02015" name="l02015"></a><span class="lineno"> 2015</span>  <span class="keywordflow">return</span> parseMarkerSequence(scene.get(), scene-&gt;getRoot(), scene-&gt;getSceneFrameRate());</div>
+<div class="line"><a id="l02016" name="l02016"></a><span class="lineno"> 2016</span>}</div>
 </div>
-<div class="line"><a id="l02024" name="l02024"></a><span class="lineno"> 2024</span> </div>
-<div class="foldopen" id="foldopen02025" data-start="{" data-end="}">
-<div class="line"><a id="l02025" name="l02025"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a480c0a639cb61a996de246271b5eb492"> 2025</a></span><a class="code hl_struct" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(<span class="keyword">const</span> filesystem::path&amp; filename, <span class="keywordtype">bool</span> stripNamespaces) {</div>
-<div class="line"><a id="l02026" name="l02026"></a><span class="lineno"> 2026</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(filename);</div>
-<div class="line"><a id="l02027" name="l02027"></a><span class="lineno"> 2027</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(gsl::as_bytes(gsl::make_span(buffer)), stripNamespaces);</div>
-<div class="line"><a id="l02028" name="l02028"></a><span class="lineno"> 2028</span>}</div>
+<div class="line"><a id="l02017" name="l02017"></a><span class="lineno"> 2017</span> </div>
+<div class="foldopen" id="foldopen02018" data-start="{" data-end="}">
+<div class="line"><a id="l02018" name="l02018"></a><span class="lineno"><a class="line" href="namespacemomentum.html#a480c0a639cb61a996de246271b5eb492"> 2018</a></span><a class="code hl_struct" href="structmomentum_1_1MarkerSequence.html">MarkerSequence</a> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(<span class="keyword">const</span> filesystem::path&amp; filename, <span class="keywordtype">bool</span> stripNamespaces) {</div>
+<div class="line"><a id="l02019" name="l02019"></a><span class="lineno"> 2019</span>  <span class="keyword">auto</span> buffer = readFileToBuffer(filename);</div>
+<div class="line"><a id="l02020" name="l02020"></a><span class="lineno"> 2020</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">loadOpenFbxMarkerSequence</a>(gsl::as_bytes(gsl::make_span(buffer)), stripNamespaces);</div>
+<div class="line"><a id="l02021" name="l02021"></a><span class="lineno"> 2021</span>}</div>
 </div>
-<div class="line"><a id="l02029" name="l02029"></a><span class="lineno"> 2029</span> </div>
-<div class="line"><a id="l02030" name="l02030"></a><span class="lineno"> 2030</span>} <span class="comment">// namespace momentum</span></div>
+<div class="line"><a id="l02022" name="l02022"></a><span class="lineno"> 2022</span> </div>
+<div class="line"><a id="l02023" name="l02023"></a><span class="lineno"> 2023</span>} <span class="comment">// namespace momentum</span></div>
 <div class="ttc" id="ablend__shape_8h_html"><div class="ttname"><a href="blend__shape_8h.html">blend_shape.h</a></div></div>
 <div class="ttc" id="acharacter_2types_8h_html"><div class="ttname"><a href="character_2types_8h.html">types.h</a></div></div>
 <div class="ttc" id="acharacter_8h_html"><div class="ttname"><a href="character_8h.html">character.h</a></div></div>
@@ -2161,43 +2154,45 @@ $(function(){initNavTree('openfbx__loader_8cpp_source.html','',''); });
 <div class="ttc" id="alog_8h_html_a55b409fde2247475adccfcf743cc946f"><div class="ttname"><a href="log_8h.html#a55b409fde2247475adccfcf743cc946f">MT_LOGE</a></div><div class="ttdeci">#define MT_LOGE(...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00181">log.h:181</a></div></div>
 <div class="ttc" id="alog_8h_html_a6ccd3a39f70466d8101d49a6cdd645bb"><div class="ttname"><a href="log_8h.html#a6ccd3a39f70466d8101d49a6cdd645bb">MT_LOGT</a></div><div class="ttdeci">#define MT_LOGT(...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00177">log.h:177</a></div></div>
 <div class="ttc" id="alog_8h_html_abd90ff00ca31139752fadf7372f37fd0"><div class="ttname"><a href="log_8h.html#abd90ff00ca31139752fadf7372f37fd0">MT_LOGW_IF</a></div><div class="ttdeci">#define MT_LOGW_IF(condition,...)</div><div class="ttdef"><b>Definition</b> <a href="log_8h_source.html#l00186">log.h:186</a></div></div>
+<div class="ttc" id="amarker__property__names_8h_html"><div class="ttname"><a href="marker__property__names_8h.html">marker_property_names.h</a></div></div>
 <div class="ttc" id="amath_2utility_8h_html"><div class="ttname"><a href="math_2utility_8h.html">utility.h</a></div></div>
 <div class="ttc" id="amesh_8h_html"><div class="ttname"><a href="mesh_8h.html">mesh.h</a></div></div>
 <div class="ttc" id="anamespacemomentum_html"><div class="ttname"><a href="namespacemomentum.html">momentum</a></div><div class="ttdef"><b>Definition</b> <a href="aligned_8h_source.html#l00015">aligned.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a01b3e75714ac1833572e2d9af150c967"><div class="ttname"><a href="namespacemomentum.html#a01b3e75714ac1833572e2d9af150c967">momentum::cast_span</a></div><div class="ttdeci">std::span&lt; T &gt; cast_span(std::span&lt; std::byte &gt; bs)</div><div class="ttdoc">Casts a span of bytes to a span of a different type.</div><div class="ttdef"><b>Definition</b> <a href="gsl__utils_8h_source.html#l00026">gsl_utils.h:26</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a129626c6a60e43b62c40603e267207d5"><div class="ttname"><a href="namespacemomentum.html#a129626c6a60e43b62c40603e267207d5">momentum::CollisionGeometry</a></div><div class="ttdeci">CollisionGeometryT&lt; float &gt; CollisionGeometry</div><div class="ttdef"><b>Definition</b> <a href="collision__geometry_8h_source.html#l00354">collision_geometry.h:354</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a14bdd905f0524297f46738185d237622"><div class="ttname"><a href="namespacemomentum.html#a14bdd905f0524297f46738185d237622">momentum::Skeleton</a></div><div class="ttdeci">SkeletonT&lt; float &gt; Skeleton</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00263">fwd.h:263</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a24b0f96ee26bf432693e6444f12fb2b0"><div class="ttname"><a href="namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0">momentum::createJoint</a></div><div class="ttdeci">Joint createJoint(const fx::gltf::Node &amp;node)</div><div class="ttdoc">Create a joint from a glTF node.</div><div class="ttdef"><b>Definition</b> <a href="gltf__skeleton__io_8cpp_source.html#l00275">gltf_skeleton_io.cpp:275</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a24b0f96ee26bf432693e6444f12fb2b0"><div class="ttname"><a href="namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0">momentum::createJoint</a></div><div class="ttdeci">Joint createJoint(const fx::gltf::Node &amp;node)</div><div class="ttdoc">Create a joint from a glTF node.</div><div class="ttdef"><b>Definition</b> <a href="gltf__skeleton__io_8cpp_source.html#l00266">gltf_skeleton_io.cpp:266</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a2a7718a853401b9a2e58708e950a7077"><div class="ttname"><a href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077">momentum::Permissive</a></div><div class="ttdeci">Permissive</div><div class="ttdef"><b>Definition</b> <a href="file__save__options_8h_source.html#l00021">file_save_options.h:21</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a2a7718a853401b9a2e58708e950a7077a93cba07454f06a4a960172bbd6e2a435"><div class="ttname"><a href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077a93cba07454f06a4a960172bbd6e2a435">momentum::Permissive::Yes</a></div><div class="ttdeci">@ Yes</div><div class="ttdef"><b>Definition</b> <a href="file__save__options_8h_source.html#l00021">file_save_options.h:21</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b"><div class="ttname"><a href="namespacemomentum.html#a2a7718a853401b9a2e58708e950a7077abafd7322c6e97d25b6299b5d6fe8920b">momentum::Permissive::No</a></div><div class="ttdeci">@ No</div><div class="ttdef"><b>Definition</b> <a href="file__save__options_8h_source.html#l00021">file_save_options.h:21</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a31b6ba5435b336450702cde816a49010"><div class="ttname"><a href="namespacemomentum.html#a31b6ba5435b336450702cde816a49010">momentum::CollisionEllipsoid</a></div><div class="ttdeci">CollisionEllipsoidT&lt; float &gt; CollisionEllipsoid</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00168">fwd.h:168</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a3ef3eb97d0041e2ef65fa9506e08109e"><div class="ttname"><a href="namespacemomentum.html#a3ef3eb97d0041e2ef65fa9506e08109e">momentum::kMomentumMarkersRootProperty</a></div><div class="ttdeci">constexpr const char * kMomentumMarkersRootProperty</div><div class="ttdef"><b>Definition</b> <a href="openfbx__loader_8h_source.html#l00021">openfbx_loader.h:21</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a3ef3eb97d0041e2ef65fa9506e08109e"><div class="ttname"><a href="namespacemomentum.html#a3ef3eb97d0041e2ef65fa9506e08109e">momentum::kMomentumMarkersRootProperty</a></div><div class="ttdeci">constexpr const char * kMomentumMarkersRootProperty</div><div class="ttdoc">Names of the custom boolean properties that mark the nodes of a marker sequence in an FBX file: the n...</div><div class="ttdef"><b>Definition</b> <a href="marker__property__names_8h_source.html#l00015">marker_property_names.h:15</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a5dd3276633008104e2994b9062565fda"><div class="ttname"><a href="namespacemomentum.html#a5dd3276633008104e2994b9062565fda">momentum::TransformationList</a></div><div class="ttdeci">std::vector&lt; Affine3f &gt; TransformationList</div><div class="ttdoc">One affine transform per joint, indexed by joint id.</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00410">types.h:410</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a5e053889e659bbad2498c34c1e8bd636"><div class="ttname"><a href="namespacemomentum.html#a5e053889e659bbad2498c34c1e8bd636">momentum::ParameterLimits</a></div><div class="ttdeci">std::vector&lt; ParameterLimit &gt; ParameterLimits</div><div class="ttdef"><b>Definition</b> <a href="parameter__limits_8h_source.html#l00138">parameter_limits.h:138</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a662507d90801d201dd6192f5fa99f42a"><div class="ttname"><a href="namespacemomentum.html#a662507d90801d201dd6192f5fa99f42a">momentum::Mesh</a></div><div class="ttdeci">MeshT&lt; float &gt; Mesh</div><div class="ttdef"><b>Definition</b> <a href="math_2fwd_8h_source.html#l00020">fwd.h:20</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a67b8ed52aaffc5de85aaf6f46d13865e"><div class="ttname"><a href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">momentum::loadOpenFbxCharacterWithMotion</a></div><div class="ttdeci">std::tuple&lt; Character, std::vector&lt; MatrixXf &gt;, float &gt; loadOpenFbxCharacterWithMotion(std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdef"><b>Definition</b> <a href="#l01992">openfbx_loader.cpp:1992</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a67b8ed52aaffc5de85aaf6f46d13865e"><div class="ttname"><a href="namespacemomentum.html#a67b8ed52aaffc5de85aaf6f46d13865e">momentum::loadOpenFbxCharacterWithMotion</a></div><div class="ttdeci">std::tuple&lt; Character, std::vector&lt; MatrixXf &gt;, float &gt; loadOpenFbxCharacterWithMotion(std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdef"><b>Definition</b> <a href="#l01985">openfbx_loader.cpp:1985</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a71515078bfc2e253663275b0a6a09bd4"><div class="ttname"><a href="namespacemomentum.html#a71515078bfc2e253663275b0a6a09bd4">momentum::BlendShape_p</a></div><div class="ttdeci">::std::shared_ptr&lt; BlendShape &gt; BlendShape_p</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00020">fwd.h:20</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a77be8d26df51e57c1807fb590e2128bf"><div class="ttname"><a href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">momentum::loadOpenFbxMarkerSequence</a></div><div class="ttdeci">MarkerSequence loadOpenFbxMarkerSequence(std::span&lt; const std::byte &gt; inputData, bool stripNamespaces)</div><div class="ttdoc">Load a MarkerSequence from an in-memory FBX byte buffer.</div><div class="ttdef"><b>Definition</b> <a href="#l02016">openfbx_loader.cpp:2016</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a7a51a05d6ffe04ca35ee3efc2318e841"><div class="ttname"><a href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">momentum::loadOpenFbxCharactersWithMotion</a></div><div class="ttdeci">std::tuple&lt; std::vector&lt; std::pair&lt; Character, std::vector&lt; MatrixXf &gt; &gt; &gt;, float &gt; loadOpenFbxCharactersWithMotion(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdoc">Implementation of loadFbxCharactersWithMotion(); see fbx_io.h.</div><div class="ttdef"><b>Definition</b> <a href="#l01940">openfbx_loader.cpp:1940</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a77be8d26df51e57c1807fb590e2128bf"><div class="ttname"><a href="namespacemomentum.html#a77be8d26df51e57c1807fb590e2128bf">momentum::loadOpenFbxMarkerSequence</a></div><div class="ttdeci">MarkerSequence loadOpenFbxMarkerSequence(std::span&lt; const std::byte &gt; inputData, bool stripNamespaces)</div><div class="ttdoc">Load a MarkerSequence from an in-memory FBX byte buffer.</div><div class="ttdef"><b>Definition</b> <a href="#l02009">openfbx_loader.cpp:2009</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a7a51a05d6ffe04ca35ee3efc2318e841"><div class="ttname"><a href="namespacemomentum.html#a7a51a05d6ffe04ca35ee3efc2318e841">momentum::loadOpenFbxCharactersWithMotion</a></div><div class="ttdeci">std::tuple&lt; std::vector&lt; std::pair&lt; Character, std::vector&lt; MatrixXf &gt; &gt; &gt;, float &gt; loadOpenFbxCharactersWithMotion(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdoc">Implementation of loadFbxCharactersWithMotion(); see fbx_io.h.</div><div class="ttdef"><b>Definition</b> <a href="#l01933">openfbx_loader.cpp:1933</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a81ff111adcbf15f8b216dc958c29a555"><div class="ttname"><a href="namespacemomentum.html#a81ff111adcbf15f8b216dc958c29a555">momentum::ParameterTransform</a></div><div class="ttdeci">ParameterTransformT&lt; float &gt; ParameterTransform</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00244">fwd.h:244</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a82739ea362b4f06d15450c5670bc762e"><div class="ttname"><a href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">momentum::loadOpenFbxCharacter</a></div><div class="ttdeci">Character loadOpenFbxCharacter(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdef"><b>Definition</b> <a href="#l01966">openfbx_loader.cpp:1966</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a82739ea362b4f06d15450c5670bc762e"><div class="ttname"><a href="namespacemomentum.html#a82739ea362b4f06d15450c5670bc762e">momentum::loadOpenFbxCharacter</a></div><div class="ttdeci">Character loadOpenFbxCharacter(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdef"><b>Definition</b> <a href="#l01959">openfbx_loader.cpp:1959</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a83d8fd1699459031b0111d0dcea88f42"><div class="ttname"><a href="namespacemomentum.html#a83d8fd1699459031b0111d0dcea88f42">momentum::toRad</a></div><div class="ttdeci">constexpr T toRad(T x=T(1)) noexcept</div><div class="ttdoc">Converts the given angle x (in degrees) to radians.</div><div class="ttdef"><b>Definition</b> <a href="constants_8h_source.html#l00068">constants.h:68</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a86449639d58875cfd9449647949f9ac6"><div class="ttname"><a href="namespacemomentum.html#a86449639d58875cfd9449647949f9ac6">momentum::jointPhysicalPropertiesFromJsonString</a></div><div class="ttdeci">std::optional&lt; JointPhysicalProperties &gt; jointPhysicalPropertiesFromJsonString(const std::string &amp;json, const std::string &amp;jointName, const size_t jointIndex)</div><div class="ttdoc">Parses one joint&#39;s physical mass properties from its canonical on-disk JSON string.</div><div class="ttdef"><b>Definition</b> <a href="json__utils_8cpp_source.html#l00382">json_utils.cpp:382</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a90345c4b316e44e3442f701f38768226"><div class="ttname"><a href="namespacemomentum.html#a90345c4b316e44e3442f701f38768226">momentum::PhysicalProperties</a></div><div class="ttdeci">std::vector&lt; JointPhysicalProperties &gt; PhysicalProperties</div><div class="ttdoc">Optional physical mass properties for a character.</div><div class="ttdef"><b>Definition</b> <a href="joint_8h_source.html#l00114">joint.h:114</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a933c295b19f56ece7033f19200624039"><div class="ttname"><a href="namespacemomentum.html#a933c295b19f56ece7033f19200624039">momentum::SkeletonState</a></div><div class="ttdeci">SkeletonStateT&lt; float &gt; SkeletonState</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00282">fwd.h:282</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_a949240ef70a49c240e5cfe5dbca34c95"><div class="ttname"><a href="namespacemomentum.html#a949240ef70a49c240e5cfe5dbca34c95">momentum::CollisionBox</a></div><div class="ttdeci">CollisionBoxT&lt; float &gt; CollisionBox</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00187">fwd.h:187</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_a9b488a8ea3e28e0c00c59464208a5d74"><div class="ttname"><a href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">momentum::loadOpenFbxCharacters</a></div><div class="ttdeci">std::vector&lt; Character &gt; loadOpenFbxCharacters(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdoc">Implementation of loadFbxCharacters(); see fbx_io.h.</div><div class="ttdef"><b>Definition</b> <a href="#l01908">openfbx_loader.cpp:1908</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_a9b488a8ea3e28e0c00c59464208a5d74"><div class="ttname"><a href="namespacemomentum.html#a9b488a8ea3e28e0c00c59464208a5d74">momentum::loadOpenFbxCharacters</a></div><div class="ttdeci">std::vector&lt; Character &gt; loadOpenFbxCharacters(const std::span&lt; const std::byte &gt; inputData, KeepLocators keepLocators, Permissive permissive, LoadBlendShapes loadBlendShapes, bool stripNamespaces)</div><div class="ttdoc">Implementation of loadFbxCharacters(); see fbx_io.h.</div><div class="ttdef"><b>Definition</b> <a href="#l01901">openfbx_loader.cpp:1901</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_aa7598274bca20ed8c4e65a0f6a2901c2"><div class="ttname"><a href="namespacemomentum.html#aa7598274bca20ed8c4e65a0f6a2901c2">momentum::triangulate</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3i &gt; triangulate(std::span&lt; const uint32_t &gt; indices, std::span&lt; const uint32_t &gt; offsets)</div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8cpp_source.html#l00017">polygon_data.cpp:17</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_aa919dbc1dfafb5813e8cb4f4db695022"><div class="ttname"><a href="namespacemomentum.html#aa919dbc1dfafb5813e8cb4f4db695022">momentum::kParametersPerJoint</a></div><div class="ttdeci">constexpr size_t kParametersPerJoint</div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00021">types.h:21</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ab40a5cd02229cf96c31bd9b5ed134849"><div class="ttname"><a href="namespacemomentum.html#ab40a5cd02229cf96c31bd9b5ed134849">momentum::Joint</a></div><div class="ttdeci">JointT&lt; float &gt; Joint</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00206">fwd.h:206</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ab6f65bc16b6adb127321c29ba96280a8"><div class="ttname"><a href="namespacemomentum.html#ab6f65bc16b6adb127321c29ba96280a8">momentum::warnIfMetadataIsNotJson</a></div><div class="ttdeci">void warnIfMetadataIsNotJson(const std::string &amp;metadata, std::string_view format)</div><div class="ttdoc">Warn when the metadata of a character read from a file is not valid JSON.</div><div class="ttdef"><b>Definition</b> <a href="json__utils_8cpp_source.html#l00676">json_utils.cpp:676</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_abfb9adbe202d2620af94fa8ccd7df3bb"><div class="ttname"><a href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bb">momentum::LoadBlendShapes</a></div><div class="ttdeci">LoadBlendShapes</div><div class="ttdef"><b>Definition</b> <a href="fbx__io_8h_source.html#l00026">fbx_io.h:26</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_abfb9adbe202d2620af94fa8ccd7df3bba93cba07454f06a4a960172bbd6e2a435"><div class="ttname"><a href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bba93cba07454f06a4a960172bbd6e2a435">momentum::LoadBlendShapes::Yes</a></div><div class="ttdeci">@ Yes</div><div class="ttdef"><b>Definition</b> <a href="fbx__io_8h_source.html#l00026">fbx_io.h:26</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b"><div class="ttname"><a href="namespacemomentum.html#abfb9adbe202d2620af94fa8ccd7df3bbabafd7322c6e97d25b6299b5d6fe8920b">momentum::LoadBlendShapes::No</a></div><div class="ttdeci">@ No</div><div class="ttdef"><b>Definition</b> <a href="fbx__io_8h_source.html#l00026">fbx_io.h:26</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ac912616857bf21305ec6e575fe4ec90c"><div class="ttname"><a href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90c">momentum::KeepLocators</a></div><div class="ttdeci">KeepLocators</div><div class="ttdef"><b>Definition</b> <a href="fbx__io_8h_source.html#l00023">fbx_io.h:23</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ac912616857bf21305ec6e575fe4ec90ca93cba07454f06a4a960172bbd6e2a435"><div class="ttname"><a href="namespacemomentum.html#ac912616857bf21305ec6e575fe4ec90ca93cba07454f06a4a960172bbd6e2a435">momentum::KeepLocators::Yes</a></div><div class="ttdeci">@ Yes</div><div class="ttdef"><b>Definition</b> <a href="fbx__io_8h_source.html#l00023">fbx_io.h:23</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ac966fa038c85b7384ba387e6a6334b40"><div class="ttname"><a href="namespacemomentum.html#ac966fa038c85b7384ba387e6a6334b40">momentum::kInvalidIndex</a></div><div class="ttdeci">constexpr size_t kInvalidIndex</div><div class="ttdoc">Sentinel value indicating an invalid or unset size_t index.</div><div class="ttdef"><b>Definition</b> <a href="character_2types_8h_source.html#l00182">types.h:182</a></div></div>
-<div class="ttc" id="anamespacemomentum_html_ad1095656dd88919f719407d3a1453b5c"><div class="ttname"><a href="namespacemomentum.html#ad1095656dd88919f719407d3a1453b5c">momentum::kMomentumMarkerProperty</a></div><div class="ttdeci">constexpr const char * kMomentumMarkerProperty</div><div class="ttdef"><b>Definition</b> <a href="openfbx__loader_8h_source.html#l00022">openfbx_loader.h:22</a></div></div>
+<div class="ttc" id="anamespacemomentum_html_ad1095656dd88919f719407d3a1453b5c"><div class="ttname"><a href="namespacemomentum.html#ad1095656dd88919f719407d3a1453b5c">momentum::kMomentumMarkerProperty</a></div><div class="ttdeci">constexpr const char * kMomentumMarkerProperty</div><div class="ttdef"><b>Definition</b> <a href="marker__property__names_8h_source.html#l00016">marker_property_names.h:16</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ae4d09b3ba8ddb8121d38033f2da6e7df"><div class="ttname"><a href="namespacemomentum.html#ae4d09b3ba8ddb8121d38033f2da6e7df">momentum::TaperedCapsule</a></div><div class="ttdeci">TaperedCapsuleT&lt; float &gt; TaperedCapsule</div><div class="ttdef"><b>Definition</b> <a href="character_2fwd_8h_source.html#l00320">fwd.h:320</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_ae59297127458dd89b2aaacf2f091d68b"><div class="ttname"><a href="namespacemomentum.html#ae59297127458dd89b2aaacf2f091d68b">momentum::kMaxSkinJoints</a></div><div class="ttdeci">constexpr uint32_t kMaxSkinJoints</div><div class="ttdoc">Maximum number of joints that can influence a single vertex.</div><div class="ttdef"><b>Definition</b> <a href="skin__weights_8h_source.html#l00019">skin_weights.h:19</a></div></div>
 <div class="ttc" id="anamespacemomentum_html_aee6b90663d5ba454767d246aa512d356"><div class="ttname"><a href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">momentum::MatrixXf</a></div><div class="ttdeci">MatrixX&lt; float &gt; MatrixXf</div><div class="ttdef"><b>Definition</b> <a href="math_2types_8h_source.html#l00082">types.h:82</a></div></div>
@@ -2215,10 +2210,10 @@ $(function(){initNavTree('openfbx__loader_8cpp_source.html','',''); });
 <div class="ttc" id="astructmomentum_1_1JointT_html_ae6b0cd3102867a50d52415be1f377591"><div class="ttname"><a href="structmomentum_1_1JointT.html#ae6b0cd3102867a50d52415be1f377591">momentum::JointT::name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> <a href="joint_8h_source.html#l00021">joint.h:21</a></div></div>
 <div class="ttc" id="astructmomentum_1_1Locator_html"><div class="ttname"><a href="structmomentum_1_1Locator.html">momentum::Locator</a></div><div class="ttdoc">Represents a point attached to a joint in a skeleton.</div><div class="ttdef"><b>Definition</b> <a href="locator_8h_source.html#l00019">locator.h:19</a></div></div>
 <div class="ttc" id="astructmomentum_1_1Locator_html_a88612decc1627d1d225de11cc29ef8c5"><div class="ttname"><a href="structmomentum_1_1Locator.html#a88612decc1627d1d225de11cc29ef8c5">momentum::Locator::name</a></div><div class="ttdeci">std::string name</div><div class="ttdef"><b>Definition</b> <a href="locator_8h_source.html#l00020">locator.h:20</a></div></div>
-<div class="ttc" id="astructmomentum_1_1MarkerSequence_html"><div class="ttname"><a href="structmomentum_1_1MarkerSequence.html">momentum::MarkerSequence</a></div><div class="ttdoc">All frames from a single motion capture sequence for one subject (actor).</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00037">marker.h:37</a></div></div>
-<div class="ttc" id="astructmomentum_1_1MarkerSequence_html_a2d3b79c581965a7a13240d994214f89b"><div class="ttname"><a href="structmomentum_1_1MarkerSequence.html#a2d3b79c581965a7a13240d994214f89b">momentum::MarkerSequence::fps</a></div><div class="ttdeci">float fps</div><div class="ttdoc">Frame rate of the capture, in frames per second.</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00045">marker.h:45</a></div></div>
-<div class="ttc" id="astructmomentum_1_1Marker_html"><div class="ttname"><a href="structmomentum_1_1Marker.html">momentum::Marker</a></div><div class="ttdoc">A single motion capture marker observation (position, occlusion, confidence).</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00018">marker.h:18</a></div></div>
-<div class="ttc" id="astructmomentum_1_1Marker_html_aab97a34c378113c0f2bd750780bc37e5"><div class="ttname"><a href="structmomentum_1_1Marker.html#aab97a34c378113c0f2bd750780bc37e5">momentum::Marker::name</a></div><div class="ttdeci">std::string name</div><div class="ttdoc">The name of the marker.</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00020">marker.h:20</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MarkerSequence_html"><div class="ttname"><a href="structmomentum_1_1MarkerSequence.html">momentum::MarkerSequence</a></div><div class="ttdoc">All frames from a single motion capture sequence for one subject (actor).</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00039">marker.h:39</a></div></div>
+<div class="ttc" id="astructmomentum_1_1MarkerSequence_html_a2d3b79c581965a7a13240d994214f89b"><div class="ttname"><a href="structmomentum_1_1MarkerSequence.html#a2d3b79c581965a7a13240d994214f89b">momentum::MarkerSequence::fps</a></div><div class="ttdeci">float fps</div><div class="ttdoc">Frame rate of the capture, in frames per second.</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00047">marker.h:47</a></div></div>
+<div class="ttc" id="astructmomentum_1_1Marker_html"><div class="ttname"><a href="structmomentum_1_1Marker.html">momentum::Marker</a></div><div class="ttdoc">A single motion capture marker observation (position, occlusion, confidence).</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00020">marker.h:20</a></div></div>
+<div class="ttc" id="astructmomentum_1_1Marker_html_aab97a34c378113c0f2bd750780bc37e5"><div class="ttname"><a href="structmomentum_1_1Marker.html#aab97a34c378113c0f2bd750780bc37e5">momentum::Marker::name</a></div><div class="ttdeci">std::string name</div><div class="ttdoc">The name of the marker.</div><div class="ttdef"><b>Definition</b> <a href="marker_8h_source.html#l00022">marker.h:22</a></div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html_a1a6bbae3c994a1a2b011c58b5127f87d"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html#a1a6bbae3c994a1a2b011c58b5127f87d">momentum::ParameterTransformT&lt; float &gt;::empty</a></div><div class="ttdeci">static ParameterTransformT&lt; float &gt; empty(size_t nJointParameters)</div></div>
 <div class="ttc" id="astructmomentum_1_1ParameterTransformT_html_ae19be8881495d01510b328693f712e75"><div class="ttname"><a href="structmomentum_1_1ParameterTransformT.html#ae19be8881495d01510b328693f712e75">momentum::ParameterTransformT&lt; float &gt;::identity</a></div><div class="ttdeci">static ParameterTransformT&lt; float &gt; identity(momentum::span&lt; const std::string &gt; jointNames)</div></div>
 <div class="ttc" id="astructmomentum_1_1PolygonData_html"><div class="ttname"><a href="structmomentum_1_1PolygonData.html">momentum::PolygonData</a></div><div class="ttdef"><b>Definition</b> <a href="polygon__data_8h_source.html#l00023">polygon_data.h:23</a></div></div>

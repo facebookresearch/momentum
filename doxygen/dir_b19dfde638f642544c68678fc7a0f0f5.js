@@ -26,6 +26,7 @@ var dir_b19dfde638f642544c68678fc7a0f0f5 =
     [ "locator.h", "locator_8h.html", "locator_8h" ],
     [ "locator_state.cpp", "locator__state_8cpp.html", null ],
     [ "locator_state.h", "locator__state_8h.html", "locator__state_8h" ],
+    [ "marker.cpp", "marker_8cpp.html", "marker_8cpp" ],
     [ "marker.h", "marker_8h.html", "marker_8h" ],
     [ "mesh_state.cpp", "mesh__state_8cpp.html", null ],
     [ "mesh_state.h", "mesh__state_8h.html", "mesh__state_8h" ],

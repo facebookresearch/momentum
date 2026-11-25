@@ -93,6 +93,8 @@ $(function(){initNavTree('marker_8h.html','',''); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="math_2types_8h_source.html">momentum/math/types.h</a>&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
@@ -104,10 +106,17 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single motion capture marker observation (position, occlusion, confidence).  <a href="structmomentum_1_1Marker.html#details">More...</a><br /></td></tr>
 <tr class="memitem:momentum_3A_3AMarkerSequence" id="r_momentum_3A_3AMarkerSequence"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MarkerSequence.html">momentum::MarkerSequence</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">All frames from a single motion capture sequence for one subject (actor).  <a href="structmomentum_1_1MarkerSequence.html#details">More...</a><br /></td></tr>
+<tr class="memitem:momentum_3A_3AMarkerTrack" id="r_momentum_3A_3AMarkerTrack"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmomentum_1_1MarkerTrack.html">momentum::MarkerTrack</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The kept observations of one marker in a marker sequence, in frame order.  <a href="structmomentum_1_1MarkerTrack.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:momentum" id="r_momentum"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html">momentum</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a3596f525bf15d8504cf5586ba7247e71" id="r_a3596f525bf15d8504cf5586ba7247e71"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmomentum_1_1MarkerTrack.html">MarkerTrack</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a3596f525bf15d8504cf5586ba7247e71">momentum::groupMarkerTracks</a> (std::span&lt; const std::vector&lt; <a class="el" href="structmomentum_1_1Marker.html">Marker</a> &gt; &gt; frames, std::optional&lt; float &gt; minConfidence=std::nullopt)</td></tr>
+<tr class="memdesc:a3596f525bf15d8504cf5586ba7247e71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Group the observations of a marker sequence into one track per marker name, in the order of each name's first kept observation.  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

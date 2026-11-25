@@ -7,7 +7,6 @@ var gltf__skeleton__io_8h =
     [ "momentum::createJoint", "namespacemomentum.html#a24b0f96ee26bf432693e6444f12fb2b0", null ],
     [ "momentum::createLocator", "namespacemomentum.html#a6212be49f421e6f0ac812c6821a8646a", null ],
     [ "momentum::createSkeletonWithOnlyRoot", "namespacemomentum.html#a5fa6d9afe8923beb9a71a87461e75a43", null ],
-    [ "momentum::findMomentumExtension", "namespacemomentum.html#ac3090a2d75cbd7f20f3cf46c04939178", null ],
     [ "momentum::gatherSkeletonRoots", "namespacemomentum.html#a62502ca1da8b8491580d3915ae46a5d5", null ],
     [ "momentum::getTopLevelAncestor", "namespacemomentum.html#a0bce030c2c3fb184a8a1e6f248c44084", null ],
     [ "momentum::isHierarchyNode", "namespacemomentum.html#a0ae511a4861de1abaa163c4eab9ec4b5", null ],
