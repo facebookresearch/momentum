@@ -927,6 +927,9 @@ hello_world_sources = [
 
 convert_model_sources = [
     "examples/convert_model/convert_model.cpp",
+]
+
+convert_model_helpers_sources = [
     "examples/convert_model/convert_model_helpers.cpp",
 ]
 
@@ -936,7 +939,6 @@ convert_model_headers = [
 
 export_rig_sources = [
     "examples/convert_model/export_rig.cpp",
-    "examples/convert_model/convert_model_helpers.cpp",
 ]
 
 convert_model_test_headers = [
@@ -945,7 +947,6 @@ convert_model_test_headers = [
 
 convert_model_test_sources = [
     "examples/convert_model/convert_model_test.cpp",
-    "examples/convert_model/convert_model_helpers.cpp",
 ]
 
 convert_model_integration_test_sources = [
