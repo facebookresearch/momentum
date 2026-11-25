@@ -26,13 +26,7 @@
 
 namespace momentum {
 
-namespace {
-
-/// Parses the character format from the given file path.
-///
-/// @param[in] filepath The file path to the character file.
-/// @return The parsed CharacterFormat enumeration value.
-[[nodiscard]] CharacterFormat parseCharacterFormat(const filesystem::path& filepath) noexcept {
+CharacterFormat parseCharacterFormat(const filesystem::path& filepath) noexcept {
   std::string ext = filepath.extension().string();
   if (ext.empty()) {
     return CharacterFormat::Unknown;
@@ -49,6 +43,8 @@ namespace {
     return CharacterFormat::Unknown;
   }
 }
+
+namespace {
 
 [[nodiscard]] std::optional<Character> loadCharacterByFormat(
     const CharacterFormat format,
