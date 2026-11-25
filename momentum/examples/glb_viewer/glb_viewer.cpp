@@ -147,10 +147,12 @@ selectMotionFrames(size_t firstFrame, size_t lastFrame, size_t stride, size_t nF
 }
 
 /// Batch log model parameters using send_columns for all selected frames, under the per-character
-/// stream prefix `worldPrefix` (e.g. "world_params/character_0").
+/// stream prefixes `worldPrefix` (root parameters, e.g. "world_params/character_0") and
+/// `posePrefix` (the other parameters, e.g. "model_params/character_0").
 void batchLogModelParams(
     const RecordingStream& rec,
     const std::string& worldPrefix,
+    const std::string& posePrefix,
     std::span<const std::string> paramNames,
     const Eigen::MatrixXf& motion,
     const FrameSelection& sel) {
@@ -162,13 +164,17 @@ void batchLogModelParams(
     selectedParams.col(i) = motion.col(sel.cols[i]);
   }
   logModelParamsColumns(
-      rec, worldPrefix, "model_params", paramNames, selectedParams, sel.indices, sel.logTimes);
+      rec, worldPrefix, posePrefix, paramNames, selectedParams, sel.indices, sel.logTimes);
 }
 
 /// Everything the frame loop needs for one character.
 struct CharacterPlayback {
   std::string entityPath;
-  std::string paramsPrefix;
+  // Stream prefixes of the character's parameters: world (root) parameters, and the other joint
+  // and model parameters.
+  std::string worldParamsPrefix;
+  std::string jointParamsPrefix;
+  std::string modelParamsPrefix;
   std::string correspondencePath;
   std::vector<std::string> jointNames;
   std::map<std::string, size_t> locatorLookup;
@@ -249,7 +255,9 @@ int run(const Options& options) {
     const auto& cm = characters[i];
     auto& pc = playback.at(i);
     pc.entityPath = "world/character/" + std::to_string(i);
-    pc.paramsPrefix = "world_params/character_" + std::to_string(i);
+    pc.worldParamsPrefix = "world_params/character_" + std::to_string(i);
+    pc.jointParamsPrefix = "joint_params/character_" + std::to_string(i);
+    pc.modelParamsPrefix = "model_params/character_" + std::to_string(i);
     pc.correspondencePath = "world/markers/correspondence/character_" + std::to_string(i);
     pc.params.offsets = cm.identity;
     pc.params.pose = Eigen::VectorXf::Zero(cm.character.parameterTransform.numAllModelParameters());
@@ -293,11 +301,12 @@ int run(const Options& options) {
         selectMotionFrames(firstFrame, lastFrame, options.stride, pc.numFrames, fps);
     const auto& modelParamNames = cm.character.parameterTransform.name;
     if (options.logParams && cm.motion.cols() > 0) {
-      logModelParamNames(rec, pc.paramsPrefix, "model_params", modelParamNames);
-      batchLogModelParams(rec, pc.paramsPrefix, modelParamNames, cm.motion, sel);
+      logModelParamNames(rec, pc.worldParamsPrefix, pc.modelParamsPrefix, modelParamNames);
+      batchLogModelParams(
+          rec, pc.worldParamsPrefix, pc.modelParamsPrefix, modelParamNames, cm.motion, sel);
     }
     if (options.logJoints) {
-      logJointParamNames(rec, pc.paramsPrefix, "joint_params", pc.jointNames);
+      logJointParamNames(rec, pc.worldParamsPrefix, pc.jointParamsPrefix, pc.jointNames);
       pc.jointParams.reserve(cm.character.parameterTransform.numJointParameters(), sel.cols.size());
     }
   }
@@ -355,7 +364,7 @@ int run(const Options& options) {
   }
 
   for (const auto& pc : playback) {
-    pc.jointParams.send(rec, pc.paramsPrefix, pc.jointNames);
+    pc.jointParams.send(rec, pc.worldParamsPrefix, pc.jointParamsPrefix, pc.jointNames);
   }
 
   return EXIT_SUCCESS;
