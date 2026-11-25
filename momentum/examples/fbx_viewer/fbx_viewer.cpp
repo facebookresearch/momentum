@@ -72,13 +72,9 @@ void logMotion(
   // A file without animation can have a zero frame rate.
   const double frameDuration = fps > 0.0f ? 1.0 / fps : 0.0;
   const auto nFrames = std::max<size_t>(motion.cols(), 1);
-  Eigen::MatrixXf allJointParams;
-  std::vector<int64_t> frameIndices;
-  std::vector<double> logTimes;
+  JointParamsRecorder jointParams;
   if (logJoints) {
-    allJointParams.resize(charParams.offsets.size(), nFrames);
-    frameIndices.reserve(nFrames);
-    logTimes.reserve(nFrames);
+    jointParams.reserve(charParams.offsets.size(), nFrames);
   }
   for (size_t iFrame = 0; iFrame < nFrames; ++iFrame) {
     const double time = static_cast<double>(iFrame) * frameDuration;
@@ -96,16 +92,11 @@ void logMotion(
         false /*updateLimits*/);
     logCharacter(rec, entityPath, character, charState);
     if (logJoints) {
-      allJointParams.col(iFrame) = charState.skeletonState.jointParameters.v;
-      frameIndices.push_back(static_cast<int64_t>(iFrame));
-      logTimes.push_back(time);
+      jointParams.add(
+          static_cast<int64_t>(iFrame), time, charState.skeletonState.jointParameters.v);
     }
   }
-
-  if (logJoints) {
-    logJointParamsColumns(
-        rec, paramsPrefix, "joint_params", jointNames, allJointParams, frameIndices, logTimes);
-  }
+  jointParams.send(rec, paramsPrefix, jointNames);
 }
 
 } // namespace
