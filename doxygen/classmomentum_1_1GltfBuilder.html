@@ -320,6 +320,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Add a character to the scene. </p>
 <p>Each character will have a root node with the character's name as the parent of the skeleton root and the character mesh. positionOffset and rotationOffset can be provided as an initial offset to the character.</p>
+<p>Give every character of a file the same <a class="el" href="structmomentum_1_1FileSaveOptions.html#a24f196acc9011a4562184b523745914f" title="Enable GLTF extensions (default: true) Only used for GLTF output.">FileSaveOptions::extensions</a> value: when some character of the file has the momentum extension, the loaders read only the characters that have it.</p>
 <dl class="section return"><dt>Returns</dt><dd>The unique name the character is exported under (see the class notes). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="gltf__builder_8cpp_source.html#l00986">986</a> of file <a class="el" href="gltf__builder_8cpp_source.html">gltf_builder.cpp</a>.</p>
@@ -360,6 +361,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Add marker data to the file. </p>
+<p>Observations with a confidence below 0.001 are left out; the confidence of the others is stored.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fps</td><td>The frame rate of the motion capture data in frames per second; see <a class="el" href="#aff999cc3c299174f14ecb6eb3c11b0c5" title="Set the frame rate of the file.">setFps()</a>. </td></tr>
@@ -520,7 +522,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Add a skeleton states to the provided character. </p>
 <p>If addCharacter is not called before adding the skeleton states, the character will be automatically added with the default settings.</p>
-<p><a class="el" href="namespacemomentum.html#a14bdd905f0524297f46738185d237622">Skeleton</a> states replace the channels of the character's joints in the animation named <code class="param">customName</code>. The blend-shape weights channel that an earlier <a class="el" href="#a58d479787c90f962aa0afd235eba3f6d" title="Add a motion to the provided character.">addMotion()</a> wrote stays.</p>
+<p><a class="el" href="namespacemomentum.html#a14bdd905f0524297f46738185d237622">Skeleton</a> states replace the channels of the character's joints in the animation named <code class="param">customName</code>. The blend-shape weights channel and the model parameters that an earlier <a class="el" href="#a58d479787c90f962aa0afd235eba3f6d" title="Add a motion to the provided character.">addMotion()</a> wrote for the character stay.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fps</td><td>Frame rate of the skeleton states in frames per second; see <a class="el" href="#aff999cc3c299174f14ecb6eb3c11b0c5" title="Set the frame rate of the file.">setFps()</a>. The animation keys are stored in seconds, so the skeleton states keep their timing even if the file has another frame rate. </td></tr>

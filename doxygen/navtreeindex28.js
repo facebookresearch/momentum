@@ -1,5 +1,11 @@
 var NAVTREEINDEX28 =
 {
+"structmomentum_1_1GaussNewtonSolverOptions.html":[2,0,0,28],
+"structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[1,0,2,29,3],
+"structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[2,0,0,28,3],
+"structmomentum_1_1GaussNewtonSolverOptions.html#a45ece9b1b227660e41131dbcc4a15b9c":[1,0,2,29,0],
+"structmomentum_1_1GaussNewtonSolverOptions.html#a45ece9b1b227660e41131dbcc4a15b9c":[2,0,0,28,0],
+"structmomentum_1_1GaussNewtonSolverOptions.html#a784552e5ade5d388d4f9aab5893538a7":[1,0,2,29,1],
 "structmomentum_1_1GaussNewtonSolverOptions.html#a784552e5ade5d388d4f9aab5893538a7":[2,0,0,28,1],
 "structmomentum_1_1GaussNewtonSolverOptions.html#ac7367af08efee009a2c72ba80f984d7e":[1,0,2,29,2],
 "structmomentum_1_1GaussNewtonSolverOptions.html#ac7367af08efee009a2c72ba80f984d7e":[2,0,0,28,2],
@@ -243,11 +249,5 @@ var NAVTREEINDEX28 =
 "structmomentum_1_1JointToJointPositionDataT.html#a02daa7b42e92755b9ddf1b0e17f14e96":[2,0,0,146,2],
 "structmomentum_1_1JointToJointPositionDataT.html#a1fd6ce967e298ec7251fdedfdbc288be":[1,0,2,147,3],
 "structmomentum_1_1JointToJointPositionDataT.html#a1fd6ce967e298ec7251fdedfdbc288be":[2,0,0,146,3],
-"structmomentum_1_1JointToJointPositionDataT.html#a22d615bfe2b873297cb56785d958f1f8":[1,0,2,147,0],
-"structmomentum_1_1JointToJointPositionDataT.html#a22d615bfe2b873297cb56785d958f1f8":[2,0,0,146,0],
-"structmomentum_1_1JointToJointPositionDataT.html#a42e31dff2462efec629fdc7c08193554":[1,0,2,147,4],
-"structmomentum_1_1JointToJointPositionDataT.html#a42e31dff2462efec629fdc7c08193554":[2,0,0,146,4],
-"structmomentum_1_1JointToJointPositionDataT.html#ab7d4cc8b4448aa2e6a03f9d17644820d":[1,0,2,147,1],
-"structmomentum_1_1JointToJointPositionDataT.html#ab7d4cc8b4448aa2e6a03f9d17644820d":[2,0,0,146,1],
-"structmomentum_1_1JointToJointPositionDataT.html#abb0cc8c9bf01ad851413eca0b408d802":[1,0,2,147,6]
+"structmomentum_1_1JointToJointPositionDataT.html#a22d615bfe2b873297cb56785d958f1f8":[1,0,2,147,0]
 };

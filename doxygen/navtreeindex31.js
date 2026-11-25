@@ -1,5 +1,11 @@
 var NAVTREEINDEX31 =
 {
+"structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[2,0,0,106,2],
+"structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[1,0,2,107,0],
+"structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[2,0,0,106,0],
+"structmomentum_1_1ProjectionConstraintDataT.html":[1,0,2,148],
+"structmomentum_1_1ProjectionConstraintDataT.html":[2,0,0,147],
+"structmomentum_1_1ProjectionConstraintDataT.html#a1d87e1d12f9435bb7b9553986a170f3c":[1,0,2,148,0],
 "structmomentum_1_1ProjectionConstraintDataT.html#a1d87e1d12f9435bb7b9553986a170f3c":[2,0,0,147,0],
 "structmomentum_1_1ProjectionConstraintDataT.html#a2bda6e8da2460c543d255cf4ca793e8e":[1,0,2,148,1],
 "structmomentum_1_1ProjectionConstraintDataT.html#a2bda6e8da2460c543d255cf4ca793e8e":[2,0,0,147,1],
@@ -243,11 +249,5 @@ var NAVTREEINDEX31 =
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html":[2,0,0,29],
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[1,0,2,30,4],
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[2,0,0,29,4],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[1,0,2,30,3],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[2,0,0,29,3],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48":[1,0,2,30,2],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48":[2,0,0,29,2],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a57f0a1f056dea1054c16f04291fe6ad4":[1,0,2,30,0],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a57f0a1f056dea1054c16f04291fe6ad4":[2,0,0,29,0],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a98dbddc86ece265b7ed3e167db2602b9":[1,0,2,30,5]
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[1,0,2,30,3]
 };

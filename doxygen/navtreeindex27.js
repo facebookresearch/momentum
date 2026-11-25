@@ -1,5 +1,11 @@
 var NAVTREEINDEX27 =
 {
+"structmomentum_1_1CollisionEllipsoidT.html#a1847969d5fe7e699debc2898852f2005":[2,0,0,39,3],
+"structmomentum_1_1CollisionEllipsoidT.html#a53f0d48b667bd6ae4b0a7fbd2ec7b7c0":[1,0,2,40,5],
+"structmomentum_1_1CollisionEllipsoidT.html#a53f0d48b667bd6ae4b0a7fbd2ec7b7c0":[2,0,0,39,5],
+"structmomentum_1_1CollisionEllipsoidT.html#a9df23cc68105b4e3c381d212b8cfa1fc":[1,0,2,40,0],
+"structmomentum_1_1CollisionEllipsoidT.html#a9df23cc68105b4e3c381d212b8cfa1fc":[2,0,0,39,0],
+"structmomentum_1_1CollisionEllipsoidT.html#ac81b187ae9f7a9b07c7e1633d0552605":[1,0,2,40,2],
 "structmomentum_1_1CollisionEllipsoidT.html#ac81b187ae9f7a9b07c7e1633d0552605":[2,0,0,39,2],
 "structmomentum_1_1CollisionEllipsoidT.html#adbefa619d45a94f264218b54e6e66b5c":[1,0,2,40,1],
 "structmomentum_1_1CollisionEllipsoidT.html#adbefa619d45a94f264218b54e6e66b5c":[2,0,0,39,1],
@@ -243,11 +249,5 @@ var NAVTREEINDEX27 =
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3":[2,0,0,27,2],
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[1,0,2,28,1],
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[2,0,0,27,1],
-"structmomentum_1_1GaussNewtonSolverOptions.html":[1,0,2,29],
-"structmomentum_1_1GaussNewtonSolverOptions.html":[2,0,0,28],
-"structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[1,0,2,29,3],
-"structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[2,0,0,28,3],
-"structmomentum_1_1GaussNewtonSolverOptions.html#a45ece9b1b227660e41131dbcc4a15b9c":[1,0,2,29,0],
-"structmomentum_1_1GaussNewtonSolverOptions.html#a45ece9b1b227660e41131dbcc4a15b9c":[2,0,0,28,0],
-"structmomentum_1_1GaussNewtonSolverOptions.html#a784552e5ade5d388d4f9aab5893538a7":[1,0,2,29,1]
+"structmomentum_1_1GaussNewtonSolverOptions.html":[1,0,2,29]
 };

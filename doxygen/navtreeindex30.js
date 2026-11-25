@@ -1,5 +1,11 @@
 var NAVTREEINDEX30 =
 {
+"structmomentum_1_1MultiposeSolverOptions.html":[2,0,0,178],
+"structmomentum_1_1MultiposeSolverOptions.html#a0a338cddde913facf3189b908bc99095":[1,0,2,179,0],
+"structmomentum_1_1MultiposeSolverOptions.html#a0a338cddde913facf3189b908bc99095":[2,0,0,178,0],
+"structmomentum_1_1MultiposeSolverOptions.html#aa070d9ffcca3f3d36361893532b54388":[1,0,2,179,2],
+"structmomentum_1_1MultiposeSolverOptions.html#aa070d9ffcca3f3d36361893532b54388":[2,0,0,178,2],
+"structmomentum_1_1MultiposeSolverOptions.html#af4ef33161565064e334defc6bb4ffd9a":[1,0,2,179,1],
 "structmomentum_1_1MultiposeSolverOptions.html#af4ef33161565064e334defc6bb4ffd9a":[2,0,0,178,1],
 "structmomentum_1_1NormalDataT.html":[1,0,2,101],
 "structmomentum_1_1NormalDataT.html":[2,0,0,100],
@@ -243,11 +249,5 @@ var NAVTREEINDEX30 =
 "structmomentum_1_1PositionDataT.html":[2,0,0,106],
 "structmomentum_1_1PositionDataT.html#a0bc5193be2ff7d7dbece4aa0b34bdcc0":[1,0,2,107,1],
 "structmomentum_1_1PositionDataT.html#a0bc5193be2ff7d7dbece4aa0b34bdcc0":[2,0,0,106,1],
-"structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[1,0,2,107,2],
-"structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[2,0,0,106,2],
-"structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[1,0,2,107,0],
-"structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[2,0,0,106,0],
-"structmomentum_1_1ProjectionConstraintDataT.html":[1,0,2,148],
-"structmomentum_1_1ProjectionConstraintDataT.html":[2,0,0,147],
-"structmomentum_1_1ProjectionConstraintDataT.html#a1d87e1d12f9435bb7b9553986a170f3c":[1,0,2,148,0]
+"structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[1,0,2,107,2]
 };
