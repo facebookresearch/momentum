@@ -18,6 +18,7 @@
 #include "momentum/common/log.h"
 #include "momentum/io/common/gsl_utils.h"
 #include "momentum/io/common/json_utils.h"
+#include "momentum/io/common/stable_sort_order.h"
 #include "momentum/io/fbx/marker_property_names.h"
 #include "momentum/io/fbx/polygon_data.h"
 #include "momentum/io/skeleton/locator_io.h"
@@ -31,6 +32,7 @@
 #include <ofbx.h>
 #include <gsl/span_ext>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <exception>
@@ -41,6 +43,7 @@
 #include <set>
 #include <span>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 
 namespace momentum {
@@ -1641,6 +1644,20 @@ Character buildCharacterFromParse(
     KeepLocators keepLocators,
     const ParameterTransform& parameterTransform) {
   cp.mesh.updateNormals();
+  // Order the locators and the collision geometry by parent joint, keeping the file order within a
+  // joint, as the glTF loader does; parseSkeleton finds them in depth-first order, the locators of
+  // a joint after those of its child joints. Collision shapes without a parent joint come first.
+  std::vector<size_t> keys;
+  keys.reserve(cp.locators.size());
+  for (const Locator& locator : cp.locators) {
+    keys.push_back(locator.parent);
+  }
+  applyOrder(cp.locators, stableSortOrder(keys));
+  keys.clear();
+  for (const CollisionPrimitive& shape : cp.collision) {
+    keys.push_back(shape.parent == kInvalidIndex ? 0 : shape.parent + 1);
+  }
+  applyOrder(cp.collision, stableSortOrder(keys));
   Character character(
       cp.skeleton,
       parameterTransform,
