@@ -1241,6 +1241,14 @@ if(MOMENTUM_BUILD_EXAMPLES)
       CLI11::CLI11
   )
 
+  mt_executable(
+    NAME apply_motion
+    SOURCES_VARS apply_motion_sources
+    LINK_LIBRARIES
+      convert_model_helpers
+      CLI11::CLI11
+  )
+
   if(MOMENTUM_BUILD_RERUN)
     mt_executable(
       NAME glb_viewer
