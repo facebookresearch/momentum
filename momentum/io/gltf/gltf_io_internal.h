@@ -9,16 +9,57 @@
 
 #include <momentum/character/character.h>
 #include <momentum/character/skeleton_state.h>
+#include <momentum/common/exception.h>
+#include <momentum/common/filesystem.h>
 #include <momentum/io/gltf/gltf_skeleton_io.h>
 
 #include <fx/gltf.h>
 
 #include <cstdint>
 #include <span>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <tuple>
+#include <variant>
 #include <vector>
 
 namespace momentum {
+
+/// Load the glTF document of a file or a byte buffer.
+///
+/// A file that starts with "glTF" is read as binary glTF (GLB), any other file as text glTF with
+/// its external buffers next to it; a byte buffer is read as binary glTF. Documents up to 4 GB, the
+/// GLB limit, are accepted.
+///
+/// @param[in] input The file path or the byte buffer.
+/// @return The parsed document.
+[[nodiscard]] fx::gltf::Document loadGltfDocument(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input);
+
+/// @p what with the glTF load context "Unable to load gltf : " in front of it, added only once
+/// however many loaders an error passes through.
+///
+/// @param[in] what The message of the error.
+/// @return The message with the context.
+[[nodiscard]] std::string gltfLoadErrorMessage(std::string_view what);
+
+/// Load the document of @p input and pass it to @p loadFromDocument; a `std::runtime_error` gets
+/// the glTF load context (see gltfLoadErrorMessage()), and other exceptions pass through unchanged.
+///
+/// @param[in] input The file path or the byte buffer.
+/// @param[in] loadFromDocument Reads the result from the document.
+/// @return The result of @p loadFromDocument.
+template <typename LoadFromDocument>
+auto loadFromInput(
+    const std::variant<filesystem::path, std::span<const std::byte>>& input,
+    LoadFromDocument&& loadFromDocument) {
+  try {
+    return loadFromDocument(loadGltfDocument(input));
+  } catch (const std::runtime_error& err) {
+    MT_THROW("{}", gltfLoadErrorMessage(err.what()));
+  }
+}
 
 /// Internal function to load a character from a glTF model with node-to-object mapping.
 ///
