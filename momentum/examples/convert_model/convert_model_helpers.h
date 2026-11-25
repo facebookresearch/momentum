@@ -119,9 +119,9 @@ int findLongestTake(
 /// file.
 ///
 /// Without a parameter file, the characters of an FBX file get the rig that the file stores (see
-/// FbxBuilder::addCharacter()); the characters of an FBX file that stores no rig get the identity
-/// transform, and the motion of every motion file, glTF included, is mapped onto those of an FBX
-/// model file through the joint transforms.
+/// FbxBuilder::addCharacter()); the characters without model parameters, as those of an FBX file
+/// that stores no rig, get the identity transform, and the motion of every motion file, glTF
+/// included, is mapped onto those of an FBX model file through the joint transforms.
 ///
 /// The parameter and locator files, and the locator and parameter outputs, apply to one character,
 /// so this throws when they are given for several characters. It also throws when no character has
@@ -222,7 +222,8 @@ void saveRigOutputs(const Options& options, const Scene& scene);
 /// Initializes the character from the character of an FBX or BVH motion file when no separate
 /// model was provided. Applies parameter transform and locators if specified in the options.
 /// Without a parameter file, a character without model parameters, as from an FBX file that stores
-/// no rig, gets the identity parameter transform; a stored rig stays.
+/// no rig or a rig without model parameters, gets the identity parameter transform; a stored rig
+/// with model parameters stays.
 ///
 /// @param character The character to initialize.
 /// @param motionCharacter The character of the motion file.
