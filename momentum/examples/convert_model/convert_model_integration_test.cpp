@@ -8,8 +8,11 @@
 #include "convert_model_test_helpers.h"
 
 #include <momentum/common/filesystem.h>
+#include <momentum/io/character_io.h>
 #include <momentum/io/fbx/fbx_io.h>
 #include <momentum/io/gltf/gltf_io.h>
+#include <momentum/io/urdf/urdf_io.h>
+#include <momentum/test/character/character_helpers_gtest.h>
 #include <momentum/test/io/io_helpers.h>
 
 #include <gtest/gtest.h>
@@ -595,6 +598,121 @@ TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterModel_KeepsEveryCharact
   for (size_t i = 0; i < saved.size(); ++i) {
     EXPECT_EQ(loaded[i].name, saved[i].character.name);
     EXPECT_EQ(loaded[i].skeleton.getJointNames(), saved[i].character.skeleton.getJointNames());
+  }
+}
+
+namespace {
+
+// Every character of a glTF or FBX file, as the multi-character loader of its format reads it.
+std::vector<momentum::Character> loadEveryCharacter(const std::string& path) {
+  if (momentum::parseCharacterFormat(path) == momentum::CharacterFormat::Fbx) {
+    return momentum::loadFbxCharacters(
+        path, momentum::KeepLocators::Yes, momentum::Permissive::No, momentum::LoadBlendShapes::No);
+  }
+  return momentum::loadGltfCharacters(filesystem::path(path));
+}
+
+void expectSamePhysicalPropertiesAndMetadata(
+    const std::vector<momentum::Character>& expected,
+    const std::vector<momentum::Character>& loaded) {
+  ASSERT_EQ(loaded.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    SCOPED_TRACE(expected[i].name);
+    EXPECT_EQ(loaded[i].name, expected[i].name);
+    EXPECT_EQ(loaded[i].metadata, expected[i].metadata);
+    momentum::comparePhysicalProperties(
+        expected[i].physicalProperties, loaded[i].physicalProperties);
+  }
+}
+
+} // namespace
+
+// Test: the physical properties and metadata of every character are kept, for one and for two
+// characters, read from the model file or from the motion file, between glTF and FBX
+TEST_F(ConvertModelIntegrationTest, Result_PhysicalPropertiesAndMetadata_AreKept) {
+  for (const size_t numCharacters : {1, 2}) {
+    auto saved = momentum::createTwoCharacterScene();
+    saved.resize(numCharacters);
+    std::vector<momentum::Character> expected;
+    expected.reserve(saved.size());
+    for (const auto& entry : saved) {
+      expected.push_back(entry.character);
+    }
+    for (const std::string inputExtension : {".glb", ".fbx"}) {
+      const auto input = outputFile("properties_" + std::to_string(numCharacters) + inputExtension);
+      if (inputExtension == ".glb") {
+        momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+      } else {
+        momentum::saveTestSceneAsFbx(input, saved, 30.0f);
+      }
+      for (const std::string inputOption : {"--model", "--motion"}) {
+        for (const std::string outputExtension : {".glb", ".fbx"}) {
+          SCOPED_TRACE(
+              ::testing::Message() << input << " " << inputOption << " -> " << outputExtension);
+          std::string outName = "properties_out_";
+          outName += std::to_string(numCharacters);
+          outName += inputExtension.substr(1);
+          outName += inputOption.substr(2);
+          outName += outputExtension;
+          const auto out = outputFile(outName);
+          ASSERT_EQ(runConvertModel({inputOption, input, "--out", out}), 0);
+          expectSamePhysicalPropertiesAndMetadata(expected, loadEveryCharacter(out));
+        }
+      }
+    }
+  }
+}
+
+// Test: a selected character keeps its physical properties and metadata
+TEST_F(ConvertModelIntegrationTest, Result_SelectedCharacter_KeepsItsPhysicalProperties) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("properties_two.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto out = outputFile("properties_b.fbx");
+
+  ASSERT_EQ(runConvertModel({"--motion", input, "--character", "b", "--out", out}), 0);
+
+  expectSamePhysicalPropertiesAndMetadata({saved[1].character}, loadEveryCharacter(out));
+}
+
+// Test: the physical properties of a URDF model are kept in glTF and FBX outputs
+TEST_F(ConvertModelIntegrationTest, Result_UrdfModel_KeepsItsPhysicalProperties) {
+  const auto urdf = outputFile("inertial.urdf");
+  std::ofstream(urdf) << R"(<?xml version="1.0"?>
+<robot name="inertial_robot">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.01 0.02 0.03" rpy="0 0 0.2"/>
+      <mass value="2.0"/>
+      <inertia ixx="0.10" ixy="0.01" ixz="0.00" iyy="0.20" iyz="0.02" izz="0.30"/>
+    </inertial>
+  </link>
+  <link name="tip_link">
+    <inertial>
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0.00" ixz="0.00" iyy="0.02" iyz="0.00" izz="0.03"/>
+    </inertial>
+  </link>
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="tip_link"/>
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.0" upper="1.0" effort="100" velocity="1"/>
+  </joint>
+</robot>
+)";
+  const momentum::Character expected = momentum::loadUrdfCharacter(urdf);
+  ASSERT_EQ(expected.physicalProperties.size(), 2);
+
+  for (const std::string outputExtension : {".glb", ".fbx"}) {
+    SCOPED_TRACE(outputExtension);
+    const auto out = outputFile("inertial_out" + outputExtension);
+    ASSERT_EQ(runConvertModel({"--model", urdf, "--out", out}), 0);
+    const auto loaded = loadEveryCharacter(out);
+    ASSERT_EQ(loaded.size(), 1);
+    momentum::comparePhysicalProperties(expected.physicalProperties, loaded[0].physicalProperties);
   }
 }
 
