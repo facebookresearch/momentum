@@ -38,7 +38,7 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
          "-d,--motion",
          opt->input_motion_file,
          "Input motion data file (.glb/.gltf/.fbx/.bvh); without --model, every character of the file "
-         "is converted with its motion")
+         "is converted with its motion, and --parameters and --locator apply to it")
       ->check(CLI::ExistingFile);
   app.add_option(
       "--character",
@@ -111,6 +111,10 @@ int main(int argc, char** argv) {
 
     if (!isSceneOutputFile(options->output_model_file)) {
       MT_LOGE("Unknown output file format: {}", options->output_model_file);
+      return EXIT_FAILURE;
+    }
+    if (options->input_model_file.empty() && options->input_motion_file.empty()) {
+      MT_LOGE("No input file: give --model or --motion");
       return EXIT_FAILURE;
     }
 

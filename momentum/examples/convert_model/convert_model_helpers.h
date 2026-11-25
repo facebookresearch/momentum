@@ -113,6 +113,11 @@ int findLongestTake(
 /// at all (an empty character). A BVH file holds one character; its motion is mapped onto the
 /// model character by joint name.
 ///
+/// Without a model file, the parameter and locator files apply to the characters of the motion
+/// file. A glTF motion file is then read as the model file too, so its motion moves to the new
+/// parameter transform by parameter name, as with the same file as the model file and the motion
+/// file.
+///
 /// An FBX file stores no parameter transform: without a parameter file, the characters of an FBX
 /// model file get the identity transform, as the characters of an FBX motion file do, and the
 /// motion of every motion file, glTF included, is mapped onto them through the joint transforms.
