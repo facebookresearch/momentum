@@ -533,10 +533,12 @@ diff_ik_test_sources = [
 io_common_public_headers = [
     "io/common/gsl_utils.h",
     "io/common/name_utils.h",
+    "io/common/stable_sort_order.h",
     "io/common/stream_utils.h",
 ]
 
 io_common_sources = [
+    "io/common/stable_sort_order.cpp",
     "io/common/stream_utils.cpp",
 ]
 
@@ -551,6 +553,7 @@ io_json_utils_sources = [
 io_common_test_sources = [
     "test/io/common/json_utils_test.cpp",
     "test/io/common/name_utils_test.cpp",
+    "test/io/common/stable_sort_order_test.cpp",
     "test/io/common/stream_utils_test.cpp",
 ]
 
