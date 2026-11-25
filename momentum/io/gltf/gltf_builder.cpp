@@ -1035,7 +1035,7 @@ std::string GltfBuilder::addCharacter(
     parameterLimitsToJson(character, rig["parameterLimits"]);
     parameterSetsToJson(character, rig["parameterSet"]);
     poseConstraintsToJson(character, rig["poseConstraints"]);
-    if (!character.metadata.empty()) {
+    if (!isEmptyMetadata(character.metadata)) {
       rig["metadata"] = character.metadata;
     }
     // The document holds a single rig, so each character's rig is also stored on its root node.
