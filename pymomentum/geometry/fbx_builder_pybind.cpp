@@ -98,7 +98,9 @@ curves. Also extracts and animates blend shape weights when applicable.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
-:param motion: Model parameters matrix with shape (nFrames, nModelParams). None for no animation.
+:param motion: Model parameters matrix with shape (nFrames, nModelParams), one column for each
+    model parameter of the character; a motion with frames and another number of columns raises
+    an error. None for no animation.
 :param offsets: Identity/offset parameters for the bind pose. None to use default bind pose.
 :param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.)",
           py::arg("character"),
@@ -127,7 +129,9 @@ This is useful for rigid bodies or characters with simple parameterization.
 
 :param character: The character to animate (must match a previously added character).
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams), one column for
+    each joint parameter of the character; a motion with frames and another number of columns
+    raises an error. None for no animation.
 :param character_name: Which exported character to animate (see "Character names"). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.)",
           py::arg("character"),
           py::arg("fps") = 120.0f,
@@ -157,7 +161,9 @@ as a simple animated mesh without any skeleton hierarchy.
 :param character: The character providing the mesh geometry.
 :param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
     object's custom attributes.
@@ -191,13 +197,15 @@ as a simple animated mesh without any skeleton hierarchy.
           },
           R"(Add an animated mesh from a Mesh object (no Character needed).
 
-Creates a standalone mesh node and animates its transform from joint
-parameters. Only the root transform (first 7 joint params) is used.
+Creates a standalone mesh node and animates its transform from the root joint
+parameters.
 
 :param mesh: The mesh geometry.
 :param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
-:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
+:param joint_params: Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+    joint's columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+    without it). Fewer than 6 columns raises an error.
 :param translation_offset: Rest-pose translation offset added to the translation
     channels (defaults to zero).
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
