@@ -671,17 +671,18 @@ TEST_F(ConvertModelIntegrationTest, Result_MultiCharacterFbxToGlb_KeepsEveryChar
 
   ASSERT_EQ(runConvertModel({"--motion", input, "--out", out}), 0);
 
-  // The FBX characters have an identity parameter transform, so the motion is joint parameters.
+  // The FBX file stores the rig of each character, so the motion comes back as its model
+  // parameters.
   const auto [loaded, fps] = momentum::loadGltfCharactersWithMotion(out);
   ASSERT_EQ(loaded.size(), saved.size());
   EXPECT_FLOAT_EQ(fps, 30.0f);
   for (size_t i = 0; i < saved.size(); ++i) {
     EXPECT_EQ(loaded[i].character.name, saved[i].character.name);
-    const momentum::MatrixXf expected =
-        momentum::toJointParameters(saved[i].character, saved[i].motion);
-    ASSERT_EQ(loaded[i].motion.rows(), expected.rows()) << i;
-    ASSERT_EQ(loaded[i].motion.cols(), expected.cols()) << i;
-    EXPECT_LT((loaded[i].motion - expected).cwiseAbs().maxCoeff(), 1e-4f) << i;
+    EXPECT_EQ(
+        loaded[i].character.parameterTransform.name, saved[i].character.parameterTransform.name);
+    ASSERT_EQ(loaded[i].motion.rows(), saved[i].motion.rows()) << i;
+    ASSERT_EQ(loaded[i].motion.cols(), saved[i].motion.cols()) << i;
+    EXPECT_LT((loaded[i].motion - saved[i].motion).cwiseAbs().maxCoeff(), 1e-4f) << i;
   }
 }
 
