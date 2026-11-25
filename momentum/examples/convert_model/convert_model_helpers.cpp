@@ -49,17 +49,6 @@ void applyOptionalInputs(momentum::Character& character, const momentum::Options
   }
 }
 
-// A character read from a glTF motion file without a model file comes with its own parameter
-// transform and locators, so the parameter and locator files do not apply.
-void warnIgnoredInputs(const momentum::Options& options) {
-  if (!options.input_params_file.empty()) {
-    MT_LOGW("Ignoring input parameter transform {}.", options.input_params_file);
-  }
-  if (!options.input_locator_file.empty()) {
-    MT_LOGW("Ignoring input locators {}.", options.input_locator_file);
-  }
-}
-
 // The extension of `path` in lower case, such as ".bvh".
 std::string lowerCaseExtension(const filesystem::path& path) {
   std::string extension = path.extension().string();
@@ -479,7 +468,6 @@ std::optional<momentum::Scene> loadGltfMotionScene(
     return std::nullopt;
   }
   auto& [selected, fps] = *loaded;
-  warnIgnoredInputs(options);
   momentum::Scene scene;
   scene.fps = fps;
   for (auto& entry : selected) {
@@ -832,12 +820,29 @@ void saveBvhScene(const filesystem::path& path, const Scene& scene, bool saveMar
       entry.offsets.v);
 }
 
+// The options with which loadScene() reads the input. Without a model file, a glTF motion file is
+// also the model file when a parameter or locator file is given: these files then apply to its
+// characters, as they apply to the characters of FBX and BVH motion files (see
+// initializeCharacterFromMotionFile()), and its motion moves to the new parameter transform by
+// parameter name.
+Options sceneInputOptions(const Options& options) {
+  Options result = options;
+  const bool hasRigInputs =
+      !options.input_params_file.empty() || !options.input_locator_file.empty();
+  if (options.input_model_file.empty() && hasRigInputs &&
+      parseCharacterFormat(options.input_motion_file) == CharacterFormat::Gltf) {
+    result.input_model_file = options.input_motion_file;
+  }
+  return result;
+}
+
 } // namespace
 
 Scene loadScene(const Options& options) {
-  std::optional<Scene> scene = loadMultiCharacterScene(options);
+  const Options input = sceneInputOptions(options);
+  std::optional<Scene> scene = loadMultiCharacterScene(input);
   if (!scene) {
-    scene = loadOneCharacterScene(options);
+    scene = loadOneCharacterScene(input);
   }
   scene->hasMotionFile = !options.input_motion_file.empty();
   return std::move(*scene);
@@ -874,7 +879,6 @@ MotionData loadGlbMotion(
 
   std::tie(character, result.poses, result.offsets, result.fps) =
       loadCharacterWithMotion(motionPath);
-  warnIgnoredInputs(options);
   return result;
 }
 
