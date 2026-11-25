@@ -79,8 +79,7 @@ void loadCharacterExtensions(
       character.parameterLimits = parameterLimitsFromJson(character, def["parameterLimits"]);
     }
     if (def.count("metadata") > 0) {
-      character.metadata = def.value<std::string>("metadata", {});
-      warnIfMetadataIsNotJson(character.metadata, "glTF");
+      character.metadata = metadataFromFile(def.value<std::string>("metadata", {}), "glTF");
     }
   } catch (std::runtime_error& err) {
     MT_THROW("{}", gltfLoadErrorMessage(err.what()));

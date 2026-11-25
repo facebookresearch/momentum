@@ -143,11 +143,20 @@ JointPhysicalProperties jointPhysicalPropertiesFromJson(
     const std::string& jointName,
     size_t jointIndex);
 
-/// Warn when the metadata of a character read from a file is not valid JSON. The loaders keep such
-/// metadata as the file holds it, so the caller sees exactly what the file held.
+/// Whether character metadata is empty: the empty string, or the empty JSON object `{}`. Both mean
+/// that the character has no metadata, and the writers do not write either.
 ///
 /// @param metadata The metadata string.
+[[nodiscard]] bool isEmptyMetadata(std::string_view metadata);
+
+/// The metadata of a character read from a file. Empty metadata (see isEmptyMetadata()) gives the
+/// empty string, the metadata of a character without metadata. Other metadata is kept as the file
+/// holds it, so the caller sees exactly what the file held, with a warning when it is not valid
+/// JSON.
+///
+/// @param metadata The metadata string in the file.
 /// @param format The file format, named in the warning, for example "FBX".
-void warnIfMetadataIsNotJson(const std::string& metadata, std::string_view format);
+/// @return The metadata of the character.
+[[nodiscard]] std::string metadataFromFile(std::string metadata, std::string_view format);
 
 } // namespace momentum
