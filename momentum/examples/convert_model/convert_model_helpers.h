@@ -91,15 +91,18 @@ int findLongestTake(
 /// file. With a model file, each character gets the motion of the motion-file character with the
 /// same name.
 ///
-/// Otherwise the input converts as one character, as loadModelCharacter(), loadGlbMotion() and
-/// loadFbxMotion() read it: a file with one character, a file of another format, a file that the
-/// multi-character loaders cannot read (after a warning), or no input file at all (an empty
-/// character).
+/// Otherwise the input converts as one character, as loadModelCharacter(), loadGlbMotion(),
+/// loadFbxMotion() and the BVH loaders read it: a file with one character, a file of another
+/// format, a file that the multi-character loaders cannot read (after a warning), or no input file
+/// at all (an empty character). A BVH file holds one character; its motion is mapped onto the
+/// model character by joint name.
 ///
 /// The parameter and locator files, and the locator and parameter outputs, apply to one character,
 /// so this throws when they are given for several characters. It also throws when no character has
-/// the selected name, when a name matches several characters, and when no character of the model
-/// file has a motion-file character with the same name.
+/// the selected name, when a name matches several characters, when no character of the model file
+/// has a motion-file character with the same name, when a BVH motion file comes with several model
+/// characters, and when --character selects a character of a BVH motion file without a model
+/// file.
 ///
 /// @param options The command-line options.
 /// @return The characters with their motion, and its frame rate.
@@ -121,14 +124,24 @@ MotionData loadFbxMotion(
     bool hasModel,
     const Options& options);
 
+/// Whether `path` names a BVH file.
+///
+/// @param path A file path.
+/// @return Whether the extension of `path` is .bvh, in any letter case.
+bool isBvhFile(const filesystem::path& path);
+
 /// Loads the input model character, applying optional parameter and locator files.
 Character loadModelCharacter(const Options& options);
 
-/// Initializes the character from FBX data when no separate model was provided.
-/// Applies parameter transform and locators if specified in the options.
-void initializeCharacterFromFbx(
+/// Initializes the character from the character of an FBX or BVH motion file when no separate
+/// model was provided. Applies parameter transform and locators if specified in the options.
+///
+/// @param character The character to initialize.
+/// @param motionCharacter The character of the motion file.
+/// @param options The command-line options: the parameter and locator files.
+void initializeCharacterFromMotionFile(
     Character& character,
-    const Character& fbxCharacter,
+    const Character& motionCharacter,
     const Options& options);
 
 /// Converts joint-parameter motion data to model parameters using
