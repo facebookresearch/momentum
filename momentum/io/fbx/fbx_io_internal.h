@@ -39,7 +39,6 @@
 #include <span>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace momentum::fbx_internal {
 
@@ -185,21 +184,10 @@ inline SkeletonNodeResult createSkeletonNodes(
 inline void addPhysicalProperties(
     const Character& character,
     const std::unordered_map<size_t, fbxsdk::FbxNode*>& jointToNodeMap) {
-  std::unordered_set<size_t> seenJoints;
-  for (const auto& jointProperties : character.physicalProperties) {
-    const size_t jointIndex =
-        resolvePhysicalPropertiesJointIndex(jointProperties, character.skeleton);
-
-    MT_THROW_IF(
-        jointIndex == kInvalidIndex || jointIndex >= character.skeleton.joints.size(),
-        "Physical properties entry references unknown joint '{}'",
-        jointProperties.jointName);
-    MT_THROW_IF(
-        !seenJoints.insert(jointIndex).second,
-        "Multiple physical properties entries resolve to joint '{}' (index {})",
-        character.skeleton.joints.at(jointIndex).name,
-        jointIndex);
-
+  const std::vector<size_t> jointIndices =
+      resolvePhysicalPropertiesJointIndices(character.physicalProperties, character.skeleton);
+  for (size_t entry = 0; entry < jointIndices.size(); ++entry) {
+    const size_t jointIndex = jointIndices[entry];
     const auto nodeIt = jointToNodeMap.find(jointIndex);
     MT_THROW_IF(
         nodeIt == jointToNodeMap.end() || nodeIt->second == nullptr,
@@ -207,7 +195,8 @@ inline void addPhysicalProperties(
         character.skeleton.joints.at(jointIndex).name);
 
     ::fbxsdk::FbxProperty::Create(nodeIt->second, ::fbxsdk::FbxStringDT, "physicalProperties")
-        .Set(FbxString(jointPhysicalPropertiesToJsonString(jointProperties).c_str()));
+        .Set(FbxString(
+            jointPhysicalPropertiesToJsonString(character.physicalProperties.at(entry)).c_str()));
   }
 }
 
