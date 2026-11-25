@@ -55,6 +55,22 @@ struct SceneCharacter {
 struct Scene {
   std::vector<SceneCharacter> characters;
   float fps = 120.0f;
+  /// Whether the motion comes from a motion file, even one without frames. One character then
+  /// gets the motion in a glTF file, as saveGltfCharacter() adds it.
+  bool hasMotionFile = false;
+};
+
+/// How saveScene() writes a file.
+struct SaveSceneOptions {
+  /// The namespace of the nodes of an FBX file.
+  std::string fbxNamespace;
+  /// Whether an FBX file gets the meshes of the characters.
+  bool saveMeshes = false;
+  /// Whether an FBX or glTF file gets the first marker sequence of `markerFile`. A BVH file cannot
+  /// store markers: a warning.
+  bool saveMarkers = false;
+  /// The file with the markers to save.
+  std::string markerFile;
 };
 
 /// Finds the index of the longest motion in a list of motions.
@@ -127,6 +143,29 @@ MotionData loadFbxMotion(
     Character& character,
     bool hasModel,
     const Options& options);
+
+/// Whether saveScene() writes files with the extension of `path`.
+///
+/// @param path A file path.
+/// @return Whether the extension of `path` is .fbx, .glb, .gltf or .bvh, in any letter case.
+bool isSceneOutputFile(const filesystem::path& path);
+
+/// The options of saveScene() that the command-line options select: options.fbx_namespace,
+/// options.character_mesh_save, and the markers of options.input_motion_file with
+/// options.save_markers.
+///
+/// @param options The command-line options.
+/// @return The options of saveScene().
+SaveSceneOptions saveSceneOptions(const Options& options);
+
+/// Saves the characters of `scene` with their motion to `path`, in the format of its extension:
+/// FBX, glTF (.glb or .gltf), or BVH. A BVH file holds one character, so this throws for a scene
+/// with several characters. It also throws for another extension (see isSceneOutputFile()).
+///
+/// @param path The file to write.
+/// @param scene The characters, from loadScene().
+/// @param options The FBX namespace, the FBX meshes, and the markers to save.
+void saveScene(const filesystem::path& path, const Scene& scene, const SaveSceneOptions& options);
 
 /// Whether `path` names a BVH file.
 ///
