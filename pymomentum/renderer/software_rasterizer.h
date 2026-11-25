@@ -184,6 +184,39 @@ void rasterizeCharacter(
     const std::optional<Eigen::Vector2f>& imageOffset,
     std::optional<Eigen::Vector3f> wireframeColor);
 
+/// Rasterizes several characters into the same buffers, e.g. every character of a multi-character
+/// file, as rasterizeCharacter() rasterizes one.
+///
+/// Each pixel shows the nearest character. The index buffers tell which character covers each
+/// pixel, and which vertex and triangle of that character's mesh.
+///
+/// @param characters Characters to rasterize; each needs a mesh and skin weights.
+/// @param skeletonStates One skeleton state (nJoints x 8) per character.
+/// @param characterIndexBuffer Optional output with the index in `characters` of the character
+///   that covers each pixel; pixels that no character covers keep their value.
+/// @param vertexIndexBuffer Optional output with the vertex index in the mesh of the covering
+///   character.
+/// @param triangleIndexBuffer Optional output with the triangle index in the mesh of the covering
+///   character.
+/// @param materials Optional material per character; the default material when not set.
+void rasterizeCharacters(
+    const std::vector<const momentum::Character*>& characters,
+    const std::vector<pybind11::buffer>& skeletonStates,
+    const momentum::Camera& camera,
+    const pybind11::buffer& zBuffer,
+    const std::optional<pybind11::buffer>& rgbBuffer,
+    const std::optional<pybind11::buffer>& surfaceNormalsBuffer,
+    const std::optional<pybind11::buffer>& characterIndexBuffer,
+    const std::optional<pybind11::buffer>& vertexIndexBuffer,
+    const std::optional<pybind11::buffer>& triangleIndexBuffer,
+    const std::optional<std::vector<momentum::rasterizer::PhongMaterial>>& materials,
+    const std::optional<std::vector<momentum::rasterizer::Light>>& lights,
+    const std::optional<Eigen::Matrix4f>& modelMatrix,
+    bool backfaceCulling,
+    float nearClip,
+    float depthOffset,
+    const std::optional<Eigen::Vector2f>& imageOffset);
+
 void rasterizeCheckerboard(
     const momentum::Camera& camera,
     const pybind11::buffer& zBuffer,
