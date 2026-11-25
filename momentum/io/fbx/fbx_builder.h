@@ -45,7 +45,8 @@ using FbxUserProperties = std::map<std::string, FbxUserPropertyValue>;
 /// with an explicit `name` also gets the namespace. Pass the returned name as `characterName` to
 /// addMotion() and addMotionWithJointParams() to target that character; an empty `characterName`
 /// targets the character added from character.name that kept that name, or else the first one
-/// added from character.name.
+/// added from character.name. loadFbxCharacters() reads
+/// every character back under its exported name.
 ///
 /// Example usage:
 /// @code
