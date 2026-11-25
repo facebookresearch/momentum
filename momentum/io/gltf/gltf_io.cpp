@@ -61,23 +61,7 @@ void loadCharacterExtensions(
         : globalDef;
     const nlohmann::json& def = nodeDef.contains("transform") ? nodeDef : globalDef;
 
-    if (def.count("transform") > 0) {
-      character.parameterTransform = parameterTransformFromJson(character, def["transform"]);
-    } else {
-      character.parameterTransform =
-          ParameterTransform::empty(character.skeleton.joints.size() * kParametersPerJoint);
-    }
-    if (def.count("parameterSet") > 0) {
-      character.parameterTransform.parameterSets =
-          parameterSetsFromJson(character, def["parameterSet"]);
-    }
-    if (def.count("poseConstraints") > 0) {
-      character.parameterTransform.poseConstraints =
-          poseConstraintsFromJson(character, def["poseConstraints"]);
-    }
-    if (def.count("parameterLimits") > 0) {
-      character.parameterLimits = parameterLimitsFromJson(character, def["parameterLimits"]);
-    }
+    rigFromJson(def, character);
     if (def.count("metadata") > 0) {
       character.metadata = metadataFromFile(def.value<std::string>("metadata", {}), "glTF");
     }
