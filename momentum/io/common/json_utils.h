@@ -99,6 +99,37 @@ void parameterSetsToJson(const Character& character, nlohmann::json& j);
 void poseConstraintsToJson(const Character& character, nlohmann::json& j);
 void parameterTransformToJson(const Character& character, nlohmann::json& j);
 
+/// Writes the rig of @p character as glTF and FBX files store it: an object with the parameter
+/// transform ("transform"), the parameter limits ("parameterLimits"), the parameter sets
+/// ("parameterSet") and the pose constraints ("poseConstraints").
+///
+/// @param character The character whose rig is written.
+/// @param j The JSON object that gets the rig.
+void rigToJson(const Character& character, nlohmann::json& j);
+
+/// Reads a rig, as rigToJson() writes it, into @p character, whose skeleton must be set.
+///
+/// Without "transform", the character gets an empty parameter transform. The parameter limits,
+/// parameter sets and pose constraints are read when @p j has them.
+///
+/// @param j The rig.
+/// @param character The character that gets the rig.
+void rigFromJson(const nlohmann::json& j, Character& character);
+
+/// The rig of @p character as a JSON string, as FBX files store it (see rigToJson()).
+///
+/// @param character The character whose rig is written.
+/// @return The JSON text of the rig.
+[[nodiscard]] std::string rigToJsonString(const Character& character);
+
+/// Reads a rig from a JSON string, as rigToJsonString() writes it, into @p character (see
+/// rigFromJson()). Throws when @p text is not valid JSON, or not an object with a "transform"
+/// field, as rigToJsonString() writes it.
+///
+/// @param text The JSON text of the rig.
+/// @param character The character that gets the rig.
+void rigFromJsonString(const std::string& text, Character& character);
+
 /// Serializes one joint's physical mass properties.
 ///
 /// The JSON object contains `mass`, `centerOfMass` as a 3-element vector, `inertia` as the six
