@@ -797,3 +797,24 @@ TEST(FbxBuilderTest, MotionAndMarkersKeepTheirFrameCount) {
     }
   }
 }
+
+TEST(FbxBuilderTest, AnimatedMeshWithAConstantTransformKeepsItsFrameCount) {
+  const Character object = createTestCharacter(3);
+  const MatrixXf motion = objectMotion().col(1).replicate(1, 4);
+
+  const auto outFile = temporaryFile("builder_mesh_constant", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addAnimatedMesh(*object.mesh, "object", 30.0f, motion);
+    builder.save(outFile.path());
+  }
+
+  const auto [characters, loadedFps] = loadFbxCharactersWithMotion(outFile.path());
+  ASSERT_EQ(characters.size(), 1);
+  const auto& [loaded, takes] = characters[0];
+  ASSERT_EQ(takes.size(), 1);
+  ASSERT_EQ(takes[0].cols(), motion.cols());
+  Skeleton objectSkeleton;
+  objectSkeleton.joints.emplace_back();
+  expectSameJointTransforms(loaded, takes[0], objectSkeleton, motion);
+}
