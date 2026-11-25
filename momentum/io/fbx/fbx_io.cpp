@@ -215,6 +215,28 @@ std::vector<Character> loadFbxCharacters(
       inputSpan, keepLocators, permissive, loadBlendShapes, stripNamespaces);
 }
 
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadFbxCharactersWithMotion(
+    const filesystem::path& inputPath,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharactersWithMotion(
+      inputPath, keepLocators, permissive, loadBlendShapes, stripNamespaces);
+}
+
+std::tuple<std::vector<std::pair<Character, std::vector<MatrixXf>>>, float>
+loadFbxCharactersWithMotion(
+    std::span<const std::byte> inputSpan,
+    KeepLocators keepLocators,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  return loadOpenFbxCharactersWithMotion(
+      inputSpan, keepLocators, permissive, loadBlendShapes, stripNamespaces);
+}
+
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators,
