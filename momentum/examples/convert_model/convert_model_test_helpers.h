@@ -26,15 +26,17 @@ struct TestSceneCharacter {
   MatrixXf motion;
 };
 
-/// A test character named `name` with `numJoints` joints and a motion of `numFrames` frames, a
-/// sine wave with the phase `phase`.
+/// A test character named `name` with `numJoints` joints, physical properties on its first two
+/// joints, metadata, and a motion of `numFrames` frames, a sine wave with the phase `phase`.
 inline TestSceneCharacter createTestSceneCharacter(
     const std::string& name,
     size_t numJoints,
     Eigen::Index numFrames,
     float phase) {
-  TestSceneCharacter result{.character = createTestCharacter(numJoints), .motion = {}};
+  TestSceneCharacter result{
+      .character = withTestPhysicalProperties(createTestCharacter(numJoints)), .motion = {}};
   result.character.name = name;
+  result.character.metadata = R"({"source": ")" + name + R"("})";
   const auto numParameters = result.character.parameterTransform.numAllModelParameters();
   result.motion.resize(numParameters, numFrames);
   for (Eigen::Index frame = 0; frame < numFrames; ++frame) {
