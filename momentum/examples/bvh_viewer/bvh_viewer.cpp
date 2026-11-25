@@ -82,16 +82,11 @@ int main(int argc, char* argv[]) {
       logJointParamNames(rec, "world_params", "joint_params", jointNames);
     }
 
-    // Pre-compute time columns for batch scalar logging
-    std::vector<int64_t> frameIndices(nFrames);
-    std::vector<double> logTimes(nFrames);
-    for (size_t i = 0; i < nFrames; ++i) {
-      frameIndices[i] = static_cast<int64_t>(i);
-      logTimes[i] = static_cast<double>(i) / fps;
+    // Joint parameters are collected during the frame loop and logged in one batch after it.
+    JointParamsRecorder jointParams;
+    if (options->logJoints) {
+      jointParams.reserve(character.parameterTransform.numJointParameters(), nFrames);
     }
-
-    // Prepare matrix for collecting joint parameters during the frame loop
-    Eigen::MatrixXf allJointParams;
 
     CharacterState charState;
     CharacterParameters charParams;
@@ -111,21 +106,14 @@ int main(int argc, char* argv[]) {
           false /*applyLimits*/);
       logCharacter(rec, "world/character", character, charState);
 
-      // Collect joint params for batch logging after the loop
       if (options->logJoints) {
-        const auto& jp = charState.skeletonState.jointParameters.v;
-        if (allJointParams.cols() == 0) {
-          allJointParams.resize(jp.size(), nFrames);
-        }
-        allJointParams.col(iFrame) = jp;
+        jointParams.add(
+            static_cast<int64_t>(iFrame),
+            static_cast<double>(iFrame) / fps,
+            charState.skeletonState.jointParameters.v);
       }
     }
-
-    // Batch log joint parameters using send_columns (after the frame loop)
-    if (options->logJoints && nFrames > 0) {
-      logJointParamsColumns(
-          rec, "world_params", "joint_params", jointNames, allJointParams, frameIndices, logTimes);
-    }
+    jointParams.send(rec, "world_params", jointNames);
   } catch (const std::exception& e) {
     std::cerr << "Exception thrown. Error: " << e.what() << '\n';
     return EXIT_FAILURE;
