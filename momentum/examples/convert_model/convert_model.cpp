@@ -25,9 +25,9 @@ std::shared_ptr<Options> setupOptions(CLI::App& app) {
          "-m,--model",
          opt->input_model_file,
          "Input model (.fbx/.glb/.gltf/.urdf/.bvh); not required if reading animation from glb/gltf, fbx or bvh. "
-         "Every character of the file is converted, unless --character selects one. With several "
-         "characters or with --character, each character gets the motion of the motion-file "
-         "character with the same name")
+         "Every character of the file is converted, unless --character selects one. (Deprecated "
+         "with --motion: use apply_motion) With several characters or with --character, each "
+         "character gets the motion of the motion-file character with the same name")
       ->check(CLI::ExistingFile);
   app.add_option("-p,--parameters", opt->input_params_file, "Input model parameter file (.model)")
       ->check(CLI::ExistingFile);
@@ -90,6 +90,14 @@ void warnAboutDeprecatedRigOutputs(const Options& options) {
       "deprecated: use export_rig");
 }
 
+// Warns that convert_model --model with --motion moved to apply_motion.
+void warnAboutDeprecatedModelWithMotion(const Options& options) {
+  if (options.input_model_file.empty() || options.input_motion_file.empty()) {
+    return;
+  }
+  MT_LOGW("--model with --motion of convert_model is deprecated: use apply_motion");
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -99,6 +107,7 @@ int main(int argc, char** argv) {
     auto options = setupOptions(app);
     CLI11_PARSE(app, argc, argv);
     warnAboutDeprecatedRigOutputs(*options);
+    warnAboutDeprecatedModelWithMotion(*options);
 
     if (!isSceneOutputFile(options->output_model_file)) {
       MT_LOGE("Unknown output file format: {}", options->output_model_file);
