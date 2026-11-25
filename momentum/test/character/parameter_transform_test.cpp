@@ -69,6 +69,19 @@ TYPED_TEST(Momentum_ParameterTransformTest, Identity) {
   }
 }
 
+TYPED_TEST(Momentum_ParameterTransformTest, IsApproxIsFalseForTransformsOfAnotherSize) {
+  using T = typename TestFixture::Type;
+
+  const Character character = createTestCharacter();
+  const ParameterTransformT<T> rig = character.parameterTransform.cast<T>();
+  const auto identity = ParameterTransformT<T>::identity(character.skeleton.getJointNames());
+  ASSERT_NE(rig.numAllModelParameters(), identity.numAllModelParameters());
+  EXPECT_FALSE(rig.isApprox(identity));
+  EXPECT_FALSE(identity.isApprox(rig));
+  EXPECT_TRUE(identity.isApprox(identity));
+  EXPECT_TRUE(rig.isApprox(rig));
+}
+
 TYPED_TEST(Momentum_ParameterTransformTest, Functionality) {
   using T = typename TestFixture::Type;
 
