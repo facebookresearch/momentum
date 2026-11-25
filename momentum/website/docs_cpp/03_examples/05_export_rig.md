@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Export Rig
 
-The `export_rig` example saves the parameter transform, the parameter limits and the locators of a character to `.model` and `.locators` files. Use the `-m` or `--model` option to specify the input character file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). The `-p` and `-l` options apply a model parameter file and a locator file to the character before the export, as in `convert_model`. When the file has several characters, use `--character` to select the one to export.
+The `export_rig` example saves the parameter transform, the parameter limits and the locators of a character to `.model` and `.locators` files. Use the `-m` or `--model` option to specify the input character file (`.fbx`, `.glb`, `.gltf`, `.urdf`, or `.bvh`). The input file is read as described in [Files and options shared by the tools](./03_convert_model.md#files-and-options-shared-by-the-tools), and `-p` and `-l` apply before the export. When the file has several characters, use `--character` to select the one to export.
 
 These outputs replace the deprecated `--out-locators-local`, `--out-locators-global` and `--out-parameters` options of `convert_model`; both tools write the same files.
 
