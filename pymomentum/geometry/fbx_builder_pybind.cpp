@@ -145,7 +145,8 @@ This is useful for rigid bodies or characters with simple parameterization.
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addAnimatedMesh(character, name, fps, transposedJointParams, userProperties);
+            return builder.addAnimatedMesh(
+                character, name, fps, transposedJointParams, userProperties);
           },
           R"(Add an animated mesh (no skeleton) to the scene.
 
@@ -154,12 +155,14 @@ the root joint parameters. Use this for props/objects that should appear
 as a simple animated mesh without any skeleton hierarchy.
 
 :param character: The character providing the mesh geometry.
-:param name: Name for the mesh node.
+:param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
 :param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
-    object's custom attributes.)",
+    object's custom attributes.
+:return: The unique name the mesh node is exported under: ``name``, with a numeric suffix
+    if a character, rigid body or animated mesh already uses it.)",
           py::arg("character"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
@@ -178,7 +181,7 @@ as a simple animated mesh without any skeleton hierarchy.
             if (jointParams.has_value() && jointParams->size() > 0) {
               transposedJointParams = jointParams->transpose();
             }
-            builder.addAnimatedMesh(
+            return builder.addAnimatedMesh(
                 mesh,
                 name,
                 fps,
@@ -192,14 +195,16 @@ Creates a standalone mesh node and animates its transform from joint
 parameters. Only the root transform (first 7 joint params) is used.
 
 :param mesh: The mesh geometry.
-:param name: Name for the mesh node.
+:param name: Requested name for the mesh node.
 :param fps: Animation frame rate in frames per second.
 :param joint_params: Joint parameters matrix with shape (nFrames, nJointParams).
 :param translation_offset: Rest-pose translation offset added to the translation
     channels (defaults to zero).
 :param user_properties: Mapping of name to bool/int/float/str, written onto the
     mesh node as user-defined FBX properties. DCC tools surface these as the
-    object's custom attributes.)",
+    object's custom attributes.
+:return: The unique name the mesh node is exported under: ``name``, with a numeric suffix
+    if a character, rigid body or animated mesh already uses it.)",
           py::arg("mesh"),
           py::arg("name"),
           py::arg("fps") = 120.0f,
