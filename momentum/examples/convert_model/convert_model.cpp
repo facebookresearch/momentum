@@ -276,16 +276,15 @@ int main(int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     // Validate output file extension
-    const filesystem::path output(options->output_model_file);
-    const auto oextension = output.extension();
-    if (oextension != ".fbx" && oextension != ".glb" && oextension != ".gltf") {
+    const CharacterFormat outputFormat = parseCharacterFormat(options->output_model_file);
+    if (outputFormat != CharacterFormat::Fbx && outputFormat != CharacterFormat::Gltf) {
       MT_LOGE("Unknown output file format: {}", options->output_model_file);
       return EXIT_FAILURE;
     }
 
     if (const auto scene = loadScene(*options)) {
       const MarkerSequence markerSequence = loadRequestedMarkers(*options);
-      if (oextension == ".fbx") {
+      if (outputFormat == CharacterFormat::Fbx) {
         saveFbxScene(options->output_model_file, *scene, markerSequence, *options);
       } else {
         saveGltfScene(
@@ -317,9 +316,9 @@ int main(int argc, char** argv) {
     const MarkerSequence markerSequence = loadRequestedMarkers(*options);
 
     // Save output file
-    if (oextension == ".fbx") {
+    if (outputFormat == CharacterFormat::Fbx) {
       saveFbxOutput(options->output_model_file, character, motionData, markerSequence, *options);
-    } else if (oextension == ".glb" || oextension == ".gltf") {
+    } else {
       saveGltfOutput(options->output_model_file, character, motionData, markerSequence, hasMotion);
     }
 
