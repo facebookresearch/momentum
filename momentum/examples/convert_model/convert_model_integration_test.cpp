@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -65,8 +66,8 @@ std::string fileContents(const std::string& path) {
   return {std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
 }
 
-/// Integration test fixture that runs the convert_model, export_rig and apply_motion binaries with
-/// various arguments and checks their output files.
+/// Integration test fixture that runs the convert_model, export_rig, apply_motion and
+/// split_characters binaries with various arguments and checks their output files.
 class ConvertModelIntegrationTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -82,6 +83,11 @@ class ConvertModelIntegrationTest : public ::testing::Test {
     const char* applyMotionPath = getenv("APPLY_MOTION_BINARY");
     ASSERT_NE(applyMotionPath, nullptr) << "APPLY_MOTION_BINARY environment variable not set";
     applyMotionPath_ = filesystem::absolute(applyMotionPath).string();
+
+    const char* splitCharactersPath = getenv("SPLIT_CHARACTERS_BINARY");
+    ASSERT_NE(splitCharactersPath, nullptr)
+        << "SPLIT_CHARACTERS_BINARY environment variable not set";
+    splitCharactersPath_ = filesystem::absolute(splitCharactersPath).string();
 
     const char* testDataPath = getenv("TEST_MOMENTUM_MODELS_PATH");
     ASSERT_NE(testDataPath, nullptr) << "TEST_MOMENTUM_MODELS_PATH environment variable not set";
@@ -107,6 +113,12 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   /// Returns the process exit code (0 = success).
   int runApplyMotion(const std::vector<std::string>& args) {
     return runBinary(applyMotionPath_, args);
+  }
+
+  /// Run the split_characters binary with the given arguments.
+  /// Returns the process exit code (0 = success).
+  int runSplitCharacters(const std::vector<std::string>& args) {
+    return runBinary(splitCharactersPath_, args);
   }
 
   /// Run a binary with the given arguments.
@@ -174,6 +186,7 @@ class ConvertModelIntegrationTest : public ::testing::Test {
   std::string convertModelPath_;
   std::string exportRigPath_;
   std::string applyMotionPath_;
+  std::string splitCharactersPath_;
   std::string testDataPath_;
   momentum::TemporaryDirectory tempDir_;
 };
@@ -1199,4 +1212,102 @@ TEST_F(ConvertModelIntegrationTest, ParametersAndLocators_ApplyToTheCharacterOfA
            sameFile}),
       0);
   EXPECT_EQ(fileContents(out), fileContents(sameFile));
+}
+
+// ============================================================================
+// SPLIT_CHARACTERS TESTS
+// ============================================================================
+
+// Test: split_characters writes each character to the file that convert_model --character writes
+TEST_F(ConvertModelIntegrationTest, SplitCharacters_WritesTheFileOfConvertModelWithCharacter) {
+  const auto saved = momentum::createTwoCharacterScene();
+  const auto input = outputFile("to_split.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+
+  for (const std::string format : {"glb", "bvh"}) {
+    SCOPED_TRACE(format);
+    const auto directory = outputFile("split_" + format);
+    ASSERT_EQ(
+        runSplitCharacters({"--input", input, "--out-dir", directory, "--format", format}), 0);
+    std::vector<std::string> files;
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+      files.push_back(entry.path().filename().string());
+    }
+    std::ranges::sort(files);
+    EXPECT_EQ(files, (std::vector<std::string>{"a." + format, "b." + format}));
+    for (const auto& [character, motion] : saved) {
+      const auto expected = outputFile("expected_" + character.name + "." + format);
+      ASSERT_EQ(
+          runConvertModel({"--motion", input, "--character", character.name, "--out", expected}),
+          0);
+      const auto split = (std::filesystem::path(directory) / (character.name + "." + format));
+      ASSERT_FALSE(fileContents(expected).empty());
+      EXPECT_EQ(fileContents(split.string()), fileContents(expected));
+    }
+  }
+}
+
+// Test: the file names of split_characters are safe and unique, in any letter case, and the
+// characters keep their names
+TEST_F(ConvertModelIntegrationTest, SplitCharacters_FileNamesAreSafeAndUnique) {
+  const std::vector<std::string> names = {
+      "hand/left", "hand left", "", "hand", "Hand", "NUL", "com1.left"};
+  std::vector<momentum::TestSceneCharacter> saved;
+  saved.reserve(names.size());
+  for (const auto& name : names) {
+    saved.push_back(momentum::createTestSceneCharacter(name, 3, 2, 0.0f));
+  }
+  const auto input = outputFile("names_to_split.glb");
+  momentum::saveTestSceneAsGltf(input, saved, 30.0f);
+  const auto directory = outputFile("split_names");
+  ASSERT_EQ(runSplitCharacters({"--input", input, "--out-dir", directory}), 0);
+
+  const std::vector<std::string> files = {
+      "hand_left.glb",
+      "hand_left_1.glb",
+      "character_2.glb",
+      "hand.glb",
+      "Hand_1.glb",
+      "NUL_.glb",
+      "com1_.left.glb"};
+  size_t numFiles = 0;
+  for ([[maybe_unused]] const auto& entry : std::filesystem::directory_iterator(directory)) {
+    ++numFiles;
+  }
+  EXPECT_EQ(numFiles, files.size());
+  for (size_t i = 0; i < files.size(); ++i) {
+    SCOPED_TRACE(files[i]);
+    const auto path = std::filesystem::path(directory) / files[i];
+    ASSERT_TRUE(std::filesystem::exists(path));
+    EXPECT_EQ(momentum::loadGltfCharacter(path).name, names[i]);
+  }
+}
+
+// Test: split_characters takes the format with or without the dot, in any letter case
+TEST_F(ConvertModelIntegrationTest, SplitCharacters_FormatWithADot) {
+  const auto input = outputFile("dot_to_split.glb");
+  momentum::saveTestSceneAsGltf(input, momentum::createTwoCharacterScene(), 30.0f);
+  const auto directory = outputFile("split_dot");
+  ASSERT_EQ(runSplitCharacters({"--input", input, "--out-dir", directory, "--format", ".GLB"}), 0);
+  std::vector<std::string> files;
+  for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+    files.push_back(entry.path().filename().string());
+  }
+  std::ranges::sort(files);
+  EXPECT_EQ(files, (std::vector<std::string>{"a.glb", "b.glb"}));
+}
+
+// Test: split_characters fails for an unknown output format
+TEST_F(ConvertModelIntegrationTest, SplitCharacters_UnknownFormat_Fails) {
+  const auto directory = outputFile("split_obj");
+  EXPECT_NE(
+      runSplitCharacters(
+          {"--input",
+           testFile("character_with_motion.glb"),
+           "--out-dir",
+           directory,
+           "--format",
+           "obj"}),
+      0);
+  EXPECT_FALSE(std::filesystem::exists(directory));
 }
