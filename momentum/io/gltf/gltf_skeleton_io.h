@@ -102,10 +102,11 @@ struct JointFileTransform {
   Transform post;
 };
 
-/// The @ref JointFileTransform of each joint of a character of a document without joint marks.
+/// The @ref JointFileTransform of each joint of a character.
 ///
 /// The transforms use the rest transforms of the nodes above each joint; animation channels of
-/// nodes that are not joints do not change them.
+/// nodes that are not joints do not change them. In a document with marked joints, which momentum
+/// writes, every joint keeps its own transform: `pre` and `post` are identities.
 ///
 /// @param[in] model The glTF document.
 /// @param[in] skeleton The character's skeleton.
