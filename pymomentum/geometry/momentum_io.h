@@ -139,6 +139,16 @@ std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStates(
 std::vector<CharacterWithSkelStates> loadGLTFCharactersWithSkelStatesFromBytes(
     const pybind11::bytes& gltfBytes);
 
+/// The motion of the glTF animation channels of every character in a file, as joint parameters of
+/// shape (numFrames x numJointParameters); see momentum::loadGltfCharactersChannelMotion(). A
+/// character that no channel animates gets std::nullopt.
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotion(
+    const std::string& gltfFilename);
+
+/// The byte-buffer version of loadGLTFCharactersChannelMotion().
+std::vector<std::optional<RowMatrixf>> loadGLTFCharactersChannelMotionFromBytes(
+    const pybind11::bytes& gltfBytes);
+
 std::string toGLTF(const momentum::Character& character);
 
 std::tuple<RowMatrixf, std::vector<std::string>, Eigen::VectorXf, std::vector<std::string>>
