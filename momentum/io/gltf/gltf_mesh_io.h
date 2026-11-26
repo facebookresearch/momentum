@@ -73,6 +73,23 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
     const std::vector<size_t>& meshNodes,
     const std::vector<size_t>& nodeToObjectMap);
 
+/// Load the meshes of nodes without a skin, each bound rigidly to the joint of its node.
+///
+/// Throws, instead of the reader's fatal checks, for a mesh whose attributes or morph targets have
+/// other element counts than its positions, or whose triangles have a vertex count that is not a
+/// multiple of 3.
+///
+/// @param[in] model The glTF document.
+/// @param[in] meshNodes The node indices containing meshes without a skin.
+/// @param[in] nodeToObjectMap Mapping from node indices to joint indices; every node of @p
+/// meshNodes
+///            must map to a joint.
+/// @return A tuple containing the mesh, skin weights, and blend shapes.
+std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadRigidMeshes(
+    const fx::gltf::Document& model,
+    std::span<const size_t> meshNodes,
+    std::span<const size_t> nodeToObjectMap);
+
 /// Bind a mesh to a single joint.
 ///
 /// @param[in] mesh The mesh to bind.
