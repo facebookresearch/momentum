@@ -414,16 +414,21 @@ std::vector<JointFileTransform> jointFileTransforms(
     const Skeleton& skeleton,
     std::span<const size_t> nodeToObjectMap) {
   const size_t numJoints = skeleton.joints.size();
+  const bool marked = hasMarkedJoints(model);
   std::vector<JointFileTransform> result(numJoints);
   for (size_t nodeId = 0; nodeId < model.nodes.size() && nodeId < nodeToObjectMap.size();
        ++nodeId) {
     const size_t jointId = nodeToObjectMap[nodeId];
     const auto& node = model.nodes.at(nodeId);
     // The node map shares its indices between joints, locators and collision shapes.
-    if (jointId < numJoints && isUnmarkedJointNode(node) &&
+    if (jointId < numJoints && (marked ? isMarkedJoint(node) : isUnmarkedJointNode(node)) &&
         node.name == skeleton.joints[jointId].name) {
       result[jointId].node = static_cast<uint32_t>(nodeId);
     }
+  }
+  // The loader places marked joints by their own transforms.
+  if (marked) {
+    return result;
   }
 
   const auto parentMap = buildNodeParentMap(model);
@@ -634,7 +639,7 @@ loadHierarchyForRoots(
   auto nodeToObjectMap = std::vector<size_t>(model.nodes.size(), kInvalidIndex);
   // GltfBuilder marks every joint when it writes the momentum extension, and writes a
   // document-level extension (the frame rate of a motion) even without it, so the marks decide.
-  const bool useExtension = std::ranges::any_of(model.nodes, isMarkedJoint);
+  const bool useExtension = hasMarkedJoints(model);
   std::vector<bool> visited(model.nodes.size(), false);
 
   for (const auto& rootNode : skeletonRoots) {
