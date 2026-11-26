@@ -1099,6 +1099,25 @@ using SkeletonErrorFunctiond_const_u = ::std::unique_ptr<const SkeletonErrorFunc
 using SkeletonErrorFunctiond_const_w = ::std::weak_ptr<const SkeletonErrorFunctiond>;
 
 template <typename T>
+class SkeletonOnlySolverFunctionT;
+using SkeletonOnlySolverFunction = SkeletonOnlySolverFunctionT<float>;
+using SkeletonOnlySolverFunctiond = SkeletonOnlySolverFunctionT<double>;
+
+using SkeletonOnlySolverFunction_p = ::std::shared_ptr<SkeletonOnlySolverFunction>;
+using SkeletonOnlySolverFunction_u = ::std::unique_ptr<SkeletonOnlySolverFunction>;
+using SkeletonOnlySolverFunction_w = ::std::weak_ptr<SkeletonOnlySolverFunction>;
+using SkeletonOnlySolverFunction_const_p = ::std::shared_ptr<const SkeletonOnlySolverFunction>;
+using SkeletonOnlySolverFunction_const_u = ::std::unique_ptr<const SkeletonOnlySolverFunction>;
+using SkeletonOnlySolverFunction_const_w = ::std::weak_ptr<const SkeletonOnlySolverFunction>;
+
+using SkeletonOnlySolverFunctiond_p = ::std::shared_ptr<SkeletonOnlySolverFunctiond>;
+using SkeletonOnlySolverFunctiond_u = ::std::unique_ptr<SkeletonOnlySolverFunctiond>;
+using SkeletonOnlySolverFunctiond_w = ::std::weak_ptr<SkeletonOnlySolverFunctiond>;
+using SkeletonOnlySolverFunctiond_const_p = ::std::shared_ptr<const SkeletonOnlySolverFunctiond>;
+using SkeletonOnlySolverFunctiond_const_u = ::std::unique_ptr<const SkeletonOnlySolverFunctiond>;
+using SkeletonOnlySolverFunctiond_const_w = ::std::weak_ptr<const SkeletonOnlySolverFunctiond>;
+
+template <typename T>
 class SkeletonSolverFunctionT;
 using SkeletonSolverFunction = SkeletonSolverFunctionT<float>;
 using SkeletonSolverFunctiond = SkeletonSolverFunctionT<double>;

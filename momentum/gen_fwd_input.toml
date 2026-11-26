@@ -118,6 +118,7 @@ template_classes = [
     "ProjectionErrorFunction",
     "SkeletonDerivative",
     "SkeletonErrorFunction",
+    "SkeletonOnlySolverFunction",
     "SkeletonSolverFunction",
     "SkinnedLocatorErrorFunction",
     "SkinnedLocatorTriangleErrorFunction",
