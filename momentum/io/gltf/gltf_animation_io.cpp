@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <exception>
 #include <functional>
 #include <iterator>
 #include <span>
@@ -471,10 +472,27 @@ const fx::gltf::Animation* findAnimationForCharacter(
     const fx::gltf::Document& model,
     const Character& character,
     std::span<const size_t> nodeToObjectMap) {
-  const auto it = std::ranges::find_if(model.animations, [&](const fx::gltf::Animation& animation) {
+  const auto animates = [&](const fx::gltf::Animation& animation) {
     return animatesCharacter(model, animation, character, nodeToObjectMap);
-  });
-  return it == model.animations.end() ? nullptr : &*it;
+  };
+  const auto it = std::ranges::find_if(model.animations, animates);
+  if (it == model.animations.end()) {
+    return nullptr;
+  }
+  // The warning must not change what loads, so an animation that cannot be read does not count.
+  [[maybe_unused]] const auto alsoAnimates = [&](const fx::gltf::Animation& animation) {
+    try {
+      return animates(animation);
+    } catch (const std::exception&) {
+      return false;
+    }
+  };
+  MT_LOGW_IF(
+      std::any_of(std::next(it), model.animations.end(), alsoAnimates),
+      "glTF character '{}' has more than one animation; momentum reads only the first one, '{}'.",
+      character.name,
+      it->name);
+  return &*it;
 }
 
 std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesForCharacter(
