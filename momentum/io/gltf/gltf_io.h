@@ -28,7 +28,8 @@ namespace momentum {
 ///
 /// If the scene contains more than one character, the one with the most joints is returned and a
 /// warning is logged; use @ref loadGltfCharacters to load all of them. The character is named after
-/// the top-level node above its skeleton, as in @ref loadGltfCharacters.
+/// the top-level node above its skeleton, as in @ref loadGltfCharacters. The objects of a file from
+/// another tool (see @ref loadGltfCharacters) are not loaded, so the character is a skinned one.
 ///
 /// @param[in] model The glTF document to load from.
 /// @return The loaded Character object.
@@ -56,7 +57,18 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// A file written by GltfBuilder yields one character per addCharacter() call, with the name it was
 /// exported under. Other files yield one character per independent skinned skeleton, named after
 /// its top-level node, so names need not be unique. A character gets the skinned meshes whose skin
-/// starts at one of its joints; unskinned meshes are added only when the scene has one character.
+/// starts at one of its joints; meshes without a skin are added only when the scene has one
+/// character, and not to the characters of a file without joint marks that has skins, whose meshes
+/// without a skin are objects (see below).
+///
+/// @note A file without momentum's joint marks that has skins, such as a file from another tool,
+/// also yields one character per object: a part of the scene outside the skeletons with meshes
+/// without a skin (see gatherObjectRoots()). An object character, named after the object's root
+/// node, has a joint for each node of the object and the meshes of its nodes, each bound rigidly to
+/// the joint of its node, so the animation of the nodes moves them. Meshes without a skin inside a
+/// skeleton, and objects that cannot be read, are not loaded, with a warning; an object whose
+/// animation cannot be read loads without it, with a warning. The single-character loaders, such as
+/// @ref loadGltfCharacter, do not load objects.
 ///
 /// @note The parameter transform, parameter limits, parameter sets, pose constraints and metadata
 /// are read from the character's root node, where GltfBuilder stores each character's own copy.
@@ -80,7 +92,7 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// a joint.
 ///
 /// @param[in] model The glTF document to load from.
-/// @return One Character per character in the scene, in scene order.
+/// @return One Character per character of the file: the skinned characters, then the objects.
 std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model);
 
 /// Load every character of a glTF file.
@@ -89,7 +101,7 @@ std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model);
 /// @ref fx::gltf::Document overload.
 ///
 /// @param[in] gltfFilename The path to the glTF file.
-/// @return One Character per character in the scene, in scene order.
+/// @return One Character per character of the file: the skinned characters, then the objects.
 std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename);
 
 /// Load every character of a glTF byte buffer.
@@ -97,7 +109,7 @@ std::vector<Character> loadGltfCharacters(const filesystem::path& gltfFilename);
 /// See the @ref fx::gltf::Document overload.
 ///
 /// @param[in] byteSpan The buffer containing the glTF data.
-/// @return One Character per character in the scene, in scene order.
+/// @return One Character per character of the file: the skinned characters, then the objects.
 std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan);
 
 /// A character loaded with its motion by @ref loadGltfCharactersWithMotion.

@@ -161,7 +161,7 @@ std::tuple<Character, MatrixXf, JointParameters, float> loadCharacterWithMotionC
   // ---------------------------------------------
   try {
     fx::gltf::Document model = loadGltfDocument(input);
-    auto characters = loadGltfCharactersInternal(model);
+    auto characters = loadGltfCharactersInternal(model, GltfObjects::Skip);
     auto& loaded = selectGltfCharacter(characters);
     Character& character = loaded.character;
 
