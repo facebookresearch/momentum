@@ -101,6 +101,61 @@ std::vector<size_t> characterMeshNodes(
   return meshNodes;
 }
 
+// Gives the joints of the skins of `meshNodes` the skins' inverse bind matrices, which the glTF
+// format uses to skin the meshes, in momentum's joint frames: momentum joints have no scale, so
+// each matrix also gets its joint's accumulated rest scale (see JointFileTransform). Other joints
+// keep the inverse of their rest pose.
+void applySkinInverseBindMatrices(
+    const fx::gltf::Document& model,
+    std::span<const size_t> meshNodes,
+    std::span<const JointFileTransform> fileJoints,
+    std::span<const size_t> nodeToObjectMap,
+    TransformationList& inverseBindPose) {
+  std::vector<bool> assigned(inverseBindPose.size(), false);
+  for (const size_t meshNode : meshNodes) {
+    const auto& node = model.nodes.at(meshNode);
+    if (node.skin < 0 || static_cast<size_t>(node.skin) >= model.skins.size()) {
+      continue;
+    }
+    const auto& skin = model.skins.at(node.skin);
+    // Without the matrices, the glTF format uses identity matrices.
+    std::vector<Matrix4f> matrices(skin.joints.size(), Matrix4f::Identity());
+    if (skin.inverseBindMatrices >= 0) {
+      matrices = copyAccessorBuffer<Matrix4f>(model, skin.inverseBindMatrices);
+    }
+    // The glTF format requires at least one matrix for each joint; the first ones are used.
+    if (matrices.size() < skin.joints.size()) {
+      MT_LOGW(
+          "glTF skin '{}' has {} inverse bind matrices for {} joints; its joints keep the inverse of "
+          "their rest pose.",
+          skin.name,
+          matrices.size(),
+          skin.joints.size());
+      continue;
+    }
+    for (size_t i = 0; i < skin.joints.size(); ++i) {
+      const uint32_t jointNode = skin.joints[i];
+      const size_t jointId =
+          jointNode < nodeToObjectMap.size() ? nodeToObjectMap[jointNode] : kInvalidIndex;
+      if (jointId >= fileJoints.size() || fileJoints[jointId].node != jointNode) {
+        continue;
+      }
+      Affine3f inverseBind;
+      inverseBind.matrix() = matrices.at(i);
+      inverseBind.translation() *= toCm();
+      inverseBind = fileJoints[jointId].post.inverse().toAffine3() * inverseBind;
+      if (!assigned.at(jointId)) {
+        inverseBindPose.at(jointId) = inverseBind;
+        assigned.at(jointId) = true;
+      } else if (!inverseBind.isApprox(inverseBindPose.at(jointId), 1e-4f)) {
+        MT_LOGW(
+            "glTF joint '{}' has different inverse bind matrices in two skins; using the first.",
+            model.nodes.at(jointNode).name);
+      }
+    }
+  }
+}
+
 // Build the character whose skeleton starts at `skeletonRoots`, named after `rootNode`.
 Character buildCharacter(
     const fx::gltf::Document& model,
@@ -130,8 +185,9 @@ Character buildCharacter(
   // load the mesh -- combine all meshes of this character into one
   // ---------------------------------------------
   BlendShape_u loadedBlendShape;
-  std::tie(result.mesh, result.skinWeights, loadedBlendShape) = loadSkinnedMesh(
-      model, characterMeshNodes(model, nodeToObjectMap, includeUnskinnedMeshes), nodeToObjectMap);
+  const auto meshNodes = characterMeshNodes(model, nodeToObjectMap, includeUnskinnedMeshes);
+  std::tie(result.mesh, result.skinWeights, loadedBlendShape) =
+      loadSkinnedMesh(model, meshNodes, nodeToObjectMap);
 
   // Set the blendShape if we loaded any
   if (loadedBlendShape != nullptr) {
@@ -151,9 +207,31 @@ Character buildCharacter(
 
   loadCharacterExtensions(model, rootNode, result);
 
+  // A document from another tool places its joints with the transforms of all nodes above them and
+  // skins its meshes with its inverse bind matrices, as the glTF format defines.
+  const bool useFileTransforms = !hasMarkedJoints(model);
+  std::vector<JointFileTransform> fileJoints;
+  if (useFileTransforms) {
+    fileJoints = jointFileTransforms(model, result.skeleton, nodeToObjectMap);
+    for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
+      const auto& fileJoint = fileJoints[jointId];
+      if (fileJoint.node == kInvalidNodeId) {
+        continue;
+      }
+      const Transform local =
+          fileJoint.pre * nodeLocalTransform(model.nodes[fileJoint.node]) * fileJoint.post;
+      result.skeleton.joints[jointId].translationOffset = local.translation;
+      result.skeleton.joints[jointId].preRotation = local.rotation;
+    }
+  }
+
   // Finalize jointMap and inverseBind pose
   result.resetJointMap();
   result.initInverseBindPose();
+  if (useFileTransforms) {
+    applySkinInverseBindMatrices(
+        model, meshNodes, fileJoints, nodeToObjectMap, result.inverseBindPose);
+  }
 
   return result;
 }
