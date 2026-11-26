@@ -81,6 +81,7 @@ else()
 endif()
 mt_option(MOMENTUM_BUILD_IO_USD "Build USD I/O support" OFF)
 mt_option(MOMENTUM_BUILD_PYMOMENTUM "Build Python binding" OFF)
+mt_option(MOMENTUM_USE_SYSTEM_MOMENTUM "Build PyMomentum against an installed momentum" OFF)
 mt_option(MOMENTUM_BUILD_TORCH_EXTENSIONS "Build PyMomentum modules that link against the PyTorch C++ API" ON)
 mt_option(MOMENTUM_BUILD_CUDA_RASTERIZER "Build the CUDA rasterizer and PyMomentum binding" OFF)
 mt_option(MOMENTUM_BUILD_TESTING "Enable building tests" OFF)
@@ -288,6 +289,40 @@ endif()
 if(MSVC)
   add_compile_options(/bigobj)
   add_compile_options(/utf-8)
+endif()
+
+# Build only PyMomentum, linking the momentum and axel libraries that are
+# already installed (e.g. by the momentum-cpp package) instead of rebuilding them.
+if(MOMENTUM_USE_SYSTEM_MOMENTUM)
+  if(NOT MOMENTUM_BUILD_PYMOMENTUM)
+    message(FATAL_ERROR "MOMENTUM_USE_SYSTEM_MOMENTUM requires MOMENTUM_BUILD_PYMOMENTUM")
+  endif()
+  if(CMAKE_VERSION VERSION_LESS 3.18)
+    message(FATAL_ERROR "MOMENTUM_USE_SYSTEM_MOMENTUM requires CMake 3.18 or newer")
+  endif()
+  find_package(momentum CONFIG REQUIRED)
+  # Map the in-tree target names used by pymomentum to the exported targets.
+  add_library(axel ALIAS axel::axel)
+  foreach(_target
+      camera character character_sequence_solver character_solver common diff_ik
+      io_bvh io_character io_fbx io_file_save_options io_gltf io_legacy_json
+      io_marker io_obj io_shape io_skeleton io_urdf io_usd marker_tracker math
+      momentum process_markers rasterizer rasterizer_cuda skeleton solver)
+    if(TARGET momentum::${_target})
+      add_library(${_target} ALIAS momentum::${_target})
+    endif()
+  endforeach()
+  # Not installed, but used by pymomentum.geometry_test_utils.
+  mt_library(
+    NAME character_test_helpers
+    HEADERS_VARS character_test_helpers_public_headers
+    SOURCES_VARS character_test_helpers_sources
+    PUBLIC_LINK_LIBRARIES
+      character
+    NO_INSTALL
+  )
+  add_subdirectory(pymomentum)
+  return()
 endif()
 
 # 1st party
