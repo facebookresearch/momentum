@@ -101,15 +101,29 @@ std::vector<size_t> characterMeshNodes(
   return meshNodes;
 }
 
+// Whether two inverse bind poses are the same up to rounding: their linear parts relative to their
+// size, and their translations relative to the larger of their lengths and 1 cm. Compared as one
+// matrix, a difference in rotation would hide behind a large translation, although it moves the
+// vertices far from the origin.
+[[nodiscard]] bool sameUpToRounding(const Affine3f& a, const Affine3f& b) {
+  constexpr float kRounding = 1e-5f;
+  const float length = std::max({a.translation().norm(), b.translation().norm(), 1.0f});
+  return a.linear().isApprox(b.linear(), kRounding) &&
+      (a.translation() - b.translation()).norm() <= kRounding * length;
+}
+
 // Gives the joints of the skins of `meshNodes` the skins' inverse bind matrices, which the glTF
 // format uses to skin the meshes, in momentum's joint frames: momentum joints have no scale, so
 // each matrix also gets its joint's accumulated rest scale (see JointFileTransform). Other joints
-// keep the inverse of their rest pose.
+// keep the inverse of their rest pose. With `onlyWhereTheyDiffer`, a joint also keeps it when the
+// file's matrix is the same up to rounding (see sameUpToRounding()), so that a file momentum wrote
+// loads exactly as before.
 void applySkinInverseBindMatrices(
     const fx::gltf::Document& model,
     std::span<const size_t> meshNodes,
     std::span<const JointFileTransform> fileJoints,
     std::span<const size_t> nodeToObjectMap,
+    bool onlyWhereTheyDiffer,
     TransformationList& inverseBindPose) {
   std::vector<bool> assigned(inverseBindPose.size(), false);
   for (const size_t meshNode : meshNodes) {
@@ -145,7 +159,9 @@ void applySkinInverseBindMatrices(
       inverseBind.translation() *= toCm();
       inverseBind = fileJoints[jointId].post.inverse().toAffine3() * inverseBind;
       if (!assigned.at(jointId)) {
-        inverseBindPose.at(jointId) = inverseBind;
+        if (!onlyWhereTheyDiffer || !sameUpToRounding(inverseBind, inverseBindPose.at(jointId))) {
+          inverseBindPose.at(jointId) = inverseBind;
+        }
         assigned.at(jointId) = true;
       } else if (!inverseBind.isApprox(inverseBindPose.at(jointId), 1e-4f)) {
         MT_LOGW(
@@ -207,12 +223,12 @@ Character buildCharacter(
 
   loadCharacterExtensions(model, rootNode, result);
 
-  // A document from another tool places its joints with the transforms of all nodes above them and
-  // skins its meshes with its inverse bind matrices, as the glTF format defines.
+  // A document from another tool places its joints with the transforms of all nodes above them.
+  // Every document skins its meshes with its inverse bind matrices, as the glTF format defines.
   const bool useFileTransforms = !hasMarkedJoints(model);
-  std::vector<JointFileTransform> fileJoints;
+  const std::vector<JointFileTransform> fileJoints =
+      jointFileTransforms(model, result.skeleton, nodeToObjectMap);
   if (useFileTransforms) {
-    fileJoints = jointFileTransforms(model, result.skeleton, nodeToObjectMap);
     for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
       const auto& fileJoint = fileJoints[jointId];
       if (fileJoint.node == kInvalidNodeId) {
@@ -228,10 +244,15 @@ Character buildCharacter(
   // Finalize jointMap and inverseBind pose
   result.resetJointMap();
   result.initInverseBindPose();
-  if (useFileTransforms) {
-    applySkinInverseBindMatrices(
-        model, meshNodes, fileJoints, nodeToObjectMap, result.inverseBindPose);
-  }
+  // The inverse bind matrices of a file momentum wrote are the inverse of its rest pose, unless the
+  // character was bound in another pose.
+  applySkinInverseBindMatrices(
+      model,
+      meshNodes,
+      fileJoints,
+      nodeToObjectMap,
+      /*onlyWhereTheyDiffer=*/!useFileTransforms,
+      result.inverseBindPose);
 
   return result;
 }
