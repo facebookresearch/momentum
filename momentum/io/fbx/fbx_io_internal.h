@@ -15,6 +15,7 @@
 #include "momentum/character/character_utility.h"
 #include "momentum/character/collision_geometry_state.h"
 #include "momentum/character/marker.h"
+#include "momentum/character/skeleton_state.h"
 #include "momentum/character/skin_weights.h"
 #include "momentum/common/exception.h"
 #include "momentum/common/log.h"
@@ -465,6 +466,37 @@ inline void createAnimationCurves(
 // Skin weights
 // ============================================================================
 
+/// Convert an FBX matrix to the matrix that transforms column vectors.
+///
+/// FbxAMatrix stores the transpose of that matrix: its row 3 holds the translation.
+///
+/// @param matrix The FBX matrix.
+/// @return The same transform as a matrix that transforms column vectors.
+[[nodiscard]] inline Matrix4d toMatrix4d(const ::fbxsdk::FbxAMatrix& matrix) {
+  Matrix4d result;
+  for (int row = 0; row < 4; ++row) {
+    for (int col = 0; col < 4; ++col) {
+      result(row, col) = matrix[col][row];
+    }
+  }
+  return result;
+}
+
+/// Convert a matrix that transforms column vectors to an FBX matrix; the inverse of toMatrix4d().
+///
+/// @param matrix The matrix that transforms column vectors. It can hold any affine transform,
+/// such as one with a non-uniform or negative scale.
+/// @return The same transform as an FBX matrix.
+[[nodiscard]] inline ::fbxsdk::FbxAMatrix toFbxAMatrix(const Matrix4d& matrix) {
+  ::fbxsdk::FbxAMatrix result;
+  for (int row = 0; row < 4; ++row) {
+    for (int col = 0; col < 4; ++col) {
+      result[col][row] = matrix(row, col);
+    }
+  }
+  return result;
+}
+
 inline void saveSkinWeightsToFbx(
     const Character& character,
     ::fbxsdk::FbxScene* scene,
@@ -475,6 +507,12 @@ inline void saveSkinWeightsToFbx(
   fbxskin->SetGeometry(mesh);
   FbxAMatrix meshTransform;
   meshTransform.SetIdentity();
+  // A cluster binds its joint at the joint's rest pose, unless the character's inverse bind pose
+  // binds it elsewhere, as for a character bound in another pose than its rest pose.
+  const SkeletonState restState(
+      JointParameters::Zero(character.skeleton.joints.size() * kParametersPerJoint),
+      character.skeleton,
+      /*computeDeriv=*/false);
   for (const auto& jointNode : jointToNodeMap) {
     size_t jointIdx = jointNode.first;
     auto* fbxJointNode = jointNode.second;
@@ -490,6 +528,18 @@ inline void saveSkinWeightsToFbx(
     while (pParent != nullptr) {
       globalMatrix = pParent->EvaluateLocalTransform() * globalMatrix;
       pParent = pParent->GetParent();
+    }
+    if (jointIdx < character.inverseBindPose.size() && jointIdx < restState.jointState.size()) {
+      // From the joint's rest pose to its bind pose, in the joint's frame.
+      const Affine3f restToBind = (character.inverseBindPose[jointIdx] *
+                                   restState.jointState[jointIdx].transform.toAffine3())
+                                      .inverse();
+      constexpr float kRounding = 1e-5f;
+      if (!restToBind.isApprox(Affine3f::Identity(), kRounding)) {
+        // A bind pose can have a non-uniform or negative scale, so the product is a general affine
+        // matrix.
+        globalMatrix = toFbxAMatrix(toMatrix4d(globalMatrix) * restToBind.matrix().cast<double>());
+      }
     }
     pCluster->SetTransformLinkMatrix(globalMatrix);
     pCluster->SetTransformMatrix(meshTransform);
