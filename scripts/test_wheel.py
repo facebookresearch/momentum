@@ -383,7 +383,7 @@ def get_import_test_script(
 
 
 def get_torch_after_pymomentum_script() -> str:
-    """Return a regression test for PyMomentum's native loader state."""
+    """Return a regression test that imports pymomentum.geometry before torch."""
     return "\n".join(
         [
             "import faulthandler",
@@ -399,25 +399,43 @@ def get_torch_after_pymomentum_script() -> str:
     )
 
 
-def get_cxx_runtime_script(torch_first: bool) -> str:
+# How each runtime test sets up the process before PyMomentum's number I/O.
+CXX_RUNTIME_TRIGGERS = {
+    "torch_first": ["import torch", "import pymomentum.geometry as geometry"],
+    "pymomentum_first": ["import pymomentum.geometry as geometry", "import torch"],
+    # PyTorch is installed, but the program never imports it.
+    "torch_not_imported": ["import pymomentum.geometry as geometry"],
+    # Another copy of libstdc++ numbers its locale facets first, without torch.
+    "system_locale_first": [
+        "import ctypes",
+        'ctypes.CDLL("libstdc++.so.6")._ZNSt6locale7classicEv()',
+        "import pymomentum.geometry as geometry",
+    ],
+}
+
+
+def get_cxx_runtime_triggers(linux: bool) -> list[str]:
+    """Return the runtime test triggers that apply to the test platform."""
+    if linux:
+        return list(CXX_RUNTIME_TRIGGERS)
+    return [name for name in CXX_RUNTIME_TRIGGERS if name != "system_locale_first"]
+
+
+def get_cxx_runtime_script(trigger: str) -> str:
     """Return a regression test for PyMomentum's private C++ runtime.
 
     Parsing the URDF numbers and naming the blend-shape parameters use iostream
     number I/O, which crashed when the private libstdc++ bound its locale facet
-    ids to torch's libstdc++. On Linux, #1566's loader imports torch first in
-    both orders; the orders differ on macOS and Windows.
+    ids to another libstdc++ in the process.
     """
-    imports = ["import pymomentum.geometry as geometry", "import torch"]
-    if torch_first:
-        imports.reverse()
-    order = "torch before" if torch_first else "pymomentum.geometry before"
     return "\n".join(
         [
             "import faulthandler",
             "faulthandler.enable()",
+            "import sys",
             "import numpy as np",
-            *imports,
-            f'print("Testing with_blend_shape, {order}...")',
+            *CXX_RUNTIME_TRIGGERS[trigger],
+            f'print("Testing with_blend_shape, {trigger}...")',
             "urdf = (",
             '    b\'<robot name="r"><link name="base"/><link name="tip"/>\'',
             '    b\'<joint name="j" type="revolute"><parent link="base"/><child link="tip"/>\'',
@@ -433,7 +451,12 @@ def get_cxx_runtime_script(torch_first: bool) -> str:
             ")",
             "names = character.with_blend_shape(blend_shape).parameter_transform.names",
             'assert names[-2:] == ["blend_0", "blend_1"], names',
-            f'print("[PASS] with_blend_shape, {order}")',
+            *(
+                ['assert "torch" not in sys.modules, "pymomentum imported torch"']
+                if trigger in ("torch_not_imported", "system_locale_first")
+                else []
+            ),
+            f'print("[PASS] with_blend_shape, {trigger}")',
             "",
         ]
     )
@@ -457,10 +480,18 @@ def run_import_tests(
         env.pop(name, None)
     # Keep the checkout's namespace-package directories out of wheel import checks.
     with tempfile.TemporaryDirectory() as tmpdir:
+        linux = sys.platform.startswith("linux")
         for script in (
             get_torch_after_pymomentum_script(),
-            get_cxx_runtime_script(torch_first=True),
-            get_cxx_runtime_script(torch_first=False),
+            *(
+                get_cxx_runtime_script(trigger)
+                for trigger in get_cxx_runtime_triggers(linux)
+            ),
+            *(
+                [get_torch_extension_binding_script()]
+                if linux and has_torch_extensions(wheel_type)
+                else []
+            ),
         ):
             result = subprocess.run(
                 [python_exe, "-I", "-c", script],
@@ -540,6 +571,83 @@ def get_previous_release_container_lines(
         '{ cat /tmp/coexist.log; echo "[FAIL] no repair message"; exit 1; }',
         *repair,
     ]
+
+
+def get_torch_extension_binding_script() -> str:
+    """Return a Linux test that imports each PyMomentum extension module before torch.
+
+    The test fails if torch's libraries or the system libstdc++ bind to
+    PyMomentum's private libstdc++ (LD_DEBUG=bindings), which catches an
+    extension module that links libtorch but is missing from the loader.
+    """
+    return """import importlib.machinery
+import importlib.util
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+PRIVATE = r" to [^ ]*libstdc\\+\\+-pymomentum\\.so\\.6 "
+PATTERNS = {
+    "torch libraries": re.compile(
+        r"binding file [^ ]*/torch/lib/lib(torch|torch_cpu|torch_python|c10)"
+        r"\\.so \\[0\\]" + PRIVATE
+    ),
+    "system libstdc++": re.compile(
+        r"binding file [^ ]*/libstdc\\+\\+\\.so\\.6 \\[0\\]" + PRIVATE
+    ),
+}
+package_dirs = importlib.util.find_spec("pymomentum").submodule_search_locations
+modules = sorted(
+    {
+        name.split(".")[0]
+        for package_dir in package_dirs
+        for name in os.listdir(package_dir)
+        if name.endswith(tuple(importlib.machinery.EXTENSION_SUFFIXES))
+    }
+)
+if not modules:
+    sys.exit("[FAIL] no PyMomentum extension modules found")
+failed = False
+for module in modules:
+    with tempfile.TemporaryDirectory() as tmp:
+        env = dict(os.environ, LD_DEBUG="bindings")
+        env["LD_DEBUG_OUTPUT"] = os.path.join(tmp, "bindings")
+        subprocess.run(
+            [sys.executable, "-I", "-c", f"import pymomentum.{module}"],
+            env=env,
+            check=True,
+        )
+        counts = dict.fromkeys(PATTERNS, 0)
+        for name in os.listdir(tmp):
+            with open(os.path.join(tmp, name), errors="replace") as log:
+                for line in log:
+                    for key, pattern in PATTERNS.items():
+                        counts[key] += bool(pattern.search(line))
+    print(f"pymomentum.{module} before torch, bindings to the private libstdc++:", counts)
+    failed = failed or any(counts.values())
+if failed:
+    sys.exit("[FAIL] a library bound to PyMomentum's private libstdc++")
+print("[PASS] every extension module before torch")
+"""
+
+
+def get_cxx_runtime_container_lines() -> list[str]:
+    """Return shell lines that run every runtime test in the Linux container."""
+    lines = []
+    for trigger in get_cxx_runtime_triggers(linux=True):
+        script_path = f"/tmp/test_cxx_runtime_{trigger}.py"
+        lines.extend(
+            [
+                f"cat >{script_path} <<'PYTEST'",
+                *get_cxx_runtime_script(trigger).rstrip().splitlines(),
+                "PYTEST",
+                f"/tmp/test_venv/bin/python -I {script_path}",
+                "",
+            ]
+        )
+    return lines
 
 
 def test_in_container(
@@ -629,14 +737,14 @@ def test_in_container(
             "",
         ]
     )
-    for torch_first in (True, False):
-        script_path = f"/tmp/test_cxx_runtime_torch_first_{torch_first}.py"
+    container_lines.extend(get_cxx_runtime_container_lines())
+    if has_torch_extensions(wheel_type):
         container_lines.extend(
             [
-                f"cat >{script_path} <<'PYTEST'",
-                *get_cxx_runtime_script(torch_first).rstrip().splitlines(),
+                "cat >/tmp/test_torch_extension_bindings.py <<'PYTEST'",
+                *get_torch_extension_binding_script().rstrip().splitlines(),
                 "PYTEST",
-                f"/tmp/test_venv/bin/python -I {script_path}",
+                "/tmp/test_venv/bin/python -I /tmp/test_torch_extension_bindings.py",
                 "",
             ]
         )
