@@ -172,6 +172,101 @@ void applySkinInverseBindMatrices(
   }
 }
 
+// Places the joints of a document from another tool with the transforms of all nodes above them,
+// as the glTF format does (see JointFileTransform), and returns these transforms. A document with
+// marked joints keeps the joints as loaded.
+std::vector<JointFileTransform> placeJointsAsInFile(
+    const fx::gltf::Document& model,
+    std::span<const size_t> nodeToObjectMap,
+    Skeleton& skeleton) {
+  auto fileJoints = jointFileTransforms(model, skeleton, nodeToObjectMap);
+  if (hasMarkedJoints(model)) {
+    return fileJoints;
+  }
+  for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
+    const auto& fileJoint = fileJoints[jointId];
+    if (fileJoint.node == kInvalidNodeId) {
+      continue;
+    }
+    const Transform local =
+        fileJoint.pre * nodeLocalTransform(model.nodes.at(fileJoint.node)) * fileJoint.post;
+    skeleton.joints.at(jointId).translationOffset = local.translation;
+    skeleton.joints.at(jointId).preRotation = local.rotation;
+  }
+  return fileJoints;
+}
+
+// Build the character of the object whose root node is `objectRoot` (see gatherObjectRoots()): a
+// joint for each node of its hierarchy, and the meshes of its nodes, each bound rigidly to the
+// joint of its node.
+CharacterWithNodeMap buildObjectCharacter(const fx::gltf::Document& model, uint32_t objectRoot) {
+  CharacterWithNodeMap entry;
+  entry.rootNode = objectRoot;
+  entry.isObject = true;
+  Character& result = entry.character;
+  const std::array<uint32_t, 1> roots = {objectRoot};
+  std::tie(
+      result.name,
+      result.skeleton.joints,
+      result.collision,
+      result.locators,
+      result.physicalProperties,
+      entry.nodeToObjectMap) =
+      loadHierarchyForRoots(model, roots, objectRoot, /*meshNodesAreJoints=*/true);
+  std::vector<size_t> meshNodes;
+  for (size_t nodeId = 0; nodeId < model.nodes.size(); ++nodeId) {
+    const auto& node = model.nodes[nodeId];
+    // A node with a momentum type, such as a locator, maps to an index of its type, not to a joint.
+    if (node.mesh >= 0 && node.skin < 0 && !hasMomentumType(node) &&
+        entry.nodeToObjectMap.at(nodeId) < result.skeleton.joints.size()) {
+      meshNodes.push_back(nodeId);
+    }
+  }
+  BlendShape_u blendShape;
+  std::tie(result.mesh, result.skinWeights, blendShape) =
+      loadRigidMeshes(model, meshNodes, entry.nodeToObjectMap);
+  if (blendShape != nullptr) {
+    result.blendShape = std::move(blendShape);
+  }
+  // An object has no rig of its own: the rig of the document belongs to its skinned characters.
+  result.parameterTransform =
+      ParameterTransform::empty(result.skeleton.joints.size() * kParametersPerJoint);
+  const auto fileJoints = placeJointsAsInFile(model, entry.nodeToObjectMap, result.skeleton);
+  result.resetJointMap();
+  result.initInverseBindPose();
+  // A mesh without a skin lies in its node's frame, with the node's accumulated scale.
+  for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
+    result.inverseBindPose.at(jointId) = fileJoints[jointId].post.inverse().toAffine3();
+  }
+  return entry;
+}
+
+// Warns about the meshes without a skin of a document from another tool that no character loads:
+// those inside a skeleton, and those of an object that cannot be read.
+void warnAboutUnloadedMeshes(
+    const fx::gltf::Document& model,
+    std::span<const CharacterWithNodeMap> characters) {
+  std::string names;
+  size_t count = 0;
+  for (size_t nodeId = 0; nodeId < model.nodes.size(); ++nodeId) {
+    const auto& node = model.nodes[nodeId];
+    // A node with a momentum type, such as a marker with a cube mesh, is read as that type.
+    if (node.mesh < 0 || node.skin >= 0 || hasMomentumType(node)) {
+      continue;
+    }
+    const bool loaded =
+        std::ranges::any_of(characters, [nodeId](const CharacterWithNodeMap& entry) {
+          return nodeId < entry.nodeToObjectMap.size() &&
+              entry.nodeToObjectMap[nodeId] != kInvalidIndex;
+        });
+    if (!loaded) {
+      names += (count++ == 0 ? "'" : ", '") + node.name + "'";
+    }
+  }
+  MT_LOGW_IF(
+      count > 0, "glTF file has {} meshes without a skin that are not loaded: {}", count, names);
+}
+
 // Build the character whose skeleton starts at `skeletonRoots`, named after `rootNode`.
 Character buildCharacter(
     const fx::gltf::Document& model,
@@ -227,19 +322,7 @@ Character buildCharacter(
   // Every document skins its meshes with its inverse bind matrices, as the glTF format defines.
   const bool useFileTransforms = !hasMarkedJoints(model);
   const std::vector<JointFileTransform> fileJoints =
-      jointFileTransforms(model, result.skeleton, nodeToObjectMap);
-  if (useFileTransforms) {
-    for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
-      const auto& fileJoint = fileJoints[jointId];
-      if (fileJoint.node == kInvalidNodeId) {
-        continue;
-      }
-      const Transform local =
-          fileJoint.pre * nodeLocalTransform(model.nodes[fileJoint.node]) * fileJoint.post;
-      result.skeleton.joints[jointId].translationOffset = local.translation;
-      result.skeleton.joints[jointId].preRotation = local.rotation;
-    }
-  }
+      placeJointsAsInFile(model, nodeToObjectMap, result.skeleton);
 
   // Finalize jointMap and inverseBind pose
   result.resetJointMap();
@@ -380,18 +463,42 @@ getCharacterMotionJson(const fx::gltf::Document& model, uint32_t rootNode, bool 
   return motion != nullptr ? *motion : kNoMotion;
 }
 
-std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Document& model) {
+std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(
+    const fx::gltf::Document& model,
+    GltfObjects objects) {
   try {
     const auto sceneParentMap = buildSceneParentMap(model);
     const auto skeletonRoots = gatherSkeletonRoots(model, sceneParentMap);
+    // In a document from another tool, the meshes without a skin outside the skeletons are objects,
+    // each a character of its own, unless the caller skips objects.
+    const bool fromAnotherTool = !hasMarkedJoints(model) && !model.skins.empty();
+    const bool loadObjects = fromAnotherTool && objects == GltfObjects::Load;
+    const std::vector<uint32_t> objectRoots = loadObjects
+        ? gatherObjectRoots(model, sceneParentMap, skeletonRoots)
+        : std::vector<uint32_t>();
     std::vector<CharacterWithNodeMap> characters;
-    characters.reserve(skeletonRoots.size());
+    characters.reserve(skeletonRoots.size() + objectRoots.size());
     for (const auto& roots : skeletonRoots) {
       auto& entry = characters.emplace_back();
       entry.rootNode =
           roots.empty() ? kInvalidNodeId : getTopLevelAncestor(roots.front(), sceneParentMap);
       entry.character = buildCharacter(
-          model, roots, entry.rootNode, skeletonRoots.size() == 1, entry.nodeToObjectMap);
+          model,
+          roots,
+          entry.rootNode,
+          skeletonRoots.size() == 1 && !loadObjects,
+          entry.nodeToObjectMap);
+    }
+    // A file whose object cannot be read still loads its other characters.
+    for (const uint32_t objectRoot : objectRoots) {
+      try {
+        characters.push_back(buildObjectCharacter(model, objectRoot));
+      } catch (const std::exception& e) {
+        MT_LOGW("glTF object '{}' is not loaded: {}", model.nodes.at(objectRoot).name, e.what());
+      }
+    }
+    if (loadObjects) {
+      warnAboutUnloadedMeshes(model, characters);
     }
     return characters;
   } catch (std::runtime_error& err) {
@@ -414,7 +521,7 @@ CharacterWithNodeMap& selectGltfCharacter(std::vector<CharacterWithNodeMap>& cha
 Character loadGltfCharacterInternal(
     const fx::gltf::Document& model,
     std::vector<size_t>& nodeToObjectMap) {
-  auto characters = loadGltfCharactersInternal(model);
+  auto characters = loadGltfCharactersInternal(model, GltfObjects::Skip);
   auto& loaded = selectGltfCharacter(characters);
   nodeToObjectMap = std::move(loaded.nodeToObjectMap);
   return std::move(loaded.character);
@@ -434,7 +541,7 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan) {
 }
 
 std::vector<Character> loadGltfCharacters(const fx::gltf::Document& model) {
-  auto entries = loadGltfCharactersInternal(model);
+  auto entries = loadGltfCharactersInternal(model, GltfObjects::Load);
   std::vector<Character> characters;
   characters.reserve(entries.size());
   std::ranges::transform(entries, std::back_inserter(characters), [](CharacterWithNodeMap& entry) {
@@ -453,11 +560,15 @@ std::vector<Character> loadGltfCharacters(std::span<const std::byte> byteSpan) {
 
 std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
     const fx::gltf::Document& model) {
-  auto characters = loadGltfCharactersInternal(model);
+  auto characters = loadGltfCharactersInternal(model, GltfObjects::Load);
+  // A motion stored only at the document level belongs to the only skinned character; objects have
+  // no motion of their own.
+  const auto numSkinned = std::ranges::count(characters, false, &CharacterWithNodeMap::isObject);
   std::vector<CharacterMotion> result;
   result.reserve(characters.size());
   for (auto& entry : characters) {
-    const auto& motionJson = getCharacterMotionJson(model, entry.rootNode, characters.size() == 1);
+    const auto& motionJson =
+        getCharacterMotionJson(model, entry.rootNode, !entry.isObject && numSkinned == 1);
     const auto [motion, identity] = getMotionFromJson(model, motionJson);
     CharacterMotion characterMotion;
     characterMotion.motion = mapMotionToCharacter(motion, entry.character);
@@ -493,22 +604,36 @@ std::tuple<std::vector<CharacterMotion>, float> loadGltfCharactersWithMotion(
 namespace {
 
 // The skeleton states of a loaded character from the first animation that animates it, with their
-// frame times; both are empty when no animation animates it.
+// frame times; both are empty when no animation animates it. An object whose animation cannot be
+// read loads without it, with a warning, so that it does not stop the load of the other characters.
 std::tuple<std::vector<SkeletonState>, std::vector<float>> loadCharacterAnimation(
     const fx::gltf::Document& model,
     const CharacterWithNodeMap& entry) {
-  const auto* animation = findAnimationForCharacter(model, entry.character, entry.nodeToObjectMap);
-  if (animation == nullptr) {
+  const auto load = [&]() -> std::tuple<std::vector<SkeletonState>, std::vector<float>> {
+    const auto* animation =
+        findAnimationForCharacter(model, entry.character, entry.nodeToObjectMap);
+    if (animation == nullptr) {
+      return {};
+    }
+    return loadSkeletonStatesForCharacter(
+        model, *animation, entry.character, entry.nodeToObjectMap);
+  };
+  if (!entry.isObject) {
+    return load();
+  }
+  try {
+    return load();
+  } catch (const std::exception& e) {
+    MT_LOGW("glTF object '{}' is loaded without its animation: {}", entry.character.name, e.what());
     return {};
   }
-  return loadSkeletonStatesForCharacter(model, *animation, entry.character, entry.nodeToObjectMap);
 }
 
 } // namespace
 
 std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
     const fx::gltf::Document& model) {
-  auto characters = loadGltfCharactersInternal(model);
+  auto characters = loadGltfCharactersInternal(model, GltfObjects::Load);
   std::vector<CharacterSkeletonStates> result;
   result.reserve(characters.size());
   for (auto& entry : characters) {
@@ -536,7 +661,7 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
 
 std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& model) {
   std::vector<MatrixXf> motions;
-  for (const auto& entry : loadGltfCharactersInternal(model)) {
+  for (const auto& entry : loadGltfCharactersInternal(model, GltfObjects::Load)) {
     // One character's skeleton states at a time, so they are freed before the next character's.
     const auto [states, timestamps] = loadCharacterAnimation(model, entry);
     const Character& character = entry.character;
