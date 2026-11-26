@@ -537,6 +537,100 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
   return {std::move(resultMesh), std::move(skinWeights), std::move(blendShape)};
 }
 
+namespace {
+
+// Throws where the mesh reader would stop the process on `primitive` (its MT_CHECKs), so that an
+// object with such a mesh is skipped with a warning (see buildObjectCharacter()): attributes and
+// morph targets whose element counts differ from the positions, and triangles whose vertex count is
+// not a multiple of 3. These checks are stricter than the reader's, which skips attributes it
+// cannot read.
+void checkObjectPrimitive(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive) {
+  const auto countOf = [&](uint32_t id) {
+    MT_THROW_IF(
+        id >= model.accessors.size(),
+        "Accessor {} does not exist; the file has {} accessors",
+        id,
+        model.accessors.size());
+    return model.accessors[id].count;
+  };
+  const auto position = primitive.attributes.find("POSITION");
+  if (position == primitive.attributes.end()) {
+    return;
+  }
+  const uint32_t numPositions = countOf(position->second);
+  for (const char* name : {"NORMAL", "COLOR_0", "TEXCOORD_0"}) {
+    const auto attribute = primitive.attributes.find(name);
+    if (attribute == primitive.attributes.end()) {
+      continue;
+    }
+    const uint32_t count = countOf(attribute->second);
+    MT_THROW_IF(
+        count != numPositions,
+        "The {} attribute of a glTF mesh has {} elements for {} positions",
+        name,
+        count,
+        numPositions);
+  }
+  if (primitive.mode == fx::gltf::Primitive::Mode::Triangles) {
+    const uint32_t numVertices =
+        primitive.indices >= 0 ? countOf(static_cast<uint32_t>(primitive.indices)) : numPositions;
+    MT_THROW_IF(
+        numVertices % 3 != 0,
+        "A glTF triangle mesh has {} vertices, which is not a multiple of 3",
+        numVertices);
+  }
+  if (primitive.targets.empty()) {
+    return;
+  }
+  const size_t numBasePositions = copyAccessorBuffer<Vector3f>(model, position->second).size();
+  for (const auto& target : primitive.targets) {
+    const auto targetPosition = target.find("POSITION");
+    if (targetPosition == target.end()) {
+      continue;
+    }
+    countOf(targetPosition->second);
+    const size_t count = copyAccessorBuffer<Vector3f>(model, targetPosition->second).size();
+    MT_THROW_IF(
+        count != numBasePositions,
+        "A morph target of a glTF mesh has {} positions for {}",
+        count,
+        numBasePositions);
+  }
+}
+
+} // namespace
+
+std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadRigidMeshes(
+    const fx::gltf::Document& model,
+    std::span<const size_t> meshNodes,
+    std::span<const size_t> nodeToObjectMap) {
+  auto mesh = std::make_unique<Mesh>();
+  auto skinWeights = std::make_unique<SkinWeights>();
+  BlendShape_u blendShape;
+  for (const size_t nodeId : meshNodes) {
+    const auto& node = model.nodes.at(nodeId);
+    MT_THROW_IF(
+        nodeId >= nodeToObjectMap.size(),
+        "glTF node {} is not in the node map of {} nodes",
+        nodeId,
+        nodeToObjectMap.size());
+    const auto jointId = static_cast<uint32_t>(nodeToObjectMap[nodeId]);
+    for (const auto& primitive : model.meshes.at(node.mesh).primitives) {
+      checkObjectPrimitive(model, primitive);
+      const auto numVertices = static_cast<Eigen::Index>(addMesh(model, primitive, mesh));
+      const Eigen::Index start = skinWeights->index.rows();
+      skinWeights->index.conservativeResize(start + numVertices, Eigen::NoChange);
+      skinWeights->weight.conservativeResize(start + numVertices, Eigen::NoChange);
+      skinWeights->index.bottomRows(numVertices).setZero();
+      skinWeights->weight.bottomRows(numVertices).setZero();
+      skinWeights->index.bottomRows(numVertices).col(0).setConstant(jointId);
+      skinWeights->weight.bottomRows(numVertices).col(0).setOnes();
+      addBlendShapes(model, primitive, blendShape);
+    }
+  }
+  return {std::move(mesh), std::move(skinWeights), std::move(blendShape)};
+}
+
 SkinWeights_u bindMeshToJoint(const Mesh_u& mesh, size_t jointId) {
   auto skinWeights = std::make_unique<SkinWeights>();
   const auto kNumVertices = mesh->vertices.size();
