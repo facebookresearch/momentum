@@ -97,16 +97,20 @@ $(function(){initNavTree('bvh__io_8cpp.html','',''); });
 <code>#include &quot;<a class="el" href="parameter__transform_8h_source.html">momentum/character/parameter_transform.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="skeleton_8h_source.html">momentum/character/skeleton.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="exception_8h_source.html">momentum/common/exception.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="log_8h_source.html">momentum/common/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="stream__utils_8h_source.html">momentum/io/common/stream_utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="constants_8h_source.html">momentum/math/constants.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="math_2utility_8h_source.html">momentum/math/utility.h</a>&quot;</code><br />
 <code>#include &lt;Eigen/Geometry&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
 <code>#include &lt;cstring&gt;</code><br />
 <code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;iomanip&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;stack&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="bvh__io_8cpp_source.html">Go to the source code of this file.</a></p>
@@ -126,11 +130,13 @@ Functions</h2></td></tr>
 <tr class="memitem:a04d82e0ef15e7b2332c85acfaea068ff" id="r_a04d82e0ef15e7b2332c85acfaea068ff"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; <a class="el" href="structmomentum_1_1Character.html">Character</a>, <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a>, float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a04d82e0ef15e7b2332c85acfaea068ff">momentum::loadBvhCharacterWithMotion</a> (std::span&lt; const std::byte &gt; bytes)</td></tr>
 <tr class="memdesc:a04d82e0ef15e7b2332c85acfaea068ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a character with motion data from a BVH file buffer.  <br /></td></tr>
 <tr class="memitem:a07334de27cae2bfeeba0ef015a9a2094" id="r_a07334de27cae2bfeeba0ef015a9a2094"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a07334de27cae2bfeeba0ef015a9a2094">momentum::saveBvhCharacter</a> (const filesystem::path &amp;filepath, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character)</td></tr>
-<tr class="memdesc:a07334de27cae2bfeeba0ef015a9a2094"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character to a BVH file with a single rest-pose frame.  <br /></td></tr>
-<tr class="memitem:ab894314ccc2fa934ca7e0de27451d8b9" id="r_ab894314ccc2fa934ca7e0de27451d8b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ab894314ccc2fa934ca7e0de27451d8b9">momentum::saveBvhCharacterWithMotion</a> (const filesystem::path &amp;filepath, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motionParams, float fps)</td></tr>
-<tr class="memdesc:ab894314ccc2fa934ca7e0de27451d8b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character with motion data to a BVH file.  <br /></td></tr>
-<tr class="memitem:a0d179c6e7236273803834b5cfeea594b" id="r_a0d179c6e7236273803834b5cfeea594b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::byte &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a0d179c6e7236273803834b5cfeea594b">momentum::saveBvhCharacterWithMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motionParams, float fps)</td></tr>
-<tr class="memdesc:a0d179c6e7236273803834b5cfeea594b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character with motion data to a byte buffer in BVH format.  <br /></td></tr>
+<tr class="memdesc:a07334de27cae2bfeeba0ef015a9a2094"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character to a BVH file with a single frame of its rest pose (zero model parameters) at 30 frames per second.  <br /></td></tr>
+<tr class="memitem:aacc35b50b1fe4dc96a4edfb1d583047d" id="r_aacc35b50b1fe4dc96a4edfb1d583047d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#aacc35b50b1fe4dc96a4edfb1d583047d">momentum::saveBvhCharacterWithMotion</a> (const filesystem::path &amp;filepath, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motionParams, float fps, const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;offsets=<a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a>())</td></tr>
+<tr class="memdesc:aacc35b50b1fe4dc96a4edfb1d583047d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character with motion data to a BVH file.  <br /></td></tr>
+<tr class="memitem:a573b380e84815f0fdbd500bfa7422762" id="r_a573b380e84815f0fdbd500bfa7422762"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#a573b380e84815f0fdbd500bfa7422762">momentum::saveBvhCharacterWithJointParams</a> (const filesystem::path &amp;filepath, const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#aee6b90663d5ba454767d246aa512d356">MatrixXf</a> &amp;jointParams, float fps)</td></tr>
+<tr class="memdesc:a573b380e84815f0fdbd500bfa7422762"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character with motion data given as joint parameters to a BVH file, as <a class="el" href="namespacemomentum.html#aacc35b50b1fe4dc96a4edfb1d583047d" title="Saves a character with motion data to a BVH file.">saveBvhCharacterWithMotion()</a> saves model parameters.  <br /></td></tr>
+<tr class="memitem:ade22b9eedbc7128276c9a7219b3de48c" id="r_ade22b9eedbc7128276c9a7219b3de48c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::byte &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemomentum.html#ade22b9eedbc7128276c9a7219b3de48c">momentum::saveBvhCharacterWithMotion</a> (const <a class="el" href="structmomentum_1_1Character.html">Character</a> &amp;character, const <a class="el" href="namespacemomentum.html#a5bcd5272b9928449bc1661724d64d532">MotionParameters</a> &amp;motionParams, float fps, const <a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a> &amp;offsets=<a class="el" href="namespacemomentum.html#ad5d9243eb902f5c55daf0e687ffcfff7">VectorXf</a>())</td></tr>
+<tr class="memdesc:ade22b9eedbc7128276c9a7219b3de48c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves a character with motion data to a byte buffer in BVH format, with the content of <a class="el" href="namespacemomentum.html#aacc35b50b1fe4dc96a4edfb1d583047d" title="Saves a character with motion data to a BVH file.">saveBvhCharacterWithMotion()</a>.  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -1,5 +1,12 @@
 var NAVTREEINDEX32 =
 {
+"structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59":[1,0,2,32,3],
+"structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59":[2,0,0,31,3],
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html":[1,0,2,30],
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html":[2,0,0,29],
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[1,0,2,30,4],
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[2,0,0,29,4],
+"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[1,0,2,30,3],
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[2,0,0,29,3],
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48":[1,0,2,30,2],
 "structmomentum_1_1SparseGaussNewtonSolverOptions.html#a564c9a4df03bd0979ecb6de544ee4d48":[2,0,0,29,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX32 =
 "structmomentum_1_1VertexVelocityConstraintT.html#a7793fb95f91e0712031cc1924f877eed":[1,0,2,185,2],
 "structmomentum_1_1VertexVelocityConstraintT.html#a7793fb95f91e0712031cc1924f877eed":[2,0,0,184,2],
 "structmomentum_1_1VertexVelocityConstraintT.html#a831470f9775cd76a27446d5ff208c3fe":[1,0,2,185,0],
-"structmomentum_1_1VertexVelocityConstraintT.html#a831470f9775cd76a27446d5ff208c3fe":[2,0,0,184,0],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html":[1,0,2,162],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html":[2,0,0,161],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#a37ecc94dbc55fd0b8e3583db24f7242e":[1,0,2,162,3],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#a37ecc94dbc55fd0b8e3583db24f7242e":[2,0,0,161,3],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#a84df82cc94bea2e794b09c2e674e5c34":[1,0,2,162,4],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#a84df82cc94bea2e794b09c2e674e5c34":[2,0,0,161,4],
-"structmomentum_1_1VertexVertexDistanceConstraintT.html#ab5791b8d05cea1960c8d5a455c7479e5":[1,0,2,162,0]
+"structmomentum_1_1VertexVelocityConstraintT.html#a831470f9775cd76a27446d5ff208c3fe":[2,0,0,184,0]
 };

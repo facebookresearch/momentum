@@ -1,5 +1,12 @@
 var NAVTREEINDEX31 =
 {
+"structmomentum_1_1PositionConstraintT.html#ae979c76f2de5f438b19b461d1960eb1a":[1,0,2,192,0],
+"structmomentum_1_1PositionConstraintT.html#ae979c76f2de5f438b19b461d1960eb1a":[2,0,0,191,0],
+"structmomentum_1_1PositionDataT.html":[1,0,2,107],
+"structmomentum_1_1PositionDataT.html":[2,0,0,106],
+"structmomentum_1_1PositionDataT.html#a0bc5193be2ff7d7dbece4aa0b34bdcc0":[1,0,2,107,1],
+"structmomentum_1_1PositionDataT.html#a0bc5193be2ff7d7dbece4aa0b34bdcc0":[2,0,0,106,1],
+"structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[1,0,2,107,2],
 "structmomentum_1_1PositionDataT.html#a2feb4abea0486350e94889030bd1b3ae":[2,0,0,106,2],
 "structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[1,0,2,107,0],
 "structmomentum_1_1PositionDataT.html#af12a058af4011aa9140754b250808c45":[2,0,0,106,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX31 =
 "structmomentum_1_1SolverOptions.html#abeb1bde3af97cde2b9dec1d18c0c97ab":[1,0,2,32,4],
 "structmomentum_1_1SolverOptions.html#abeb1bde3af97cde2b9dec1d18c0c97ab":[2,0,0,31,4],
 "structmomentum_1_1SolverOptions.html#ac08f3f0b2d5333b1e23515a1b12714fa":[1,0,2,32,1],
-"structmomentum_1_1SolverOptions.html#ac08f3f0b2d5333b1e23515a1b12714fa":[2,0,0,31,1],
-"structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59":[1,0,2,32,3],
-"structmomentum_1_1SolverOptions.html#ada3316b2d8c78125eae8b34a7f0dee59":[2,0,0,31,3],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html":[1,0,2,30],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html":[2,0,0,29],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[1,0,2,30,4],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a1c089d08d0d0d830a6cf86a089336cf3":[2,0,0,29,4],
-"structmomentum_1_1SparseGaussNewtonSolverOptions.html#a3839e57739ec4a43866ae244c0e7b30c":[1,0,2,30,3]
+"structmomentum_1_1SolverOptions.html#ac08f3f0b2d5333b1e23515a1b12714fa":[2,0,0,31,1]
 };

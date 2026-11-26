@@ -1,5 +1,12 @@
 var NAVTREEINDEX28 =
 {
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae326d544f4ca8fe0eb0e2a9d7066e227":[1,0,2,28,3],
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae326d544f4ca8fe0eb0e2a9d7066e227":[2,0,0,27,3],
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3":[1,0,2,28,2],
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3":[2,0,0,27,2],
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[1,0,2,28,1],
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[2,0,0,27,1],
+"structmomentum_1_1GaussNewtonSolverOptions.html":[1,0,2,29],
 "structmomentum_1_1GaussNewtonSolverOptions.html":[2,0,0,28],
 "structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[1,0,2,29,3],
 "structmomentum_1_1GaussNewtonSolverOptions.html#a1d234d7948668ce6cf46ab0642b229f0":[2,0,0,28,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX28 =
 "structmomentum_1_1JointToJointOrientationDataT.html#aeee4eed2a602dec13ec156c3ce844679":[1,0,2,100,3],
 "structmomentum_1_1JointToJointOrientationDataT.html#aeee4eed2a602dec13ec156c3ce844679":[2,0,0,99,3],
 "structmomentum_1_1JointToJointOrientationDataT.html#aefb268299a79fffb8d1c723a8a40c58e":[1,0,2,100,2],
-"structmomentum_1_1JointToJointOrientationDataT.html#aefb268299a79fffb8d1c723a8a40c58e":[2,0,0,99,2],
-"structmomentum_1_1JointToJointPositionDataT.html":[1,0,2,147],
-"structmomentum_1_1JointToJointPositionDataT.html":[2,0,0,146],
-"structmomentum_1_1JointToJointPositionDataT.html#a02daa7b42e92755b9ddf1b0e17f14e96":[1,0,2,147,2],
-"structmomentum_1_1JointToJointPositionDataT.html#a02daa7b42e92755b9ddf1b0e17f14e96":[2,0,0,146,2],
-"structmomentum_1_1JointToJointPositionDataT.html#a1fd6ce967e298ec7251fdedfdbc288be":[1,0,2,147,3],
-"structmomentum_1_1JointToJointPositionDataT.html#a1fd6ce967e298ec7251fdedfdbc288be":[2,0,0,146,3],
-"structmomentum_1_1JointToJointPositionDataT.html#a22d615bfe2b873297cb56785d958f1f8":[1,0,2,147,0]
+"structmomentum_1_1JointToJointOrientationDataT.html#aefb268299a79fffb8d1c723a8a40c58e":[2,0,0,99,2]
 };

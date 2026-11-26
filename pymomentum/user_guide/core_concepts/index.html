@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQKPMTK7XB"></script>
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-NQKPMTK7XB",{})</script><link rel="stylesheet" href="/momentum/assets/css/styles.3ba2e559.css">
-<script src="/momentum/assets/js/runtime~main.e3562ebe.js" defer="defer"></script>
-<script src="/momentum/assets/js/main.cc0997ae.js" defer="defer"></script>
+<script src="/momentum/assets/js/runtime~main.304d1570.js" defer="defer"></script>
+<script src="/momentum/assets/js/main.7a74e1c6.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -29,6 +29,9 @@ joint transforms or a posed mesh.</p>
 </ul>
 <p>Not every character has every component. For example, a character loaded from
 URDF may have a skeleton but no mesh.</p>
+<p>A character often comes from several files, such as an FBX file with the
+skeleton and the mesh, a <code>.model</code> file with the rig, and a <code>.locators</code> file. See
+<a href="https://facebookresearch.github.io/momentum/docs/user_guide/character_files" target="_blank" rel="noopener noreferrer" class="">Character Files</a> for the role of each file.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="pose-representations">Pose representations<a href="#pose-representations" class="hash-link" aria-label="Direct link to Pose representations" title="Direct link to Pose representations" translate="no">​</a></h2>
 <table><thead><tr><th>Representation</th><th>Shape</th><th>Contents</th></tr></thead><tbody><tr><td>Model parameters</td><td><code>(..., P)</code></td><td>Rig-specific, named controls. This is usually the best representation to optimize or save.</td></tr><tr><td>Joint parameters</td><td><code>(..., J * 7)</code> or <code>(..., J, 7)</code></td><td>Translation, XYZ Euler rotation, and log2 scale for every joint.</td></tr><tr><td>Skeleton state</td><td><code>(..., J, 8)</code></td><td>Global translation, quaternion in <code>[x, y, z, w]</code> order, and scale.</td></tr><tr><td>Posed vertices</td><td><code>(..., V, 3)</code></td><td>Mesh vertices after forward kinematics and skinning.</td></tr></tbody></table>
 <p><code>P</code>, <code>J</code>, and <code>V</code> depend on the character. Leading dimensions are batch

@@ -1,5 +1,12 @@
 var NAVTREEINDEX27 =
 {
+"structmomentum_1_1CollisionDebugEntryT.html#af39df64b20a3dabc77db9afa92fcc233":[1,0,2,89,3],
+"structmomentum_1_1CollisionDebugEntryT.html#af39df64b20a3dabc77db9afa92fcc233":[2,0,0,88,3],
+"structmomentum_1_1CollisionEllipsoidT.html":[1,0,2,40],
+"structmomentum_1_1CollisionEllipsoidT.html":[2,0,0,39],
+"structmomentum_1_1CollisionEllipsoidT.html#a12eb9c1ad77631f781b61b1bdaf7f0a9":[1,0,2,40,4],
+"structmomentum_1_1CollisionEllipsoidT.html#a12eb9c1ad77631f781b61b1bdaf7f0a9":[2,0,0,39,4],
+"structmomentum_1_1CollisionEllipsoidT.html#a1847969d5fe7e699debc2898852f2005":[1,0,2,40,3],
 "structmomentum_1_1CollisionEllipsoidT.html#a1847969d5fe7e699debc2898852f2005":[2,0,0,39,3],
 "structmomentum_1_1CollisionEllipsoidT.html#a53f0d48b667bd6ae4b0a7fbd2ec7b7c0":[1,0,2,40,5],
 "structmomentum_1_1CollisionEllipsoidT.html#a53f0d48b667bd6ae4b0a7fbd2ec7b7c0":[2,0,0,39,5],
@@ -242,12 +249,5 @@ var NAVTREEINDEX27 =
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html":[1,0,2,28],
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html":[2,0,0,27],
 "structmomentum_1_1GaussNewtonSolverBaseOptions.html#a92d1b7015992bcc89f5664abfb9b04cb":[1,0,2,28,0],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#a92d1b7015992bcc89f5664abfb9b04cb":[2,0,0,27,0],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae326d544f4ca8fe0eb0e2a9d7066e227":[1,0,2,28,3],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae326d544f4ca8fe0eb0e2a9d7066e227":[2,0,0,27,3],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3":[1,0,2,28,2],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#ae46acc4fcda96b46323714231afc55f3":[2,0,0,27,2],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[1,0,2,28,1],
-"structmomentum_1_1GaussNewtonSolverBaseOptions.html#af09f0faccbcd25796a17043d610bd7b4":[2,0,0,27,1],
-"structmomentum_1_1GaussNewtonSolverOptions.html":[1,0,2,29]
+"structmomentum_1_1GaussNewtonSolverBaseOptions.html#a92d1b7015992bcc89f5664abfb9b04cb":[2,0,0,27,0]
 };

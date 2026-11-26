@@ -385,7 +385,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Add a skinned character (skeleton + mesh with skin weights) to the scene. </p>
-<p>Creates the skeleton hierarchy, mesh with skin deformer, locators, collision geometry, and metadata.</p>
+<p>Creates the skeleton hierarchy, mesh with skin deformer, locators, collision geometry, and metadata. The character also gets its rig (the parameter transform, parameter limits, parameter sets and pose constraints), stored as glTF files store it (see <a class="el" href="namespacemomentum.html#a6c2133226c390f6c280c2842a428e474" title="Writes the rig of character as glTF and FBX files store it: an object with the parameter transform (&quot;...">rigToJson()</a>), which the FBX loaders read back, also when it has no model parameters.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">character</td><td>The character to add. </td></tr>

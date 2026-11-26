@@ -91,11 +91,25 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.inverse_bind_pose"><code class="docutils literal notranslate"><span class="pre">Character.inverse_bind_pose</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.joint_parameter_limits"><code class="docutils literal notranslate"><span class="pre">Character.joint_parameter_limits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.joints_for_parameters"><code class="docutils literal notranslate"><span class="pre">Character.joints_for_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_bvh"><code class="docutils literal notranslate"><span class="pre">Character.load_bvh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_bvh_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_bvh_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_characters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_characters_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_characters_with_motion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_characters_with_motion_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_fbx_with_motion_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_channel_motion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_channel_motion_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_with_motion()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_with_motion_from_bytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_with_skel_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_characters_with_skel_states_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_from_bytes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion_from_bytes"><code class="docutils literal notranslate"><span class="pre">Character.load_gltf_with_motion_from_bytes()</span></code></a></li>
@@ -125,6 +139,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.pose_mesh"><code class="docutils literal notranslate"><span class="pre">Character.pose_mesh()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.rebind_skin"><code class="docutils literal notranslate"><span class="pre">Character.rebind_skin()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save"><code class="docutils literal notranslate"><span class="pre">Character.save()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_bvh"><code class="docutils literal notranslate"><span class="pre">Character.save_bvh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_bvh_with_joint_params"><code class="docutils literal notranslate"><span class="pre">Character.save_bvh_with_joint_params()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_fbx"><code class="docutils literal notranslate"><span class="pre">Character.save_fbx()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_fbx_with_joint_params"><code class="docutils literal notranslate"><span class="pre">Character.save_fbx_with_joint_params()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pymomentum.geometry.Character.save_gltf"><code class="docutils literal notranslate"><span class="pre">Character.save_gltf()</span></code></a></li>
@@ -550,6 +566,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.find_closest_points_on_mesh"><code class="docutils literal notranslate"><span class="pre">find_closest_points_on_mesh()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.get_log_level"><code class="docutils literal notranslate"><span class="pre">get_log_level()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.is_fbxsdk_available"><code class="docutils literal notranslate"><span class="pre">is_fbxsdk_available()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.join_takes_on_shared_timeline"><code class="docutils literal notranslate"><span class="pre">join_takes_on_shared_timeline()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_local_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_local_skeleton_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_positions"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_positions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pymomentum.geometry.joint_parameters_to_skeleton_state"><code class="docutils literal notranslate"><span class="pre">joint_parameters_to_skeleton_state()</span></code></a></li>
@@ -1003,9 +1020,43 @@ limits are passed through unchanged.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_bvh">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_bvh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_bvh" title="Link to this definition"></a></dt>
+<dd><p>Load a character from a BVH (BioVision Hierarchy) file.</p>
+<p>The character has the skeleton of the file and an identity parameter transform (7 parameters per
+joint), and no mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – A .bvh file; e.g. motion.bvh.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The character.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_bvh_with_motion">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_bvh_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_bvh_with_motion" title="Link to this definition"></a></dt>
+<dd><p>Load a character and its motion from a BVH (BioVision Hierarchy) file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – A .bvh file; e.g. motion.bvh.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (character, motion, fps): the character as <a class="reference internal" href="#pymomentum.geometry.Character.load_bvh" title="pymomentum.geometry.Character.load_bvh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_bvh()</span></code></a> returns it, its motion
+in [n_frames x n_parameters] (model parameters of its identity parameter transform), and the
+frame rate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_fbx">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_fbx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fbx_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locators_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_namespaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_fbx" title="Link to this definition"></a></dt>
 <dd><p>Load a character from an FBX file.  Optionally pass in a separate model definition and locators file.</p>
+<p>Without a model definition, the character has the rig that the file stores (see <a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">FbxBuilder</span></code></a>),
+or else an empty parameter transform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1019,6 +1070,102 @@ limits are passed through unchanged.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_fbx_characters">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_fbx_characters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fbx_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_namespaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_fbx_characters" title="Link to this definition"></a></dt>
+<dd><p>Load every character of an FBX file.</p>
+<p>Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx" title="pymomentum.geometry.Character.load_fbx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx()</span></code></a>, which merges the whole scene into one character, this returns one
+character per skeleton and one per unskinned mesh outside a skeleton, such as an object written by
+<a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_animated_mesh" title="pymomentum.geometry.FbxBuilder.add_animated_mesh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FbxBuilder.add_animated_mesh()</span></code></a>, which becomes a one-joint character. An unskinned mesh in a
+skeleton, such as one written by <a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_rigid_body" title="pymomentum.geometry.FbxBuilder.add_rigid_body"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FbxBuilder.add_rigid_body()</span></code></a>, moves rigidly with the nearest
+joint above it. Each character has the rig that the file stores for it (see <a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">FbxBuilder</span></code></a>),
+or else an identity parameter transform. No animation is loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_filename</strong> – .fbx file; e.g. scene.fbx.</p></li>
+<li><p><strong>permissive</strong> – If true, load joints with unsupported rotation settings and skip a mesh that
+belongs to no character, with a warning. If false, such a mesh makes the load fail.</p></li>
+<li><p><strong>load_blendshapes</strong> – If true, load blendshapes from the file.</p></li>
+<li><p><strong>strip_namespaces</strong> – If true, strip namespaces from nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, in scene order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_fbx_characters_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_fbx_characters_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fbx_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_namespaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_fbx_characters_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load every character of an FBX byte array.</p>
+<p>Byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters" title="pymomentum.geometry.Character.load_fbx_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx_characters()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_bytes</strong> – An array of bytes in FBX format.</p></li>
+<li><p><strong>permissive</strong> – If true, load joints with unsupported rotation settings and skip a mesh that
+belongs to no character, with a warning. If false, such a mesh makes the load fail.</p></li>
+<li><p><strong>load_blendshapes</strong> – If true, load blendshapes from the file.</p></li>
+<li><p><strong>strip_namespaces</strong> – If true, strip namespaces from nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, in scene order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_fbx_characters_with_motion">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_fbx_characters_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fbx_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_namespaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion" title="Link to this definition"></a></dt>
+<dd><p>Load every character of an FBX file with its motion.</p>
+<p>Characters are those of <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters" title="pymomentum.geometry.Character.load_fbx_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx_characters()</span></code></a>. Each character’s motion is read only from the
+curves on its own joints, with one motion per animation stack; the lists are index-aligned across
+characters, and a motion has no frames when its stack does not animate the character. Frame i of
+every motion is the pose at i / fps seconds, so the motions of one stack share their frame times;
+each motion ends at the last key on its character’s own joints, so the motions of one stack can have
+different frame counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_filename</strong> – .fbx file; e.g. scene.fbx.</p></li>
+<li><p><strong>permissive</strong> – If true, load joints with unsupported rotation settings and skip a mesh that
+belongs to no character, with a warning. If false, such a mesh makes the load fail.</p></li>
+<li><p><strong>load_blendshapes</strong> – If true, load blendshapes from the file.</p></li>
+<li><p><strong>strip_namespaces</strong> – If true, strip namespaces from nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(characters,</span> <span class="pre">fps)</span></code>. <code class="docutils literal notranslate"><span class="pre">characters</span></code> is a <code class="docutils literal notranslate"><span class="pre">list</span></code> of tuples
+<code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">motions)</span></code>, in scene order, where <code class="docutils literal notranslate"><span class="pre">motions</span></code> holds one numpy array of shape
+<code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joint_parameters)</span></code> per animation stack. <code class="docutils literal notranslate"><span class="pre">fps</span></code> is the scene frame rate.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_fbx_characters_with_motion_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_fbx_characters_with_motion_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fbx_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_blendshapes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_namespaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load every character of an FBX byte array with its motion.</p>
+<p>Byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion" title="pymomentum.geometry.Character.load_fbx_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx_characters_with_motion()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fbx_bytes</strong> – An array of bytes in FBX format.</p></li>
+<li><p><strong>permissive</strong> – If true, load joints with unsupported rotation settings and skip a mesh that
+belongs to no character, with a warning. If false, such a mesh makes the load fail.</p></li>
+<li><p><strong>load_blendshapes</strong> – If true, load blendshapes from the file.</p></li>
+<li><p><strong>strip_namespaces</strong> – If true, strip namespaces from nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(characters,</span> <span class="pre">fps)</span></code>, as in <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion" title="pymomentum.geometry.Character.load_fbx_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx_characters_with_motion()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1084,6 +1231,8 @@ limits are passed through unchanged.</p>
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf" title="Link to this definition"></a></dt>
 <dd><p>Load a character from a gltf file.</p>
+<p>If the file has more than one character, this returns the one with the most joints; use
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters" title="pymomentum.geometry.Character.load_gltf_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters()</span></code></a> to load all of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>path</strong> – A .gltf file; e.g. character_s0.glb.</p>
@@ -1092,9 +1241,159 @@ limits are passed through unchanged.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters" title="Link to this definition"></a></dt>
+<dd><p>Load every character from a gltf file.</p>
+<p>Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf" title="pymomentum.geometry.Character.load_gltf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf()</span></code></a>, which returns one character (the one with the most joints), this returns
+every character in the scene, in scene order. Each character gets its own rig (parameter transform,
+limits, parameter sets, pose constraints) from its root node; files without that copy have a single
+document-level rig, which every character then uses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – A .gltf/.glb file; e.g. character_s0.glb.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, one per character in the scene.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_channel_motion">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_channel_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion" title="Link to this definition"></a></dt>
+<dd><p>Load the motion that the gltf animation channels give every character in a gltf file, as
+joint parameters.</p>
+<p>These are the skeleton states of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_skel_states()</span></code></a> converted to joint
+parameters; each channel key is one frame. Files written by other tools keep their animation in
+these channels rather than in momentum’s motion data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf/.glb file; e.g. scene.glb.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One motion per character, in the order of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters" title="pymomentum.geometry.Character.load_gltf_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters()</span></code></a>: a numpy array of
+shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joint_parameters)</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for a character that no channel
+animates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_channel_motion_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_channel_motion_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load the motion of the gltf animation channels of every character in a gltf byte array.</p>
+<p>This is the byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion" title="pymomentum.geometry.Character.load_gltf_characters_channel_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_channel_motion()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One motion per character, as in <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_channel_motion" title="pymomentum.geometry.Character.load_gltf_characters_channel_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_channel_motion()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load every character from a gltf byte array.</p>
+<p>This is the byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters" title="pymomentum.geometry.Character.load_gltf_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>, one per character in the scene.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_with_motion">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_with_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="Link to this definition"></a></dt>
+<dd><p>Load every character together with its own motion from a gltf file.</p>
+<p>Each character’s motion, identity and timestamps are read from its root node, where
+<a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">GltfBuilder</span></code></a> stores them. A file with a single character, where no node stores a motion,
+falls back to the document-level motion. This is the multi-character counterpart of
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf/.glb file; e.g. character_s0.glb.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(characters,</span> <span class="pre">fps)</span></code> where <code class="docutils literal notranslate"><span class="pre">characters</span></code> is a list of per-character tuples
+<code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">motion,</span> <span class="pre">identity,</span> <span class="pre">timestamps)</span></code>: <code class="docutils literal notranslate"><span class="pre">character</span></code> is a <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>,
+<code class="docutils literal notranslate"><span class="pre">motion</span></code> is a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_parameters)</span></code>, <code class="docutils literal notranslate"><span class="pre">identity</span></code> is a
+joint-parameter vector (empty if the character has no stored identity), and <code class="docutils literal notranslate"><span class="pre">timestamps</span></code>
+is a list of per-frame timestamps (empty if the file stores none). <code class="docutils literal notranslate"><span class="pre">fps</span></code> is the
+document-global frame rate shared by all characters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_with_motion_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_with_motion_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load every character together with its own motion from a gltf byte array.</p>
+<p>This is the byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_motion()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple <code class="docutils literal notranslate"><span class="pre">(characters,</span> <span class="pre">fps)</span></code> where <code class="docutils literal notranslate"><span class="pre">characters</span></code> is a list of per-character tuples
+<code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">motion,</span> <span class="pre">identity,</span> <span class="pre">timestamps)</span></code>: <code class="docutils literal notranslate"><span class="pre">character</span></code> is a <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>,
+<code class="docutils literal notranslate"><span class="pre">motion</span></code> is a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_parameters)</span></code>, <code class="docutils literal notranslate"><span class="pre">identity</span></code> is a
+joint-parameter vector (empty if the character has no stored identity), and <code class="docutils literal notranslate"><span class="pre">timestamps</span></code>
+is a list of per-frame timestamps (empty if the file stores none). <code class="docutils literal notranslate"><span class="pre">fps</span></code> is the
+document-global frame rate shared by all characters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_with_skel_states">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_with_skel_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="Link to this definition"></a></dt>
+<dd><p>Load every character in a gltf file with its animation as skeleton states.</p>
+<p>Multi-character counterpart of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>. It reads the standard gltf
+animation channels, so it also works for files without momentum motion. Each character is read from
+the first animation with a translation, rotation or scale channel on one of its joints, and only
+from the channels that target its joints; a character that no such animation drives comes back with
+no frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf/.glb file; e.g. scene.glb.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of per-character tuples <code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">skel_states,</span> <span class="pre">timestamps)</span></code>, in the order of
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters" title="pymomentum.geometry.Character.load_gltf_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters()</span></code></a>, where <code class="docutils literal notranslate"><span class="pre">skel_states</span></code> is a numpy array of shape
+<code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joints,</span> <span class="pre">8)</span></code> and <code class="docutils literal notranslate"><span class="pre">timestamps</span></code> is a list of per-frame times in seconds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_characters_with_skel_states_from_bytes">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_characters_with_skel_states_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states_from_bytes" title="Link to this definition"></a></dt>
+<dd><p>Load every character with its animation as skeleton states from a gltf byte array.</p>
+<p>This is the byte-array version of <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_skel_states()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of per-character tuples <code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">skel_states,</span> <span class="pre">timestamps)</span></code>, as in
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_skel_states()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_from_bytes">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_from_bytes" title="Link to this definition"></a></dt>
 <dd><p>Load a character from a gltf byte array.</p>
+<p>If the file has more than one character, this returns the one with the most joints; use
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters" title="pymomentum.geometry.Character.load_gltf_characters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters()</span></code></a> to load all of them.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_bytes</strong> – A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
@@ -1113,6 +1412,8 @@ limits are passed through unchanged.</p>
 For loading ONLY motion data without the character, use <a class="reference internal" href="#pymomentum.geometry.load_motion" title="pymomentum.geometry.load_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pymomentum.geometry.load_motion()</span></code></a> instead.</p>
 <p>Note that motion can only be read from GLTF files saved using momentum, which stores model parameters
 in a custom extension. For GLTF files saved using other software, use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_skel_states" title="pymomentum.geometry.Character.load_gltf_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_skel_states()</span></code></a>.</p>
+<p>For a multi-character file, this returns the character with the most joints and that character’s
+own motion; use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_motion()</span></code></a> to load every character.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
@@ -1129,13 +1430,15 @@ and fps is the frame rate. Does NOT include parameter names (unlike <a class="re
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_gltf_with_motion_from_bytes">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_gltf_with_motion_from_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_gltf_with_motion_from_bytes" title="Link to this definition"></a></dt>
 <dd><p>Load a character and motion from a gltf byte array.</p>
+<p>For a multi-character file, this returns the character with the most joints and that character’s
+own motion; use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_motion()</span></code></a> to load every character.</p>
 <blockquote>
 <div><dl class="field-list simple">
 <dt class="field-odd">param gltf_bytes<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code> containing the GLTF JSON/messagepack data.</p>
 </dd>
 <dt class="field-even">return<span class="colon">:</span></dt>
-<dd class="field-even"><p>a valid <a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><code class="xref py py-class docutils literal notranslate"><span class="pre">Character</span></code></a>.</p>
+<dd class="field-even"><p>a tuple <code class="docutils literal notranslate"><span class="pre">(character,</span> <span class="pre">motion,</span> <span class="pre">identity,</span> <span class="pre">fps)</span></code>, as in <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -1153,6 +1456,8 @@ added back to the scale parameters.</p>
 <p>Use this function when you need the character structure, animation, and identity parameters
 all expressed in model parameter space, which is the natural format for optimization and
 character posing.</p>
+<p>For a multi-character file, this returns the character with the most joints and that character’s
+own motion; use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_motion()</span></code></a> to load every character.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_filename</strong> – Path to the GLTF/GLB file to load.</p>
@@ -1194,6 +1499,9 @@ and fps is the frames per second of the motion data.</p>
 <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, this function should work with any GLTF file since it reads the raw transforms from the file
 and doesn’t require that the Character have a valid parameter transform.  Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.</p>
+<p>For a multi-character file, this returns the character with the most joints, read from the first
+animation with a translation, rotation or scale channel on one of its joints; use
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_skel_states()</span></code></a> to load every character.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
@@ -1211,6 +1519,9 @@ support the proprietary momentum motion format for storing model parameters in G
 <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, this function should work with any GLTF file since it reads the raw transforms from the file
 and doesn’t require that the Character have a valid parameter transform.  Unlike <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_with_motion" title="pymomentum.geometry.Character.load_gltf_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_with_motion()</span></code></a>, it does not
 support the proprietary momentum motion format for storing model parameters in GLB.</p>
+<p>For a multi-character file, this returns the character with the most joints, read from the first
+animation with a translation, rotation or scale channel on one of its joints; use
+<a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_skel_states" title="pymomentum.geometry.Character.load_gltf_characters_with_skel_states"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_skel_states()</span></code></a> to load every character.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_bytes</strong> – The bytes of a gltf file.</p>
@@ -1337,7 +1648,9 @@ this is a legacy format that has historically been used in previous Python libra
 <dt class="sig sig-object py" id="pymomentum.geometry.Character.load_motion_timestamps">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_motion_timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gltf_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.load_motion_timestamps" title="Link to this definition"></a></dt>
 <dd><p>Load per-frame timestamps from a gltf file.</p>
-<p>Load timestamps stored in the momentum extension (usually in microseconds).</p>
+<p>Load timestamps stored in the momentum extension (usually in microseconds). This reads the
+document-level motion, which in a multi-character file belongs to the character whose motion was
+added last; use <a class="reference internal" href="#pymomentum.geometry.Character.load_gltf_characters_with_motion" title="pymomentum.geometry.Character.load_gltf_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_gltf_characters_with_motion()</span></code></a> to get every character’s timestamps.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gltf_filename</strong> – A .gltf file; e.g. character_s0.glb.</p>
@@ -1465,6 +1778,48 @@ this is a legacy format that has historically been used in previous Python libra
 <li><p><strong>offsets</strong> – [Optional] Offset array in [(n_joints x n_parameters_per_joint)]</p></li>
 <li><p><strong>markers</strong> – [Optional] Additional marker (3d positions) data in [n_frames][n_markers]</p></li>
 <li><p><strong>options</strong> – [Optional] FileSaveOptions for controlling output (mesh, locators, collisions, etc.)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.save_bvh">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_bvh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.save_bvh" title="Link to this definition"></a></dt>
+<dd><p>Save a character and its motion to a BVH (BioVision Hierarchy) file.</p>
+<p>A BVH file stores a skeleton and its motion only: the mesh, locators, collision geometry, physical
+properties, metadata and joint scales of the character are not saved, with a warning. Joint
+pre-rotations are folded into the rotation channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A .bvh export filename.</p></li>
+<li><p><strong>character</strong> – A Character to be saved to the output file.</p></li>
+<li><p><strong>fps</strong> – Frequency in frames per second.</p></li>
+<li><p><strong>motion</strong> – [Optional] Model parameters in [n_frames x n_parameters]. Without a motion, the file
+holds a single frame of zero model parameters.</p></li>
+<li><p><strong>offsets</strong> – [Optional] Identity offsets in [(n_joints x n_parameters_per_joint)]. As in
+<a class="reference internal" href="#pymomentum.geometry.Character.save_fbx" title="pymomentum.geometry.Character.save_fbx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_fbx()</span></code></a>, the joint parameters are the parameter transform applied to the motion plus
+these offsets, which take the place of the parameter transform’s own offsets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymomentum.geometry.Character.save_bvh_with_joint_params">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_bvh_with_joint_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.Character.save_bvh_with_joint_params" title="Link to this definition"></a></dt>
+<dd><p>Save a character and its motion, given as joint parameters, to a BVH (BioVision Hierarchy) file.</p>
+<p>Like <a class="reference internal" href="#pymomentum.geometry.Character.save_bvh" title="pymomentum.geometry.Character.save_bvh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_bvh()</span></code></a>, for joint-parameter motion such as the takes of
+<a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_with_motion" title="pymomentum.geometry.Character.load_fbx_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_fbx_with_motion()</span></code></a>, whatever the character’s parameter transform is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – A .bvh export filename.</p></li>
+<li><p><strong>character</strong> – A Character to be saved to the output file.</p></li>
+<li><p><strong>fps</strong> – Frequency in frames per second.</p></li>
+<li><p><strong>joint_params</strong> – [Optional] Joint parameters in [n_frames x (n_joints x
+n_parameters_per_joint)]. Without them, the file holds a single frame of zero joint parameters.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1966,6 +2321,10 @@ It can be used to solve for facial expressions.</p>
 <p>FbxBuilder allows you to incrementally construct an FBX scene by adding
 skinned characters, rigid bodies, motions, and marker data. This is useful
 for creating scenes with multiple characters/objects in a single FBX file.</p>
+<p>Character names: <code class="docutils literal notranslate"><span class="pre">add_character</span></code> / <code class="docutils literal notranslate"><span class="pre">add_rigid_body</span></code> de-duplicate names (appending
+<code class="docutils literal notranslate"><span class="pre">_1</span></code>, <code class="docutils literal notranslate"><span class="pre">_2</span></code>, …) and return the exported name, which may differ from <code class="docutils literal notranslate"><span class="pre">character.name</span></code>.
+Pass that returned name as <code class="docutils literal notranslate"><span class="pre">character_name</span></code> to the <code class="docutils literal notranslate"><span class="pre">add_motion*</span></code> methods to target a
+specific character or instance (e.g. the same character added more than once).</p>
 <p>Note: FBX saving requires the Autodesk FBX SDK and is only available on
 Linux x86_64, Windows x86_64, and macOS.</p>
 <dl class="py method">
@@ -1979,7 +2338,7 @@ Linux x86_64, Windows x86_64, and macOS.</p>
 <span class="sig-name descname"><span class="pre">add_animated_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_animated_mesh" title="Link to this definition"></a></dt>
 <dd><p>Overloaded function.</p>
 <ol class="arabic simple">
-<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, character: pymomentum.geometry.Character, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None, user_properties: dict[str, Union[bool, int, float, str]] = {}) -&gt; None</p></li>
+<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, character: pymomentum.geometry.Character, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None, user_properties: dict[str, Union[bool, int, float, str]] = {}) -&gt; str</p></li>
 </ol>
 <p>Add an animated mesh (no skeleton) to the scene.</p>
 <p>Creates a standalone mesh node and animates its transform directly from
@@ -1989,28 +2348,36 @@ as a simple animated mesh without any skeleton hierarchy.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character providing the mesh geometry.</p></li>
-<li><p><strong>name</strong> – Name for the mesh node.</p></li>
+<li><p><strong>name</strong> – Requested name for the mesh node.</p></li>
 <li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
-<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams).</p></li>
+<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+joint’s columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+without it). Fewer than 6 columns raises an error.</p></li>
 <li><p><strong>user_properties</strong> – Mapping of name to bool/int/float/str, written onto the
 mesh node as user-defined FBX properties. DCC tools surface these as the
 object’s custom attributes.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The unique name the mesh node is exported under: <code class="docutils literal notranslate"><span class="pre">name</span></code>, with a numeric suffix
+if a character, rigid body or animated mesh already uses it.</p>
+</dd>
 </dl>
 <ol class="arabic simple" start="2">
-<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, mesh: pymomentum.geometry.Mesh, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None, translation_offset: Optional[numpy.ndarray[numpy.float32[3, 1]]] = None, user_properties: dict[str, Union[bool, int, float, str]] = {}) -&gt; None</p></li>
+<li><p>add_animated_mesh(self: pymomentum.geometry.FbxBuilder, mesh: pymomentum.geometry.Mesh, name: str, fps: float = 120.0, joint_params: Optional[numpy.ndarray[numpy.float32[m, n]]] = None, translation_offset: Optional[numpy.ndarray[numpy.float32[3, 1]]] = None, user_properties: dict[str, Union[bool, int, float, str]] = {}) -&gt; str</p></li>
 </ol>
 <p>Add an animated mesh from a Mesh object (no Character needed).</p>
-<p>Creates a standalone mesh node and animates its transform from joint
-parameters. Only the root transform (first 7 joint params) is used.</p>
+<p>Creates a standalone mesh node and animates its transform from the root joint
+parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mesh</strong> – The mesh geometry.</p></li>
-<li><p><strong>name</strong> – Name for the mesh node.</p></li>
+<li><p><strong>name</strong> – Requested name for the mesh node.</p></li>
 <li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
-<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams).</p></li>
+<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams). Only the first
+joint’s columns are used: tx, ty, tz, rx, ry, rz and, if present, the scale (unit scale
+without it). Fewer than 6 columns raises an error.</p></li>
 <li><p><strong>translation_offset</strong> – Rest-pose translation offset added to the translation
 channels (defaults to zero).</p></li>
 <li><p><strong>user_properties</strong> – Mapping of name to bool/int/float/str, written onto the
@@ -2018,12 +2385,16 @@ mesh node as user-defined FBX properties. DCC tools surface these as the
 object’s custom attributes.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The unique name the mesh node is exported under: <code class="docutils literal notranslate"><span class="pre">name</span></code>, with a numeric suffix
+if a character, rigid body or animated mesh already uses it.</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_character">
-<span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto,</span> <span class="pre">gltf_animation_interpolation=Step)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_character" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto,</span> <span class="pre">gltf_animation_interpolation=Step)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_character" title="Link to this definition"></a></dt>
 <dd><p>Add a skinned character (skeleton + mesh with skin weights) to the scene.</p>
 <p>Creates the skeleton hierarchy, mesh with skin deformer, locators,
 collision geometry, and metadata.</p>
@@ -2031,8 +2402,13 @@ collision geometry, and metadata.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to add.</p></li>
-<li><p><strong>options</strong> – File save options controlling mesh, locators, collisions.</p></li>
+<li><p><strong>options</strong> – File save options: mesh, locators, collisions, coordinate system and FBX
+namespace. A non-empty <code class="docutils literal notranslate"><span class="pre">fbx_namespace</span></code> prefixes the name of every node in the saved file; a
+file has one namespace, so a different non-empty namespace in a later call raises an error.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The exported character name. A numeric suffix is added when the requested name is already in use.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2053,17 +2429,25 @@ collision geometry, and metadata.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_motion">
-<span class="sig-name descname"><span class="pre">add_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion" title="Link to this definition"></a></dt>
 <dd><p>Add model-parameter animation for a previously added character.</p>
 <p>Converts model parameters to joint parameters, then creates animation
-curves. Also extracts and animates blend shape weights when applicable.</p>
+curves. Also extracts and animates blend shape weights when applicable.
+A joint parameter that no model parameter drives gets a curve when its value
+is not zero, such as an offset. A later call for the same character replaces
+its motion; a motion without frames writes nothing and keeps the earlier one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to animate (must match a previously added character).</p></li>
 <li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
-<li><p><strong>motion</strong> – Model parameters matrix with shape (nFrames, nModelParams). None for no animation.</p></li>
-<li><p><strong>offsets</strong> – Identity/offset parameters for the bind pose. None to use default bind pose.</p></li>
+<li><p><strong>motion</strong> – Model parameters matrix with shape (nFrames, nModelParams), one column for each
+model parameter of the character; a motion with frames and another number of columns raises
+an error. None for no animation.</p></li>
+<li><p><strong>offsets</strong> – Identity/offset joint parameters, added to the joint parameters of every frame.
+None keeps the offsets of the character’s earlier motion, or uses the bind pose if there is
+none.</p></li>
+<li><p><strong>character_name</strong> – Which exported character to animate (see “Character names”). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2071,16 +2455,20 @@ curves. Also extracts and animates blend shape weights when applicable.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_motion_with_joint_params">
-<span class="sig-name descname"><span class="pre">add_motion_with_joint_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion_with_joint_params" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_motion_with_joint_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_motion_with_joint_params" title="Link to this definition"></a></dt>
 <dd><p>Add joint-parameter animation for a previously added character.</p>
 <p>Uses joint parameters directly, bypassing the activeJointParams check.
-This is useful for rigid bodies or characters with simple parameterization.</p>
+This is useful for rigid bodies or characters with simple parameterization.
+A later call for the same character replaces its motion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to animate (must match a previously added character).</p></li>
 <li><p><strong>fps</strong> – Animation frame rate in frames per second.</p></li>
-<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams). None for no animation.</p></li>
+<li><p><strong>joint_params</strong> – Joint parameters matrix with shape (nFrames, nJointParams), one column for
+each joint parameter of the character; a motion with frames and another number of columns
+raises an error. None for no animation.</p></li>
+<li><p><strong>character_name</strong> – Which exported character to animate (see “Character names”). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2088,7 +2476,7 @@ This is useful for rigid bodies or characters with simple parameterization.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.FbxBuilder.add_rigid_body">
-<span class="sig-name descname"><span class="pre">add_rigid_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto,</span> <span class="pre">gltf_animation_interpolation=Step)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_rigid_body" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_rigid_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FbxBuilder" title="pymomentum.geometry.FbxBuilder"><span class="pre">pymomentum.geometry.FbxBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_joint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FileSaveOptions(mesh=true,</span> <span class="pre">locators=true,</span> <span class="pre">collisions=true,</span> <span class="pre">blend_shapes=true,</span> <span class="pre">permissive=false,</span> <span class="pre">coord_system_info=FbxCoordSystemInfo(upVector=YAxis,</span> <span class="pre">frontVector=ParityOdd,</span> <span class="pre">coordSystem=RightHanded),</span> <span class="pre">fbx_namespace='',</span> <span class="pre">extensions=true,</span> <span class="pre">gltf_file_format=Auto,</span> <span class="pre">gltf_animation_interpolation=Step)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.geometry.FbxBuilder.add_rigid_body" title="Link to this definition"></a></dt>
 <dd><p>Add a rigid body (skeleton + mesh parented to a joint, no skinning).</p>
 <p>For props/objects where the entire mesh moves rigidly with a joint.
 The mesh is parented under the specified joint node instead of the scene
@@ -2097,11 +2485,16 @@ root, so it inherits the skeleton’s animation without needing skin weights.</p
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to add as a rigid body.</p></li>
-<li><p><strong>name</strong> – Optional name override. Uses character.name if empty.</p></li>
+<li><p><strong>name</strong> – Optional requested base name. Uses character.name if empty. A numeric
+suffix is appended if the resulting name is already in use.</p></li>
 <li><p><strong>parent_joint</strong> – Index of the joint to parent the mesh under. Defaults to 0
 (the root joint).</p></li>
-<li><p><strong>options</strong> – File save options (mesh option is respected).</p></li>
+<li><p><strong>options</strong> – File save options: the mesh option and the FBX namespace (see
+<a class="reference internal" href="#pymomentum.geometry.FbxBuilder.add_character" title="pymomentum.geometry.FbxBuilder.add_character"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_character()</span></code></a>).</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The exported rigid-body name. A numeric suffix is added when the requested name is already in use.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2392,20 +2785,25 @@ root, so it inherits the skeleton’s animation without needing skin weights.</p
 <p>The GltfBuilder allows you to incrementally construct a GLTF scene by adding characters,
 meshes, motions, and marker data. This is useful for creating complex scenes with multiple
 characters or combining different types of data into a single GLTF file.</p>
+<p>Character names: <code class="docutils literal notranslate"><span class="pre">add_character</span></code> de-duplicates names (appending <code class="docutils literal notranslate"><span class="pre">_1</span></code>, <code class="docutils literal notranslate"><span class="pre">_2</span></code>, …) and
+returns the exported name, which may differ from <code class="docutils literal notranslate"><span class="pre">character.name</span></code>. Pass that returned name
+as <code class="docutils literal notranslate"><span class="pre">character_name</span></code> to <code class="docutils literal notranslate"><span class="pre">add_motion</span></code> / <code class="docutils literal notranslate"><span class="pre">add_skeleton_states</span></code> to target a specific
+character or instance (e.g. the same character added more than once).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.GltfBuilder.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.__init__" title="Link to this definition"></a></dt>
 <dd><p>Create a new GltfBuilder with the specified frame rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fps</strong> – Frame rate in frames per second for animations.</p>
+<dd class="field-odd"><p><strong>fps</strong> – Frame rate of the file in frames per second. A glTF file stores one frame rate, and
+the motion of every character is read back at this frame rate.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.GltfBuilder.add_character">
-<span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_character" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_character</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.FileSaveOptions" title="pymomentum.geometry.FileSaveOptions"><span class="pre">pymomentum.geometry.FileSaveOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_character" title="Link to this definition"></a></dt>
 <dd><p>Add a character to the GLTF scene.</p>
 <p>Each character will have a root node with the character’s name as the parent
 of the skeleton root and the character mesh. Position and rotation offsets
@@ -2416,11 +2814,11 @@ can be provided as an initial transform for the character.</p>
 <li><p><strong>character</strong> – The character to add to the scene.</p></li>
 <li><p><strong>position_offset</strong> – Translation offset for the character’s root node. Defaults to zero vector if None.</p></li>
 <li><p><strong>rotation_offset</strong> – Rotation offset as a quaternion in (x,y,z,w) format. Defaults to identity quaternion if None.</p></li>
-<li><p><strong>add_extensions</strong> – Whether to add momentum extensions to GLTF nodes.</p></li>
-<li><p><strong>add_collisions</strong> – Whether to add collision geometry to the scene.</p></li>
-<li><p><strong>add_locators</strong> – Whether to add locator data to the scene.</p></li>
-<li><p><strong>add_mesh</strong> – Whether to add the character’s mesh to the scene.</p></li>
+<li><p><strong>options</strong> – File save options controlling extensions, collisions, locators, and meshes.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The exported character name. A numeric suffix is added when the requested name is already in use.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2435,7 +2833,9 @@ analysis or visualization. Optional marker mesh visualization can be added as un
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fps</strong> – Frame rate in frames per second for the marker sequence data.</p></li>
+<li><p><strong>fps</strong> – Frame rate in frames per second for the marker sequence data. The marker keys are
+stored in seconds, so the markers keep their timing even if the builder has another frame rate
+(<a class="reference internal" href="#pymomentum.geometry.GltfBuilder.fps" title="pymomentum.geometry.GltfBuilder.fps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fps</span></code></a>).</p></li>
 <li><p><strong>marker_sequence</strong> – A 2D list/array with shape [numFrames][numMarkers] containing
 Marker objects for each frame. Each Marker contains name,
 position, and occlusion status.</p></li>
@@ -2468,22 +2868,30 @@ node in the scene with the specified name.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.GltfBuilder.add_motion">
-<span class="sig-name descname"><span class="pre">add_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_extensions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_motion" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_extensions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_motion" title="Link to this definition"></a></dt>
 <dd><p>Add a motion sequence to the specified character.</p>
 <p>If addCharacter has not been called before adding the motion, the character
 will be automatically added with default settings. The motion data contains
-model parameters that animate the character over time.</p>
+model parameters that animate the character over time. Another motion for the
+same character replaces its stored model parameters (and the identity, when
+offsets are given) and the channels of its joints and mesh in the animation
+named custom_name; a motion without frames stores nothing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to add motion for.</p></li>
-<li><p><strong>fps</strong> – Frame rate in frames per second for the motion data.</p></li>
+<li><p><strong>fps</strong> – Frame rate in frames per second for the motion data. It must match the frame rate of
+the builder (<a class="reference internal" href="#pymomentum.geometry.GltfBuilder.fps" title="pymomentum.geometry.GltfBuilder.fps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fps</span></code></a>, set by the constructor); a different value only logs a warning, and
+the motion is then read back at the builder’s frame rate.</p></li>
 <li><p><strong>motion</strong> – Optional motion parameters as a tuple of (parameter_names, motion_data).
 Motion data should be a matrix with shape [n_frames x n_parameters].</p></li>
 <li><p><strong>offsets</strong> – Optional identity parameters as a tuple of (joint_names, offset_data).
 Offset data should be a vector with shape [n_joints * 7].</p></li>
 <li><p><strong>add_extensions</strong> – Whether to add momentum extensions to GLTF nodes.</p></li>
-<li><p><strong>custom_name</strong> – Custom name for the animation in the GLTF file.</p></li>
+<li><p><strong>custom_name</strong> – Name of the glTF animation that receives the motion. Motions added with the
+same name share one animation, which glTF viewers play as one clip, so give the characters of
+one recording the same name.</p></li>
+<li><p><strong>character_name</strong> – Which exported character to animate (see “Character names”). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2491,21 +2899,29 @@ Offset data should be a vector with shape [n_joints * 7].</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymomentum.geometry.GltfBuilder.add_skeleton_states">
-<span class="sig-name descname"><span class="pre">add_skeleton_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_skeleton_states" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_skeleton_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.GltfBuilder" title="pymomentum.geometry.GltfBuilder"><span class="pre">pymomentum.geometry.GltfBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skeleton_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.add_skeleton_states" title="Link to this definition"></a></dt>
 <dd><p>Add skeleton states animation to the specified character.</p>
 <p>If addCharacter has not been called before adding the skeleton states, the character
 will be automatically added with default settings. The skeleton states contain
-per-joint transforms that define the character’s pose over time.</p>
+per-joint transforms that define the character’s pose over time. They replace
+the channels of the character’s joints in the animation named custom_name; the
+blend-shape weights channel and the model parameters of an earlier
+<a class="reference internal" href="#pymomentum.geometry.GltfBuilder.add_motion" title="pymomentum.geometry.GltfBuilder.add_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_motion()</span></code></a> stay.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>character</strong> – The character to add skeleton states for.</p></li>
-<li><p><strong>fps</strong> – Frame rate in frames per second for the skeleton state data.</p></li>
+<li><p><strong>fps</strong> – Frame rate in frames per second for the skeleton state data. The animation keys are
+stored in seconds, so the skeleton states keep their timing even if the builder has another
+frame rate (<a class="reference internal" href="#pymomentum.geometry.GltfBuilder.fps" title="pymomentum.geometry.GltfBuilder.fps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fps</span></code></a>).</p></li>
 <li><p><strong>skeleton_states</strong> – Skeleton states as a 3D array with shape [nFrames, nJoints, 8].
 Each joint state contains [tx, ty, tz, rx, ry, rz, rw, s] where
 translation is (tx,ty,tz), rotation is quaternion (rx,ry,rz,rw)
 in (x,y,z,w) format, and s is scale.</p></li>
-<li><p><strong>custom_name</strong> – Custom name for the animation in the GLTF file.</p></li>
+<li><p><strong>custom_name</strong> – Name of the glTF animation that receives the motion. Motions added with the
+same name share one animation, which glTF viewers play as one clip, so give the characters of
+one recording the same name.</p></li>
+<li><p><strong>character_name</strong> – Which exported character to animate (see “Character names”). When empty, resolves to the character added from the source name that kept that name, or else the first one added from it, auto-adding it if absent.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2526,9 +2942,9 @@ skeleton states interpolate between their keys (default: Step). Marker animation
 <dl class="py property">
 <dt class="sig sig-object py" id="pymomentum.geometry.GltfBuilder.fps">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fps</span></span><a class="headerlink" href="#pymomentum.geometry.GltfBuilder.fps" title="Link to this definition"></a></dt>
-<dd><p>The frame rate in frames per second used for animations.</p>
-<p>This property controls the timing of all animations added to the GLTF file.
-Setting this value will affect subsequently added motions and animations.</p>
+<dd><p>The frame rate of the file in frames per second.</p>
+<p>A glTF file stores one frame rate, which the constructor sets. Setting a different value later
+only logs a warning and keeps the current frame rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -4541,6 +4957,27 @@ The fourth is […, nSrcPoints, 3] and contains the barycentric coordinates of t
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymomentum.geometry.join_takes_on_shared_timeline">
+<span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">join_takes_on_shared_timeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">takes_per_character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float32</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymomentum.geometry.join_takes_on_shared_timeline" title="Link to this definition"></a></dt>
+<dd><p>Join the takes of every character, as <a class="reference internal" href="#pymomentum.geometry.Character.load_fbx_characters_with_motion" title="pymomentum.geometry.Character.load_fbx_characters_with_motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Character.load_fbx_characters_with_motion()</span></code></a>
+returns them, into one motion per character on a timeline shared by all characters.</p>
+<p>Take <code class="docutils literal notranslate"><span class="pre">i</span></code> starts at the same frame for every character. A character whose take is shorter, or
+that the take does not animate, holds its last pose until the take ends; before its first animated
+frame, that is its rest pose (zero joint parameters).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>takes_per_character</strong> – For every character, its takes, index-aligned across characters; each
+take is a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joint_parameters)</span></code>, and a take without frames does
+not animate the character.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One motion per character, a numpy array of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_joint_parameters)</span></code> with
+the same frame count for every character, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for a character that no take animates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymomentum.geometry.joint_parameters_to_local_skeleton_state">
 <span class="sig-prename descclassname"><span class="pre">pymomentum.geometry.</span></span><span class="sig-name descname"><span class="pre">joint_parameters_to_local_skeleton_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pymomentum.geometry.Character" title="pymomentum.geometry.Character"><span class="pre">pymomentum.geometry.Character</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Buffer</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#pymomentum.geometry.joint_parameters_to_local_skeleton_state" title="Link to this definition"></a></dt>
 <dd><p>Map from the 7*nJoints jointParameters (representing transforms to the parent joint) to the 8*nJoints local skeleton state.</p>
@@ -4613,7 +5050,7 @@ Shape: […, numJoints, 8]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> – A marker data file: .c3d, .gltf, or .trc.</p></li>
+<li><p><strong>path</strong> – A marker data file: .c3d, .trc, .glb, .gltf or .fbx (the extension in any letter case).</p></li>
 <li><p><strong>main_subject_only</strong> – True to load only one subject’s data.</p></li>
 <li><p><strong>up</strong> – The up vector to use for the coordinate system, default to Y.</p></li>
 </ul>
