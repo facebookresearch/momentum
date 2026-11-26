@@ -86,13 +86,25 @@ struct CharacterWithNodeMap {
   /// The character's top-level scene node (the root node GltfBuilder writes for it), or
   /// kInvalidNodeId if there is none.
   uint32_t rootNode = kInvalidNodeId;
+  /// Whether the character is an object of a document from another tool (see
+  /// loadGltfCharacters()) rather than a skinned character.
+  bool isObject = false;
 };
+
+/// Whether loadGltfCharactersInternal() loads each object of a document from another tool (see
+/// loadGltfCharacters()) as a character of its own.
+enum class GltfObjects { Load, Skip };
 
 /// Load every character of a glTF document, in the order of loadGltfCharacters().
 ///
 /// @param[in] model The glTF document to load from.
+/// @param[in] objects Whether the objects of a document from another tool are characters. The
+/// single-character loaders skip them, so their character is a skinned one, which gets the meshes
+/// without a skin when the document has one skeleton.
 /// @return One entry per character.
-std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(const fx::gltf::Document& model);
+std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(
+    const fx::gltf::Document& model,
+    GltfObjects objects);
 
 /// The character the single-character loaders return: the one with the most joints, the first of
 /// those on a tie. Warns when there is more than one character and throws when there is none.
