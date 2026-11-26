@@ -22,7 +22,12 @@
 #include "momentum/math/constants.h"
 
 #include <algorithm>
+#include <cmath>
+#include <functional>
+#include <iterator>
 #include <span>
+#include <string>
+#include <vector>
 
 namespace momentum {
 
@@ -231,90 +236,194 @@ size_t validateAndResolveChannel(
   return boneIdx;
 }
 
-// Reads translation/rotation/scale data from a channel sampler and applies it to the local
-// transforms of skeleton states, which start at `restLocals`, one transform per joint.
-// A channel with an unrecognized target path is skipped.
-void applyChannelDataToStates(
+// The keys of a channel that animates a joint transform: the key times and, for each key, the
+// value (x, y, z for a translation in meters or a scale, x, y, z, w for a rotation) and, for a
+// cubic spline, the in- and out-tangents.
+struct ChannelKeys {
+  size_t joint = kInvalidIndex;
+  std::string path;
+  fx::gltf::Animation::Sampler::Type interpolation = fx::gltf::Animation::Sampler::Type::Linear;
+  std::vector<float> times;
+  std::vector<Vector4f> values;
+  std::vector<Vector4f> inTangents;
+  std::vector<Vector4f> outTangents;
+};
+
+// The keys of `sampler`, which animates the `path` of joint `joint`. A channel with an
+// unrecognized target path, or whose values do not match its key times, has no keys.
+ChannelKeys readChannelKeys(
     const fx::gltf::Document& model,
     const fx::gltf::Animation::Sampler& sampler,
-    const std::string& targetPath,
-    size_t boneIdx,
-    const Character& character,
-    std::span<const Transform> restLocals,
-    std::vector<SkeletonState>& states,
-    std::vector<float>& timestamps) {
-  // Read the appropriate transform component from the sampler output
-  std::vector<Vector3f> translations_m;
-  std::vector<Quaternionf> rotations;
-  std::vector<Vector3f> scales;
-  if (targetPath == "translation") {
-    translations_m = copyAccessorBuffer<Vector3f>(model, sampler.output);
-  } else if (targetPath == "rotation") {
-    rotations = copyAccessorBuffer<Quaternionf>(model, sampler.output);
-  } else if (targetPath == "scale") {
-    scales = copyAccessorBuffer<Vector3f>(model, sampler.output);
+    const std::string& path,
+    size_t joint) {
+  std::vector<Vector4f> outputs;
+  if (path == "rotation") {
+    std::ranges::transform(
+        copyAccessorBuffer<Quaternionf>(model, sampler.output),
+        std::back_inserter(outputs),
+        [](const Quaternionf& rotation) { return rotation.coeffs(); });
+  } else if (path == "translation" || path == "scale") {
+    std::ranges::transform(
+        copyAccessorBuffer<Vector3f>(model, sampler.output),
+        std::back_inserter(outputs),
+        [](const Vector3f& value) { return Vector4f(value.x(), value.y(), value.z(), 0.0f); });
   } else {
-    return;
+    return {};
   }
 
-  // Validate and store timestamps
-  auto timestampsCur = copyAccessorBuffer<float>(model, sampler.input);
-  if (timestamps.empty()) {
-    timestamps = timestampsCur;
-  } else {
-    MT_THROW_IF(
-        timestamps.size() != timestampsCur.size(),
-        "Timestamps do not match between channels, got {} and {}",
-        timestamps.size(),
-        timestampsCur.size());
+  ChannelKeys keys;
+  keys.joint = joint;
+  keys.path = path;
+  keys.interpolation = sampler.interpolation;
+  keys.times = copyAccessorBuffer<float>(model, sampler.input);
+  if (!std::ranges::all_of(keys.times, [](float time) { return std::isfinite(time); })) {
+    MT_LOGW(
+        "glTF animation channel for the {} of joint {} has key times that are not finite numbers; it is not read.",
+        path,
+        joint);
+    return {};
   }
+  const size_t numKeys = keys.times.size();
+  const bool cubic = keys.interpolation == fx::gltf::Animation::Sampler::Type::CubicSpline;
+  // A cubic spline stores an in-tangent, a value and an out-tangent for each key.
+  if (numKeys == 0 || outputs.size() != (cubic ? 3 * numKeys : numKeys)) {
+    MT_LOGW(
+        "glTF animation channel for the {} of joint {} has {} values for {} keys; it is not read.",
+        path,
+        joint,
+        outputs.size(),
+        numKeys);
+    return {};
+  }
+  if (!cubic) {
+    keys.values = std::move(outputs);
+    return keys;
+  }
+  for (size_t key = 0; key < numKeys; ++key) {
+    keys.inTangents.push_back(outputs.at(3 * key));
+    keys.values.push_back(outputs.at(3 * key + 1));
+    keys.outTangents.push_back(outputs.at(3 * key + 2));
+  }
+  return keys;
+}
 
-  // Lazily initialize states on first channel
-  if (states.empty()) {
-    states.resize(
-        timestamps.size(),
-        SkeletonState(
-            JointParameters::Zero(character.parameterTransform.numJointParameters()),
-            character.skeleton));
-    for (auto& state : states) {
-      for (size_t jointId = 0; jointId < restLocals.size() && jointId < state.jointState.size();
-           ++jointId) {
-        state.jointState[jointId].localTransform = restLocals[jointId];
+// Key times closer than this are the same frame time (see frameTimes()).
+constexpr float kKeyTimeTolerance = 1e-5f;
+
+// The value of `keys` at `time`, interpolated as the glTF format defines. Before the first key and
+// after the last key, and within kKeyTimeTolerance of a key, the value is that of the key.
+Vector4f sampleChannel(const ChannelKeys& keys, float time) {
+  const auto& times = keys.times;
+  const size_t lastKey = times.size() - 1;
+  if (time <= times.at(0)) {
+    return keys.values.at(0);
+  }
+  if (time >= times.at(lastKey)) {
+    return keys.values.at(lastKey);
+  }
+  const auto next = static_cast<size_t>(std::ranges::upper_bound(times, time) - times.begin());
+  const size_t key = next - 1;
+  if (times.at(next) - time < kKeyTimeTolerance) {
+    return keys.values.at(next);
+  }
+  if (time - times.at(key) < kKeyTimeTolerance ||
+      keys.interpolation == fx::gltf::Animation::Sampler::Type::Step) {
+    return keys.values.at(key);
+  }
+  const float duration = times.at(next) - times.at(key);
+  const float s = (time - times.at(key)) / duration;
+  const bool rotation = keys.path == "rotation";
+  if (keys.interpolation == fx::gltf::Animation::Sampler::Type::Linear) {
+    if (rotation) {
+      return Quaternionf(keys.values.at(key)).slerp(s, Quaternionf(keys.values.at(next))).coeffs();
+    }
+    return (1.0f - s) * keys.values.at(key) + s * keys.values.at(next);
+  }
+  // A cubic Hermite spline, with tangents per unit of time.
+  const float s2 = s * s;
+  const float s3 = s2 * s;
+  Vector4f value = (2.0f * s3 - 3.0f * s2 + 1.0f) * keys.values.at(key) +
+      duration * (s3 - 2.0f * s2 + s) * keys.outTangents.at(key) +
+      (-2.0f * s3 + 3.0f * s2) * keys.values.at(next) +
+      duration * (s3 - s2) * keys.inTangents.at(next);
+  if (rotation) {
+    // A spline value of zero, such as halfway between the keys q and -q with zero tangents, has no
+    // direction to normalize (Eigen's normalize() leaves a vector whose squared norm is not
+    // positive unchanged), so it gets the spherical interpolation of its keys.
+    if (!(value.squaredNorm() > 0.0f)) {
+      return Quaternionf(keys.values.at(key)).slerp(s, Quaternionf(keys.values.at(next))).coeffs();
+    }
+    value.normalize();
+  }
+  return value;
+}
+
+// The frame times of `channels`: their key times when all channels have the same key times, and
+// otherwise the key times of the channels whose key times increase, in order, with times closer
+// than kKeyTimeTolerance merged. applyChannels() does not read the other channels.
+std::vector<float> frameTimes(std::span<const ChannelKeys> channels) {
+  if (channels.empty()) {
+    return {};
+  }
+  if (std::ranges::all_of(channels, [&](const ChannelKeys& keys) {
+        return keys.times == channels.front().times;
+      })) {
+    // Channels that share their key times give their keys in order, as before, also when the times
+    // do not increase as the glTF format requires.
+    const auto& times = channels.front().times;
+    if (std::ranges::adjacent_find(times, std::greater_equal<>()) != times.end()) {
+      MT_LOGW(
+          "glTF animation has key times that do not increase, which the glTF format requires; momentum reads its keys in order.");
+    }
+    return times;
+  }
+  std::vector<float> result;
+  for (const auto& keys : channels) {
+    if (std::ranges::adjacent_find(keys.times, std::greater_equal<>()) != keys.times.end()) {
+      continue;
+    }
+    result.insert(result.end(), keys.times.begin(), keys.times.end());
+  }
+  std::ranges::sort(result);
+  const auto [first, last] = std::ranges::unique(
+      result, [](float earlier, float later) { return later - earlier < kKeyTimeTolerance; });
+  result.erase(first, last);
+  return result;
+}
+
+// Sets the local transforms of the joints of `states`, one state per frame at `times`, from the
+// channels' values at these times. A channel whose keys are at the frame times gives its key values
+// in order; another channel is interpolated, and is not read if its key times do not increase, as
+// the glTF format requires.
+void applyChannels(
+    std::span<const ChannelKeys> channels,
+    std::span<const float> times,
+    std::vector<SkeletonState>& states) {
+  for (const auto& keys : channels) {
+    const bool atFrames = std::ranges::equal(keys.times, times);
+    if (!atFrames &&
+        std::ranges::adjacent_find(keys.times, std::greater_equal<>()) != keys.times.end()) {
+      MT_LOGW(
+          "glTF animation channel for the {} of joint {} has key times that do not increase; it is not read.",
+          keys.path,
+          keys.joint);
+      continue;
+    }
+    for (size_t frame = 0; frame < states.size(); ++frame) {
+      MT_THROW_IF(
+          keys.joint >= states[frame].jointState.size(),
+          "Bone index {} exceeds jointState size {}",
+          keys.joint,
+          states[frame].jointState.size());
+      auto& local = states[frame].jointState[keys.joint].localTransform;
+      const Vector4f value = atFrames ? keys.values.at(frame) : sampleChannel(keys, times[frame]);
+      if (keys.path == "translation") {
+        local.translation = toCm() * value.head<3>();
+      } else if (keys.path == "rotation") {
+        local.rotation = Quaternionf(value);
+      } else {
+        local.scale = value.x();
       }
-    }
-  }
-
-  MT_THROW_IF(states.size() != timestamps.size(), "States and timestamps do not match in size");
-
-  // Apply the transform component to each frame
-  if (translations_m.size() == states.size()) {
-    for (size_t i = 0; i < states.size(); ++i) {
-      MT_THROW_IF(
-          boneIdx >= states[i].jointState.size(),
-          "Bone index {} exceeds jointState size {}",
-          boneIdx,
-          states[i].jointState.size());
-      states[i].jointState[boneIdx].localTransform.translation = toCm() * translations_m[i];
-    }
-  }
-  if (rotations.size() == states.size()) {
-    for (size_t i = 0; i < states.size(); ++i) {
-      MT_THROW_IF(
-          boneIdx >= states[i].jointState.size(),
-          "Bone index {} exceeds jointState size {}",
-          boneIdx,
-          states[i].jointState.size());
-      states[i].jointState[boneIdx].localTransform.rotation = rotations[i];
-    }
-  }
-  if (scales.size() == states.size()) {
-    for (size_t i = 0; i < states.size(); ++i) {
-      MT_THROW_IF(
-          boneIdx >= states[i].jointState.size(),
-          "Bone index {} exceeds jointState size {}",
-          boneIdx,
-          states[i].jointState.size());
-      states[i].jointState[boneIdx].localTransform.scale = scales[i].x();
     }
   }
 }
@@ -337,7 +446,7 @@ void computeGlobalTransforms(const Skeleton& skeleton, std::vector<SkeletonState
 
 namespace {
 
-// Whether `channel` animates a joint transform, the only channels applyChannelDataToStates reads.
+// Whether `channel` animates a joint transform, the only channels readChannelKeys() reads.
 bool isTransformChannel(const fx::gltf::Animation::Channel& channel) {
   const auto& path = channel.target.path;
   return path == "translation" || path == "rotation" || path == "scale";
@@ -401,17 +510,34 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesFor
     }
   }
 
+  std::vector<ChannelKeys> channels;
   for (const auto& channel : animation.channels) {
     const auto boneIdx =
         validateAndResolveChannel(channel, model, nodeToObjectMap, character.skeleton);
     if (boneIdx == kInvalidIndex) {
       continue;
     }
-
-    const auto& sampler = animation.samplers.at(channel.sampler);
-    applyChannelDataToStates(
-        model, sampler, channel.target.path, boneIdx, character, restLocals, states, timestamps);
+    ChannelKeys keys = readChannelKeys(
+        model, animation.samplers.at(channel.sampler), channel.target.path, boneIdx);
+    if (!keys.times.empty()) {
+      channels.push_back(std::move(keys));
+    }
   }
+
+  // Channels may have their own key times; each is sampled at the frame times.
+  timestamps = frameTimes(channels);
+  states.assign(
+      timestamps.size(),
+      SkeletonState(
+          JointParameters::Zero(character.parameterTransform.numJointParameters()),
+          character.skeleton));
+  for (auto& state : states) {
+    for (size_t jointId = 0; jointId < restLocals.size() && jointId < state.jointState.size();
+         ++jointId) {
+      state.jointState.at(jointId).localTransform = restLocals.at(jointId);
+    }
+  }
+  applyChannels(channels, timestamps, states);
 
   if (useFileTransforms) {
     for (auto& state : states) {
