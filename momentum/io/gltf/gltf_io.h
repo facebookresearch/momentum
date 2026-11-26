@@ -62,6 +62,14 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// are read from the character's root node, where GltfBuilder stores each character's own copy.
 /// Files without that copy have a single document-level rig, which every character then uses.
 ///
+/// @note A file without momentum's joint marks, such as a file from another tool, places its joints
+/// and skins its meshes as the glTF format defines: each joint gets the transforms of the nodes
+/// above it, node scales and node matrices count, and the character's inverse bind pose comes from
+/// the inverse bind matrices of its skins, so a mesh bound in another pose than the rest pose skins
+/// correctly. Momentum joints have no rest scale, so a joint's scale goes into the inverse bind
+/// pose and into the rest translations of the joints below it, and a non-uniform scale keeps the
+/// scale of its x axis. Animation channels of nodes that are not joints are not read.
+///
 /// @note The joints come in the depth-first order of the file's hierarchy, so a character whose
 /// joints were in another order when it was written comes back reordered, each joint with its name
 /// and parent. The locators and collision shapes come ordered by parent joint, in file order within
