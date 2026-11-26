@@ -231,7 +231,8 @@ size_t validateAndResolveChannel(
   return boneIdx;
 }
 
-// Reads translation/rotation/scale data from a channel sampler and applies it to skeleton states.
+// Reads translation/rotation/scale data from a channel sampler and applies it to the local
+// transforms of skeleton states, which start at `restLocals`, one transform per joint.
 // A channel with an unrecognized target path is skipped.
 void applyChannelDataToStates(
     const fx::gltf::Document& model,
@@ -239,6 +240,7 @@ void applyChannelDataToStates(
     const std::string& targetPath,
     size_t boneIdx,
     const Character& character,
+    std::span<const Transform> restLocals,
     std::vector<SkeletonState>& states,
     std::vector<float>& timestamps) {
   // Read the appropriate transform component from the sampler output
@@ -274,6 +276,12 @@ void applyChannelDataToStates(
         SkeletonState(
             JointParameters::Zero(character.parameterTransform.numJointParameters()),
             character.skeleton));
+    for (auto& state : states) {
+      for (size_t jointId = 0; jointId < restLocals.size() && jointId < state.jointState.size();
+           ++jointId) {
+        state.jointState[jointId].localTransform = restLocals[jointId];
+      }
+    }
   }
 
   MT_THROW_IF(states.size() != timestamps.size(), "States and timestamps do not match in size");
@@ -368,6 +376,31 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesFor
   std::vector<float> timestamps;
   std::vector<SkeletonState> states;
 
+  // The channels give the local transforms of the joints' nodes. In a document from another tool,
+  // these differ from the joints' local transforms (see JointFileTransform), so a joint without a
+  // channel starts at its node's transform, and the transforms are mapped after the channels.
+  const bool useFileTransforms = !hasMarkedJoints(model);
+  std::vector<JointFileTransform> fileJoints;
+  std::vector<Transform> restLocals;
+  restLocals.reserve(character.skeleton.joints.size());
+  if (useFileTransforms) {
+    fileJoints = jointFileTransforms(model, character.skeleton, nodeToObjectMap);
+    for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
+      const uint32_t node = fileJoints[jointId].node;
+      const Joint& joint = character.skeleton.joints.at(jointId);
+      restLocals.push_back(
+          node == kInvalidNodeId ? Transform(joint.translationOffset, joint.preRotation)
+                                 : nodeLocalTransform(model.nodes.at(node)));
+    }
+  } else {
+    const SkeletonState restState(
+        JointParameters::Zero(character.parameterTransform.numJointParameters()),
+        character.skeleton);
+    for (const auto& jointState : restState.jointState) {
+      restLocals.push_back(jointState.localTransform);
+    }
+  }
+
   for (const auto& channel : animation.channels) {
     const auto boneIdx =
         validateAndResolveChannel(channel, model, nodeToObjectMap, character.skeleton);
@@ -377,9 +410,19 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadSkeletonStatesFor
 
     const auto& sampler = animation.samplers.at(channel.sampler);
     applyChannelDataToStates(
-        model, sampler, channel.target.path, boneIdx, character, states, timestamps);
+        model, sampler, channel.target.path, boneIdx, character, restLocals, states, timestamps);
   }
 
+  if (useFileTransforms) {
+    for (auto& state : states) {
+      for (size_t jointId = 0; jointId < fileJoints.size(); ++jointId) {
+        if (fileJoints[jointId].node != kInvalidNodeId) {
+          auto& local = state.jointState[jointId].localTransform;
+          local = fileJoints[jointId].pre * local * fileJoints[jointId].post;
+        }
+      }
+    }
+  }
   computeGlobalTransforms(character.skeleton, states);
   return {std::move(states), std::move(timestamps)};
 }
