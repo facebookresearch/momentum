@@ -381,10 +381,11 @@ void addParentsBreadthFirst(
 
 // The root nodes of the scene that the loader reads, or none.
 std::span<const uint32_t> loadedSceneRoots(const fx::gltf::Document& model) {
-  if (model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size()) {
+  const int32_t scene = sceneToLoad(model);
+  if (scene < 0 || static_cast<size_t>(scene) >= model.scenes.size()) {
     return {};
   }
-  return model.scenes.at(model.scene).nodes;
+  return model.scenes.at(scene).nodes;
 }
 
 // The parent of each node for placing joints: the parent in the loaded scene (see
@@ -487,6 +488,10 @@ std::vector<JointFileTransform> jointFileTransforms(
   return result;
 }
 
+int32_t sceneToLoad(const fx::gltf::Document& model) {
+  return model.scene < 0 && !model.scenes.empty() ? 0 : model.scene;
+}
+
 std::vector<uint32_t> buildSceneParentMap(const fx::gltf::Document& model) {
   auto parentMap = std::vector<uint32_t>(model.nodes.size(), kInvalidNodeId);
   std::vector<bool> queued(model.nodes.size(), false);
@@ -507,12 +512,13 @@ uint32_t getTopLevelAncestor(uint32_t nodeId, std::span<const uint32_t> parentMa
 std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
     const fx::gltf::Document& model,
     std::span<const uint32_t> sceneParentMap) {
+  const int32_t scene = sceneToLoad(model);
   MT_THROW_IF(
-      model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size(),
+      scene < 0 || static_cast<size_t>(scene) >= model.scenes.size(),
       "Invalid glTF scene index {} for {} scene(s)",
-      model.scene,
+      scene,
       model.scenes.size());
-  const auto& sceneRoots = model.scenes.at(model.scene).nodes;
+  const auto& sceneRoots = model.scenes.at(scene).nodes;
 
   // GltfBuilder marks joints with the momentum extension and puts each character under its own
   // scene root, so every scene root with a marked joint below it is one character.
@@ -682,11 +688,12 @@ std::vector<uint32_t> gatherObjectRoots(
 
   // Each highest node that is neither in nor above a skeleton, in the order of the scene.
   std::vector<uint32_t> result;
-  if (model.scene < 0 || static_cast<size_t>(model.scene) >= model.scenes.size()) {
+  const int32_t scene = sceneToLoad(model);
+  if (scene < 0 || static_cast<size_t>(scene) >= model.scenes.size()) {
     return result;
   }
   std::vector<bool> visited(numNodes, false);
-  const auto& sceneNodes = model.scenes.at(model.scene).nodes;
+  const auto& sceneNodes = model.scenes.at(scene).nodes;
   std::vector<uint32_t> stack(sceneNodes.rbegin(), sceneNodes.rend());
   while (!stack.empty()) {
     const uint32_t node = stack.back();

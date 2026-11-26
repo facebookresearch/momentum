@@ -134,7 +134,15 @@ struct JointFileTransform {
 /// @return True if the node has a momentum type.
 [[nodiscard]] bool hasMomentumType(const fx::gltf::Node& node);
 
-/// Map each node index to its parent node index, walking the default scene breadth-first.
+/// The index of the scene that momentum reads: the default scene of @p model, or the first scene
+/// when the file has scenes but names no default scene, which the glTF format allows.
+///
+/// @param[in] model The glTF document.
+/// @return The scene index; negative when the file has no scene.
+[[nodiscard]] int32_t sceneToLoad(const fx::gltf::Document& model);
+
+/// Map each node index to its parent node index, walking the scene of @ref sceneToLoad
+/// breadth-first.
 ///
 /// Each node gets the parent that reaches it first, so the result is a forest even for a malformed
 /// document whose nodes have several parents or form a cycle. Scene roots and nodes not reachable

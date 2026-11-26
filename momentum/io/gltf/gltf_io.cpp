@@ -38,10 +38,13 @@
 #include "momentum/math/utility.h"
 
 #include <algorithm>
+#include <array>
+#include <charconv>
 #include <iterator>
 #include <limits>
 #include <ranges>
 #include <set>
+#include <string_view>
 #include <variant>
 
 namespace {
@@ -319,6 +322,125 @@ void nameCharactersThatShareATopLevelNode(
   }
 }
 
+// The functions below that list the parts of a document that momentum does not read are called
+// only in log macros, which do not evaluate their arguments in builds without logging, so these
+// builds, such as production builds, do not include them.
+
+// Throws when the document requires an extension whose data momentum cannot read.
+void checkRequiredExtensions(const fx::gltf::Document& model) {
+  constexpr std::array<std::string_view, 2> kCompressedMeshes = {
+      "KHR_draco_mesh_compression", "EXT_meshopt_compression"};
+  for (const std::string& extension : model.extensionsRequired) {
+    MT_THROW_IF(
+        std::ranges::find(kCompressedMeshes, extension) != kCompressedMeshes.end(),
+        "The glTF file requires {}, and momentum cannot read compressed meshes; save the file without mesh compression.",
+        extension);
+  }
+}
+
+// `names`, separated by commas.
+template <typename Names>
+std::string joinNames(const Names& names) {
+  std::string result;
+  for (const auto& name : names) {
+    if (!result.empty()) {
+      result += ", ";
+    }
+    result += name;
+  }
+  return result;
+}
+
+// The required extensions of the document that momentum does not read, separated by commas.
+[[maybe_unused]] std::string unreadRequiredExtensions(const fx::gltf::Document& model) {
+  // Momentum reads the quantized attributes of KHR_mesh_quantization as other accessors.
+  constexpr std::array<std::string_view, 2> kRead = {"FB_momentum", "KHR_mesh_quantization"};
+  std::vector<std::string_view> notRead;
+  std::ranges::copy_if(
+      model.extensionsRequired, std::back_inserter(notRead), [&](const std::string& extension) {
+        return std::ranges::find(kRead, extension) == kRead.end();
+      });
+  return joinNames(notRead);
+}
+
+// The vertex attributes of the document that momentum does not read, separated by commas: other
+// sets of texture coordinates and colors than the first, more than eight joint influences, and the
+// normals and tangents of morph targets.
+[[maybe_unused]] std::string unreadAttributes(const fx::gltf::Document& model) {
+  std::set<std::string> notRead;
+  // The set index of attribute `name` with `prefix`, such as 1 for TEXCOORD_1, or -1.
+  const auto setIndex = [](std::string_view name, std::string_view prefix) {
+    int index = -1;
+    if (name.starts_with(prefix)) {
+      std::from_chars(name.data() + prefix.size(), name.data() + name.size(), index);
+    }
+    return index;
+  };
+  for (const auto& mesh : model.meshes) {
+    for (const auto& primitive : mesh.primitives) {
+      for (const auto& [name, accessor] : primitive.attributes) {
+        if (setIndex(name, "TEXCOORD_") > 0 || setIndex(name, "COLOR_") > 0 ||
+            setIndex(name, "JOINTS_") > 1 || setIndex(name, "WEIGHTS_") > 1) {
+          notRead.insert(name);
+        }
+      }
+      for (const auto& target : primitive.targets) {
+        for (const auto& [name, accessor] : target) {
+          if (name != "POSITION") {
+            notRead.insert("morph target " + name);
+          }
+        }
+      }
+    }
+  }
+  return joinNames(notRead);
+}
+
+// The mesh nodes of the document whose skin momentum cannot read, separated by commas: nodes with a
+// skin index outside the skins, or with a skin without joints. No character loads their meshes.
+[[maybe_unused]] std::string meshesWithUnreadableSkins(const fx::gltf::Document& model) {
+  std::vector<std::string> names;
+  for (const auto& node : model.nodes) {
+    if (node.mesh >= 0 && node.skin >= 0 &&
+        (static_cast<size_t>(node.skin) >= model.skins.size() ||
+         model.skins.at(node.skin).joints.empty())) {
+      names.push_back("'" + node.name + "'");
+    }
+  }
+  return joinNames(names);
+}
+
+// The animation channels of a document from another tool that no character reads, separated by
+// commas: the channels of nodes that are not joints of a loaded character, such as nodes above a
+// skeleton, and the channels of morph target weights. Empty for a document with marked joints.
+[[maybe_unused]] std::string unreadChannels(
+    const fx::gltf::Document& model,
+    std::span<const CharacterWithNodeMap> characters) {
+  if (hasMarkedJoints(model)) {
+    return {};
+  }
+  std::set<std::string> notRead;
+  for (const auto& animation : model.animations) {
+    for (const auto& channel : animation.channels) {
+      // A channel without a target node targets what an extension defines.
+      const bool hasNode =
+          channel.target.node >= 0 && static_cast<size_t>(channel.target.node) < model.nodes.size();
+      const auto node = hasNode ? static_cast<size_t>(channel.target.node) : 0;
+      const bool read = hasNode && channel.target.path != "weights" &&
+          std::ranges::any_of(characters, [node](const CharacterWithNodeMap& entry) {
+                          return node < entry.nodeToObjectMap.size() &&
+                              entry.nodeToObjectMap[node] != kInvalidIndex;
+                        });
+      if (!read) {
+        const std::string target =
+            hasNode ? "'" + model.nodes.at(node).name + "'" : std::string("(no node)");
+        notRead.insert(target + " " + channel.target.path);
+      }
+    }
+  }
+  return joinNames(notRead);
+}
+
 // Build the character whose skeleton starts at `skeletonRoots`, named after `rootNode`.
 Character buildCharacter(
     const fx::gltf::Document& model,
@@ -519,6 +641,24 @@ std::vector<CharacterWithNodeMap> loadGltfCharactersInternal(
     const fx::gltf::Document& model,
     GltfObjects objects) {
   try {
+    checkRequiredExtensions(model);
+    MT_LOGW_IF(
+        model.scenes.size() > 1,
+        "glTF file has {} scenes; momentum reads only scene {}.",
+        model.scenes.size(),
+        sceneToLoad(model));
+    MT_LOGW_IF(
+        !unreadAttributes(model).empty(),
+        "glTF file has vertex attributes that momentum does not read: {}.",
+        unreadAttributes(model));
+    MT_LOGW_IF(
+        !meshesWithUnreadableSkins(model).empty(),
+        "glTF file has meshes whose skin momentum cannot read, which are not loaded: {}.",
+        meshesWithUnreadableSkins(model));
+    MT_LOGW_IF(
+        !unreadRequiredExtensions(model).empty(),
+        "glTF file requires extensions that momentum does not read: {}. Momentum reads the skeletons, meshes and animation without them.",
+        unreadRequiredExtensions(model));
     const auto sceneParentMap = buildSceneParentMap(model);
     const auto skeletonRoots = gatherSkeletonRoots(model, sceneParentMap);
     // In a document from another tool, the meshes without a skin outside the skeletons are objects,
@@ -689,6 +829,10 @@ std::tuple<std::vector<SkeletonState>, std::vector<float>> loadCharacterAnimatio
 std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
     const fx::gltf::Document& model) {
   auto characters = loadGltfCharactersInternal(model, GltfObjects::Load);
+  MT_LOGW_IF(
+      !unreadChannels(model, characters).empty(),
+      "glTF file has animation channels that momentum does not read: {}.",
+      unreadChannels(model, characters));
   std::vector<CharacterSkeletonStates> result;
   result.reserve(characters.size());
   for (auto& entry : characters) {
@@ -716,7 +860,12 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
 
 std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& model) {
   std::vector<MatrixXf> motions;
-  for (const auto& entry : loadGltfCharactersInternal(model, GltfObjects::Load)) {
+  const auto characters = loadGltfCharactersInternal(model, GltfObjects::Load);
+  MT_LOGW_IF(
+      !unreadChannels(model, characters).empty(),
+      "glTF file has animation channels that momentum does not read: {}.",
+      unreadChannels(model, characters));
+  for (const auto& entry : characters) {
     // One character's skeleton states at a time, so they are freed before the next character's.
     const auto [states, timestamps] = loadCharacterAnimation(model, entry);
     const Character& character = entry.character;
