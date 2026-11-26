@@ -50,17 +50,41 @@ std::vector<Vector3i> makeTriangleFaces(const std::vector<uint32_t>& indices) {
   return faces;
 }
 
+// The triangles of `primitive`, a triangle list, strip or fan, with or without an index buffer, as
+// the glTF format defines them. The triangles of a strip or fan that repeat a vertex have no area
+// and are skipped.
 std::vector<Vector3i> loadTriangleFaces(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive) {
-  if (primitive.indices < 0) {
-    // Non-indexed geometry: every three consecutive vertices form a triangle (glTF 2.0, 3.7.2.1).
-    const auto& positions = model.accessors.at(primitive.attributes.at("POSITION"));
-    std::vector<uint32_t> indices(positions.count);
+  std::vector<uint32_t> indices;
+  if (primitive.indices >= 0) {
+    indices = loadIndexBuffer(model, primitive);
+  } else {
+    // Without an index buffer, the vertices come in order.
+    indices.resize(model.accessors.at(primitive.attributes.at("POSITION")).count);
     std::iota(indices.begin(), indices.end(), 0u);
+  }
+  if (primitive.mode == fx::gltf::Primitive::Mode::Triangles) {
     return makeTriangleFaces(indices);
   }
-  return makeTriangleFaces(loadIndexBuffer(model, primitive));
+  const bool strip = primitive.mode == fx::gltf::Primitive::Mode::TriangleStrip;
+  const auto vertex = [&indices](size_t i) { return static_cast<int>(indices.at(i)); };
+  std::vector<Vector3i> faces;
+  for (size_t i = 0; i + 2 < indices.size(); ++i) {
+    Vector3i face;
+    if (!strip) {
+      face = Vector3i(vertex(i + 1), vertex(i + 2), vertex(0));
+    } else if (i % 2 == 0) {
+      face = Vector3i(vertex(i), vertex(i + 1), vertex(i + 2));
+    } else {
+      // A strip alternates the order of its triangles so that they all face the same side.
+      face = Vector3i(vertex(i), vertex(i + 2), vertex(i + 1));
+    }
+    if (face[0] != face[1] && face[1] != face[2] && face[0] != face[2]) {
+      faces.push_back(face);
+    }
+  }
+  return faces;
 }
 
 template <typename T>
@@ -256,8 +280,14 @@ void appendMeshBuffers(Mesh& mesh, const MeshBuffers& buffers, const size_t vert
 
 size_t
 addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, Mesh_u& mesh) {
-  if (primitive.mode != fx::gltf::Primitive::Mode::Triangles) {
-    MT_LOGW("Mesh not loaded because it's not a triangle mesh");
+  if (primitive.mode != fx::gltf::Primitive::Mode::Triangles &&
+      primitive.mode != fx::gltf::Primitive::Mode::TriangleStrip &&
+      primitive.mode != fx::gltf::Primitive::Mode::TriangleFan) {
+    MT_LOGW("Mesh not loaded because it has points or lines instead of triangles");
+    return 0;
+  }
+  if (primitive.attributes.count("POSITION") == 0) {
+    MT_LOGW("Mesh not loaded because it has no vertex positions");
     return 0;
   }
 
@@ -277,7 +307,7 @@ size_t addBlendShapes(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive,
     BlendShape_u& blendShape) {
-  if (primitive.targets.empty()) {
+  if (primitive.targets.empty() || primitive.attributes.count("POSITION") == 0) {
     return 0;
   }
 
