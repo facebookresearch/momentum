@@ -760,12 +760,16 @@ parseUVMapping(const ofbx::IElement& geomElement, PolygonData& vertices, size_t 
   return textureCoords;
 }
 
+// Append the blend shapes of the mesh just appended at vertexOffset. `deltaTransform` maps the
+// shape deltas from the mesh node's space to the space of the stored vertices, for a mesh that
+// bindRigidMesh() moved.
 void parseBlendShapes(
     const ofbx::BlendShape* blendshapes,
     const std::vector<Eigen::Vector3f>& vertexPositions,
     size_t vertexOffset,
     BlendShape_p& blendShape,
-    const Mesh& mesh) {
+    const Mesh& mesh,
+    const std::optional<Eigen::Matrix3f>& deltaTransform = std::nullopt) {
   if (!blendShape) {
     blendShape = std::make_shared<BlendShape>();
   }
@@ -799,9 +803,16 @@ void parseBlendShapes(
       MT_CHECK(numIndices == numVertices);
       for (int v = 0; v < numVertices; ++v) {
         MT_THROW_IF(v >= numIndices, "Vertex index {} exceeds numIndices {}", v, numIndices);
-        shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = shapeV[v].x;
-        shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = shapeV[v].y;
-        shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = shapeV[v].z;
+        Eigen::Vector3f delta(
+            static_cast<float>(shapeV[v].x),
+            static_cast<float>(shapeV[v].y),
+            static_cast<float>(shapeV[v].z));
+        if (deltaTransform.has_value()) {
+          delta = *deltaTransform * delta;
+        }
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 0, currentShapes + shapeIndex) = delta.x();
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 1, currentShapes + shapeIndex) = delta.y();
+        shapes(vertexOffset * 3 + indexV[v] * 3 + 2, currentShapes + shapeIndex) = delta.z();
       }
       MT_CHECK(
           static_cast<size_t>(currentShapes + shapeIndex) < shapeNames.size(),
@@ -971,8 +982,9 @@ void assignSkinWeights(
 // Attach the unskinned mesh just appended at vertexOffset rigidly to `joint`, whose node is
 // `jointNode` and whose inverse bind transform is `inverseBind`: weight its vertices fully on the
 // joint, and move them from the mesh node's space to the joint's bind pose, where skinning expects
-// them. The mesh keeps its place relative to the joint node in the scene.
-void bindRigidMesh(
+// them. The mesh keeps its place relative to the joint node in the scene. Returns the transform
+// that moved the vertices.
+Eigen::Affine3f bindRigidMesh(
     const ofbx::Mesh& meshRoot,
     const ofbx::Object& jointNode,
     const Eigen::Affine3f& inverseBind,
@@ -998,6 +1010,7 @@ void bindRigidMesh(
     weights.emplace_back(iVertex++, joint, 1.0);
   }
   assignSkinWeights(weights, skinWeights, vertexOffset, vertices.size(), meshRoot.name);
+  return bindTransform;
 }
 
 // The joint that an unskinned mesh moves rigidly with, and the inverse bind transform to bind the
@@ -1075,13 +1088,10 @@ void parseSkinnedModel(
   populatePolyFaceData(mesh, vertices, vertexOffset, textureCoordOffset);
 
   const auto* blendshapes = geometry->getBlendShape();
-  if (loadBlendShapes == LoadBlendShapes::Yes && blendshapes) {
-    parseBlendShapes(blendshapes, vertexPositions, vertexOffset, blendShape, mesh);
-  }
-
+  const bool readBlendShapes = loadBlendShapes == LoadBlendShapes::Yes && blendshapes;
   const auto* fbxskin = geometry->getSkin();
   if (!fbxskin && rigid.has_value()) {
-    bindRigidMesh(
+    const Eigen::Affine3f bindTransform = bindRigidMesh(
         *meshRoot,
         *boneFbxNodes.at(rigid->joint),
         rigid->inverseBind,
@@ -1089,7 +1099,16 @@ void parseSkinnedModel(
         rigid->joint,
         mesh,
         skinWeights);
+    // The blend shapes are read after the move, so that their base shape and deltas are in the
+    // joint's bind pose too.
+    if (readBlendShapes) {
+      parseBlendShapes(
+          blendshapes, vertexPositions, vertexOffset, blendShape, mesh, bindTransform.linear());
+    }
     return;
+  }
+  if (readBlendShapes) {
+    parseBlendShapes(blendshapes, vertexPositions, vertexOffset, blendShape, mesh);
   }
   if (!fbxskin) {
     MT_THROW_IF(
@@ -1708,57 +1727,6 @@ Character buildCharacterFromParse(
   return character;
 }
 
-std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
-    const std::span<const std::byte> inputData,
-    KeepLocators keepLocators,
-    bool loadAnim,
-    Permissive permissive,
-    LoadBlendShapes loadBlendShapes,
-    bool stripNamespaces) {
-  const OfbxScenePtr scenePtr =
-      loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);
-  ofbx::IScene& scene = *scenePtr;
-
-  // Singular load: every skeleton in the scene is merged into one character (unlike
-  // parseFbxCharacters, which keeps each top-level skeleton and rigid object separate).
-  FbxCharacterParse cp;
-  std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =
-      parseSkeleton(scene.getRoot(), {}, permissive);
-  fillNameAndMetadata(cp, /*fallbackToNodeName=*/false);
-  // A stored rig belongs to the skeleton of one character, so a scene with several skeletons, which
-  // this loader merges, gets none.
-  if (std::ranges::count(cp.skeleton.joints, kInvalidIndex, &Joint::parent) != 1) {
-    cp.rig.clear();
-  }
-  computeInverseBindPose(cp);
-
-  // Likewise, every mesh in the scene belongs to that one character.
-  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
-    parseSkinnedModel(
-        scene.getMesh(iMesh),
-        cp.jointFbxNodes,
-        cp.mesh,
-        cp.skinWeights,
-        cp.inverseBindPose,
-        cp.blendShape,
-        permissive,
-        loadBlendShapes);
-  }
-
-  std::vector<MatrixXf> jointParamMotions;
-  if (loadAnim) {
-    const auto stacks = collectReadableAnimationStacks(scene);
-    jointParamMotions = parseAnimationStacks(stacks, cp, sceneFrameRate(scene), permissive);
-  }
-
-  const auto parameterTransform =
-      ParameterTransform::empty(cp.skeleton.joints.size() * kParametersPerJoint);
-  return {
-      buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),
-      jointParamMotions,
-      sceneFrameRate(scene)};
-}
-
 // The character, and the joint within it, of each parsed character's joint nodes.
 struct JointOwner {
   size_t character = kInvalidIndex;
@@ -1812,6 +1780,114 @@ bool isRigidMesh(const ofbx::Object& object) {
   }
   const auto* geometry = static_cast<const ofbx::Mesh&>(object).getGeometry();
   return geometry != nullptr && geometry->getSkin() == nullptr;
+}
+
+// The bind transform that each skin cluster of the scene gives its joint, in the order of the
+// scene's meshes and their clusters, for the clusters that link to a joint in `jointOwner`. Applied
+// in this order, a joint that several clusters bind ends with the transform that
+// collectClusterWeights() leaves it.
+std::vector<std::pair<JointOwner, Eigen::Affine3f>> clusterBindTransforms(
+    const ofbx::IScene& scene,
+    const JointOwnerMap& jointOwner) {
+  std::vector<std::pair<JointOwner, Eigen::Affine3f>> result;
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
+    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
+    const ofbx::Skin* skin = mesh != nullptr && mesh->getGeometry() != nullptr
+        ? mesh->getGeometry()->getSkin()
+        : nullptr;
+    for (int c = 0; skin != nullptr && c < skin->getClusterCount(); ++c) {
+      const ofbx::Cluster* cluster = skin->getCluster(c);
+      const auto it = cluster != nullptr ? jointOwner.find(cluster->getLink()) : jointOwner.end();
+      if (it != jointOwner.end()) {
+        result.emplace_back(it->second, clusterInverseBind(*cluster));
+      }
+    }
+  }
+  return result;
+}
+
+std::tuple<Character, std::vector<MatrixXf>, float> loadOpenFbx(
+    const std::span<const std::byte> inputData,
+    KeepLocators keepLocators,
+    bool loadAnim,
+    Permissive permissive,
+    LoadBlendShapes loadBlendShapes,
+    bool stripNamespaces) {
+  const OfbxScenePtr scenePtr =
+      loadOfbxScene(inputData, loadAnim, loadBlendShapes, stripNamespaces);
+  ofbx::IScene& scene = *scenePtr;
+
+  // Singular load: every skeleton in the scene is merged into one character (unlike
+  // parseFbxCharacters, which keeps each top-level skeleton and rigid object separate).
+  FbxCharacterParse cp;
+  std::tie(cp.skeleton, cp.jointFbxNodes, cp.locators, cp.collision) =
+      parseSkeleton(scene.getRoot(), {}, permissive);
+  fillNameAndMetadata(cp, /*fallbackToNodeName=*/false);
+  // A stored rig belongs to the skeleton of one character, so a scene with several skeletons, which
+  // this loader merges, gets none.
+  if (std::ranges::count(cp.skeleton.joints, kInvalidIndex, &Joint::parent) != 1) {
+    cp.rig.clear();
+  }
+  computeInverseBindPose(cp);
+
+  // Likewise, every mesh in the scene belongs to that one character. In permissive mode, a mesh
+  // without a skin in a scene with skinned meshes moves rigidly with the nearest joint at or above
+  // its node, as in loadFbxCharacters(), or else with the first root joint, so that every vertex of
+  // the character has skin weights.
+  const JointOwnerMap jointOwner = buildJointOwnerMap(std::span(&cp, 1));
+  // A rigid mesh is bound with its joint's final bind transform, which the skin clusters give.
+  TransformationList finalInverseBindPose = cp.inverseBindPose;
+  for (const auto& [owner, inverseBind] : clusterBindTransforms(scene, jointOwner)) {
+    finalInverseBindPose.at(owner.joint) = inverseBind;
+  }
+  bool hasSkinnedMesh = false;
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
+    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
+    hasSkinnedMesh = hasSkinnedMesh ||
+        (mesh != nullptr && mesh->getGeometry() != nullptr &&
+         mesh->getGeometry()->getSkin() != nullptr);
+  }
+  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
+    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
+    std::optional<RigidBinding> rigid;
+    if (permissive == Permissive::Yes && hasSkinnedMesh && !cp.jointFbxNodes.empty() &&
+        mesh != nullptr && isRigidMesh(*mesh)) {
+      const size_t joint = findMeshOwner(*mesh, jointOwner).joint;
+      if (joint != kInvalidIndex) {
+        rigid = RigidBinding{.joint = joint, .inverseBind = finalInverseBindPose.at(joint)};
+      } else {
+        MT_LOGW(
+            "FBX mesh '{}' has no skin and no joint above it; it moves rigidly with the root joint "
+            "'{}'.",
+            mesh->name,
+            cp.jointFbxNodes.front()->name);
+        rigid = RigidBinding{.joint = 0, .inverseBind = finalInverseBindPose.at(0)};
+      }
+    }
+    parseSkinnedModel(
+        mesh,
+        cp.jointFbxNodes,
+        cp.mesh,
+        cp.skinWeights,
+        cp.inverseBindPose,
+        cp.blendShape,
+        permissive,
+        loadBlendShapes,
+        rigid);
+  }
+
+  std::vector<MatrixXf> jointParamMotions;
+  if (loadAnim) {
+    const auto stacks = collectReadableAnimationStacks(scene);
+    jointParamMotions = parseAnimationStacks(stacks, cp, sceneFrameRate(scene), permissive);
+  }
+
+  const auto parameterTransform =
+      ParameterTransform::empty(cp.skeleton.joints.size() * kParametersPerJoint);
+  return {
+      buildCharacterFromParse(std::move(cp), keepLocators, parameterTransform),
+      jointParamMotions,
+      sceneFrameRate(scene)};
 }
 
 // Collect the nodes that each root a character, descending through grouping NULL_NODEs: every
@@ -1869,19 +1945,8 @@ parseFbxCharacters(ofbx::IScene& scene, Permissive permissive, LoadBlendShapes l
   const JointOwnerMap jointOwner = buildJointOwnerMap(characters);
   // Set the bind transforms that skin clusters give their joints before any mesh is parsed: a rigid
   // mesh is bound with its joint's final bind transform, whatever the mesh order.
-  for (int iMesh = 0; iMesh < scene.getMeshCount(); ++iMesh) {
-    const ofbx::Mesh* mesh = scene.getMesh(iMesh);
-    const ofbx::Skin* skin = mesh != nullptr && mesh->getGeometry() != nullptr
-        ? mesh->getGeometry()->getSkin()
-        : nullptr;
-    for (int c = 0; skin != nullptr && c < skin->getClusterCount(); ++c) {
-      const ofbx::Cluster* cluster = skin->getCluster(c);
-      const auto it = cluster != nullptr ? jointOwner.find(cluster->getLink()) : jointOwner.end();
-      if (it != jointOwner.end()) {
-        characters.at(it->second.character).inverseBindPose.at(it->second.joint) =
-            clusterInverseBind(*cluster);
-      }
-    }
+  for (const auto& [owner, inverseBind] : clusterBindTransforms(scene, jointOwner)) {
+    characters.at(owner.character).inverseBindPose.at(owner.joint) = inverseBind;
   }
   // collectClusterWeights writes these transforms again, mesh by mesh, and ends with the same
   // values. When two clusters give one joint different transforms, the value at a rigid mesh's

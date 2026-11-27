@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "momentum/character/blend_shape.h"
 #include "momentum/character/character.h"
 #include "momentum/character/skeleton_state.h"
 #include "momentum/io/fbx/fbx_builder.h"
@@ -469,6 +470,137 @@ TEST(FbxBuilderTest, LoadCharactersWithObjects) {
   EXPECT_EQ(characters[1].name, "object");
   ASSERT_EQ(characters[1].skeleton.joints.size(), 1);
   expectRigidlyBound(characters[1], 0, object.mesh->vertices);
+}
+
+TEST(FbxBuilderTest, LoadCharacterBindsAMeshWithoutASkinToTheJointAboveIt) {
+  // A skinned character, a rigid body whose mesh is below its joint 1, and a static mesh beside
+  // them, 1000 cm along x, loaded as one character in permissive mode.
+  const Character character = createTestCharacter(3);
+  const Character prop = createTestCharacter(3);
+  constexpr size_t kPropMeshJoint = 1;
+  const Vector3f besideOffset(1000.0f, 0.0f, 0.0f);
+  const auto outFile = temporaryFile("builder_mixed_meshes", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addCharacter(character);
+    builder.addRigidBody(prop, "prop", kPropMeshJoint);
+    builder.addAnimatedMesh(
+        *prop.mesh, "beside", 30.0f, MatrixXf::Zero(kParametersPerJoint, 2), besideOffset);
+    builder.save(outFile.path());
+  }
+
+  const Character loaded = loadFbxCharacter(
+      outFile.path(), KeepLocators::No, Permissive::Yes, LoadBlendShapes::No, false);
+  // Every vertex has skin weights, and every mesh is loaded. The FBX parser lists the meshes in no
+  // fixed order, so the vertices of each mesh are found by their joint or their place.
+  ASSERT_NE(loaded.mesh, nullptr);
+  ASSERT_NE(loaded.skinWeights, nullptr);
+  const size_t numProp = prop.mesh->vertices.size();
+  ASSERT_EQ(loaded.mesh->vertices.size(), character.mesh->vertices.size() + 2 * numProp);
+  ASSERT_EQ(loaded.skinWeights->index.rows(), loaded.mesh->vertices.size());
+  const size_t propJoint =
+      loaded.skeleton.getJointIdByName("prop:" + prop.skeleton.joints.at(kPropMeshJoint).name);
+  ASSERT_LT(propJoint, loaded.skeleton.joints.size());
+  std::vector<size_t> onPropJoint;
+  std::vector<size_t> beside;
+  for (size_t i = 0; i < loaded.mesh->vertices.size(); ++i) {
+    if (loaded.skinWeights->index(i, 0) == propJoint) {
+      onPropJoint.push_back(i);
+    } else if (loaded.mesh->vertices[i].x() > 500.0f) {
+      beside.push_back(i);
+    }
+  }
+  ASSERT_EQ(onPropJoint.size(), numProp);
+  ASSERT_EQ(beside.size(), numProp);
+
+  // At rest, the rigid body's vertices are where the scene puts them, below its joint 1, and they
+  // move with that joint alone. The mesh beside moves with the first root joint, from its place.
+  const SkeletonState propRest(
+      prop.parameterTransform.apply(
+          ModelParameters::Zero(prop.parameterTransform.numAllModelParameters())),
+      prop.skeleton);
+  for (size_t v = 0; v < numProp; ++v) {
+    const size_t i = onPropJoint[v];
+    EXPECT_FLOAT_EQ(loaded.skinWeights->weight(i, 0), 1.0f);
+    EXPECT_LT(
+        (loaded.mesh->vertices[i] -
+         propRest.jointState.at(kPropMeshJoint).transform * prop.mesh->vertices[v])
+            .norm(),
+        1e-3f)
+        << v;
+    const size_t b = beside[v];
+    EXPECT_EQ(loaded.skinWeights->index(b, 0), 0);
+    EXPECT_FLOAT_EQ(loaded.skinWeights->weight(b, 0), 1.0f);
+    EXPECT_LT((loaded.mesh->vertices[b] - (prop.mesh->vertices[v] + besideOffset)).norm(), 1e-3f)
+        << v;
+  }
+}
+
+TEST(FbxBuilderTest, LoadCharacterKeepsTheBlendShapesOfAMeshWithoutASkinInPlace) {
+  // A skinned character whose joint 0 is bound in another pose than its rest pose, and a character
+  // without skin weights 1000 cm along x, whose mesh has blend shapes and no joint above it, loaded
+  // as one character in permissive mode with blend shapes.
+  Character skinned = withTestBlendShapes(createTestCharacter(3));
+  const SkeletonState skinnedRest(
+      skinned.parameterTransform.apply(
+          ModelParameters::Zero(skinned.parameterTransform.numAllModelParameters())),
+      skinned.skeleton);
+  const Affine3f bindOffset(
+      Eigen::Translation3f(0.0f, 5.0f, 0.0f) * Eigen::AngleAxisf(0.3f, Vector3f::UnitZ()));
+  skinned.inverseBindPose.at(0) =
+      (skinnedRest.jointState.at(0).transform.toAffine3() * bindOffset).inverse();
+  Character beside = createTestCharacter(3);
+  beside.name = "beside";
+  for (auto& vertex : beside.mesh->vertices) {
+    vertex.x() += 1000.0f;
+  }
+  beside = withTestBlendShapes(beside);
+  beside.skinWeights.reset();
+  FileSaveOptions options;
+  options.permissive = Permissive::Yes;
+  const auto outFile = temporaryFile("builder_rigid_blend_shapes", "fbx");
+  {
+    FbxBuilder builder;
+    builder.addCharacter(skinned, options);
+    builder.addCharacter(beside, options);
+    builder.save(outFile.path());
+  }
+
+  const Character loaded = loadFbxCharacter(
+      outFile.path(), KeepLocators::No, Permissive::Yes, LoadBlendShapes::Yes, false);
+  ASSERT_NE(loaded.mesh, nullptr);
+  ASSERT_NE(loaded.skinWeights, nullptr);
+  ASSERT_NE(loaded.blendShape, nullptr);
+  ASSERT_EQ(loaded.skeleton.joints.at(0).name, skinned.skeleton.joints.at(0).name);
+  ASSERT_TRUE(loaded.inverseBindPose.at(0).isApprox(skinned.inverseBindPose.at(0), 1e-4f));
+  // The blend shape starts from the stored vertices.
+  EXPECT_EQ(loaded.blendShape->getBaseShape(), loaded.mesh->vertices);
+
+  // At rest, with the weight 0.5 on every blend shape, each vertex of the mesh beside is where the
+  // scene puts that vertex with its blend shapes: its place plus 0.5 times the sum of its deltas.
+  const SkeletonState loadedRest(
+      JointParameters::Zero(loaded.skeleton.joints.size() * kParametersPerJoint), loaded.skeleton);
+  const Affine3f skinning =
+      loadedRest.jointState.at(0).transform.toAffine3() * loaded.inverseBindPose.at(0);
+  const MatrixXf& loadedShapes = loaded.blendShape->getShapeVectors();
+  const MatrixXf& besideShapes = beside.blendShape->getShapeVectors();
+  size_t numBeside = 0;
+  float maxDistance = 0.0f;
+  for (size_t i = 0; i < loaded.mesh->vertices.size(); ++i) {
+    if (loaded.mesh->vertices[i].x() < 500.0f) {
+      continue;
+    }
+    const size_t v = numBeside++;
+    ASSERT_LT(v, beside.mesh->vertices.size());
+    const auto row = static_cast<Eigen::Index>(3 * i);
+    const Vector3f stored =
+        loaded.mesh->vertices[i] + 0.5f * loadedShapes.middleRows(row, 3).rowwise().sum();
+    const Vector3f expected = beside.mesh->vertices[v] +
+        0.5f * besideShapes.middleRows(static_cast<Eigen::Index>(3 * v), 3).rowwise().sum();
+    maxDistance = std::max(maxDistance, (skinning * stored - expected).norm());
+  }
+  EXPECT_EQ(numBeside, beside.mesh->vertices.size());
+  EXPECT_LT(maxDistance, 1e-3f);
 }
 
 TEST(FbxBuilderTest, AnimatedMeshNamesAreUniqueAmongCharacters) {
