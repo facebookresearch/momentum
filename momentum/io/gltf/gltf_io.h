@@ -92,8 +92,10 @@ Character loadGltfCharacter(std::span<const std::byte> byteSpan);
 /// EXT_meshopt_compression) does not load. A file without a default scene loads its first scene.
 /// The loaders warn about the parts of a file that they do not read: other required extensions,
 /// scenes other than the one they read, texture coordinate and color sets after the first, more
-/// than eight joint influences, morph target normals and tangents, a second animation of a
-/// character, and the animation channels of nodes that are not joints of a loaded character.
+/// than eight joint influences, morph target normals and tangents (which the blend shapes do not
+/// keep; the default weights of the morph targets still turn the normals of the rest shape), a
+/// second animation of a character, and the animation channels of nodes that are not joints of a
+/// loaded character.
 ///
 /// @note The joints come in the depth-first order of the file's hierarchy, so a character whose
 /// joints were in another order when it was written comes back reordered, each joint with its name
