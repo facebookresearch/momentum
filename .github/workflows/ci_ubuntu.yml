@@ -43,7 +43,7 @@ jobs:
           lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           key: ${{ github.workflow }}-cpp-ubuntu-simd-${{ matrix.simd }}-${{ matrix.mode == '' && 'opt' || 'dev' }}
           # ccache-action appends a timestamp when saving; restore keys are the timestamp-free prefixes.
@@ -104,7 +104,7 @@ jobs:
           lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           key: ${{ github.workflow }}-py312-ubuntu
           # ccache-action appends a timestamp when saving; restore keys are the

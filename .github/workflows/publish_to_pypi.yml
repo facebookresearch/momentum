@@ -182,7 +182,7 @@ jobs:
       # ccache for macOS
       - name: Set up ccache (macOS)
         if: steps.should_run.outputs.run == 'true' && runner.os == 'macOS'
-        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           key: ${{ github.workflow }}-${{ matrix.package-variant }}-${{ matrix.os }}-py${{ matrix.python-version }}
           # ccache-action appends a timestamp when saving; restore keys are the timestamp-free prefixes.

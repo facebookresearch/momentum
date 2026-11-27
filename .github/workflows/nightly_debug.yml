@@ -87,7 +87,7 @@ jobs:
           lscpu | sed -n '/^Model name:/p;/^Flags:/p' > /tmp/native-cpu.txt
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           key: ${{ github.workflow }}-cpp-debug-ubuntu
           restore-keys: |
@@ -125,7 +125,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@dbeefd73e8e2ffc1bbc412570072735eb4db3607 # v1.2.25
+        uses: hendrikmuhs/ccache-action@e91f31892a1d1b8c44424b1a94c0b7f52d337168 # v1.2.26
         with:
           key: ${{ github.workflow }}-cpp-debug-macos
           restore-keys: |
