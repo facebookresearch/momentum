@@ -340,6 +340,14 @@ Transform nodeLocalTransform(const fx::gltf::Node& node) {
   if (node.matrix != fx::gltf::defaults::IdentityMatrix) {
     Matrix4f matrix = Map<const Matrix4f>(node.matrix.data());
     matrix.topRightCorner<3, 1>() *= toCm();
+    // A mirror, which a negative uniform scale makes, has a negative determinant, which no rotation
+    // has: the rotation is that of the negated matrix, and the scale is negative.
+    if (matrix.topLeftCorner<3, 3>().determinant() < 0.0f) {
+      matrix.topLeftCorner<3, 3>() *= -1.0f;
+      Transform result = Transform::fromMatrix(matrix);
+      result.scale = -result.scale;
+      return result;
+    }
     return Transform::fromMatrix(matrix);
   }
   return Transform(
