@@ -508,7 +508,9 @@ std::vector<JointFileTransform> jointFileTransforms(
       entry.post = Transform::makeScale(1.0f / scale);
     } else {
       MT_LOGW(
-          "glTF joint '{}' has a rest scale of zero; its scale is not removed from its rest pose.",
+          "glTF joint '{}' has a rest scale of zero, which momentum cannot represent: at rest its "
+          "vertices are not shrunk to a point, and in frames that scale it up, the joints below it "
+          "and their vertices stay at its position.",
           model.nodes.at(entry.node).name);
     }
   }
