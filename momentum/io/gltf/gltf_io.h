@@ -216,7 +216,11 @@ std::vector<CharacterSkeletonStates> loadGltfCharactersWithSkeletonStates(
 ///
 /// These are the skeleton states of @ref loadGltfCharactersWithSkeletonStates converted to joint
 /// parameters; each channel key is one frame. Files written by other tools keep their animation in
-/// these channels rather than in momentum's motion data.
+/// these channels rather than in momentum's motion data. A joint parameter cannot represent a
+/// negative local scale, which comes for example from a scale key whose sign differs from the rest
+/// scale, so a file with such a scale in a frame fails to load, with an error that names the
+/// joints; @ref loadGltfCharactersWithSkeletonStates keeps it. A scale of zero gives an infinite
+/// parameter.
 ///
 /// @param[in] model The glTF document to load from.
 /// @return One motion per character, in the order of @ref loadGltfCharacters, of shape

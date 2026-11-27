@@ -876,6 +876,23 @@ std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& 
     MatrixXf& motion = motions.emplace_back(
         character.parameterTransform.numJointParameters(),
         static_cast<Eigen::Index>(states.size()));
+    // A joint parameter scales by a power of two, which cannot be negative, so the motion cannot
+    // give a joint whose local scale is negative in a frame, for example from a scale key whose
+    // sign differs from the rest scale.
+    std::set<std::string> negativeScale;
+    for (const SkeletonState& state : states) {
+      for (size_t jointId = 0; jointId < state.jointState.size(); ++jointId) {
+        if (state.jointState[jointId].localTransform.scale < 0.0f) {
+          negativeScale.insert("'" + character.skeleton.joints.at(jointId).name + "'");
+        }
+      }
+    }
+    MT_THROW_IF(
+        !negativeScale.empty(),
+        "glTF character '{}' has joints whose local scale is negative in some frames, which a joint "
+        "parameter cannot represent: {}.",
+        character.name,
+        joinNames(negativeScale));
     for (size_t frame = 0; frame < states.size(); ++frame) {
       // The loader sets each joint's local transform from the channels, so this reads them as they
       // are rather than recomputing them from the world transforms.
