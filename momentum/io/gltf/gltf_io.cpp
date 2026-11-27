@@ -76,15 +76,18 @@ void loadCharacterExtensions(
 
 // The mesh nodes of the character whose node map is `nodeToObjectMap`: each skinned mesh whose skin
 // starts at one of its joints (GltfBuilder writes the skeleton root first), and, when
-// `includeUnskinnedMeshes`, the unskinned meshes, which no particular character owns.
+// `includeUnskinnedMeshes`, the unskinned meshes, which no particular character owns. In a document
+// without joint marks, the mesh of a joint that a skin lists counts as the mesh of any other node.
 std::vector<size_t> characterMeshNodes(
     const fx::gltf::Document& model,
     std::span<const size_t> nodeToObjectMap,
     bool includeUnskinnedMeshes) {
+  const std::vector<bool> skinJoints =
+      hasMarkedJoints(model) ? std::vector<bool>(model.nodes.size(), false) : skinJointNodes(model);
   std::vector<size_t> meshNodes;
   for (size_t nodeId = 0; nodeId < model.nodes.size(); nodeId++) {
     const auto& node = model.nodes[nodeId];
-    if (node.mesh < 0 || nodeToObjectMap[nodeId] != kInvalidIndex) {
+    if (node.mesh < 0 || (nodeToObjectMap[nodeId] != kInvalidIndex && !skinJoints[nodeId])) {
       continue;
     }
     if (node.skin < 0) {
@@ -246,7 +249,8 @@ CharacterWithNodeMap buildObjectCharacter(const fx::gltf::Document& model, uint3
 }
 
 // Warns about the meshes without a skin of a document from another tool that no character loads:
-// those inside a skeleton, and those of an object that cannot be read.
+// those inside a skeleton, joints included, and those of an object that cannot be read. Only an
+// object loads a mesh without a skin here.
 void warnAboutUnloadedMeshes(
     const fx::gltf::Document& model,
     std::span<const CharacterWithNodeMap> characters) {
@@ -260,7 +264,7 @@ void warnAboutUnloadedMeshes(
     }
     const bool loaded =
         std::ranges::any_of(characters, [nodeId](const CharacterWithNodeMap& entry) {
-          return nodeId < entry.nodeToObjectMap.size() &&
+          return entry.isObject && nodeId < entry.nodeToObjectMap.size() &&
               entry.nodeToObjectMap[nodeId] != kInvalidIndex;
         });
     if (!loaded) {

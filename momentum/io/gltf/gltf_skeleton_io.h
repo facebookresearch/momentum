@@ -66,13 +66,22 @@ Joint createJoint(const fx::gltf::Node& node);
 
 /// Whether the document marks its joints with the momentum extension, as GltfBuilder does.
 ///
-/// A document without marks comes from another tool: every node without a mesh in a skeleton's
-/// hierarchy loads as a joint, with the transforms that the glTF format gives it (see
-/// @ref jointFileTransforms).
+/// A document without marks comes from another tool: every node in a skeleton's hierarchy that has
+/// no mesh or that a skin lists (see @ref skinJointNodes) loads as a joint, with the transforms
+/// that the glTF format gives it (see @ref jointFileTransforms). A node with a skin or a camera,
+/// and the nodes below it, are not in a skeleton's hierarchy (see @ref isHierarchyNode). Of a
+/// skeleton with several roots, only the hierarchy of the first root that gives joints loads (see
+/// @ref loadHierarchyForRoots).
 ///
 /// @param[in] model The glTF document.
 /// @return True if a node of the document is a marked joint.
 [[nodiscard]] bool hasMarkedJoints(const fx::gltf::Document& model);
+
+/// The nodes that a skin of the document lists as joints.
+///
+/// @param[in] model The glTF document.
+/// @return One entry per node of the document: whether a skin lists the node.
+[[nodiscard]] std::vector<bool> skinJointNodes(const fx::gltf::Document& model);
 
 /// The local transform of a glTF node in momentum units: its matrix, or its translation, rotation
 /// and scale.
@@ -168,7 +177,10 @@ struct JointFileTransform {
 /// skeleton multiple root nodes are allowed. When the document marks its joints with the momentum
 /// extension (as GltfBuilder does), each group is one scene root with a marked joint below it, so a
 /// character is found whether or not it has a skinned mesh. Otherwise skeletons are found from the
-/// skins.
+/// skins: the skeleton of a skin starts at the closest common ancestor of its joints in the node
+/// hierarchy, whichever scene holds it, as the glTF format defines. A document without meshes or
+/// without skins gives the scene roots as one group. Throws when the joints of a skin have no
+/// common root, which the glTF format does not allow.
 ///
 /// @param[in] model The glTF document.
 /// @param[in] sceneParentMap The parent map from @ref buildSceneParentMap.
