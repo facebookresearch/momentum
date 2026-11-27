@@ -69,7 +69,9 @@ namespace {
 // shape and locator, as well as a nodeToObjectMap for query. nodeToObjectMap stores mapping from
 // node index to joint index, if the node is a joint. If it's a collision capsule or locator,
 // stores the index in the collision volume array or locator array.
-// If no node of the document is a marked joint, every node without a mesh is loaded as a joint.
+// If no node of the document is a marked joint, every node without a mesh, and every node that a
+// skin lists (`skinJoints`), is loaded as a joint. A node with a skin or a camera, and the nodes
+// below it, are not part of the hierarchy (see isHierarchyNode()), even when a skin lists them.
 // #TODO: correctly load hierarchy from the skinning information if no momentum extension is in the
 // file.
 void loadHierarchyRecursive(
@@ -85,6 +87,7 @@ void loadHierarchyRecursive(
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension,
     bool meshNodesAreJoints,
+    const std::vector<bool>& skinJoints,
     std::vector<bool>& visited) {
   MT_THROW_IF(
       (nodeId < 0) || (nodeId >= model.nodes.size()),
@@ -151,7 +154,9 @@ void loadHierarchyRecursive(
     locators.push_back(loc);
     locatorNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = locators.size() - 1;
-  } else if ((!useExtension && (node.mesh < 0 || meshNodesAreJoints)) || type == "skeleton_joint") {
+  } else if (
+      (!useExtension && (node.mesh < 0 || meshNodesAreJoints || skinJoints[nodeId])) ||
+      type == "skeleton_joint") {
     Joint joint = createJoint(node);
     joint.parent = parentJointId;
     joints.push_back(joint);
@@ -184,6 +189,7 @@ void loadHierarchyRecursive(
         nodeToObjectMap,
         useExtension,
         meshNodesAreJoints,
+        skinJoints,
         visited);
   }
 }
@@ -318,10 +324,30 @@ bool hasMarkedJoints(const fx::gltf::Document& model) {
   return std::ranges::any_of(model.nodes, isMarkedJoint);
 }
 
+std::vector<bool> skinJointNodes(const fx::gltf::Document& model) {
+  std::vector<bool> result(model.nodes.size(), false);
+  for (const auto& skin : model.skins) {
+    for (const uint32_t node : skin.joints) {
+      if (node < result.size()) {
+        result[node] = true;
+      }
+    }
+  }
+  return result;
+}
+
 Transform nodeLocalTransform(const fx::gltf::Node& node) {
   if (node.matrix != fx::gltf::defaults::IdentityMatrix) {
     Matrix4f matrix = Map<const Matrix4f>(node.matrix.data());
     matrix.topRightCorner<3, 1>() *= toCm();
+    // A mirror, which a negative uniform scale makes, has a negative determinant, which no rotation
+    // has: the rotation is that of the negated matrix, and the scale is negative.
+    if (matrix.topLeftCorner<3, 3>().determinant() < 0.0f) {
+      matrix.topLeftCorner<3, 3>() *= -1.0f;
+      Transform result = Transform::fromMatrix(matrix);
+      result.scale = -result.scale;
+      return result;
+    }
     return Transform::fromMatrix(matrix);
   }
   return Transform(
@@ -331,7 +357,8 @@ Transform nodeLocalTransform(const fx::gltf::Node& node) {
 namespace {
 
 // Whether loadHierarchyRecursive can load `node` as a joint of a document without joint marks: a
-// node of a skeleton without a mesh, or any node of an object (see gatherObjectRoots()).
+// node of a skeleton without a mesh or that a skin lists, or any node of an object (see
+// gatherObjectRoots()).
 [[nodiscard]] bool isUnmarkedJointNode(const fx::gltf::Node& node) {
   if (!isHierarchyNode(node)) {
     return false;
@@ -388,7 +415,8 @@ std::span<const uint32_t> loadedSceneRoots(const fx::gltf::Document& model) {
   return model.scenes.at(scene).nodes;
 }
 
-// The parent of each node for placing joints: the parent in the loaded scene (see
+// The parent of each node, for placing joints and for the skeleton of each skin: the parent in the
+// loaded scene (see
 // buildSceneParentMap()) for the nodes that the scene reaches, and for the other nodes the parent
 // in their own tree, from the nodes that no node lists as a child. So a skeleton outside the loaded
 // scene keeps its hierarchy.
@@ -542,31 +570,32 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
     }
   }
 
-  // If no skinned mesh is present, consider the scene root nodes as skeleton roots.
+  // A document without meshes or without skins gives the scene roots as skeleton roots.
   if (model.meshes.empty() || model.skins.empty()) {
     return {sceneRoots};
   }
 
-  // Assumption: all the joints in the skin are directly connected (i.e. no non-joint node in
-  // between two joints) Merge skeleton within the same skin. If they are in the same hierarchy,
-  // they can be merged under their closest common ancestor.
+  // The glTF format defines the joint hierarchy of a skin by the node hierarchy, whichever scene
+  // holds it, and requires the joints of a skin to have a common root. So the skeleton of a skin
+  // starts at the closest common ancestor of its joints in the node hierarchy.
+  const auto parentMap = buildNodeParentMap(model);
   auto skinSkeletonRoots =
       std::vector<std::vector<uint32_t>>(model.skins.size(), std::vector<uint32_t>());
   for (auto skinId = 0; skinId < model.skins.size(); skinId++) {
     const auto& skin = model.skins[skinId];
     auto& roots = skinSkeletonRoots[skinId];
     for (const auto jointId : skin.joints) {
-      if (jointId >= sceneParentMap.size()) {
-        // Malformed glTF: the skin references a node outside the scene.
+      if (jointId >= parentMap.size()) {
+        // Malformed glTF: the skin references a node that does not exist.
         MT_LOGW("Skipping out-of-range joint {} in glTF skin {}.", jointId, skinId);
         continue;
       }
-      const auto parentId = sceneParentMap[jointId];
+      const auto parentId = parentMap[jointId];
       auto parentIter = std::find(skin.joints.begin(), skin.joints.end(), parentId);
       if (parentIter == skin.joints.end()) {
         bool foundSibling = false;
         for (auto& root : roots) {
-          auto commonAncestor = findClosestCommonAncestor(jointId, root, sceneParentMap);
+          auto commonAncestor = findClosestCommonAncestor(jointId, root, parentMap);
           if (commonAncestor != kInvalidNodeId) {
             root = commonAncestor;
             foundSibling = true;
@@ -580,6 +609,15 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
     }
   }
 
+  for (auto skinId = 0; skinId < model.skins.size(); skinId++) {
+    MT_THROW_IF(
+        skinSkeletonRoots[skinId].size() > 1,
+        "glTF skin {} ('{}') has joints without a common root, which the glTF format does not "
+        "allow.",
+        skinId,
+        model.skins[skinId].name);
+  }
+
   auto result = std::vector<std::vector<uint32_t>>(model.skins.size());
   // Merge skeleton between different skins. If the skeleton root of one is an ancestor of another,
   // the other one can be merged to the same root.
@@ -589,37 +627,31 @@ std::vector<std::vector<uint32_t>> gatherSkeletonRoots(
         "id: {}, size: {}",
         skinId,
         skinSkeletonRoots[skinId].size());
-    if (skinSkeletonRoots[skinId].size() > 1) {
+    auto ancestors = getAncestorsIncludingSelf(skinSkeletonRoots[skinId][0], parentMap);
+    bool isIndependent = true;
+    for (auto checkId = 0; checkId < model.skins.size(); checkId++) {
+      MT_CHECK(
+          !skinSkeletonRoots[checkId].empty(),
+          "id: {}, size: {}",
+          checkId,
+          skinSkeletonRoots[checkId].size());
+      if (checkId == skinId) {
+        continue;
+      }
+      // Skins with the same root share one skeleton, which the first of them keeps.
+      const uint32_t checkRoot = skinSkeletonRoots[checkId][0];
+      const bool dependent = checkRoot == skinSkeletonRoots[skinId][0]
+          ? checkId < skinId
+          : std::ranges::find(ancestors, checkRoot) != ancestors.end();
+      if (dependent) {
+        isIndependent = false;
+        break;
+      }
+    }
+    if (isIndependent) {
       // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
       auto& roots = result[skinId];
-      roots = skinSkeletonRoots[skinId];
-    } else {
-      auto ancestors = getAncestorsIncludingSelf(skinSkeletonRoots[skinId][0], sceneParentMap);
-      bool isIndependent = true;
-      for (auto checkId = 0; checkId < model.skins.size(); checkId++) {
-        MT_CHECK(
-            !skinSkeletonRoots[checkId].empty(),
-            "id: {}, size: {}",
-            checkId,
-            skinSkeletonRoots[checkId].size());
-        if ((checkId == skinId) || skinSkeletonRoots[checkId].size() > 1) {
-          continue;
-        }
-        // Skins with the same root share one skeleton, which the first of them keeps.
-        const uint32_t checkRoot = skinSkeletonRoots[checkId][0];
-        const bool dependent = checkRoot == skinSkeletonRoots[skinId][0]
-            ? checkId < skinId
-            : std::ranges::find(ancestors, checkRoot) != ancestors.end();
-        if (dependent) {
-          isIndependent = false;
-          break;
-        }
-      }
-      if (isIndependent) {
-        // NOLINTNEXTLINE(facebook-hte-LocalUncheckedArrayBounds)
-        auto& roots = result[skinId];
-        roots.push_back(skinSkeletonRoots[skinId][0]);
-      }
+      roots.push_back(skinSkeletonRoots[skinId][0]);
     }
   }
   // Remove the empty skeletons that were skipped
@@ -737,6 +769,9 @@ loadHierarchyForRoots(
   // document-level extension (the frame rate of a motion) even without it, so the marks decide.
   const bool useExtension = hasMarkedJoints(model);
   std::vector<bool> visited(model.nodes.size(), false);
+  // Without joint marks, a node that a skin lists is a joint, even when it has a mesh without a
+  // skin.
+  const std::vector<bool> skinJoints = skinJointNodes(model);
 
   for (const auto& rootNode : skeletonRoots) {
     loadHierarchyRecursive(
@@ -752,6 +787,7 @@ loadHierarchyForRoots(
         nodeToObjectMap,
         useExtension,
         meshNodesAreJoints,
+        skinJoints,
         visited);
     if (!joints.empty()) {
       break;
