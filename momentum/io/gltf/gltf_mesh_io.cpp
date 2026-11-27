@@ -15,7 +15,10 @@
 #include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
+#include <array>
 #include <numeric>
+#include <tuple>
+#include <utility>
 
 namespace momentum {
 
@@ -475,11 +478,11 @@ void addSkinWeights(
       weightsData = loadWeightsFromAccessor(model, weightsAttribute->second);
       if (weightsData.empty()) {
         MT_LOGW("No skinning weights read");
-        return;
+        break;
       }
     } else {
       MT_LOGW_IF(i == 0, "No skinning weights stored on primitive");
-      return;
+      break;
     }
 
     if (jointIndices.empty() || weightsData.empty() || jointIndices.size() != weightsData.size() ||
@@ -496,7 +499,7 @@ void addSkinWeights(
           "Inconsistent data: {} vertices are skinned but mesh has {} vertices",
           jointIndices.size(),
           kNumVertices);
-      return;
+      break;
     }
 
     // copy indices/vertices into our buffer
@@ -519,6 +522,24 @@ void addSkinWeights(
           MT_LOGW("Invalid joint index encountered when reading skinning weights");
         }
       }
+    }
+  }
+
+  // The glTF format allows a zero weight before a nonzero one, but applySSD() and the other
+  // skinning code stop at the first zero weight of a vertex, so the nonzero weights go first. The
+  // order of the weights is kept otherwise.
+  for (auto v = kVertexOffset; v < kVertexOffset + static_cast<Eigen::Index>(kNumVertices); ++v) {
+    std::array<std::pair<uint32_t, float>, kMaxSkinJoints> slots;
+    size_t next = 0;
+    for (const bool nonzero : {true, false}) {
+      for (size_t slot = 0; slot < kMaxSkinJoints; ++slot) {
+        if ((skinWeights->weight(v, slot) != 0.0f) == nonzero) {
+          slots[next++] = {skinWeights->index(v, slot), skinWeights->weight(v, slot)};
+        }
+      }
+    }
+    for (size_t slot = 0; slot < kMaxSkinJoints; ++slot) {
+      std::tie(skinWeights->index(v, slot), skinWeights->weight(v, slot)) = slots[slot];
     }
   }
 }
