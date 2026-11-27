@@ -87,7 +87,8 @@ Joint createJoint(const fx::gltf::Node& node);
 /// and scale.
 ///
 /// Momentum transforms have a uniform scale, so a non-uniform scale keeps the scale of the node's
-/// x axis.
+/// x axis. A mirror gives a negative scale: from a matrix, when its 3x3 part has a negative
+/// determinant; from the node's scale, when its x value is negative.
 ///
 /// @param[in] node The glTF node.
 /// @return The node's transform relative to its parent node.
