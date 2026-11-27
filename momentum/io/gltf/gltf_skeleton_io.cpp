@@ -69,7 +69,9 @@ namespace {
 // shape and locator, as well as a nodeToObjectMap for query. nodeToObjectMap stores mapping from
 // node index to joint index, if the node is a joint. If it's a collision capsule or locator,
 // stores the index in the collision volume array or locator array.
-// If no node of the document is a marked joint, every node without a mesh is loaded as a joint.
+// If no node of the document is a marked joint, every node without a mesh, and every node that a
+// skin lists (`skinJoints`), is loaded as a joint. A node with a skin or a camera, and the nodes
+// below it, are not part of the hierarchy (see isHierarchyNode()), even when a skin lists them.
 // #TODO: correctly load hierarchy from the skinning information if no momentum extension is in the
 // file.
 void loadHierarchyRecursive(
@@ -85,6 +87,7 @@ void loadHierarchyRecursive(
     std::vector<size_t>& nodeToObjectMap,
     bool useExtension,
     bool meshNodesAreJoints,
+    const std::vector<bool>& skinJoints,
     std::vector<bool>& visited) {
   MT_THROW_IF(
       (nodeId < 0) || (nodeId >= model.nodes.size()),
@@ -151,7 +154,9 @@ void loadHierarchyRecursive(
     locators.push_back(loc);
     locatorNodes.push_back(nodeId);
     nodeToObjectMap[nodeId] = locators.size() - 1;
-  } else if ((!useExtension && (node.mesh < 0 || meshNodesAreJoints)) || type == "skeleton_joint") {
+  } else if (
+      (!useExtension && (node.mesh < 0 || meshNodesAreJoints || skinJoints[nodeId])) ||
+      type == "skeleton_joint") {
     Joint joint = createJoint(node);
     joint.parent = parentJointId;
     joints.push_back(joint);
@@ -184,6 +189,7 @@ void loadHierarchyRecursive(
         nodeToObjectMap,
         useExtension,
         meshNodesAreJoints,
+        skinJoints,
         visited);
   }
 }
@@ -318,10 +324,30 @@ bool hasMarkedJoints(const fx::gltf::Document& model) {
   return std::ranges::any_of(model.nodes, isMarkedJoint);
 }
 
+std::vector<bool> skinJointNodes(const fx::gltf::Document& model) {
+  std::vector<bool> result(model.nodes.size(), false);
+  for (const auto& skin : model.skins) {
+    for (const uint32_t node : skin.joints) {
+      if (node < result.size()) {
+        result[node] = true;
+      }
+    }
+  }
+  return result;
+}
+
 Transform nodeLocalTransform(const fx::gltf::Node& node) {
   if (node.matrix != fx::gltf::defaults::IdentityMatrix) {
     Matrix4f matrix = Map<const Matrix4f>(node.matrix.data());
     matrix.topRightCorner<3, 1>() *= toCm();
+    // A mirror, which a negative uniform scale makes, has a negative determinant, which no rotation
+    // has: the rotation is that of the negated matrix, and the scale is negative.
+    if (matrix.topLeftCorner<3, 3>().determinant() < 0.0f) {
+      matrix.topLeftCorner<3, 3>() *= -1.0f;
+      Transform result = Transform::fromMatrix(matrix);
+      result.scale = -result.scale;
+      return result;
+    }
     return Transform::fromMatrix(matrix);
   }
   return Transform(
@@ -331,7 +357,8 @@ Transform nodeLocalTransform(const fx::gltf::Node& node) {
 namespace {
 
 // Whether loadHierarchyRecursive can load `node` as a joint of a document without joint marks: a
-// node of a skeleton without a mesh, or any node of an object (see gatherObjectRoots()).
+// node of a skeleton without a mesh or that a skin lists, or any node of an object (see
+// gatherObjectRoots()).
 [[nodiscard]] bool isUnmarkedJointNode(const fx::gltf::Node& node) {
   if (!isHierarchyNode(node)) {
     return false;
@@ -481,7 +508,9 @@ std::vector<JointFileTransform> jointFileTransforms(
       entry.post = Transform::makeScale(1.0f / scale);
     } else {
       MT_LOGW(
-          "glTF joint '{}' has a rest scale of zero; its scale is not removed from its rest pose.",
+          "glTF joint '{}' has a rest scale of zero, which momentum cannot represent: at rest its "
+          "vertices are not shrunk to a point, and in frames that scale it up, the joints below it "
+          "and their vertices stay at its position.",
           model.nodes.at(entry.node).name);
     }
   }
@@ -737,6 +766,9 @@ loadHierarchyForRoots(
   // document-level extension (the frame rate of a motion) even without it, so the marks decide.
   const bool useExtension = hasMarkedJoints(model);
   std::vector<bool> visited(model.nodes.size(), false);
+  // Without joint marks, a node that a skin lists is a joint, even when it has a mesh without a
+  // skin.
+  const std::vector<bool> skinJoints = skinJointNodes(model);
 
   for (const auto& rootNode : skeletonRoots) {
     loadHierarchyRecursive(
@@ -752,6 +784,7 @@ loadHierarchyForRoots(
         nodeToObjectMap,
         useExtension,
         meshNodesAreJoints,
+        skinJoints,
         visited);
     if (!joints.empty()) {
       break;

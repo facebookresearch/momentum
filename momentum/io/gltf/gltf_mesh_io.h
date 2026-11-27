@@ -14,6 +14,7 @@
 
 #include <fx/gltf.h>
 
+#include <span>
 #include <tuple>
 #include <vector>
 
@@ -21,23 +22,40 @@ namespace momentum {
 
 /// Add mesh data from a glTF primitive.
 ///
+/// The positions and normals are those of the primitive's rest shape, which includes its morph
+/// targets times their default weights.
+///
 /// @param[in] model The glTF document.
 /// @param[in] primitive The primitive to load mesh data from.
 /// @param[in,out] mesh The mesh to append data to.
+/// @param[in] defaultMorphWeights The default weights of the morph targets: the `weights` of the
+///            glTF node that instantiates the mesh, or else of the mesh (fx-gltf reads no node
+///            weights from a file).
 /// @return The number of vertices newly loaded.
-size_t addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, Mesh_u& mesh);
+size_t addMesh(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    Mesh_u& mesh,
+    std::span<const float> defaultMorphWeights);
 
 /// Add blend shapes from a glTF primitive.
+///
+/// The base shape is the primitive's rest shape, which includes its morph targets times their
+/// default weights, as in @ref addMesh.
 ///
 /// @param[in] model The glTF document.
 /// @param[in] primitive The primitive to load blend shapes from.
 /// @param[in,out] blendShape The blend shape to append data to (may be nullptr, will be created if
 /// needed).
+/// @param[in] defaultMorphWeights The default weights of the morph targets: the `weights` of the
+///            glTF node that instantiates the mesh, or else of the mesh (fx-gltf reads no node
+///            weights from a file).
 /// @return The number of blend shapes newly loaded.
 size_t addBlendShapes(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive,
-    BlendShape_u& blendShape);
+    BlendShape_u& blendShape,
+    std::span<const float> defaultMorphWeights);
 
 /// Load skin weights from a glTF accessor.
 ///
@@ -47,6 +65,9 @@ size_t addBlendShapes(
 std::vector<Vector4f> loadWeightsFromAccessor(const fx::gltf::Document& model, int32_t accessorIdx);
 
 /// Add skin weights from a glTF primitive.
+///
+/// The nonzero weights of each vertex go first, so that no nonzero weight follows a zero weight;
+/// the order of the file is kept otherwise.
 ///
 /// @param[in] model The glTF document.
 /// @param[in] skin The skin containing joint indices.
