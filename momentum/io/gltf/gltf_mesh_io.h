@@ -48,6 +48,9 @@ std::vector<Vector4f> loadWeightsFromAccessor(const fx::gltf::Document& model, i
 
 /// Add skin weights from a glTF primitive.
 ///
+/// The nonzero weights of each vertex go first, so that no nonzero weight follows a zero weight;
+/// the order of the file is kept otherwise.
+///
 /// @param[in] model The glTF document.
 /// @param[in] skin The skin containing joint indices.
 /// @param[in] primitive The primitive to load skin weights from.
