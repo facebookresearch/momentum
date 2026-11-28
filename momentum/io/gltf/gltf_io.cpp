@@ -369,7 +369,8 @@ std::string joinNames(const Names& names) {
 
 // The vertex attributes of the document that momentum does not read, separated by commas: other
 // sets of texture coordinates and colors than the first, more than eight joint influences, and the
-// normals and tangents of morph targets.
+// normals and tangents of morph targets, which the blend shapes do not keep (the default weights
+// of the morph targets still turn the normals of the rest shape).
 [[maybe_unused]] std::string unreadAttributes(const fx::gltf::Document& model) {
   std::set<std::string> notRead;
   // The set index of attribute `name` with `prefix`, such as 1 for TEXCOORD_1, or -1.
