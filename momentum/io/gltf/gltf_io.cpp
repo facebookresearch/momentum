@@ -76,15 +76,18 @@ void loadCharacterExtensions(
 
 // The mesh nodes of the character whose node map is `nodeToObjectMap`: each skinned mesh whose skin
 // starts at one of its joints (GltfBuilder writes the skeleton root first), and, when
-// `includeUnskinnedMeshes`, the unskinned meshes, which no particular character owns.
+// `includeUnskinnedMeshes`, the unskinned meshes, which no particular character owns. In a document
+// without joint marks, the mesh of a joint that a skin lists counts as the mesh of any other node.
 std::vector<size_t> characterMeshNodes(
     const fx::gltf::Document& model,
     std::span<const size_t> nodeToObjectMap,
     bool includeUnskinnedMeshes) {
+  const std::vector<bool> skinJoints =
+      hasMarkedJoints(model) ? std::vector<bool>(model.nodes.size(), false) : skinJointNodes(model);
   std::vector<size_t> meshNodes;
   for (size_t nodeId = 0; nodeId < model.nodes.size(); nodeId++) {
     const auto& node = model.nodes[nodeId];
-    if (node.mesh < 0 || nodeToObjectMap[nodeId] != kInvalidIndex) {
+    if (node.mesh < 0 || (nodeToObjectMap[nodeId] != kInvalidIndex && !skinJoints[nodeId])) {
       continue;
     }
     if (node.skin < 0) {
@@ -246,7 +249,8 @@ CharacterWithNodeMap buildObjectCharacter(const fx::gltf::Document& model, uint3
 }
 
 // Warns about the meshes without a skin of a document from another tool that no character loads:
-// those inside a skeleton, and those of an object that cannot be read.
+// those inside a skeleton, joints included, and those of an object that cannot be read. Only an
+// object loads a mesh without a skin here.
 void warnAboutUnloadedMeshes(
     const fx::gltf::Document& model,
     std::span<const CharacterWithNodeMap> characters) {
@@ -260,7 +264,7 @@ void warnAboutUnloadedMeshes(
     }
     const bool loaded =
         std::ranges::any_of(characters, [nodeId](const CharacterWithNodeMap& entry) {
-          return nodeId < entry.nodeToObjectMap.size() &&
+          return entry.isObject && nodeId < entry.nodeToObjectMap.size() &&
               entry.nodeToObjectMap[nodeId] != kInvalidIndex;
         });
     if (!loaded) {
@@ -365,7 +369,8 @@ std::string joinNames(const Names& names) {
 
 // The vertex attributes of the document that momentum does not read, separated by commas: other
 // sets of texture coordinates and colors than the first, more than eight joint influences, and the
-// normals and tangents of morph targets.
+// normals and tangents of morph targets, which the blend shapes do not keep (the default weights
+// of the morph targets still turn the normals of the rest shape).
 [[maybe_unused]] std::string unreadAttributes(const fx::gltf::Document& model) {
   std::set<std::string> notRead;
   // The set index of attribute `name` with `prefix`, such as 1 for TEXCOORD_1, or -1.
@@ -872,6 +877,23 @@ std::vector<MatrixXf> loadGltfCharactersChannelMotion(const fx::gltf::Document& 
     MatrixXf& motion = motions.emplace_back(
         character.parameterTransform.numJointParameters(),
         static_cast<Eigen::Index>(states.size()));
+    // A joint parameter scales by a power of two, which cannot be negative, so the motion cannot
+    // give a joint whose local scale is negative in a frame, for example from a scale key whose
+    // sign differs from the rest scale.
+    std::set<std::string> negativeScale;
+    for (const SkeletonState& state : states) {
+      for (size_t jointId = 0; jointId < state.jointState.size(); ++jointId) {
+        if (state.jointState[jointId].localTransform.scale < 0.0f) {
+          negativeScale.insert("'" + character.skeleton.joints.at(jointId).name + "'");
+        }
+      }
+    }
+    MT_THROW_IF(
+        !negativeScale.empty(),
+        "glTF character '{}' has joints whose local scale is negative in some frames, which a joint "
+        "parameter cannot represent: {}.",
+        character.name,
+        joinNames(negativeScale));
     for (size_t frame = 0; frame < states.size(); ++frame) {
       // The loader sets each joint's local transform from the channels, so this reads them as they
       // are rather than recomputing them from the world transforms.

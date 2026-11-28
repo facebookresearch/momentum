@@ -27,7 +27,10 @@ enum class LoadBlendShapes { No, Yes };
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
-// Permissive mode allows loading  mesh-only characters (without skin weights).
+// Permissive mode allows loading  mesh-only characters (without skin weights). In a scene with
+// skinned meshes, it binds a mesh without a skin rigidly to the nearest joint at or above its node,
+// as loadFbxCharacters() does, and one without such a joint to the first root joint, with a
+// warning.
 // The character has the rig that the file stores (see FbxBuilder), or else an empty parameter
 // transform; the scene of several skeletons, which this merges into one character, gets no rig.
 Character loadFbxCharacter(
@@ -39,7 +42,8 @@ Character loadFbxCharacter(
 
 // Using keepLocators means the Nulls in the transform hierarchy will be turned into Locators.
 // This is different from historical momentum behavior so it's off by default.
-// Permissive mode allows loading  mesh-only characters (without skin weights).
+// Permissive mode allows loading  mesh-only characters (without skin weights), and binds a mesh
+// without a skin as the filename overload does.
 Character loadFbxCharacter(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocators = KeepLocators::No,
@@ -158,7 +162,8 @@ loadFbxCharactersWithMotion(
 std::vector<MatrixXf> joinTakesOnSharedTimeline(
     std::span<const std::vector<MatrixXf>> takesPerCharacter);
 
-// Permissive mode allows loading mesh-only characters (without skin weights).
+// Permissive mode allows loading mesh-only characters (without skin weights), and binds a mesh
+// without a skin as loadFbxCharacter() does.
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     const filesystem::path& inputPath,
     KeepLocators keepLocators = KeepLocators::No,
@@ -166,7 +171,8 @@ std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     LoadBlendShapes loadBlendShapes = LoadBlendShapes::No,
     bool stripNamespaces = true);
 
-// Permissive mode allows loading mesh-only characters (without skin weights).
+// Permissive mode allows loading mesh-only characters (without skin weights), and binds a mesh
+// without a skin as loadFbxCharacter() does.
 std::tuple<Character, std::vector<MatrixXf>, float> loadFbxCharacterWithMotion(
     std::span<const std::byte> inputSpan,
     KeepLocators keepLocatorss = KeepLocators::No,

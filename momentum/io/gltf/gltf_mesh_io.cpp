@@ -15,7 +15,13 @@
 #include "momentum/io/gltf/utils/momentum_extension.h"
 
 #include <algorithm>
+#include <array>
+#include <exception>
 #include <numeric>
+#include <span>
+#include <string>
+#include <tuple>
+#include <utility>
 
 namespace momentum {
 
@@ -151,6 +157,133 @@ std::vector<Vector3f> loadPositions(
   return positions;
 }
 
+// The sum over the morph targets of `primitive` of the target's attribute `name` times its default
+// weight in `weights`, which the glTF format adds to the primitive's attribute, of `count` values,
+// in its rest shape. Empty when no target with a nonzero weight has `count` values of the
+// attribute, or when `weights` does not have one weight for each morph target, which the glTF
+// format requires. A target with another count is skipped, with a warning when `warn` is true; for
+// POSITION, the blend shape reader's own check of the counts then stops the load, as before.
+std::vector<Vector3f> defaultMorphOffsets(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    std::span<const float> weights,
+    const std::string& name,
+    size_t count,
+    bool warn = true) {
+  std::vector<Vector3f> offsets;
+  if (count == 0 || weights.size() != primitive.targets.size()) {
+    return offsets;
+  }
+  for (size_t target = 0; target < weights.size(); ++target) {
+    const float weight = weights[target];
+    const auto& attributes = primitive.targets.at(target);
+    const auto attribute = attributes.find(name);
+    if (weight == 0.0f || attribute == attributes.end()) {
+      continue;
+    }
+    const auto deltas = copyAccessorBuffer<Vector3f>(model, attribute->second);
+    if (deltas.size() != count) {
+      MT_LOGW_IF(
+          warn,
+          "glTF morph target {} has {} {} values, but its primitive has {}; its default weight is "
+          "not applied to them.",
+          target,
+          deltas.size(),
+          name,
+          count);
+      continue;
+    }
+    offsets.resize(count, Vector3f::Zero());
+    for (size_t i = 0; i < count; ++i) {
+      offsets[i] += weight * deltas[i];
+    }
+  }
+  return offsets;
+}
+
+// Adds to `positions`, the POSITION values of `primitive` in momentum units, the morph targets
+// times their default weights `weights`: the positions of the primitive's rest shape.
+void addDefaultMorphPositions(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    std::span<const float> weights,
+    std::vector<Vector3f>& positions) {
+  auto offsets = defaultMorphOffsets(model, primitive, weights, "POSITION", positions.size());
+  toMomentumVec3f(offsets);
+  for (size_t i = 0; i < offsets.size(); ++i) {
+    positions.at(i) += offsets[i];
+  }
+}
+
+// Whether the morph targets of `primitive` times their default weights `weights` give a rest shape
+// whose positions and normals are finite, as addMesh() computes it; a weight of infinity or NaN,
+// for example, does not.
+bool restShapeIsFinite(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    std::span<const float> weights) {
+  const auto isFinite = [](const Vector3f& v) { return v.allFinite(); };
+  if (primitive.attributes.count("POSITION") == 0) {
+    return true;
+  }
+  auto positions = loadPositions(model, primitive);
+  auto offsets =
+      defaultMorphOffsets(model, primitive, weights, "POSITION", positions.size(), false);
+  toMomentumVec3f(offsets);
+  for (size_t i = 0; i < offsets.size(); ++i) {
+    positions[i] += offsets[i];
+  }
+  if (!std::ranges::all_of(positions, isFinite)) {
+    return false;
+  }
+  auto normals = loadOptionalAttribute<Vector3f>(model, primitive, "NORMAL");
+  std::vector<Vector3f> normalOffsets;
+  try {
+    normalOffsets = defaultMorphOffsets(model, primitive, weights, "NORMAL", normals.size(), false);
+  } catch (const std::exception&) {
+    // addMesh() keeps the normals of the base shape, with a warning.
+    return true;
+  }
+  for (size_t i = 0; i < normalOffsets.size(); ++i) {
+    normals[i] += normalOffsets[i];
+  }
+  return std::ranges::all_of(normals, isFinite);
+}
+
+// The default weights of the morph targets of `primitive` of the mesh of `node`: the node's, which
+// override the mesh's for that node, or else the mesh's. fx-gltf does not read the `weights` of a
+// node from a file, so a node's weights come only from a document built in memory. The glTF format
+// requires one weight for each morph target; for weights of another number, which
+// defaultMorphOffsets() does not apply, this warns. Weights that do not give a finite rest shape
+// of a triangle primitive are not applied either, with a warning.
+std::span<const float> morphWeightsOfNode(
+    const fx::gltf::Document& model,
+    const fx::gltf::Node& node,
+    const fx::gltf::Mesh& mesh,
+    const fx::gltf::Primitive& primitive) {
+  const auto weights = node.weights.empty() ? std::span<const float>(mesh.weights)
+                                            : std::span<const float>(node.weights);
+  MT_LOGW_IF(
+      !weights.empty() && weights.size() != primitive.targets.size(),
+      "glTF mesh '{}' has {} default morph-target weights for {} morph targets, which the glTF "
+      "format does not allow; they are not applied.",
+      mesh.name,
+      weights.size(),
+      primitive.targets.size());
+  const bool triangles = primitive.mode == fx::gltf::Primitive::Mode::Triangles ||
+      primitive.mode == fx::gltf::Primitive::Mode::TriangleStrip ||
+      primitive.mode == fx::gltf::Primitive::Mode::TriangleFan;
+  if (!triangles || weights.size() != primitive.targets.size() ||
+      restShapeIsFinite(model, primitive, weights)) {
+    return weights;
+  }
+  MT_LOGW(
+      "glTF mesh '{}' has default morph-target weights that do not give finite vertices, which "
+      "momentum does not add to the rest shape.",
+      mesh.name);
+  return {};
+}
+
 void offsetFaces(std::vector<Vector3i>& faces, const size_t vertexOffset) {
   if (vertexOffset == 0) {
     return;
@@ -278,8 +411,11 @@ void appendMeshBuffers(Mesh& mesh, const MeshBuffers& buffers, const size_t vert
 
 } // namespace
 
-size_t
-addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, Mesh_u& mesh) {
+size_t addMesh(
+    const fx::gltf::Document& model,
+    const fx::gltf::Primitive& primitive,
+    Mesh_u& mesh,
+    std::span<const float> defaultMorphWeights) {
   if (primitive.mode != fx::gltf::Primitive::Mode::Triangles &&
       primitive.mode != fx::gltf::Primitive::Mode::TriangleStrip &&
       primitive.mode != fx::gltf::Primitive::Mode::TriangleFan) {
@@ -292,11 +428,27 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
   }
 
   const size_t vertexOffset = mesh->vertices.size();
-  const auto buffers = loadMeshBuffers(model, primitive, vertexOffset);
+  auto buffers = loadMeshBuffers(model, primitive, vertexOffset);
 
   // if we have no points or indices, skip loading
   if (buffers.faces.empty() || buffers.positions.empty()) {
     return 0;
+  }
+
+  // The rest shape of a primitive includes its morph targets times their default weights.
+  addDefaultMorphPositions(model, primitive, defaultMorphWeights, buffers.positions);
+  // The loader did not read the normals of morph targets before it applied their default weights,
+  // so a file whose normal deltas cannot be read keeps loading, with the normals of its base shape.
+  std::vector<Vector3f> normalOffsets;
+  try {
+    normalOffsets = defaultMorphOffsets(
+        model, primitive, defaultMorphWeights, "NORMAL", buffers.normals.size());
+  } catch (const std::exception& e) {
+    MT_LOGW(
+        "The default weights of glTF morph targets are not applied to the normals: {}", e.what());
+  }
+  for (size_t i = 0; i < normalOffsets.size(); ++i) {
+    buffers.normals[i] = (buffers.normals[i] + normalOffsets[i]).normalized();
   }
 
   appendMeshBuffers(*mesh, buffers, vertexOffset);
@@ -306,16 +458,17 @@ addMesh(const fx::gltf::Document& model, const fx::gltf::Primitive& primitive, M
 size_t addBlendShapes(
     const fx::gltf::Document& model,
     const fx::gltf::Primitive& primitive,
-    BlendShape_u& blendShape) {
+    BlendShape_u& blendShape,
+    std::span<const float> defaultMorphWeights) {
   if (primitive.targets.empty() || primitive.attributes.count("POSITION") == 0) {
     return 0;
   }
 
   const size_t numNewTargets = primitive.targets.size();
 
-  // Read the base mesh vertices from the primitive
-  auto baseVertices = copyAccessorBuffer<Vector3f>(model, primitive.attributes.at("POSITION"));
-  toMomentumVec3f(baseVertices);
+  // The base shape is the rest shape that addMesh() gives.
+  auto baseVertices = loadPositions(model, primitive);
+  addDefaultMorphPositions(model, primitive, defaultMorphWeights, baseVertices);
   const size_t kNumNewVertices = baseVertices.size();
 
   // Create the BlendShape if it doesn't exist yet
@@ -475,11 +628,11 @@ void addSkinWeights(
       weightsData = loadWeightsFromAccessor(model, weightsAttribute->second);
       if (weightsData.empty()) {
         MT_LOGW("No skinning weights read");
-        return;
+        break;
       }
     } else {
       MT_LOGW_IF(i == 0, "No skinning weights stored on primitive");
-      return;
+      break;
     }
 
     if (jointIndices.empty() || weightsData.empty() || jointIndices.size() != weightsData.size() ||
@@ -496,7 +649,7 @@ void addSkinWeights(
           "Inconsistent data: {} vertices are skinned but mesh has {} vertices",
           jointIndices.size(),
           kNumVertices);
-      return;
+      break;
     }
 
     // copy indices/vertices into our buffer
@@ -519,6 +672,24 @@ void addSkinWeights(
           MT_LOGW("Invalid joint index encountered when reading skinning weights");
         }
       }
+    }
+  }
+
+  // The glTF format allows a zero weight before a nonzero one, but applySSD() and the other
+  // skinning code stop at the first zero weight of a vertex, so the nonzero weights go first. The
+  // order of the weights is kept otherwise.
+  for (auto v = kVertexOffset; v < kVertexOffset + static_cast<Eigen::Index>(kNumVertices); ++v) {
+    std::array<std::pair<uint32_t, float>, kMaxSkinJoints> slots;
+    size_t next = 0;
+    for (const bool nonzero : {true, false}) {
+      for (size_t slot = 0; slot < kMaxSkinJoints; ++slot) {
+        if ((skinWeights->weight(v, slot) != 0.0f) == nonzero) {
+          slots[next++] = {skinWeights->index(v, slot), skinWeights->weight(v, slot)};
+        }
+      }
+    }
+    for (size_t slot = 0; slot < kMaxSkinJoints; ++slot) {
+      std::tie(skinWeights->index(v, slot), skinWeights->weight(v, slot)) = slots[slot];
     }
   }
 }
@@ -561,9 +732,10 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
       const auto& skin = model.skins[node.skin];
       // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
-        const auto kNumVertices = addMesh(model, primitive, resultMesh);
+        const auto weights = morphWeightsOfNode(model, node, mesh, primitive);
+        const auto kNumVertices = addMesh(model, primitive, resultMesh, weights);
         addSkinWeights(model, skin, primitive, nodeToObjectMap, kNumVertices, skinWeights);
-        addBlendShapes(model, primitive, blendShape);
+        addBlendShapes(model, primitive, blendShape, weights);
         MT_CHECK(
             resultMesh->vertices.size() == skinWeights->index.rows(),
             "vertices: {}, skinWeights: {}",
@@ -578,8 +750,9 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadSkinnedMesh(
       const auto& mesh = model.meshes[node.mesh];
       // NOLINTEND(facebook-hte-ParameterUncheckedArrayBounds)
       for (const auto& primitive : mesh.primitives) {
-        addMesh(model, primitive, resultMesh);
-        addBlendShapes(model, primitive, blendShape);
+        const auto weights = morphWeightsOfNode(model, node, mesh, primitive);
+        addMesh(model, primitive, resultMesh, weights);
+        addBlendShapes(model, primitive, blendShape, weights);
       }
     }
     return {std::move(resultMesh), nullptr, std::move(blendShape)};
@@ -667,9 +840,11 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadRigidMeshes(
         nodeId,
         nodeToObjectMap.size());
     const auto jointId = static_cast<uint32_t>(nodeToObjectMap[nodeId]);
-    for (const auto& primitive : model.meshes.at(node.mesh).primitives) {
+    const auto& gltfMesh = model.meshes.at(node.mesh);
+    for (const auto& primitive : gltfMesh.primitives) {
       checkObjectPrimitive(model, primitive);
-      const auto numVertices = static_cast<Eigen::Index>(addMesh(model, primitive, mesh));
+      const auto weights = morphWeightsOfNode(model, node, gltfMesh, primitive);
+      const auto numVertices = static_cast<Eigen::Index>(addMesh(model, primitive, mesh, weights));
       const Eigen::Index start = skinWeights->index.rows();
       skinWeights->index.conservativeResize(start + numVertices, Eigen::NoChange);
       skinWeights->weight.conservativeResize(start + numVertices, Eigen::NoChange);
@@ -677,7 +852,7 @@ std::tuple<Mesh_u, SkinWeights_u, BlendShape_u> loadRigidMeshes(
       skinWeights->weight.bottomRows(numVertices).setZero();
       skinWeights->index.bottomRows(numVertices).col(0).setConstant(jointId);
       skinWeights->weight.bottomRows(numVertices).col(0).setOnes();
-      addBlendShapes(model, primitive, blendShape);
+      addBlendShapes(model, primitive, blendShape, weights);
     }
   }
   return {std::move(mesh), std::move(skinWeights), std::move(blendShape)};
